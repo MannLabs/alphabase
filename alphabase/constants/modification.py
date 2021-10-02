@@ -7,7 +7,7 @@ import os
 import numba
 import numpy as np
 import pandas as pd
-from typing import Union
+from typing import Union, List
 from copy import deepcopy
 
 from alphabase.yaml_utils import load_yaml
@@ -73,12 +73,27 @@ load_modloss_importance(
 )
 
 # Cell
-
 def get_modification_mass(
     peplen:int,
-    mod_names:list,
-    mod_sites:Union[list, np.array]
-):
+    mod_names:List[str],
+    mod_sites:List[int]
+)->np.array:
+    '''
+    Get modification masses for the given peptide length (`peplen`),
+    and modified site list.
+    Args:
+        peplen (int): peptide length
+        mod_names (List[str]): modification name list
+        mod_sites (List[int]): modification site list corresponding
+            to `mod_names`.
+            * `site=0` refers to an N-term modification
+            * `site=-1` refers to a C-term modification
+            * `1<=site<=peplen` refers to a normal modification
+    Returns:
+        np.array: 1-D array with length=`peplen`.
+            Masses of modifications through the peptide,
+            `0` if sites has no modifications
+    '''
     masses = np.zeros(peplen)
     for site, mod in zip(mod_sites, mod_names):
         if site == 0:
@@ -92,7 +107,22 @@ def get_modification_mass(
 
 # Cell
 @numba.jit(nopython=True, nogil=True)
-def _get_modloss(mod_losses, _loss_importance):
+def _get_modloss(
+    mod_losses: np.array,
+    _loss_importance: np.array
+)->np.array:
+    '''
+    Get modification loss masses (e.g. -98 Da for Phospho@S/T,
+    -64 Da for Oxidation@M). Modification with higher `_loss_importance`
+    has higher priorities. For example, `AM(Oxidation@M)S(Phospho@S)...`,
+    importance of Phospho@S > importance of Oxidation@M, so the modloss of
+    b3 ion will be -98 Da, not -64 Da.
+    Args:
+        mod_losses (np.array): mod loss masses of each AA position
+        _loss_importance (np.array): mod loss importance of each AA position
+    Returns:
+        np.array: new mod_loss masses selected by `_loss_importance`
+    '''
     prev_importance = _loss_importance[0]
     prev_most = 0
     for i, _curr_imp in enumerate(_loss_importance[1:]):
@@ -105,10 +135,26 @@ def _get_modloss(mod_losses, _loss_importance):
 
 def get_modloss_mass(
     peplen: int,
-    mod_names: list,
-    mod_sites: Union[list, np.array],
+    mod_names: List,
+    mod_sites: List,
     for_nterm_frag: bool,
-):
+)->np.array:
+    '''
+    Get modification loss masses (e.g. -98 Da for Phospho@S/T,
+    -64 Da for Oxidation@M). Modifications with higher `MOD_LOSS_IMPORTANCE`
+    have higher priorities. For example, `AM(Oxidation@M)S(Phospho@S)...`,
+    importance of Phospho@S > importance of Oxidation@M, so the modloss of
+    b3 ion will be -98 Da, not -64 Da.
+    Args:
+        peplen (int): peptide length
+        mod_names (List[str]): modification name list
+        mod_sites (List[int]): modification site list corresponding
+        for_nterm_frag (bool): if `True`, the loss will be on the
+            N-term fragments (mainly `b` ions); if `False`, the loss
+            will be on the C-term fragments (mainly `y` ions)
+    Returns:
+        np.array: mod_loss masses
+    '''
     if not mod_names: return np.zeros(peplen-1)
     mod_losses = np.zeros(peplen+2)
     mod_losses[mod_sites] = [MOD_LOSS_MASS[mod] for mod in mod_names]

@@ -26,12 +26,24 @@ index = {"reset_AA_mass": "aa.ipynb",
          "load_modloss_importance": "modification.ipynb",
          "get_modification_mass": "modification.ipynb",
          "get_modloss_mass": "modification.ipynb",
+         "get_charged_frag_types": "fragment.ipynb",
+         "parse_charged_frag_type": "fragment.ipynb",
+         "get_by_and_peptide_mass": "fragment.ipynb",
+         "get_by_and_peptide_mass_for_same_len_seqs": "fragment.ipynb",
+         "init_zero_fragment_dataframe": "fragment.ipynb",
+         "init_fragment_dataframe_from_other": "fragment.ipynb",
+         "init_fragment_by_precursor_dataframe": "fragment.ipynb",
+         "set_sliced_fragment_dataframe": "fragment.ipynb",
+         "get_sliced_fragment_dataframe": "fragment.ipynb",
+         "concat_precursor_fragment_dataframes": "fragment.ipynb",
+         "get_fragment_mass_dataframe": "fragment.ipynb",
          "load_yaml": "yaml_utils.ipynb",
          "save_yaml": "yaml_utils.ipynb"}
 
 modules = ["constants/aa.py",
            "constants/element.py",
            "constants/modification.py",
+           "peptide/fragment.py",
            "yaml_utils.py"]
 
 doc_url = "https://MannLabs.github.io/alphabase/"
