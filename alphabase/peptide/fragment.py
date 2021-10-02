@@ -9,12 +9,11 @@ __all__ = ['get_charged_frag_types', 'parse_charged_frag_type', 'get_by_and_pept
 # Cell
 import numpy as np
 import pandas as pd
-from typing import List, Union, Tuple, Iterable, Optional
-import warnings
+from typing import List, Union, Tuple, Iterable
 
 from alphabase.constants.aa import get_sequence_mass, get_same_len_sequences_mass
 from alphabase.constants.modification import get_modification_mass, get_modloss_mass
-from alphabase.constants.element import MASS_H2O, MASS_PROTON
+from alphabase.constants.element import MASS_H2O, MASS_PROTON, MASS_NH3, CHEM_MONO_MASS
 
 def get_charged_frag_types(
     frag_types:List[str],
@@ -303,6 +302,24 @@ def get_fragment_mass_dataframe(
             elif frag_type == 'y-modloss':
                 _mass = (y_mass-y_modloss)/charge + MASS_PROTON
                 _mass[y_modloss == 0] = 0
+                set_values.append(_mass)
+            elif frag_type == 'b-H2O':
+                _mass = (b_mass-MASS_H2O)/charge + MASS_PROTON
+                set_values.append(_mass)
+            elif frag_type == 'y-H2O':
+                _mass = (y_mass-MASS_H2O)/charge + MASS_PROTON
+                set_values.append(_mass)
+            elif frag_type == 'b-NH3':
+                _mass = (b_mass-MASS_NH3)/charge + MASS_PROTON
+                set_values.append(_mass)
+            elif frag_type == 'y-NH3':
+                _mass = (y_mass-MASS_NH3)/charge + MASS_PROTON
+                set_values.append(_mass)
+            elif frag_type == 'c':
+                _mass = (b_mass+MASS_NH3)/charge + MASS_PROTON
+                set_values.append(_mass)
+            elif frag_type == 'z':
+                _mass = (y_mass-(MASS_NH3-CHEM_MONO_MASS['H']))/charge + MASS_PROTON
                 set_values.append(_mass)
             else:
                 raise NotImplementedError(f'Fragment type "{frag_type}" is not in fragment_mass_df.')
