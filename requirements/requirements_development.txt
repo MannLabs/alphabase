@@ -12,5 +12,5 @@ psutil==5.8.0
 
 numba
 numpy
-yaml
+pyyaml
 pandas
