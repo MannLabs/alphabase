@@ -220,12 +220,16 @@ def get_fragment_mass_dataframe(
         precursor_df (pd.DataFrame): precursors to generate fragment masses,
             if `precursor_df` contains the 'frag_start_idx' column,
             `reference_fragment_df` must be provided
-        charged_fragment_types (List):
+        charged_frag_types (List):
             `['b_1+','b_2+','y_1+','y_2+','b-modloss_1+','y-H2O_1+'...]`
         reference_fragment_df (pd.DataFrame): generate fragment_mass_df based
             on this reference, as `precursor_df.frag_start_idx` and
             `precursor.frag_end_idx` point to the indices in
             `reference_fragment_df`
+    Returns:
+        pd.DataFrame: `precursor_df`. `precursor_df` contains the 'charge' column, this function
+        will automatically assign the 'precursor_mz' to `precursor_df`
+        pd.DataFrame: `fragment_mass_df` with given `charged_frag_types`
     '''
     if reference_fragment_df is None:
         if 'frag_start_idx' in precursor_df.columns:
@@ -242,7 +246,7 @@ def get_fragment_mass_dataframe(
 
     if reference_fragment_df is not None:
         fragment_mass_df = init_fragment_dataframe_from_other(
-            reference_fragment_df
+            reference_fragment_df[charged_frag_types]
         )
     else:
         fragment_df_list = []
@@ -271,7 +275,8 @@ def get_fragment_mass_dataframe(
         b_mass = b_mass.reshape(-1)
         y_mass = y_mass.reshape(-1)
 
-        df_group['precursor_mz'] = pepmass/df_group['charge'].values + MASS_PROTON
+        if 'charge' in df_group.columns:
+            df_group['precursor_mz'] = pepmass/df_group['charge'].values + MASS_PROTON
 
         for charged_frag_type in charged_frag_types:
             if charged_frag_type.startswith('b-modloss'):
