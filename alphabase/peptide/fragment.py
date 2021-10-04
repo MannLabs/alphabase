@@ -10,6 +10,7 @@ __all__ = ['get_charged_frag_types', 'parse_charged_frag_type', 'get_by_and_pept
 import numpy as np
 import pandas as pd
 from typing import List, Union, Tuple, Iterable
+import warnings
 
 from alphabase.constants.aa import get_sequence_mass, get_same_len_sequences_mass
 from alphabase.constants.modification import get_modification_mass, get_modloss_mass
@@ -105,8 +106,18 @@ def get_by_and_peptide_mass_for_same_len_seqs(
 # Cell
 def init_zero_fragment_dataframe(
     peplen_array:np.array,
-    charged_frag_types:list
-):
+    charged_frag_types:List[str]
+)->Tuple[pd.DataFrame, np.array, np.array]:
+    '''
+    Args:
+        peplen_array (np.array): peptide lengths for the fragment dataframe
+        charged_frag_types (List[str]):
+            `['b_1+','b_2+','y_1+','y_2+','b-modloss_1+','y-H2O_1+'...]`
+    Returns:
+        pd.DataFrame: `fragment_df` with zero values
+        np.array (int64): the start indices point to the `fragment_df` for each peptide
+        np.array (int64): the end indices point to the `fragment_df` for each peptide
+    '''
     indices = np.zeros(len(peplen_array)+1, dtype=np.int64)
     indices[1:] = peplen_array-1
     indices = np.cumsum(indices)
@@ -119,6 +130,9 @@ def init_zero_fragment_dataframe(
 def init_fragment_dataframe_from_other(
     reference_fragment_df: pd.DataFrame
 ):
+    '''
+    Init zero fragment dataframe from the `reference_fragment_df`
+    '''
     return pd.DataFrame(
         np.zeros_like(reference_fragment_df.values),
         columns = reference_fragment_df.columns
@@ -126,14 +140,50 @@ def init_fragment_dataframe_from_other(
 
 def init_fragment_by_precursor_dataframe(
     precursor_df,
-    charged_frag_types: List[str] = None
+    charged_frag_types: List[str],
+    reference_fragment_df: int = None
 ):
-    fragment_df, start_indices, end_indices = init_zero_fragment_dataframe(
-        precursor_df['nAA'].values,
-        charged_frag_types
-    )
-    precursor_df['frag_start_idx'] = start_indices
-    precursor_df['frag_end_idx'] = end_indices
+    '''
+    Init zero fragment dataframe for the `precursor_df`. If
+    the `reference_fragment_df` is provided, it will generate
+    the dataframe based on the reference. Otherwise it
+    generates the dataframe from scratch.
+    Args:
+        precursor_df (pd.DataFrame): precursors to generate fragment masses,
+            if `precursor_df` contains the 'frag_start_idx' column,
+            it is better to provide `reference_fragment_df` as
+            `precursor_df.frag_start_idx` and `precursor.frag_end_idx`
+            point to the indices in `reference_fragment_df`
+        charged_frag_types (List):
+            `['b_1+','b_2+','y_1+','y_2+','b-modloss_1+','y-H2O_1+'...]`
+        reference_fragment_df (pd.DataFrame): generate fragment_mass_df based
+            on this reference (default: None)
+    Returns:
+        pd.DataFrame: zero `fragment_df` with given `charged_frag_types`
+    '''
+    if 'frag_start_idx' not in precursor_df.columns:
+        fragment_df, start_indices, end_indices = init_zero_fragment_dataframe(
+            precursor_df.nAA.values,
+            charged_frag_types
+        )
+        precursor_df['frag_start_idx'] = start_indices
+        precursor_df['frag_end_idx'] = end_indices
+    else:
+        if reference_fragment_df is None:
+            warnings.warn(
+                "`precursor_df` contains the 'frag_start_idx' column, "\
+                "it is better to provide `reference_fragment_df`", RuntimeWarning
+            )
+            fragment_df = pd.DataFrame(
+                np.zeros((
+                    precursor_df.frag_end_idx.max(), len(charged_frag_types)
+                )),
+                columns = charged_frag_types
+            )
+        else:
+            fragment_df = init_fragment_dataframe_from_other(
+                reference_fragment_df[charged_frag_types]
+            )
     return fragment_df
 
 # Cell
@@ -227,9 +277,13 @@ def get_fragment_mass_dataframe(
             `precursor.frag_end_idx` point to the indices in
             `reference_fragment_df`
     Returns:
-        pd.DataFrame: `precursor_df`. `precursor_df` contains the 'charge' column, this function
-        will automatically assign the 'precursor_mz' to `precursor_df`
+        pd.DataFrame: `precursor_df`. `precursor_df` contains the 'charge' column,
+        this function will automatically assign the 'precursor_mz' to `precursor_df`
         pd.DataFrame: `fragment_mass_df` with given `charged_frag_types`
+    Raises:
+        ValueError: when 1. `precursor_df` contains 'frag_start_idx' but
+        `reference_fragment_df` is not None; or 2. `reference_fragment_df`
+        is None but `precursor_df` does not contain 'frag_start_idx'
     '''
     if reference_fragment_df is None:
         if 'frag_start_idx' in precursor_df.columns:
