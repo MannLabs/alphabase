@@ -15,45 +15,47 @@ from alphabase.constants.element import calc_formula_mass
 
 _base_dir = os.path.dirname(__file__)
 
-def load_mod_yaml(yaml_file):
-    global MOD_INFO_DICT
+def _update_all_by_MOD_INFO_DICT():
     global MOD_CHEM
     global MOD_MASS
     global MOD_LOSS_MASS
+
+    MOD_CHEM = {}
+    MOD_MASS = {}
+    MOD_LOSS_MASS = {}
+    for mod, val in MOD_INFO_DICT.items():
+        MOD_CHEM[mod] = val['composition']
+        MOD_MASS[mod] = val['mass']
+        MOD_LOSS_MASS[mod] = val['modloss']
+
+def load_mod_yaml(yaml_file):
+    global MOD_INFO_DICT
     global MOD_DF
     MOD_INFO_DICT = load_yaml(yaml_file)
 
     # Add lower-case modifications for future usages
     for key, modinfo in list(MOD_INFO_DICT.items()):
-       modname, site = key.split('@')
-       if len(site) == 1:
-           MOD_INFO_DICT[modname+'@'+site.lower()] = deepcopy(modinfo)
-           MOD_INFO_DICT[modname+'@'+site.lower()]['classification'] = 'Lower-case'
+        MOD_INFO_DICT[key]['upper_case_AA'] = True
+        modname, site = key.split('@')
+        if len(site) == 1:
+            MOD_INFO_DICT[modname+'@'+site.lower()] = deepcopy(modinfo)
+            MOD_INFO_DICT[modname+'@'+site.lower()]['upper_case_AA'] = False
+        elif '^' in site:
+            site = site[0].lower()+site[1:]
+            MOD_INFO_DICT[modname+'@'+site] = deepcopy(modinfo)
+            MOD_INFO_DICT[modname+'@'+site]['upper_case_AA'] = False
 
-    MOD_CHEM = {}
-    for key, val in MOD_INFO_DICT.items():
-        MOD_CHEM[key] = val['composition']
-        MOD_INFO_DICT[key]['unimod_mass'] = MOD_INFO_DICT[key]['mono_mass']
-        MOD_INFO_DICT[key]['unimod_modloss'] = MOD_INFO_DICT[key]['modloss']
+    for mod, val in MOD_INFO_DICT.items():
+        MOD_INFO_DICT[mod]['unimod_mass'] = MOD_INFO_DICT[mod]['mono_mass']
+        MOD_INFO_DICT[mod]['unimod_modloss'] = MOD_INFO_DICT[mod]['modloss']
+        MOD_INFO_DICT[mod]['mass'] = calc_formula_mass(val['composition'])
+        MOD_INFO_DICT[mod]['modloss'] = calc_formula_mass(val['modloss_composition'])
+        MOD_INFO_DICT[mod]['modloss_importance'] = 0
 
-
-    MOD_MASS = dict(
-        [
-            (mod, calc_formula_mass(chem))
-            for mod, chem in MOD_CHEM.items()
-        ]
-    )
-
-    MOD_LOSS_MASS = dict(
-        [
-        (mod, calc_formula_mass(val['modloss_composition']))
-        for mod, val in MOD_INFO_DICT.items()
-        ]
-    )
+    _update_all_by_MOD_INFO_DICT()
 
     MOD_DF = pd.DataFrame().from_dict(MOD_INFO_DICT, orient='index')
-    MOD_DF['mass'] = pd.DataFrame().from_dict(MOD_MASS, orient='index')
-    MOD_DF['modloss'] = pd.DataFrame().from_dict(MOD_LOSS_MASS, orient='index')
+    MOD_DF['name'] = MOD_DF.index
 
 load_mod_yaml(
     os.path.join(_base_dir,
@@ -63,7 +65,11 @@ load_mod_yaml(
 def load_modloss_importance(yaml_file):
     global MOD_LOSS_IMPORTANCE
     MOD_LOSS_IMPORTANCE = load_yaml(yaml_file)
-    MOD_DF['modloss_importance'] = pd.DataFrame().from_dict(MOD_LOSS_IMPORTANCE, orient='index')
+    for mod,val in MOD_LOSS_IMPORTANCE.items():
+        MOD_INFO_DICT[mod]['modloss_importance'] = val
+    MOD_DF['modloss_importance'] = pd.DataFrame().from_dict(
+        MOD_LOSS_IMPORTANCE, orient='index'
+    )
     MOD_DF.loc[pd.isna(MOD_DF['modloss_importance']), 'modloss_importance'] = 0
 
 
@@ -71,6 +77,12 @@ load_modloss_importance(
     os.path.join(_base_dir,
     'modloss_importance.yaml')
 )
+
+def _update_all_by_MOD_DF():
+    global MOD_INFO_DICT
+    MOD_INFO_DICT = MOD_DF.to_dict(orient='index')
+    _update_all_by_MOD_INFO_DICT()
+
 
 # Cell
 def get_modification_mass(
