@@ -132,3 +132,6 @@ dmypy.json
 alphabase/logs
 *.DS_Store
 *sandbox*
+
+# vscode temp file
+**/.last_checked
