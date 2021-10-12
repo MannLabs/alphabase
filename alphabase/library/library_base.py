@@ -318,6 +318,12 @@ class SpecLibBase(object):
             df['iRT'] = self._precursor_df['predict_RT']
         else:
             df['iRT'] = self._precursor_df['RT']
+
+        if 'predict_CCS' in self._precursor_df.columns:
+            df['CCS'] = self._precursor_df['predict_CCS']
+        elif 'CCS' in self._precursor_df.columns:
+            df['CCS'] = self._precursor_df['CCS']
+
         df['LabelModifiedSequence'] = df['ModifiedPeptide']
         df['StrippedPeptide'] = self._precursor_df['sequence']
 
