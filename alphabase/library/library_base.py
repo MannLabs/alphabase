@@ -279,7 +279,7 @@ class SpecLibBase(object):
         )
 
     def load_fragment_mass_df(self):
-        self._fragment_mass_df = fragment.get_fragment_mass_dataframe(
+        self._precursor_df, self._fragment_mass_df = fragment.get_fragment_mass_dataframe(
             self._precursor_df, self.charged_ion_types
         )
         # clip precursor after mass calculation
