@@ -131,8 +131,8 @@ def merge_precursor_fragment_df(
     frag_inten_list = []
     frag_num_list = []
     for start, end in tqdm.tqdm(df[['frag_start_idx','frag_end_idx']].values):
-        intens = fragment_inten_df.loc[start:end-1,:].values
-        masses = fragment_mass_df.loc[start:end-1,:].values
+        intens = fragment_inten_df.iloc[start:end,:].values # is loc[start:end-1,:] faster?
+        masses = fragment_mass_df.iloc[start:end,:].values
         sorted_idx = np.argsort(intens.reshape(-1))[-top_n_inten:][::-1]
         idx_in_df = np.unravel_index(sorted_idx, masses.shape)
 
