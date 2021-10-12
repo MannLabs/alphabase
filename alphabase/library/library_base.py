@@ -354,7 +354,7 @@ class SpecLibBase(object):
             frag_inten,
             top_n_inten=keep_k_highest_inten,
             frag_type_head='FragmentType',
-            frag_mass_head='FragmengMz',
+            frag_mass_head='FragmentMz',
             frag_inten_head='RelativeIntensity',
             frag_charge_head='FragmentCharge',
             frag_loss_head='FragmentLossType',
