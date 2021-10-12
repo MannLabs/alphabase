@@ -282,6 +282,8 @@ class SpecLibBase(object):
         self._fragment_mass_df = fragment.get_fragment_mass_dataframe(
             self._precursor_df, self.charged_ion_types
         )
+        # clip precursor after mass calculation
+        self.clip_precursor_()
 
     def save_hdf(self, hdf_file):
         raise NotImplementedError('') # we need alphabase.HDFFile for HDF files
