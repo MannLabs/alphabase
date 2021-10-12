@@ -321,6 +321,8 @@ class SpecLibBase(object):
         df['LabelModifiedSequence'] = df['ModifiedPeptide']
         df['StrippedPeptide'] = self._precursor_df['sequence']
 
+        df['PrecursorMz'] = self._precursor_df['precursor_mz']
+
         if 'protein_name' in self._precursor_df.columns:
             df['ProteinName'] = self._precursor_df['protein_name']
             df['UniprotID'] = df['ProteinName']
