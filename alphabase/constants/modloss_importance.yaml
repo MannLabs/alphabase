@@ -1,0 +1,5 @@
+# pS>pT means pS is easier to generate modloss ions
+Phospho@S: 1e8
+Phospho@T: 1e7
+GlyGly@K: 1e6
+Oxidation@M: 0
