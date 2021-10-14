@@ -91,8 +91,8 @@ class SpecLibBase(object):
         Create flattened (1-D) np.array for mass and intensity
         dataframes, respectively. The arrays are references to
         original data, that means:
-          1. this method is fast;
-          2. change the array values will change the df values.
+          1. This method is fast;
+          2. Changing the array values will change the df values.
         They can be unraveled back using:
           `array.reshape(len(self._fragment_mass_df.columns), -1)`
 
@@ -117,7 +117,11 @@ class SpecLibBase(object):
         )
 
     def load_fragment_mass_df(self):
-        need_clip = False if 'precursor_mz' in self._precursor_df.columns else True
+        need_clip = (
+            False if
+            'precursor_mz' in self._precursor_df.columns
+            else True
+        )
 
         (
             self._precursor_df, self._fragment_mass_df
