@@ -38,9 +38,6 @@ index = {"reset_AA_mass": "aa.ipynb",
          "concat_precursor_fragment_dataframes": "fragment.ipynb",
          "get_fragment_mass_dataframe": "fragment.ipynb",
          "SpecLibBase": "library_base.ipynb",
-         "merge_precursor_fragment_df": "translate.ipynb",
-         "speclib_to_single_df": "translate.ipynb",
-         "alpha_to_other_mod_dict": "translate.ipynb",
          "load_yaml": "yaml_utils.ipynb",
          "save_yaml": "yaml_utils.ipynb"}
 
@@ -49,7 +46,6 @@ modules = ["constants/aa.py",
            "constants/modification.py",
            "peptide/fragment.py",
            "speclib/library_base.py",
-           "speclib/translate.py",
            "yaml_utils.py"]
 
 doc_url = "https://MannLabs.github.io/alphabase/"

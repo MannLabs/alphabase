@@ -4,12 +4,14 @@ __all__ = ['SpecLibBase']
 
 # Cell
 import pandas as pd
+import typing
 
 import alphabase.peptide.fragment as fragment
 
 class SpecLibBase(object):
     def __init__(self,
-        charged_ion_types:str, # e.g. ['b_1+','b_2+','y_1+','y_2+', ...]
+        # e.g. ['b_1+','b_2+','y_1+','y_2+', ...]
+        charged_ion_types:typing.List[str],
         min_frag_mz = 100, max_frag_mz = 2000,
         min_precursor_mz = 400, max_precursor_mz = 6000,
     ):
@@ -26,12 +28,6 @@ class SpecLibBase(object):
     def precursor_df(self):
         return self._precursor_df
 
-    @precursor_df.setter
-    def precursor_df(self, df):
-        self._precursor_df = df.reset_index(drop=True)
-        if 'precursor_mz' in self._precursor_df.columns:
-            self.clip_precursor_()
-
     @property
     def fragment_mass_df(self):
         return self._fragment_mass_df
@@ -40,7 +36,7 @@ class SpecLibBase(object):
     def fragment_inten_df(self):
         return self._fragment_inten_df
 
-    def clip_precursor_(self):
+    def clip_precursor_by_mz_(self):
         '''
         Clip self._precursor_df inplace
         '''
@@ -52,7 +48,9 @@ class SpecLibBase(object):
 
     def clip_inten_by_fragment_mass_(self):
         '''
-        Clip self._fragment_inten_df inplace. All clipped masses are set as zeros.
+        Clip self._fragment_inten_df inplace.
+        All clipped masses are set as zeros.
+        A more generic way is to use a mask.
         '''
         self._fragment_inten_df[
             (self._fragment_mass_df<self.min_frag_mz)|
@@ -71,7 +69,7 @@ class SpecLibBase(object):
         precursor_files, **kwargs
     ):
         self._load_precursor_df(precursor_files, **kwargs)
-        self.clip_precursor_()
+        self.clip_precursor_by_mz()
 
     def _load_precursor_df(self, precursor_files, **kwargs):
         '''
@@ -95,13 +93,13 @@ class SpecLibBase(object):
         )
 
     def load_fragment_mass_df(self):
+        need_clip = False if 'precursor_mz' in self._precursor_df.columns else True
         (
             self._precursor_df, self._fragment_mass_df
         ) = fragment.get_fragment_mass_dataframe(
             self._precursor_df, self.charged_ion_types
         )
-        # clip precursor after mass calculation
-        self.clip_precursor_()
+        if need_clip: self.clip_precursor_by_mz_()
 
     def save_hdf(self, hdf_file):
         self._precursor_df.to_hdf(hdf_file, key='precursor', mode='w')
