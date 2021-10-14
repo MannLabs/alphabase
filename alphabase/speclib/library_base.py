@@ -4,6 +4,7 @@ __all__ = ['SpecLibBase']
 
 # Cell
 import pandas as pd
+import numpy as np
 import typing
 
 import alphabase.peptide.fragment as fragment
@@ -49,7 +50,7 @@ class SpecLibBase(object):
     def clip_inten_by_fragment_mass_(self):
         '''
         Clip self._fragment_inten_df inplace.
-        All clipped masses are set as zeros.
+        All clipped intensities are set as zeros.
         A more generic way is to use a mask.
         '''
         self._fragment_inten_df[
@@ -69,7 +70,7 @@ class SpecLibBase(object):
         precursor_files, **kwargs
     ):
         self._load_precursor_df(precursor_files, **kwargs)
-        self.clip_precursor_by_mz()
+        self.clip_precursor_by_mz_()
 
     def _load_precursor_df(self, precursor_files, **kwargs):
         '''
@@ -83,9 +84,32 @@ class SpecLibBase(object):
         self.load_fragment_mass_df(**kwargs)
         self.load_fragment_inten_df(**kwargs)
 
+    def flatten_fragment_data(
+        self
+    )->typing.Tuple[np.array, np.array]:
+        '''
+        Create flattened (1-D) np.array for mass and intensity
+        dataframes, respectively. The arrays are references to
+        original data, that means:
+          1. this method is fast;
+          2. change the array values will change the df values.
+        They can be unraveled back using:
+          `array.reshape(len(self._fragment_mass_df.columns), -1)`
+
+        Retruns:
+            np.array: 1-D flattened mass array (a reference to
+            original mass df data)
+            np.array: 1-D flattened intensity array (a reference to
+            original intensity df data)
+        '''
+        return (
+            self._fragment_mass_df.values.reshape(-1),
+            self._fragment_inten_df.values.reshape(-1)
+        )
+
     def load_fragment_inten_df(self, **kwargs):
         '''
-        All sub-class must reimplement this method.
+        All sub-class must re-implement this method.
         Fragment intensities can be predicted or from AlphaPept, or ...
         '''
         raise NotImplementedError(
@@ -94,6 +118,7 @@ class SpecLibBase(object):
 
     def load_fragment_mass_df(self):
         need_clip = False if 'precursor_mz' in self._precursor_df.columns else True
+
         (
             self._precursor_df, self._fragment_mass_df
         ) = fragment.get_fragment_mass_dataframe(
