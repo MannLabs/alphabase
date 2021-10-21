@@ -139,7 +139,7 @@ class HDF_Group(HDF_Object):
             object.__setattr__(self, name, dataframe)
 
     def __len__(self):
-        return [len(component) for component in self.components]
+        return sum([len(component) for component in self.components])
 
     @property
     def group_names(self):
