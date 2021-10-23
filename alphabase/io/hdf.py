@@ -283,7 +283,6 @@ class HDF_Group(HDF_Object):
                 )
             for key, value in group.items():
                 new_group.__setattr__(key, value)
-            # object.__setattr__(self, "_shape", self._shape + 1) # TODO move to Dataframe?
             object.__setattr__(self, name, new_group)
 
 
@@ -322,6 +321,11 @@ class HDF_Dataset(HDF_Object):
             hdf_object.resize(new_shape)
             hdf_object[len(self):] = data
 
+    def set_slice(self, selection, values):
+        with h5py.File(self.file_name, "a") as hdf_file:
+            hdf_object = hdf_file[self.name]
+            hdf_object[selection] = values
+
 
 class HDF_Dataframe(HDF_Group):
 
@@ -357,6 +361,11 @@ class HDF_Dataframe(HDF_Group):
             dataset = self.__getattribute__(column_name)
             if isinstance(dataset, HDF_Dataset):
                 dataset.append(data[column_name])
+
+    def set_slice(self, selection, values):
+        for column_name in self.dataset_names:
+            dataset = self.__getattribute__(column_name)
+            dataset.set_slice(selection, values[column_name])
 
 
 class HDF_File(HDF_Group):
