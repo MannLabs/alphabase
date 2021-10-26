@@ -41,6 +41,8 @@ index = {"reset_AA_mass": "aa.ipynb",
          "concat_precursor_fragment_dataframes": "fragment.ipynb",
          "get_fragment_mass_dataframe": "fragment.ipynb",
          "set_precursor_mz": "fragment.ipynb",
+         "DecoyProvider": "decoy_library.ipynb",
+         "decoy_provider": "decoy_library.ipynb",
          "SpecLibBase": "library_base.ipynb",
          "load_yaml": "yaml_utils.ipynb",
          "save_yaml": "yaml_utils.ipynb"}
@@ -49,6 +51,7 @@ modules = ["constants/aa.py",
            "constants/element.py",
            "constants/modification.py",
            "peptide/fragment.py",
+           "speclib/decoy_library.py",
            "speclib/library_base.py",
            "yaml_utils.py"]
 

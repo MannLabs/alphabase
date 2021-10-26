@@ -134,15 +134,15 @@ class SpecLibBase(object):
         if need_clip: self.clip_precursor_by_mz_()
 
     def save_hdf(self, hdf_file):
-        _hdf = HDF_File(
+        self._hdf = HDF_File(
             hdf_file,
             read_only=False,
             truncate=True,
             delete_existing=True
         )
-        _hdf.precursor_df = self._precursor_df
-        _hdf.fragment_mass_df = self._fragment_mass_df
-        _hdf.fragment_inten_df = self._fragment_inten_df
+        self._hdf.precursor_df = self._precursor_df
+        self._hdf.fragment_mass_df = self._fragment_mass_df
+        self._hdf.fragment_inten_df = self._fragment_inten_df
 
     def load_hdf(self, hdf_file):
         self._hdf = HDF_File(
