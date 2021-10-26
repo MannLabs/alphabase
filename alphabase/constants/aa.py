@@ -68,7 +68,7 @@ def get_AA_masses_for_same_len_seqs(
     '''
     return AA_ASCII_MASS[
         np.array(sequence_array).view(np.int32)
-    ].reshape(-1, len(sequence_array[0]))
+    ].reshape(len(sequence_array), -1)
 
 def get_sequence_masses_for_same_len_seqs(
     sequence_array: np.array
