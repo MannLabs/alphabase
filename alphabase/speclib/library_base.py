@@ -12,7 +12,9 @@ from alphabase.io.hdf import HDF_File
 
 class SpecLibBase(object):
     def __init__(self,
-        # e.g. ['b_1','b_2','y_1','y_2', ...]
+        # ['b_1','b_2','y_1','y_modloss_1', ...];
+        # 'b_1': 'b' is the fragment type and
+        # '1' is the charge state.
         charged_frag_types:typing.List[str],
         min_frag_mz = 100, max_frag_mz = 2000,
         min_precursor_mz = 400, max_precursor_mz = 6000,
@@ -97,7 +99,7 @@ class SpecLibBase(object):
         They can be unraveled back using:
           `array.reshape(len(self._fragment_mass_df.columns), -1)`
 
-        Retruns:
+        Returns:
             np.array: 1-D flattened mass array (a reference to
             original mass df data)
             np.array: 1-D flattened intensity array (a reference to
