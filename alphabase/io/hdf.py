@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import re
 import contextlib
+import time
 
 
 class HDF_Object(object):
@@ -34,7 +35,7 @@ class HDF_Object(object):
         )
 
     @contextlib.contextmanager
-    def enable_modification(
+    def editing_mode(
         self,
         read_only: bool = False,
         truncate: bool = True
@@ -120,7 +121,7 @@ class HDF_Group(HDF_Object):
                 read_only=self.read_only,
                 truncate=self.truncate,
             )
-            object.__setattr__(self, name, dataset)
+            object.__setattr__(self, dataset_name, dataset)
         for group_name in self.group_names:
             group = HDF_Group(
                 file_name=self.file_name,
@@ -128,7 +129,7 @@ class HDF_Group(HDF_Object):
                 read_only=self.read_only,
                 truncate=self.truncate,
             )
-            object.__setattr__(self, name, group)
+            object.__setattr__(self, group_name, group)
         for dataframe_name in self.dataframe_names:
             dataframe = HDF_Dataframe(
                 file_name=self.file_name,
@@ -136,7 +137,7 @@ class HDF_Group(HDF_Object):
                 read_only=self.read_only,
                 truncate=self.truncate,
             )
-            object.__setattr__(self, name, dataframe)
+            object.__setattr__(self, dataframe_name, dataframe)
 
     def __len__(self):
         return sum([len(component) for component in self.components])
@@ -212,7 +213,7 @@ class HDF_Group(HDF_Object):
                 self.add_group(name, value)
             else:
                 raise NotImplementedError(
-                    f"Type '{type(name)}' is invalid for attribute {name}"
+                    f"Type '{type(value)}' is invalid for attribute {name}"
                 )
 
     def add_dataset(
@@ -252,6 +253,7 @@ class HDF_Group(HDF_Object):
                 read_only=self.read_only,
                 truncate=self.truncate,
             )
+            dataset.last_updated = time.asctime()
             # object.__setattr__(self, "_shape", self._shape + 1) # TODO move to Dataframe?
             object.__setattr__(self, name, dataset)
 
@@ -265,25 +267,26 @@ class HDF_Group(HDF_Object):
             if name in hdf_object:
                 del hdf_object[name]
             hdf_object.create_group(name)
-            if isinstance(group, pd.DataFrame):
-                group = dict(group)
-                group["is_pd_dataframe"] = True
-                new_group = HDF_Dataframe(
-                    file_name=self.file_name,
-                    name=f"{self.name}/{name}",
-                    read_only=self.read_only,
-                    truncate=self.truncate,
-                )
-            else:
-                new_group = HDF_Group(
-                    file_name=self.file_name,
-                    name=f"{self.name}/{name}",
-                    read_only=self.read_only,
-                    truncate=self.truncate,
-                )
-            for key, value in group.items():
-                new_group.__setattr__(key, value)
-            object.__setattr__(self, name, new_group)
+        if isinstance(group, pd.DataFrame):
+            group = dict(group)
+            group["is_pd_dataframe"] = True
+            new_group = HDF_Dataframe(
+                file_name=self.file_name,
+                name=f"{self.name}/{name}",
+                read_only=self.read_only,
+                truncate=self.truncate,
+            )
+        else:
+            new_group = HDF_Group(
+                file_name=self.file_name,
+                name=f"{self.name}/{name}",
+                read_only=self.read_only,
+                truncate=self.truncate,
+            )
+        for key, value in group.items():
+            new_group.__setattr__(key, value)
+        new_group.last_updated = time.asctime()
+        object.__setattr__(self, name, new_group)
 
 
 class HDF_Dataset(HDF_Object):
