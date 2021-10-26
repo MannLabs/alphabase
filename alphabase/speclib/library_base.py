@@ -8,15 +8,16 @@ import numpy as np
 import typing
 
 import alphabase.peptide.fragment as fragment
+from alphabase.io.hdf import HDF_File
 
 class SpecLibBase(object):
     def __init__(self,
-        # e.g. ['b_1+','b_2+','y_1+','y_2+', ...]
-        charged_ion_types:typing.List[str],
+        # e.g. ['b_1','b_2','y_1','y_2', ...]
+        charged_frag_types:typing.List[str],
         min_frag_mz = 100, max_frag_mz = 2000,
         min_precursor_mz = 400, max_precursor_mz = 6000,
     ):
-        self.charged_ion_types = charged_ion_types
+        self.charged_frag_types = charged_frag_types
         self._precursor_df:pd.DataFrame = None
         self._fragment_inten_df:pd.DataFrame = None
         self._fragment_mass_df:pd.DataFrame = None
@@ -126,16 +127,25 @@ class SpecLibBase(object):
         (
             self._precursor_df, self._fragment_mass_df
         ) = fragment.get_fragment_mass_dataframe(
-            self._precursor_df, self.charged_ion_types
+            self._precursor_df, self.charged_frag_types
         )
         if need_clip: self.clip_precursor_by_mz_()
 
     def save_hdf(self, hdf_file):
-        self._precursor_df.to_hdf(hdf_file, key='precursor', mode='w')
-        self._fragment_mass_df.to_hdf(hdf_file, key='fragment_mass')
-        self._fragment_inten_df.to_hdf(hdf_file, key='fragment_inten')
+        _hdf = HDF_File(
+            hdf_file,
+            read_only=False,
+            truncate=True,
+            delete_existing=True
+        )
+        _hdf.precursor_df = self._precursor_df
+        _hdf.fragment_mass_df = self._fragment_mass_df
+        _hdf.fragment_inten_df = self._fragment_inten_df
 
     def load_hdf(self, hdf_file):
-        self._precursor_df = pd.read_hdf(hdf_file, key='precursor')
-        self._fragment_mass_df = pd.read_hdf(hdf_file, key='fragment_mass')
-        self._fragment_inten_df = pd.read_hdf(hdf_file, key='fragment_inten')
+        self._hdf = HDF_File(
+            hdf_file,
+        )
+        self._precursor_df = self._hdf.precursor_df.values
+        self._fragment_mass_df = self._hdf.fragment_mass_df.values
+        self._fragment_inten_df = self._hdf.fragment_inten_df.values

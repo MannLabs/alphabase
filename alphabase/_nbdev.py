@@ -40,6 +40,7 @@ index = {"reset_AA_mass": "aa.ipynb",
          "get_sliced_fragment_dataframe": "fragment.ipynb",
          "concat_precursor_fragment_dataframes": "fragment.ipynb",
          "get_fragment_mass_dataframe": "fragment.ipynb",
+         "set_precursor_mz": "fragment.ipynb",
          "SpecLibBase": "library_base.ipynb",
          "load_yaml": "yaml_utils.ipynb",
          "save_yaml": "yaml_utils.ipynb"}

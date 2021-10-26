@@ -4,7 +4,7 @@ __all__ = ['get_charged_frag_types', 'parse_charged_frag_type', 'get_by_and_pept
            'get_peptide_mass_for_same_len_seqs', 'get_by_and_peptide_mass_for_same_len_seqs',
            'init_zero_fragment_dataframe', 'init_fragment_dataframe_from_other', 'init_fragment_by_precursor_dataframe',
            'set_sliced_fragment_dataframe', 'get_sliced_fragment_dataframe', 'concat_precursor_fragment_dataframes',
-           'get_fragment_mass_dataframe']
+           'get_fragment_mass_dataframe', 'set_precursor_mz']
 
 # Cell
 import numpy as np
@@ -17,7 +17,8 @@ from alphabase.constants.aa import \
     get_AA_masses_for_same_len_seqs,\
     get_sequence_masses_for_same_len_seqs
 from alphabase.constants.modification import \
-    get_modification_mass, get_modloss_mass
+    get_modification_mass, get_modloss_mass,\
+    get_modification_mass_sum
 from alphabase.constants.element import \
     MASS_H2O, MASS_PROTON, MASS_NH3, CHEM_MONO_MASS
 
@@ -27,16 +28,16 @@ def get_charged_frag_types(
 )->List[str]:
     '''
     Args:
-        frag_types (List[str]): e.g. ['b','y','b-modloss','y-modloss']
+        frag_types (List[str]): e.g. ['b','y','b_modloss','y_modloss']
         max_frag_charge (int): max fragment charge. (default: 2)
     Returns:
-        List[str]: for `frag_types=['b','y','b-modloss','y-modloss']` and `max_frag_charge=2`,
-        return `['b_1+','b_2+','y_1+','y_2+','b-modloss_1+','b-modloss_2+','y-modloss_1+','y-modloss_2+']`.
+        List[str]: for `frag_types=['b','y','b_modloss','y_modloss']` and `max_frag_charge=2`,
+        return `['b_1','b_2','y_1','y_2','b_modloss_1','b_modloss_2','y_modloss_1','y_modloss_2']`.
     '''
     charged_frag_types = []
     for _type in frag_types:
         for _ch in range(1, max_frag_charge+1):
-            charged_frag_types.append(f"{_type}_{_ch}+")
+            charged_frag_types.append(f"{_type}_{_ch}")
     return charged_frag_types
 
 def parse_charged_frag_type(
@@ -44,13 +45,18 @@ def parse_charged_frag_type(
 )->Tuple[str,int]:
     '''
     Args:
-        charged_frag_type (str): e.g. 'y_1+', 'b_modloss_1-'
+        charged_frag_type (str): e.g. 'y_1', 'b_modloss_1'
     Returns:
         str: fragment type, e.g. 'b','y'
         int: charge state, can be a negative value
     '''
-    _type, _ch = charged_frag_type.split('_')
-    return _type, int(_ch[-1]+_ch[:-1])
+    items = charged_frag_type.split('_')
+    _ch = items[-1]
+    _type = '_'.join(items[:-1])
+    if not _ch[-1].isdigit():
+        return _type, int(_ch[:-1])
+    else:
+        return _type, int(_ch)
 
 def get_by_and_peptide_mass(
     sequence: str,
@@ -78,34 +84,21 @@ def get_peptide_mass_for_same_len_seqs(
 )->np.array:
     '''
     Args:
-        sequence (np.array of str): np.array of peptie sequences with same length.
         mod_list (Iterable[List[str]]): Iterable of modifications (list, array, ...),
             e.g. `[['Oxidation@M','Phospho@S'],['Phospho@S','Deamidated@N']]`
-        site_list (Iterable[List[int]]): Iterable of modification sites
-            corresponding to `mod_list`, e.g. `[[3,6],[4,17]]`
     Returns:
-        np.array: neutral b fragment masses (2-D array)
-        np.array: neutral y fragmnet masses (2-D array)
-        np.array: neutral peptide masses (1-D array)
+        np.array: peptide masses (1-D array, H2O already added)
     '''
-    seq_masses = get_AA_masses_for_same_len_seqs(sequences)
+    seq_masses = get_sequence_masses_for_same_len_seqs(
+        sequences
+    )
     mod_masses = np.zeros_like(seq_masses)
-    seq_len = len(sequences[0])
     for i, mods in enumerate(mod_list):
         if mods:
-            mod_masses[i] = get_modification_mass(
-                seq_len,
-                mods,
-                sites,
+            mod_masses[i] = get_modification_mass_sum(
+                mods.split(';')
             )
-    residue_masses += mod_masses
-
-    b_masses = np.cumsum(residue_masses, axis=1)
-    b_masses, pepmass = b_masses[:,:-1], b_masses[:,-1:]
-
-    pepmass += MASS_H2O
-    y_masses = pepmass - b_masses
-    return b_masses, y_masses, pepmass.reshape(-1)
+    return seq_masses+mod_masses
 
 
 def get_by_and_peptide_mass_for_same_len_seqs(
@@ -153,7 +146,7 @@ def init_zero_fragment_dataframe(
     Args:
         peplen_array (np.array): peptide lengths for the fragment dataframe
         charged_frag_types (List[str]):
-            `['b_1+','b_2+','y_1+','y_2+','b-modloss_1+','y-H2O_1+'...]`
+            `['b_1','b_2','y_1','y_2','b_modloss_1','y_H2O_1'...]`
     Returns:
         pd.DataFrame: `fragment_df` with zero values
         np.array (int64): the start indices point to the `fragment_df` for each peptide
@@ -196,7 +189,7 @@ def init_fragment_by_precursor_dataframe(
             `precursor_df.frag_start_idx` and `precursor.frag_end_idx`
             point to the indices in `reference_fragment_df`
         charged_frag_types (List):
-            `['b_1+','b_2+','y_1+','y_2+','b-modloss_1+','y-H2O_1+'...]`
+            `['b_1+','b_2+','y_1+','y_2+','b_modloss_1+','y_H2O_1+'...]`
         reference_fragment_df (pd.DataFrame): generate fragment_mass_df based
             on this reference (default: None)
     Returns:
@@ -239,7 +232,7 @@ def set_sliced_fragment_dataframe(
     Args:
         fragment_df (pd.DataFrame): fragment dataframe to be set
         frag_start_end_list (List[Tuple[int,int]]): e.g. `[(start,end),(start,end),...]`
-        charged_frag_types (List[str]): e.g. `['b_1+','b_2+','y_1+','y_2+']`
+        charged_frag_types (List[str]): e.g. `['b_1','b_2','y_1','y_2']`
     Returns:
         pd.DataFrame: fragment_df after the values are set
     '''
@@ -258,7 +251,7 @@ def get_sliced_fragment_dataframe(
     Args:
         fragment_df (pd.DataFrame): fragment dataframe to be set
         frag_start_end_list (List[Tuple[int,int]]): e.g. `[(start,end),(start,end),...]`
-        charged_frag_types (List[str]): e.g. `['b_1+','b_2+','y_1+','y_2+']` (default: None)
+        charged_frag_types (List[str]): e.g. `['b_1','b_2','y_1','y_2']` (default: None)
     Returns:
         pd.DataFrame: sliced fragment_df. If `charged_frag_types` is None,
         return fragment_df with all columns
@@ -312,7 +305,7 @@ def get_fragment_mass_dataframe(
             if `precursor_df` contains the 'frag_start_idx' column,
             `reference_fragment_df` must be provided
         charged_frag_types (List):
-            `['b_1+','b_2+','y_1+','y_2+','b-modloss_1+','y-H2O_1+'...]`
+            `['b_1','b_2','y_1','y_2','b_modloss_1','y_H2O_1'...]`
         reference_fragment_df (pd.DataFrame): generate fragment_mass_df based
             on this reference, as `precursor_df.frag_start_idx` and
             `precursor.frag_end_idx` point to the indices in
@@ -364,24 +357,31 @@ def get_fragment_mass_dataframe(
             mod_list.append(mod_names)
             site_list.append(mod_sites)
 
-        b_mass, y_mass, pepmass = get_by_and_peptide_mass_for_same_len_seqs(
+        (
+            b_mass, y_mass, pepmass
+        ) = get_by_and_peptide_mass_for_same_len_seqs(
             df_group.sequence.values.astype('U'), mod_list, site_list
         )
         b_mass = b_mass.reshape(-1)
         y_mass = y_mass.reshape(-1)
 
-        if 'charge' in df_group.columns:
-            df_group['precursor_mz'] = pepmass/df_group['charge'].values + MASS_PROTON
+        if (
+            'charge' in df_group.columns and
+            'precursor_mz' not in df_group.columns
+        ):
+            df_group['precursor_mz'] = pepmass/df_group[
+                'charge'
+            ].values + MASS_PROTON
 
         for charged_frag_type in charged_frag_types:
-            if charged_frag_type.startswith('b-modloss'):
+            if charged_frag_type.startswith('b_modloss'):
                 b_modloss = np.concatenate([
                     get_modloss_mass(nAA, mods, sites, True)
                     for mods, sites in zip(mod_list, site_list)
                 ])
                 break
         for charged_frag_type in charged_frag_types:
-            if charged_frag_type.startswith('y-modloss'):
+            if charged_frag_type.startswith('y_modloss'):
                 y_modloss = np.concatenate([
                     get_modloss_mass(nAA, mods, sites, True)
                     for mods, sites in zip(mod_list, site_list)
@@ -389,40 +389,45 @@ def get_fragment_mass_dataframe(
                 break
 
         set_values = []
+        add_proton = MASS_PROTON
         for charged_frag_type in charged_frag_types:
             frag_type, charge = parse_charged_frag_type(charged_frag_type)
             if frag_type =='b':
-                set_values.append(b_mass/charge + MASS_PROTON)
+                set_values.append(b_mass/charge + add_proton)
             elif frag_type == 'y':
-                set_values.append(y_mass/charge + MASS_PROTON)
-            elif frag_type == 'b-modloss':
-                _mass = (b_mass-b_modloss)/charge + MASS_PROTON
+                set_values.append(y_mass/charge + add_proton)
+            elif frag_type == 'b_modloss':
+                _mass = (b_mass-b_modloss)/charge + add_proton
                 _mass[b_modloss == 0] = 0
                 set_values.append(_mass)
-            elif frag_type == 'y-modloss':
-                _mass = (y_mass-y_modloss)/charge + MASS_PROTON
+            elif frag_type == 'y_modloss':
+                _mass = (y_mass-y_modloss)/charge + add_proton
                 _mass[y_modloss == 0] = 0
                 set_values.append(_mass)
-            elif frag_type == 'b-H2O':
-                _mass = (b_mass-MASS_H2O)/charge + MASS_PROTON
+            elif frag_type == 'b_H2O':
+                _mass = (b_mass-MASS_H2O)/charge + add_proton
                 set_values.append(_mass)
-            elif frag_type == 'y-H2O':
-                _mass = (y_mass-MASS_H2O)/charge + MASS_PROTON
+            elif frag_type == 'y_H2O':
+                _mass = (y_mass-MASS_H2O)/charge + add_proton
                 set_values.append(_mass)
-            elif frag_type == 'b-NH3':
-                _mass = (b_mass-MASS_NH3)/charge + MASS_PROTON
+            elif frag_type == 'b_NH3':
+                _mass = (b_mass-MASS_NH3)/charge + add_proton
                 set_values.append(_mass)
-            elif frag_type == 'y-NH3':
-                _mass = (y_mass-MASS_NH3)/charge + MASS_PROTON
+            elif frag_type == 'y_NH3':
+                _mass = (y_mass-MASS_NH3)/charge + add_proton
                 set_values.append(_mass)
             elif frag_type == 'c':
-                _mass = (b_mass+MASS_NH3)/charge + MASS_PROTON
+                _mass = (b_mass+MASS_NH3)/charge + add_proton
                 set_values.append(_mass)
             elif frag_type == 'z':
-                _mass = (y_mass-(MASS_NH3-CHEM_MONO_MASS['H']))/charge + MASS_PROTON
+                _mass = (
+                    y_mass-(MASS_NH3-CHEM_MONO_MASS['H'])
+                )/charge + add_proton
                 set_values.append(_mass)
             else:
-                raise NotImplementedError(f'Fragment type "{frag_type}" is not in fragment_mass_df.')
+                raise NotImplementedError(
+                    f'Fragment type "{frag_type}" is not in fragment_mass_df.'
+                )
 
         if reference_fragment_df is not None:
             set_sliced_fragment_dataframe(
@@ -445,3 +450,32 @@ def get_fragment_mass_dataframe(
         return concat_precursor_fragment_dataframes(
             precursor_df_list, fragment_df_list
         )
+
+
+# Cell
+def set_precursor_mz(
+    precursor_df: pd.DataFrame
+)->pd.DataFrame:
+    """
+    Calculate precursor_mz for the precursor_df
+    Args:
+        precursor_df (pd.DataFrame):
+          precursor_df with the 'charge' column
+
+    Returns:
+        pd.DataFrame: precursor_df with 'precursor_mz'
+    """
+
+    precursor_df['precursor_mz'] = 0
+    _grouped = precursor_df.groupby('nAA')
+    for nAA, df_group in _grouped:
+
+        pepmass = get_peptide_mass_for_same_len_seqs(
+            df_group.sequence.values.astype('U'),
+            df_group.mods.values
+        )
+
+        precursor_df.loc[
+            df_group.index, 'precursor_mz'
+        ] = pepmass/df_group.charge + MASS_PROTON
+    return precursor_df
