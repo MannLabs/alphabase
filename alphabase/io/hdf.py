@@ -94,7 +94,8 @@ class HDF_Object(object):
                 object.__setattr__(self, name, value)
         else:
             raise NotImplementedError(
-                f"Type '{type(name)}' is invalid for attribute {name}"
+                f"Type '{type(name)}' is invalid for attribute {name}. "
+                "Only (str, bool, int, float) types are accepted."
             )
 
 
@@ -213,7 +214,10 @@ class HDF_Group(HDF_Object):
                 self.add_group(name, value)
             else:
                 raise NotImplementedError(
-                    f"Type '{type(value)}' is invalid for attribute {name}"
+                    f"Type '{type(value)}' is invalid for attribute {name}",
+                    "Only (str, bool, int, float, np.ndarray, "
+                    "pd.core.series.Series, dict pd.DataFrame) types are "
+                    "accepted."
                 )
 
     def add_dataset(
@@ -236,17 +240,24 @@ class HDF_Group(HDF_Object):
             #     # data=value_.astype(str).values,
             #     # # dtype=h5py.string_dtype(encoding='utf-8')
             #     # dtype=h5py.vlen_dtype(str),
-            hdf_object.create_dataset(
-                name,
-                data=array,
-    #             TODO
-                compression="lzf",
-    #             # compression="gzip" if compress else None, # TODO slower to make, faster to load?
-                shuffle=True,
-                chunks=True,
-                # dtype=dtype,
-                maxshape=tuple([None for i in array.shape]),
-            )
+            try:
+                hdf_object.create_dataset(
+                    name,
+                    data=array,
+        #             TODO
+                    compression="lzf",
+        #             # compression="gzip" if compress else None, # TODO slower to make, faster to load?
+                    shuffle=True,
+                    chunks=True,
+                    # dtype=dtype,
+                    maxshape=tuple([None for i in array.shape]),
+                )
+            except TypeError:
+                raise NotImplementedError(
+                    f"Type {array.dtype} is not understood. "
+                    "If this is a string format, try to cast it to "
+                    "np.dtype('O') as possible solution."
+                )
             dataset = HDF_Dataset(
                 file_name=self.file_name,
                 name=f"{self.name}/{name}",
@@ -385,7 +396,7 @@ class HDF_File(HDF_Group):
             mode = "w"
         else:
             mode = "a"
-        with h5py.File(file_name, mode):
+        with h5py.File(file_name, mode):#, swmr=True):
             pass
         super().__init__(
             file_name=file_name,
