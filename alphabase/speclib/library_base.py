@@ -140,10 +140,11 @@ class SpecLibBase(object):
             truncate=True,
             delete_existing=True
         )
-        _hdf.add_group('library',{})
-        _hdf.library.precursor_df = self._precursor_df
-        _hdf.library.fragment_mass_df = self._fragment_mass_df
-        _hdf.library.fragment_inten_df = self._fragment_inten_df
+        _hdf.library = {
+            'precursor_df': self._precursor_df,
+            'fragment_mass_df': self._fragment_mass_df,
+            'fragment_inten_df': self._fragment_inten_df,
+        }
 
     def load_hdf(self, hdf_file):
         _hdf = HDF_File(
