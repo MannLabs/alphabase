@@ -65,18 +65,20 @@ class DecoyLib(SpecLibBase):
             truncate=True,
             delete_existing=False
         )
-        _hdf.add_group('decoy',{})
-        _hdf.decoy.precursor_df = self._precursor_df
-        _hdf.decoy.fragment_mass_df = self._fragment_mass_df
-        _hdf.decoy.fragment_inten_df = self._fragment_inten_df
+        _hdf_lib = _hdf.library
+        _hdf_lib.add_group('decoy',{})
+        _hdf_lib.decoy.precursor_df = self._precursor_df
+        _hdf_lib.decoy.fragment_mass_df = self._fragment_mass_df
+        _hdf_lib.decoy.fragment_inten_df = self._fragment_inten_df
 
     def load_hdf(self, hdf_file):
         _hdf = HDF_File(
             hdf_file,
         )
-        self._precursor_df = _hdf.decoy.precursor_df.values
-        self._fragment_mass_df = _hdf.decoy.fragment_mass_df.values
-        self._fragment_inten_df = _hdf.decoy.fragment_inten_df.values
+        _hdf_lib = _hdf.library
+        self._precursor_df = _hdf_lib.decoy.precursor_df.values
+        self._fragment_mass_df = _hdf_lib.decoy.fragment_mass_df.values
+        self._fragment_inten_df = _hdf_lib.decoy.fragment_inten_df.values
 
 class DiaNNDecoyLib(DecoyLib):
     def __init__(self,
