@@ -3,3 +3,4 @@ numba
 numpy
 pyyaml
 pandas
+h5py
