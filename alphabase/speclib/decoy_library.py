@@ -29,7 +29,7 @@ class DecoyLib(SpecLibBase):
 
     def _decoy_mod(self):
         """
-        Decoy for modifications and modification sits
+        Decoy for modifications and modification sites
         """
         pass
 
@@ -65,11 +65,11 @@ class DecoyLib(SpecLibBase):
             truncate=True,
             delete_existing=False
         )
-        _hdf_lib = _hdf.library
-        _hdf_lib.add_group('decoy',{})
-        _hdf_lib.decoy.precursor_df = self._precursor_df
-        _hdf_lib.decoy.fragment_mass_df = self._fragment_mass_df
-        _hdf_lib.decoy.fragment_inten_df = self._fragment_inten_df
+        _hdf.library.decoy = {
+            'precursor_df': self._precursor_df,
+            'fragment_mass_df': self._fragment_mass_df,
+            'fragment_inten_df': self._fragment_inten_df,
+        }
 
     def load_hdf(self, hdf_file):
         _hdf = HDF_File(
