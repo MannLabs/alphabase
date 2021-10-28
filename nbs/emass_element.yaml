@@ -1,3 +1,5 @@
+# https://github.com/princelab/emass/blob/master/ISOTOPE.DAT
+# with additional self-defined elements (13C, 14N, 15N, ...)
 13C:
   abundance:
   - 0.01
