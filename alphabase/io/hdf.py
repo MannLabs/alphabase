@@ -52,7 +52,7 @@ class HDF_Object(object):
 
     @property
     def metadata(self):
-        with h5py.File(self.file_name, "r") as hdf_file:
+        with h5py.File(self.file_name, "a") as hdf_file:
             return dict(hdf_file[self.name].attrs)
 
     def __init__(
@@ -160,7 +160,7 @@ class HDF_Group(HDF_Object):
         group_names = []
         dataset_names = []
         datafame_names = []
-        with h5py.File(self.file_name, "r") as hdf_file:
+        with h5py.File(self.file_name, "a") as hdf_file:
             hdf_object = hdf_file[self.name]
             for name in sorted(hdf_object):
                 if isinstance(hdf_object[name], h5py.Dataset):
@@ -307,12 +307,12 @@ class HDF_Dataset(HDF_Object):
 
     @property
     def dtype(self):
-        with h5py.File(self.file_name, "r") as hdf_file:
+        with h5py.File(self.file_name, "a") as hdf_file:
             return hdf_file[self.name].dtype
 
     @property
     def shape(self):
-        with h5py.File(self.file_name, "r") as hdf_file:
+        with h5py.File(self.file_name, "a") as hdf_file:
             return hdf_file[self.name].shape
 
     @property
@@ -320,7 +320,7 @@ class HDF_Dataset(HDF_Object):
         return self[...]
 
     def __getitem__(self, keys):
-        with h5py.File(self.file_name, "r") as hdf_file:
+        with h5py.File(self.file_name, "a") as hdf_file:
             hdf_object = hdf_file[self.name]
             if h5py.check_string_dtype(hdf_object.dtype) is not None:
                 hdf_object = hdf_object.asstr()
