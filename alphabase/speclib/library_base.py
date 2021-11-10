@@ -20,9 +20,9 @@ class SpecLibBase(object):
         min_precursor_mz = 400, max_precursor_mz = 6000,
     ):
         self.charged_frag_types = charged_frag_types
-        self._precursor_df:pd.DataFrame = None
-        self._fragment_inten_df:pd.DataFrame = None
-        self._fragment_mass_df:pd.DataFrame = None
+        self._precursor_df = pd.DataFrame()
+        self._fragment_inten_df = pd.DataFrame()
+        self._fragment_mass_df = pd.DataFrame()
         self.min_frag_mz = min_frag_mz
         self.max_frag_mz = max_frag_mz
         self.min_precursor_mz = min_precursor_mz
