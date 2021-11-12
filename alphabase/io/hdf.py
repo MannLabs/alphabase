@@ -156,6 +156,33 @@ class HDF_Group(HDF_Object):
         return self.components[2]
 
     @property
+    def groups(self):
+        groups = []
+        with h5py.File(self.file_name, "a") as hdf_file:
+            hdf_object = hdf_file[self.name]
+            for group_name in self.group_names:
+                groups.append(hdf_object[group_name])
+        return groups
+
+    @property
+    def datasets(self):
+        datasets = []
+        with h5py.File(self.file_name, "a") as hdf_file:
+            hdf_object = hdf_file[self.name]
+            for dataset_name in self.dataset_names:
+                datasets.append(hdf_object[dataset_name])
+        return datasets
+
+    @property
+    def dataframes(self):
+        dataframes = []
+        with h5py.File(self.file_name, "a") as hdf_file:
+            hdf_object = hdf_file[self.name]
+            for dataframe_name in self.dataframe_names:
+                dataframes.append(hdf_object[dataframe_name])
+        return dataframes
+
+    @property
     def components(self):
         group_names = []
         dataset_names = []
