@@ -332,8 +332,9 @@ class HDF_Dataset(HDF_Object):
             new_shape = tuple(
                 [i + j for i, j in zip(self.shape, data.shape)]
             )
+            old_size = len(self)
             hdf_object.resize(new_shape)
-            hdf_object[len(self):] = data
+            hdf_object[old_size:] = data
 
     def set_slice(self, selection, values):
         with h5py.File(self.file_name, "a") as hdf_file:
