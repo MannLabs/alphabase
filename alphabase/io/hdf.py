@@ -157,30 +157,21 @@ class HDF_Group(HDF_Object):
 
     @property
     def groups(self):
-        groups = []
-        with h5py.File(self.file_name, "a") as hdf_file:
-            hdf_object = hdf_file[self.name]
-            for group_name in self.group_names:
-                groups.append(hdf_object[group_name])
-        return groups
+        return [
+            self.__getattribute__(name) for name in self.group_names
+        ]
 
     @property
     def datasets(self):
-        datasets = []
-        with h5py.File(self.file_name, "a") as hdf_file:
-            hdf_object = hdf_file[self.name]
-            for dataset_name in self.dataset_names:
-                datasets.append(hdf_object[dataset_name])
-        return datasets
+        return [
+            self.__getattribute__(name) for name in self.dataset_names
+        ]
 
     @property
     def dataframes(self):
-        dataframes = []
-        with h5py.File(self.file_name, "a") as hdf_file:
-            hdf_object = hdf_file[self.name]
-            for dataframe_name in self.dataframe_names:
-                dataframes.append(hdf_object[dataframe_name])
-        return dataframes
+        return [
+            self.__getattribute__(name) for name in self.dataframe_names
+        ]
 
     @property
     def components(self):
@@ -276,6 +267,7 @@ class HDF_Group(HDF_Object):
         #             # compression="gzip" if compress else None, # TODO slower to make, faster to load?
                     shuffle=True,
                     chunks=True,
+                    # chunks=array.shape,
                     # dtype=dtype,
                     maxshape=tuple([None for i in array.shape]),
                 )
