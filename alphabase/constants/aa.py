@@ -20,7 +20,7 @@ AA_CHEM = load_yaml(
 )
 
 def reset_AA_mass():
-    AA_ASCII_MASS = np.zeros(128)
+    AA_ASCII_MASS = np.ones(128)*1e8
     for aa, chem in AA_CHEM.items():
         AA_ASCII_MASS[ord(aa)] = calc_formula_mass(chem)
     return AA_ASCII_MASS

@@ -247,7 +247,8 @@ def get_fragment_mz_dataframe(
                 "No column 'frag_start_idx' in `precursor_df` "\
                 "to slice the `reference_fragment_df`"
             )
-
+    if 'nAA' not in precursor_df.columns:
+        precursor_df['nAA'] = precursor_df.sequence.str.len()
     if reference_fragment_df is not None:
         fragment_mz_df = init_fragment_dataframe_from_other(
             reference_fragment_df[charged_frag_types]
