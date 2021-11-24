@@ -45,7 +45,7 @@ class DecoyLib(SpecLibBase):
         del self._precursor_df['frag_start_idx']
         del self._precursor_df['frag_end_idx']
 
-        self.load_fragment_mz_df()
+        self.calc_fragment_mz_df()
 
     def _decoy_fragment_intensity(self):
         pass

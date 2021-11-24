@@ -84,14 +84,19 @@ class SpecLibBase(object):
         )
 
     def load_fragment_df(self, **kwargs):
-        self.load_fragment_mz_df(**kwargs)
+        self.calc_fragment_mz_df(**kwargs)
         self.load_fragment_intensity_df(**kwargs)
+        for col in self._fragment_mz_df.columns.values:
+            if 'modloss' in col:
+                self._fragment_intensity_df.loc[
+                    self._fragment_mz_df[col]==0,col
+                ] = 0
 
     def flatten_fragment_data(
         self
     )->typing.Tuple[np.array, np.array]:
         '''
-        Create flattened (1-D) np.array for mass and intensity
+        Create flattened (1-D) np.array for fragment mz and intensity
         dataframes, respectively. The arrays are references to
         original data, that means:
           1. This method is fast;
@@ -100,10 +105,10 @@ class SpecLibBase(object):
           `array.reshape(len(self._fragment_mz_df.columns), -1)`
 
         Returns:
-            np.array: 1-D flattened mass array (a reference to
-            original mass df data)
+            np.array: 1-D flattened mz array (a reference to
+            original fragment mz df data)
             np.array: 1-D flattened intensity array (a reference to
-            original intensity df data)
+            original fragment intensity df data)
         '''
         return (
             self._fragment_mz_df.values.reshape(-1),
@@ -119,7 +124,7 @@ class SpecLibBase(object):
             f'Sub-class of "{self.__class__}" must re-implement "load_fragment_intensity_df()"'
         )
 
-    def load_fragment_mz_df(self):
+    def calc_fragment_mz_df(self):
         need_clip = (
             False if
             'precursor_mz' in self._precursor_df.columns
