@@ -7,15 +7,16 @@ __all__ = ['calc_delta_modification_mass', 'calc_b_y_and_peptide_mass', 'calc_pe
 import numpy as np
 from typing import List, Tuple, Iterable
 
-from alphabase.constants.aa import \
-    get_sequence_mass, \
-    get_AA_masses_for_same_len_seqs,\
-    get_sequence_masses_for_same_len_seqs
-from alphabase.constants.modification import \
-    get_modification_mass,\
-    get_modification_mass_sum
-from alphabase.constants.element import \
-    MASS_H2O
+from alphabase.constants.aa import (
+    calc_sequence_mass,
+    calc_AA_masses_for_same_len_seqs,
+    calc_sequence_masses_for_same_len_seqs
+)
+from alphabase.constants.modification import (
+    calc_modification_mass,
+    calc_modification_mass_sum
+)
+from alphabase.constants.element import MASS_H2O
 
 def calc_delta_modification_mass(
     pep_len:int,
@@ -57,8 +58,8 @@ def calc_b_y_and_peptide_mass(
     `calc_b_y_and_peptide_mass_for_same_len_seqs()`
     as it is much faster
     '''
-    residue_masses = get_sequence_mass(sequence)
-    mod_masses = get_modification_mass(
+    residue_masses = calc_sequence_mass(sequence)
+    mod_masses = calc_modification_mass(
         len(sequence), mod_names, mod_sites
     )
     residue_masses += mod_masses
@@ -84,7 +85,7 @@ def calc_peptide_mass_for_same_len_seqs(
     Calculate peptide masses for peptide sequences with same lengths.
     We need 'same_len' here because numpy can process AA sequences
     with same length very fast.
-    See `alphabase.aa.get_sequence_masses_for_same_len_seqs()`
+    See `alphabase.aa.calc_sequence_masses_for_same_len_seqs()`
 
     Args:
         mod_list (List[str]): list of modifications,
@@ -94,13 +95,13 @@ def calc_peptide_mass_for_same_len_seqs(
     Returns:
         np.array: peptide masses (1-D array, H2O already added)
     '''
-    seq_masses = get_sequence_masses_for_same_len_seqs(
+    seq_masses = calc_sequence_masses_for_same_len_seqs(
         sequences
     )
     mod_masses = np.zeros_like(seq_masses)
     for i, mods in enumerate(mod_list):
         if len(mods) != 0:
-            mod_masses[i] = get_modification_mass_sum(
+            mod_masses[i] = calc_modification_mass_sum(
                 mods.split(';')
             )
     if mass_delta_list is not None:
@@ -140,12 +141,12 @@ def calc_b_y_and_peptide_mass_for_same_len_seqs(
         np.array: neutral y fragmnet masses (2-D array)
         np.array: neutral peptide masses (1-D array)
     '''
-    residue_masses = get_AA_masses_for_same_len_seqs(sequences)
+    residue_masses = calc_AA_masses_for_same_len_seqs(sequences)
     mod_masses = np.zeros_like(residue_masses)
     seq_len = len(sequences[0])
     for i, (mods, sites) in enumerate(zip(mod_list, site_list)):
         if len(mods) != 0:
-            mod_masses[i,:] = get_modification_mass(
+            mod_masses[i,:] = calc_modification_mass(
                 seq_len,
                 mods,
                 sites,

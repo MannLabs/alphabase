@@ -3,7 +3,7 @@
 __all__ = ['get_charged_frag_types', 'parse_charged_frag_type', 'init_zero_fragment_dataframe',
            'init_fragment_dataframe_from_other', 'init_fragment_by_precursor_dataframe',
            'update_sliced_fragment_dataframe', 'get_sliced_fragment_dataframe', 'concat_precursor_fragment_dataframes',
-           'get_fragment_mz_dataframe', 'update_precursor_mz']
+           'create_fragment_mz_dataframe', 'update_precursor_mz']
 
 # Cell
 import numpy as np
@@ -12,10 +12,13 @@ from typing import List, Union, Tuple
 import warnings
 
 from alphabase.peptide.mass_calc import *
-from alphabase.constants.modification import \
-    get_modloss_mass
-from alphabase.constants.element import \
-    MASS_H2O, MASS_PROTON, MASS_NH3, CHEM_MONO_MASS
+from alphabase.constants.modification import (
+    calc_modloss_mass
+)
+from alphabase.constants.element import (
+    MASS_H2O, MASS_PROTON,
+    MASS_NH3, CHEM_MONO_MASS
+)
 
 def get_charged_frag_types(
     frag_types:List[str],
@@ -206,7 +209,7 @@ def concat_precursor_fragment_dataframes(
             *[pd.concat(other_list).reset_index(drop=True) for other_list in other_fragment_df_lists]
 
 # Cell
-def get_fragment_mz_dataframe(
+def create_fragment_mz_dataframe(
     precursor_df: pd.DataFrame,
     charged_frag_types:List,
     reference_fragment_df: pd.DataFrame = None,
@@ -318,14 +321,14 @@ def get_fragment_mz_dataframe(
         for charged_frag_type in charged_frag_types:
             if charged_frag_type.startswith('b_modloss'):
                 b_modloss = np.concatenate([
-                    get_modloss_mass(nAA, mods, sites, True)
+                    calc_modloss_mass(nAA, mods, sites, True)
                     for mods, sites in zip(mod_list, site_list)
                 ])
                 break
         for charged_frag_type in charged_frag_types:
             if charged_frag_type.startswith('y_modloss'):
                 y_modloss = np.concatenate([
-                    get_modloss_mass(nAA, mods, sites, True)
+                    calc_modloss_mass(nAA, mods, sites, True)
                     for mods, sites in zip(mod_list, site_list)
                 ])
                 break
@@ -408,6 +411,8 @@ def update_precursor_mz(
         pd.DataFrame: precursor_df with 'precursor_mz'
     """
 
+    if 'nAA' not in precursor_df:
+        precursor_df['nAA'] = precursor_df.sequence.str.len()
     precursor_df['precursor_mz'] = 0
     _grouped = precursor_df.groupby('nAA')
     for nAA, df_group in _grouped:
