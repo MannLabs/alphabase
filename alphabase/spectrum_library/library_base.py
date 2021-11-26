@@ -125,6 +125,9 @@ class SpecLibBase(object):
         )
 
     def calc_fragment_mz_df(self):
+        if ('frag_start_idx' in self._precursor_df.columns
+            and len(self._fragment_mz_df)>0
+        ): return
         need_clip = (
             False if
             'precursor_mz' in self._precursor_df.columns
