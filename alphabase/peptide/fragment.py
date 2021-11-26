@@ -328,7 +328,7 @@ def create_fragment_mz_dataframe(
         for charged_frag_type in charged_frag_types:
             if charged_frag_type.startswith('y_modloss'):
                 y_modloss = np.concatenate([
-                    calc_modloss_mass(nAA, mods, sites, True)
+                    calc_modloss_mass(nAA, mods, sites, False)
                     for mods, sites in zip(mod_list, site_list)
                 ])
                 break

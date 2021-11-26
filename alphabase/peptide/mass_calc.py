@@ -100,13 +100,13 @@ def calc_peptide_mass_for_same_len_seqs(
     )
     mod_masses = np.zeros_like(seq_masses)
     for i, mods in enumerate(mod_list):
-        if len(mods) != 0:
+        if len(mods) > 0:
             mod_masses[i] = calc_modification_mass_sum(
                 mods.split(';')
             )
     if mass_delta_list is not None:
         for i, mass_deltas in enumerate(mass_delta_list):
-            if len(mass_deltas) != 0:
+            if len(mass_deltas) > 0:
                 mod_masses[i] += np.sum([
                     float(mass) for mass in mass_deltas.split(';')
                 ])
