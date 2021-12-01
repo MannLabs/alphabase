@@ -5,7 +5,7 @@ __all__ = ['load_yaml', 'save_yaml']
 # Cell
 import yaml
 
-def load_yaml(filename):
+def load_yaml(filename)->dict:
     with open(filename) as f:
         settings = yaml.load(f, Loader=yaml.FullLoader)
     return settings
