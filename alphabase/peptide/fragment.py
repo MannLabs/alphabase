@@ -204,9 +204,13 @@ def concat_precursor_fragment_dataframes(
     cum_frag_df_lens = np.cumsum(fragment_df_lens)
     for i,precursor_df in enumerate(precursor_df_list[1:]):
         precursor_df[['frag_start_idx','frag_end_idx']] += cum_frag_df_lens[i]
-    return pd.concat(precursor_df_list).reset_index(drop=True),\
-            pd.concat(fragment_df_list).reset_index(drop=True),\
-            *[pd.concat(other_list).reset_index(drop=True) for other_list in other_fragment_df_lists]
+    return (
+        pd.concat(precursor_df_list).reset_index(drop=True),
+        pd.concat(fragment_df_list).reset_index(drop=True),
+        *[pd.concat(other_list).reset_index(drop=True)
+            for other_list in other_fragment_df_lists
+        ]
+    )
 
 # Cell
 def create_fragment_mz_dataframe(
@@ -263,50 +267,31 @@ def create_fragment_mz_dataframe(
 
     _grouped = precursor_df.groupby('nAA')
     for nAA, df_group in _grouped:
-        mod_list = []
-        site_list = []
-        for mod_names, mod_sites in df_group[
-            ['mods', 'mod_sites']
-        ].values:
-            if len(mod_names) != 0:
-                mod_names = mod_names.split(';')
-                mod_sites = [int(_site) for _site in mod_sites.split(';')]
-            else:
-                mod_names = []
-                mod_sites = []
-            mod_list.append(mod_names)
-            site_list.append(mod_sites)
+        mod_list = df_group.mods.str.split(';').apply(
+            lambda x: [m for m in x if len(m)>0]
+        ).values
+        site_list = df_group.mod_sites.str.split(';').apply(
+            lambda x: [int(s) for s in x if len(s)>0]
+        ).values
 
-        if 'mass_deltas' in df_group.columns:
-            mass_delta_list = []
-            mass_delta_site_list = []
-            for mass_deltas, mass_delta_sites in df_group[
-                ['mass_deltas', 'mass_delta_sites']
-            ].values:
-                if len(mass_deltas) != 0:
-                    mass_deltas = [float(_) for _ in mass_deltas.split(';')]
-                    mass_delta_sites = [int(_site) for _site in mass_delta_sites.split(';')]
-                else:
-                    mass_deltas = []
-                    mass_delta_sites = []
-                mass_delta_list.append(mass_deltas)
-                mass_delta_site_list.append(mass_delta_sites)
-
-            (
-                b_mass, y_mass, pepmass
-            ) = calc_b_y_and_peptide_mass_for_same_len_seqs(
-                df_group.sequence.values.astype('U'),
-                mod_list, site_list,
-                mass_delta_list,
-                mass_delta_site_list
-            )
+        if 'mod_deltas' in df_group.columns:
+            mod_delta_list = df_group.mod_deltas.str.split(';').apply(
+                lambda x: [float(m) for m in x if len(m)>0]
+            ).values
+            mod_delta_site_list = df_group.mod_delta_sites.str.split(';').apply(
+                lambda x: [int(s) for s in x if len(s)>0]
+            ).values
         else:
-            (
-                b_mass, y_mass, pepmass
-            ) = calc_b_y_and_peptide_mass_for_same_len_seqs(
-                df_group.sequence.values.astype('U'),
-                mod_list, site_list
-            )
+            mod_delta_list = None
+            mod_delta_site_list = None
+        (
+            b_mass, y_mass, pepmass
+        ) = calc_b_y_and_peptide_masses_for_same_len_seqs(
+            df_group.sequence.values.astype('U'),
+            mod_list, site_list,
+            mod_delta_list,
+            mod_delta_site_list
+        )
         b_mass = b_mass.reshape(-1)
         y_mass = y_mass.reshape(-1)
 
@@ -417,13 +402,13 @@ def update_precursor_mz(
     _grouped = precursor_df.groupby('nAA')
     for nAA, df_group in _grouped:
 
-        pep_mass = calc_peptide_mass_for_same_len_seqs(
+        pep_masses = calc_peptide_masses_for_same_len_seqs(
             df_group.sequence.values.astype('U'),
             df_group.mods.values,
-            df_group.mass_deltas.values if 'mass_deltas' in df_group.columns else None
+            df_group.mod_deltas.values if 'mod_deltas' in df_group.columns else None
         )
 
         precursor_df.loc[
             df_group.index, 'precursor_mz'
-        ] = pep_mass/df_group.charge + MASS_PROTON
+        ] = pep_masses/df_group.charge + MASS_PROTON
     return precursor_df
