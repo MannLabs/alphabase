@@ -135,7 +135,10 @@ def init_fragment_by_precursor_dataframe(
             )
         else:
             fragment_df = init_fragment_dataframe_from_other(
-                reference_fragment_df[charged_frag_types]
+                reference_fragment_df[[
+                    _fr for _fr in charged_frag_types
+                    if _fr in reference_fragment_df.columns
+                ]]
             )
     return fragment_df
 
