@@ -107,6 +107,17 @@ class PSMReaderBase(object):
         self._translate_modifications()
         self._post_process(filename, origin_df)
 
+    def normalize_rt_by_raw_name(self):
+        if (
+            not 'raw_name' in self.psm_df.columns
+            or not 'rt_norm' in self.psm_df.columns
+        ):
+            return
+        for raw_name, df_group in self.psm_df.groupby('raw_name'):
+            self.psm_df.loc[
+                df_group.index,'rt_norm'
+            ] = df_group.rt_norm / df_group.rt_norm.max()
+
     def _load_file(self, filename:str)->pd.DataFrame:
         """
         Load original dataframe from PSM filename.
