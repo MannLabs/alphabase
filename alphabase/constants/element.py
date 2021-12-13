@@ -2,8 +2,8 @@
 
 __all__ = ['common_dict', 'MASS_PROTON', 'MASS_ISOTOPE', 'truncate_isotope', 'MAX_ISOTOPE_LEN', 'EMPTY_DIST',
            'reset_elements', 'load_elem_yaml', 'CHEM_INFO_DICT', 'CHEM_MONO_MASS', 'CHEM_ISOTOPE_DIST', 'CHEM_MONO_IDX',
-           'MASS_H2O', 'MASS_NH3', 'parse_formula', 'calc_formula_mass', 'abundance_convolution', 'one_element_dist',
-           'formula_dist']
+           'MASS_H2O', 'MASS_NH3', 'parse_formula', 'calc_mass_from_formula', 'abundance_convolution',
+           'one_element_dist', 'formula_dist']
 
 # Cell
 
@@ -159,7 +159,7 @@ def parse_formula(
     ]
     return [(elem, int(n)) for elem, n in items]
 
-def calc_formula_mass(formula:str):
+def calc_mass_from_formula(formula:str):
     '''
     Calculates the mass of the formula`
     Args:

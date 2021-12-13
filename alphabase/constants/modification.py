@@ -13,7 +13,7 @@ from typing import Union, List
 from copy import deepcopy
 
 from alphabase.yaml_utils import load_yaml
-from alphabase.constants.element import calc_formula_mass
+from alphabase.constants.element import calc_mass_from_formula
 
 _base_dir = os.path.dirname(__file__)
 
@@ -56,8 +56,8 @@ def load_mod_yaml(yaml_file):
     for mod, val in MOD_INFO_DICT.items():
         MOD_INFO_DICT[mod]['unimod_mass'] = MOD_INFO_DICT[mod]['mono_mass']
         MOD_INFO_DICT[mod]['unimod_modloss'] = MOD_INFO_DICT[mod]['modloss']
-        MOD_INFO_DICT[mod]['mass'] = calc_formula_mass(val['composition'])
-        MOD_INFO_DICT[mod]['modloss'] = calc_formula_mass(val['modloss_composition'])
+        MOD_INFO_DICT[mod]['mass'] = calc_mass_from_formula(val['composition'])
+        MOD_INFO_DICT[mod]['modloss'] = calc_mass_from_formula(val['modloss_composition'])
         MOD_INFO_DICT[mod]['modloss_importance'] = 0
 
     _update_all_by_MOD_INFO_DICT()
