@@ -84,6 +84,7 @@ class SpecLibBase(object):
         )
 
     def load_fragment_df(self, **kwargs):
+        self._precursor_df.sort_values('nAA', inplace=True)
         self.calc_fragment_mz_df(**kwargs)
         self.load_fragment_intensity_df(**kwargs)
         for col in self._fragment_mz_df.columns.values:
@@ -125,21 +126,15 @@ class SpecLibBase(object):
         )
 
     def calc_fragment_mz_df(self):
-        if ('frag_start_idx' in self._precursor_df.columns
-            and len(self._fragment_mz_df)>0
-        ): return
-        need_clip = (
-            False if
-            'precursor_mz' in self._precursor_df.columns
-            else True
-        )
+        if 'frag_start_idx' in self._precursor_df.columns:
+            del self._precursor_df['frag_start_idx']
+            del self._precursor_df['frag_end_idx']
 
         (
             self._precursor_df, self._fragment_mz_df
         ) = fragment.create_fragment_mz_dataframe(
             self._precursor_df, self.charged_frag_types
         )
-        if need_clip: self.clip_precursor_by_mz_()
 
     def save_hdf(self, hdf_file):
         _hdf = HDF_File(

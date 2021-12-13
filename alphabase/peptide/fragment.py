@@ -220,6 +220,7 @@ def create_fragment_mz_dataframe(
     precursor_df: pd.DataFrame,
     charged_frag_types:List,
     reference_fragment_df: pd.DataFrame = None,
+    batch_size=1000000,
 )->Tuple[pd.DataFrame, pd.DataFrame]:
     '''
     Generate fragment mass dataframe for the precursor_df. If
@@ -269,113 +270,118 @@ def create_fragment_mz_dataframe(
     precursor_df_list = []
 
     _grouped = precursor_df.groupby('nAA')
-    for nAA, df_group in _grouped:
-        mod_list = df_group.mods.str.split(';').apply(
-            lambda x: [m for m in x if len(m)>0]
-        ).values
-        site_list = df_group.mod_sites.str.split(';').apply(
-            lambda x: [int(s) for s in x if len(s)>0]
-        ).values
+    for nAA, big_df_group in _grouped:
+        for i in range(0, len(big_df_group), batch_size):
+            batch_end = i+batch_size
 
-        if 'mod_deltas' in df_group.columns:
-            mod_delta_list = df_group.mod_deltas.str.split(';').apply(
-                lambda x: [float(m) for m in x if len(m)>0]
+            df_group = big_df_group.iloc[i:batch_end,:]
+
+            mod_list = df_group.mods.str.split(';').apply(
+                lambda x: [m for m in x if len(m)>0]
             ).values
-            mod_delta_site_list = df_group.mod_delta_sites.str.split(';').apply(
+            site_list = df_group.mod_sites.str.split(';').apply(
                 lambda x: [int(s) for s in x if len(s)>0]
             ).values
-        else:
-            mod_delta_list = None
-            mod_delta_site_list = None
-        (
-            b_mass, y_mass, pepmass
-        ) = calc_b_y_and_peptide_masses_for_same_len_seqs(
-            df_group.sequence.values.astype('U'),
-            mod_list, site_list,
-            mod_delta_list,
-            mod_delta_site_list
-        )
-        b_mass = b_mass.reshape(-1)
-        y_mass = y_mass.reshape(-1)
 
-        if (
-            'charge' in df_group.columns and
-            'precursor_mz' not in df_group.columns
-        ):
-            df_group['precursor_mz'] = pepmass/df_group[
-                'charge'
-            ].values + MASS_PROTON
-
-        for charged_frag_type in charged_frag_types:
-            if charged_frag_type.startswith('b_modloss'):
-                b_modloss = np.concatenate([
-                    calc_modloss_mass(nAA, mods, sites, True)
-                    for mods, sites in zip(mod_list, site_list)
-                ])
-                break
-        for charged_frag_type in charged_frag_types:
-            if charged_frag_type.startswith('y_modloss'):
-                y_modloss = np.concatenate([
-                    calc_modloss_mass(nAA, mods, sites, False)
-                    for mods, sites in zip(mod_list, site_list)
-                ])
-                break
-
-        set_values = []
-        add_proton = MASS_PROTON
-        for charged_frag_type in charged_frag_types:
-            frag_type, charge = parse_charged_frag_type(charged_frag_type)
-            if frag_type =='b':
-                set_values.append(b_mass/charge + add_proton)
-            elif frag_type == 'y':
-                set_values.append(y_mass/charge + add_proton)
-            elif frag_type == 'b_modloss':
-                _mass = (b_mass-b_modloss)/charge + add_proton
-                _mass[b_modloss == 0] = 0
-                set_values.append(_mass)
-            elif frag_type == 'y_modloss':
-                _mass = (y_mass-y_modloss)/charge + add_proton
-                _mass[y_modloss == 0] = 0
-                set_values.append(_mass)
-            elif frag_type == 'b_H2O':
-                _mass = (b_mass-MASS_H2O)/charge + add_proton
-                set_values.append(_mass)
-            elif frag_type == 'y_H2O':
-                _mass = (y_mass-MASS_H2O)/charge + add_proton
-                set_values.append(_mass)
-            elif frag_type == 'b_NH3':
-                _mass = (b_mass-MASS_NH3)/charge + add_proton
-                set_values.append(_mass)
-            elif frag_type == 'y_NH3':
-                _mass = (y_mass-MASS_NH3)/charge + add_proton
-                set_values.append(_mass)
-            elif frag_type == 'c':
-                _mass = (b_mass+MASS_NH3)/charge + add_proton
-                set_values.append(_mass)
-            elif frag_type == 'z':
-                _mass = (
-                    y_mass-(MASS_NH3-CHEM_MONO_MASS['H'])
-                )/charge + add_proton
-                set_values.append(_mass)
+            if 'mod_deltas' in df_group.columns:
+                mod_delta_list = df_group.mod_deltas.str.split(';').apply(
+                    lambda x: [float(m) for m in x if len(m)>0]
+                ).values
+                mod_delta_site_list = df_group.mod_delta_sites.str.split(';').apply(
+                    lambda x: [int(s) for s in x if len(s)>0]
+                ).values
             else:
-                raise NotImplementedError(
-                    f'Fragment type "{frag_type}" is not in fragment_mz_df.'
-                )
+                mod_delta_list = None
+                mod_delta_site_list = None
+            (
+                b_mass, y_mass, pepmass
+            ) = calc_b_y_and_peptide_masses_for_same_len_seqs(
+                df_group.sequence.values.astype('U'),
+                mod_list, site_list,
+                mod_delta_list,
+                mod_delta_site_list
+            )
+            b_mass = b_mass.reshape(-1)
+            y_mass = y_mass.reshape(-1)
 
-        if reference_fragment_df is not None:
-            update_sliced_fragment_dataframe(
-                fragment_mz_df, np.array(set_values).T,
-                df_group[['frag_start_idx','frag_end_idx']].values,
-                charged_frag_types,
-            )
-        else:
-            _fragment_mz_df = init_fragment_by_precursor_dataframe(
-                df_group,
-                charged_frag_types
-            )
-            _fragment_mz_df[:] = np.array(set_values).T
-            fragment_df_list.append(_fragment_mz_df)
-        precursor_df_list.append(df_group)
+            if (
+                'charge' in df_group.columns and
+                'precursor_mz' not in df_group.columns
+            ):
+                df_group['precursor_mz'] = pepmass/df_group[
+                    'charge'
+                ].values + MASS_PROTON
+
+            for charged_frag_type in charged_frag_types:
+                if charged_frag_type.startswith('b_modloss'):
+                    b_modloss = np.concatenate([
+                        calc_modloss_mass(nAA, mods, sites, True)
+                        for mods, sites in zip(mod_list, site_list)
+                    ])
+                    break
+            for charged_frag_type in charged_frag_types:
+                if charged_frag_type.startswith('y_modloss'):
+                    y_modloss = np.concatenate([
+                        calc_modloss_mass(nAA, mods, sites, False)
+                        for mods, sites in zip(mod_list, site_list)
+                    ])
+                    break
+
+            set_values = []
+            add_proton = MASS_PROTON
+            for charged_frag_type in charged_frag_types:
+                frag_type, charge = parse_charged_frag_type(charged_frag_type)
+                if frag_type =='b':
+                    set_values.append(b_mass/charge + add_proton)
+                elif frag_type == 'y':
+                    set_values.append(y_mass/charge + add_proton)
+                elif frag_type == 'b_modloss':
+                    _mass = (b_mass-b_modloss)/charge + add_proton
+                    _mass[b_modloss == 0] = 0
+                    set_values.append(_mass)
+                elif frag_type == 'y_modloss':
+                    _mass = (y_mass-y_modloss)/charge + add_proton
+                    _mass[y_modloss == 0] = 0
+                    set_values.append(_mass)
+                elif frag_type == 'b_H2O':
+                    _mass = (b_mass-MASS_H2O)/charge + add_proton
+                    set_values.append(_mass)
+                elif frag_type == 'y_H2O':
+                    _mass = (y_mass-MASS_H2O)/charge + add_proton
+                    set_values.append(_mass)
+                elif frag_type == 'b_NH3':
+                    _mass = (b_mass-MASS_NH3)/charge + add_proton
+                    set_values.append(_mass)
+                elif frag_type == 'y_NH3':
+                    _mass = (y_mass-MASS_NH3)/charge + add_proton
+                    set_values.append(_mass)
+                elif frag_type == 'c':
+                    _mass = (b_mass+MASS_NH3)/charge + add_proton
+                    set_values.append(_mass)
+                elif frag_type == 'z':
+                    _mass = (
+                        y_mass-(MASS_NH3-CHEM_MONO_MASS['H'])
+                    )/charge + add_proton
+                    set_values.append(_mass)
+                else:
+                    raise NotImplementedError(
+                        f'Fragment type "{frag_type}" is not in fragment_mz_df.'
+                    )
+
+            if reference_fragment_df is not None:
+                update_sliced_fragment_dataframe(
+                    fragment_mz_df, np.array(set_values).T,
+                    df_group[['frag_start_idx','frag_end_idx']].values,
+                    charged_frag_types,
+                )
+            else:
+                _fragment_mz_df = init_fragment_by_precursor_dataframe(
+                    df_group,
+                    charged_frag_types
+                )
+                _fragment_mz_df[:] = np.array(set_values).T
+                fragment_df_list.append(_fragment_mz_df)
+            precursor_df_list.append(df_group)
 
     if reference_fragment_df is not None:
         return pd.concat(precursor_df_list), fragment_mz_df
