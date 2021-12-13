@@ -173,7 +173,6 @@ def calc_mass_from_formula(formula:str):
     ])
 
 # Cell
-
 @numba.njit
 def abundance_convolution(
     d1:np.array,
@@ -204,7 +203,6 @@ def abundance_convolution(
     return ret[start:end], mono_idx
 
 # Cell
-
 @numba.njit
 def one_element_dist(
     elem: str,
