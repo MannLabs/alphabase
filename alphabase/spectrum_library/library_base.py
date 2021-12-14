@@ -63,20 +63,6 @@ class SpecLibBase(object):
             (self._fragment_mz_df>self.max_frag_mz)
         ] = 0
 
-    def load_precursor_df(self,
-        precursor_files, **kwargs
-    ):
-        self._load_precursor_df(precursor_files, **kwargs)
-        self.clip_by_precursor_mz_()
-
-    def _load_precursor_df(self, precursor_files, **kwargs):
-        '''
-        All sub-class must reimplement this method
-        '''
-        raise NotImplementedError(
-            f'Sub-class of "{self.__class__}" must re-implement "_load_precursor_df()"'
-        )
-
     def load_fragment_df(self, **kwargs):
         self._precursor_df.sort_values('nAA', inplace=True)
         self.calc_fragment_mz_df(**kwargs)
@@ -132,6 +118,7 @@ class SpecLibBase(object):
 
     def calc_precursor_mz(self):
         fragment.update_precursor_mz(self._precursor_df)
+        self.clip_by_precursor_mz_()
 
     def update_precursor_mz(self):
         self.calc_precursor_mz()

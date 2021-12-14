@@ -2,9 +2,11 @@
 
 __all__ = ['get_charged_frag_types', 'parse_charged_frag_type', 'init_zero_fragment_dataframe',
            'init_fragment_dataframe_from_other', 'init_fragment_by_precursor_dataframe',
-           'update_sliced_fragment_dataframe', 'get_sliced_fragment_dataframe', 'concat_precursor_fragment_dataframes',
-           'calc_fragment_mz_values_for_same_nAA', 'create_fragment_mz_dataframe_ignore_old_idxes',
-           'create_fragment_mz_dataframe', 'create_fragment_mz_dataframe_by_sort_nAA', 'update_precursor_mz']
+           'update_sliced_fragment_dataframe', 'get_sliced_fragment_dataframe', 'update_sliced_fragment_dataframe',
+           'get_sliced_fragment_dataframe', 'concat_precursor_fragment_dataframes',
+           'calc_fragment_mz_values_for_same_nAA', 'reset_precursor_df',
+           'create_fragment_mz_dataframe_ignore_old_idxes', 'create_fragment_mz_dataframe',
+           'create_fragment_mz_dataframe_by_sort_nAA', 'update_precursor_mz']
 
 # Cell
 import numpy as np
@@ -186,6 +188,48 @@ def get_sliced_fragment_dataframe(
     return fragment_df.loc[frag_slices, charged_frag_types]
 
 # Cell
+def update_sliced_fragment_dataframe(
+    fragment_df: pd.DataFrame,
+    values: np.array,
+    frag_start_end_list: List[Tuple[int,int]],
+    charged_frag_types: List[str],
+)->pd.DataFrame:
+    '''
+    Set the values of the slices `frag_start_end_list=[(start,end),(start,end),...]` of fragment_df.
+    Args:
+        fragment_df (pd.DataFrame): fragment dataframe to be set
+        frag_start_end_list (List[Tuple[int,int]]): e.g. `[(start,end),(start,end),...]`
+        charged_frag_types (List[str]): e.g. `['b_z1','b_z2','y_z1','y_z2']`
+    Returns:
+        pd.DataFrame: fragment_df after the values are set
+    '''
+    frag_slice_list = [slice(start,end) for start,end in frag_start_end_list]
+    frag_slices = np.r_[tuple(frag_slice_list)]
+    fragment_df.loc[frag_slices, charged_frag_types] = values
+    return fragment_df
+
+def get_sliced_fragment_dataframe(
+    fragment_df: pd.DataFrame,
+    frag_start_end_list:Union[List,np.array],
+    charged_frag_types:List = None,
+)->pd.DataFrame:
+    '''
+    Get the sliced fragment_df from `frag_start_end_list=[(start,end),(start,end),...]`.
+    Args:
+        fragment_df (pd.DataFrame): fragment dataframe to be set
+        frag_start_end_list (List[Tuple[int,int]]): e.g. `[(start,end),(start,end),...]`
+        charged_frag_types (List[str]): e.g. `['b_z1','b_z2','y_z1','y_z2']` (default: None)
+    Returns:
+        pd.DataFrame: sliced fragment_df. If `charged_frag_types` is None,
+        return fragment_df with all columns
+    '''
+    frag_slice_list = [slice(start,end) for start,end in frag_start_end_list]
+    frag_slices = np.r_[tuple(frag_slice_list)]
+    if charged_frag_types is None or len(charged_frag_types)==0:
+        charged_frag_types = slice(None)
+    return fragment_df.loc[frag_slices, charged_frag_types]
+
+# Cell
 def concat_precursor_fragment_dataframes(
     precursor_df_list: List[pd.DataFrame],
     fragment_df_list: List[pd.DataFrame],
@@ -316,6 +360,11 @@ def calc_fragment_mz_values_for_same_nAA(
     return np.array(mz_values).T
 
 # Cell
+def reset_precursor_df(df:pd.DataFrame):
+    """ For faster precursor/fragment calculation """
+    df.sort_values('nAA', inplace=True)
+    df.reset_index(drop=True, inplace=True)
+
 def create_fragment_mz_dataframe_ignore_old_idxes(
     precursor_df: pd.DataFrame,
     charged_frag_types:List,
@@ -406,8 +455,7 @@ def create_fragment_mz_dataframe(
             )
     if 'nAA' not in precursor_df.columns:
         precursor_df['nAA'] = precursor_df.sequence.str.len()
-        precursor_df.sort_values('nAA', inplace=True)
-        precursor_df.reset_index(drop=True, inplace=True)
+        reset_precursor_df(precursor_df)
 
     if  'frag_start_idx' not in precursor_df.columns:
         return create_fragment_mz_dataframe_by_sort_nAA(
@@ -484,8 +532,7 @@ def update_precursor_mz(
 
     if 'nAA' not in precursor_df:
         precursor_df['nAA'] = precursor_df.sequence.str.len()
-        precursor_df.sort_values('nAA', iplace=True)
-        precursor_df.reset_index(drop=True, inplace=True)
+        reset_precursor_df(precursor_df)
         _calc_in_order = True
     elif precursor_df.nAA.is_monotonic and precursor_df.index.is_monotonic:
         _calc_in_order = True
