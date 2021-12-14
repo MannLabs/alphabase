@@ -3,8 +3,8 @@
 __all__ = ['get_charged_frag_types', 'parse_charged_frag_type', 'init_zero_fragment_dataframe',
            'init_fragment_dataframe_from_other', 'init_fragment_by_precursor_dataframe',
            'update_sliced_fragment_dataframe', 'get_sliced_fragment_dataframe', 'concat_precursor_fragment_dataframes',
-           'calc_fragment_mz_values_for_same_nAA', 'create_fragment_mz_dataframe_by_sort_nAA',
-           'create_fragment_mz_dataframe', 'update_precursor_mz']
+           'calc_fragment_mz_values_for_same_nAA', 'create_fragment_mz_dataframe_ignore_old_idxes',
+           'create_fragment_mz_dataframe', 'create_fragment_mz_dataframe_by_sort_nAA', 'update_precursor_mz']
 
 # Cell
 import numpy as np
@@ -315,7 +315,8 @@ def calc_fragment_mz_values_for_same_nAA(
             )
     return np.array(mz_values).T
 
-def create_fragment_mz_dataframe_by_sort_nAA(
+# Cell
+def create_fragment_mz_dataframe_ignore_old_idxes(
     precursor_df: pd.DataFrame,
     charged_frag_types:List,
     batch_size=500000,
@@ -324,6 +325,8 @@ def create_fragment_mz_dataframe_by_sort_nAA(
 
     Because the fragment mz values are continous in memory, so it is faster
     when setting values in pandas.
+
+    Note that this function will change the order and index of precursor_df
 
     Args:
         precursor_df (pd.DataFrame): precursor dataframe
@@ -340,6 +343,7 @@ def create_fragment_mz_dataframe_by_sort_nAA(
         precursor_df.sort_values('nAA', inplace=True)
     elif not precursor_df.nAA.is_monotonic:
         precursor_df.sort_values('nAA', inplace=True)
+    precursor_df.reset_index(drop=True, inplace=True)
 
     fragment_mz_df = init_fragment_by_precursor_dataframe(
         precursor_df, charged_frag_types
@@ -362,6 +366,8 @@ def create_fragment_mz_dataframe_by_sort_nAA(
             ] = mz_values
     return precursor_df, fragment_mz_df
 
+#wrapper
+create_fragment_mz_dataframe_by_sort_nAA = create_fragment_mz_dataframe_ignore_old_idxes
 
 def create_fragment_mz_dataframe(
     precursor_df: pd.DataFrame,
@@ -371,8 +377,8 @@ def create_fragment_mz_dataframe(
 )->Tuple[pd.DataFrame, pd.DataFrame]:
     '''
     Generate fragment mass dataframe for the precursor_df. If
-    the `reference_fragment_df` is provided, it will generate
-    the mz dataframe based on the reference. Otherwise it
+    the `reference_fragment_df` is provided and precursor_df contains `frag_start_idx`,
+    it will generate  the mz dataframe based on the reference. Otherwise it
     generates the mz dataframe from scratch.
     Args:
         precursor_df (pd.DataFrame): precursors to generate fragment masses,
@@ -389,9 +395,8 @@ def create_fragment_mz_dataframe(
         this function will automatically assign the 'precursor_mz' to `precursor_df`
         pd.DataFrame: `fragment_mz_df` with given `charged_frag_types`
     Raises:
-        ValueError: when 1. `precursor_df` contains 'frag_start_idx' but
-        `reference_fragment_df` is not None; or 2. `reference_fragment_df`
-        is None but `precursor_df` does not contain 'frag_start_idx'
+        ValueError: when `precursor_df` contains 'frag_start_idx' but
+        `reference_fragment_df` is not None
     '''
     if reference_fragment_df is None:
         if 'frag_start_idx' in precursor_df.columns:
@@ -399,18 +404,19 @@ def create_fragment_mz_dataframe(
                 "`precursor_df` contains 'frag_start_idx' column, "\
                 "please provide `reference_fragment_df` argument"
             )
-    else:
-        if 'frag_start_idx' not in precursor_df.columns:
-            raise ValueError(
-                "No column 'frag_start_idx' in `precursor_df` "\
-                "to slice the `reference_fragment_df`"
-            )
     if 'nAA' not in precursor_df.columns:
         precursor_df['nAA'] = precursor_df.sequence.str.len()
         precursor_df.sort_values('nAA', inplace=True)
+        precursor_df.reset_index(drop=True, inplace=True)
 
+    if  'frag_start_idx' not in precursor_df.columns:
+        return create_fragment_mz_dataframe_by_sort_nAA(
+            precursor_df, charged_frag_types, batch_size
+        )
 
-    if precursor_df['nAA'].is_monotonic and reference_fragment_df is None:
+    if (precursor_df['nAA'].is_monotonic and
+        reference_fragment_df is None
+    ):
         return create_fragment_mz_dataframe_by_sort_nAA(
             precursor_df, charged_frag_types, batch_size
         )
