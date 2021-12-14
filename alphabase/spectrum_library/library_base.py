@@ -133,6 +133,9 @@ class SpecLibBase(object):
     def calc_precursor_mz(self):
         fragment.update_precursor_mz(self._precursor_df)
 
+    def update_precursor_mz(self):
+        self.calc_precursor_mz()
+
     def save_hdf(self, hdf_file):
         _hdf = HDF_File(
             hdf_file,
