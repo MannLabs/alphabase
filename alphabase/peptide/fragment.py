@@ -62,7 +62,8 @@ def parse_charged_frag_type(
 # Cell
 def init_zero_fragment_dataframe(
     peplen_array:np.array,
-    charged_frag_types:List[str]
+    charged_frag_types:List[str],
+    dtype=np.float64
 )->Tuple[pd.DataFrame, np.array, np.array]:
     '''
     Args:
@@ -78,26 +79,28 @@ def init_zero_fragment_dataframe(
     indices[1:] = peplen_array-1
     indices = np.cumsum(indices)
     fragment_df = pd.DataFrame(
-        np.zeros((indices[-1],len(charged_frag_types))),
+        np.zeros((indices[-1],len(charged_frag_types)), dtype=dtype),
         columns = charged_frag_types
     )
     return fragment_df, indices[:-1], indices[1:]
 
 def init_fragment_dataframe_from_other(
-    reference_fragment_df: pd.DataFrame
+    reference_fragment_df: pd.DataFrame,
+    dtype=np.float64
 ):
     '''
     Init zero fragment dataframe from the `reference_fragment_df`
     '''
     return pd.DataFrame(
-        np.zeros_like(reference_fragment_df.values),
+        np.zeros_like(reference_fragment_df.values, dtype=dtype),
         columns = reference_fragment_df.columns
     )
 
 def init_fragment_by_precursor_dataframe(
     precursor_df,
     charged_frag_types: List[str],
-    reference_fragment_df: int = None
+    reference_fragment_df: int = None,
+    dtype=np.float64
 ):
     '''
     Init zero fragment dataframe for the `precursor_df`. If
@@ -120,7 +123,8 @@ def init_fragment_by_precursor_dataframe(
     if 'frag_start_idx' not in precursor_df.columns:
         fragment_df, start_indices, end_indices = init_zero_fragment_dataframe(
             precursor_df.nAA.values,
-            charged_frag_types
+            charged_frag_types,
+            dtype=dtype
         )
         precursor_df['frag_start_idx'] = start_indices
         precursor_df['frag_end_idx'] = end_indices
@@ -141,7 +145,8 @@ def init_fragment_by_precursor_dataframe(
                 reference_fragment_df[[
                     _fr for _fr in charged_frag_types
                     if _fr in reference_fragment_df.columns
-                ]]
+                ]],
+                dtype=dtype
             )
     return fragment_df
 
@@ -545,7 +550,6 @@ def update_precursor_mz(
             batch_end = i+batch_size
 
             df_group = big_df_group.iloc[i:batch_end,:]
-
 
             pep_mzs = calc_peptide_masses_for_same_len_seqs(
                 df_group.sequence.values.astype('U'),
