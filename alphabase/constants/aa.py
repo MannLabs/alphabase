@@ -12,7 +12,7 @@ import numpy as np
 from typing import Union, Tuple
 from alphabase.yaml_utils import load_yaml
 
-from alphabase.constants.element import calc_formula_mass
+from alphabase.constants.element import calc_mass_from_formula
 from alphabase.constants.element import MASS_H2O
 
 AA_CHEM = load_yaml(
@@ -25,7 +25,7 @@ AA_CHEM = load_yaml(
 def reset_AA_mass():
     AA_ASCII_MASS = np.ones(128)*1e8
     for aa, chem in AA_CHEM.items():
-        AA_ASCII_MASS[ord(aa)] = calc_formula_mass(chem)
+        AA_ASCII_MASS[ord(aa)] = calc_mass_from_formula(chem)
     return AA_ASCII_MASS
 
 AA_ASCII_MASS = reset_AA_mass()

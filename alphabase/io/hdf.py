@@ -52,7 +52,7 @@ class HDF_Object(object):
 
     @property
     def metadata(self):
-        with h5py.File(self.file_name, "r") as hdf_file:
+        with h5py.File(self.file_name, "a") as hdf_file:
             return dict(hdf_file[self.name].attrs)
 
     def __init__(
@@ -156,11 +156,29 @@ class HDF_Group(HDF_Object):
         return self.components[2]
 
     @property
+    def groups(self):
+        return [
+            self.__getattribute__(name) for name in self.group_names
+        ]
+
+    @property
+    def datasets(self):
+        return [
+            self.__getattribute__(name) for name in self.dataset_names
+        ]
+
+    @property
+    def dataframes(self):
+        return [
+            self.__getattribute__(name) for name in self.dataframe_names
+        ]
+
+    @property
     def components(self):
         group_names = []
         dataset_names = []
         datafame_names = []
-        with h5py.File(self.file_name, "r") as hdf_file:
+        with h5py.File(self.file_name, "a") as hdf_file:
             hdf_object = hdf_file[self.name]
             for name in sorted(hdf_object):
                 if isinstance(hdf_object[name], h5py.Dataset):
@@ -249,6 +267,7 @@ class HDF_Group(HDF_Object):
         #             # compression="gzip" if compress else None, # TODO slower to make, faster to load?
                     shuffle=True,
                     chunks=True,
+                    # chunks=array.shape,
                     # dtype=dtype,
                     maxshape=tuple([None for i in array.shape]),
                 )
@@ -307,12 +326,12 @@ class HDF_Dataset(HDF_Object):
 
     @property
     def dtype(self):
-        with h5py.File(self.file_name, "r") as hdf_file:
+        with h5py.File(self.file_name, "a") as hdf_file:
             return hdf_file[self.name].dtype
 
     @property
     def shape(self):
-        with h5py.File(self.file_name, "r") as hdf_file:
+        with h5py.File(self.file_name, "a") as hdf_file:
             return hdf_file[self.name].shape
 
     @property
@@ -320,7 +339,7 @@ class HDF_Dataset(HDF_Object):
         return self[...]
 
     def __getitem__(self, keys):
-        with h5py.File(self.file_name, "r") as hdf_file:
+        with h5py.File(self.file_name, "a") as hdf_file:
             hdf_object = hdf_file[self.name]
             if h5py.check_string_dtype(hdf_object.dtype) is not None:
                 hdf_object = hdf_object.asstr()
@@ -332,8 +351,9 @@ class HDF_Dataset(HDF_Object):
             new_shape = tuple(
                 [i + j for i, j in zip(self.shape, data.shape)]
             )
+            old_size = len(self)
             hdf_object.resize(new_shape)
-            hdf_object[len(self):] = data
+            hdf_object[old_size:] = data
 
     def set_slice(self, selection, values):
         with h5py.File(self.file_name, "a") as hdf_file:

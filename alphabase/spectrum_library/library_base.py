@@ -16,8 +16,8 @@ class SpecLibBase(object):
         # 'b_z1': 'b' is the fragment type and
         # 'z1' is the charge state z=1.
         charged_frag_types:typing.List[str],
-        min_frag_mz = 100, max_frag_mz = 2000,
         min_precursor_mz = 400, max_precursor_mz = 6000,
+        min_frag_mz = 200, max_frag_mz = 2000,
     ):
         self.charged_frag_types = charged_frag_types
         self._precursor_df = pd.DataFrame()
@@ -40,17 +40,19 @@ class SpecLibBase(object):
     def fragment_intensity_df(self):
         return self._fragment_intensity_df
 
-    def clip_precursor_by_mz_(self):
+    def clip_by_precursor_mz_(self):
         '''
         Clip self._precursor_df inplace
         '''
-        self._precursor_df = self._precursor_df[
-            (self._precursor_df['precursor_mz']>=self.min_precursor_mz)&
-            (self._precursor_df['precursor_mz']<=self.max_precursor_mz)
-        ]
+        self._precursor_df.drop(
+            self._precursor_df.loc[
+                (self._precursor_df['precursor_mz']<self.min_precursor_mz)|
+                (self._precursor_df['precursor_mz']>self.max_precursor_mz)
+            ].index, inplace=True
+        )
         self._precursor_df.reset_index(drop=True, inplace=True)
 
-    def clip_inten_by_fragment_mz_(self):
+    def mask_fragment_intensity_by_mz_(self):
         '''
         Clip self._fragment_intensity_df inplace.
         All clipped intensities are set as zeros.
@@ -61,29 +63,8 @@ class SpecLibBase(object):
             (self._fragment_mz_df>self.max_frag_mz)
         ] = 0
 
-    def clip_inten_by_fragment_mz(self)->pd.DataFrame:
-        df = self._fragment_intensity_df.copy()
-        df[
-            (self._fragment_mz_df<self.min_frag_mz)|
-            (self._fragment_mz_df>self.max_frag_mz)
-        ] = 0
-        return df
-
-    def load_precursor_df(self,
-        precursor_files, **kwargs
-    ):
-        self._load_precursor_df(precursor_files, **kwargs)
-        self.clip_precursor_by_mz_()
-
-    def _load_precursor_df(self, precursor_files, **kwargs):
-        '''
-        All sub-class must reimplement this method
-        '''
-        raise NotImplementedError(
-            f'Sub-class of "{self.__class__}" must re-implement "_load_precursor_df()"'
-        )
-
     def load_fragment_df(self, **kwargs):
+        self._precursor_df.sort_values('nAA', inplace=True)
         self.calc_fragment_mz_df(**kwargs)
         self.load_fragment_intensity_df(**kwargs)
         for col in self._fragment_mz_df.columns.values:
@@ -125,21 +106,22 @@ class SpecLibBase(object):
         )
 
     def calc_fragment_mz_df(self):
-        if ('frag_start_idx' in self._precursor_df.columns
-            and len(self._fragment_mz_df)>0
-        ): return
-        need_clip = (
-            False if
-            'precursor_mz' in self._precursor_df.columns
-            else True
-        )
+        if 'frag_start_idx' in self._precursor_df.columns:
+            del self._precursor_df['frag_start_idx']
+            del self._precursor_df['frag_end_idx']
 
         (
             self._precursor_df, self._fragment_mz_df
         ) = fragment.create_fragment_mz_dataframe(
             self._precursor_df, self.charged_frag_types
         )
-        if need_clip: self.clip_precursor_by_mz_()
+
+    def calc_precursor_mz(self):
+        fragment.update_precursor_mz(self._precursor_df)
+        self.clip_by_precursor_mz_()
+
+    def update_precursor_mz(self):
+        self.calc_precursor_mz()
 
     def save_hdf(self, hdf_file):
         _hdf = HDF_File(
