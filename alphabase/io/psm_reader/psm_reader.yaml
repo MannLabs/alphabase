@@ -1,8 +1,7 @@
 alphapept:
   column_mapping:
     'sequence': 'naked_sequence'
-    'rt':'rt'
-    'rt_norm': 'rt_norm'
+    'rt': 'rt'
     'spec_idx': ['scan_no','raw_idx']
     'query_id': 'query_idx'
     'mobility': 'mobility'
@@ -20,33 +19,154 @@ alphapept:
     'Acetyl@Protein N-term': 'a'
 maxquant:
   column_mapping:
+    'sequence': 'Sequence'
+    'charge': 'Charge'
+    'rt': 'Retention time'
+    'ccs': 'CCS'
+    'mobility': ['Mobility','IonMobility']
+    'spec_idx': ['Scan number','MS/MS scan number','Scan index']
+    'raw_name': 'Raw file'
+    'score': 'Score'
+    'proteins': 'Proteins'
+    'genes': ['Gene Names','Gene names']
+    'decoy': 'decoy'
+    'fdr': 'fdr'
   modification_mapping:
+    'Acetyl@Protein N-term': 
+      - '_(Acetyl (Protein N-term))'
+      - '_(ac)'
+      - '_(UniMod:1)'
+    'Carbamidomethyl@C': 
+      - 'C(Carbamidomethyl (C))'
+      - 'C(UniMod:4)'
+    'Oxidation@M': 
+      - 'M(Oxidation (M))'
+      - 'M(ox)'
+      - 'M(UniMod:35)'
+    'Phospho@S': 
+      - 'S(Phospho (S))'
+      - 'S(Phospho (ST))'
+      - 'S(Phospho (STY))'
+      - 'S(ph)'
+      - 'S(UniMod:21)'
+    'Phospho@T': 
+      - 'T(Phospho (T))'
+      - 'T(Phospho (ST))'
+      - 'T(Phospho (STY))'
+      - 'T(ph)'
+      - 'T(UniMod:21)'
+    'Phospho@Y': 
+      - 'Y(Phospho (Y))'
+      - 'Y(Phospho (STY))'
+      - 'Y(ph)'
+      - 'Y(UniMod:21)'
+    'Deamidated@N': ['N(Deamidation (NQ))']
+    'Deamidated@Q': ['Q(Deamidation (NQ))']
+    'GlyGly@K': ['K(GlyGly (K))', 'K(gl)']
 pfind:
   column_mapping:
     'sequence': 'Sequence'
     'charge': 'Charge'
     'rt': 'RT'
-    'rt_norm': 'rt_norm'
-    'ccs': 'ccs'
     'raw_name': 'raw_name'
     'query_id': 'File_Name'
     'spec_idx': 'Scan_No'
     'score': 'Final_Score'
     'proteins': 'Proteins'
     'uniprot_ids': 'Proteins'
-    'genes': 'Proteins'
     'fdr': 'Q-value'
     'decoy': 'decoy'
   modification_mapping:
+    '': ''
 msfragger:
   column_mapping:
   modification_mapping:
 diann:
   column_mapping:
+    'raw_name': 'Run'
+    'sequence': 'Stripped.Sequence'
+    'charge': 'Precursor.Charge'
+    'rt': ['RT','iRT','Tr_recalibrated','RetentionTime']
+    'rt_norm': 'rt_norm'
+    'ccs': 'CCS'
+    'mobility': ['IM','IonMobility']
+    'proteins': 'Protein.Names'
+    'uniprot_ids': 'Protein.Ids'
+    'genes': 'Genes'
+    'spec_idx': 'MS2.Scan'
   modification_mapping:
+    'Acetyl@Protein N-term': 
+      - '_(Acetyl (Protein N-term))'
+      - '_(ac)'
+      - '_(UniMod:1)'
+    'Carbamidomethyl@C': 
+      - 'C(Carbamidomethyl (C))'
+      - 'C(UniMod:4)'
+    'Oxidation@M': 
+      - 'M(Oxidation (M))'
+      - 'M(ox)'
+      - 'M(UniMod:35)'
+    'Phospho@S': 
+      - 'S(Phospho (S))'
+      - 'S(Phospho (ST))'
+      - 'S(Phospho (STY))'
+      - 'S(ph)'
+      - 'S(UniMod:21)'
+    'Phospho@T': 
+      - 'T(Phospho (T))'
+      - 'T(Phospho (ST))'
+      - 'T(Phospho (STY))'
+      - 'T(ph)'
+      - 'T(UniMod:21)'
+    'Phospho@Y': 
+      - 'Y(Phospho (Y))'
+      - 'Y(Phospho (STY))'
+      - 'Y(ph)'
+      - 'Y(UniMod:21)'
+    'Deamidated@N': ['N(Deamidation (NQ))']
+    'Deamidated@Q': ['Q(Deamidation (NQ))']
+    'GlyGly@K': ['K(GlyGly (K))', 'K(gl)']
 spectronaut:
   column_mapping:
+    'sequence': ['StrippedPeptide','PeptideSequence']
+    'charge': 'PrecursorCharge'
+    'rt': ['RT','iRT','Tr_recalibrated','RetentionTime']
+    'rt_norm': 'rt_norm'
+    'ccs': 'CCS'
+    'mobility': ['Mobility','IonMobility']
+    'proteins': 'Protein Name'
+    'uniprot_ids': ['UniProtIds','UniProtID']
+    'genes': 'Genes'
   modification_mapping:
-openswath:
-  column_mapping:
-  modification_mapping:
+    'Acetyl@Protein N-term': 
+      - '_(Acetyl (Protein N-term))'
+      - '_(ac)'
+      - '_(UniMod:1)'
+    'Carbamidomethyl@C': 
+      - 'C(Carbamidomethyl (C))'
+      - 'C(UniMod:4)'
+    'Oxidation@M': 
+      - 'M(Oxidation (M))'
+      - 'M(ox)'
+      - 'M(UniMod:35)'
+    'Phospho@S': 
+      - 'S(Phospho (S))'
+      - 'S(Phospho (ST))'
+      - 'S(Phospho (STY))'
+      - 'S(ph)'
+      - 'S(UniMod:21)'
+    'Phospho@T': 
+      - 'T(Phospho (T))'
+      - 'T(Phospho (ST))'
+      - 'T(Phospho (STY))'
+      - 'T(ph)'
+      - 'T(UniMod:21)'
+    'Phospho@Y': 
+      - 'Y(Phospho (Y))'
+      - 'Y(Phospho (STY))'
+      - 'Y(ph)'
+      - 'Y(UniMod:21)'
+    'Deamidated@N': ['N(Deamidation (NQ))']
+    'Deamidated@Q': ['Q(Deamidation (NQ))']
+    'GlyGly@K': ['K(GlyGly (K))', 'K(gl)']
+  

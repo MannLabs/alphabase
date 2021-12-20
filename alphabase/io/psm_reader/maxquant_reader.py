@@ -110,7 +110,6 @@ class MaxQuantReader(PSMReaderBase):
             'Deamidated@N': ['N(Deamidation (NQ))'],
             'Deamidated@Q': ['Q(Deamidation (NQ))'],
             'GlyGly@K': ['K(GlyGly (K))', 'K(gl)'],
-            'Glu->pyro-Glu@E^Protein N-term': ['E(Glu->pyro-Glu)']
         }
 
         for key, mod_list in list(self.modification_mapping.items()):
