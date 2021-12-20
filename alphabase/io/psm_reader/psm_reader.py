@@ -4,8 +4,9 @@ __all__ = ['translate_other_modification', 'keep_modifications', 'PSMReaderBase'
            'psm_reader_provider']
 
 # Cell
-import typing
 import pandas as pd
+import numpy as np
+import alphabase.peptide.mobility as mobility
 
 # Cell
 
@@ -61,17 +62,62 @@ def keep_modifications(
 
 class PSMReaderBase(object):
     def __init__(self,
-        modification_mapping:dict = None
+        *,
+        column_mapping:dict = None,
+        modification_mapping:dict = None,
+        fdr = 0.01,
+        keep_decoy = False,
+        **kwargs,
     ):
-        # modification_mapping=dict[str, str]:
-        #     key:   mod names of other search engines
-        #     value: mod names in AlphaBase
-        # It is used to convert mods of other engines
-        # to AlphaBase format. Different search engines
-        # have different mod names.
+        """
+        Args:
+            column_mapping (dict, optional):
+                A dict that maps alphabase's columns to other search engine's.
+                The key of the column_mapping is alphabase's column name, and
+                the value could be the column name or a list of column names
+                in other engine's result.
+                If it is None, this dict will be init by
+                `self._init_column_mapping()`. Defaults to None.
+            modification_mapping (dict, optional):
+                A dict that maps alphabase's modifications to other engine's.
+                If it is None, this dict will be init by
+                `self._init_modification_mapping()`. Defaults to None.
+        """
 
-        self.modification_mapping = modification_mapping
+        if modification_mapping is not None:
+            self.modification_mapping = modification_mapping
+        else:
+            self._init_modification_mapping()
+        self._reverse_mod_mapping()
 
+        if column_mapping is not None:
+            self.column_mapping = column_mapping
+        else:
+            self._init_column_mapping()
+
+        self._psm_df = pd.DataFrame()
+        self.keep_fdr = fdr
+        self.keep_decoy = keep_decoy
+
+    @property
+    def psm_df(self)->pd.DataFrame:
+        return self._psm_df
+
+    def _init_modification_mapping(self):
+        self.modification_mapping = {}
+    def _reverse_mod_mapping(self):
+        self.rev_mod_mapping = {}
+        for (
+            this_mod, other_mod
+        ) in self.modification_mapping.items():
+            if isinstance(other_mod, (list, tuple)):
+                for _mod in other_mod:
+                    self.rev_mod_mapping[_mod] = this_mod
+            else:
+                self.rev_mod_mapping[other_mod] = this_mod
+
+    def _init_column_mapping(self):
+        """Example:
         self.column_mapping = {
             'sequence': 'NakedSequence',
             # AlphaBase does not need 'modified_sequence',
@@ -86,26 +132,23 @@ class PSMReaderBase(object):
             # Similar to 'proteins'
             'genes': ['Genes','Gene Names','Gene names'],
             'fdr': 'fdr',
-        } # Add more columns for subclasses of different tasks
+        }
+        """
+        raise NotImplementedError(
+            f'"{self.__class__}" must implement "_init_column_mapping()"'
+        )
 
-        self._psm_df = pd.DataFrame()
-        self.keep_all_psm = False # keep all PSMs for percolator or ...
-
-    @property
-    def psm_df(self):
-        return self._psm_df
-
-    def load(self, filename):
+    def import_file(self, _file):
         """
         This is the main entry function of PSM readers.
         Args:
-            filename (str): [description]
+            _file: file path or file stream.
         """
-        origin_df = self._load_file(filename)
+        origin_df = self._load_file(_file)
         self._translate_columns(origin_df)
         self._load_modifications(origin_df)
         self._translate_modifications()
-        self._post_process(filename, origin_df)
+        self._post_process(origin_df)
 
     def normalize_rt_by_raw_name(self):
         if (
@@ -134,7 +177,7 @@ class PSMReaderBase(object):
             pd.DataFrame: dataframe loaded
         """
         raise NotImplementedError(
-            f'"{self.__class__}" must re-implement "_load_file()"'
+            f'"{self.__class__}" must implement "_load_file()"'
         )
 
     def _translate_columns(self, origin_df:pd.DataFrame):
@@ -153,16 +196,22 @@ class PSMReaderBase(object):
             if isinstance(map_col, str):
                 if map_col in origin_df.columns:
                     self._psm_df[col] = origin_df[map_col]
-                else:
-                    self._psm_df[col] = pd.NA
             else:
                 for other_col in map_col:
                     if other_col in origin_df.columns:
                         self._psm_df[col] = origin_df[other_col]
                         break
-                if col not in self._psm_df.columns:
-                    self._psm_df[col] = pd.NA
-        origin_df['nAA'] = origin_df[self.column_mapping['sequence']].str.len()
+        if isinstance(self.column_mapping['sequence'], str):
+            origin_df['nAA'] = origin_df[
+                self.column_mapping['sequence']
+            ].str.len()
+        else:
+            for col in self.column_mapping['sequence']:
+                if col in origin_df:
+                    origin_df['nAA'] = origin_df[
+                        col
+                    ].str.len()
+                    break
         self._psm_df['nAA'] = origin_df['nAA']
 
 
@@ -192,36 +241,76 @@ class PSMReaderBase(object):
         '''
         self._psm_df.mods = self._psm_df.mods.apply(
             translate_other_modification,
-            mod_dict=self.modification_mapping
+            mod_dict=self.rev_mod_mapping
         )
 
     def _post_process(self,
-        filename:str, origin_df:pd.DataFrame
+        origin_df:pd.DataFrame
     ):
         """
         Remove unknown modifications and perform other post processings,
-        e.g. loading fragments for AlphaQuant or AlphaDeep
+        e.g. get 'rt_norm', remove decoys, filter FDR...
 
         Args:
-            filename (str): psm filename
             origin_df (pd.DataFrame): the loaded original df
         """
-        origin_df = origin_df[
-            ~self._psm_df['mods'].isna()
-        ].reset_index(drop=True)
+        if (
+            'rt' in self._psm_df.columns and
+            not 'rt_norm' in self._psm_df.columns
+        ):
+            self._psm_df['rt_norm'] = (
+                self._psm_df.rt / self._psm_df.rt.max()
+            )
 
         self._psm_df = self._psm_df[
             ~self._psm_df['mods'].isna()
-        ].reset_index(drop=True)
+        ]
 
-    def filter_psm_by_modifications(self, include_mod_list = [
-        'Oxidation@M','Phospho@S','Phospho@T','Phospho@Y','Acetyl@Protein N-term'
-    ]):
+        if 'fdr' in self._psm_df.columns:
+            self._psm_df = self._psm_df[
+                self._psm_df.fdr <= self.keep_fdr
+            ]
+        if (
+            'decoy' in self._psm_df.columns
+            and not self.keep_decoy
+        ):
+            self._psm_df = self._psm_df[
+                self._psm_df.decoy == 0
+            ]
+
+        self._psm_df.reset_index(drop=True, inplace=True)
+
+        if (
+            'ccs' in self._psm_df.columns and
+            'mobility' not in self._psm_df.columns
+        ):
+            self._psm_df['mobility'] = (
+                mobility.ccs_to_mobility_bruker_for_df(
+                    self._psm_df,
+                    'ccs'
+                )
+            )
+        elif (
+            'mobility' in self._psm_df.columns and
+            'ccs' not in self._psm_df.columns
+        ):
+            self._psm_df['ccs'] = (
+                mobility.mobility_to_ccs_bruker_for_df(
+                    self._psm_df,
+                    'mobility'
+                )
+            )
+
+    def filter_psm_by_modifications(self, include_mod_set = set([
+        'Oxidation@M','Phospho@S','Phospho@T',
+        'Phospho@Y','Acetyl@Protein N-term'
+    ])):
         '''
             Only keeps peptides with modifications in `include_mod_list`.
         '''
-        mod_set = set(include_mod_list)
-        self._psm_df.mods = self._psm_df.mods.apply(keep_modifications, mod_set=mod_set)
+        self._psm_df.mods = self._psm_df.mods.apply(
+            keep_modifications, mod_set=include_mod_set
+        )
 
         self._psm_df.dropna(
             subset=['mods'], inplace=True
@@ -237,8 +326,18 @@ class PSMReaderProvider:
     def register_reader(self, reader_name, reader_class):
         self.reader_dict[reader_name.lower()] = reader_class
 
-    def get_reader(self, reader_name, modification_mapping:dict=None
+    def get_reader(self,
+        reader_name:str,
+        *,
+        column_mapping:dict=None,
+        modification_mapping:dict=None,
+        fdr=0.01, keep_decoy=False,
+        **kwargs
     )->PSMReaderBase:
-        return self.reader_dict[reader_name.lower()](modification_mapping)
+        return self.reader_dict[reader_name.lower()](
+            column_mapping = column_mapping,
+            modification_mapping=modification_mapping,
+            fdr=fdr, keep_decoy=keep_decoy, **kwargs
+        )
 
 psm_reader_provider = PSMReaderProvider()

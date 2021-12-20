@@ -5,14 +5,13 @@ __all__ = ['convert_one_pFind_mod', 'translate_pFind_mod', 'get_pFind_mods', 're
 
 # Cell
 import pandas as pd
-import typing
+import numpy as np
 
 import alphabase.constants.modification as ap_mod
 
 from alphabase.io.psm_reader.psm_reader import (
     PSMReaderBase, psm_reader_provider,
 )
-
 
 def convert_one_pFind_mod(mod):
     if mod[-1] == ')':
@@ -65,50 +64,71 @@ def get_pFind_mods(pfind_mod_str):
 
 def remove_pFind_decoy_protein(protein):
     proteins = protein[:-1].split('/')
-    return ';'.join([protein for protein in proteins if not protein.startswith('REV_')])
+    return ';'.join(
+        [
+            protein for protein in proteins
+            if not protein.startswith('REV_')
+        ]
+    )
 
 
 # Cell
 class pFindReader(PSMReaderBase):
-    def __init__(self, modification_mapping=None):
-        super().__init__()
+    def __init__(self,
+        *,
+        column_mapping:dict = None,
+        modification_mapping:dict = None,
+        fdr = 0.01,
+        keep_decoy = False,
+    ):
+        super().__init__(
+            column_mapping=column_mapping,
+            modification_mapping=modification_mapping,
+            fdr = fdr,
+            keep_decoy = keep_decoy,
+        )
 
+    def _init_column_mapping(self):
         self.column_mapping = {
             'sequence': 'Sequence',
             'charge': 'Charge',
-            'rt': 'RT',
-            'rt_norm': 'rt_norm',
-            'ccs': 'ccs',
             'raw_name': 'raw_name',
             'query_id': 'File_Name',
             'spec_idx': 'Scan_No',
             'score': 'Final_Score',
             'proteins': 'Proteins',
             'uniprot_ids': 'Proteins',
-            'genes': 'Proteins',
             'fdr': 'Q-value',
             'decoy': 'decoy'
         }
+    def _init_modification_mapping(self):
+        self.modification_mapping = {}
 
     def _translate_modifications(self):
-        pass
-
-    def _post_process(self, filename: str, origin_df: pd.DataFrame):
         pass
 
     def _load_file(self, filename):
         pfind_df = pd.read_csv(filename, index_col=False, sep='\t')
         pfind_df.fillna('', inplace=True)
         pfind_df = pfind_df[pfind_df.Sequence != '']
-        pfind_df['raw_name'] = pfind_df['File_Name'].str.split('.').apply(lambda x: x[0])
-        pfind_df['Proteins'] = pfind_df['Proteins'].apply(remove_pFind_decoy_protein)
-        pfind_df['decoy'] = (pfind_df['Target/Decoy']=='decoy').astype(int)
+        pfind_df['raw_name'] = pfind_df[
+            'File_Name'
+        ].str.split('.').apply(lambda x: x[0])
+        # pfind_df['Proteins'] = pfind_df[
+        #     'Proteins'
+        # ].apply(remove_pFind_decoy_protein)
+        pfind_df['decoy'] = (
+            pfind_df['Target/Decoy']=='decoy'
+        ).astype(np.int8)
         return pfind_df
 
     def _load_modifications(self, pfind_df):
-        self._psm_df['mods'], self._psm_df['mod_sites'] = zip(*pfind_df['Modification'].apply(get_pFind_mods))
+        (
+            self._psm_df['mods'], self._psm_df['mod_sites']
+        ) = zip(*pfind_df['Modification'].apply(get_pFind_mods))
 
-        self._psm_df['mods'] = self._psm_df['mods'].apply(translate_pFind_mod)
-        self._psm_df = self._psm_df[~self._psm_df['mods'].isna()]
+        self._psm_df['mods'] = self._psm_df['mods'].apply(
+            translate_pFind_mod
+        )
 
 psm_reader_provider.register_reader('pfind', pFindReader)

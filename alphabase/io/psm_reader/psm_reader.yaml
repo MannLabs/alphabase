@@ -1,0 +1,52 @@
+alphapept:
+  column_mapping:
+    'sequence': 'naked_sequence'
+    'rt':'rt'
+    'rt_norm': 'rt_norm'
+    'spec_idx': ['scan_no','raw_idx']
+    'query_id': 'query_idx'
+    'mobility': 'mobility'
+    'score': 'score'
+    'charge': 'charge'
+    'raw_name': 'raw_name' #parse from `ms_data.hdf`` file
+    'fdr': 'q_value'
+    'decoy': 'decoy'
+  modification_mapping:
+    'Carbamidomethyl@C': 'cC'
+    'Oxidation@M': 'oxM'
+    'Phospho@S': 'pS'
+    'Phospho@T': 'pT'
+    'Phospho@Y': 'pY'
+    'Acetyl@Protein N-term': 'a'
+maxquant:
+  column_mapping:
+  modification_mapping:
+pfind:
+  column_mapping:
+    'sequence': 'Sequence'
+    'charge': 'Charge'
+    'rt': 'RT'
+    'rt_norm': 'rt_norm'
+    'ccs': 'ccs'
+    'raw_name': 'raw_name'
+    'query_id': 'File_Name'
+    'spec_idx': 'Scan_No'
+    'score': 'Final_Score'
+    'proteins': 'Proteins'
+    'uniprot_ids': 'Proteins'
+    'genes': 'Proteins'
+    'fdr': 'Q-value'
+    'decoy': 'decoy'
+  modification_mapping:
+msfragger:
+  column_mapping:
+  modification_mapping:
+diann:
+  column_mapping:
+  modification_mapping:
+spectronaut:
+  column_mapping:
+  modification_mapping:
+openswath:
+  column_mapping:
+  modification_mapping:

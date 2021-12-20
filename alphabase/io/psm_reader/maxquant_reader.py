@@ -37,60 +37,94 @@ def parse_mod_seq(
         while site != -1:
             if underscore_for_ncterm: site_list.append(str(site))
             else: site_list.append(str(site+1))
-            mod_list.append(f'C{"Carbamidomethyl (C)".join(mod_sep)}')
+            mod_list.append('C'+"Carbamidomethyl (C)".join(mod_sep))
             site = PeptideModSeq.find('C',site+1)
     return ';'.join(mod_list), ';'.join(site_list)
 
 
 class MaxQuantReader(PSMReaderBase):
-    def __init__(self,modification_mapping:dict=None):
-        super().__init__(modification_mapping)
+    def __init__(self,
+        *,
+        column_mapping:dict = None,
+        modification_mapping:dict = None,
+        fdr = 0.01,
+        keep_decoy = False,
+        mod_sep = '()',
+        underscore_for_ncterm=True,
+        fixed_C57 = True,
+        mod_seq_column='Modified sequence',
+        **kwargs,
+    ):
+        super().__init__(
+            column_mapping=column_mapping,
+            modification_mapping=modification_mapping,
+            fdr = fdr,
+            keep_decoy = keep_decoy,
+        )
 
-        self.mod_sep = '()'
-        self.underscore_for_ncterm=True
-        self.fixed_C = True
+        self.mod_sep = mod_sep
+        self.underscore_for_ncterm=underscore_for_ncterm
+        self.fixed_C = fixed_C57
+        self.mod_seq_column = mod_seq_column
 
-        if self.modification_mapping is None:
-            self.modification_mapping = {}
-            self.modification_mapping['_(Acetyl (Protein N-term))'] = 'Acetyl@Protein N-term'
-            self.modification_mapping['C(Carbamidomethyl (C))'] = 'Carbamidomethyl@C'
-            self.modification_mapping['M(Oxidation (M))'] = 'Oxidation@M'
-            self.modification_mapping['S(Phospho (S))'] = 'Phospho@S'
-            self.modification_mapping['T(Phospho (T))'] = 'Phospho@T'
-            self.modification_mapping['Y(Phospho (Y))'] = 'Phospho@Y'
-            self.modification_mapping['S(Phospho (ST))'] = 'Phospho@S'
-            self.modification_mapping['T(Phospho (ST))'] = 'Phospho@T'
-            self.modification_mapping['S(Phospho (STY))'] = 'Phospho@S'
-            self.modification_mapping['T(Phospho (STY))'] = 'Phospho@T'
-            self.modification_mapping['Y(Phospho (STY))'] = 'Phospho@Y'
-            self.modification_mapping['N(Deamidation (NQ))'] = 'Deamidated@N'
-            self.modification_mapping['Q(Deamidation (NQ))'] = 'Deamidated@Q'
-            self.modification_mapping['K(GlyGly (K))'] = 'GlyGly@K'
-            self.modification_mapping['_(ac)'] = 'Acetyl@Protein N-term'
-            self.modification_mapping['M(ox)'] = 'Oxidation@M'
-            self.modification_mapping['S(ph)'] = 'Phospho@S'
-            self.modification_mapping['T(ph)'] = 'Phospho@T'
-            self.modification_mapping['Y(ph)'] = 'Phospho@Y'
-            self.modification_mapping['K(gl)'] = 'GlyGly@K'
-            self.modification_mapping['E(Glu->pyro-Glu)'] = 'Glu->pyro-Glu@E^Protein N-term'
-            self.modification_mapping['_(UniMod:1)'] = 'Acetyl@Protein N-term'
-            self.modification_mapping['C(UniMod:4)'] = 'Carbamidomethyl@C'
-            self.modification_mapping['M(UniMod:35)'] = 'Oxidation@M'
-            self.modification_mapping['S(UniMod:21)'] = 'Phospho@S'
-            self.modification_mapping['T(UniMod:21)'] = 'Phospho@T'
-            self.modification_mapping['Y(UniMod:21)'] = 'Phospho@Y'
+    def _init_modification_mapping(self):
+        self.modification_mapping = {
+            'Acetyl@Protein N-term':
+                [
+                    '_(Acetyl (Protein N-term))',
+                    '_(ac)','_(UniMod:1)'
+                ],
+            'Carbamidomethyl@C':
+                [
+                    'C(Carbamidomethyl (C))',
+                    'C(UniMod:4)'
+                ],
+            'Oxidation@M':
+                [
+                    'M(Oxidation (M))',
+                    'M(ox)', 'M(UniMod:35)'
+                ],
+            'Phospho@S':
+                [
+                    'S(Phospho (S))',
+                    'S(Phospho (ST))',
+                    'S(Phospho (STY))',
+                    'S(ph)',
+                    'S(UniMod:21)'
+                ],
+            'Phospho@T':
+                [
+                    'T(Phospho (T))',
+                    'T(Phospho (ST))',
+                    'T(Phospho (STY))',
+                    'T(ph)',
+                    'T(UniMod:21)'
+                ],
+            'Phospho@Y':
+                [
+                    'Y(Phospho (Y))',
+                    'Y(Phospho (STY))',
+                    'Y(ph)',
+                    'Y(UniMod:21)'
+                ],
+            'Deamidated@N': ['N(Deamidation (NQ))'],
+            'Deamidated@Q': ['Q(Deamidation (NQ))'],
+            'GlyGly@K': ['K(GlyGly (K))', 'K(gl)'],
+            'Glu->pyro-Glu@E^Protein N-term': ['E(Glu->pyro-Glu)']
+        }
 
-            for key, val in list(self.modification_mapping.items()):
-                self.modification_mapping[f'{key[0]}[{key[2:-1]}]'] = val
-                if key.startswith('_'):
-                    self.modification_mapping[key[1:]] = val
-                    self.modification_mapping[f'[{key[2:-1]}]'] = val
-
+        for key, mod_list in list(self.modification_mapping.items()):
+            self.modification_mapping[key].extend(
+                [f'{mod[0]}[{mod[2:-1]}]' for mod in mod_list]
+            )
+            self.modification_mapping[key].extend(
+                [f'{mod[1:]}' for mod in mod_list if mod.startswith('_')]
+            )
+    def _init_column_mapping(self):
         self.column_mapping = {
             'sequence': 'Sequence',
             'charge': 'Charge',
             'rt': 'Retention time',
-            'rt_norm': 'rt_norm',
             'ccs': 'CCS',
             'mobility': ['Mobility','IonMobility'],
             'spec_idx': ['Scan number','MS/MS scan number','Scan index'],
@@ -101,13 +135,10 @@ class MaxQuantReader(PSMReaderBase):
             'decoy': 'decoy',
             'fdr': 'fdr',
         }
-        self.mod_seq_column = 'Modified sequence'
 
     def _load_file(self, filename):
         df = pd.read_csv(filename, sep='\t')
-        if not self.keep_all_psm:
-            df = df[(df['Reverse']!='+')&(~pd.isna(df['Retention time']))]
-        df.reset_index(drop=True,inplace=True)
+        df = df[~pd.isna(df['Retention time'])]
         df.fillna('', inplace=True)
         if 'K0' in df.columns:
             df['Mobility'] = df['K0'] # Bug in MaxQuant, it should be 1/K0
@@ -115,7 +146,6 @@ class MaxQuantReader(PSMReaderBase):
         # df['rt_norm'] = (
         #     df['Retention time']-min_rt
         # )/(df['Retention time'].max()-min_rt)
-        df['rt_norm'] = df['Retention time']/df['Retention time'].max()
         df['decoy'] = 0
         df.loc[df['Reverse']=='+','decoy'] == 1
         return df
