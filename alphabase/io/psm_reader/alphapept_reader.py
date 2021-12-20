@@ -80,6 +80,8 @@ class AlphaPeptReader(PSMReaderBase):
         )
         if fdr <= 0.1:
             self.hdf_dataset = 'peptide_fdr'
+        else:
+            self.hdf_dataset = 'second_search'
 
     def _init_column_mapping(self):
         self.column_mapping = {
