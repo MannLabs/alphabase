@@ -321,6 +321,7 @@ class PSMReaderBase(object):
 # Cell
 from alphabase.yaml_utils import load_yaml
 import os
+import copy
 
 psm_reader_yaml = load_yaml(
     os.path.join(
@@ -351,11 +352,11 @@ class PSMReaderProvider:
         )
 
     def get_reader_by_yaml(self,
-        reader_name:str,
+        yaml_key:str,
     )->PSMReaderBase:
-        reader_name = reader_name.lower()
-        return self.get_reader(reader_name,
-            **psm_reader_yaml[reader_name]
+        yaml_key = yaml_key.lower()
+        return self.get_reader(yaml_key,
+            **copy.deepcopy(psm_reader_yaml[yaml_key])
         )
 
 psm_reader_provider = PSMReaderProvider()

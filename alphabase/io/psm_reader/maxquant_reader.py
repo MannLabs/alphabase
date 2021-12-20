@@ -61,6 +61,8 @@ class MaxQuantReader(PSMReaderBase):
             fdr = fdr,
             keep_decoy = keep_decoy,
         )
+        self._extend_mod_brackets()
+        self._reverse_mod_mapping()
 
         self.mod_sep = mod_sep
         self.underscore_for_ncterm=underscore_for_ncterm
@@ -112,6 +114,7 @@ class MaxQuantReader(PSMReaderBase):
             'GlyGly@K': ['K(GlyGly (K))', 'K(gl)'],
         }
 
+    def _extend_mod_brackets(self):
         for key, mod_list in list(self.modification_mapping.items()):
             self.modification_mapping[key].extend(
                 [f'{mod[0]}[{mod[2:-1]}]' for mod in mod_list]
@@ -119,6 +122,7 @@ class MaxQuantReader(PSMReaderBase):
             self.modification_mapping[key].extend(
                 [f'{mod[1:]}' for mod in mod_list if mod.startswith('_')]
             )
+
     def _init_column_mapping(self):
         self.column_mapping = {
             'sequence': 'Sequence',
@@ -128,6 +132,7 @@ class MaxQuantReader(PSMReaderBase):
             'mobility': ['Mobility','IonMobility'],
             'spec_idx': ['Scan number','MS/MS scan number','Scan index'],
             'raw_name': 'Raw file',
+            'precursor_mz': 'm/z',
             'score': 'Score',
             'proteins': 'Proteins',
             'genes': ['Gene Names','Gene names'],

@@ -89,6 +89,7 @@ class AlphaPeptReader(PSMReaderBase):
             'query_id': 'query_idx',
             'mobility': 'mobility',
             'score': 'score',
+            'precursor_mz': 'mz',
             'charge': 'charge',
             'raw_name': 'raw_name', #parse from `ms_data.hdf`` file
             'fdr': 'q_value',
