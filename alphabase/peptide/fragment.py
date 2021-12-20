@@ -539,7 +539,7 @@ def update_precursor_mz(
         precursor_df['nAA'] = precursor_df.sequence.str.len()
         reset_precursor_df(precursor_df)
         _calc_in_order = True
-    elif precursor_df.nAA.is_monotonic and precursor_df.index.is_monotonic:
+    elif precursor_df.nAA.is_monotonic and np.diff(precursor_df.index.values)==1:
         _calc_in_order = True
     else:
         _calc_in_order = False
