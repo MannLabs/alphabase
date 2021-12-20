@@ -7,6 +7,9 @@ __all__ = ['translate_other_modification', 'keep_modifications', 'PSMReaderBase'
 import pandas as pd
 import numpy as np
 import alphabase.peptide.mobility as mobility
+from alphabase.peptide.precursor import (
+    update_precursor_mz, reset_precursor_df
+)
 
 # Cell
 
@@ -229,7 +232,7 @@ class PSMReaderBase(object):
             self._psm_df['mods'], self._psm_df['mod_sites'].
         """
         raise NotImplementedError(
-            f'"{self.__class__}" must re-implement "_load_modifications()"'
+            f'"{self.__class__}" must implement "_load_modifications()"'
         )
 
     def _translate_modifications(self):
@@ -266,19 +269,22 @@ class PSMReaderBase(object):
             ~self._psm_df['mods'].isna()
         ]
 
+        keep_rows = np.ones(
+            len(self._psm_df), dtype=bool
+        )
         if 'fdr' in self._psm_df.columns:
-            self._psm_df = self._psm_df[
-                self._psm_df.fdr <= self.keep_fdr
-            ]
+            keep_rows &= (self._psm_df.fdr <= self.keep_fdr)
         if (
             'decoy' in self._psm_df.columns
             and not self.keep_decoy
         ):
-            self._psm_df = self._psm_df[
-                self._psm_df.decoy == 0
-            ]
+            keep_rows &= (self._psm_df.decoy == 0)
+        self._psm_df = self._psm_df[keep_rows]
 
-        self._psm_df.reset_index(drop=True, inplace=True)
+        reset_precursor_df(self._psm_df)
+
+        if 'precursor_mz' not in self._psm_df:
+            self._psm_df = update_precursor_mz(self._psm_df)
 
         if (
             'ccs' in self._psm_df.columns and
