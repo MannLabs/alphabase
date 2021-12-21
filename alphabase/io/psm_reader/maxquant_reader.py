@@ -61,8 +61,6 @@ class MaxQuantReader(PSMReaderBase):
             fdr = fdr,
             keep_decoy = keep_decoy,
         )
-        self._extend_mod_brackets()
-        self._reverse_mod_mapping()
 
         self.mod_sep = mod_sep
         self.underscore_for_ncterm=underscore_for_ncterm
@@ -114,10 +112,22 @@ class MaxQuantReader(PSMReaderBase):
             'GlyGly@K': ['K(GlyGly (K))', 'K(gl)'],
         }
 
+    def set_modification_mapping(self, modification_mapping: dict):
+        if modification_mapping is None:
+            self._init_modification_mapping()
+        else:
+            self.modification_mapping = modification_mapping
+        self._extend_mod_brackets()
+        self._reverse_mod_mapping()
+
     def _extend_mod_brackets(self):
         for key, mod_list in list(self.modification_mapping.items()):
             self.modification_mapping[key].extend(
-                [f'{mod[0]}[{mod[2:-1]}]' for mod in mod_list]
+                [
+                    f'{mod[0]}[{mod[2:-1]}]'
+                    if mod[1] == '(' else f'{mod[0]}({mod[2:-1]})'
+                    for mod in mod_list
+                ]
             )
             self.modification_mapping[key].extend(
                 [f'{mod[1:]}' for mod in mod_list if mod.startswith('_')]

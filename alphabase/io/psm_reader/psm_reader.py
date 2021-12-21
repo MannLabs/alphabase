@@ -87,11 +87,7 @@ class PSMReaderBase(object):
                 `self._init_modification_mapping()`. Defaults to None.
         """
 
-        if modification_mapping is not None:
-            self.modification_mapping = modification_mapping
-        else:
-            self._init_modification_mapping()
-        self._reverse_mod_mapping()
+        self.set_modification_mapping(modification_mapping)
 
         if column_mapping is not None:
             self.column_mapping = column_mapping
@@ -106,8 +102,16 @@ class PSMReaderBase(object):
     def psm_df(self)->pd.DataFrame:
         return self._psm_df
 
+    def set_modification_mapping(self, modification_mapping:dict):
+        if modification_mapping is None:
+            self._init_modification_mapping()
+        else:
+            self.modification_mapping = modification_mapping
+        self._reverse_mod_mapping()
+
     def _init_modification_mapping(self):
         self.modification_mapping = {}
+
     def _reverse_mod_mapping(self):
         self.rev_mod_mapping = {}
         for (

@@ -6,7 +6,7 @@
 
 
 # AlphaBase
-An open-source Python package of the AlphaPept ecosystem from the [Mann Labs at the Max Planck Institute of Biochemistry](https://www.biochem.mpg.de/mann) and the [University of Copenhagen](https://www.cpr.ku.dk/research/proteomics/mann/). To enable all hyperlinks in this document, please view it at [GitHub](https://github.com/MannLabs/alphabase).
+AlphaBase provides all basic python functionalities for AlphaPept ecosystem from the [Mann Labs at the Max Planck Institute of Biochemistry](https://www.biochem.mpg.de/mann) and the [University of Copenhagen](https://www.cpr.ku.dk/research/proteomics/mann/). To enable all hyperlinks in this document, please view it at [GitHub](https://github.com/MannLabs/alphabase).
 
 * [**About**](#about)
 * [**License**](#license)
@@ -26,7 +26,7 @@ An open-source Python package of the AlphaPept ecosystem from the [Mann Labs at 
 ---
 ## About
 
-An open-source Python package of the AlphaPept ecosystem from the [Mann Labs at the Max Planck Institute of Biochemistry](https://www.biochem.mpg.de/mann) and the [University of Copenhagen](https://www.cpr.ku.dk/research/proteomics/mann/).
+An open-source Python package of the AlphaPept ecosystem from the [Mann Labs at the Max Planck Institute of Biochemistry](https://www.biochem.mpg.de/mann) and the [University of Copenhagen](https://www.cpr.ku.dk/research/proteomics/mann/). It provides basic functionalities for AlphaPept ecosystem.
 
 ---
 ## License
@@ -39,19 +39,8 @@ AlphaBase was developed by the [Mann Labs at the Max Planck Institute of Biochem
 AlphaBase can be installed and used on all major operating systems (Windows, macOS and Linux).
 There are three different types of installation possible:
 
-* [**One-click GUI installer:**](#one-click-gui) Choose this installation if you only want the GUI and/or keep things as simple as possible.
 * [**Pip installer:**](#pip) Choose this installation if you want to use AlphaBase as a Python package in an existing Python 3.8 environment (e.g. a Jupyter notebook). If needed, the GUI and CLI can be installed with pip as well.
 * [**Developer installer:**](#developer) Choose this installation if you are familiar with CLI tools, [conda](https://docs.conda.io/en/latest/) and Python. This installation allows access to all available features of AlphaBase and even allows to modify its source code directly. Generally, the developer version of AlphaBase outperforms the precompiled versions which makes this the installation of choice for high-throughput experiments.
-
-### One-click GUI
-
-The GUI of AlphaBase is a completely stand-alone tool that requires no knowledge of Python or CLI tools. Click on one of the links below to download the latest release for:
-
-* [**Windows**](https://github.com/MannLabs/alphabase/releases/latest/download/alphabase_gui_installer_windows.exe)
-* [**macOS**](https://github.com/MannLabs/alphabase/releases/latest/download/alphabase_gui_installer_macos.pkg)
-* [**Linux**](https://github.com/MannLabs/alphabase/releases/latest/download/alphabase_gui_installer_linux.deb)
-
-Older releases remain available on the [release page](https://github.com/MannLabs/alphabase/releases), but no backwards compatibility is guaranteed.
 
 ### Pip
 
@@ -112,23 +101,12 @@ By default this installs loose dependancies (no explicit versioning), although i
 ---
 ## Usage
 
-There are three ways to use AlphaBase:
+There are two ways to use AlphaBase:
 
-* [**GUI**](#gui)
 * [**CLI**](#cli)
 * [**Python**](#python-and-jupyter-notebooks)
 
 NOTE: The first time you use a fresh installation of AlphaBase, it is often quite slow because some functions might still need compilation on your local operating system and architecture. Subsequent use should be a lot faster.
-
-### GUI
-
-If the GUI was not installed through a one-click GUI installer, it can be activate with the following `bash` command:
-
-```bash
-alphabase gui
-```
-
-Note that this needs to be prepended with a `!` when you want to run this from within a Jupyter notebook. When the command is run directly from the command-line, make sure you use the right environment (activate it with e.g. `conda activate alphabase` or set an alias to the binary executable (can be obtained with `where alphabase` or `which alphabase`)).
 
 ### CLI
 
