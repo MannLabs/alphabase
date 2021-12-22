@@ -35,8 +35,8 @@ AlphaBase was developed by the [Mann Labs at the Max Planck Institute of Biochem
 AlphaBase can be installed and used on all major operating systems (Windows, macOS and Linux).
 There are two different types of installation possible:
 
-* [**Pip installer:**](#pip) Choose this installation if you want to use AlphaBase as a Python package in an existing Python 3.8 environment (e.g. a Jupyter notebook). If needed, the GUI and CLI can be installed with pip as well.
-* [**Developer installer:**](#developer) Choose this installation if you are familiar with CLI tools, [conda](https://docs.conda.io/en/latest/) and Python. This installation allows access to all available features of AlphaBase and even allows to modify its source code directly. Generally, the developer version of AlphaBase outperforms the precompiled versions which makes this the installation of choice for high-throughput experiments.
+* [**Pip installer:**](#pip) Choose this installation if you want to use AlphaBase as a Python package in an existing Python 3.8 environment (e.g. a Jupyter notebook). 
+* [**Developer installer:**](#developer) Choose this installation if you are familiar with [conda](https://docs.conda.io/en/latest/) and Python. This installation allows access to all available features of AlphaBase and even allows to modify its source code directly. Generally, the developer version of AlphaBase outperforms the precompiled versions which makes this the installation of choice for high-throughput experiments.
 
 ### Pip
 
