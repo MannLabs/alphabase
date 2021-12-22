@@ -8,6 +8,7 @@ import numpy as np
 import typing
 
 import alphabase.peptide.fragment as fragment
+import alphabase.peptide.precursor as precursor
 from alphabase.io.hdf import HDF_File
 
 class SpecLibBase(object):
@@ -15,7 +16,9 @@ class SpecLibBase(object):
         # ['b_z1','b_z2','y_z1','y_modloss_z1', ...];
         # 'b_z1': 'b' is the fragment type and
         # 'z1' is the charge state z=1.
-        charged_frag_types:typing.List[str],
+        charged_frag_types:typing.List[str] = [
+            'b_z1','b_z2','y_z1', 'y_z2'
+        ],
         min_precursor_mz = 400, max_precursor_mz = 6000,
         min_frag_mz = 200, max_frag_mz = 2000,
     ):
@@ -31,6 +34,10 @@ class SpecLibBase(object):
     @property
     def precursor_df(self):
         return self._precursor_df
+
+    @precursor_df.setter
+    def precursor_df(self, df:pd.DataFrame):
+        self._precursor_df = df
 
     @property
     def fragment_mz_df(self):
@@ -64,7 +71,7 @@ class SpecLibBase(object):
         ] = 0
 
     def load_fragment_df(self, **kwargs):
-        self._precursor_df.sort_values('nAA', inplace=True)
+        precursor.reset_precursor_df(self._precursor_df)
         self.calc_fragment_mz_df(**kwargs)
         self.load_fragment_intensity_df(**kwargs)
         for col in self._fragment_mz_df.columns.values:
@@ -105,7 +112,7 @@ class SpecLibBase(object):
             f'Sub-class of "{self.__class__}" must re-implement "load_fragment_intensity_df()"'
         )
 
-    def calc_fragment_mz_df(self):
+    def calc_fragment_mz_df(self, **kwargs):
         if 'frag_start_idx' in self._precursor_df.columns:
             del self._precursor_df['frag_start_idx']
             del self._precursor_df['frag_end_idx']

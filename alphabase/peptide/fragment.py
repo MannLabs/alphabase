@@ -4,8 +4,8 @@ __all__ = ['get_charged_frag_types', 'parse_charged_frag_type', 'init_zero_fragm
            'init_fragment_dataframe_from_other', 'init_fragment_by_precursor_dataframe',
            'update_sliced_fragment_dataframe', 'get_sliced_fragment_dataframe', 'update_sliced_fragment_dataframe',
            'get_sliced_fragment_dataframe', 'concat_precursor_fragment_dataframes',
-           'calc_fragment_mz_values_for_same_nAA', 'create_fragment_mz_dataframe_ignore_old_idxes',
-           'create_fragment_mz_dataframe', 'create_fragment_mz_dataframe_by_sort_nAA']
+           'calc_fragment_mz_values_for_same_nAA', 'create_fragment_mz_dataframe_by_sort_precursor',
+           'create_fragment_mz_dataframe', 'create_fragment_mz_dataframe_ignore_old_idxes']
 
 # Cell
 import numpy as np
@@ -24,7 +24,8 @@ from alphabase.constants.element import (
 
 from alphabase.peptide.precursor import (
     reset_precursor_df,
-    update_precursor_mz
+    update_precursor_mz,
+    is_precursor_sorted
 )
 
 def get_charged_frag_types(
@@ -370,7 +371,7 @@ def calc_fragment_mz_values_for_same_nAA(
 
 # Cell
 
-def create_fragment_mz_dataframe_ignore_old_idxes(
+def create_fragment_mz_dataframe_by_sort_precursor(
     precursor_df: pd.DataFrame,
     charged_frag_types:List,
     batch_size=500000,
@@ -394,10 +395,7 @@ def create_fragment_mz_dataframe_ignore_old_idxes(
 
     if 'nAA' not in precursor_df.columns:
         precursor_df['nAA'] = precursor_df.sequence.str.len()
-        precursor_df.sort_values('nAA', inplace=True)
-    elif not precursor_df.nAA.is_monotonic:
-        precursor_df.sort_values('nAA', inplace=True)
-    precursor_df.reset_index(drop=True, inplace=True)
+    reset_precursor_df(precursor_df)
 
     fragment_mz_df = init_fragment_by_precursor_dataframe(
         precursor_df, charged_frag_types
@@ -421,7 +419,7 @@ def create_fragment_mz_dataframe_ignore_old_idxes(
     return precursor_df, fragment_mz_df
 
 #wrapper
-create_fragment_mz_dataframe_by_sort_nAA = create_fragment_mz_dataframe_ignore_old_idxes
+create_fragment_mz_dataframe_ignore_old_idxes = create_fragment_mz_dataframe_by_sort_precursor
 
 def create_fragment_mz_dataframe(
     precursor_df: pd.DataFrame,
@@ -463,14 +461,14 @@ def create_fragment_mz_dataframe(
         reset_precursor_df(precursor_df)
 
     if  'frag_start_idx' not in precursor_df.columns:
-        return create_fragment_mz_dataframe_by_sort_nAA(
+        return create_fragment_mz_dataframe_by_sort_precursor(
             precursor_df, charged_frag_types, batch_size
         )
 
-    if (precursor_df['nAA'].is_monotonic and
+    if (is_precursor_sorted(precursor_df) and
         reference_fragment_df is None
     ):
-        return create_fragment_mz_dataframe_by_sort_nAA(
+        return create_fragment_mz_dataframe_by_sort_precursor(
             precursor_df, charged_frag_types, batch_size
         )
 

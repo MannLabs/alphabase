@@ -344,29 +344,27 @@ class PSMReaderProvider:
     def __init__(self):
         self.reader_dict = {}
 
-    def register_reader(self, reader_name, reader_class):
-        self.reader_dict[reader_name.lower()] = reader_class
+    def register_reader(self, reader_type, reader_class):
+        self.reader_dict[reader_type.lower()] = reader_class
 
     def get_reader(self,
-        reader_name:str,
+        reader_type:str,
         *,
         column_mapping:dict=None,
         modification_mapping:dict=None,
         fdr=0.01, keep_decoy=False,
         **kwargs
     )->PSMReaderBase:
-        return self.reader_dict[reader_name.lower()](
+        return self.reader_dict[reader_type.lower()](
             column_mapping = column_mapping,
             modification_mapping=modification_mapping,
             fdr=fdr, keep_decoy=keep_decoy, **kwargs
         )
 
-    def get_reader_by_yaml(self,
-        yaml_key:str,
+    def get_reader_by_yaml(self, yaml_dict:dict,
     )->PSMReaderBase:
-        yaml_key = yaml_key.lower()
-        return self.get_reader(yaml_key,
-            **copy.deepcopy(psm_reader_yaml[yaml_key])
+        return self.get_reader(
+            **copy.deepcopy(yaml_dict)
         )
 
 psm_reader_provider = PSMReaderProvider()

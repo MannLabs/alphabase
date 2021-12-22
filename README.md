@@ -11,13 +11,9 @@ AlphaBase provides all basic python functionalities for AlphaPept ecosystem from
 * [**About**](#about)
 * [**License**](#license)
 * [**Installation**](#installation)
-  * [**One-click GUI**](#one-click-gui)
   * [**Pip installer**](#pip)
   * [**Developer installer**](#developer)
 * [**Usage**](#usage)
-  * [**GUI**](#gui)
-  * [**CLI**](#cli)
-  * [**Python and jupyter notebooks**](#python-and-jupyter-notebooks)
 * [**Troubleshooting**](#troubleshooting)
 * [**Citations**](#citations)
 * [**How to contribute**](#how-to-contribute)
@@ -37,7 +33,7 @@ AlphaBase was developed by the [Mann Labs at the Max Planck Institute of Biochem
 ## Installation
 
 AlphaBase can be installed and used on all major operating systems (Windows, macOS and Linux).
-There are three different types of installation possible:
+There are two different types of installation possible:
 
 * [**Pip installer:**](#pip) Choose this installation if you want to use AlphaBase as a Python package in an existing Python 3.8 environment (e.g. a Jupyter notebook). If needed, the GUI and CLI can be installed with pip as well.
 * [**Developer installer:**](#developer) Choose this installation if you are familiar with CLI tools, [conda](https://docs.conda.io/en/latest/) and Python. This installation allows access to all available features of AlphaBase and even allows to modify its source code directly. Generally, the developer version of AlphaBase outperforms the precompiled versions which makes this the installation of choice for high-throughput experiments.
@@ -100,25 +96,6 @@ By default this installs loose dependancies (no explicit versioning), although i
 
 ---
 ## Usage
-
-There are two ways to use AlphaBase:
-
-* [**CLI**](#cli)
-* [**Python**](#python-and-jupyter-notebooks)
-
-NOTE: The first time you use a fresh installation of AlphaBase, it is often quite slow because some functions might still need compilation on your local operating system and architecture. Subsequent use should be a lot faster.
-
-### CLI
-
-The CLI can be run with the following command (after activating the `conda` environment with `conda activate alphabase` or if an alias was set to the alphabase executable):
-
-```bash
-alphabase -h
-```
-
-It is possible to get help about each function and their (required) parameters by using the `-h` flag.
-
-### Python and Jupyter notebooks
 
 AlphaBase can be imported as a Python package into any Python script or notebook with the command `import alphabase`.
 
