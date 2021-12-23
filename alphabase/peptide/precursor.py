@@ -20,7 +20,7 @@ def reset_precursor_df(df:pd.DataFrame):
 
 def is_precursor_sorted(precursor_df: pd.DataFrame):
     return (
-        precursor_df.index.values[0] == 0 &
+        (precursor_df.index.values[0] == 0) &
         precursor_df.nAA.is_monotonic &
         np.all(
             np.diff(precursor_df.index.values)==1
