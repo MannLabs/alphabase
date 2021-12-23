@@ -27,9 +27,9 @@ maxquant:
     'rt': 'Retention time'
     'ccs': 'CCS'
     'mobility': 
-      - 'K0' # Bug in MaxQuant? It should be 1/K0
       - 'Mobility'
       - 'IonMobility'
+      - 'K0' # Bug in MaxQuant? It should be 1/K0
     'spec_idx': 
       - 'Scan number'
       - 'MS/MS scan number'
@@ -107,38 +107,7 @@ diann:
     'uniprot_ids': 'Protein.Ids'
     'genes': 'Genes'
     'spec_idx': 'MS2.Scan'
-  modification_mapping:
-    'Acetyl@Protein N-term': 
-      - '_(Acetyl (Protein N-term))'
-      - '_(ac)'
-      - '_(UniMod:1)'
-    'Carbamidomethyl@C': 
-      - 'C(Carbamidomethyl (C))'
-      - 'C(UniMod:4)'
-    'Oxidation@M': 
-      - 'M(Oxidation (M))'
-      - 'M(ox)'
-      - 'M(UniMod:35)'
-    'Phospho@S': 
-      - 'S(Phospho (S))'
-      - 'S(Phospho (ST))'
-      - 'S(Phospho (STY))'
-      - 'S(ph)'
-      - 'S(UniMod:21)'
-    'Phospho@T': 
-      - 'T(Phospho (T))'
-      - 'T(Phospho (ST))'
-      - 'T(Phospho (STY))'
-      - 'T(ph)'
-      - 'T(UniMod:21)'
-    'Phospho@Y': 
-      - 'Y(Phospho (Y))'
-      - 'Y(Phospho (STY))'
-      - 'Y(ph)'
-      - 'Y(UniMod:21)'
-    'Deamidated@N': ['N(Deamidation (NQ))']
-    'Deamidated@Q': ['Q(Deamidation (NQ))']
-    'GlyGly@K': ['K(GlyGly (K))', 'K(gl)']
+  modification_mapping: 'maxquant'
 spectronaut:
   reader_type: spectronaut
   column_mapping:
@@ -152,36 +121,5 @@ spectronaut:
     'proteins': 'Protein Name'
     'uniprot_ids': ['UniProtIds','UniProtID']
     'genes': 'Genes'
-  modification_mapping:
-    'Acetyl@Protein N-term': 
-      - '_(Acetyl (Protein N-term))'
-      - '_(ac)'
-      - '_(UniMod:1)'
-    'Carbamidomethyl@C': 
-      - 'C(Carbamidomethyl (C))'
-      - 'C(UniMod:4)'
-    'Oxidation@M': 
-      - 'M(Oxidation (M))'
-      - 'M(ox)'
-      - 'M(UniMod:35)'
-    'Phospho@S': 
-      - 'S(Phospho (S))'
-      - 'S(Phospho (ST))'
-      - 'S(Phospho (STY))'
-      - 'S(ph)'
-      - 'S(UniMod:21)'
-    'Phospho@T': 
-      - 'T(Phospho (T))'
-      - 'T(Phospho (ST))'
-      - 'T(Phospho (STY))'
-      - 'T(ph)'
-      - 'T(UniMod:21)'
-    'Phospho@Y': 
-      - 'Y(Phospho (Y))'
-      - 'Y(Phospho (STY))'
-      - 'Y(ph)'
-      - 'Y(UniMod:21)'
-    'Deamidated@N': ['N(Deamidation (NQ))']
-    'Deamidated@Q': ['Q(Deamidation (NQ))']
-    'GlyGly@K': ['K(GlyGly (K))', 'K(gl)']
+  modification_mapping: 'maxquant'
   

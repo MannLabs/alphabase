@@ -5,9 +5,11 @@ __all__ = ['parse_mod_seq', 'MaxQuantReader']
 # Cell
 import pandas as pd
 import numba
+import copy
 
 from alphabase.io.psm_reader.psm_reader import (
-    PSMReaderBase, psm_reader_provider
+    PSMReaderBase, psm_reader_provider,
+    psm_reader_yaml
 )
 
 @numba.njit
@@ -68,55 +70,14 @@ class MaxQuantReader(PSMReaderBase):
         self.mod_seq_column = mod_seq_column
 
     def _init_modification_mapping(self):
-        self.modification_mapping = {
-            'Acetyl@Protein N-term':
-                [
-                    '_(Acetyl (Protein N-term))',
-                    '_(ac)','_(UniMod:1)'
-                ],
-            'Carbamidomethyl@C':
-                [
-                    'C(Carbamidomethyl (C))',
-                    'C(UniMod:4)'
-                ],
-            'Oxidation@M':
-                [
-                    'M(Oxidation (M))',
-                    'M(ox)', 'M(UniMod:35)'
-                ],
-            'Phospho@S':
-                [
-                    'S(Phospho (S))',
-                    'S(Phospho (ST))',
-                    'S(Phospho (STY))',
-                    'S(ph)',
-                    'S(UniMod:21)'
-                ],
-            'Phospho@T':
-                [
-                    'T(Phospho (T))',
-                    'T(Phospho (ST))',
-                    'T(Phospho (STY))',
-                    'T(ph)',
-                    'T(UniMod:21)'
-                ],
-            'Phospho@Y':
-                [
-                    'Y(Phospho (Y))',
-                    'Y(Phospho (STY))',
-                    'Y(ph)',
-                    'Y(UniMod:21)'
-                ],
-            'Deamidated@N': ['N(Deamidation (NQ))'],
-            'Deamidated@Q': ['Q(Deamidation (NQ))'],
-            'GlyGly@K': ['K(GlyGly (K))', 'K(gl)'],
-        }
+        self.modification_mapping = copy.deepcopy(
+            psm_reader_yaml['maxquant'][
+                'modification_mapping'
+            ]
+        ) # maxquant reader will modify the dict inplace
 
     def set_modification_mapping(self, modification_mapping: dict):
-        if modification_mapping is None:
-            self._init_modification_mapping()
-        else:
-            self.modification_mapping = modification_mapping
+        super().set_modification_mapping(modification_mapping)
         self._extend_mod_brackets()
         self._reverse_mod_mapping()
 
@@ -134,21 +95,9 @@ class MaxQuantReader(PSMReaderBase):
             )
 
     def _init_column_mapping(self):
-        self.column_mapping = {
-            'sequence': 'Sequence',
-            'charge': 'Charge',
-            'rt': 'Retention time',
-            'ccs': 'CCS',
-            'mobility': ['K0','Mobility','IonMobility'], # Bug in MaxQuant? It should be 1/K0
-            'spec_idx': ['Scan number','MS/MS scan number','Scan index'],
-            'raw_name': 'Raw file',
-            'precursor_mz': 'm/z',
-            'score': 'Score',
-            'proteins': 'Proteins',
-            'genes': ['Gene Names','Gene names'],
-            'decoy': 'decoy',
-            'fdr': 'fdr',
-        }
+        self.column_mapping = psm_reader_yaml[
+            'maxquant'
+        ]['column_mapping']
 
     def _load_file(self, filename):
         df = pd.read_csv(filename, sep='\t')
@@ -157,9 +106,6 @@ class MaxQuantReader(PSMReaderBase):
         # if 'K0' in df.columns:
         #     df['Mobility'] = df['K0'] # Bug in MaxQuant? It should be 1/K0
         # min_rt = df['Retention time'].min()
-        # df['rt_norm'] = (
-        #     df['Retention time']-min_rt
-        # )/(df['Retention time'].max()-min_rt)
         df['decoy'] = 0
         df.loc[df['Reverse']=='+','decoy'] == 1
         return df

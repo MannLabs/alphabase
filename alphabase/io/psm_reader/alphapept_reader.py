@@ -10,7 +10,8 @@ import numpy as np
 import h5py
 
 from alphabase.io.psm_reader.psm_reader import (
-    PSMReaderBase, psm_reader_provider
+    PSMReaderBase, psm_reader_provider,
+    psm_reader_yaml
 )
 
 @numba.njit
@@ -84,29 +85,14 @@ class AlphaPeptReader(PSMReaderBase):
             self.hdf_dataset = 'second_search'
 
     def _init_column_mapping(self):
-        self.column_mapping = {
-            'sequence': 'naked_sequence',
-            'rt':'rt',
-            'spec_idx': ['scan_no','raw_idx'],
-            'query_id': 'query_idx',
-            'mobility': 'mobility',
-            'score': 'score',
-            'precursor_mz': 'mz',
-            'charge': 'charge',
-            'raw_name': 'raw_name', #parse from `ms_data.hdf`` file
-            'fdr': 'q_value',
-            'decoy': 'decoy',
-        }
+        self.column_mapping = psm_reader_yaml[
+            'alphapept'
+        ]['column_mapping']
 
     def _init_modification_mapping(self):
-        self.modification_mapping = {
-            'Carbamidomethyl@C': 'cC',
-            'Oxidation@M': 'oxM',
-            'Phospho@S': 'pS',
-            'Phospho@T': 'pT',
-            'Phospho@Y': 'pY',
-            'Acetyl@Protein N-term': 'a',
-        }
+        self.modification_mapping = psm_reader_yaml[
+            'alphapept'
+        ]['modification_mapping']
 
     def _load_file(self, filename):
         with h5py.File(filename, 'r') as _hdf:

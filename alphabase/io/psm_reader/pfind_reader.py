@@ -11,6 +11,7 @@ import alphabase.constants.modification as ap_mod
 
 from alphabase.io.psm_reader.psm_reader import (
     PSMReaderBase, psm_reader_provider,
+    psm_reader_yaml
 )
 
 def convert_one_pFind_mod(mod):
@@ -89,18 +90,10 @@ class pFindReader(PSMReaderBase):
         )
 
     def _init_column_mapping(self):
-        self.column_mapping = {
-            'sequence': 'Sequence',
-            'charge': 'Charge',
-            'raw_name': 'raw_name',
-            'query_id': 'File_Name',
-            'spec_idx': 'Scan_No',
-            'score': 'Final_Score',
-            'proteins': 'Proteins',
-            'uniprot_ids': 'Proteins',
-            'fdr': 'Q-value',
-            'decoy': 'decoy'
-        }
+        self.column_mapping = psm_reader_yaml[
+            'pfind'
+        ]['column_mapping']
+
     def _init_modification_mapping(self):
         self.modification_mapping = {}
 

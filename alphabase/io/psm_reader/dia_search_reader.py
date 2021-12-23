@@ -7,7 +7,7 @@ import pandas as pd
 import numpy as np
 
 from alphabase.io.psm_reader.psm_reader import (
-    psm_reader_provider
+    psm_reader_provider, psm_reader_yaml
 )
 
 from alphabase.io.psm_reader.maxquant_reader import (
@@ -52,18 +52,9 @@ class SpectronautReader(MaxQuantReader):
                 break
 
     def _init_column_mapping(self):
-        self.column_mapping = {
-            'sequence': ['StrippedPeptide','PeptideSequence'],
-            'charge': 'PrecursorCharge',
-            'rt': ['RT','iRT','Tr_recalibrated','RetentionTime'],
-            'rt_norm': 'rt_norm',
-            'ccs': 'CCS',
-            'mobility': ['Mobility','IonMobility'],
-            'precursor_mz': 'mz',
-            'proteins': 'Protein Name',
-            'uniprot_ids': ['UniProtIds','UniProtID'],
-            'genes': 'Genes',
-        }
+        self.column_mapping = psm_reader_yaml[
+            'spectronaut'
+        ]['column_mapping']
 
     def _load_file(self, filename):
         df = pd.read_csv(filename, sep=self.csv_sep)
@@ -112,20 +103,9 @@ class DiannReader(SpectronautReader):
         self.mod_seq_column = 'Modified.Sequence'
 
     def _init_column_mapping(self):
-        self.column_mapping = {
-            'raw_name': 'Run',
-            'sequence': 'Stripped.Sequence',
-            'charge': 'Precursor.Charge',
-            'rt': ['RT','iRT','Tr_recalibrated','RetentionTime'],
-            'rt_norm':'rt_norm',
-            'ccs': 'CCS',
-            'precursor_mz': 'PrecursorMz',
-            'mobility': ['IM','IonMobility'],
-            'proteins': 'Protein.Names',
-            'uniprot_ids': 'Protein.Ids',
-            'genes': 'Genes',
-            'spec_idx': 'MS2.Scan',
-        }
+        self.column_mapping = psm_reader_yaml[
+            'diann'
+        ]['column_mapping']
 
     def _load_file(self, filename):
         df = pd.read_csv(filename, sep=self.csv_sep)
