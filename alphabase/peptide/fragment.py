@@ -457,8 +457,6 @@ def create_fragment_mz_dataframe(
     if 'nAA' not in precursor_df.columns:
         precursor_df['nAA'] = precursor_df.sequence.str.len()
         reset_precursor_df(precursor_df)
-
-    if  'frag_start_idx' not in precursor_df.columns:
         return create_fragment_mz_dataframe_by_sort_precursor(
             precursor_df, charged_frag_types, batch_size
         )
