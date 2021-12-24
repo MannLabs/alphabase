@@ -153,6 +153,37 @@ class SpecLibBase(object):
     def update_precursor_mz(self):
         self.calc_precursor_mz()
 
+    def _get_hdf_to_save(self,
+        hdf_file,
+        delete_existing=False
+    ):
+        _hdf = HDF_File(
+            hdf_file,
+            read_only=False,
+            truncate=True,
+            delete_existing=delete_existing
+        )
+        return _hdf.library
+
+    def _get_hdf_to_load(self,
+        hdf_file,
+    ):
+        _hdf = HDF_File(
+            hdf_file,
+        )
+        return _hdf.library
+
+    def save_df_to_hdf(self,
+        hdf_file:str,
+        df_key: str,
+        df: pd.DataFrame,
+        delete_existing=False
+    ):
+        self._get_hdf_to_save(
+            hdf_file,
+            delete_existing=delete_existing
+        ).add_group(df_key, df)
+
     def save_hdf(self, hdf_file):
         _hdf = HDF_File(
             hdf_file,
@@ -165,6 +196,14 @@ class SpecLibBase(object):
             'fragment_mz_df': self._fragment_mz_df,
             'fragment_intensity_df': self._fragment_intensity_df,
         }
+
+    def load_df_from_hdf(self,
+        hdf_file:str,
+        df_key: str
+    ):
+        return self._get_hdf_to_load(
+            hdf_file
+        ).__getattribute__(df_key).values
 
     def load_hdf(self, hdf_file):
         _hdf = HDF_File(
