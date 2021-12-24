@@ -118,7 +118,7 @@ class SpecLibBase(object):
             del self._precursor_df['frag_end_idx']
 
         (
-            self._precursor_df, self._fragment_mz_df
+            self._fragment_mz_df
         ) = fragment.create_fragment_mz_dataframe(
             self._precursor_df, self.charged_frag_types
         )

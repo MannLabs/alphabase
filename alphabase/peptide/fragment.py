@@ -375,7 +375,7 @@ def create_fragment_mz_dataframe_by_sort_precursor(
     precursor_df: pd.DataFrame,
     charged_frag_types:List,
     batch_size=500000,
-):
+)->pd.DataFrame:
     """Sort nAA in precursor_df for faster fragment mz dataframe creation.
 
     Because the fragment mz values are continous in memory, so it is faster
@@ -416,7 +416,7 @@ def create_fragment_mz_dataframe_by_sort_precursor(
                 df_group.frag_start_idx.values[0]:
                 df_group.frag_end_idx.values[-1], :
             ] = mz_values
-    return precursor_df, fragment_mz_df
+    return fragment_mz_df
 
 #wrapper
 create_fragment_mz_dataframe_ignore_old_idxes = create_fragment_mz_dataframe_by_sort_precursor
@@ -426,7 +426,7 @@ def create_fragment_mz_dataframe(
     charged_frag_types:List,
     reference_fragment_df: pd.DataFrame = None,
     batch_size=500000,
-)->Tuple[pd.DataFrame, pd.DataFrame]:
+)->pd.DataFrame:
     '''
     Generate fragment mass dataframe for the precursor_df. If
     the `reference_fragment_df` is provided and precursor_df contains `frag_start_idx`,
@@ -443,8 +443,6 @@ def create_fragment_mz_dataframe(
             `precursor.frag_end_idx` point to the indices in
             `reference_fragment_df`
     Returns:
-        pd.DataFrame: `precursor_df`. `precursor_df` contains the 'charge' column,
-        this function will automatically assign the 'precursor_mz' to `precursor_df`
         pd.DataFrame: `fragment_mz_df` with given `charged_frag_types`
     Raises:
         ValueError: when `precursor_df` contains 'frag_start_idx' but
@@ -480,9 +478,9 @@ def create_fragment_mz_dataframe(
             ]]
         )
     else:
-        fragment_df_list = []
-
-    precursor_df_list = []
+        fragment_mz_df = init_fragment_by_precursor_dataframe(
+            precursor_df, charged_frag_types,
+        )
 
     _grouped = precursor_df.groupby('nAA')
     for nAA, big_df_group in _grouped:
@@ -495,24 +493,10 @@ def create_fragment_mz_dataframe(
                 df_group, nAA, charged_frag_types
             )
 
-            if reference_fragment_df is not None:
-                update_sliced_fragment_dataframe(
-                    fragment_mz_df, mz_values,
-                    df_group[['frag_start_idx','frag_end_idx']].values,
-                    charged_frag_types,
-                )
-            else:
-                _fragment_mz_df = init_fragment_by_precursor_dataframe(
-                    df_group,
-                    charged_frag_types
-                )
-                _fragment_mz_df[:] = mz_values
-                fragment_df_list.append(_fragment_mz_df)
-            precursor_df_list.append(df_group)
+            update_sliced_fragment_dataframe(
+                fragment_mz_df, mz_values,
+                df_group[['frag_start_idx','frag_end_idx']].values,
+                charged_frag_types,
+            )
 
-    if reference_fragment_df is not None:
-        return pd.concat(precursor_df_list), fragment_mz_df
-    else:
-        return concat_precursor_fragment_dataframes(
-            precursor_df_list, fragment_df_list
-        )
+    return fragment_mz_df
