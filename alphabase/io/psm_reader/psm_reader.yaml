@@ -21,6 +21,9 @@ alphapept:
     'Acetyl@Protein N-term': 'a'
 maxquant:
   reader_type: maxquant
+  mod_sep: '()'
+  underscore_for_ncterm: True
+  fixed_C57: True
   column_mapping:
     'sequence': 'Sequence'
     'charge': 'Charge'
@@ -95,6 +98,10 @@ msfragger:
   modification_mapping:
 diann:
   reader_type: diann
+  mod_sep: '()'
+  underscore_for_ncterm: False
+  fixed_C57: False
+  csv_sep: '\t'
   column_mapping:
     'raw_name': 'Run'
     'sequence': 'Stripped.Sequence'
@@ -110,6 +117,14 @@ diann:
   modification_mapping: 'maxquant'
 spectronaut:
   reader_type: spectronaut
+  mod_sep: '[]'
+  underscore_for_ncterm: False
+  fixed_C57: False
+  csv_sep: '\t'
+  mod_seq_columns:
+    - 'ModifiedPeptide'
+    - 'ModifiedSequence'
+    - 'FullUniModPeptideName'
   column_mapping:
     'sequence': ['StrippedPeptide','PeptideSequence']
     'charge': 'PrecursorCharge'

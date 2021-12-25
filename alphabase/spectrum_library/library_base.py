@@ -184,6 +184,14 @@ class SpecLibBase(object):
             delete_existing=delete_existing
         ).add_group(df_key, df)
 
+    def load_df_from_hdf(self,
+        hdf_file:str,
+        df_key: str
+    ):
+        return self._get_hdf_to_load(
+            hdf_file
+        ).__getattribute__(df_key).values
+
     def save_hdf(self, hdf_file):
         _hdf = HDF_File(
             hdf_file,
@@ -196,14 +204,6 @@ class SpecLibBase(object):
             'fragment_mz_df': self._fragment_mz_df,
             'fragment_intensity_df': self._fragment_intensity_df,
         }
-
-    def load_df_from_hdf(self,
-        hdf_file:str,
-        df_key: str
-    ):
-        return self._get_hdf_to_load(
-            hdf_file
-        ).__getattribute__(df_key).values
 
     def load_hdf(self, hdf_file):
         _hdf = HDF_File(

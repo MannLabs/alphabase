@@ -24,7 +24,7 @@ class SpectronautReader(MaxQuantReader):
         mod_sep = '[]',
         underscore_for_ncterm=True,
         fixed_C57 = False,
-        mod_seq_column=[
+        mod_seq_columns=[
             'ModifiedPeptide',
             'ModifiedSequence',
             'FullUniModPeptideName',
@@ -38,18 +38,12 @@ class SpectronautReader(MaxQuantReader):
             fdr=fdr, keep_decoy=keep_decoy,
             mod_sep=mod_sep,
             underscore_for_ncterm=underscore_for_ncterm,
+            mod_seq_columns = mod_seq_columns,
             fixed_C57=fixed_C57
         )
         self.csv_sep = csv_sep
 
-        self._mod_seq_columns = mod_seq_column
         self.mod_seq_column = 'ModifiedPeptide'
-
-    def _find_mod_seq_column(self, df):
-        for mod_seq_col in self._mod_seq_columns:
-            if mod_seq_col in df.columns:
-                self.mod_seq_column = mod_seq_col
-                break
 
     def _init_column_mapping(self):
         self.column_mapping = psm_reader_yaml[

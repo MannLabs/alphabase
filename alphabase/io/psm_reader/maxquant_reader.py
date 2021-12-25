@@ -54,7 +54,7 @@ class MaxQuantReader(PSMReaderBase):
         mod_sep = '()',
         underscore_for_ncterm=True,
         fixed_C57 = True,
-        mod_seq_column='Modified sequence',
+        mod_seq_columns = ['Modified sequence'],
         **kwargs,
     ):
         super().__init__(
@@ -65,9 +65,16 @@ class MaxQuantReader(PSMReaderBase):
         )
 
         self.mod_sep = mod_sep
-        self.underscore_for_ncterm=underscore_for_ncterm
+        self.underscore_for_ncterm = underscore_for_ncterm
         self.fixed_C = fixed_C57
-        self.mod_seq_column = mod_seq_column
+        self._mod_seq_columns = mod_seq_columns
+        self.mod_seq_column = 'Modified sequence'
+
+    def _find_mod_seq_column(self, df):
+        for mod_seq_col in self._mod_seq_columns:
+            if mod_seq_col in df.columns:
+                self.mod_seq_column = mod_seq_col
+                break
 
     def _init_modification_mapping(self):
         self.modification_mapping = copy.deepcopy(
@@ -101,6 +108,7 @@ class MaxQuantReader(PSMReaderBase):
 
     def _load_file(self, filename):
         df = pd.read_csv(filename, sep='\t')
+        self._find_mod_seq_column(df)
         df = df[~pd.isna(df['Retention time'])]
         df.fillna('', inplace=True)
         # if 'K0' in df.columns:
