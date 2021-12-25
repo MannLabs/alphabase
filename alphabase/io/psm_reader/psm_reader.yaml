@@ -101,7 +101,7 @@ diann:
   mod_sep: '()'
   underscore_for_ncterm: False
   fixed_C57: False
-  csv_sep: '\t'
+  csv_sep: "\t"
   column_mapping:
     'raw_name': 'Run'
     'sequence': 'Stripped.Sequence'
@@ -120,7 +120,7 @@ spectronaut:
   mod_sep: '[]'
   underscore_for_ncterm: False
   fixed_C57: False
-  csv_sep: '\t'
+  csv_sep: "\t"
   mod_seq_columns:
     - 'ModifiedPeptide'
     - 'ModifiedSequence'
