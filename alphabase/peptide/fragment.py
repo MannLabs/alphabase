@@ -259,6 +259,7 @@ def concat_precursor_fragment_dataframes(
         Tuple[pd.DataFrame,...]: concatenated precursor_df, fragment_df, *other_fragment_df ...
     '''
     fragment_df_lens = [len(fragment_df) for fragment_df in fragment_df_list]
+    precursor_df_list = [precursor_df.copy() for precursor_df in precursor_df_list]
     cum_frag_df_lens = np.cumsum(fragment_df_lens)
     for i,precursor_df in enumerate(precursor_df_list[1:]):
         precursor_df[['frag_start_idx','frag_end_idx']] += cum_frag_df_lens[i]
