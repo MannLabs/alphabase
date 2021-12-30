@@ -181,11 +181,18 @@ class PSMReaderBase(object):
         self._translate_modifications()
         self._post_process(origin_df)
 
+    def norm_rt(self):
+        if 'rt' in self.psm_df.columns:
+            self.psm_df['rt_norm'] = (
+                self.psm_df.rt / self.psm_df.rt.max()
+            )
+
     def normalize_rt_by_raw_name(self):
-        if (
-            not 'raw_name' in self.psm_df.columns
-            or not 'rt_norm' in self.psm_df.columns
-        ):
+        if not 'rt' in self.psm_df.columns:
+            return
+        if not 'rt_norm' in self.psm_df.columns:
+            self.norm_rt()
+        if not 'raw_name' in self.psm_df.columns:
             return
         for raw_name, df_group in self.psm_df.groupby('raw_name'):
             self.psm_df.loc[
@@ -285,13 +292,7 @@ class PSMReaderBase(object):
         Args:
             origin_df (pd.DataFrame): the loaded original df
         """
-        if (
-            'rt' in self._psm_df.columns and
-            not 'rt_norm' in self._psm_df.columns
-        ):
-            self._psm_df['rt_norm'] = (
-                self._psm_df.rt / self._psm_df.rt.max()
-            )
+        self.normalize_rt_by_raw_name()
 
         self._psm_df = self._psm_df[
             ~self._psm_df['mods'].isna()
