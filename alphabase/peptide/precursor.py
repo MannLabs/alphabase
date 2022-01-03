@@ -23,10 +23,12 @@ refine_precursor_df = reset_precursor_df
 
 def is_precursor_sorted(precursor_df: pd.DataFrame):
     return (
-        (precursor_df.index.values[0] == 0) &
-        precursor_df.nAA.is_monotonic &
-        np.all(
-            np.diff(precursor_df.index.values)==1
+        (len(precursor_df) == 0) or (
+            (precursor_df.index.values[0] == 0) and
+            precursor_df.nAA.is_monotonic and
+            np.all(
+                np.diff(precursor_df.index.values)==1
+            )
         )
     )
 

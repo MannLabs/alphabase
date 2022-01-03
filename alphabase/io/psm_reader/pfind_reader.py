@@ -110,9 +110,6 @@ class pFindReader(PSMReaderBase):
         # pfind_df['Proteins'] = pfind_df[
         #     'Proteins'
         # ].apply(remove_pFind_decoy_protein)
-        pfind_df['decoy'] = (
-            pfind_df['Target/Decoy']=='decoy'
-        ).astype(np.int8)
         return pfind_df
 
     def _load_modifications(self, pfind_df):
@@ -123,5 +120,8 @@ class pFindReader(PSMReaderBase):
         self._psm_df['mods'] = self._psm_df['mods'].apply(
             translate_pFind_mod
         )
+    def _post_process(self, origin_df: pd.DataFrame):
+        self._psm_df.decoy = (self._psm_df.decoy == 'decoy').astype(int)
+        super()._post_process(origin_df)
 
 psm_reader_provider.register_reader('pfind', pFindReader)

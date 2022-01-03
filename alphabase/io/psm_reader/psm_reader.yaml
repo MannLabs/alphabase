@@ -89,7 +89,7 @@ pfind:
     'proteins': 'Proteins'
     'uniprot_ids': 'Proteins'
     'fdr': 'Q-value'
-    'decoy': 'decoy'
+    'decoy': ['Target/Decoy', 'Targe/Decoy']
   modification_mapping:
     '': ''
 msfragger:
