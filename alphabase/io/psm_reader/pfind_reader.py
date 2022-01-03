@@ -112,6 +112,19 @@ class pFindReader(PSMReaderBase):
         # ].apply(remove_pFind_decoy_protein)
         return pfind_df
 
+    def _translate_columns(self, origin_df: pd.DataFrame):
+        super()._translate_columns(origin_df)
+
+    def _translate_decoy(self):
+        self._psm_df.decoy = (
+            self._psm_df.decoy == 'decoy'
+        ).astype(np.int8)
+
+    def _translate_score(self):
+        self._psm_df.score = -np.log(
+            self._psm_df.score.astype(float)+1e-100
+        )
+
     def _load_modifications(self, pfind_df):
         (
             self._psm_df['mods'], self._psm_df['mod_sites']
@@ -120,8 +133,5 @@ class pFindReader(PSMReaderBase):
         self._psm_df['mods'] = self._psm_df['mods'].apply(
             translate_pFind_mod
         )
-    def _post_process(self, origin_df: pd.DataFrame):
-        self._psm_df.decoy = (self._psm_df.decoy == 'decoy').astype(int)
-        super()._post_process(origin_df)
 
 psm_reader_provider.register_reader('pfind', pFindReader)

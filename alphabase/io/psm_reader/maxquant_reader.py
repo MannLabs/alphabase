@@ -101,6 +101,12 @@ class MaxQuantReader(PSMReaderBase):
                 [f'{mod[1:]}' for mod in mod_list if mod.startswith('_')]
             )
 
+    def _translate_decoy(self):
+        if 'decoy' in self._psm_df.columns:
+            self._psm_df.decoy = (
+                self._psm_df.decoy == '-'
+            ).astype(np.int8)
+
     def _init_column_mapping(self):
         self.column_mapping = psm_reader_yaml[
             'maxquant'
@@ -114,8 +120,6 @@ class MaxQuantReader(PSMReaderBase):
         # if 'K0' in df.columns:
         #     df['Mobility'] = df['K0'] # Bug in MaxQuant? It should be 1/K0
         # min_rt = df['Retention time'].min()
-        df['decoy'] = 0
-        df.loc[df['Reverse']=='+','decoy'] == 1
         return df
 
     def _load_modifications(self, origin_df: pd.DataFrame):

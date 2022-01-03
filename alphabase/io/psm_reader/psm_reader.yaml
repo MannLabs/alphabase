@@ -42,8 +42,7 @@ maxquant:
     'score': 'Score'
     'proteins': 'Proteins'
     'genes': ['Gene Names','Gene names']
-    'decoy': 'decoy'
-    'fdr': 'fdr'
+    'decoy': 'Reverse'
   modification_mapping:
     'Acetyl@Protein N-term': 
       - '_(Acetyl (Protein N-term))'

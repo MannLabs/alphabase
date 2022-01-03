@@ -177,10 +177,18 @@ class PSMReaderBase(object):
         """
         origin_df = self._load_file(_file)
         self._translate_columns(origin_df)
+        self._translate_decoy()
+        self._translate_score()
         self._load_modifications(origin_df)
         self._translate_modifications()
         self._post_process(origin_df)
         return self._psm_df
+
+    def _translate_decoy(self):
+        pass
+
+    def _translate_score(self):
+        pass
 
     def norm_rt(self):
         if 'rt' in self.psm_df.columns:
