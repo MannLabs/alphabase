@@ -4,6 +4,7 @@ __all__ = ['parse_mod_seq', 'MaxQuantReader']
 
 # Cell
 import pandas as pd
+import numpy as np
 import numba
 import copy
 
