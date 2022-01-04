@@ -64,7 +64,8 @@ def get_pFind_mods(pfind_mod_str):
     ]
 
     items = [
-        ('-1',mod) if mod.endswith('C-term]')
+        ('-1',mod) if (mod.endswith('C-term]')
+        or mod[:-2].endswith('C-term'))
         #else ('0', mod) if mod.endswith('N-term]')
         else (site, mod) for site, mod in items
     ]
