@@ -58,9 +58,14 @@ def get_pFind_mods(pfind_mod_str):
     pfind_mod_str = pfind_mod_str.strip(';')
     if not pfind_mod_str: return "", ""
 
-    items = [item.split(',',3) for item in pfind_mod_str.split(';')]
+    items = [
+        item.split(',',3)
+        for item in pfind_mod_str.split(';')
+    ]
+
     items = [
         ('-1',mod) if mod.endswith('C-term]')
+        #else ('0', mod) if mod.endswith('N-term]')
         else (site, mod) for site, mod in items
     ]
     items = list(zip(*items))
