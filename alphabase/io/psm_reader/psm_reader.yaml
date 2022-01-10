@@ -1,7 +1,6 @@
 alphapept:
   reader_type: alphapept
   column_mapping:
-    'sequence': 'naked_sequence'
     'rt': 'rt'
     'spec_idx': ['scan_no','raw_idx']
     'query_id': 'query_idx'

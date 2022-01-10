@@ -176,12 +176,15 @@ class PSMReaderBase(object):
             _file: file path or file stream.
         """
         origin_df = self._load_file(_file)
-        self._translate_columns(origin_df)
-        self._translate_decoy()
-        self._translate_score()
-        self._load_modifications(origin_df)
-        self._translate_modifications()
-        self._post_process(origin_df)
+        if len(origin_df) == 0:
+            self._psm_df = pd.DataFrame()
+        else:
+            self._translate_columns(origin_df)
+            self._translate_decoy()
+            self._translate_score()
+            self._load_modifications(origin_df)
+            self._translate_modifications()
+            self._post_process(origin_df)
         return self._psm_df
 
     def _translate_decoy(self):
@@ -248,18 +251,6 @@ class PSMReaderBase(object):
                     if other_col in origin_df.columns:
                         self._psm_df[col] = origin_df[other_col]
                         break
-        if isinstance(self.column_mapping['sequence'], str):
-            origin_df['nAA'] = origin_df[
-                self.column_mapping['sequence']
-            ].str.len()
-        else:
-            for col in self.column_mapping['sequence']:
-                if col in origin_df:
-                    origin_df['nAA'] = origin_df[
-                        col
-                    ].str.len()
-                    break
-        self._psm_df['nAA'] = origin_df['nAA']
 
 
     def _load_modifications(self, origin_df:pd.DataFrame):
@@ -295,12 +286,15 @@ class PSMReaderBase(object):
         origin_df:pd.DataFrame
     ):
         """
-        Remove unknown modifications and perform other post processings,
+        Set 'nAA' columns, remove unknown modifications
+        and perform other post processings,
         e.g. get 'rt_norm', remove decoys, filter FDR...
 
         Args:
             origin_df (pd.DataFrame): the loaded original df
         """
+        self._psm_df['nAA'] = self._psm_df.sequence.str.len()
+
         self.normalize_rt_by_raw_name()
 
         self._psm_df = self._psm_df[

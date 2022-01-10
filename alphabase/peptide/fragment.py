@@ -391,8 +391,9 @@ def create_fragment_mz_dataframe_by_sort_precursor(
             Defaults to 500000.
     """
     if 'frag_start_idx' in precursor_df.columns:
-        del precursor_df['frag_start_idx']
-        del precursor_df['frag_end_idx']
+        precursor_df.drop(columns=[
+            'frag_start_idx','frag_end_idx'
+        ], inplace=True)
 
     if 'nAA' not in precursor_df.columns:
         precursor_df['nAA'] = precursor_df.sequence.str.len()

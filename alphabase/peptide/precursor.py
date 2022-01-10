@@ -14,12 +14,21 @@ from alphabase.peptide.mass_calc import (
     calc_peptide_masses_for_same_len_seqs
 )
 
-def refine_precursor_df(df:pd.DataFrame)->pd.DataFrame:
+def refine_precursor_df(
+    df:pd.DataFrame,
+    drop_frag_idx=True,
+)->pd.DataFrame:
     """
     Refine df inplace for faster precursor/fragment calculation.
     """
     df.sort_values('nAA', inplace=True)
     df.reset_index(drop=True, inplace=True)
+
+    if drop_frag_idx and 'frag_start_idx' in df.columns:
+        df.drop(columns=[
+            'frag_start_idx','frag_end_idx'
+        ], inplace=True)
+
     return df
 
 reset_precursor_df = refine_precursor_df

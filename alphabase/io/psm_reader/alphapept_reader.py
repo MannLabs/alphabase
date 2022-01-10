@@ -100,7 +100,7 @@ class AlphaPeptReader(PSMReaderBase):
             df = pd.DataFrame({col:dataset[col] for col in dataset.keys()})
             df['raw_name'] = os.path.basename(filename)[:-len('.ms_data.hdf')]
             df['precursor'] = df['precursor'].str.decode('utf-8')
-            df['naked_sequence'] = df['naked_sequence'].str.decode('utf-8')
+            #df['naked_sequence'] = df['naked_sequence'].str.decode('utf-8')
             if 'scan_no' in df.columns:
                 df['scan_no'] = df['scan_no'].astype('int')
             df['charge'] = df['charge'].astype(int)
@@ -111,7 +111,7 @@ class AlphaPeptReader(PSMReaderBase):
 
     def _load_modifications(self, df: pd.DataFrame):
         (
-            _seqs, self._psm_df['mods'],
+            self._psm_df['sequence'], self._psm_df['mods'],
             self._psm_df['mod_sites'], _charges,
             self._psm_df['decoy']
         ) = zip(*df['precursor'].apply(parse_ap))
