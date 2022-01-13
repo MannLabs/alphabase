@@ -180,17 +180,25 @@ class PSMReaderBase(object):
             self._psm_df = pd.DataFrame()
         else:
             self._translate_columns(origin_df)
-            self._translate_decoy()
-            self._translate_score()
+            self._translate_decoy(origin_df)
+            self._translate_score(origin_df)
             self._load_modifications(origin_df)
             self._translate_modifications()
             self._post_process(origin_df)
         return self._psm_df
 
-    def _translate_decoy(self):
+    def _translate_decoy(
+        self,
+        origin_df:pd.DataFrame=None
+    ):
         pass
 
-    def _translate_score(self):
+    def _translate_score(
+        self,
+        origin_df:pd.DataFrame=None
+    ):
+        # some scores are evalue/pvalue, it should be translated
+        # to -log(evalue), as score is the larger the better
         pass
 
     def norm_rt(self):

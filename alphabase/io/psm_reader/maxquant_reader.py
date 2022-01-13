@@ -102,7 +102,7 @@ class MaxQuantReader(PSMReaderBase):
                 [f'{mod[1:]}' for mod in mod_list if mod.startswith('_')]
             )
 
-    def _translate_decoy(self):
+    def _translate_decoy(self, origin_df=None):
         if 'decoy' in self._psm_df.columns:
             self._psm_df.decoy = (
                 self._psm_df.decoy == '-'

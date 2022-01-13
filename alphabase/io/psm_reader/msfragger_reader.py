@@ -58,13 +58,12 @@ class MSFraggerPepXML(PSMReaderBase):
     def __init__(self, *,
         column_mapping: dict = None,
         modification_mapping: dict = None,
-        keep_decoy=False,
+        keep_decoy=True,
         **kwargs
     ):
         super().__init__(
             column_mapping=column_mapping,
             modification_mapping=modification_mapping,
-            fdr=1,
             keep_decoy=keep_decoy,
             **kwargs
         )
@@ -87,10 +86,9 @@ class MSFraggerPepXML(PSMReaderBase):
         msf_df['raw_name'] = msf_df[
             'spectrum'
         ].str.split('.').apply(lambda x: x[0])
-        msf_df['expect'] = -np.log(msf_df['expect']+1e-100)
         return msf_df
 
-    def _translate_decoy(self):
+    def _translate_decoy(self, origin_df=None):
         self._psm_df['decoy'] = self._psm_df.proteins.apply(
             _is_decoy
         ).astype(np.int8)
@@ -98,6 +96,12 @@ class MSFraggerPepXML(PSMReaderBase):
         self._psm_df.proteins = self._psm_df.proteins.apply(
             lambda x: ';'.join(x)
         )
+    def _translate_score(self, origin_df=None):
+        if self.column_mapping['score'] == 'expect':
+            # evalue score
+            self._psm_df['score'] = -np.log(
+                self._psm_df['score']+1e-100
+            )
 
     def _load_modifications(self, msf_df):
         (
