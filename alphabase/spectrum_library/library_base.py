@@ -8,7 +8,7 @@ import numpy as np
 import typing
 
 import alphabase.peptide.fragment as fragment
-from alphabase.io.hdf import HDF_File
+from ..io.hdf import HDF_File
 
 class SpecLibBase(object):
     def __init__(self,

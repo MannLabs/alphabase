@@ -12,7 +12,7 @@ import numpy as np
 import numba
 import typing
 
-from alphabase.yaml_utils import load_yaml
+from ..yaml_utils import load_yaml
 
 _base_dir = os.path.dirname(__file__)
 

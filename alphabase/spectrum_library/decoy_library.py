@@ -4,8 +4,8 @@ __all__ = ['DecoyLib', 'DiaNNDecoyLib', 'DecoyLibProvider', 'decoy_lib_provider'
 
 # Cell
 import copy
-from alphabase.spectrum_library.library_base import SpecLibBase
-from alphabase.io.hdf import HDF_File
+from .library_base import SpecLibBase
+from ..io.hdf import HDF_File
 
 class DecoyLib(SpecLibBase):
     def __init__(self,
