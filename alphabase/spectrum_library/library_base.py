@@ -8,14 +8,17 @@ import numpy as np
 import typing
 
 import alphabase.peptide.fragment as fragment
-from ..io.hdf import HDF_File
+import alphabase.peptide.precursor as precursor
+from alphabase.io.hdf import HDF_File
 
 class SpecLibBase(object):
     def __init__(self,
         # ['b_z1','b_z2','y_z1','y_modloss_z1', ...];
         # 'b_z1': 'b' is the fragment type and
         # 'z1' is the charge state z=1.
-        charged_frag_types:typing.List[str],
+        charged_frag_types:typing.List[str] = [
+            'b_z1','b_z2','y_z1', 'y_z2'
+        ],
         min_precursor_mz = 400, max_precursor_mz = 6000,
         min_frag_mz = 200, max_frag_mz = 2000,
     ):
@@ -28,9 +31,36 @@ class SpecLibBase(object):
         self.min_precursor_mz = min_precursor_mz
         self.max_precursor_mz = max_precursor_mz
 
+
     @property
     def precursor_df(self):
         return self._precursor_df
+
+    @precursor_df.setter
+    def precursor_df(self, df):
+        self._precursor_df = df
+        self.refine_df()
+
+    def sort_by_nAA(self):
+        if 'nAA' not in self._precursor_df.columns:
+            self._precursor_df[
+                'nAA'
+            ] = self._precursor_df.sequence.str.len().astype(np.int32)
+        self._precursor_df.sort_values('nAA', inplace=True)
+        self._precursor_df.reset_index(drop=True, inplace=True)
+
+    def refine_df(self):
+        """
+        To make sure all columns have desired dtype.
+        This function also sorts `nAA`, and `reset_index` for fast prediction.
+        """
+        if self._precursor_df.charge.dtype not in ['int','int8','int64','int32']:
+            self._precursor_df['charge'] = self._precursor_df['charge'].astype(int)
+
+        if self._precursor_df.mod_sites.dtype not in ['O','U']:
+            self._precursor_df['mod_sites'] = self._precursor_df.mod_sites.astype('U')
+
+        self.sort_by_nAA()
 
     @property
     def fragment_mz_df(self):
@@ -64,7 +94,7 @@ class SpecLibBase(object):
         ] = 0
 
     def load_fragment_df(self, **kwargs):
-        self._precursor_df.sort_values('nAA', inplace=True)
+        precursor.reset_precursor_df(self._precursor_df)
         self.calc_fragment_mz_df(**kwargs)
         self.load_fragment_intensity_df(**kwargs)
         for col in self._fragment_mz_df.columns.values:
@@ -105,13 +135,13 @@ class SpecLibBase(object):
             f'Sub-class of "{self.__class__}" must re-implement "load_fragment_intensity_df()"'
         )
 
-    def calc_fragment_mz_df(self):
+    def calc_fragment_mz_df(self, **kwargs):
         if 'frag_start_idx' in self._precursor_df.columns:
             del self._precursor_df['frag_start_idx']
             del self._precursor_df['frag_end_idx']
 
         (
-            self._precursor_df, self._fragment_mz_df
+            self._fragment_mz_df
         ) = fragment.create_fragment_mz_dataframe(
             self._precursor_df, self.charged_frag_types
         )
@@ -122,6 +152,45 @@ class SpecLibBase(object):
 
     def update_precursor_mz(self):
         self.calc_precursor_mz()
+
+    def _get_hdf_to_save(self,
+        hdf_file,
+        delete_existing=False
+    ):
+        _hdf = HDF_File(
+            hdf_file,
+            read_only=False,
+            truncate=True,
+            delete_existing=delete_existing
+        )
+        return _hdf.library
+
+    def _get_hdf_to_load(self,
+        hdf_file,
+    ):
+        _hdf = HDF_File(
+            hdf_file,
+        )
+        return _hdf.library
+
+    def save_df_to_hdf(self,
+        hdf_file:str,
+        df_key: str,
+        df: pd.DataFrame,
+        delete_existing=False
+    ):
+        self._get_hdf_to_save(
+            hdf_file,
+            delete_existing=delete_existing
+        ).add_group(df_key, df)
+
+    def load_df_from_hdf(self,
+        hdf_file:str,
+        df_key: str
+    ):
+        return self._get_hdf_to_load(
+            hdf_file
+        ).__getattribute__(df_key).values
 
     def save_hdf(self, hdf_file):
         _hdf = HDF_File(

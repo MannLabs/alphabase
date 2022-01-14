@@ -1,0 +1,9 @@
+MASS_PROTON: 1.007276467 #https://physics.nist.gov/cgi-bin/cuu/Value?arp|search_for=proton
+MASS_ISOTOPE: 1.0033
+MAX_ISOTOPE_LEN: 10
+MOBILITY:
+  # 1059.62245 is the estimated constant coef in 
+  # Mason Schamp equation of Burker.
+  CCS_IM_COEF: 1059.62245
+  # 28 is the mass of N(2), the default gas in IM bruker
+  IM_GAS_MASS: 28.0

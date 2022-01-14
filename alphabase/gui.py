@@ -1,5 +1,2 @@
-#!python
-
-
-def run():
-    raise NotImplementedError
+def run(*args, **kwargs):
+    pass

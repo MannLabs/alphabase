@@ -58,6 +58,26 @@ class DecoyLib(SpecLibBase):
              if self.fix_C_term else x[::-1]
         )
 
+    def _get_hdf_to_save(self,
+        hdf_file,
+        delete_existing=False
+    ):
+        _hdf = HDF_File(
+            hdf_file,
+            read_only=False,
+            truncate=True,
+            delete_existing=delete_existing
+        )
+        return _hdf.library.decoy
+
+    def _get_hdf_to_load(self,
+        hdf_file,
+    ):
+        _hdf = HDF_File(
+            hdf_file,
+        )
+        return _hdf.library.decoy
+
     def save_hdf(self, hdf_file):
         _hdf = HDF_File(
             hdf_file,

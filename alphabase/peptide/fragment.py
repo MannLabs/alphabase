@@ -4,9 +4,8 @@ __all__ = ['get_charged_frag_types', 'parse_charged_frag_type', 'init_zero_fragm
            'init_fragment_dataframe_from_other', 'init_fragment_by_precursor_dataframe',
            'update_sliced_fragment_dataframe', 'get_sliced_fragment_dataframe', 'update_sliced_fragment_dataframe',
            'get_sliced_fragment_dataframe', 'concat_precursor_fragment_dataframes',
-           'calc_fragment_mz_values_for_same_nAA', 'reset_precursor_df',
-           'create_fragment_mz_dataframe_ignore_old_idxes', 'create_fragment_mz_dataframe',
-           'create_fragment_mz_dataframe_by_sort_nAA', 'update_precursor_mz']
+           'calc_fragment_mz_values_for_same_nAA', 'create_fragment_mz_dataframe_by_sort_precursor',
+           'create_fragment_mz_dataframe', 'create_fragment_mz_dataframe_ignore_old_idxes']
 
 # Cell
 import numpy as np
@@ -21,6 +20,12 @@ from ..constants.modification import (
 from ..constants.element import (
     MASS_H2O, MASS_PROTON,
     MASS_NH3, CHEM_MONO_MASS
+)
+
+from alphabase.peptide.precursor import (
+    reset_precursor_df,
+    update_precursor_mz,
+    is_precursor_sorted
 )
 
 def get_charged_frag_types(
@@ -254,6 +259,7 @@ def concat_precursor_fragment_dataframes(
         Tuple[pd.DataFrame,...]: concatenated precursor_df, fragment_df, *other_fragment_df ...
     '''
     fragment_df_lens = [len(fragment_df) for fragment_df in fragment_df_list]
+    precursor_df_list = [precursor_df.copy() for precursor_df in precursor_df_list]
     cum_frag_df_lens = np.cumsum(fragment_df_lens)
     for i,precursor_df in enumerate(precursor_df_list[1:]):
         precursor_df[['frag_start_idx','frag_end_idx']] += cum_frag_df_lens[i]
@@ -365,16 +371,12 @@ def calc_fragment_mz_values_for_same_nAA(
     return np.array(mz_values).T
 
 # Cell
-def reset_precursor_df(df:pd.DataFrame):
-    """ For faster precursor/fragment calculation """
-    df.sort_values('nAA', inplace=True)
-    df.reset_index(drop=True, inplace=True)
 
-def create_fragment_mz_dataframe_ignore_old_idxes(
+def create_fragment_mz_dataframe_by_sort_precursor(
     precursor_df: pd.DataFrame,
     charged_frag_types:List,
     batch_size=500000,
-):
+)->pd.DataFrame:
     """Sort nAA in precursor_df for faster fragment mz dataframe creation.
 
     Because the fragment mz values are continous in memory, so it is faster
@@ -389,15 +391,13 @@ def create_fragment_mz_dataframe_ignore_old_idxes(
             Defaults to 500000.
     """
     if 'frag_start_idx' in precursor_df.columns:
-        del precursor_df['frag_start_idx']
-        del precursor_df['frag_end_idx']
+        precursor_df.drop(columns=[
+            'frag_start_idx','frag_end_idx'
+        ], inplace=True)
 
     if 'nAA' not in precursor_df.columns:
         precursor_df['nAA'] = precursor_df.sequence.str.len()
-        precursor_df.sort_values('nAA', inplace=True)
-    elif not precursor_df.nAA.is_monotonic:
-        precursor_df.sort_values('nAA', inplace=True)
-    precursor_df.reset_index(drop=True, inplace=True)
+    reset_precursor_df(precursor_df)
 
     fragment_mz_df = init_fragment_by_precursor_dataframe(
         precursor_df, charged_frag_types
@@ -418,17 +418,17 @@ def create_fragment_mz_dataframe_ignore_old_idxes(
                 df_group.frag_start_idx.values[0]:
                 df_group.frag_end_idx.values[-1], :
             ] = mz_values
-    return precursor_df, fragment_mz_df
+    return fragment_mz_df
 
 #wrapper
-create_fragment_mz_dataframe_by_sort_nAA = create_fragment_mz_dataframe_ignore_old_idxes
+create_fragment_mz_dataframe_ignore_old_idxes = create_fragment_mz_dataframe_by_sort_precursor
 
 def create_fragment_mz_dataframe(
     precursor_df: pd.DataFrame,
     charged_frag_types:List,
     reference_fragment_df: pd.DataFrame = None,
     batch_size=500000,
-)->Tuple[pd.DataFrame, pd.DataFrame]:
+)->pd.DataFrame:
     '''
     Generate fragment mass dataframe for the precursor_df. If
     the `reference_fragment_df` is provided and precursor_df contains `frag_start_idx`,
@@ -445,8 +445,6 @@ def create_fragment_mz_dataframe(
             `precursor.frag_end_idx` point to the indices in
             `reference_fragment_df`
     Returns:
-        pd.DataFrame: `precursor_df`. `precursor_df` contains the 'charge' column,
-        this function will automatically assign the 'precursor_mz' to `precursor_df`
         pd.DataFrame: `fragment_mz_df` with given `charged_frag_types`
     Raises:
         ValueError: when `precursor_df` contains 'frag_start_idx' but
@@ -461,16 +459,14 @@ def create_fragment_mz_dataframe(
     if 'nAA' not in precursor_df.columns:
         precursor_df['nAA'] = precursor_df.sequence.str.len()
         reset_precursor_df(precursor_df)
-
-    if  'frag_start_idx' not in precursor_df.columns:
-        return create_fragment_mz_dataframe_by_sort_nAA(
+        return create_fragment_mz_dataframe_by_sort_precursor(
             precursor_df, charged_frag_types, batch_size
         )
 
-    if (precursor_df['nAA'].is_monotonic and
+    if (is_precursor_sorted(precursor_df) and
         reference_fragment_df is None
     ):
-        return create_fragment_mz_dataframe_by_sort_nAA(
+        return create_fragment_mz_dataframe_by_sort_precursor(
             precursor_df, charged_frag_types, batch_size
         )
 
@@ -482,9 +478,9 @@ def create_fragment_mz_dataframe(
             ]]
         )
     else:
-        fragment_df_list = []
-
-    precursor_df_list = []
+        fragment_mz_df = init_fragment_by_precursor_dataframe(
+            precursor_df, charged_frag_types,
+        )
 
     _grouped = precursor_df.groupby('nAA')
     for nAA, big_df_group in _grouped:
@@ -497,72 +493,10 @@ def create_fragment_mz_dataframe(
                 df_group, nAA, charged_frag_types
             )
 
-            if reference_fragment_df is not None:
-                update_sliced_fragment_dataframe(
-                    fragment_mz_df, mz_values,
-                    df_group[['frag_start_idx','frag_end_idx']].values,
-                    charged_frag_types,
-                )
-            else:
-                _fragment_mz_df = init_fragment_by_precursor_dataframe(
-                    df_group,
-                    charged_frag_types
-                )
-                _fragment_mz_df[:] = mz_values
-                fragment_df_list.append(_fragment_mz_df)
-            precursor_df_list.append(df_group)
+            update_sliced_fragment_dataframe(
+                fragment_mz_df, mz_values,
+                df_group[['frag_start_idx','frag_end_idx']].values,
+                charged_frag_types,
+            )
 
-    if reference_fragment_df is not None:
-        return pd.concat(precursor_df_list), fragment_mz_df
-    else:
-        return concat_precursor_fragment_dataframes(
-            precursor_df_list, fragment_df_list
-        )
-
-
-# Cell
-def update_precursor_mz(
-    precursor_df: pd.DataFrame,
-    batch_size = 500000,
-)->pd.DataFrame:
-    """
-    Calculate precursor_mz for the precursor_df
-    Args:
-        precursor_df (pd.DataFrame):
-          precursor_df with the 'charge' column
-
-    Returns:
-        pd.DataFrame: precursor_df with 'precursor_mz'
-    """
-
-    if 'nAA' not in precursor_df:
-        precursor_df['nAA'] = precursor_df.sequence.str.len()
-        reset_precursor_df(precursor_df)
-        _calc_in_order = True
-    elif precursor_df.nAA.is_monotonic and np.diff(precursor_df.index.values)==1:
-        _calc_in_order = True
-    else:
-        _calc_in_order = False
-    precursor_df['precursor_mz'] = 0.
-    _grouped = precursor_df.groupby('nAA')
-    for nAA, big_df_group in _grouped:
-        for i in range(0, len(big_df_group), batch_size):
-            batch_end = i+batch_size
-
-            df_group = big_df_group.iloc[i:batch_end,:]
-
-            pep_mzs = calc_peptide_masses_for_same_len_seqs(
-                df_group.sequence.values.astype('U'),
-                df_group.mods.values,
-                df_group.mod_deltas.values if 'mod_deltas' in df_group.columns else None
-            )/df_group.charge + MASS_PROTON
-            if _calc_in_order:
-                precursor_df.loc[:,'precursor_mz'].values[
-                    df_group.index.values[0]:
-                    df_group.index.values[-1]+1
-                ] = pep_mzs
-            else:
-                precursor_df.loc[
-                    df_group.index, 'precursor_mz'
-                ] = pep_mzs
-    return precursor_df
+    return fragment_mz_df
