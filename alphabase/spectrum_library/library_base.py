@@ -3,6 +3,7 @@
 __all__ = ['SpecLibBase']
 
 # Cell
+
 import pandas as pd
 import numpy as np
 import typing
@@ -11,6 +12,7 @@ import alphabase.peptide.fragment as fragment
 import alphabase.peptide.precursor as precursor
 from alphabase.io.hdf import HDF_File
 
+# Cell
 class SpecLibBase(object):
     def __init__(self,
         # ['b_z1','b_z2','y_z1','y_modloss_z1', ...];
@@ -20,17 +22,21 @@ class SpecLibBase(object):
             'b_z1','b_z2','y_z1', 'y_z2'
         ],
         min_precursor_mz = 400, max_precursor_mz = 6000,
-        min_frag_mz = 200, max_frag_mz = 2000,
+        decoy:str = 'pseudo_reverse',
     ):
         self.charged_frag_types = charged_frag_types
         self._precursor_df = pd.DataFrame()
         self._fragment_intensity_df = pd.DataFrame()
         self._fragment_mz_df = pd.DataFrame()
-        self.min_frag_mz = min_frag_mz
-        self.max_frag_mz = max_frag_mz
         self.min_precursor_mz = min_precursor_mz
         self.max_precursor_mz = max_precursor_mz
 
+        self.mod_seq_df_columns = [
+            'sequence',
+            'mods', 'mod_sites',
+            'nce', 'instrument',
+        ]
+        self.decoy = decoy
 
     @property
     def precursor_df(self):
@@ -39,28 +45,7 @@ class SpecLibBase(object):
     @precursor_df.setter
     def precursor_df(self, df):
         self._precursor_df = df
-        self.refine_df()
-
-    def sort_by_nAA(self):
-        if 'nAA' not in self._precursor_df.columns:
-            self._precursor_df[
-                'nAA'
-            ] = self._precursor_df.sequence.str.len().astype(np.int32)
-        self._precursor_df.sort_values('nAA', inplace=True)
-        self._precursor_df.reset_index(drop=True, inplace=True)
-
-    def refine_df(self):
-        """
-        To make sure all columns have desired dtype.
-        This function also sorts `nAA`, and `reset_index` for fast prediction.
-        """
-        if self._precursor_df.charge.dtype not in ['int','int8','int64','int32']:
-            self._precursor_df['charge'] = self._precursor_df['charge'].astype(int)
-
-        if self._precursor_df.mod_sites.dtype not in ['O','U']:
-            self._precursor_df['mod_sites'] = self._precursor_df.mod_sites.astype('U')
-
-        self.sort_by_nAA()
+        precursor.refine_precursor_df(self._precursor_df)
 
     @property
     def fragment_mz_df(self):
@@ -69,6 +54,29 @@ class SpecLibBase(object):
     @property
     def fragment_intensity_df(self):
         return self._fragment_intensity_df
+
+    def refine_df(self):
+        precursor.refine_precursor_df(self._precursor_df)
+
+    def append_decoy_sequence(self):
+        from alphabase.spectrum_library.decoy_library import (
+            decoy_lib_provider
+        )
+        if self.decoy not in (
+            decoy_lib_provider.decoy_dict
+        ): return
+        decoy_lib = (
+            decoy_lib_provider.get_decoy_lib(
+                self.decoy, self
+            )
+        )
+        decoy_lib.decoy_sequence()
+        self._precursor_df['decoy'] = 0
+        decoy_lib._precursor_df['decoy'] = 1
+        self._precursor_df = self._precursor_df.append(
+            decoy_lib._precursor_df
+        )
+        self.refine_df()
 
     def clip_by_precursor_mz_(self):
         '''
@@ -82,26 +90,6 @@ class SpecLibBase(object):
         )
         self._precursor_df.reset_index(drop=True, inplace=True)
 
-    def mask_fragment_intensity_by_mz_(self):
-        '''
-        Clip self._fragment_intensity_df inplace.
-        All clipped intensities are set as zeros.
-        A more generic way is to use a mask.
-        '''
-        self._fragment_intensity_df[
-            (self._fragment_mz_df<self.min_frag_mz)|
-            (self._fragment_mz_df>self.max_frag_mz)
-        ] = 0
-
-    def load_fragment_df(self, **kwargs):
-        precursor.reset_precursor_df(self._precursor_df)
-        self.calc_fragment_mz_df(**kwargs)
-        self.load_fragment_intensity_df(**kwargs)
-        for col in self._fragment_mz_df.columns.values:
-            if 'modloss' in col:
-                self._fragment_intensity_df.loc[
-                    self._fragment_mz_df[col]==0,col
-                ] = 0
 
     def flatten_fragment_data(
         self
@@ -124,26 +112,6 @@ class SpecLibBase(object):
         return (
             self._fragment_mz_df.values.reshape(-1),
             self._fragment_intensity_df.values.reshape(-1)
-        )
-
-    def load_fragment_intensity_df(self, **kwargs):
-        '''
-        All sub-class must re-implement this method.
-        Fragment intensities can be predicted or from AlphaPept, or ...
-        '''
-        raise NotImplementedError(
-            f'Sub-class of "{self.__class__}" must re-implement "load_fragment_intensity_df()"'
-        )
-
-    def calc_fragment_mz_df(self, **kwargs):
-        if 'frag_start_idx' in self._precursor_df.columns:
-            del self._precursor_df['frag_start_idx']
-            del self._precursor_df['frag_end_idx']
-
-        (
-            self._fragment_mz_df
-        ) = fragment.create_fragment_mz_dataframe(
-            self._precursor_df, self.charged_frag_types
         )
 
     def calc_precursor_mz(self):
@@ -199,16 +167,37 @@ class SpecLibBase(object):
             truncate=True,
             delete_existing=True
         )
+        precursor.hash_precursor_df(
+            self._precursor_df
+        )
         _hdf.library = {
-            'precursor_df': self._precursor_df,
+            'precursor_df': self._precursor_df[
+                [
+                    col for col in self._precursor_df.columns
+                    if col not in self.mod_seq_df_columns
+                ]
+            ],
+            'mod_seq_df': self._precursor_df[
+                [
+                    col for col in self._precursor_df.columns
+                    if col in (
+                        self.mod_seq_df_columns+[
+                        'mod_seq_hash', 'mod_seq_charge_hash']
+                    )
+                ]
+            ],
             'fragment_mz_df': self._fragment_mz_df,
             'fragment_intensity_df': self._fragment_intensity_df,
         }
 
-    def load_hdf(self, hdf_file):
+    def load_hdf(self, hdf_file, load_mod_seq=False):
         _hdf = HDF_File(
             hdf_file,
         )
-        self._precursor_df = _hdf.library.precursor_df.values
+        self._precursor_df:pd.DataFrame = _hdf.library.precursor_df.values
+        if load_mod_seq:
+            self._precursor_df = self._precursor_df.join(
+                _hdf.library.mod_seq_df.values
+            )
         self._fragment_mz_df = _hdf.library.fragment_mz_df.values
         self._fragment_intensity_df = _hdf.library.fragment_intensity_df.values
