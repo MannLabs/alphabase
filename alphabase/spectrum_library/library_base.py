@@ -32,9 +32,10 @@ class SpecLibBase(object):
         self.max_precursor_mz = max_precursor_mz
 
         self.mod_seq_df_columns = [
-            'sequence',
-            'mods', 'mod_sites',
+            'sequence', 'mods', 'mod_sites',
             'nce', 'instrument',
+            'protein_idxes',
+            'is_prot_nterm', 'is_prot_cterm'
         ]
         self.decoy = decoy
 
@@ -197,7 +198,9 @@ class SpecLibBase(object):
         self._precursor_df:pd.DataFrame = _hdf.library.precursor_df.values
         if load_mod_seq:
             self._precursor_df = self._precursor_df.join(
-                _hdf.library.mod_seq_df.values
+                _hdf.library.mod_seq_df.values.drop(
+                    columns=['mod_seq_hash', 'mod_seq_charge_hash']
+                )
             )
         self._fragment_mz_df = _hdf.library.fragment_mz_df.values
         self._fragment_intensity_df = _hdf.library.fragment_intensity_df.values

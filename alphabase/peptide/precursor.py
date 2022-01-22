@@ -16,26 +16,28 @@ from alphabase.peptide.mass_calc import (
 
 def refine_precursor_df(
     df:pd.DataFrame,
-    drop_frag_idx=True,
-    fillna = False
+    drop_frag_idx = True,
+    ensure_data_validity = False,
 )->pd.DataFrame:
     """
     Refine df inplace for faster precursor/fragment calculation.
     """
-    if fillna: df.fillna('', inplace=True)
+    if ensure_data_validity:
+        df.fillna('', inplace=True)
+        if 'charge' in df.columns:
+            if df.charge.dtype not in [
+                'int','int8','int64','int32',
+                # np.int64, np.int32, np.int8,
+            ]:
+                df['charge'] = df['charge'].astype(np.int8)
+        if 'mod_sites' in df.columns:
+            if df.mod_sites.dtype not in ['O','U']:
+                df['mod_sites'] = df.mod_sites.astype('U')
+
     if 'nAA' not in df.columns:
         df['nAA']= df.sequence.str.len().astype(np.int32)
     df.sort_values('nAA', inplace=True)
     df.reset_index(drop=True, inplace=True)
-
-    if df.charge.dtype not in [
-        'int','int8','int64','int32',
-        # np.int64, np.int32, np.int8,
-    ]:
-        df['charge'] = df['charge'].astype(np.int8)
-
-    if df.mod_sites.dtype not in ['O','U']:
-        df['mod_sites'] = df.mod_sites.astype('U')
 
     if drop_frag_idx and 'frag_start_idx' in df.columns:
         df.drop(columns=[
