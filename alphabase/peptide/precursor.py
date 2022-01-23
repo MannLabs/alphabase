@@ -120,8 +120,15 @@ def hash_precursor_df(precursor_df:pd.DataFrame):
     precursor_df[
         "mod_seq_hash"
     ] = precursor_df[
-        ["sequence","mods", "mod_sites"]
+        ["sequence", "mods", "mod_sites"]
     ].apply(lambda x: hash(tuple(x)), axis = 1)
+
+    # Add 'nAA' to make sure the unique hash values
+    # precursor_df[
+    #     "mod_seq_nAA_hash"
+    # ] = precursor_df[
+    #     ["sequence", "mods", "mod_sites", "nAA"]
+    # ].apply(lambda x: hash(tuple(x)), axis = 1)
 
     precursor_df[
         "mod_seq_charge_hash"

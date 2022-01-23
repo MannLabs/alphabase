@@ -197,10 +197,11 @@ class SpecLibBase(object):
         )
         self._precursor_df:pd.DataFrame = _hdf.library.precursor_df.values
         if load_mod_seq:
-            self._precursor_df = self._precursor_df.join(
-                _hdf.library.mod_seq_df.values.drop(
-                    columns=['mod_seq_hash', 'mod_seq_charge_hash']
-                )
-            )
+            mod_seq_df = _hdf.library.mod_seq_df.values
+            cols = [
+                col for col in mod_seq_df.columns
+                if col in self.mod_seq_df_columns
+            ]
+            self._precursor_df[cols] = mod_seq_df[cols]
         self._fragment_mz_df = _hdf.library.fragment_mz_df.values
         self._fragment_intensity_df = _hdf.library.fragment_intensity_df.values
