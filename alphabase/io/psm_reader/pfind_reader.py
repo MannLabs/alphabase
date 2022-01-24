@@ -73,7 +73,7 @@ def get_pFind_mods(pfind_mod_str):
     return ';'.join(items[1]), ';'.join(items[0])
 
 def parse_pfind_protein(protein, keep_reverse=True):
-    proteins = protein[:-1].split('/')
+    proteins = protein.strip('/').split('/')
     return ';'.join(
         [
             protein for protein in proteins
@@ -119,9 +119,9 @@ class pFindReader(PSMReaderBase):
         pfind_df['raw_name'] = pfind_df[
             'File_Name'
         ].str.split('.').apply(lambda x: x[0])
-        # pfind_df['Proteins'] = pfind_df[
-        #     'Proteins'
-        # ].apply(remove_pFind_decoy_protein)
+        pfind_df['Proteins'] = pfind_df[
+            'Proteins'
+        ].apply(parse_pfind_protein)
         return pfind_df
 
     def _translate_columns(self, origin_df: pd.DataFrame):

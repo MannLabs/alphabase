@@ -11,15 +11,42 @@ class DecoyLib(SpecLibBase):
     def __init__(self,
         target_lib:SpecLibBase,
         fix_C_term = True,
+        **kwargs,
     ):
         self.__dict__ = copy.deepcopy(target_lib.__dict__)
+        self.target_lib = target_lib
         self.fix_C_term = fix_C_term
 
     def translate_to_decoy(self):
-        self._decoy_seq()
+        self.decoy_sequence()
         self._decoy_mod()
         self._decoy_meta()
         self._decoy_frag()
+
+    def decoy_sequence(self):
+        self._decoy_seq()
+        self._remove_target_seqs()
+
+    def append_decoy_sequence(self):
+        pass
+
+    def _decoy_seq(self):
+        (
+            self._precursor_df.sequence
+        ) = self._precursor_df.sequence.apply(
+            lambda x: (x[:-1][::-1]+x[-1])
+             if self.fix_C_term else x[::-1]
+        )
+
+    def _remove_target_seqs(self):
+        target_seqs = set(
+            self.target_lib._precursor_df.sequence.values
+        )
+        self._precursor_df.drop(
+            self._precursor_df.loc[
+                self._precursor_df.sequence.isin(target_seqs)
+            ].index, inplace=True
+        )
 
     def _decoy_meta(self):
         """
@@ -41,22 +68,10 @@ class DecoyLib(SpecLibBase):
         self._decoy_fragment_intensity()
 
     def _decoy_fragment_mz(self):
-        del self._precursor_df['precursor_mz']
-        del self._precursor_df['frag_start_idx']
-        del self._precursor_df['frag_end_idx']
-
-        self.calc_fragment_mz_df()
+        pass
 
     def _decoy_fragment_intensity(self):
         pass
-
-    def _decoy_seq(self):
-        (
-            self._precursor_df.sequence
-        ) = self._precursor_df.sequence.apply(
-            lambda x: (x[:-1][::-1]+x[-1])
-             if self.fix_C_term else x[::-1]
-        )
 
     def _get_hdf_to_save(self,
         hdf_file,
@@ -103,11 +118,11 @@ class DecoyLib(SpecLibBase):
 class DiaNNDecoyLib(DecoyLib):
     def __init__(self,
         target_lib:SpecLibBase,
-        fix_C_term = True,
         raw_AAs:str = 'GAVLIFMPWSCTYHKRQEND',
         mutated_AAs:str = 'LLLVVLLLLTSSSSLLNDQE', #DiaNN
+        **kwargs,
     ):
-        super().__init__(target_lib, fix_C_term)
+        super().__init__(target_lib)
         self.raw_AAs = raw_AAs
         self.mutated_AAs = mutated_AAs
 
@@ -128,13 +143,13 @@ class DecoyLibProvider(object):
     def register(self, name, decoy_class):
         self.decoy_dict[name.lower()] = decoy_class
 
-    def get_decoy(self, name,
-        target_lib, fix_C_term=True
+    def get_decoy_lib(self, name,
+        target_lib, **kwargs
     )->DecoyLib:
         return self.decoy_dict[name.lower()](
-            target_lib, fix_C_term
+            target_lib, **kwargs
         )
 
 decoy_lib_provider = DecoyLibProvider()
-decoy_lib_provider.register('reverse', DecoyLib)
+decoy_lib_provider.register('pseudo_reverse', DecoyLib)
 decoy_lib_provider.register('diann', DiaNNDecoyLib)
