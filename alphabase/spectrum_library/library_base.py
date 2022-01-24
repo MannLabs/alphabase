@@ -122,6 +122,11 @@ class SpecLibBase(object):
     def update_precursor_mz(self):
         self.calc_precursor_mz()
 
+    def hash_precursor_df(self):
+        precursor.hash_precursor_df(
+            self._precursor_df
+        )
+
     def _get_hdf_to_save(self,
         hdf_file,
         delete_existing=False
@@ -168,9 +173,8 @@ class SpecLibBase(object):
             truncate=True,
             delete_existing=True
         )
-        precursor.hash_precursor_df(
-            self._precursor_df
-        )
+        if 'mod_seq_charge_hash' not in self._precursor_df.columns:
+            self.hash_precursor_df()
         _hdf.library = {
             'precursor_df': self._precursor_df[
                 [
