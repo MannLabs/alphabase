@@ -169,6 +169,10 @@ class PSMReaderBase(object):
             f'"{self.__class__}" must implement "_init_column_mapping()"'
         )
 
+    def load(self, _file):
+        """ Wrapper for import_file() """
+        return self.import_file(_file)
+
     def import_file(self, _file):
         """
         This is the main entry function of PSM readers.
