@@ -15,3 +15,4 @@ pyyaml
 pandas
 h5py
 contextlib2
+mmh3

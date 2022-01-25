@@ -141,6 +141,7 @@ spectronaut:
     - 'ModifiedSequence'
     - 'FullUniModPeptideName'
   column_mapping:
+    'raw_name': 'ReferenceRun'
     'sequence': ['StrippedPeptide','PeptideSequence']
     'charge': 'PrecursorCharge'
     'rt': ['RT','iRT','Tr_recalibrated','RetentionTime']
