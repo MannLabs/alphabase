@@ -247,6 +247,9 @@ class HDF_Group(HDF_Object):
             hdf_object = hdf_file[self.name]
             if name in hdf_object:
                 del hdf_object[name]
+                mmap_name = f"{name}_mmap"
+                if mmap_name in hdf_object:
+                    del hdf_object[mmap_name]
             if isinstance(array, (pd.core.series.Series)):
                 array = array.values
             # if array.dtype == np.dtype('O'):
@@ -359,6 +362,37 @@ class HDF_Dataset(HDF_Object):
         with h5py.File(self.file_name, "a") as hdf_file:
             hdf_object = hdf_file[self.name]
             hdf_object[selection] = values
+
+    @property
+    def mmap(self):
+        mmap_name = f"{self.name}_mmap"
+        with h5py.File(self.file_name, "a") as hdf_file:
+            if mmap_name not in hdf_file:
+                hdf_object = hdf_file[self.name]
+                subgroup = hdf_file.create_dataset(
+                    mmap_name,
+                    hdf_object.shape,
+                    dtype=hdf_object.dtype,
+                )
+                for i in hdf_object.iter_chunks():
+                    subgroup[i] = hdf_object[i]
+        with h5py.File(self.file_name, "r") as hdf_file:
+            subgroup = hdf_file[mmap_name]
+            offset = subgroup.id.get_offset()
+            shape = subgroup.shape
+            import mmap
+            with open(self.file_name, "rb") as raw_hdf_file:
+                mmap_obj = mmap.mmap(
+                    raw_hdf_file.fileno(),
+                    0,
+                    access=mmap.ACCESS_READ
+                )
+                return np.frombuffer(
+                    mmap_obj,
+                    dtype=subgroup.dtype,
+                    count=np.prod(shape),
+                    offset=offset
+                ).reshape(shape)
 
 
 class HDF_Dataframe(HDF_Group):
