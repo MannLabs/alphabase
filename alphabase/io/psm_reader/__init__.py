@@ -3,7 +3,6 @@ import alphabase.io.psm_reader.psm_reader
 import alphabase.io.psm_reader.alphapept_reader
 import alphabase.io.psm_reader.dia_search_reader
 import alphabase.io.psm_reader.maxquant_reader
-import alphabase.io.psm_reader.msfragger_reader
 import alphabase.io.psm_reader.pfind_reader
 
 try:
