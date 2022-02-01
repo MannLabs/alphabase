@@ -469,6 +469,8 @@ class HDF_Dataframe(HDF_Group):
                 dataset.append(data[column_name])
 
     def set_slice(self, slice_selection, df):
+        if self.read_only:
+            raise AttributeError("Cannot set slice of read-only dataframe")
         for column_name in self.dataset_names:
             dataset = self.__getattribute__(column_name)
             dataset.set_slice(slice_selection, df[column_name])
