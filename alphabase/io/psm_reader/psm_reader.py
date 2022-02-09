@@ -335,7 +335,7 @@ class PSMReaderBase(object):
             'mobility' not in self._psm_df.columns
         ):
             self._psm_df['mobility'] = (
-                mobility.ccs_to_mobility_bruker_for_df(
+                mobility.ccs_to_mobility_for_df(
                     self._psm_df,
                     'ccs'
                 )
