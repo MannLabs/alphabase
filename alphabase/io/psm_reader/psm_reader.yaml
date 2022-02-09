@@ -32,6 +32,7 @@ maxquant:
       - 'Mobility'
       - 'IonMobility'
       - 'K0' # Bug in MaxQuant? It should be 1/K0
+      - '1/K0'
     'spec_idx': 
       - 'Scan number'
       - 'MS/MS scan number'
