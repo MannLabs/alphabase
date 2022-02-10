@@ -161,7 +161,7 @@ jobs:
       - name: Publish distribution to Test PyPI
         uses: pypa/gh-action-pypi-publish@master
         with:
-          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          password: ${{ secrets.TEST_PYPI_ALPHABASE_API_TOKEN }}
           repository_url: https://test.pypi.org/legacy/
       - name: Test PyPI test release
         shell: bash -l {0}
@@ -171,7 +171,7 @@ jobs:
       - name: Publish distribution to PyPI
         uses: pypa/gh-action-pypi-publish@master
         with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
+          password: ${{ secrets.PYPI_ALPHABASE_API_TOKEN }}
   Test_PyPi_Release:
     name: Test_PyPi_version_on_${{ matrix.os }}
     runs-on: ${{ matrix.os }}
