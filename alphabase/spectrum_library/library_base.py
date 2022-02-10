@@ -46,18 +46,32 @@ class SpecLibBase(object):
     @precursor_df.setter
     def precursor_df(self, df):
         self._precursor_df = df
-        precursor.refine_precursor_df(self._precursor_df)
+        precursor.refine_precursor_df(
+            self._precursor_df,
+            drop_frag_idx=False,
+            ensure_data_validity=True,
+        )
 
     @property
     def fragment_mz_df(self):
         return self._fragment_mz_df
 
+    @fragment_mz_df.setter
+    def fragment_mz_df(self, df):
+        self._fragment_mz_df = df
+
     @property
     def fragment_intensity_df(self):
         return self._fragment_intensity_df
 
+    @fragment_intensity_df.setter
+    def fragment_intensity_df(self, df):
+        self._fragment_intensity_df = df
+
     def refine_df(self):
-        precursor.refine_precursor_df(self._precursor_df)
+        precursor.refine_precursor_df(
+            self._precursor_df
+        )
 
     def append_decoy_sequence(self):
         from alphabase.spectrum_library.decoy_library import (
