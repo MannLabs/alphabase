@@ -8,6 +8,8 @@ pipdeptree
 ipykernel
 tqdm
 psutil
+nbdev
+pyteomics
 
 numba
 numpy
