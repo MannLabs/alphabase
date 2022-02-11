@@ -35,6 +35,16 @@ def parse_mod_seq(
         mod_list.append(PeptideModSeq[start_mod:site_end])
         PeptideModSeq = PeptideModSeq[:site] + PeptideModSeq[site_end:]
         site = PeptideModSeq.find(mod_sep[0], site)
+
+    # patch for phos. How many other modification formats does MQ have?
+    site = PeptideModSeq.find('p')
+    while site != -1:
+        mod_list.append(PeptideModSeq[site:site+2])
+        if underscore_for_ncterm: site_list.append(str(site))
+        else: site_list.append(str(site+1))
+        PeptideModSeq = PeptideModSeq[:site] + PeptideModSeq[site+1:]
+        site = PeptideModSeq.find('p', site)
+
     if fixed_C:
         site = PeptideModSeq.find('C')
         while site != -1:
@@ -91,13 +101,15 @@ class MaxQuantReader(PSMReaderBase):
 
     def _extend_mod_brackets(self):
         for key, mod_list in list(self.modification_mapping.items()):
-            self.modification_mapping[key].extend(
-                [
-                    f'{mod[0]}[{mod[2:-1]}]'
-                    if mod[1] == '(' else f'{mod[0]}({mod[2:-1]})'
-                    for mod in mod_list
-                ]
-            )
+            extend_mods = []
+            for mod in mod_list:
+                if mod[1] == '(':
+                    extend_mods.append(f'{mod[0]}[{mod[2:-1]}]')
+                elif mod[1] == '[':
+                    extend_mods.append(f'{mod[0]}({mod[2:-1]})')
+
+            self.modification_mapping[key].extend(extend_mods)
+
             self.modification_mapping[key].extend(
                 [f'{mod[1:]}' for mod in mod_list if mod.startswith('_')]
             )

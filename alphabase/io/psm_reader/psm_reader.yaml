@@ -61,17 +61,20 @@ maxquant:
       - 'S(Phospho (STY))'
       - 'S(ph)'
       - 'S(UniMod:21)'
+      - 'pS'
     'Phospho@T': 
       - 'T(Phospho (T))'
       - 'T(Phospho (ST))'
       - 'T(Phospho (STY))'
       - 'T(ph)'
       - 'T(UniMod:21)'
+      - 'pT'
     'Phospho@Y': 
       - 'Y(Phospho (Y))'
       - 'Y(Phospho (STY))'
       - 'Y(ph)'
       - 'Y(UniMod:21)'
+      - 'pY'
     'Deamidated@N': ['N(Deamidation (NQ))']
     'Deamidated@Q': ['Q(Deamidation (NQ))']
     'GlyGly@K': ['K(GlyGly (K))', 'K(gl)']
