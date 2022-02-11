@@ -35,6 +35,7 @@ class SpecLibBase(object):
             'sequence', 'mods', 'mod_sites',
             'nce', 'instrument',
             'protein_idxes',
+            'proteins', 'genes', 'uniprot_ids',
             'is_prot_nterm', 'is_prot_cterm'
         ]
         self.decoy = decoy
@@ -56,17 +57,9 @@ class SpecLibBase(object):
     def fragment_mz_df(self):
         return self._fragment_mz_df
 
-    @fragment_mz_df.setter
-    def fragment_mz_df(self, df):
-        self._fragment_mz_df = df
-
     @property
     def fragment_intensity_df(self):
         return self._fragment_intensity_df
-
-    @fragment_intensity_df.setter
-    def fragment_intensity_df(self, df):
-        self._fragment_intensity_df = df
 
     def refine_df(self):
         precursor.refine_precursor_df(
@@ -134,6 +127,7 @@ class SpecLibBase(object):
         self.clip_by_precursor_mz_()
 
     def update_precursor_mz(self):
+        """Calculate precursor mz for self._precursor_df"""
         self.calc_precursor_mz()
 
     def hash_precursor_df(self):
@@ -174,11 +168,20 @@ class SpecLibBase(object):
 
     def load_df_from_hdf(self,
         hdf_file:str,
-        df_key: str
-    ):
+        df_name: str
+    )->pd.DataFrame:
+        """Load specific dataset (dataframe) from hdf_file.
+
+        Args:
+            hdf_file (str): The hdf file name
+            df_name (str): The dataset/dataframe name in the hdf file
+
+        Returns:
+            pd.DataFrame: Loaded dataframe
+        """
         return self._get_hdf_to_load(
             hdf_file
-        ).__getattribute__(df_key).values
+        ).__getattribute__(df_name).values
 
     def save_hdf(self, hdf_file):
         _hdf = HDF_File(
@@ -189,6 +192,11 @@ class SpecLibBase(object):
         )
         if 'mod_seq_charge_hash' not in self._precursor_df.columns:
             self.hash_precursor_df()
+
+        mod_seq_cols = self.mod_seq_df_columns+[
+            'mod_seq_hash', 'mod_seq_charge_hash'
+        ]
+
         _hdf.library = {
             'precursor_df': self._precursor_df[
                 [
@@ -199,10 +207,7 @@ class SpecLibBase(object):
             'mod_seq_df': self._precursor_df[
                 [
                     col for col in self._precursor_df.columns
-                    if col in (
-                        self.mod_seq_df_columns+[
-                        'mod_seq_hash', 'mod_seq_charge_hash']
-                    )
+                    if col in mod_seq_cols
                 ]
             ],
             'fragment_mz_df': self._fragment_mz_df,
