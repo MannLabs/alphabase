@@ -45,6 +45,8 @@ class SpectronautReader(MaxQuantReader):
 
         self.mod_seq_column = 'ModifiedPeptide'
 
+        self._min_max_rt_norm = True
+
     def _init_column_mapping(self):
         self.column_mapping = psm_reader_yaml[
             'spectronaut'
@@ -63,13 +65,6 @@ class SpectronautReader(MaxQuantReader):
             ], inplace=True)
         df.reset_index(drop=True, inplace=True)
 
-        for rt_col in self.column_mapping['rt']:
-            if rt_col not in df.columns: continue
-            min_rt = df[rt_col].min()
-            df['rt_norm'] = (
-                df[rt_col] - min_rt
-            )/(df[rt_col].max() - min_rt)
-            break
         return df
 
 class DiannReader(SpectronautReader):
@@ -95,6 +90,7 @@ class DiannReader(SpectronautReader):
             csv_sep=csv_sep,
         )
         self.mod_seq_column = 'Modified.Sequence'
+        self._min_max_rt_norm = False
 
     def _init_column_mapping(self):
         self.column_mapping = psm_reader_yaml[
@@ -104,13 +100,6 @@ class DiannReader(SpectronautReader):
     def _load_file(self, filename):
         df = pd.read_csv(filename, sep=self.csv_sep)
 
-        # for rt_col in self.column_mapping['rt']:
-            # if rt_col not in df.columns: continue
-            # min_rt = df[rt_col].min()
-            # df['rt_norm'] = (
-            #     df[rt_col] - min_rt
-            # )/(df[rt_col].max() - min_rt)
-            # break
         return df
 
 psm_reader_provider.register_reader(

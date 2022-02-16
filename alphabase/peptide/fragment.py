@@ -91,6 +91,7 @@ def init_zero_fragment_dataframe(
 
 def init_fragment_dataframe_from_other(
     reference_fragment_df: pd.DataFrame,
+    inplace_in_reference=False,
     dtype=np.float64
 ):
     '''
@@ -104,8 +105,10 @@ def init_fragment_dataframe_from_other(
 def init_fragment_by_precursor_dataframe(
     precursor_df,
     charged_frag_types: List[str],
-    reference_fragment_df: int = None,
-    dtype=np.float64
+    *,
+    reference_fragment_df: pd.DataFrame = None,
+    dtype=np.float64,
+    inplace_in_reference=False,
 ):
     '''
     Init zero fragment dataframe for the `precursor_df`. If
@@ -122,6 +125,8 @@ def init_fragment_by_precursor_dataframe(
             `['b_z1','b_z2','y_z1','y_z2','b_modloss_z1','y_H2O_z1'...]`
         reference_fragment_df (pd.DataFrame): generate fragment_mz_df based
             on this reference (default: None)
+        inplace_in_reference (bool): if calculate the fragment information
+        inplace in the reference_fragment_df (default: False)
     Returns:
         pd.DataFrame: zero `fragment_df` with given `charged_frag_types`
     '''
@@ -146,13 +151,19 @@ def init_fragment_by_precursor_dataframe(
                 columns = charged_frag_types
             )
         else:
-            fragment_df = init_fragment_dataframe_from_other(
-                reference_fragment_df[[
+            if inplace_in_reference:
+                fragment_df = reference_fragment_df[[
                     _fr for _fr in charged_frag_types
                     if _fr in reference_fragment_df.columns
-                ]],
-                dtype=dtype
-            )
+                ]]
+            else:
+                fragment_df = init_fragment_dataframe_from_other(
+                    reference_fragment_df[[
+                        _fr for _fr in charged_frag_types
+                        if _fr in reference_fragment_df.columns
+                    ]],
+                    dtype=dtype
+                )
     return fragment_df
 
 # Cell
@@ -426,7 +437,9 @@ create_fragment_mz_dataframe_ignore_old_idxes = create_fragment_mz_dataframe_by_
 def create_fragment_mz_dataframe(
     precursor_df: pd.DataFrame,
     charged_frag_types:List,
+    *,
     reference_fragment_df: pd.DataFrame = None,
+    inplace_in_reference = False,
     batch_size=500000,
 )->pd.DataFrame:
     '''
@@ -471,12 +484,18 @@ def create_fragment_mz_dataframe(
         )
 
     if reference_fragment_df is not None:
-        fragment_mz_df = init_fragment_dataframe_from_other(
-            reference_fragment_df[[
+        if inplace_in_reference:
+            fragment_mz_df = reference_fragment_df[[
                 _fr for _fr in charged_frag_types
                 if _fr in reference_fragment_df.columns
             ]]
-        )
+        else:
+            fragment_mz_df = init_fragment_dataframe_from_other(
+                reference_fragment_df[[
+                    _fr for _fr in charged_frag_types
+                    if _fr in reference_fragment_df.columns
+                ]]
+            )
     else:
         fragment_mz_df = init_fragment_by_precursor_dataframe(
             precursor_df, charged_frag_types,
