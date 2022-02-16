@@ -91,7 +91,6 @@ def init_zero_fragment_dataframe(
 
 def init_fragment_dataframe_from_other(
     reference_fragment_df: pd.DataFrame,
-    inplace_in_reference=False,
     dtype=np.float64
 ):
     '''
