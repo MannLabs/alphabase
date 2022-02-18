@@ -13,11 +13,11 @@ import pandas as pd
 from typing import List, Union, Tuple
 import warnings
 
-from alphabase.peptide.mass_calc import *
-from alphabase.constants.modification import (
+from .mass_calc import *
+from ..constants.modification import (
     calc_modloss_mass
 )
-from alphabase.constants.element import (
+from ..constants.element import (
     MASS_H2O, MASS_PROTON,
     MASS_NH3, CHEM_MONO_MASS
 )

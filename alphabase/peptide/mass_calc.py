@@ -7,17 +7,17 @@ __all__ = ['calc_delta_modification_mass', 'calc_mod_delta_masses_for_same_len_s
 import numpy as np
 from typing import List, Tuple
 
-from alphabase.constants.aa import (
+from ..constants.aa import (
     calc_sequence_mass,
     calc_AA_masses_for_same_len_seqs,
     calc_sequence_masses_for_same_len_seqs
 )
-from alphabase.constants.modification import (
+from ..constants.modification import (
     calc_modification_mass,
     calc_modification_mass_sum,
     calc_mod_masses_for_same_len_seqs
 )
-from alphabase.constants.element import MASS_H2O
+from ..constants.element import MASS_H2O
 
 def calc_delta_modification_mass(
     pep_len:int,
