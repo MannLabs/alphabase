@@ -379,7 +379,7 @@ def mask_fragments_for_charge_greater_than_precursor_charge(
     precursor_charge_array:np.array,
     nAA_array:np.array,
     *,
-    mask_fragment_charges = [2],
+    mask_fragment_charges = [2,3],
 ):
     """Mask the fragment dataframe when
     the fragment charge is larger than the precursor charge"""
