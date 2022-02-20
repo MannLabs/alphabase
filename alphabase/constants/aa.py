@@ -10,10 +10,10 @@ import os
 import pandas as pd
 import numpy as np
 from typing import Union, Tuple
-from alphabase.yaml_utils import load_yaml
+from ..yaml_utils import load_yaml
 
-from alphabase.constants.element import calc_mass_from_formula
-from alphabase.constants.element import MASS_H2O
+from .element import calc_mass_from_formula
+from .element import MASS_H2O
 
 AA_CHEM = load_yaml(
     os.path.join(os.path.dirname(__file__),

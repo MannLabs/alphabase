@@ -12,8 +12,8 @@ import pandas as pd
 from typing import Union, List
 from copy import deepcopy
 
-from alphabase.yaml_utils import load_yaml
-from alphabase.constants.element import calc_mass_from_formula
+from ..yaml_utils import load_yaml
+from .element import calc_mass_from_formula
 
 _base_dir = os.path.dirname(__file__)
 
