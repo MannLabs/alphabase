@@ -37,13 +37,15 @@ def refine_precursor_df(
 
     if 'nAA' not in df.columns:
         df['nAA']= df.sequence.str.len().astype(np.int32)
-    df.sort_values('nAA', inplace=True)
-    df.reset_index(drop=True, inplace=True)
 
     if drop_frag_idx and 'frag_start_idx' in df.columns:
         df.drop(columns=[
             'frag_start_idx','frag_end_idx'
         ], inplace=True)
+
+    if not is_precursor_refined(df):
+        df.sort_values('nAA', inplace=True)
+        df.reset_index(drop=True, inplace=True)
 
     return df
 
