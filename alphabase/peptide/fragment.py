@@ -4,8 +4,9 @@ __all__ = ['get_charged_frag_types', 'parse_charged_frag_type', 'init_zero_fragm
            'init_fragment_dataframe_from_other', 'init_fragment_by_precursor_dataframe',
            'update_sliced_fragment_dataframe', 'get_sliced_fragment_dataframe', 'update_sliced_fragment_dataframe',
            'get_sliced_fragment_dataframe', 'concat_precursor_fragment_dataframes',
-           'calc_fragment_mz_values_for_same_nAA', 'create_fragment_mz_dataframe_by_sort_precursor',
-           'create_fragment_mz_dataframe', 'create_fragment_mz_dataframe_ignore_old_idxes']
+           'calc_fragment_mz_values_for_same_nAA', 'mask_fragments_for_charge_greater_than_precursor_charge',
+           'create_fragment_mz_dataframe_by_sort_precursor', 'create_fragment_mz_dataframe',
+           'create_fragment_mz_dataframe_ignore_old_idxes']
 
 # Cell
 import numpy as np
@@ -315,14 +316,6 @@ def calc_fragment_mz_values_for_same_nAA(
     b_mass = b_mass.reshape(-1)
     y_mass = y_mass.reshape(-1)
 
-    # if (
-    #     'charge' in df_group.columns and
-    #     'precursor_mz' not in df_group.columns
-    # ):
-    #     df_group['precursor_mz'] = pepmass/df_group[
-    #         'charge'
-    #     ].values + MASS_PROTON
-
     for charged_frag_type in charged_frag_types:
         if charged_frag_type.startswith('b_modloss'):
             b_modloss = np.concatenate([
@@ -381,6 +374,25 @@ def calc_fragment_mz_values_for_same_nAA(
     return np.array(mz_values).T
 
 # Cell
+def mask_fragments_for_charge_greater_than_precursor_charge(
+    fragment_df:pd.DataFrame,
+    precursor_charge_array:np.array,
+    nAA_array:np.array,
+    *,
+    mask_fragment_charges = [2],
+):
+    """Mask the fragment dataframe when
+    the fragment charge is larger than the precursor charge"""
+    precursor_charge_array = np.repeat(
+        precursor_charge_array, nAA_array-1
+    )
+    for col in fragment_df.columns:
+        for charge in mask_fragment_charges:
+            if col.endswith(f'z{charge}'):
+                fragment_df.loc[precursor_charge_array<charge,col] = 0
+    return fragment_df
+
+# Cell
 
 def create_fragment_mz_dataframe_by_sort_precursor(
     precursor_df: pd.DataFrame,
@@ -428,7 +440,11 @@ def create_fragment_mz_dataframe_by_sort_precursor(
                 df_group.frag_start_idx.values[0]:
                 df_group.frag_end_idx.values[-1], :
             ] = mz_values
-    return fragment_mz_df
+    return mask_fragments_for_charge_greater_than_precursor_charge(
+            fragment_mz_df,
+            precursor_df.charge.values,
+            precursor_df.nAA.values,
+        )
 
 #wrapper
 create_fragment_mz_dataframe_ignore_old_idxes = create_fragment_mz_dataframe_by_sort_precursor
@@ -482,39 +498,44 @@ def create_fragment_mz_dataframe(
             precursor_df, charged_frag_types, batch_size
         )
 
-    if reference_fragment_df is not None:
-        if inplace_in_reference:
-            fragment_mz_df = reference_fragment_df[[
-                _fr for _fr in charged_frag_types
-                if _fr in reference_fragment_df.columns
-            ]]
-        else:
-            fragment_mz_df = init_fragment_dataframe_from_other(
-                reference_fragment_df[[
+    else:
+        if reference_fragment_df is not None:
+            if inplace_in_reference:
+                fragment_mz_df = reference_fragment_df[[
                     _fr for _fr in charged_frag_types
                     if _fr in reference_fragment_df.columns
                 ]]
+            else:
+                fragment_mz_df = init_fragment_dataframe_from_other(
+                    reference_fragment_df[[
+                        _fr for _fr in charged_frag_types
+                        if _fr in reference_fragment_df.columns
+                    ]]
+                )
+        else:
+            fragment_mz_df = init_fragment_by_precursor_dataframe(
+                precursor_df, charged_frag_types,
             )
-    else:
-        fragment_mz_df = init_fragment_by_precursor_dataframe(
-            precursor_df, charged_frag_types,
+
+        _grouped = precursor_df.groupby('nAA')
+        for nAA, big_df_group in _grouped:
+            for i in range(0, len(big_df_group), batch_size):
+                batch_end = i+batch_size
+
+                df_group = big_df_group.iloc[i:batch_end,:]
+
+                mz_values = calc_fragment_mz_values_for_same_nAA(
+                    df_group, nAA, charged_frag_types
+                )
+
+                update_sliced_fragment_dataframe(
+                    fragment_mz_df, mz_values,
+                    df_group[['frag_start_idx','frag_end_idx']].values,
+                    charged_frag_types,
+                )
+
+    return mask_fragments_for_charge_greater_than_precursor_charge(
+            fragment_mz_df,
+            precursor_df.charge.values,
+            precursor_df.nAA.values,
         )
-
-    _grouped = precursor_df.groupby('nAA')
-    for nAA, big_df_group in _grouped:
-        for i in range(0, len(big_df_group), batch_size):
-            batch_end = i+batch_size
-
-            df_group = big_df_group.iloc[i:batch_end,:]
-
-            mz_values = calc_fragment_mz_values_for_same_nAA(
-                df_group, nAA, charged_frag_types
-            )
-
-            update_sliced_fragment_dataframe(
-                fragment_mz_df, mz_values,
-                df_group[['frag_start_idx','frag_end_idx']].values,
-                charged_frag_types,
-            )
-
-    return fragment_mz_df
