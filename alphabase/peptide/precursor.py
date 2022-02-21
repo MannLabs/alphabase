@@ -249,6 +249,15 @@ def get_mod_seq_isotope_distribution(seq_mods:tuple):
     return dist[mono+1]/dist[mono], dist[mono+2]/dist[mono]
 
 def calc_precursor_isotope(precursor_df:pd.DataFrame):
+    """Calculate isotope mz values and relative (to M0) intensity values for precursors.
+
+    Args:
+        precursor_df (pd.DataFrame): precursor_df to calculate.
+
+    Returns:
+        pd.DataFrame: precursor_df with `isotope_mz_m1/isotope_intensity_m1`
+            and also `*_m2` columns.
+    """
     precursor_df['isotope_mz_m1'] = (
         precursor_df.precursor_mz +
         MASS_ISOTOPE/precursor_df.charge
@@ -274,11 +283,27 @@ def _precursor_df_group(df_group):
     for _, df in df_group:
         yield df
 
+# `process_bar` should be replaced by more advanced tqdm wrappers created by Sander
+# I will leave it to alphabase.utils
 def calc_precursor_isotope_mp(
     precursor_df:pd.DataFrame,
-    processes=8,
+    processes:int=8,
     process_bar=None,
-):
+)->pd.DataFrame:
+    """`formula_dist` is not that fast for large dataframes, so here we use multiprocessing
+    for faster isotope pattern calculation.
+    The speed is acceptable with multiprocessing (4.5 min for 21M precursors, 8 processes).
+
+    Args:
+        precursor_df (pd.DataFrame): precursor_df calculate.
+        processes (int, optional): process number. Defaults to 8.
+        process_bar (function, optional): The callback function to check multiprocessing.
+            Defaults to None.
+
+    Returns:
+        pd.DataFrame: new precursor_df with `isotope_mz_m1/isotope_intensity_m1`
+            and also `*_m2` columns.
+    """
     df_list = []
     df_group = precursor_df.groupby('nAA')
     with mp.Pool(processes) as p:
