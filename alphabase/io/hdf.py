@@ -182,7 +182,8 @@ class HDF_Group(HDF_Object):
             hdf_object = hdf_file[self.name]
             for name in sorted(hdf_object):
                 if isinstance(hdf_object[name], h5py.Dataset):
-                    dataset_names.append(name)
+                    if not name.endswith("_mmap"):
+                        dataset_names.append(name)
                 else:
                     if "is_pd_dataframe" in hdf_object[name].attrs:
                         if hdf_object[name].attrs["is_pd_dataframe"]:
@@ -247,6 +248,9 @@ class HDF_Group(HDF_Object):
             hdf_object = hdf_file[self.name]
             if name in hdf_object:
                 del hdf_object[name]
+                mmap_name = f"{name}_mmap"
+                if mmap_name in hdf_object:
+                    del hdf_object[mmap_name]
             if isinstance(array, (pd.core.series.Series)):
                 array = array.values
             # if array.dtype == np.dtype('O'):
@@ -262,13 +266,10 @@ class HDF_Group(HDF_Object):
                 hdf_object.create_dataset(
                     name,
                     data=array,
-        #             TODO
                     compression="lzf",
-        #             # compression="gzip" if compress else None, # TODO slower to make, faster to load?
                     shuffle=True,
                     chunks=True,
                     # chunks=array.shape,
-                    # dtype=dtype,
                     maxshape=tuple([None for i in array.shape]),
                 )
             except TypeError:
@@ -284,7 +285,6 @@ class HDF_Group(HDF_Object):
                 truncate=self.truncate,
             )
             dataset.last_updated = time.asctime()
-            # object.__setattr__(self, "_shape", self._shape + 1) # TODO move to Dataframe?
             object.__setattr__(self, name, dataset)
 
     def add_group(
@@ -321,6 +321,25 @@ class HDF_Group(HDF_Object):
 
 class HDF_Dataset(HDF_Object):
 
+    def __init__(
+        self,
+        *,
+        file_name: str,
+        name: str,
+        read_only: bool = True,
+        truncate: bool = False,
+    ):
+        super().__init__(
+            file_name=file_name,
+            name=name,
+            read_only=read_only,
+            truncate=truncate,
+        )
+        object.__setattr__(self, "mmap_name", f"{self.name}_mmap")
+        with h5py.File(self.file_name, "r") as hdf_file:
+            mmap_exists = self.mmap_name in hdf_file
+            object.__setattr__(self, "mmap_exists", mmap_exists)
+
     def __len__(self):
         return self.shape[0]
 
@@ -346,6 +365,8 @@ class HDF_Dataset(HDF_Object):
             return hdf_object[keys]
 
     def append(self, data):
+        if self.read_only:
+            raise AttributeError("Cannot append read-only dataset")
         with h5py.File(self.file_name, "a") as hdf_file:
             hdf_object = hdf_file[self.name]
             new_shape = tuple(
@@ -355,10 +376,61 @@ class HDF_Dataset(HDF_Object):
             hdf_object.resize(new_shape)
             hdf_object[old_size:] = data
 
-    def set_slice(self, selection, values):
+    def set_slice(self, slice_selection, values):
+        if self.read_only:
+            raise AttributeError("Cannot set slice of read-only dataset")
         with h5py.File(self.file_name, "a") as hdf_file:
             hdf_object = hdf_file[self.name]
-            hdf_object[selection] = values
+            hdf_object[slice_selection] = values
+            if self.mmap_exists:
+                hdf_object = hdf_file[self.mmap_name]
+                hdf_object[slice_selection] = values
+
+    def delete_mmap(self):
+        if self.read_only:
+            raise AttributeError("Cannot delete read-only mmap of dataset")
+        if self.mmap_exists:
+            with h5py.File(self.file_name, "a") as hdf_file:
+                del hdf_file[self.mmap_name]
+            object.__setattr__(self, "mmap_exists", False)
+
+    def create_mmap(self):
+        if self.read_only:
+            raise AttributeError("Cannot create read-only mmap of dataset")
+        if self.mmap_exists:
+            self.delete_mmap()
+        with h5py.File(self.file_name, "a") as hdf_file:
+            hdf_object = hdf_file[self.name]
+            subgroup = hdf_file.create_dataset(
+                self.mmap_name,
+                hdf_object.shape,
+                dtype=hdf_object.dtype,
+            )
+            for i in hdf_object.iter_chunks():
+                subgroup[i] = hdf_object[i]
+        object.__setattr__(self, "mmap_exists", True)
+
+    @property
+    def mmap(self):
+        if not self.mmap_exists:
+            self.create_mmap()
+        with h5py.File(self.file_name, "r") as hdf_file:
+            subgroup = hdf_file[self.mmap_name]
+            offset = subgroup.id.get_offset()
+            shape = subgroup.shape
+            import mmap
+            with open(self.file_name, "rb") as raw_hdf_file:
+                mmap_obj = mmap.mmap(
+                    raw_hdf_file.fileno(),
+                    0,
+                    access=mmap.ACCESS_READ
+                )
+                return np.frombuffer(
+                    mmap_obj,
+                    dtype=subgroup.dtype,
+                    count=np.prod(shape),
+                    offset=offset
+                ).reshape(shape)
 
 
 class HDF_Dataframe(HDF_Group):
@@ -396,10 +468,12 @@ class HDF_Dataframe(HDF_Group):
             if isinstance(dataset, HDF_Dataset):
                 dataset.append(data[column_name])
 
-    def set_slice(self, selection, values):
+    def set_slice(self, slice_selection, df):
+        if self.read_only:
+            raise AttributeError("Cannot set slice of read-only dataframe")
         for column_name in self.dataset_names:
             dataset = self.__getattribute__(column_name)
-            dataset.set_slice(selection, values[column_name])
+            dataset.set_slice(slice_selection, df[column_name])
 
 
 class HDF_File(HDF_Group):
