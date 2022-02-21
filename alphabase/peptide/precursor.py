@@ -270,8 +270,8 @@ def calc_precursor_isotope(precursor_df:pd.DataFrame):
 
 import multiprocessing as mp
 
-def _precursor_df_group(precursor_df:pd.DataFrame):
-    for nAA, df in precursor_df.groupby('nAA'):
+def _precursor_df_group(df_group):
+    for _, df in df_group:
         yield df
 
 def calc_precursor_isotope_mp(
@@ -280,12 +280,13 @@ def calc_precursor_isotope_mp(
     process_bar=None,
 ):
     df_list = []
+    df_group = precursor_df.groupby('nAA')
     with mp.Pool(processes) as p:
         processing = p.imap_unordered(
-            calc_precursor_isotope, _precursor_df_group(precursor_df)
+            calc_precursor_isotope, _precursor_df_group(df_group)
         )
         if process_bar:
-            processing = process_bar(processing)
+            processing = process_bar(processing, df_group.ngroups)
         for df in processing:
             df_list.append(df)
     return pd.concat(df_list)
