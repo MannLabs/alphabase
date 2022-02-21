@@ -159,6 +159,7 @@ def parse_formula(
     ]
     return [(elem, int(n)) for elem, n in items]
 
+
 def calc_mass_from_formula(formula:str):
     '''
     Calculates the mass of the formula`

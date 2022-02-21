@@ -14,7 +14,7 @@ from copy import deepcopy
 
 from alphabase.yaml_utils import load_yaml
 from alphabase.constants.element import (
-    calc_mass_from_formula, parse_formula
+    calc_mass_from_formula, parse_formula,
 )
 
 _base_dir = os.path.dirname(__file__)

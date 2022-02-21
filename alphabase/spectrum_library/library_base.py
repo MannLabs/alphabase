@@ -81,9 +81,10 @@ class SpecLibBase(object):
         decoy_lib.decoy_sequence()
         self._precursor_df['decoy'] = 0
         decoy_lib._precursor_df['decoy'] = 1
-        self._precursor_df = self._precursor_df.append(
+        self._precursor_df = pd.concat((
+            self._precursor_df,
             decoy_lib._precursor_df
-        )
+        ))
         self.refine_df()
 
     def clip_by_precursor_mz_(self):

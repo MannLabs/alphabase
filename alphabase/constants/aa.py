@@ -12,8 +12,10 @@ import numpy as np
 from typing import Union, Tuple
 from alphabase.yaml_utils import load_yaml
 
-from alphabase.constants.element import calc_mass_from_formula
-from alphabase.constants.element import MASS_H2O, parse_formula
+from alphabase.constants.element import (
+    calc_mass_from_formula,
+    MASS_H2O, parse_formula,
+)
 
 AA_CHEM = load_yaml(
     os.path.join(os.path.dirname(__file__),
@@ -44,10 +46,12 @@ def ret_set_AA_df():
     return AA_DF
 AA_DF = ret_set_AA_df()
 
-AA_formula = {}
-for aa, formula,mass in AA_DF.values:
-    AA_formula[aa] = dict(parse_formula(formula))
 
+AA_formula = {}
+for aa, formula, mass in AA_DF.values:
+    AA_formula[aa] = dict(
+        parse_formula(formula)
+    )
 
 # Cell
 def calc_sequence_mass(
