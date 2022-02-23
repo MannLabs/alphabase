@@ -301,15 +301,15 @@ def calc_precursor_isotope_mp(
     processes:int=8,
     process_bar=None,
 )->pd.DataFrame:
-    """`calc_precursor_isotope` is not that fast for large dataframes,
+    """`calc_precursor_isotope()` is not that fast for large dataframes,
     so here we use multiprocessing for faster isotope pattern calculation.
-    The speed is acceptable with multiprocessing (4.5 min for 21M precursors, 8 processes).
+    The speed is acceptable with multiprocessing (3.8 min for 21M precursors, 8 processes).
 
     Args:
-        precursor_df (pd.DataFrame): precursor_df calculate.
+        precursor_df (pd.DataFrame): precursor_df to calculate.
         processes (int, optional): process number. Defaults to 8.
-        process_bar (function, optional): The callback function to check multiprocessing.
-            Defaults to None.
+        process_bar (function, optional): The tqdm-based callback function
+        to check multiprocessing. Defaults to None.
 
     Returns:
         pd.DataFrame: new precursor_df with `isotope_mz_m1/isotope_intensity_m1`
