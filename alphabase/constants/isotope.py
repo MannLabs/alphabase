@@ -153,7 +153,7 @@ class IsotopeDistribution:
             if n < 2: n = 2
             self.element_to_cum_dist_dict[elem] = np.zeros((n, MAX_ISOTOPE_LEN))
             self.element_to_cum_mono_idx[elem] = -np.ones(n,dtype=np.int64)
-            self.element_to_cum_dist_dict[elem][0,:] = EMPTY_DIST.copy()
+            self.element_to_cum_dist_dict[elem][0,:] = EMPTY_DIST
             self.element_to_cum_mono_idx[elem][0] = 0
             self.element_to_cum_dist_dict[elem][1,:] = CHEM_ISOTOPE_DIST[elem]
             self.element_to_cum_mono_idx[elem][1] = CHEM_MONO_IDX[elem]
@@ -168,17 +168,26 @@ class IsotopeDistribution:
         """Calculate isotope abundance distribution for a given formula
 
         Args:
-            formula (list of tuple(str,int)): chemical formula: "[('H',1),('H',2),('H',3)]".
+            formula (list of tuple(str,int)): chemical formula: "[('H',1),('C',2),('O',3)]".
 
         Returns:
             np.array: isotope abundance distribution
             int: mono isotope position in the distribution array
         """
-        dist = EMPTY_DIST.copy()
-        mono = 0
+        first_elem = 'H'
+        for elem, n in formula:
+            if elem == first_elem:
+                if n >= len(self.element_to_cum_mono_idx[elem]):
+                    n = len(self.element_to_cum_mono_idx[elem])-1
+                mono = self.element_to_cum_mono_idx[elem][n]
+                dist = self.element_to_cum_dist_dict[elem][n]
+                break
         for elem, n in formula:
             if elem in self.element_to_cum_dist_dict:
-                # We have consider large enough number of elements.
+                if elem == first_elem: continue
+                # We have consider large enough number of elements for shotgun proteomics.
+                # We can increase max_elem_num_dict in __init__() to support top-down
+                # in the future.
                 if n >= len(self.element_to_cum_mono_idx[elem]):
                     # Note that non-standard amino acids have 1000000
                     # C elements in AlphaBase.
