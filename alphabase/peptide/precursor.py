@@ -10,10 +10,13 @@ import pandas as pd
 import numpy as np
 
 from alphabase.constants.element import (
-    MASS_PROTON, formula_dist, MASS_ISOTOPE
+    MASS_PROTON, MASS_ISOTOPE
 )
 from alphabase.constants.aa import AA_formula
 from alphabase.constants.modification import MOD_formula
+from alphabase.constants.isotope import (
+    IsotopeDistribution, formula_dist
+)
 from alphabase.peptide.mass_calc import (
     calc_peptide_masses_for_same_len_seqs
 )
@@ -242,13 +245,24 @@ def get_mod_seq_formula(seq, mods):
                     formula[chem]=n
     return list(formula.items())
 
-def get_mod_seq_isotope_distribution(seq_mods:tuple):
-    dist, mono = formula_dist(
-        get_mod_seq_formula(*seq_mods)
-    )
+def get_mod_seq_isotope_distribution(
+    seq_mods:tuple,
+    isotope_dist:IsotopeDistribution = None,
+):
+    if isotope_dist is None:
+        dist, mono = formula_dist(
+            get_mod_seq_formula(*seq_mods)
+        )
+    else:
+        dist, mono = isotope_dist.calc_formula_distribution(
+            get_mod_seq_formula(*seq_mods)
+        )
     return dist[mono+1]/dist[mono], dist[mono+2]/dist[mono]
 
-def calc_precursor_isotope(precursor_df:pd.DataFrame):
+def calc_precursor_isotope(
+    precursor_df:pd.DataFrame,
+    use_prebuilt_dist=True,
+):
     """Calculate isotope mz values and relative (to M0) intensity values for precursors.
 
     Args:
@@ -258,6 +272,11 @@ def calc_precursor_isotope(precursor_df:pd.DataFrame):
         pd.DataFrame: precursor_df with `isotope_mz_m1/isotope_intensity_m1`
             and also `*_m2` columns.
     """
+    if use_prebuilt_dist:
+        isotope_dist = IsotopeDistribution()
+    else:
+        isotope_dist = None
+
     precursor_df['isotope_mz_m1'] = (
         precursor_df.precursor_mz +
         MASS_ISOTOPE/precursor_df.charge
@@ -272,7 +291,8 @@ def calc_precursor_isotope(precursor_df:pd.DataFrame):
         precursor_df['isotope_intensity_m2']
     ) = zip(
         *precursor_df[['sequence','mods']].apply(
-            get_mod_seq_isotope_distribution, axis=1
+            get_mod_seq_isotope_distribution,
+            axis=1, isotope_dist=isotope_dist
         )
     )
     return precursor_df
