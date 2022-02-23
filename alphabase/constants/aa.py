@@ -75,7 +75,7 @@ def calc_AA_masses_for_same_len_seqs(
         sequence_array (np.array): unmodified sequences with the same length.
     Returns:
         np.array: 2-D (array_size, sequence_len) array of masses.
-    Raise:
+    Raises:
         ValueError: if sequences are not with the same length.
     '''
     return AA_ASCII_MASS[
@@ -93,7 +93,7 @@ def calc_sequence_masses_for_same_len_seqs(
         sequence_array (np.array): unmodified sequences with the same length.
     Returns:
         np.array: 1-D (array_size, sequence_len) array of masses.
-    Raise:
+    Raises:
         ValueError: if sequences are not with the same length.
     '''
     return np.sum(
