@@ -15,7 +15,7 @@ from alphabase.constants.element import (
 from alphabase.constants.aa import AA_formula
 from alphabase.constants.modification import MOD_formula
 from alphabase.constants.isotope import (
-    IsotopeDistribution, formula_dist
+    IsotopeDistribution
 )
 from alphabase.peptide.mass_calc import (
     calc_peptide_masses_for_same_len_seqs
@@ -247,21 +247,15 @@ def get_mod_seq_formula(seq, mods):
 
 def get_mod_seq_isotope_distribution(
     seq_mods:tuple,
-    isotope_dist:IsotopeDistribution = None,
+    isotope_dist:IsotopeDistribution,
 ):
-    if isotope_dist is None:
-        dist, mono = formula_dist(
-            get_mod_seq_formula(*seq_mods)
-        )
-    else:
-        dist, mono = isotope_dist.calc_formula_distribution(
-            get_mod_seq_formula(*seq_mods)
-        )
+    dist, mono = isotope_dist.calc_formula_distribution(
+        get_mod_seq_formula(*seq_mods)
+    )
     return dist[mono+1]/dist[mono], dist[mono+2]/dist[mono]
 
 def calc_precursor_isotope(
-    precursor_df:pd.DataFrame,
-    use_prebuilt_dist=True,
+    precursor_df:pd.DataFrame
 ):
     """Calculate isotope mz values and relative (to M0) intensity values for precursors.
 
@@ -272,10 +266,7 @@ def calc_precursor_isotope(
         pd.DataFrame: precursor_df with `isotope_mz_m1/isotope_intensity_m1`
             and also `*_m2` columns.
     """
-    if use_prebuilt_dist:
-        isotope_dist = IsotopeDistribution()
-    else:
-        isotope_dist = None
+    isotope_dist = IsotopeDistribution()
 
     precursor_df['isotope_mz_m1'] = (
         precursor_df.precursor_mz +
@@ -310,8 +301,8 @@ def calc_precursor_isotope_mp(
     processes:int=8,
     process_bar=None,
 )->pd.DataFrame:
-    """`formula_dist` is not that fast for large dataframes, so here we use multiprocessing
-    for faster isotope pattern calculation.
+    """`calc_precursor_isotope` is not that fast for large dataframes,
+    so here we use multiprocessing for faster isotope pattern calculation.
     The speed is acceptable with multiprocessing (4.5 min for 21M precursors, 8 processes).
 
     Args:
