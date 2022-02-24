@@ -12,7 +12,7 @@ import numpy as np
 import numba
 import typing
 
-from ..yaml_utils import load_yaml
+from alphabase.yaml_utils import load_yaml
 
 _base_dir = os.path.dirname(__file__)
 
@@ -158,6 +158,7 @@ def parse_formula(
         formula.strip(')').split(')')
     ]
     return [(elem, int(n)) for elem, n in items]
+
 
 def calc_mass_from_formula(formula:str):
     '''

@@ -2,15 +2,18 @@
 
 __all__ = ['refine_precursor_df', 'is_precursor_refined', 'update_precursor_mz', 'reset_precursor_df',
            'is_precursor_sorted', 'calc_precursor_mz', 'get_mod_seq_hash', 'get_mod_seq_charge_hash', 'hash_mod_seq_df',
-           'hash_mod_seq_charge_df', 'hash_precursor_df']
+           'hash_mod_seq_charge_df', 'hash_precursor_df', 'get_mod_seq_formula', 'get_mod_seq_isotope_distribution',
+           'calc_precursor_isotope', 'calc_precursor_isotope_mp']
 
 # Cell
 import pandas as pd
 import numpy as np
 
 from alphabase.constants.element import (
-    MASS_PROTON
+    MASS_PROTON, formula_dist, MASS_ISOTOPE
 )
+from alphabase.constants.aa import AA_formula
+from alphabase.constants.modification import MOD_formula
 from alphabase.peptide.mass_calc import (
     calc_peptide_masses_for_same_len_seqs
 )
@@ -220,3 +223,95 @@ def hash_precursor_df(
     if 'charge' in precursor_df.columns:
         hash_mod_seq_charge_df(precursor_df, seed=seed)
     return precursor_df
+
+# Cell
+def get_mod_seq_formula(seq, mods):
+    formula = {}
+    for aa in seq:
+        for chem,n in AA_formula[aa].items():
+            if chem in formula:
+                formula[chem]+=n
+            else:
+                formula[chem]=n
+    if len(mods) > 0:
+        for mod in mods.split(';'):
+            for chem,n in MOD_formula[mod].items():
+                if chem in formula:
+                    formula[chem]+=n
+                else:
+                    formula[chem]=n
+    return list(formula.items())
+
+def get_mod_seq_isotope_distribution(seq_mods:tuple):
+    dist, mono = formula_dist(
+        get_mod_seq_formula(*seq_mods)
+    )
+    return dist[mono+1]/dist[mono], dist[mono+2]/dist[mono]
+
+def calc_precursor_isotope(precursor_df:pd.DataFrame):
+    """Calculate isotope mz values and relative (to M0) intensity values for precursors.
+
+    Args:
+        precursor_df (pd.DataFrame): precursor_df to calculate.
+
+    Returns:
+        pd.DataFrame: precursor_df with `isotope_mz_m1/isotope_intensity_m1`
+            and also `*_m2` columns.
+    """
+    precursor_df['isotope_mz_m1'] = (
+        precursor_df.precursor_mz +
+        MASS_ISOTOPE/precursor_df.charge
+    )
+    precursor_df['isotope_mz_m2'] = (
+        precursor_df.precursor_mz +
+        2*MASS_ISOTOPE/precursor_df.charge
+    )
+
+    (
+        precursor_df['isotope_intensity_m1'],
+        precursor_df['isotope_intensity_m2']
+    ) = zip(
+        *precursor_df[['sequence','mods']].apply(
+            get_mod_seq_isotope_distribution, axis=1
+        )
+    )
+    return precursor_df
+
+import multiprocessing as mp
+
+def _precursor_df_group(df_group):
+    for _, df in df_group:
+        yield df
+
+# `process_bar` should be replaced by more advanced tqdm wrappers created by Sander
+# I will leave it to alphabase.utils
+def calc_precursor_isotope_mp(
+    precursor_df:pd.DataFrame,
+    processes:int=8,
+    process_bar=None,
+)->pd.DataFrame:
+    """`formula_dist` is not that fast for large dataframes, so here we use multiprocessing
+    for faster isotope pattern calculation.
+    The speed is acceptable with multiprocessing (4.5 min for 21M precursors, 8 processes).
+
+    Args:
+        precursor_df (pd.DataFrame): precursor_df calculate.
+        processes (int, optional): process number. Defaults to 8.
+        process_bar (function, optional): The callback function to check multiprocessing.
+            Defaults to None.
+
+    Returns:
+        pd.DataFrame: new precursor_df with `isotope_mz_m1/isotope_intensity_m1`
+            and also `*_m2` columns.
+    """
+    df_list = []
+    df_group = precursor_df.groupby('nAA')
+    with mp.Pool(processes) as p:
+        processing = p.imap_unordered(
+            calc_precursor_isotope, _precursor_df_group(df_group)
+        )
+        if process_bar:
+            processing = process_bar(processing, df_group.ngroups)
+        for df in processing:
+            df_list.append(df)
+    return pd.concat(df_list)

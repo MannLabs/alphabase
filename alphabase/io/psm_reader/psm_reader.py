@@ -108,6 +108,7 @@ class PSMReaderBase(object):
         self._psm_df = pd.DataFrame()
         self.keep_fdr = fdr
         self.keep_decoy = keep_decoy
+        self._min_max_rt_norm = False
 
     @property
     def psm_df(self)->pd.DataFrame:
@@ -205,11 +206,15 @@ class PSMReaderBase(object):
         # to -log(evalue), as score is the larger the better
         pass
 
-    def norm_rt(self):
+    def norm_rt(self, min_max_norm=False):
         if 'rt' in self.psm_df.columns:
+            if self._min_max_rt_norm:
+                min_rt = self.psm_df.rt.min()
+            else:
+                min_rt = 0
             self.psm_df['rt_norm'] = (
-                self.psm_df.rt / self.psm_df.rt.max()
-            )
+                self.psm_df.rt - min_rt
+            ) / (self.psm_df.rt.max()-min_rt)
 
     def normalize_rt_by_raw_name(self):
         if not 'rt' in self.psm_df.columns:

@@ -126,7 +126,6 @@ diann:
     'sequence': 'Stripped.Sequence'
     'charge': 'Precursor.Charge'
     'rt': ['RT','iRT','Tr_recalibrated','RetentionTime']
-    'rt_norm': 'rt_norm'
     'ccs': 'CCS'
     'mobility': ['IM','IonMobility']
     'proteins': 'Protein.Names'
@@ -149,7 +148,6 @@ spectronaut:
     'sequence': ['StrippedPeptide','PeptideSequence']
     'charge': 'PrecursorCharge'
     'rt': ['RT','iRT','Tr_recalibrated','RetentionTime']
-    'rt_norm': 'rt_norm'
     'ccs': 'CCS'
     'precursor_mz': 'PrecursorMz'
     'mobility': ['Mobility','IonMobility']
