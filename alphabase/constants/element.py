@@ -15,12 +15,12 @@ from alphabase.yaml_utils import load_yaml
 
 _base_dir = os.path.dirname(__file__)
 
-common_const_dict = load_yaml(
+common_const_dict:dict = load_yaml(
     os.path.join(_base_dir, 'common_constants.yaml')
 )
 
-MASS_PROTON = common_const_dict['MASS_PROTON']
-MASS_ISOTOPE = common_const_dict['MASS_ISOTOPE']
+MASS_PROTON:float = common_const_dict['MASS_PROTON']
+MASS_ISOTOPE:float = common_const_dict['MASS_ISOTOPE']
 
 # Cell
 
@@ -38,8 +38,10 @@ def truncate_isotope(
     `MAX_ISOTOPE_LEN` neighbors those contain the monoisotopic
     peak pointed by `mono_idx`.
     Args:
-        isotopes (np.array): isotope patterns with size > `MAX_ISOTOPE_LEN`.
-        mono_idx (int): where is the monoisotopic peak in the isotope patterns
+        isotopes (np.array):
+            Isotope patterns with size > `MAX_ISOTOPE_LEN`.
+        mono_idx (int):
+            Monoisotopic peak position (index) in the isotope patterns
     Returns:
         int: the new position of `mono_idx`
         int: the start position of the truncated isotopes
@@ -61,15 +63,20 @@ def truncate_isotope(
 
 # Cell
 
+#: chemical element information in dict defined by `nist_element.yaml`
 CHEM_INFO_DICT = {}
 
+#: {element: mass}
 CHEM_MONO_MASS = {}
-CHEM_ISOTOPE_DIST = numba.typed.Dict.empty(
+
+#: {element: np.array of abundance distribution}
+CHEM_ISOTOPE_DIST:numba.typed.Dict = numba.typed.Dict.empty(
     key_type=numba.types.unicode_type,
     value_type=numba.types.float64[:]
 )
 
-CHEM_MONO_IDX = numba.typed.Dict.empty(
+#: {element: int (mono position)}
+CHEM_MONO_IDX:numba.typed.Dict = numba.typed.Dict.empty(
     key_type=numba.types.unicode_type,
     value_type=numba.types.int64
 )
@@ -110,8 +117,8 @@ def reset_elements():
             CHEM_MONO_IDX[elem] = _mono_idx
 
 def load_elem_yaml(yaml_file:str):
-    '''
-    This function can be use to load user-defined `element.yaml` file
+    '''Load built-in or user-defined element yaml file. Default yaml is:
+        os.path.join(_base_dir, 'nist_element.yaml')
     '''
     global CHEM_INFO_DICT
     global CHEM_MONO_MASS

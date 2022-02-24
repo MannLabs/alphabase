@@ -102,7 +102,8 @@ def _calc_one_elem_cum_dist(
     element_cum_dist:np.array,
     element_cum_mono:np.array
 ):
-    """Pre-build element isotope abundance distribution for fast calculation
+    """Pre-build isotope abundance distribution for an element for fast calculation.
+    Internel function.
 
     Args:
         element_cum_dist (np.array): cumulated element abundance distribution
@@ -132,19 +133,29 @@ class IsotopeDistribution:
             'P': 200,
         }
     ):
-        """Faster calculation of isotope abundance distribution by pre-defining
-        isotope distribution tables.
+        """Faster calculation of isotope abundance distribution by pre-building
+        isotope distribution tables for most common elements.
 
         Args:
             max_elem_num_dict (dict, optional):
-            Define the maximal number of the elements.
-            Defaults to { 'C': 2000, 'H': 5000, 'N': 1000, 'O': 1000, 'S': 200, 'P': 200, },
-            they are large enough for shotgun proteomics.
+                Define the maximal number of the elements.
+                Defaults to { 'C': 2000, 'H': 5000, 'N': 1000, 'O': 1000, 'S': 200, 'P': 200, }
+
+                We have considered large enough number of elements for shotgun proteomics.
+                We can increase `max_elem_num_dict` to support larger peptide or top-down
+                in the future. However, current `MAX_ISOTOPE_LEN` is not suitable for top-down,
+                it must be extended to a larger number (100?).
+                Note that non-standard amino acids have 1000000 C elements in AlphaBase,
+                We clip 1000000 C to the maximal number of C in `max_elem_num_dict`.
+                As they have very large masses thus impossible to identify,
+                their isotope distributions do not matter.
         Attributes:
-            element_to_cum_dist_dict (dict): {element: cumulated isotope distribution array},
+            element_to_cum_dist_dict (dict):
+                {element: cumulated isotope distribution array},
                 and the cumulated isotope distribution array is a 2-D float np.array with
                 shape (element_max_number, MAX_ISOTOPE_LEN).
-            element_to_cum_mono_idx (dict): {element: mono position array of cumulated isotope distribution},
+            element_to_cum_mono_idx (dict):
+                {element: mono position array of cumulated isotope distribution},
                 and mono position array is a 1-D int np.array.
         """
         self.element_to_cum_dist_dict = {}
@@ -168,11 +179,53 @@ class IsotopeDistribution:
         """Calculate isotope abundance distribution for a given formula
 
         Args:
-            formula (list of tuple(str,int)): chemical formula: "[('H',1),('C',2),('O',3)]".
+            formula (list of tuple(str,int)):
+                chemical formula: "[('H',1),('C',2),('O',3)]".
 
         Returns:
-            np.array: isotope abundance distribution
-            int: mono isotope position in the distribution array
+            np.array:
+                isotope abundance distribution
+            int: mono
+                isotope position in the distribution array
+
+        Examples::
+
+            >>> from alphabase.constants import IsotopeDistribution, parse_formula
+            >>> iso = IsotopeDistribution()
+            >>> formula = 'C(100)H(100)O(10)Na(1)Fe(1)'
+            >>> formula = parse_formula(formula)
+            >>> dist, mono = iso.calc_formula_distribution(formula)
+            >>> dist
+            array([1.92320044e-02, 2.10952666e-02, 3.13753566e-01, 3.42663681e-01,
+                   1.95962632e-01, 7.69157517e-02, 2.31993814e-02, 5.71948249e-03,
+                   1.19790438e-03, 2.18815385e-04])
+            >>> # Fe's mono position is 2 Da larger than its smallest mass,
+            >>> # so the mono position of this formula shifts by +2 (Da).
+            >>> mono
+            2
+
+            >>> formula = 'C(100)H(100)O(10)13C(1)Na(1)'
+            >>> formula = parse_formula(formula)
+            >>> dist, mono = iso.calc_formula_distribution(formula)
+            >>> dist
+            array([3.29033438e-03, 3.29352217e-01, 3.59329960e-01, 2.01524592e-01,
+                   7.71395498e-02, 2.26229845e-02, 5.41229894e-03, 1.09842389e-03,
+                   1.94206388e-04, 3.04911585e-05])
+            >>> # 13C's mono position is +1 Da shifted
+            >>> mono
+            1
+
+            >>> formula = 'C(100)H(100)O(10)Na(1)'
+            >>> formula = parse_formula(formula)
+            >>> dist, mono = iso.calc_formula_distribution(formula)
+            >>> dist
+            array([3.29033438e-01, 3.60911319e-01, 2.02775462e-01, 7.76884706e-02,
+                   2.27963906e-02, 5.45578135e-03, 1.10754072e-03, 1.95857410e-04,
+                   3.07552058e-05, 4.35047710e-06])
+            >>> # mono position is normal (=0) for regular formulas
+            >>> mono
+            0
+
         """
         first_elem = 'H'
         for elem, n in formula:
@@ -185,12 +238,7 @@ class IsotopeDistribution:
         for elem, n in formula:
             if elem in self.element_to_cum_dist_dict:
                 if elem == first_elem: continue
-                # We have consider large enough number of elements for shotgun proteomics.
-                # We can increase max_elem_num_dict in __init__() to support top-down
-                # in the future.
                 if n >= len(self.element_to_cum_mono_idx[elem]):
-                    # Note that non-standard amino acids have 1000000
-                    # C elements in AlphaBase.
                     n = len(self.element_to_cum_mono_idx[elem])-1
                 dist, mono = abundance_convolution(
                     dist, mono,
