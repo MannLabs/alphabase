@@ -13,15 +13,31 @@ class DecoyLib(SpecLibBase):
         fix_C_term = True,
         **kwargs,
     ):
+        """Pseudo-reverse peptide decoy generator
+        Currently, only sequence-level decoy is implemented,
+        but AlphaPeptDeep will add modifications onto both target and decoy sequences,
+        so it is enough for practical uses.
+
+        Args:
+            target_lib (SpecLibBase): Target library
+            fix_C_term (bool, optional): If fix C-term AA when decoy.
+                Defaults to True.
+        """
         self.__dict__ = copy.deepcopy(target_lib.__dict__)
         self.target_lib = target_lib
         self.fix_C_term = fix_C_term
 
     def translate_to_decoy(self):
+        """Main entry of this class, it calls follows methods:
+            self.decoy_sequence()
+            self._decoy_mods()
+            self._decoy_meta()
+            self._decoy_frags()
+        """
         self.decoy_sequence()
-        self._decoy_mod()
+        self._decoy_mods()
         self._decoy_meta()
-        self._decoy_frag()
+        self._decoy_frags()
 
     def decoy_sequence(self):
         self._decoy_seq()
@@ -54,13 +70,13 @@ class DecoyLib(SpecLibBase):
         """
         pass
 
-    def _decoy_mod(self):
+    def _decoy_mods(self):
         """
         Decoy for modifications and modification sites
         """
         pass
 
-    def _decoy_frag(self):
+    def _decoy_frags(self):
         """
         Decoy for fragment masses and intensities
         """
@@ -122,6 +138,15 @@ class DiaNNDecoyLib(DecoyLib):
         mutated_AAs:str = 'LLLVVLLLLTSSSSLLNDQE', #DiaNN
         **kwargs,
     ):
+        """DiaNN-like decoy peptide generator
+
+        Args:
+            target_lib (SpecLibBase): Target library object
+            raw_AAs (str, optional): AAs those DiaNN decoy from.
+                Defaults to 'GAVLIFMPWSCTYHKRQEND'.
+            mutated_AAs (str, optional): AAs those DiaNN decoy to.
+                Defaults to 'LLLVVLLLLTSSSSLLNDQE'.
+        """
         super().__init__(target_lib)
         self.raw_AAs = raw_AAs
         self.mutated_AAs = mutated_AAs
