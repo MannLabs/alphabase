@@ -45,10 +45,17 @@ def ccs_to_mobility_for_df(
     *,
     vendor="bruker"
 )->np.array:
-    """ Convert mobility to CCS for a dataframe
+    """_summary_
+
+    Args:
+        precursor_df (pd.DataFrame): precursor_df
+        ccs_column (str): CCS column name in precursor_df
+        vendor (str, optional): Different vender may have different IM calculation.
+            Defaults to "bruker".
+            Note that other vendors are not implemented currently.
 
     Returns:
-      np.array: mobility values
+        np.array: mobility values
     """
     if 'precursor_mz' not in precursor_df.columns:
         precursor_df = update_precursor_mz(precursor_df)
@@ -64,10 +71,17 @@ def mobility_to_ccs_for_df(
     *,
     vendor="bruker"
 )->np.array:
-    """ Convert CCS to mobility for a dataframe
+    """_summary_
+
+    Args:
+        precursor_df (pd.DataFrame): precursor_df
+        mobility_column (str): mobility column name in precursor_df
+        vendor (str, optional): Different vender may have different IM calculation.
+            Defaults to "bruker".
+            Note that other vendors are not implemented currently.
 
     Returns:
-      np.array: CCS values
+        np.array: CCS values
     """
 
     if 'precursor_mz' not in precursor_df.columns:

@@ -75,7 +75,7 @@ def update_precursor_mz(
     batch_size = 500000,
 )->pd.DataFrame:
     """
-    Calculate precursor_mz for the precursor_df
+    Calculate precursor_mz inplace in the precursor_df
     Args:
         precursor_df (pd.DataFrame):
           precursor_df with the 'charge' column
@@ -93,6 +93,9 @@ def update_precursor_mz(
         _calc_in_order = False
     precursor_df['precursor_mz'] = 0.
     _grouped = precursor_df.groupby('nAA')
+    precursor_mz_idx = precursor_df.columns.get_loc(
+        'precursor_mz'
+    )
     for nAA, big_df_group in _grouped:
         for i in range(0, len(big_df_group), batch_size):
             batch_end = i+batch_size
@@ -106,7 +109,7 @@ def update_precursor_mz(
                 'mod_deltas' in df_group.columns else None
             )/df_group.charge + MASS_PROTON
             if _calc_in_order:
-                precursor_df.loc[:,'precursor_mz'].values[
+                precursor_df.iloc[:,precursor_mz_idx].values[
                     df_group.index.values[0]:
                     df_group.index.values[-1]+1
                 ] = pep_mzs
@@ -228,7 +231,8 @@ def hash_precursor_df(
     return precursor_df
 
 # Cell
-def get_mod_seq_formula(seq, mods):
+def get_mod_seq_formula(seq:str, mods:str)->list:
+    """ 'PEPTIDE','Acetyl@Any N-term' --> [('C',n), ('H',m), ...] """
     formula = {}
     for aa in seq:
         for chem,n in AA_formula[aa].items():
@@ -248,7 +252,19 @@ def get_mod_seq_formula(seq, mods):
 def get_mod_seq_isotope_distribution(
     seq_mods:tuple,
     isotope_dist:IsotopeDistribution,
-):
+)->tuple:
+    """Get isotope abundance distribution by IsotopeDistribution.
+    This function is designed for multiprocessing.
+
+    Args:
+        seq_mods (tuple): (sequence, mods)
+        isotope_dist (IsotopeDistribution):
+            see : class : `alphabase.constants.isotope.IsotopeDistribution`
+
+    Returns:
+        float: mono+1 abundance / mono abundance
+        float: mono+2 abundance / mono abundance
+    """
     dist, mono = isotope_dist.calc_formula_distribution(
         get_mod_seq_formula(*seq_mods)
     )
@@ -257,7 +273,7 @@ def get_mod_seq_isotope_distribution(
 def calc_precursor_isotope(
     precursor_df:pd.DataFrame
 ):
-    """Calculate isotope mz values and relative (to M0) intensity values for precursors.
+    """Calculate isotope mz values and relative (to M0) intensity values for precursor_df.
 
     Args:
         precursor_df (pd.DataFrame): precursor_df to calculate.
@@ -291,6 +307,7 @@ def calc_precursor_isotope(
 import multiprocessing as mp
 
 def _precursor_df_group(df_group):
+    """Internal funciton for multiprocessing"""
     for _, df in df_group:
         yield df
 
