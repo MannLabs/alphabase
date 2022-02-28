@@ -24,6 +24,30 @@ class SpecLibBase(object):
         min_precursor_mz = 400, max_precursor_mz = 6000,
         decoy:str = 'pseudo_reverse',
     ):
+        """Base spectral library in alphabase and alphapeptdeep.
+
+        Args:
+            charged_frag_types (typing.List[str], optional): fragment types with charge.
+                Defaults to [ 'b_z1','b_z2','y_z1', 'y_z2' ].
+            min_precursor_mz (int, optional): Use this to clip precursor df.
+                Defaults to 400.
+            max_precursor_mz (int, optional): Use this to clip precursor df.
+                Defaults to 6000.
+            decoy (str, optional): Decoy methods, could be "pseudo_reverse" or "diann".
+                Defaults to 'pseudo_reverse'.
+
+        Attributes:
+            precursor_df (pd.DataFrame): precursor dataframe.
+            fragment_mz_df (pd.DataFrame): fragment m/z dataframe.
+            fragment_intensity_df (pd.DataFrame): fragment intensity dataframe.
+            charged_frag_types (list): same as `charged_frag_types` in Args.
+            min_precursor_mz (float): same as `min_precursor_mz` in Args.
+            max_precursor_mz (float): same as `max_precursor_mz` in Args.
+            decoy (str): same as `decoy` in Args.
+            mod_seq_df_columns (list of str): str or unnecessary columns to be saved
+                into library/precursor_df in the hdf file. They will be saved into
+                library/mod_seq_df instead.
+        """
         self.charged_frag_types = charged_frag_types
         self._precursor_df = pd.DataFrame()
         self._fragment_intensity_df = pd.DataFrame()

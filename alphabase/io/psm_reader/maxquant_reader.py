@@ -15,11 +15,27 @@ from alphabase.io.psm_reader.psm_reader import (
 
 @numba.njit
 def parse_mod_seq(
-    modseq,
-    mod_sep='()',
-    fixed_C=True,
-    underscore_for_ncterm=True,
-):
+    modseq:str,
+    mod_sep:str='()',
+    fixed_C57:bool=True,
+    underscore_for_ncterm:bool=True,
+)->tuple:
+    """Extract modifications and sites from the modified sequence (modseq)
+
+    Args:
+        modseq (str): modified sequence to extract modifications.
+        mod_sep (str, optional): separator to indicate the modification section.
+            Defaults to '()'.
+        fixed_C (bool, optional): If Carbamidomethyl@C is a fixed modification
+            and not displayed in the sequence. Defaults to True for MaxQuant.
+        underscore_for_ncterm (bool, optional): If modseq starts and ends with underscores.
+            Defaults to True.
+
+    Returns:
+        str: modification names, separated by ';'
+        str: modification sites, separated by ';'.
+            0 for N-term; -1 for C-term; 1 to N for normal modifications.
+    """
     PeptideModSeq = modseq
     mod_list = []
     site_list = []
@@ -45,7 +61,7 @@ def parse_mod_seq(
         PeptideModSeq = PeptideModSeq[:site] + PeptideModSeq[site+1:]
         site = PeptideModSeq.find('p', site)
 
-    if fixed_C:
+    if fixed_C57:
         site = PeptideModSeq.find('C')
         while site != -1:
             if underscore_for_ncterm: site_list.append(str(site))
@@ -77,7 +93,7 @@ class MaxQuantReader(PSMReaderBase):
 
         self.mod_sep = mod_sep
         self.underscore_for_ncterm = underscore_for_ncterm
-        self.fixed_C = fixed_C57
+        self.fixed_C57 = fixed_C57
         self._mod_seq_columns = mod_seq_columns
         self.mod_seq_column = 'Modified sequence'
 
@@ -142,7 +158,7 @@ class MaxQuantReader(PSMReaderBase):
         ) = zip(
             *origin_df[self.mod_seq_column].apply(
                 parse_mod_seq, mod_sep=self.mod_sep,
-                fixed_C=self.fixed_C,
+                fixed_C57=self.fixed_C57,
                 underscore_for_ncterm=self.underscore_for_ncterm
             )
         )

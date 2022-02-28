@@ -62,6 +62,8 @@ try:
             keep_decoy=True,
             **kwargs
         ):
+            """MSFragger is not fully supported as we can only access the pepxml file.
+            """
             super().__init__(
                 column_mapping=column_mapping,
                 modification_mapping=modification_mapping,

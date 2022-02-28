@@ -28,10 +28,12 @@ def calc_delta_modification_mass(
     For open-search, we may also get modification
     mass deltas other than mod names. This function calculate
     modification masses from these delta masses.
+
     Args:
         pep_len (int): nAA
         mass_deltas (list of floats): mass deltas on the peptide
         mass_delta_sites (list of int): localized sites of corresponding mass deltas
+
     Returns:
         np.array: 1-D array with length=`peplen`.
             Masses of modifications (mass deltas) through the peptide,
@@ -57,6 +59,7 @@ def calc_mod_delta_masses_for_same_len_seqs(
     For open-search, we may also get modification
     mass deltas other than mod names. This function calculate
     modification masses from these delta masses.
+
     Args:
         nAA (int): peptide length
         mod_names_list (List[List[str]]): list of modification list
@@ -65,6 +68,7 @@ def calc_mod_delta_masses_for_same_len_seqs(
             * `site=0` refers to an N-term modification
             * `site=-1` refers to a C-term modification
             * `1<=site<=peplen` refers to a normal modification
+
     Returns:
         np.array: 2-D array with shape=`(nAA, pep_count or len(mod_names_list)))`.
             Masses of modifications through all the peptides,
@@ -131,6 +135,7 @@ def calc_peptide_masses_for_same_len_seqs(
             e.g. `['Oxidation@M;Phospho@S','Phospho@S;Deamidated@N']`
         mass_delta_list (List[str]): List of modifications as mass deltas,
             e.g. `['15.9xx;79.9xxx','79.9xx;0.98xx']`
+
     Returns:
         np.array: peptide masses (1-D array, H2O already added)
     '''
@@ -175,6 +180,7 @@ def calc_b_y_and_peptide_masses_for_same_len_seqs(
             e.g. `[[15.994915,79.966331],[79.966331,0.984016]]`
         mod_delta_site_list (List[List[int]]): list of modification mass delta sites
             corresponding to `mod_list`, e.g. `[[3,6],[4,17]]`
+
     Returns:
         np.array: neutral b fragment masses (2-D array)
         np.array: neutral y fragmnet masses (2-D array)

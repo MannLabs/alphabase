@@ -38,6 +38,7 @@ def get_charged_frag_types(
     Args:
         frag_types (List[str]): e.g. ['b','y','b_modloss','y_modloss']
         max_frag_charge (int): max fragment charge. (default: 2)
+
     Returns:
         List[str]: charged fragment types
 
@@ -58,8 +59,10 @@ def parse_charged_frag_type(
 )->Tuple[str,int]:
     '''
     Oppsite to `get_charged_frag_types`.
+
     Args:
         charged_frag_type (str): e.g. 'y_z1', 'b_modloss_z1'
+
     Returns:
         str: fragment type, e.g. 'b','y'
         int: charge state
@@ -83,6 +86,7 @@ def init_zero_fragment_dataframe(
         peplen_array (np.array): peptide lengths for the fragment dataframe
         charged_frag_types (List[str]):
             `['b_z1','b_z2','y_z1','y_z2','b_modloss_z1','y_H2O_z1'...]`
+
     Returns:
         pd.DataFrame: `fragment_df` with zero values
         np.array (int64): the start indices point to the `fragment_df` for each peptide
@@ -122,6 +126,7 @@ def init_fragment_by_precursor_dataframe(
     the `reference_fragment_df` is provided, it will generate
     the dataframe based on the reference. Otherwise it
     generates the dataframe from scratch.
+
     Args:
         precursor_df (pd.DataFrame): precursors to generate fragment masses,
             if `precursor_df` contains the 'frag_start_idx' column,
@@ -136,8 +141,10 @@ def init_fragment_by_precursor_dataframe(
             Defaults to None.
         inplace_in_reference (bool, optional): if calculate the fragment mz
         inplace in the reference_fragment_df (default: False)
+
     Returns:
         pd.DataFrame: zero `fragment_df` with given `charged_frag_types` columns
+
     Raises:
         ValueError: if `reference_fragment_df` is None but there are 'frag_start_idx'
             in the `precursor_df`, meaning that there are some other fragment
@@ -192,6 +199,7 @@ def update_sliced_fragment_dataframe(
     '''
     Set the values of the slices `frag_start_end_list=[(start,end),(start,end),...]`
     of fragment_df.
+
     Args:
         fragment_df (pd.DataFrame): fragment dataframe to set the values
         frag_start_end_list (List[Tuple[int,int]]): e.g. `[(start,end),(start,end),...]`
@@ -200,6 +208,7 @@ def update_sliced_fragment_dataframe(
             It is much faster if charged_frag_types is None as we use numpy slicing,
             otherwise we use pd.loc (much slower).
             Defaults to None.
+
     Returns:
         pd.DataFrame: fragment_df after the values are set into slices
     '''
@@ -219,11 +228,13 @@ def get_sliced_fragment_dataframe(
 )->pd.DataFrame:
     '''
     Get the sliced fragment_df from `frag_start_end_list=[(start,end),(start,end),...]`.
+
     Args:
         fragment_df (pd.DataFrame): fragment dataframe to get values
         frag_start_end_list (List[Tuple[int,int]]): e.g. `[(start,end),(start,end),...]`
         charged_frag_types (List[str]): e.g. `['b_z1','b_z2','y_z1','y_z2']`.
             if None, all columns will be considered
+
     Returns:
         pd.DataFrame: sliced fragment_df. If `charged_frag_types` is None,
         return fragment_df with all columns
@@ -247,11 +258,13 @@ def concat_precursor_fragment_dataframes(
     fragment_df, the indexed positions will change for in precursor_dfs,
     this function keeps the correct indexed positions of precursor_df when
     concatenating multiple fragment_df dataframes.
+
     Args:
         precursor_df_list (List[pd.DataFrame]): precursor dataframe list to concatenate
         fragment_df_list (List[pd.DataFrame]): fragment dataframe list to concatenate
         *other_fragment_df_lists: arbitray other fragment dataframe list to concatenate,
             e.g. fragment_mass_df, fragment_inten_df, ...
+
     Returns:
         Tuple[pd.DataFrame,...]: concatenated precursor_df, fragment_df, *other_fragment_df ...
     '''
@@ -448,6 +461,7 @@ def create_fragment_mz_dataframe(
     the `reference_fragment_df` is provided and precursor_df contains `frag_start_idx`,
     it will generate  the mz dataframe based on the reference. Otherwise it
     generates the mz dataframe from scratch.
+
     Args:
         precursor_df (pd.DataFrame): precursors to generate fragment masses,
             if `precursor_df` contains the 'frag_start_idx' column,
@@ -458,8 +472,10 @@ def create_fragment_mz_dataframe(
             on this reference, as `precursor_df.frag_start_idx` and
             `precursor.frag_end_idx` point to the indices in
             `reference_fragment_df`
+
     Returns:
         pd.DataFrame: `fragment_mz_df` with given `charged_frag_types`
+
     Raises:
         ValueError: when `precursor_df` contains 'frag_start_idx' but
         `reference_fragment_df` is not None

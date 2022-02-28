@@ -37,11 +37,13 @@ def truncate_isotope(
     this function truncates the distribution by top
     `MAX_ISOTOPE_LEN` neighbors those contain the monoisotopic
     peak pointed by `mono_idx`.
+
     Args:
         isotopes (np.array):
             Isotope patterns with size > `MAX_ISOTOPE_LEN`.
         mono_idx (int):
             Monoisotopic peak position (index) in the isotope patterns
+
     Returns:
         int: the new position of `mono_idx`
         int: the start position of the truncated isotopes
@@ -169,8 +171,10 @@ def parse_formula(
 def calc_mass_from_formula(formula:str):
     '''
     Calculates the mass of the formula`
+
     Args:
         formula (str): e.g. `H(1)C(2)O(3)`
+
     Returns:
         float: mass of the formula
     '''

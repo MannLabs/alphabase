@@ -45,7 +45,7 @@ def ccs_to_mobility_for_df(
     *,
     vendor="bruker"
 )->np.array:
-    """_summary_
+    """
 
     Args:
         precursor_df (pd.DataFrame): precursor_df
@@ -71,7 +71,7 @@ def mobility_to_ccs_for_df(
     *,
     vendor="bruker"
 )->np.array:
-    """_summary_
+    """
 
     Args:
         precursor_df (pd.DataFrame): precursor_df

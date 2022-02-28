@@ -477,7 +477,6 @@ class HDF_Dataframe(HDF_Group):
 
 
 class HDF_File(HDF_Group):
-
     def __init__(
         self,
         file_name: str,
@@ -486,6 +485,35 @@ class HDF_File(HDF_Group):
         truncate: bool = False,
         delete_existing: bool = False,
     ):
+        """HDF file object to load/save the hdf file. It also provides convenient
+        attribute-like APIs to operate the data in the HDF object.
+
+        Args:
+            file_name (str): file path.
+            read_only (bool, optional): If hdf read-only. Defaults to True.
+            truncate (bool, optional): ???. Defaults to False.
+            delete_existing (bool, optional): Overwrite. Defaults to False.
+
+        Examples::
+            >>> # create a hdf file
+            >>> hdf_file = HDF_File(hdf_file_path, read_only=False)
+            >>> # write a empty group as "dfs"
+            >>> hdf_file.dfs = {}
+            >>> # write a DataFrame dataset into the dfs
+            >>> hdf_file.dfs.df1 = pd.DataFrame({'a':[1,2,3]})
+            >>> # write a DataFrame dataset into the dfs
+            >>> hdf_file.dfs.df2 = pd.DataFrame({'a':[3,2,1]})
+            >>> # set an property value to the dataframe
+            >>> hdf_file.dfs.df1.data_from = "colleagues"
+            >>> # get a dataframe dataset from a dfs
+            >>> df1 = hdf_file.dfs.df1.values
+            >>> # get the dataframe via the dataset name instead of attribute
+            >>> df1 = hdf_file.dfs.__getattribute__("df1").values
+            >>> # get the dataframe via the dataset path (i.e. "dfs/df1")
+            >>> df1 = hdf_file.__getattribute__('dfs').__getattribute__("df1").values
+            >>> hdf_file.dfs.df1.data_from
+            "colleagues"
+        """
         if delete_existing:
             mode = "w"
         else:

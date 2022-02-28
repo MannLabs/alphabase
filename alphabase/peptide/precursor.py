@@ -76,6 +76,7 @@ def update_precursor_mz(
 )->pd.DataFrame:
     """
     Calculate precursor_mz inplace in the precursor_df
+
     Args:
         precursor_df (pd.DataFrame):
           precursor_df with the 'charge' column

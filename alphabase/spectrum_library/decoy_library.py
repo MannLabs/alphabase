@@ -19,9 +19,12 @@ class DecoyLib(SpecLibBase):
         so it is enough for practical uses.
 
         Args:
-            target_lib (SpecLibBase): Target library
+            target_lib (SpecLibBase): Target library to decoy.
             fix_C_term (bool, optional): If fix C-term AA when decoy.
                 Defaults to True.
+
+        Attributes:
+            target_lib (SpecLibBase): same as 'target_lib' in Args.
         """
         self.__dict__ = copy.deepcopy(target_lib.__dict__)
         self.target_lib = target_lib
