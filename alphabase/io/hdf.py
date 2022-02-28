@@ -486,27 +486,37 @@ class HDF_File(HDF_Group):
         delete_existing: bool = False,
     ):
         """HDF file object to load/save the hdf file. It also provides convenient
-        attribute-like APIs to operate the data in the HDF object.
+        attribute-like accesses to operate the data in the HDF object.
+
+        Instead of relying directly on the `h5py` interface, we will use an HDF wrapper 
+        file to provide consistent access to only those specific HDF features we want. 
+        Since components of an HDF file come in three shapes `datasets`, `groups` and `attributes`, 
+        we will first define a generic HDF wrapper object to handle these components. 
+        Once this is done, the HDF wrapper file can be treated as such an object with additional 
+        features to open and close the initial connection.
 
         Args:
             file_name (str): file path.
-            read_only (bool, optional): If hdf read-only. Defaults to True.
-            truncate (bool, optional): ???. Defaults to False.
-            delete_existing (bool, optional): Overwrite. Defaults to False.
+            read_only (bool, optional): If hdf is read-only. Defaults to True.
+            truncate (bool, optional): If existing groups and datasets can be 
+                truncated (i.e. are overwitten). Defaults to False.
+            delete_existing (bool, optional): If the file already exists, 
+                delete it completely and create a new one. Defaults to False.
 
         Examples::
-            >>> # create a hdf file
-            >>> hdf_file = HDF_File(hdf_file_path, read_only=False)
-            >>> # write a empty group as "dfs"
+            >>> # create a hdf file to write
+            >>> hdf_file = HDF_File(hdf_file_path, read_only=False, truncate=True, delete_existing=True)
+            >>> # create an empty group as "dfs"
             >>> hdf_file.dfs = {}
             >>> # write a DataFrame dataset into the dfs
             >>> hdf_file.dfs.df1 = pd.DataFrame({'a':[1,2,3]})
-            >>> # write a DataFrame dataset into the dfs
+            >>> # write another DataFrame dataset into the dfs
             >>> hdf_file.dfs.df2 = pd.DataFrame({'a':[3,2,1]})
             >>> # set an property value to the dataframe
             >>> hdf_file.dfs.df1.data_from = "colleagues"
             >>> # get a dataframe dataset from a dfs
             >>> df1 = hdf_file.dfs.df1.values
+            >>> # features below are not important, but may be useful sometimes
             >>> # get the dataframe via the dataset name instead of attribute
             >>> df1 = hdf_file.dfs.__getattribute__("df1").values
             >>> # get the dataframe via the dataset path (i.e. "dfs/df1")
