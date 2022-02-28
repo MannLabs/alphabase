@@ -83,7 +83,8 @@ class PSMReaderBase(object):
         keep_decoy = False,
         **kwargs,
     ):
-        """
+        """The Base class for all PSMReaders. The key of the sub-classes for different
+        search engine format is to re-define `column_mapping` and `modification_mapping`.
         Args:
             column_mapping (dict, optional):
                 A dict that maps alphabase's columns to other search engine's.
@@ -91,11 +92,40 @@ class PSMReaderBase(object):
                 the value could be the column name or a list of column names
                 in other engine's result.
                 If it is None, this dict will be init by
-                `self._init_column_mapping()`. Defaults to None.
+                `self._init_column_mapping()`. The dict values could be
+                either str or list, for exaplme:
+                columns_mapping = {
+                    'sequence': 'NakedSequence', #str
+                    'charge': 'Charge', #str
+                    'proteins':['Proteins','UniprotIDs'], # list, this reader will automatically detect all of them.
+                }
+                Defaults to None.
             modification_mapping (dict, optional):
                 A dict that maps alphabase's modifications to other engine's.
                 If it is None, this dict will be init by
-                `self._init_modification_mapping()`. Defaults to None.
+                `self._init_modification_mapping()`. The dict values could be
+                either str or list, for exaplme:
+                modification_mapping = {
+                    'Oxidation@M': 'Oxidation (M)', # str
+                    'Phospho@S': ['S(Phospho (STY))','S(ph)','pS'], # list, this reader will automatically detect all of them.
+                }
+                Defaults to None.
+            fdr (float, optional): FDR level to keep PSMs.
+                Defaults to 0.01.
+            keep_decoy(bool, optional): If keep decoy PSMs in self.psm_df.
+                Defautls to False.
+        Attributes:
+            column_mapping (dict): dict structure same as column_mapping in Args.
+            modification_mapping (dict): dict structure same as modification_mapping in Args.
+                We must use self.set_modification_mapping(new_mapping) to update it.
+            _psm_df (pd.DataFrame): the PSM DataFrame after loading from search engines.
+            psm_df (pd.DataFrame): the getter of self._psm_df
+            keep_fdr (float): The only PSMs with FDR<=keep_fdr were returned in self._psm_df.
+            keep_decoy (bool): If keep decoy PSMs in self.psm_df.
+            _min_max_rt_norm (bool): if True, the 'rt_norm' values in self._psm_df
+                will be normalized by rt_norm = (self.psm_df.rt-rt_min)/(rt_max-rt_min).
+                It is useful to normalize iRT values as they contain negative values.
+                Defaults to False.
         """
 
         self.set_modification_mapping(modification_mapping)
@@ -149,23 +179,6 @@ class PSMReaderBase(object):
                 self.rev_mod_mapping[other_mod] = this_mod
 
     def _init_column_mapping(self):
-        """Example:
-        self.column_mapping = {
-            'sequence': 'NakedSequence',
-            # AlphaBase does not need 'modified_sequence',
-            # but it will get 'mods', 'mod_sites' from it
-            'modified_sequence': 'ModifiedSequence',
-            'charge': 'Charge',
-            # If the value is a list, check if one of the columns exist
-            # and get 'proteins' from that column
-            'proteins':['Proteins','UniprotIDs'],
-            # Similar to 'proteins'
-            'uniprot_ids':['UniprotIDs','UniprotIds'],
-            # Similar to 'proteins'
-            'genes': ['Genes','Gene Names','Gene names'],
-            'fdr': 'fdr',
-        }
-        """
         raise NotImplementedError(
             f'"{self.__class__}" must implement "_init_column_mapping()"'
         )
@@ -176,7 +189,17 @@ class PSMReaderBase(object):
 
     def import_file(self, _file):
         """
-        This is the main entry function of PSM readers.
+        This is the main entry function of PSM readers,
+        it imports the file with following steps:
+        --------
+        origin_df = self._load_file(_file)
+        self._translate_columns(origin_df)
+        self._translate_decoy(origin_df)
+        self._translate_score(origin_df)
+        self._load_modifications(origin_df)
+        self._translate_modifications()
+        self._post_process(origin_df)
+        --------
         Args:
             _file: file path or file stream.
         """
@@ -206,7 +229,7 @@ class PSMReaderBase(object):
         # to -log(evalue), as score is the larger the better
         pass
 
-    def norm_rt(self, min_max_norm=False):
+    def normalize_rt(self):
         if 'rt' in self.psm_df.columns:
             if self._min_max_rt_norm:
                 min_rt = self.psm_df.rt.min()
@@ -215,6 +238,9 @@ class PSMReaderBase(object):
             self.psm_df['rt_norm'] = (
                 self.psm_df.rt - min_rt
             ) / (self.psm_df.rt.max()-min_rt)
+
+    def norm_rt(self):
+        self.normalize_rt()
 
     def normalize_rt_by_raw_name(self):
         if not 'rt' in self.psm_df.columns:
@@ -241,7 +267,7 @@ class PSMReaderBase(object):
             NotImplementedError: Subclasses must re-implement this method
 
         Returns:
-            pd.DataFrame: dataframe loaded
+            pd.DataFrame: loaded dataframe
         """
         raise NotImplementedError(
             f'"{self.__class__}" must implement "_load_file()"'
@@ -271,16 +297,15 @@ class PSMReaderBase(object):
 
 
     def _load_modifications(self, origin_df:pd.DataFrame):
-        """
-        How to read modification information from 'origin_df'.
+        """Read modification information from 'origin_df'.
         Some of search engines use modified_sequence, some of them
-        use additional columns to store modifications.
+        use additional columns to store modifications and the sites.
 
         Args:
             origin_df (pd.DataFrame): dataframe of original search engine.
 
         Returns:
-            None. Add information inplace into
+            None: Add information inplace into
             self._psm_df['mods'], self._psm_df['mod_sites'].
         """
         raise NotImplementedError(
@@ -328,6 +353,7 @@ class PSMReaderBase(object):
             and not self.keep_decoy
         ):
             keep_rows &= (self._psm_df.decoy == 0)
+
         self._psm_df = self._psm_df[keep_rows]
 
         reset_precursor_df(self._psm_df)

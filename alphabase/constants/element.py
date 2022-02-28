@@ -2,8 +2,7 @@
 
 __all__ = ['common_const_dict', 'MASS_PROTON', 'MASS_ISOTOPE', 'truncate_isotope', 'MAX_ISOTOPE_LEN', 'EMPTY_DIST',
            'reset_elements', 'load_elem_yaml', 'CHEM_INFO_DICT', 'CHEM_MONO_MASS', 'CHEM_ISOTOPE_DIST', 'CHEM_MONO_IDX',
-           'MASS_H2O', 'MASS_NH3', 'parse_formula', 'calc_mass_from_formula', 'abundance_convolution',
-           'one_element_dist', 'formula_dist']
+           'MASS_H2O', 'MASS_NH3', 'parse_formula', 'calc_mass_from_formula']
 
 # Cell
 
@@ -16,12 +15,12 @@ from alphabase.yaml_utils import load_yaml
 
 _base_dir = os.path.dirname(__file__)
 
-common_const_dict = load_yaml(
+common_const_dict:dict = load_yaml(
     os.path.join(_base_dir, 'common_constants.yaml')
 )
 
-MASS_PROTON = common_const_dict['MASS_PROTON']
-MASS_ISOTOPE = common_const_dict['MASS_ISOTOPE']
+MASS_PROTON:float = common_const_dict['MASS_PROTON']
+MASS_ISOTOPE:float = common_const_dict['MASS_ISOTOPE']
 
 # Cell
 
@@ -39,8 +38,10 @@ def truncate_isotope(
     `MAX_ISOTOPE_LEN` neighbors those contain the monoisotopic
     peak pointed by `mono_idx`.
     Args:
-        isotopes (np.array): isotope patterns with size > `MAX_ISOTOPE_LEN`.
-        mono_idx (int): where is the monoisotopic peak in the isotope patterns
+        isotopes (np.array):
+            Isotope patterns with size > `MAX_ISOTOPE_LEN`.
+        mono_idx (int):
+            Monoisotopic peak position (index) in the isotope patterns
     Returns:
         int: the new position of `mono_idx`
         int: the start position of the truncated isotopes
@@ -62,15 +63,20 @@ def truncate_isotope(
 
 # Cell
 
+#: chemical element information in dict defined by `nist_element.yaml`
 CHEM_INFO_DICT = {}
 
+#: {element: mass}
 CHEM_MONO_MASS = {}
-CHEM_ISOTOPE_DIST = numba.typed.Dict.empty(
+
+#: {element: np.array of abundance distribution}
+CHEM_ISOTOPE_DIST:numba.typed.Dict = numba.typed.Dict.empty(
     key_type=numba.types.unicode_type,
     value_type=numba.types.float64[:]
 )
 
-CHEM_MONO_IDX = numba.typed.Dict.empty(
+#: {element: int (mono position)}
+CHEM_MONO_IDX:numba.typed.Dict = numba.typed.Dict.empty(
     key_type=numba.types.unicode_type,
     value_type=numba.types.int64
 )
@@ -111,8 +117,8 @@ def reset_elements():
             CHEM_MONO_IDX[elem] = _mono_idx
 
 def load_elem_yaml(yaml_file:str):
-    '''
-    This function can be use to load user-defined `element.yaml` file
+    '''Load built-in or user-defined element yaml file. Default yaml is:
+        os.path.join(_base_dir, 'nist_element.yaml')
     '''
     global CHEM_INFO_DICT
     global CHEM_MONO_MASS
@@ -172,83 +178,3 @@ def calc_mass_from_formula(formula:str):
         CHEM_MONO_MASS[elem]*n
         for elem, n in parse_formula(formula)
     ])
-
-# Cell
-@numba.njit
-def abundance_convolution(
-    d1:np.array,
-    mono1:int,
-    d2:np.array,
-    mono2:int,
-)->typing.Tuple[np.array, int]:
-    '''
-    If we have two isotope distributions,
-    we can use convolute them into one distribution.
-
-    Args:
-        d1 (np.array): isotope distribution to convolute.
-        mono1 (int): mono position of d1.
-        d2 (np.array): isotope distribution to convolute.
-        mono2 (int): mono position of d2
-    Returns:
-        np.array: convoluted isotope distribution.
-        int: new mono position.
-    '''
-    mono_idx = mono1 + mono2
-    ret = np.zeros(MAX_ISOTOPE_LEN*2-1)
-    for i in range(len(d1)):
-        for j in range(len(d2)):
-            ret[i+j] += d1[i]*d2[j]
-
-    mono_idx, start, end = truncate_isotope(ret, mono_idx)
-    return ret[start:end], mono_idx
-
-# Cell
-@numba.njit
-def one_element_dist(
-    elem: str,
-    n: int,
-    chem_isotope_dist: numba.typed.Dict,
-    chem_mono_idx: numba.typed.Dict,
-)->typing.Tuple[np.array, int]:
-    '''
-    Calculate the isotope distribution for
-    an element and its numbers.
-
-    Args:
-        elem (str): element.
-        n (int): element number.
-        chem_isotope_dist (numba.typed.Dict): use `CHEM_ISOTOPE_DIST` as parameter.
-        chem_mono_idx (numba.typed.Dict): use `CHEM_MONO_IDX` as parameter.
-    Returns:
-        np.array: isotope distribution of the element.
-        int: mono position in the distribution
-    '''
-    if n == 0: return EMPTY_DIST.copy(), 0
-    elif n == 1: return chem_isotope_dist[elem], chem_mono_idx[elem]
-    tmp_dist, mono_idx = one_element_dist(elem, n//2, chem_isotope_dist, chem_mono_idx)
-    tmp_dist, mono_idx = abundance_convolution(tmp_dist, mono_idx, tmp_dist, mono_idx)
-    if n%2 == 0:
-        return tmp_dist, mono_idx
-    else:
-        return abundance_convolution(tmp_dist, mono_idx, chem_isotope_dist[elem], chem_mono_idx[elem])
-
-def formula_dist(
-    formula_list:typing.List[typing.Tuple[str,int]]
-)->typing.Tuple[np.array, int]:
-    '''
-    Generate the isotope distribution and the mono index for
-    a given formula (as a list, e.g. `[('H', 2), ('C', 2), ('O', 1)]`),
-    Args:
-        formula_list (list of tuples[str,int]):
-            formula list, e.g. `[('H', 2), ('C', 2), ('O', 1)]`
-    Returns:
-        np.array: isotope distribution
-        int: mono position
-    '''
-    calc_dist = EMPTY_DIST.copy()
-    mono_idx = 0
-    for elem, n in formula_list:
-        _dist, _mono = one_element_dist(elem, n, CHEM_ISOTOPE_DIST, CHEM_MONO_IDX)
-        calc_dist, mono_idx = abundance_convolution(calc_dist, mono_idx, _dist, _mono)
-    return calc_dist, mono_idx

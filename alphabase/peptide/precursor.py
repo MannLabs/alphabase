@@ -10,10 +10,13 @@ import pandas as pd
 import numpy as np
 
 from alphabase.constants.element import (
-    MASS_PROTON, formula_dist, MASS_ISOTOPE
+    MASS_PROTON, MASS_ISOTOPE
 )
 from alphabase.constants.aa import AA_formula
 from alphabase.constants.modification import MOD_formula
+from alphabase.constants.isotope import (
+    IsotopeDistribution
+)
 from alphabase.peptide.mass_calc import (
     calc_peptide_masses_for_same_len_seqs
 )
@@ -242,13 +245,18 @@ def get_mod_seq_formula(seq, mods):
                     formula[chem]=n
     return list(formula.items())
 
-def get_mod_seq_isotope_distribution(seq_mods:tuple):
-    dist, mono = formula_dist(
+def get_mod_seq_isotope_distribution(
+    seq_mods:tuple,
+    isotope_dist:IsotopeDistribution,
+):
+    dist, mono = isotope_dist.calc_formula_distribution(
         get_mod_seq_formula(*seq_mods)
     )
     return dist[mono+1]/dist[mono], dist[mono+2]/dist[mono]
 
-def calc_precursor_isotope(precursor_df:pd.DataFrame):
+def calc_precursor_isotope(
+    precursor_df:pd.DataFrame
+):
     """Calculate isotope mz values and relative (to M0) intensity values for precursors.
 
     Args:
@@ -258,6 +266,8 @@ def calc_precursor_isotope(precursor_df:pd.DataFrame):
         pd.DataFrame: precursor_df with `isotope_mz_m1/isotope_intensity_m1`
             and also `*_m2` columns.
     """
+    isotope_dist = IsotopeDistribution()
+
     precursor_df['isotope_mz_m1'] = (
         precursor_df.precursor_mz +
         MASS_ISOTOPE/precursor_df.charge
@@ -272,7 +282,8 @@ def calc_precursor_isotope(precursor_df:pd.DataFrame):
         precursor_df['isotope_intensity_m2']
     ) = zip(
         *precursor_df[['sequence','mods']].apply(
-            get_mod_seq_isotope_distribution, axis=1
+            get_mod_seq_isotope_distribution,
+            axis=1, isotope_dist=isotope_dist
         )
     )
     return precursor_df
@@ -290,15 +301,15 @@ def calc_precursor_isotope_mp(
     processes:int=8,
     process_bar=None,
 )->pd.DataFrame:
-    """`formula_dist` is not that fast for large dataframes, so here we use multiprocessing
-    for faster isotope pattern calculation.
-    The speed is acceptable with multiprocessing (4.5 min for 21M precursors, 8 processes).
+    """`calc_precursor_isotope()` is not that fast for large dataframes,
+    so here we use multiprocessing for faster isotope pattern calculation.
+    The speed is acceptable with multiprocessing (3.8 min for 21M precursors, 8 processes).
 
     Args:
-        precursor_df (pd.DataFrame): precursor_df calculate.
+        precursor_df (pd.DataFrame): precursor_df to calculate.
         processes (int, optional): process number. Defaults to 8.
-        process_bar (function, optional): The callback function to check multiprocessing.
-            Defaults to None.
+        process_bar (function, optional): The tqdm-based callback function
+        to check multiprocessing. Defaults to None.
 
     Returns:
         pd.DataFrame: new precursor_df with `isotope_mz_m1/isotope_intensity_m1`
