@@ -44,8 +44,8 @@ def parse_mod_seq(
         site_end = PeptideModSeq.find(mod_sep[1],site+1)+1
         if site_end < len(PeptideModSeq) and PeptideModSeq[site_end] == mod_sep[1]:
             site_end += 1
-        if underscore_for_ncterm: site_list.append(str(site-1))
-        else: site_list.append(str(site))
+        if underscore_for_ncterm: site_list.append(site-1)
+        else: site_list.append(site)
         start_mod = site
         if start_mod > 0: start_mod -= 1
         mod_list.append(PeptideModSeq[start_mod:site_end])
@@ -56,19 +56,20 @@ def parse_mod_seq(
     site = PeptideModSeq.find('p')
     while site != -1:
         mod_list.append(PeptideModSeq[site:site+2])
-        if underscore_for_ncterm: site_list.append(str(site))
-        else: site_list.append(str(site+1))
+        site_list = [i-1 if i > site else i for i in site_list]
+        if underscore_for_ncterm: site_list.append(site)
+        else: site_list.append(site+1)
         PeptideModSeq = PeptideModSeq[:site] + PeptideModSeq[site+1:]
         site = PeptideModSeq.find('p', site)
 
     if fixed_C57:
         site = PeptideModSeq.find('C')
         while site != -1:
-            if underscore_for_ncterm: site_list.append(str(site))
-            else: site_list.append(str(site+1))
+            if underscore_for_ncterm: site_list.append(site)
+            else: site_list.append(site+1)
             mod_list.append('C'+"Carbamidomethyl (C)".join(mod_sep))
             site = PeptideModSeq.find('C',site+1)
-    return ';'.join(mod_list), ';'.join(site_list)
+    return ';'.join(mod_list), ';'.join([str(i) for i in site_list])
 
 
 class MaxQuantReader(PSMReaderBase):
