@@ -297,6 +297,9 @@ class PSMReaderBase(object):
                         self._psm_df[col] = origin_df[other_col]
                         break
 
+        if 'scan_num' in self._psm_df.columns:
+            self._psm_df['spec_idx'] = self._psm_df.scan_num - 1
+
 
     def _load_modifications(self, origin_df:pd.DataFrame):
         """Read modification information from 'origin_df'.
