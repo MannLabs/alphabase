@@ -122,6 +122,6 @@ def clear() -> str:
         "All existing temp mmapp arrays will be unusable!"
     )
     del _TEMP_DIR
-    _TEMP_DIR = tempfile.TemporaryDirectory(prefix="tempmmap_")
+    _TEMP_DIR = tempfile.TemporaryDirectory(prefix="temp_mmap_")
     TEMP_DIR_NAME = _TEMP_DIR.name
     return TEMP_DIR_NAME
