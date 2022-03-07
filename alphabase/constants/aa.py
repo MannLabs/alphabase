@@ -75,10 +75,13 @@ def calc_AA_masses_for_same_len_seqs(
 )->np.array:
     '''
     Calculate AA masses for the array of same-len AA sequences.
+
     Args:
         sequence_array (np.array): unmodified sequences with the same length.
+
     Returns:
         np.array: 2-D (array_size, sequence_len) array of masses.
+
     Raises:
         ValueError: if sequences are not with the same length.
     '''
@@ -93,10 +96,13 @@ def calc_sequence_masses_for_same_len_seqs(
 )->np.array:
     '''
     Calculate sequence masses for the array of same-len AA sequences.
+
     Args:
         sequence_array (np.array): unmodified sequences with the same length.
+
     Returns:
         np.array: 1-D (array_size, sequence_len) array of masses.
+
     Raises:
         ValueError: if sequences are not with the same length.
     '''
@@ -112,8 +118,10 @@ def calc_AA_masses_for_var_len_seqs(
 )->np.array:
     '''
     We recommend to use `calc_AA_masses_for_same_len_seqs` as it is much faster.
+
     Args:
         sequence_array (np.array): sequences with variable lengths.
+
     Returns:
         np.array: 1D array of masses, zero values are padded to fill the max length.
     '''

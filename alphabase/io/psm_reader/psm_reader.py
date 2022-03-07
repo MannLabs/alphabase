@@ -85,6 +85,7 @@ class PSMReaderBase(object):
     ):
         """The Base class for all PSMReaders. The key of the sub-classes for different
         search engine format is to re-define `column_mapping` and `modification_mapping`.
+
         Args:
             column_mapping (dict, optional):
                 A dict that maps alphabase's columns to other search engine's.
@@ -114,6 +115,7 @@ class PSMReaderBase(object):
                 Defaults to 0.01.
             keep_decoy(bool, optional): If keep decoy PSMs in self.psm_df.
                 Defautls to False.
+
         Attributes:
             column_mapping (dict): dict structure same as column_mapping in Args.
             modification_mapping (dict): dict structure same as modification_mapping in Args.
@@ -294,6 +296,9 @@ class PSMReaderBase(object):
                     if other_col in origin_df.columns:
                         self._psm_df[col] = origin_df[other_col]
                         break
+
+        if 'scan_num' in self._psm_df.columns:
+            self._psm_df['spec_idx'] = self._psm_df.scan_num - 1
 
 
     def _load_modifications(self, origin_df:pd.DataFrame):

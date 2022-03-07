@@ -134,6 +134,7 @@ def calc_modification_mass(
     '''
     Calculate modification masses for the given peptide length (`nAA`),
     and modified site list.
+
     Args:
         nAA (int): Peptide length
         mod_names (List[str]): Modification name list
@@ -142,6 +143,7 @@ def calc_modification_mass(
             * `site=0` refers to an N-term modification
             * `site=-1` refers to a C-term modification
             * `1<=site<=peplen` refers to a normal modification
+
     Returns:
         np.array: 1-D array with length=`nAA`.
             Masses of modifications through the peptide,
@@ -164,6 +166,7 @@ def calc_mod_masses_for_same_len_seqs(
 )->np.array:
     '''
     Calculate modification masses for the given peptides with same peptide length (`nAA`).
+
     Args:
         nAA (int): Peptide length
         mod_names_list (List[List[str]]):
@@ -173,6 +176,7 @@ def calc_mod_masses_for_same_len_seqs(
             * `site=0` refers to an N-term modification
             * `site=-1` refers to a C-term modification
             * `1<=site<=peplen` refers to a normal modification
+
     Returns:
         np.array:
             2-D array with shape=`(nAA, pep_count or len(mod_names_list)))`.
@@ -199,8 +203,10 @@ def calc_modification_mass_sum(
     Calculate summed mass of the given modification
     without knowing the sites and peptide length.
     It is useful to calculate peptide mass.
+
     Args:
         mod_names (List[str]): Modification name list
+
     Returns:
         float: Total mass
     """
@@ -221,11 +227,13 @@ def _calc_modloss_with_importance(
     For example, `AM(Oxidation@M)S(Phospho@S)...`,
     importance of Phospho@S > importance of Oxidation@M, so the modloss of
     b3 ion will be -98 Da, not -64 Da.
+
     Args:
         mod_losses (np.array):
             Mod loss masses of each AA position
         _loss_importance (np.array):
             Mod loss importance of each AA position
+
     Returns:
         np.array:
             New mod_loss masses selected by `_loss_importance`
@@ -252,6 +260,7 @@ def calc_modloss_mass_with_importance(
     have higher priorities. For example, `AM(Oxidation@M)S(Phospho@S)...`,
     importance of Phospho@S > importance of Oxidation@M, so the modloss of
     b3 ion will be -98 Da, not -64 Da.
+
     Args:
         nAA (int): Peptide length
         mod_names (List[str]): Modification name list
@@ -261,6 +270,7 @@ def calc_modloss_mass_with_importance(
             N-term fragments (mainly `b` ions);
             If `False`, the loss will be on the
             C-term fragments (mainly `y` ions)
+
     Returns:
         np.array: mod_loss masses
     '''
@@ -287,8 +297,10 @@ def _calc_modloss(
 )->np.array:
     '''
     Calculate modification loss masses (e.g. -98 Da for Phospho@S/T).
+
     Args:
         mod_losses (np.array): Mod loss masses of each AA position
+
     Returns:
         np.array: New mod_loss masses
     '''
@@ -311,6 +323,7 @@ def calc_modloss_mass(
     have higher priorities. For example, `AM(Oxidation@M)S(Phospho@S)...`,
     importance of Phospho@S > importance of Oxidation@M, so the modloss of
     b3 ion will be -98 Da, not -64 Da.
+
     Args:
         nAA (int): Peptide length
         mod_names (List[str]): Modification name list
@@ -320,6 +333,7 @@ def calc_modloss_mass(
             N-term fragments (mainly `b` ions);
             If `False`, the loss will be on the
             C-term fragments (mainly `y` ions)
+
     Returns:
         np.array: mod_loss masses
     '''

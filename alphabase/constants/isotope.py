@@ -30,6 +30,7 @@ def abundance_convolution(
         mono1 (int): mono position of d1.
         d2 (np.array): isotope distribution to convolute.
         mono2 (int): mono position of d2
+
     Returns:
         np.array: convoluted isotope distribution.
         int: new mono position.
@@ -60,6 +61,7 @@ def one_element_dist(
         n (int): element number.
         chem_isotope_dist (numba.typed.Dict): use `CHEM_ISOTOPE_DIST` as parameter.
         chem_mono_idx (numba.typed.Dict): use `CHEM_MONO_IDX` as parameter.
+
     Returns:
         np.array: isotope distribution of the element.
         int: mono position in the distribution
@@ -78,11 +80,13 @@ def formula_dist(
 )->typing.Tuple[np.array, int]:
     '''
     Generate the isotope distribution and the mono index for
-    a given formula (as a list, e.g. `[('H', 2), ('C', 2), ('O', 1)]`),
+    a given formula (as a list, e.g. `[('H', 2), ('C', 2), ('O', 1)]`).
+
     Args:
         formula (typing.Union[list, str]): chemical formula, could be str or list.
             If str: "H(1)N(2)O(3)".
             If list: "[('H',1),('H',2),('H',3)]".
+
     Returns:
         np.array: isotope distribution
         int: mono position
@@ -108,6 +112,7 @@ def _calc_one_elem_cum_dist(
     Args:
         element_cum_dist (np.array): cumulated element abundance distribution
         element_cum_mono (np.array): cumulated element mono position in the distribution
+
     Returns:
         None. Added information inplace into element_cum_dist and element_cum_mono
     """
@@ -149,6 +154,7 @@ class IsotopeDistribution:
                 We clip 1000000 C to the maximal number of C in `max_elem_num_dict`.
                 As they have very large masses thus impossible to identify,
                 their isotope distributions do not matter.
+
         Attributes:
             element_to_cum_dist_dict (dict):
                 {element: cumulated isotope distribution array},

@@ -24,6 +24,30 @@ class SpecLibBase(object):
         min_precursor_mz = 400, max_precursor_mz = 6000,
         decoy:str = 'pseudo_reverse',
     ):
+        """Base spectral library in alphabase and alphapeptdeep.
+
+        Args:
+            charged_frag_types (typing.List[str], optional): fragment types with charge.
+                Defaults to [ 'b_z1','b_z2','y_z1', 'y_z2' ].
+            min_precursor_mz (int, optional): Use this to clip precursor df.
+                Defaults to 400.
+            max_precursor_mz (int, optional): Use this to clip precursor df.
+                Defaults to 6000.
+            decoy (str, optional): Decoy methods, could be "pseudo_reverse" or "diann".
+                Defaults to 'pseudo_reverse'.
+
+        Attributes:
+            precursor_df (pd.DataFrame): precursor dataframe.
+            fragment_mz_df (pd.DataFrame): fragment m/z dataframe.
+            fragment_intensity_df (pd.DataFrame): fragment intensity dataframe.
+            charged_frag_types (list): same as `charged_frag_types` in Args.
+            min_precursor_mz (float): same as `min_precursor_mz` in Args.
+            max_precursor_mz (float): same as `max_precursor_mz` in Args.
+            decoy (str): same as `decoy` in Args.
+            mod_seq_df_columns (list of str): str or unnecessary columns to be saved
+                into library/precursor_df in the hdf file. They will be saved into
+                library/mod_seq_df instead.
+        """
         self.charged_frag_types = charged_frag_types
         self._precursor_df = pd.DataFrame()
         self._fragment_intensity_df = pd.DataFrame()
@@ -41,11 +65,14 @@ class SpecLibBase(object):
         self.decoy = decoy
 
     @property
-    def precursor_df(self):
+    def precursor_df(self)->pd.DataFrame:
+        """: pd.DataFrame : precursor dataframe with columns
+        'sequence', 'mods', 'mod_sites', 'charge', ...
+        """
         return self._precursor_df
 
     @precursor_df.setter
-    def precursor_df(self, df):
+    def precursor_df(self, df:pd.DataFrame):
         self._precursor_df = df
         precursor.refine_precursor_df(
             self._precursor_df,
@@ -54,19 +81,29 @@ class SpecLibBase(object):
         )
 
     @property
-    def fragment_mz_df(self):
+    def fragment_mz_df(self)->pd.DataFrame:
+        """: pd.DataFrame : The fragment mz dataframe with
+        fragment types as columns (['b_z1', 'y_z2', ...])
+        """
         return self._fragment_mz_df
 
     @property
-    def fragment_intensity_df(self):
+    def fragment_intensity_df(self)->pd.DataFrame:
+        """: pd.DataFrame : The fragment intensity dataframe with
+        fragment types as columns (['b_z1', 'y_z2', ...])
+        """
         return self._fragment_intensity_df
 
     def refine_df(self):
+        """Sort nAA and reset_index for faster calculation (or prediction)
+        """
         precursor.refine_precursor_df(
             self._precursor_df
         )
 
     def append_decoy_sequence(self):
+        """Append decoy sequence into precursor_df
+        """
         from alphabase.spectrum_library.decoy_library import (
             decoy_lib_provider
         )
@@ -89,7 +126,7 @@ class SpecLibBase(object):
 
     def clip_by_precursor_mz_(self):
         '''
-        Clip self._precursor_df inplace
+        Clip self._precursor_df inplace by self.min_precursor_mz and self.max_precursor_mz
         '''
         self._precursor_df.drop(
             self._precursor_df.loc[
@@ -132,6 +169,7 @@ class SpecLibBase(object):
         self.calc_precursor_mz()
 
     def hash_precursor_df(self):
+        """Insert hash codes for peptides and precursors"""
         precursor.hash_precursor_df(
             self._precursor_df
         )
@@ -140,6 +178,7 @@ class SpecLibBase(object):
         hdf_file,
         delete_existing=False
     ):
+        """Internal function to get a HDF group to write"""
         _hdf = HDF_File(
             hdf_file,
             read_only=False,
@@ -151,6 +190,7 @@ class SpecLibBase(object):
     def _get_hdf_to_load(self,
         hdf_file,
     ):
+        """Internal function to get a HDF group to read"""
         _hdf = HDF_File(
             hdf_file,
         )
@@ -162,6 +202,7 @@ class SpecLibBase(object):
         df: pd.DataFrame,
         delete_existing=False
     ):
+        """Save a new HDF group or dataset into existing HDF file"""
         self._get_hdf_to_save(
             hdf_file,
             delete_existing=delete_existing
@@ -184,7 +225,28 @@ class SpecLibBase(object):
             hdf_file
         ).__getattribute__(df_name).values
 
-    def save_hdf(self, hdf_file):
+    def save_hdf(self, hdf_file:str):
+        """Save library dataframes into hdf_file.
+        For `self.precursor_df`, this method will save it into two hdf groups:
+            hdf_file: `library/precursor_df` and `library/mod_seq_df`.
+
+        `library/precursor_df` contains all essential numberic columns those
+        can be loaded faster from hdf file into memory:
+            'precursor_mz', 'charge', 'mod_seq_hash', 'mod_seq_charge_hash',
+            'frag_start_idx', 'frag_end_idx', 'decoy', 'rt_pred', 'ccs_pred',
+            'mobility_pred', 'miss_cleave', 'nAA',
+            ['isotope_mz_m1', 'isotope_intensity_m1'], ...
+
+        `library/mod_seq_df` contains all string columns and the other
+        not essential columns:
+            'sequence','mods','mod_sites', ['proteins', 'genes']...
+        as well as 'mod_seq_hash', 'mod_seq_charge_hash' columns to map
+        back to `precursor_df`
+
+
+        Args:
+            hdf_file (str): the hdf file path to save
+        """
         _hdf = HDF_File(
             hdf_file,
             read_only=False,
@@ -215,7 +277,14 @@ class SpecLibBase(object):
             'fragment_intensity_df': self._fragment_intensity_df,
         }
 
-    def load_hdf(self, hdf_file, load_mod_seq=False):
+    def load_hdf(self, hdf_file:str, load_mod_seq:bool=False):
+        """Load the hdf library from hdf_file
+
+        Args:
+            hdf_file (str): hdf library path to load
+            load_mod_seq (bool, optional): if also load mod_seq_df.
+                Defaults to False.
+        """
         _hdf = HDF_File(
             hdf_file,
         )

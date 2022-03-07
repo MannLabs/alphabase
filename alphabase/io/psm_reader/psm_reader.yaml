@@ -2,7 +2,8 @@ alphapept:
   reader_type: alphapept
   column_mapping:
     'rt': 'rt'
-    'spec_idx': ['scan_no','raw_idx']
+    'scan_num': 'scan_no'
+    'spec_idx': 'raw_idx'
     'query_id': 'query_idx'
     'mobility': 'mobility'
     'score': 'score'
@@ -33,7 +34,7 @@ maxquant:
       - 'IonMobility'
       - 'K0' # Bug in MaxQuant? It should be 1/K0
       - '1/K0'
-    'spec_idx': 
+    'scan_num': 
       - 'Scan number'
       - 'MS/MS scan number'
       - 'Scan index'
@@ -86,7 +87,7 @@ pfind:
     'rt': 'RT'
     'raw_name': 'raw_name'
     'query_id': 'File_Name'
-    'spec_idx': 'Scan_No'
+    'scan_num': 'Scan_No'
     'score': 'Final_Score'
     'proteins': 'Proteins'
     'uniprot_ids': 'Proteins'
@@ -101,14 +102,14 @@ msfragger_pepxml:
     'charge': 'assumed_charge'
     'rt': 'retention_time_sec'
     'query_id': 'spectrum'
-    'spec_idx': 'start_scan'
+    'scan_num': 'start_scan'
     'score': 'expect'
     'proteins': 'protein'
     'raw_name': 'raw_name'
   modification_mapping:
     '': ''
   mass_mapped_mods:
-    - 'Oxidation@M' #other Oxidation@X are
+    - 'Oxidation@M' #other Oxidation@X are not needed here
     - 'Carbamidomethyl@C'
     - 'Phospho@S' #TY are not needed here
     - 'Acetyl@Any N-term'
@@ -131,7 +132,7 @@ diann:
     'proteins': 'Protein.Names'
     'uniprot_ids': 'Protein.Ids'
     'genes': 'Genes'
-    'spec_idx': 'MS2.Scan'
+    'scan_num': 'MS2.Scan'
   modification_mapping: 'maxquant'
 spectronaut:
   reader_type: spectronaut

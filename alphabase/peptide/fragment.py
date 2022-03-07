@@ -2,8 +2,7 @@
 
 __all__ = ['get_charged_frag_types', 'parse_charged_frag_type', 'init_zero_fragment_dataframe',
            'init_fragment_dataframe_from_other', 'init_fragment_by_precursor_dataframe',
-           'update_sliced_fragment_dataframe', 'get_sliced_fragment_dataframe', 'update_sliced_fragment_dataframe',
-           'get_sliced_fragment_dataframe', 'concat_precursor_fragment_dataframes',
+           'update_sliced_fragment_dataframe', 'get_sliced_fragment_dataframe', 'concat_precursor_fragment_dataframes',
            'calc_fragment_mz_values_for_same_nAA', 'mask_fragments_for_charge_greater_than_precursor_charge',
            'create_fragment_mz_dataframe_by_sort_precursor', 'create_fragment_mz_dataframe',
            'create_fragment_mz_dataframe_ignore_old_idxes']
@@ -24,7 +23,7 @@ from alphabase.constants.element import (
 )
 
 from alphabase.peptide.precursor import (
-    reset_precursor_df,
+    refine_precursor_df,
     update_precursor_mz,
     is_precursor_sorted
 )
@@ -39,9 +38,15 @@ def get_charged_frag_types(
     Args:
         frag_types (List[str]): e.g. ['b','y','b_modloss','y_modloss']
         max_frag_charge (int): max fragment charge. (default: 2)
+
     Returns:
-        List[str]: for `frag_types=['b','y','b_modloss','y_modloss']` and `max_frag_charge=2`,
-        return `['b_z1','b_z2','y_z1','y_z2','b_modloss_z1','b_modloss_z2','y_modloss_z1','y_modloss_z2']`.
+        List[str]: charged fragment types
+
+    Examples::
+
+        >>> frag_types=['b','y','b_modloss','y_modloss']
+        >>> get_charged_frag_types(frag_types, 2)
+        ['b_z1','b_z2','y_z1','y_z2','b_modloss_z1','b_modloss_z2','y_modloss_z1','y_modloss_z2']
     '''
     charged_frag_types = []
     for _type in frag_types:
@@ -54,11 +59,13 @@ def parse_charged_frag_type(
 )->Tuple[str,int]:
     '''
     Oppsite to `get_charged_frag_types`.
+
     Args:
         charged_frag_type (str): e.g. 'y_z1', 'b_modloss_z1'
+
     Returns:
         str: fragment type, e.g. 'b','y'
-        int: charge state, can be a negative value
+        int: charge state
     '''
     items = charged_frag_type.split('_')
     _ch = items[-1]
@@ -71,11 +78,15 @@ def init_zero_fragment_dataframe(
     charged_frag_types:List[str],
     dtype=np.float64
 )->Tuple[pd.DataFrame, np.array, np.array]:
-    '''
+    '''Initialize a zero dataframe based on peptide length
+    (nAA) array (peplen_array) and charge_frag_types (column number).
+    The row number of returned dataframe is np.sum(peplen_array-1).
+
     Args:
         peplen_array (np.array): peptide lengths for the fragment dataframe
         charged_frag_types (List[str]):
             `['b_z1','b_z2','y_z1','y_z2','b_modloss_z1','y_H2O_z1'...]`
+
     Returns:
         pd.DataFrame: `fragment_df` with zero values
         np.array (int64): the start indices point to the `fragment_df` for each peptide
@@ -95,7 +106,7 @@ def init_fragment_dataframe_from_other(
     dtype=np.float64
 ):
     '''
-    Init zero fragment dataframe from the `reference_fragment_df`
+    Init zero fragment dataframe from the `reference_fragment_df` (same rows and same columns)
     '''
     return pd.DataFrame(
         np.zeros_like(reference_fragment_df.values, dtype=dtype),
@@ -115,6 +126,7 @@ def init_fragment_by_precursor_dataframe(
     the `reference_fragment_df` is provided, it will generate
     the dataframe based on the reference. Otherwise it
     generates the dataframe from scratch.
+
     Args:
         precursor_df (pd.DataFrame): precursors to generate fragment masses,
             if `precursor_df` contains the 'frag_start_idx' column,
@@ -123,12 +135,23 @@ def init_fragment_by_precursor_dataframe(
             point to the indices in `reference_fragment_df`
         charged_frag_types (List):
             `['b_z1','b_z2','y_z1','y_z2','b_modloss_z1','y_H2O_z1'...]`
-        reference_fragment_df (pd.DataFrame): generate fragment_mz_df based
-            on this reference (default: None)
-        inplace_in_reference (bool): if calculate the fragment information
+        reference_fragment_df (pd.DataFrame): init zero fragment_mz_df based
+            on this reference. If None, fragment_mz_df will be
+            initialized by :func:`alphabase.peptide.fragment.init_zero_fragment_dataframe`.
+            Defaults to None.
+        inplace_in_reference (bool, optional): if calculate the fragment mz
         inplace in the reference_fragment_df (default: False)
+
     Returns:
-        pd.DataFrame: zero `fragment_df` with given `charged_frag_types`
+        pd.DataFrame: zero `fragment_df` with given `charged_frag_types` columns
+
+    Raises:
+        ValueError: if `reference_fragment_df` is None but there are 'frag_start_idx'
+            in the `precursor_df`, meaning that there are some other fragment
+            dataframes linked to the `precursor_df`, these fragment dataframes must
+            be provided as `reference_fragment_df`.
+            If we are sure that other fragment dataframes are not needed any more,
+            we can just `del precursor_df['frag_start_idx']` before call this function.
     '''
     if 'frag_start_idx' not in precursor_df.columns:
         fragment_df, start_indices, end_indices = init_zero_fragment_dataframe(
@@ -171,20 +194,31 @@ def update_sliced_fragment_dataframe(
     fragment_df: pd.DataFrame,
     values: np.array,
     frag_start_end_list: List[Tuple[int,int]],
-    charged_frag_types: List[str],
+    charged_frag_types: List[str]=None,
 )->pd.DataFrame:
     '''
-    Set the values of the slices `frag_start_end_list=[(start,end),(start,end),...]` of fragment_df.
+    Set the values of the slices `frag_start_end_list=[(start,end),(start,end),...]`
+    of fragment_df.
+
     Args:
-        fragment_df (pd.DataFrame): fragment dataframe to be set
+        fragment_df (pd.DataFrame): fragment dataframe to set the values
         frag_start_end_list (List[Tuple[int,int]]): e.g. `[(start,end),(start,end),...]`
-        charged_frag_types (List[str]): e.g. `['b_z1','b_z2','y_z1','y_z2']`
+        charged_frag_types (List[str], optional): e.g. `['b_z1','b_z2','y_z1','y_z2']`.
+            If None, the columns of values should be the same as fragment_df's columns.
+            It is much faster if charged_frag_types is None as we use numpy slicing,
+            otherwise we use pd.loc (much slower).
+            Defaults to None.
+
     Returns:
-        pd.DataFrame: fragment_df after the values are set
+        pd.DataFrame: fragment_df after the values are set into slices
     '''
     frag_slice_list = [slice(start,end) for start,end in frag_start_end_list]
     frag_slices = np.r_[tuple(frag_slice_list)]
-    fragment_df.loc[frag_slices, charged_frag_types] = values
+    if charged_frag_types is None or len(charged_frag_types)==0:
+        fragment_df.values[frag_slices, :] = values
+    else:
+        charged_frag_idxes = [fragment_df.columns.get_loc(c) for c in charged_frag_types]
+        fragment_df.iloc[frag_slices, charged_frag_idxes] = values
     return fragment_df
 
 def get_sliced_fragment_dataframe(
@@ -194,10 +228,13 @@ def get_sliced_fragment_dataframe(
 )->pd.DataFrame:
     '''
     Get the sliced fragment_df from `frag_start_end_list=[(start,end),(start,end),...]`.
+
     Args:
-        fragment_df (pd.DataFrame): fragment dataframe to be set
+        fragment_df (pd.DataFrame): fragment dataframe to get values
         frag_start_end_list (List[Tuple[int,int]]): e.g. `[(start,end),(start,end),...]`
-        charged_frag_types (List[str]): e.g. `['b_z1','b_z2','y_z1','y_z2']` (default: None)
+        charged_frag_types (List[str]): e.g. `['b_z1','b_z2','y_z1','y_z2']`.
+            if None, all columns will be considered
+
     Returns:
         pd.DataFrame: sliced fragment_df. If `charged_frag_types` is None,
         return fragment_df with all columns
@@ -205,50 +242,10 @@ def get_sliced_fragment_dataframe(
     frag_slice_list = [slice(start,end) for start,end in frag_start_end_list]
     frag_slices = np.r_[tuple(frag_slice_list)]
     if charged_frag_types is None or len(charged_frag_types)==0:
-        charged_frag_types = slice(None)
-    return fragment_df.loc[frag_slices, charged_frag_types]
-
-# Cell
-def update_sliced_fragment_dataframe(
-    fragment_df: pd.DataFrame,
-    values: np.array,
-    frag_start_end_list: List[Tuple[int,int]],
-    charged_frag_types: List[str],
-)->pd.DataFrame:
-    '''
-    Set the values of the slices `frag_start_end_list=[(start,end),(start,end),...]` of fragment_df.
-    Args:
-        fragment_df (pd.DataFrame): fragment dataframe to be set
-        frag_start_end_list (List[Tuple[int,int]]): e.g. `[(start,end),(start,end),...]`
-        charged_frag_types (List[str]): e.g. `['b_z1','b_z2','y_z1','y_z2']`
-    Returns:
-        pd.DataFrame: fragment_df after the values are set
-    '''
-    frag_slice_list = [slice(start,end) for start,end in frag_start_end_list]
-    frag_slices = np.r_[tuple(frag_slice_list)]
-    fragment_df.loc[frag_slices, charged_frag_types] = values
-    return fragment_df
-
-def get_sliced_fragment_dataframe(
-    fragment_df: pd.DataFrame,
-    frag_start_end_list:Union[List,np.array],
-    charged_frag_types:List = None,
-)->pd.DataFrame:
-    '''
-    Get the sliced fragment_df from `frag_start_end_list=[(start,end),(start,end),...]`.
-    Args:
-        fragment_df (pd.DataFrame): fragment dataframe to be set
-        frag_start_end_list (List[Tuple[int,int]]): e.g. `[(start,end),(start,end),...]`
-        charged_frag_types (List[str]): e.g. `['b_z1','b_z2','y_z1','y_z2']` (default: None)
-    Returns:
-        pd.DataFrame: sliced fragment_df. If `charged_frag_types` is None,
-        return fragment_df with all columns
-    '''
-    frag_slice_list = [slice(start,end) for start,end in frag_start_end_list]
-    frag_slices = np.r_[tuple(frag_slice_list)]
-    if charged_frag_types is None or len(charged_frag_types)==0:
-        charged_frag_types = slice(None)
-    return fragment_df.loc[frag_slices, charged_frag_types]
+        charged_frag_idxes = slice(None)
+    else:
+        charged_frag_idxes = [fragment_df.columns.get_loc(c) for c in charged_frag_types]
+    return fragment_df.iloc[frag_slices, charged_frag_idxes]
 
 # Cell
 def concat_precursor_fragment_dataframes(
@@ -261,11 +258,13 @@ def concat_precursor_fragment_dataframes(
     fragment_df, the indexed positions will change for in precursor_dfs,
     this function keeps the correct indexed positions of precursor_df when
     concatenating multiple fragment_df dataframes.
+
     Args:
         precursor_df_list (List[pd.DataFrame]): precursor dataframe list to concatenate
         fragment_df_list (List[pd.DataFrame]): fragment dataframe list to concatenate
         *other_fragment_df_lists: arbitray other fragment dataframe list to concatenate,
             e.g. fragment_mass_df, fragment_inten_df, ...
+
     Returns:
         Tuple[pd.DataFrame,...]: concatenated precursor_df, fragment_df, *other_fragment_df ...
     '''
@@ -419,7 +418,7 @@ def create_fragment_mz_dataframe_by_sort_precursor(
 
     if 'nAA' not in precursor_df.columns:
         precursor_df['nAA'] = precursor_df.sequence.str.len()
-    reset_precursor_df(precursor_df)
+    refine_precursor_df(precursor_df)
 
     fragment_mz_df = init_fragment_by_precursor_dataframe(
         precursor_df, charged_frag_types
@@ -462,6 +461,7 @@ def create_fragment_mz_dataframe(
     the `reference_fragment_df` is provided and precursor_df contains `frag_start_idx`,
     it will generate  the mz dataframe based on the reference. Otherwise it
     generates the mz dataframe from scratch.
+
     Args:
         precursor_df (pd.DataFrame): precursors to generate fragment masses,
             if `precursor_df` contains the 'frag_start_idx' column,
@@ -472,8 +472,10 @@ def create_fragment_mz_dataframe(
             on this reference, as `precursor_df.frag_start_idx` and
             `precursor.frag_end_idx` point to the indices in
             `reference_fragment_df`
+
     Returns:
         pd.DataFrame: `fragment_mz_df` with given `charged_frag_types`
+
     Raises:
         ValueError: when `precursor_df` contains 'frag_start_idx' but
         `reference_fragment_df` is not None
@@ -486,7 +488,7 @@ def create_fragment_mz_dataframe(
             )
     if 'nAA' not in precursor_df.columns:
         precursor_df['nAA'] = precursor_df.sequence.str.len()
-        reset_precursor_df(precursor_df)
+        refine_precursor_df(precursor_df)
         return create_fragment_mz_dataframe_by_sort_precursor(
             precursor_df, charged_frag_types, batch_size
         )
@@ -501,7 +503,7 @@ def create_fragment_mz_dataframe(
     else:
         if reference_fragment_df is not None:
             if inplace_in_reference:
-                fragment_mz_df = reference_fragment_df[[
+                fragment_mz_df = reference_fragment_df.loc[:,[
                     _fr for _fr in charged_frag_types
                     if _fr in reference_fragment_df.columns
                 ]]
@@ -525,13 +527,12 @@ def create_fragment_mz_dataframe(
                 df_group = big_df_group.iloc[i:batch_end,:]
 
                 mz_values = calc_fragment_mz_values_for_same_nAA(
-                    df_group, nAA, charged_frag_types
+                    df_group, nAA, fragment_mz_df.columns
                 )
 
                 update_sliced_fragment_dataframe(
                     fragment_mz_df, mz_values,
                     df_group[['frag_start_idx','frag_end_idx']].values,
-                    charged_frag_types,
                 )
 
     return mask_fragments_for_charge_greater_than_precursor_charge(
