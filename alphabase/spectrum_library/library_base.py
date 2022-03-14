@@ -44,8 +44,8 @@ class SpecLibBase(object):
             min_precursor_mz (float): same as `min_precursor_mz` in Args.
             max_precursor_mz (float): same as `max_precursor_mz` in Args.
             decoy (str): same as `decoy` in Args.
-            mod_seq_df_columns (list of str): str or unnecessary columns to be saved
-                into library/precursor_df in the hdf file. They will be saved into
+            key_numeric_columns (list of str): key numeric columns to be saved
+                into library/precursor_df in the hdf file. Others will be saved into
                 library/mod_seq_df instead.
         """
         self.charged_frag_types = charged_frag_types
@@ -55,12 +55,16 @@ class SpecLibBase(object):
         self.min_precursor_mz = min_precursor_mz
         self.max_precursor_mz = max_precursor_mz
 
-        self.mod_seq_df_columns = [
-            'sequence', 'mods', 'mod_sites',
-            'nce', 'instrument',
-            'protein_idxes',
-            'proteins', 'genes', 'uniprot_ids',
-            'is_prot_nterm', 'is_prot_cterm'
+        self.key_numeric_columns = [
+            'ccs_pred', 'charge',
+            'decoy',
+            'frag_end_idx', 'frag_start_idx',
+            'isotope_intensity_m1', 'isotope_intensity_m2',
+            'isotope_mz_m1', 'isotope_mz_m2',
+            'miss_cleavage', 'mobility_pred',
+            'nAA',
+            'precursor_mz',
+            'rt_pred', 'rt_norm_pred'
         ]
         self.decoy = decoy
 
@@ -256,21 +260,21 @@ class SpecLibBase(object):
         if 'mod_seq_charge_hash' not in self._precursor_df.columns:
             self.hash_precursor_df()
 
-        mod_seq_cols = self.mod_seq_df_columns+[
+        key_columns = self.key_numeric_columns+[
             'mod_seq_hash', 'mod_seq_charge_hash'
         ]
 
         _hdf.library = {
-            'precursor_df': self._precursor_df[
-                [
-                    col for col in self._precursor_df.columns
-                    if col not in self.mod_seq_df_columns
-                ]
-            ],
             'mod_seq_df': self._precursor_df[
                 [
                     col for col in self._precursor_df.columns
-                    if col in mod_seq_cols
+                    if col not in self.key_numeric_columns
+                ]
+            ],
+            'precursor_df': self._precursor_df[
+                [
+                    col for col in self._precursor_df.columns
+                    if col in key_columns
                 ]
             ],
             'fragment_mz_df': self._fragment_mz_df,
@@ -290,10 +294,13 @@ class SpecLibBase(object):
         )
         self._precursor_df:pd.DataFrame = _hdf.library.precursor_df.values
         if load_mod_seq:
+            key_columns = self.key_numeric_columns+[
+                'mod_seq_hash', 'mod_seq_charge_hash'
+            ]
             mod_seq_df = _hdf.library.mod_seq_df.values
             cols = [
                 col for col in mod_seq_df.columns
-                if col in self.mod_seq_df_columns
+                if col not in key_columns
             ]
             self._precursor_df[cols] = mod_seq_df[cols]
         self._fragment_mz_df = _hdf.library.fragment_mz_df.values
