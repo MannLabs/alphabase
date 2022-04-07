@@ -61,6 +61,8 @@ class SpecLibBase(object):
             'frag_end_idx', 'frag_start_idx',
             'isotope_intensity_m1', 'isotope_intensity_m2',
             'isotope_mz_m1', 'isotope_mz_m2',
+            'isotope_apex_mz', 'isotope_apex_intensity',
+            'isotope_apex_index',
             'miss_cleavage', 'mobility_pred',
             'nAA',
             'precursor_mz',
