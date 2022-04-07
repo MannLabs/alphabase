@@ -360,8 +360,14 @@ def calc_precursor_isotope_mp(
         to check multiprocessing. Defaults to None.
 
     Returns:
-        pd.DataFrame: new precursor_df with `isotope_mz_m1/isotope_intensity_m1`
-            and also `*_m2` columns.
+        pd.DataFrame: precursor_df with additional columns:
+        - isotope_intensity_m1
+        - isotope_mz_m1
+        - isotope_intensity_m2
+        - isotope_mz_m2
+        - isotope_apex_intensity
+        - isotope_apex_mz
+        - isotope_apex_index
     """
     df_list = []
     df_group = precursor_df.groupby('nAA')

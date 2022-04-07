@@ -23,7 +23,7 @@ cd release/one_click_macos_gui
 pip install "../../dist/alphabase-0.0.5-py3-none-any.whl[stable]"
 
 # Creating the stand-alone pyinstaller folder
-pip install pyinstaller==4.2
+pip install pyinstaller
 pyinstaller ../pyinstaller/alphabase.spec -y
 conda deactivate
 
