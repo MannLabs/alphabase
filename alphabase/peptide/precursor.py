@@ -260,30 +260,60 @@ def get_mod_seq_isotope_distribution(
     Args:
         seq_mods (tuple): (sequence, mods)
         isotope_dist (IsotopeDistribution):
-            see : class : `alphabase.constants.isotope.IsotopeDistribution`
+            see :class:`alphabase.constants.isotope.IsotopeDistribution`
 
     Returns:
-        float: mono+1 abundance / mono abundance
-        float: mono+2 abundance / mono abundance
+        float: abundance of mono+1 / mono
+        float: abundance of mono+2 / mono
+        float: abundance of apex / mono
+        int: Apex isotope position relative to mono,
+             i.e. apex index - mono index and
+             0 refers to the position of mono itself.
     """
     dist, mono = isotope_dist.calc_formula_distribution(
         get_mod_seq_formula(*seq_mods)
     )
-    return dist[mono+1]/dist[mono], dist[mono+2]/dist[mono]
+
+    apex_idx = np.argmax(dist)
+
+    return (
+        dist[mono+1]/dist[mono],
+        dist[mono+2]/dist[mono],
+        dist[apex_idx]/dist[mono],
+        apex_idx-mono
+    )
 
 def calc_precursor_isotope(
     precursor_df:pd.DataFrame
 ):
-    """Calculate isotope mz values and relative (to M0) intensity values for precursor_df.
+    """Calculate isotope mz values and relative (to M0) intensity values for precursor_df inplace.
 
     Args:
         precursor_df (pd.DataFrame): precursor_df to calculate.
 
     Returns:
-        pd.DataFrame: precursor_df with `isotope_mz_m1/isotope_intensity_m1`
-            and also `*_m2` columns.
+        pd.DataFrame: precursor_df with additional columns:
+        - isotope_intensity_m1
+        - isotope_mz_m1
+        - isotope_intensity_m2
+        - isotope_mz_m2
+        - isotope_apex_intensity
+        - isotope_apex_mz
+        - isotope_apex_index
     """
     isotope_dist = IsotopeDistribution()
+
+    (
+        precursor_df['isotope_intensity_m1'],
+        precursor_df['isotope_intensity_m2'],
+        precursor_df['isotope_apex_intensity'],
+        precursor_df['isotope_apex_index'],
+    ) = zip(
+        *precursor_df[['sequence','mods']].apply(
+            get_mod_seq_isotope_distribution,
+            axis=1, isotope_dist=isotope_dist
+        )
+    )
 
     precursor_df['isotope_mz_m1'] = (
         precursor_df.precursor_mz +
@@ -294,15 +324,15 @@ def calc_precursor_isotope(
         2*MASS_ISOTOPE/precursor_df.charge
     )
 
-    (
-        precursor_df['isotope_intensity_m1'],
-        precursor_df['isotope_intensity_m2']
-    ) = zip(
-        *precursor_df[['sequence','mods']].apply(
-            get_mod_seq_isotope_distribution,
-            axis=1, isotope_dist=isotope_dist
+    precursor_df['isotope_apex_mz'] = (
+        precursor_df.precursor_mz +
+        (
+            MASS_ISOTOPE
+            *precursor_df.isotope_apex_index
+            /precursor_df.charge
         )
     )
+
     return precursor_df
 
 import multiprocessing as mp
@@ -330,8 +360,14 @@ def calc_precursor_isotope_mp(
         to check multiprocessing. Defaults to None.
 
     Returns:
-        pd.DataFrame: new precursor_df with `isotope_mz_m1/isotope_intensity_m1`
-            and also `*_m2` columns.
+        pd.DataFrame: precursor_df with additional columns:
+        - isotope_intensity_m1
+        - isotope_mz_m1
+        - isotope_intensity_m2
+        - isotope_mz_m2
+        - isotope_apex_intensity
+        - isotope_apex_mz
+        - isotope_apex_index
     """
     df_list = []
     df_group = precursor_df.groupby('nAA')

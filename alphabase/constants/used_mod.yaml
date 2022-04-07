@@ -1,4 +1,5 @@
 #user-defined modifications
+# See GG@K for GlyGly@K
 GlyGly@K:
   avge_mass: 114.042927
   classification: Post-translational
@@ -6,7 +7,7 @@ GlyGly@K:
   modloss: 114.042927
   modloss_composition: H(6)C(4)N(2)O(2)
   mono_mass: 114.042927
-  unimod_id: -1
+  unimod_id: 121
 
 #unimod modifications
 15N-oxobutanoic@C^Any N-term:

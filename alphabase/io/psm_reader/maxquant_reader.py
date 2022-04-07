@@ -69,7 +69,8 @@ def parse_mod_seq(
             else: site_list.append(site+1)
             mod_list.append('C'+"Carbamidomethyl (C)".join(mod_sep))
             site = PeptideModSeq.find('C',site+1)
-    return ';'.join(mod_list), ';'.join([str(i) for i in site_list])
+    nAA = len(PeptideModSeq.strip('_'))
+    return ';'.join(mod_list), ';'.join([str(i) if i <= nAA else '-1' for i in site_list])
 
 
 class MaxQuantReader(PSMReaderBase):

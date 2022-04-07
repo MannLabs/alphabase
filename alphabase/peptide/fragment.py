@@ -274,9 +274,9 @@ def concat_precursor_fragment_dataframes(
     for i,precursor_df in enumerate(precursor_df_list[1:]):
         precursor_df[['frag_start_idx','frag_end_idx']] += cum_frag_df_lens[i]
     return (
-        pd.concat(precursor_df_list).reset_index(drop=True),
-        pd.concat(fragment_df_list).reset_index(drop=True),
-        *[pd.concat(other_list).reset_index(drop=True)
+        pd.concat(precursor_df_list, ignore_index=True),
+        pd.concat(fragment_df_list, ignore_index=True),
+        *[pd.concat(other_list, ignore_index=True)
             for other_list in other_fragment_df_lists
         ]
     )

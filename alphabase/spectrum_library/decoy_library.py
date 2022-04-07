@@ -171,12 +171,17 @@ class DecoyLibProvider(object):
     def register(self, name, decoy_class):
         self.decoy_dict[name.lower()] = decoy_class
 
-    def get_decoy_lib(self, name,
+    def get_decoy_lib(self, name:str,
         target_lib, **kwargs
     )->DecoyLib:
-        return self.decoy_dict[name.lower()](
-            target_lib, **kwargs
-        )
+        if name is None: return None
+        name = name.lower()
+        if name in self.decoy_dict:
+            return self.decoy_dict[name](
+                target_lib, **kwargs
+            )
+        else:
+            return None
 
 decoy_lib_provider = DecoyLibProvider()
 decoy_lib_provider.register('pseudo_reverse', DecoyLib)

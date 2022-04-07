@@ -297,7 +297,10 @@ class PSMReaderBase(object):
                         self._psm_df[col] = origin_df[other_col]
                         break
 
-        if 'scan_num' in self._psm_df.columns:
+        if (
+            'scan_num' in self._psm_df.columns and
+            not 'spec_idx' in self._psm_df.columns
+        ):
             self._psm_df['spec_idx'] = self._psm_df.scan_num - 1
 
 
