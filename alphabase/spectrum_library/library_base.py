@@ -22,7 +22,7 @@ class SpecLibBase(object):
             'b_z1','b_z2','y_z1', 'y_z2'
         ],
         min_precursor_mz = 400, max_precursor_mz = 6000,
-        decoy:str = 'pseudo_reverse',
+        decoy:str = None,
     ):
         """Base spectral library in alphabase and alphapeptdeep.
 
@@ -34,7 +34,7 @@ class SpecLibBase(object):
             max_precursor_mz (int, optional): Use this to clip precursor df.
                 Defaults to 6000.
             decoy (str, optional): Decoy methods, could be "pseudo_reverse" or "diann".
-                Defaults to 'pseudo_reverse'.
+                Defaults to None.
 
         Attributes:
             precursor_df (pd.DataFrame): precursor dataframe.
@@ -111,14 +111,12 @@ class SpecLibBase(object):
         from alphabase.spectrum_library.decoy_library import (
             decoy_lib_provider
         )
-        if self.decoy not in (
-            decoy_lib_provider.decoy_dict
-        ): return
         decoy_lib = (
             decoy_lib_provider.get_decoy_lib(
                 self.decoy, self
             )
         )
+        if decoy_lib is None: return None
         decoy_lib.decoy_sequence()
         self._precursor_df['decoy'] = 0
         decoy_lib._precursor_df['decoy'] = 1
