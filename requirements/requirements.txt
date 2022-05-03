@@ -1,1 +1,7 @@
-click==8.0.1
+numba
+numpy
+pyyaml
+pandas
+h5py
+contextlib2
+mmh3

@@ -1,0 +1,160 @@
+alphapept:
+  reader_type: alphapept
+  column_mapping:
+    'rt': 'rt'
+    'scan_num': 'scan_no'
+    'spec_idx': 'raw_idx'
+    'query_id': 'query_idx'
+    'mobility': 'mobility'
+    'score': 'score'
+    'precursor_mz': 'mz'
+    'charge': 'charge'
+    'raw_name': 'raw_name' #parse from `ms_data.hdf`` file
+    'fdr': 'q_value'
+    'decoy': 'decoy'
+  modification_mapping:
+    'Carbamidomethyl@C': 'cC'
+    'Oxidation@M': 'oxM'
+    'Phospho@S': 'pS'
+    'Phospho@T': 'pT'
+    'Phospho@Y': 'pY'
+    'Acetyl@Protein N-term': 'a'
+maxquant:
+  reader_type: maxquant
+  mod_sep: '()'
+  underscore_for_ncterm: True
+  fixed_C57: True
+  column_mapping:
+    'sequence': 'Sequence'
+    'charge': 'Charge'
+    'rt': 'Retention time'
+    'ccs': 'CCS'
+    'mobility': 
+      - 'Mobility'
+      - 'IonMobility'
+      - 'K0' # Bug in MaxQuant? It should be 1/K0
+      - '1/K0'
+    'scan_num': 
+      - 'Scan number'
+      - 'MS/MS scan number'
+      - 'Scan index'
+    'raw_name': 'Raw file'
+    'precursor_mz': 'm/z'
+    'score': 'Score'
+    'proteins': 'Proteins'
+    'genes': ['Gene Names','Gene names']
+    'decoy': 'Reverse'
+  modification_mapping:
+    'Acetyl@Protein N-term': 
+      - '_(Acetyl (Protein N-term))'
+      - '_(ac)'
+      - '_(UniMod:1)'
+    'Carbamidomethyl@C': 
+      - 'C(Carbamidomethyl (C))'
+      - 'C(UniMod:4)'
+    'Oxidation@M': 
+      - 'M(Oxidation (M))'
+      - 'M(ox)'
+      - 'M(UniMod:35)'
+    'Phospho@S': 
+      - 'S(Phospho (S))'
+      - 'S(Phospho (ST))'
+      - 'S(Phospho (STY))'
+      - 'S(ph)'
+      - 'S(UniMod:21)'
+      - 'pS'
+    'Phospho@T': 
+      - 'T(Phospho (T))'
+      - 'T(Phospho (ST))'
+      - 'T(Phospho (STY))'
+      - 'T(ph)'
+      - 'T(UniMod:21)'
+      - 'pT'
+    'Phospho@Y': 
+      - 'Y(Phospho (Y))'
+      - 'Y(Phospho (STY))'
+      - 'Y(ph)'
+      - 'Y(UniMod:21)'
+      - 'pY'
+    'Deamidated@N': ['N(Deamidation (NQ))']
+    'Deamidated@Q': ['Q(Deamidation (NQ))']
+    'GlyGly@K': ['K(GlyGly (K))', 'K(gl)']
+pfind:
+  reader_type: pfind
+  column_mapping:
+    'sequence': 'Sequence'
+    'charge': 'Charge'
+    'rt': 'RT'
+    'raw_name': 'raw_name'
+    'query_id': 'File_Name'
+    'scan_num': 'Scan_No'
+    'score': 'Final_Score'
+    'proteins': 'Proteins'
+    'uniprot_ids': 'Proteins'
+    'fdr': 'Q-value'
+    'decoy': ['Target/Decoy', 'Targe/Decoy']
+  modification_mapping:
+    '': ''
+msfragger_pepxml:
+  reader_type: msfragger_pepxml
+  column_mapping:
+    'sequence': 'peptide'
+    'charge': 'assumed_charge'
+    'rt': 'retention_time_sec'
+    'query_id': 'spectrum'
+    'scan_num': 'start_scan'
+    'score': 'expect'
+    'proteins': 'protein'
+    'raw_name': 'raw_name'
+  modification_mapping:
+    '': ''
+  mass_mapped_mods:
+    - 'Oxidation@M' #other Oxidation@X are not needed here
+    - 'Carbamidomethyl@C'
+    - 'Phospho@S' #TY are not needed here
+    - 'Acetyl@Any N-term'
+    - 'Glu->pyro-Glu@E^Any N-term'
+    - 'Gln->pyro-Glu@Q^Any N-term'
+  mod_mass_tol: 0.1 # Da
+diann:
+  reader_type: diann
+  mod_sep: '()'
+  underscore_for_ncterm: False
+  fixed_C57: False
+  csv_sep: "\t"
+  column_mapping:
+    'raw_name': 'Run'
+    'sequence': 'Stripped.Sequence'
+    'charge': 'Precursor.Charge'
+    'rt': ['RT','iRT','Tr_recalibrated','RetentionTime']
+    'ccs': 'CCS'
+    'mobility': ['IM','IonMobility']
+    'proteins': 'Protein.Names'
+    'uniprot_ids': 'Protein.Ids'
+    'genes': 'Genes'
+    'scan_num': 'MS2.Scan'
+    'score': 'CScore'
+  modification_mapping: 'maxquant'
+spectronaut:
+  reader_type: spectronaut
+  mod_sep: '[]'
+  underscore_for_ncterm: False
+  fixed_C57: False
+  csv_sep: "\t"
+  mod_seq_columns:
+    - 'ModifiedPeptide'
+    - 'ModifiedSequence'
+    - 'FullUniModPeptideName'
+  column_mapping:
+    'raw_name': 'ReferenceRun'
+    'sequence': ['StrippedPeptide','PeptideSequence']
+    'charge': 'PrecursorCharge'
+    'rt': ['RT','iRT','Tr_recalibrated','RetentionTime']
+    'ccs': 'CCS'
+    'precursor_mz': 'PrecursorMz'
+    'mobility': ['Mobility','IonMobility']
+    'proteins': 'Protein Name'
+    'uniprot_ids': ['UniProtIds','UniProtID']
+    'genes': 'Genes'
+  modification_mapping: 'maxquant'
+  
