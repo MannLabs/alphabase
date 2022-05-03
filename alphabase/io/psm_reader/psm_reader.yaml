@@ -133,6 +133,7 @@ diann:
     'uniprot_ids': 'Protein.Ids'
     'genes': 'Genes'
     'scan_num': 'MS2.Scan'
+    'score': 'CScore'
   modification_mapping: 'maxquant'
 spectronaut:
   reader_type: spectronaut
