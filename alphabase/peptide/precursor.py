@@ -301,6 +301,10 @@ def calc_precursor_isotope(
         - isotope_apex_mz
         - isotope_apex_index
     """
+
+    if "precursor_mz" not in precursor_df.columns:
+        update_precursor_mz(precursor_df)
+
     isotope_dist = IsotopeDistribution()
 
     (
