@@ -103,6 +103,7 @@ class AlphaPeptReader(PSMReaderBase):
             #df['naked_sequence'] = df['naked_sequence'].str.decode('utf-8')
             if 'scan_no' in df.columns:
                 df['scan_no'] = df['scan_no'].astype('int')
+                df['raw_idx'] = df['scan_no']-1
             df['charge'] = df['charge'].astype(int)
 
             if 'score' not in df.columns:
