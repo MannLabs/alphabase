@@ -8,6 +8,7 @@ __all__ = ['refine_precursor_df', 'is_precursor_refined', 'update_precursor_mz',
 # Cell
 import pandas as pd
 import numpy as np
+import multiprocessing as mp
 
 from alphabase.constants.element import (
     MASS_PROTON, MASS_ISOTOPE
@@ -233,7 +234,9 @@ def hash_precursor_df(
 
 # Cell
 def get_mod_seq_formula(seq:str, mods:str)->list:
-    """ 'PEPTIDE','Acetyl@Any N-term' --> [('C',n), ('H',m), ...] """
+    """
+    'PEPTIDE','Acetyl@Any N-term' --> [('C',n), ('H',m), ...]
+    """
     formula = {}
     for aa in seq:
         for chem,n in AA_formula[aa].items():
@@ -338,8 +341,6 @@ def calc_precursor_isotope(
     )
 
     return precursor_df
-
-import multiprocessing as mp
 
 def _precursor_df_group(df_group):
     """Internal funciton for multiprocessing"""

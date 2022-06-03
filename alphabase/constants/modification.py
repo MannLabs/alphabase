@@ -40,20 +40,19 @@ def update_all_by_MOD_DF():
     we can also process MOD_DF and then update all global
     modification variables from MOD_DF
     """
-    global MOD_INFO_DICT
-    global MOD_CHEM
-    global MOD_MASS
-    global MOD_LOSS_MASS
-    global MOD_LOSS_IMPORTANCE
-    global MOD_formula
 
-    MOD_INFO_DICT = MOD_DF.to_dict(orient='index')
-    MOD_CHEM = MOD_DF['composition'].to_dict()
-    MOD_MASS = MOD_DF['mass'].to_dict()
-    MOD_LOSS_MASS = MOD_DF['modloss'].to_dict()
-    MOD_LOSS_IMPORTANCE = MOD_DF['modloss_importance'].to_dict()
+    MOD_INFO_DICT.clear()
+    MOD_INFO_DICT.update(MOD_DF.to_dict(orient='index'))
+    MOD_CHEM.clear()
+    MOD_CHEM.update(MOD_DF['composition'].to_dict())
+    MOD_MASS.clear()
+    MOD_MASS.update(MOD_DF['mass'].to_dict())
+    MOD_LOSS_MASS.clear()
+    MOD_LOSS_MASS.update(MOD_DF['modloss'].to_dict())
+    MOD_LOSS_IMPORTANCE.clear()
+    MOD_LOSS_IMPORTANCE.update(MOD_DF['modloss_importance'].to_dict())
 
-    MOD_formula = {}
+    MOD_formula.clear()
     for mod, chem in MOD_CHEM.items():
         MOD_formula[mod] = dict(parse_formula(chem))
 
@@ -87,7 +86,7 @@ def _keep_only_important_modloss():
 def load_mod_df(
     tsv:str=os.path.join(_base_dir, 'modification.tsv'),
     *,
-    keep_only_important_modloss=True,
+    keep_only_important_modloss=False,
 ):
     global MOD_DF
     MOD_DF = pd.read_table(tsv)
