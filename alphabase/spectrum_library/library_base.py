@@ -21,7 +21,7 @@ class SpecLibBase(object):
         charged_frag_types:typing.List[str] = [
             'b_z1','b_z2','y_z1', 'y_z2'
         ],
-        min_precursor_mz = 400, max_precursor_mz = 6000,
+        precursor_mz_min = 400, precursor_mz_max = 6000,
         decoy:str = None,
     ):
         """Base spectral library in alphabase and alphapeptdeep.
@@ -29,9 +29,9 @@ class SpecLibBase(object):
         Args:
             charged_frag_types (typing.List[str], optional): fragment types with charge.
                 Defaults to [ 'b_z1','b_z2','y_z1', 'y_z2' ].
-            min_precursor_mz (int, optional): Use this to clip precursor df.
+            precursor_mz_min (int, optional): Use this to clip precursor df.
                 Defaults to 400.
-            max_precursor_mz (int, optional): Use this to clip precursor df.
+            precursor_mz_max (int, optional): Use this to clip precursor df.
                 Defaults to 6000.
             decoy (str, optional): Decoy methods, could be "pseudo_reverse" or "diann".
                 Defaults to None.
@@ -52,8 +52,8 @@ class SpecLibBase(object):
         self._precursor_df = pd.DataFrame()
         self._fragment_intensity_df = pd.DataFrame()
         self._fragment_mz_df = pd.DataFrame()
-        self.min_precursor_mz = min_precursor_mz
-        self.max_precursor_mz = max_precursor_mz
+        self.min_precursor_mz = precursor_mz_min
+        self.max_precursor_mz = precursor_mz_max
 
         self.key_numeric_columns = [
             'ccs_pred', 'charge',
