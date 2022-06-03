@@ -173,13 +173,14 @@ class SpecLibBase(object):
         self.calc_precursor_mz()
 
     def calc_precursor_isotope(self,
-        multiprocessing=True,
-        mp_process_num=8,
+        multiprocessing:bool=True,
+        mp_process_num:int=8,
         mp_process_bar=None,
+        min_num_for_mp:int=1000,
     ):
         if 'precursor_mz' not in self._precursor_df.columns:
             self.calc_precursor_mz()
-        if multiprocessing:
+        if multiprocessing and len(self.precursor_df)>min_num_for_mp:
             (
                 self._precursor_df
             ) = precursor.calc_precursor_isotope_mp(
@@ -193,6 +194,25 @@ class SpecLibBase(object):
             ) = precursor.calc_precursor_isotope(
                 self.precursor_df
             )
+
+    def calc_fragment_mz_df(self):
+        """
+        TODO: use multiprocessing here or in the
+        `create_fragment_mz_dataframe()` function.
+        """
+        if 'frag_start_idx' in self.precursor_df.columns:
+            return
+        if (
+            self.charged_frag_types is not None
+            or len(self.charged_frag_types)
+        ):
+            (
+                self._fragment_mz_df
+            ) = fragment.create_fragment_mz_dataframe(
+                self.precursor_df, self.charged_frag_types,
+            )
+        else:
+            print('Skip fragment calculation as fragment type is None')
 
     def hash_precursor_df(self):
         """Insert hash codes for peptides and precursors"""

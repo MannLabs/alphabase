@@ -209,6 +209,9 @@ def get_fix_mods(
     fix_mod_aas:str,
     fix_mod_dict:dict
 )->tuple:
+    """
+    Generate fix modifications for the sequence
+    """
     mods = []
     mod_sites = []
     for i,aa in enumerate(sequence):
@@ -276,6 +279,11 @@ def get_var_mods_per_sites_multi_mods_on_aa(
     mod_sites:tuple,
     var_mod_dict:dict
 )->list:
+    """
+    Used only when the var mod list contains
+    more than one mods on the same AA, for example:
+    Mod1@A, Mod2@A ...
+    """
     mods_str_list = ['']
     for i,site in enumerate(mod_sites):
         if len(var_mod_dict[sequence[site-1]]) == 1:
@@ -296,6 +304,11 @@ def get_var_mods_per_sites_single_mod_on_aa(
     mod_sites:tuple,
     var_mod_dict:dict
 )->list:
+    """
+    Used when the var mod list contains
+    only one mods on the each AA, for example:
+    Mod1@A, Mod2@D ...
+    """
     mod_str = ''
     for site in mod_sites:
             mod_str += var_mod_dict[sequence[site-1]]+';'
@@ -311,6 +324,10 @@ def get_var_mods(
     max_combs:int,
     keep_unmodified:bool=False,
 )->tuple:
+    """
+    Generate all modification combinations and associated sites
+    for the sequence.
+    """
     mod_sites_list = get_var_mod_sites(
         sequence, var_mod_aas,
         max_var_mod, max_combs
@@ -419,7 +436,25 @@ def append_regular_modifications(df:pd.DataFrame,
     var_mods = ['Phospho@S','Phospho@T','Phospho@Y'],
     max_mod_num=1, max_combs=100,
     keep_unmodified=True,
-):
+)->pd.DataFrame:
+    """
+    Append regular (not N/C-term) variable modifications to the
+    exsiting modifications of each sequence in `df`.
+
+    Args:
+        df (pd.DataFrame): Precursor dataframe
+        var_mods (list, optional): Considered varialbe modification list.
+            Defaults to ['Phospho@S','Phospho@T','Phospho@Y'].
+        max_mod_num (int, optional): Maximal modification number for
+            each sequence of the `var_mods`. Defaults to 1.
+        max_combs (int, optional): One sequence is only allowed to explode
+            to `max_combs` number of modified peptides. Defaults to 100.
+        keep_unmodified (bool, optional): If unmodified (only refered to `var_mods`)
+        peptides are also remained in the returned dataframe. Defaults to True.
+
+    Returns:
+        pd.DataFrame: The precursor_df with `var_mods` appended.
+    """
     mod_dict = dict([(mod[-1],mod) for mod in var_mods])
     var_mod_aas = ''.join(mod_dict.keys())
 
