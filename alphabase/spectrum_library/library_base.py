@@ -172,6 +172,28 @@ class SpecLibBase(object):
         """Calculate precursor mz for self._precursor_df"""
         self.calc_precursor_mz()
 
+    def calc_precursor_isotope(self,
+        multiprocessing=True,
+        mp_process_num=8,
+        mp_process_bar=None,
+    ):
+        if 'precursor_mz' not in self._precursor_df.columns:
+            self.calc_precursor_mz()
+        if multiprocessing:
+            (
+                self._precursor_df
+            ) = precursor.calc_precursor_isotope_mp(
+                self.precursor_df,
+                processes=mp_process_num,
+                process_bar=mp_process_bar,
+            )
+        else:
+            (
+                self._precursor_df
+            ) = precursor.calc_precursor_isotope(
+                self.precursor_df
+            )
+
     def hash_precursor_df(self):
         """Insert hash codes for peptides and precursors"""
         precursor.hash_precursor_df(
