@@ -10,6 +10,7 @@ tqdm
 psutil
 nbdev
 pyteomics
+biopython
 
 numba
 numpy
