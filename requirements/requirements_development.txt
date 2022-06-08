@@ -10,6 +10,7 @@ tqdm
 psutil
 nbdev
 pyteomics
+biopython
 
 numba
 numpy
@@ -18,3 +19,5 @@ pandas
 h5py
 contextlib2
 mmh3
+pydivsufsort
+ahocorasick

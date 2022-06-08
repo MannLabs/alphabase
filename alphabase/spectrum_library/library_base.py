@@ -21,7 +21,7 @@ class SpecLibBase(object):
         charged_frag_types:typing.List[str] = [
             'b_z1','b_z2','y_z1', 'y_z2'
         ],
-        min_precursor_mz = 400, max_precursor_mz = 6000,
+        precursor_mz_min = 400, precursor_mz_max = 6000,
         decoy:str = None,
     ):
         """Base spectral library in alphabase and alphapeptdeep.
@@ -29,9 +29,9 @@ class SpecLibBase(object):
         Args:
             charged_frag_types (typing.List[str], optional): fragment types with charge.
                 Defaults to [ 'b_z1','b_z2','y_z1', 'y_z2' ].
-            min_precursor_mz (int, optional): Use this to clip precursor df.
+            precursor_mz_min (int, optional): Use this to clip precursor df.
                 Defaults to 400.
-            max_precursor_mz (int, optional): Use this to clip precursor df.
+            precursor_mz_max (int, optional): Use this to clip precursor df.
                 Defaults to 6000.
             decoy (str, optional): Decoy methods, could be "pseudo_reverse" or "diann".
                 Defaults to None.
@@ -52,8 +52,8 @@ class SpecLibBase(object):
         self._precursor_df = pd.DataFrame()
         self._fragment_intensity_df = pd.DataFrame()
         self._fragment_mz_df = pd.DataFrame()
-        self.min_precursor_mz = min_precursor_mz
-        self.max_precursor_mz = max_precursor_mz
+        self.min_precursor_mz = precursor_mz_min
+        self.max_precursor_mz = precursor_mz_max
 
         self.key_numeric_columns = [
             'ccs_pred', 'charge',
@@ -171,6 +171,48 @@ class SpecLibBase(object):
     def update_precursor_mz(self):
         """Calculate precursor mz for self._precursor_df"""
         self.calc_precursor_mz()
+
+    def calc_precursor_isotope(self,
+        multiprocessing:bool=True,
+        mp_process_num:int=8,
+        mp_process_bar=None,
+        min_num_for_mp:int=1000,
+    ):
+        if 'precursor_mz' not in self._precursor_df.columns:
+            self.calc_precursor_mz()
+        if multiprocessing and len(self.precursor_df)>min_num_for_mp:
+            (
+                self._precursor_df
+            ) = precursor.calc_precursor_isotope_mp(
+                self.precursor_df,
+                processes=mp_process_num,
+                process_bar=mp_process_bar,
+            )
+        else:
+            (
+                self._precursor_df
+            ) = precursor.calc_precursor_isotope(
+                self.precursor_df
+            )
+
+    def calc_fragment_mz_df(self):
+        """
+        TODO: use multiprocessing here or in the
+        `create_fragment_mz_dataframe()` function.
+        """
+        if 'frag_start_idx' in self.precursor_df.columns:
+            return
+        if (
+            self.charged_frag_types is not None
+            or len(self.charged_frag_types)
+        ):
+            (
+                self._fragment_mz_df
+            ) = fragment.create_fragment_mz_dataframe(
+                self.precursor_df, self.charged_frag_types,
+            )
+        else:
+            print('Skip fragment calculation as fragment type is None')
 
     def hash_precursor_df(self):
         """Insert hash codes for peptides and precursors"""
