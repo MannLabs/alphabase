@@ -41,8 +41,8 @@ class SpecLibBase(object):
             fragment_mz_df (pd.DataFrame): fragment m/z dataframe.
             fragment_intensity_df (pd.DataFrame): fragment intensity dataframe.
             charged_frag_types (list): same as `charged_frag_types` in Args.
-            min_precursor_mz (float): same as `min_precursor_mz` in Args.
-            max_precursor_mz (float): same as `max_precursor_mz` in Args.
+            min_precursor_mz (float): same as `precursor_mz_min` in Args.
+            max_precursor_mz (float): same as `precursor_mz_max` in Args.
             decoy (str): same as `decoy` in Args.
             key_numeric_columns (list of str): key numeric columns to be saved
                 into library/precursor_df in the hdf file. Others will be saved into
@@ -345,5 +345,19 @@ class SpecLibBase(object):
                 if col not in key_columns
             ]
             self._precursor_df[cols] = mod_seq_df[cols]
+
         self._fragment_mz_df = _hdf.library.fragment_mz_df.values
         self._fragment_intensity_df = _hdf.library.fragment_intensity_df.values
+
+        self._fragment_mz_df = self._fragment_mz_df[
+            [
+                frag for frag in self.charged_frag_types
+                if frag in self._fragment_mz_df.columns
+            ]
+        ]
+        self._fragment_intensity_df = self._fragment_intensity_df[
+            [
+                frag for frag in self.charged_frag_types
+                if frag in self._fragment_intensity_df.columns
+            ]
+        ]

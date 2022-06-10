@@ -519,8 +519,8 @@ class FastaLib(SpecLibBase):
             protease, max_missed_cleavages,
             peptide_length_min, peptide_length_max
         )
-        self.precursor_charge_min = precursor_charge_min
-        self.precursor_charge_max = precursor_charge_max
+        self.min_precursor_charge = precursor_charge_min
+        self.max_precursor_charge = precursor_charge_max
 
         self.var_mods = var_mods
         self.fix_mods = fix_mods
@@ -851,8 +851,8 @@ class FastaLib(SpecLibBase):
     def add_charge(self):
         self._precursor_df['charge'] = [
             np.arange(
-                self.precursor_charge_min,
-                self.precursor_charge_max+1
+                self.min_precursor_charge,
+                self.min_precursor_charge+1
             )
         ]*len(self._precursor_df)
         self._precursor_df = self._precursor_df.explode('charge')
