@@ -6,5 +6,5 @@ h5py
 contextlib2
 mmh3
 biopython
-pydivsufsort
-ahocorasick
+psutil
+tqdm

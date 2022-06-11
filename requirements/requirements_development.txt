@@ -6,12 +6,12 @@ twine
 bumpversion
 pipdeptree
 ipykernel
-tqdm
-psutil
 nbdev
 pyteomics
-biopython
 
+tqdm
+psutil
+biopython
 numba
 numpy
 pyyaml
@@ -20,4 +20,4 @@ h5py
 contextlib2
 mmh3
 pydivsufsort
-ahocorasick
+pyahocorasick
