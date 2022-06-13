@@ -852,7 +852,7 @@ class FastaLib(SpecLibBase):
         self._precursor_df['charge'] = [
             np.arange(
                 self.min_precursor_charge,
-                self.min_precursor_charge+1
+                self.max_precursor_charge+1
             )
         ]*len(self._precursor_df)
         self._precursor_df = self._precursor_df.explode('charge')
