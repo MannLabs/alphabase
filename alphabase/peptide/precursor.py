@@ -342,16 +342,27 @@ def calc_precursor_isotope(
 
     return precursor_df
 
-def _precursor_df_group(df_group):
+def _batchify_df(df_group, mp_batch_size):
     """Internal funciton for multiprocessing"""
     for _, df in df_group:
-        yield df
+        for i in range(i, len(df), mp_batch_size):
+            yield df.iloc[i:i+mp_batch_size,:]
+
+def _count_batchify_df(df_group, mp_batch_size):
+    """Internal funciton for multiprocessing"""
+    count = 0
+    for _, df in df_group:
+        for i in range(i, len(df), mp_batch_size):
+            count += 1
+    return count
+
 
 # `process_bar` should be replaced by more advanced tqdm wrappers created by Sander
 # I will leave it to alphabase.utils
 def calc_precursor_isotope_mp(
     precursor_df:pd.DataFrame,
     processes:int=8,
+    mp_batch_size:int=100000,
     process_bar=None,
 )->pd.DataFrame:
     """`calc_precursor_isotope()` is not that fast for large dataframes,
@@ -361,6 +372,7 @@ def calc_precursor_isotope_mp(
     Args:
         precursor_df (pd.DataFrame): precursor_df to calculate.
         processes (int, optional): process number. Defaults to 8.
+        mp_batch_size (int, optional): multiprocessing batch size. Defaults to 100000.
         process_bar (function, optional): The tqdm-based callback function
         to check multiprocessing. Defaults to None.
 
@@ -377,11 +389,15 @@ def calc_precursor_isotope_mp(
     df_list = []
     df_group = precursor_df.groupby('nAA')
     with mp.Pool(processes) as p:
-        processing = p.imap_unordered(
-            calc_precursor_isotope, _precursor_df_group(df_group)
+        processing = p.imap(
+            calc_precursor_isotope, _batchify_df(df_group, mp_batch_size)
         )
         if process_bar:
-            processing = process_bar(processing, df_group.ngroups)
+            processing = process_bar(
+                processing, _count_batchify_df(
+                    df_group, mp_batch_size
+                )
+            )
         for df in processing:
             df_list.append(df)
     return pd.concat(df_list)
