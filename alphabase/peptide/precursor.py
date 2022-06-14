@@ -345,14 +345,14 @@ def calc_precursor_isotope(
 def _batchify_df(df_group, mp_batch_size):
     """Internal funciton for multiprocessing"""
     for _, df in df_group:
-        for i in range(i, len(df), mp_batch_size):
+        for i in range(0, len(df), mp_batch_size):
             yield df.iloc[i:i+mp_batch_size,:]
 
 def _count_batchify_df(df_group, mp_batch_size):
     """Internal funciton for multiprocessing"""
     count = 0
     for _, df in df_group:
-        for i in range(i, len(df), mp_batch_size):
+        for _ in range(0, len(df), mp_batch_size):
             count += 1
     return count
 
