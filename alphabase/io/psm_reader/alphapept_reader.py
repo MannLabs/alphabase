@@ -56,9 +56,9 @@ def parse_ap(precursor):
     return ''.join(parsed), ';'.join(mods), ';'.join(sites), charge, decoy
 
 def get_x_tandem_score(df: pd.DataFrame) -> np.ndarray:
-    b = df['b_hits'].astype('int').apply(lambda x: np.math.factorial(x)).values
-    y = df['y_hits'].astype('int').apply(lambda x: np.math.factorial(x)).values
-    x_tandem = np.log(b.astype('float')*y.astype('float')*df['matched_int'].values)
+    b = df['hits_b'].astype('int').apply(lambda x: np.math.factorial(x)).values
+    y = df['hits_y'].astype('int').apply(lambda x: np.math.factorial(x)).values
+    x_tandem = np.log(b.astype('float')*y.astype('float')*df['fragments_matched_int_sum'].values)
 
     x_tandem[x_tandem==-np.inf] = 0
 
@@ -103,6 +103,7 @@ class AlphaPeptReader(PSMReaderBase):
             #df['naked_sequence'] = df['naked_sequence'].str.decode('utf-8')
             if 'scan_no' in df.columns:
                 df['scan_no'] = df['scan_no'].astype('int')
+                df['raw_idx'] = df['scan_no']-1 # if thermo, use scan-1 as spec_idx
             df['charge'] = df['charge'].astype(int)
 
             if 'score' not in df.columns:

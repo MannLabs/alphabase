@@ -1,4 +1,4 @@
-name	avge_mass	classification	composition	modloss_composition	mono_mass	unimod_id	unimod_mass	unimod_modloss	modloss_importance
+mod_name	avge_mass	classification	composition	modloss_composition	mono_mass	unimod_id	unimod_mass	unimod_modloss	modloss_importance
 GlyGly@K	114.042927	Post-translational	H(6)C(4)N(2)O(2)	H(6)C(4)N(2)O(2)	114.042927	121	114.042927	114.042927	1E+06
 15N-oxobutanoic@C^Any N-term	-18.0239	Artefact	H(-3)15N(-1)		-18.023584	1419	-18.023584	0.0	0
 15N-oxobutanoic@S^Protein N-term	-18.0239	Post-translational	H(-3)15N(-1)		-18.023584	1419	-18.023584	0.0	0

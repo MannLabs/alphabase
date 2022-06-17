@@ -3,7 +3,7 @@
 __all__ = ['update_all_by_MOD_DF', 'add_modifications_for_lower_case_AA', 'MOD_DF', 'MOD_INFO_DICT', 'MOD_CHEM',
            'MOD_MASS', 'MOD_LOSS_MASS', 'MOD_formula', 'MOD_LOSS_IMPORTANCE', 'load_mod_df', 'calc_modification_mass',
            'calc_mod_masses_for_same_len_seqs', 'calc_modification_mass_sum', 'calc_modloss_mass_with_importance',
-           'calc_modloss_mass']
+           'calc_modloss_mass', 'add_new_modifications']
 
 # Cell
 import os
@@ -40,20 +40,19 @@ def update_all_by_MOD_DF():
     we can also process MOD_DF and then update all global
     modification variables from MOD_DF
     """
-    global MOD_INFO_DICT
-    global MOD_CHEM
-    global MOD_MASS
-    global MOD_LOSS_MASS
-    global MOD_LOSS_IMPORTANCE
-    global MOD_formula
 
-    MOD_INFO_DICT = MOD_DF.to_dict(orient='index')
-    MOD_CHEM = MOD_DF['composition'].to_dict()
-    MOD_MASS = MOD_DF['mass'].to_dict()
-    MOD_LOSS_MASS = MOD_DF['modloss'].to_dict()
-    MOD_LOSS_IMPORTANCE = MOD_DF['modloss_importance'].to_dict()
+    MOD_INFO_DICT.clear()
+    MOD_INFO_DICT.update(MOD_DF.to_dict(orient='index'))
+    MOD_CHEM.clear()
+    MOD_CHEM.update(MOD_DF['composition'].to_dict())
+    MOD_MASS.clear()
+    MOD_MASS.update(MOD_DF['mass'].to_dict())
+    MOD_LOSS_MASS.clear()
+    MOD_LOSS_MASS.update(MOD_DF['modloss'].to_dict())
+    MOD_LOSS_IMPORTANCE.clear()
+    MOD_LOSS_IMPORTANCE.update(MOD_DF['modloss_importance'].to_dict())
 
-    MOD_formula = {}
+    MOD_formula.clear()
     for mod, chem in MOD_CHEM.items():
         MOD_formula[mod] = dict(parse_formula(chem))
 
@@ -71,9 +70,9 @@ def add_modifications_for_lower_case_AA():
             return modname+'@'+site
         else:
             return ''
-    lower_case_df['name'] = lower_case_df['name'].apply(_mod_lower_case)
-    lower_case_df = lower_case_df[lower_case_df['name']!='']
-    lower_case_df.set_index('name', drop=False, inplace=True)
+    lower_case_df['mod_name'] = lower_case_df['mod_name'].apply(_mod_lower_case)
+    lower_case_df = lower_case_df[lower_case_df['mod_name']!='']
+    lower_case_df.set_index('mod_name', drop=False, inplace=True)
     lower_case_df['lower_case_AA'] = True
     MOD_DF['lower_case_AA'] = False
     MOD_DF = pd.concat([MOD_DF, lower_case_df])
@@ -87,12 +86,13 @@ def _keep_only_important_modloss():
 def load_mod_df(
     tsv:str=os.path.join(_base_dir, 'modification.tsv'),
     *,
-    keep_only_important_modloss=True,
+    keep_only_important_modloss=False,
 ):
     global MOD_DF
     MOD_DF = pd.read_table(tsv)
     MOD_DF.fillna('',inplace=True)
-    MOD_DF.set_index('name', drop=False, inplace=True)
+    MOD_DF['unimod_id'] = MOD_DF.unimod_id.astype(np.int32)
+    MOD_DF.set_index('mod_name', drop=False, inplace=True)
     MOD_DF['mass'] = MOD_DF.composition.apply(calc_mass_from_formula)
     MOD_DF['modloss'] = MOD_DF.modloss_composition.apply(calc_mass_from_formula)
     if keep_only_important_modloss:
@@ -322,3 +322,37 @@ def calc_modloss_mass(
         return _calc_modloss(mod_losses)[1:-2]
     else:
         return _calc_modloss(mod_losses[::-1])[-3:0:-1]
+
+# Cell
+def add_new_modifications(new_mods:list):
+    """Add new modifications into MOD_DF
+
+    Args:
+        new_mods (list): list of tuples. Tuple example:
+            (
+                modname@site:str (e.g. Mod@S),
+                chemical compositions:str (e.g. "H(4)O(2)"),
+                [optional] modloss compositions:str (e.g. "H(2)O(1)"),
+            )
+    """
+    for items in new_mods:
+        if len(items) == 2:
+            mod, comp = items
+            modloss_comp = ''
+        else:
+            mod, comp, modloss_comp = items
+        MOD_DF.loc[mod,[
+            'mod_name','composition','modloss_composition',
+            'classification','unimod_id'
+        ]] = [
+            mod, comp, modloss_comp,
+            'User-added', 0
+        ]
+        MOD_DF.loc[mod,['mass','modloss']] = (
+            calc_mass_from_formula(comp),
+            calc_mass_from_formula(modloss_comp)
+        )
+        if MOD_DF.loc[mod, 'modloss'] > 0:
+            MOD_DF.loc[mod, 'modloss_importance'] = 1e6
+    MOD_DF.fillna(0, inplace=True)
+    update_all_by_MOD_DF()

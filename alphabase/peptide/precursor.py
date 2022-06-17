@@ -8,6 +8,7 @@ __all__ = ['refine_precursor_df', 'is_precursor_refined', 'update_precursor_mz',
 # Cell
 import pandas as pd
 import numpy as np
+import multiprocessing as mp
 
 from alphabase.constants.element import (
     MASS_PROTON, MASS_ISOTOPE
@@ -194,6 +195,7 @@ def hash_mod_seq_df(
     precursor_df[
         "mod_seq_hash"
     ] = hash_vals
+    return precursor_df
 
 def hash_mod_seq_charge_df(
     precursor_df:pd.DataFrame,
@@ -211,6 +213,7 @@ def hash_mod_seq_charge_df(
         precursor_df["mod_seq_hash"].values
         + precursor_df["charge"].values
     )
+    return precursor_df
 
 def hash_precursor_df(
     precursor_df:pd.DataFrame,
@@ -233,7 +236,9 @@ def hash_precursor_df(
 
 # Cell
 def get_mod_seq_formula(seq:str, mods:str)->list:
-    """ 'PEPTIDE','Acetyl@Any N-term' --> [('C',n), ('H',m), ...] """
+    """
+    'PEPTIDE','Acetyl@Any N-term' --> [('C',n), ('H',m), ...]
+    """
     formula = {}
     for aa in seq:
         for chem,n in AA_formula[aa].items():
@@ -301,6 +306,10 @@ def calc_precursor_isotope(
         - isotope_apex_mz
         - isotope_apex_index
     """
+
+    if "precursor_mz" not in precursor_df.columns:
+        update_precursor_mz(precursor_df)
+
     isotope_dist = IsotopeDistribution()
 
     (
@@ -335,18 +344,27 @@ def calc_precursor_isotope(
 
     return precursor_df
 
-import multiprocessing as mp
-
-def _precursor_df_group(df_group):
+def _batchify_df(df_group, mp_batch_size):
     """Internal funciton for multiprocessing"""
     for _, df in df_group:
-        yield df
+        for i in range(0, len(df), mp_batch_size):
+            yield df.iloc[i:i+mp_batch_size,:]
+
+def _count_batchify_df(df_group, mp_batch_size):
+    """Internal funciton for multiprocessing"""
+    count = 0
+    for _, df in df_group:
+        for _ in range(0, len(df), mp_batch_size):
+            count += 1
+    return count
+
 
 # `process_bar` should be replaced by more advanced tqdm wrappers created by Sander
 # I will leave it to alphabase.utils
 def calc_precursor_isotope_mp(
     precursor_df:pd.DataFrame,
     processes:int=8,
+    mp_batch_size:int=100000,
     process_bar=None,
 )->pd.DataFrame:
     """`calc_precursor_isotope()` is not that fast for large dataframes,
@@ -356,6 +374,7 @@ def calc_precursor_isotope_mp(
     Args:
         precursor_df (pd.DataFrame): precursor_df to calculate.
         processes (int, optional): process number. Defaults to 8.
+        mp_batch_size (int, optional): multiprocessing batch size. Defaults to 100000.
         process_bar (function, optional): The tqdm-based callback function
         to check multiprocessing. Defaults to None.
 
@@ -372,11 +391,15 @@ def calc_precursor_isotope_mp(
     df_list = []
     df_group = precursor_df.groupby('nAA')
     with mp.Pool(processes) as p:
-        processing = p.imap_unordered(
-            calc_precursor_isotope, _precursor_df_group(df_group)
+        processing = p.imap(
+            calc_precursor_isotope, _batchify_df(df_group, mp_batch_size)
         )
         if process_bar:
-            processing = process_bar(processing, df_group.ngroups)
+            processing = process_bar(
+                processing, _count_batchify_df(
+                    df_group, mp_batch_size
+                )
+            )
         for df in processing:
             df_list.append(df)
     return pd.concat(df_list)
