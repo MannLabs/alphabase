@@ -153,8 +153,8 @@ modules = ["constants/aa.py",
            "peptide/mobility.py",
            "peptide/precursor.py",
            "protein/fasta.py",
-           "spectrum_library/decoy_library.py",
-           "spectrum_library/library_base.py",
+           "spectral_library/decoy_library.py",
+           "spectral_library/library_base.py",
            "utils.py",
            "yaml_utils.py"]
 

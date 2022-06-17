@@ -485,7 +485,7 @@ def append_regular_modifications(df:pd.DataFrame,
     return df
 
 # Cell
-from alphabase.spectrum_library.library_base import SpecLibBase
+from alphabase.spectral_library.library_base import SpecLibBase
 
 class FastaLib(SpecLibBase):
     def __init__(self,
