@@ -195,6 +195,7 @@ def hash_mod_seq_df(
     precursor_df[
         "mod_seq_hash"
     ] = hash_vals
+    return precursor_df
 
 def hash_mod_seq_charge_df(
     precursor_df:pd.DataFrame,
@@ -212,6 +213,7 @@ def hash_mod_seq_charge_df(
         precursor_df["mod_seq_hash"].values
         + precursor_df["charge"].values
     )
+    return precursor_df
 
 def hash_precursor_df(
     precursor_df:pd.DataFrame,
