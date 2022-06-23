@@ -625,20 +625,25 @@ class FastaLib(SpecLibBase):
         return False
 
     def import_and_process_fasta(self, fasta_files:Union[str,list]):
-        self.get_peptides_from_fasta(fasta_files)
-        self._preprocessing_after_load_pep_seqs()
+        protein_dict = load_all_proteins(fasta_files)
+        self.import_and_process_protein_dict(protein_dict)
 
     def import_and_process_protein_dict(self, protein_dict:dict):
         self.get_peptides_from_protein_dict(protein_dict)
-        self._preprocessing_after_load_pep_seqs()
+        self._process_after_load_pep_seqs()
 
     def import_and_process_peptide_sequences(self,
-        pep_seq_list:list, protein_list
+        pep_seq_list:list, protein_list=None,
     ):
-        self.get_peptides_from_peptide_sequence_list(pep_seq_list, protein_list)
-        self._preprocessing_after_load_pep_seqs()
+        self.get_peptides_from_peptide_sequence_list(
+            pep_seq_list, protein_list
+        )
+        self._process_after_load_pep_seqs()
 
-    def _preprocessing_after_load_pep_seqs(self):
+    def _process_after_load_pep_seqs(self):
+        """
+        Called by `import_and_process_...` methods.
+        """
         self.append_decoy_sequence()
         self.add_modifications()
         self.add_charge()
