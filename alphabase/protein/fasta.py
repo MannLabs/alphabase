@@ -624,18 +624,18 @@ class FastaLib(SpecLibBase):
                 mod_set.add(mod[-1])
         return False
 
-    def import_fasta(self, fasta_files:Union[str,list]):
-        self.from_fasta(fasta_files)
+    def import_and_process_fasta(self, fasta_files:Union[str,list]):
+        self.get_peptides_from_fasta(fasta_files)
         self._preprocessing_after_load_pep_seqs()
 
-    def import_protein_dict(self, protein_dict:dict):
-        self.from_protein_dict(protein_dict)
+    def import_and_process_protein_dict(self, protein_dict:dict):
+        self.get_peptides_from_protein_dict(protein_dict)
         self._preprocessing_after_load_pep_seqs()
 
-    def import_peptide_sequences(self,
+    def import_and_process_peptide_sequences(self,
         pep_seq_list:list, protein_list
     ):
-        self.from_peptide_sequence_list(pep_seq_list, protein_list)
+        self.get_peptides_from_peptide_sequence_list(pep_seq_list, protein_list)
         self._preprocessing_after_load_pep_seqs()
 
     def _preprocessing_after_load_pep_seqs(self):
@@ -643,7 +643,7 @@ class FastaLib(SpecLibBase):
         self.add_modifications()
         self.add_charge()
 
-    def from_fasta(self, fasta_file:Union[str,list]):
+    def get_peptides_from_fasta(self, fasta_file:Union[str,list]):
         """Load peptide sequence from fasta file.
 
         Args:
@@ -651,21 +651,20 @@ class FastaLib(SpecLibBase):
               or a list of fasta paths
         """
         if isinstance(fasta_file, str):
-            self.from_fasta_list([fasta_file])
+            self.get_peptides_from_fasta_list([fasta_file])
         else:
-            self.from_fasta_list(fasta_file)
+            self.get_peptides_from_fasta_list(fasta_file)
 
-    def from_fasta_list(self, fasta_files:list):
+    def get_peptides_from_fasta_list(self, fasta_files:list):
         """Load peptide sequences from fasta file list
 
         Args:
             fasta_files (list): fasta file list
         """
         protein_dict = load_all_proteins(fasta_files)
-        self.from_protein_dict(protein_dict)
+        self.get_peptides_from_protein_dict(protein_dict)
 
-    def from_protein_dict(self, protein_dict:dict):
-        pep_dict = {}
+    def get_peptides_from_protein_dict(self, protein_dict:dict):
 
         self.protein_df = pd.DataFrame.from_dict(
             protein_dict, orient='index'
@@ -678,9 +677,19 @@ class FastaLib(SpecLibBase):
             digest_seq = 'sequence_I2L'
         else:
             digest_seq = 'sequence'
+        self._cleave_to_peptides(
+            self.protein_df,
+            protein_seq_column=digest_seq
+        )
+
+    def _cleave_to_peptides(self,
+        protein_df:pd.DataFrame,
+        protein_seq_column:str='sequence'
+    ):
+        pep_dict = {}
 
         for i,prot_seq in enumerate(
-            self.protein_df[digest_seq].values
+            protein_df[protein_seq_column].values
         ):
             (
                 seq_list, miss_list, nterm_list, cterm_list
@@ -728,8 +737,7 @@ class FastaLib(SpecLibBase):
                 protein_names=self.protein_df['gene_name'].values
             )
 
-
-    def from_peptide_sequence_list(self,
+    def get_peptides_from_peptide_sequence_list(self,
         pep_seq_list:list,
         protein_list:list = None
     ):

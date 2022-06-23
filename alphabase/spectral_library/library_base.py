@@ -180,6 +180,7 @@ class SpecLibBase(object):
     ):
         if 'precursor_mz' not in self._precursor_df.columns:
             self.calc_precursor_mz()
+            self.clip_by_precursor_mz_()
         if multiprocessing and len(self.precursor_df)>min_num_for_mp:
             (
                 self._precursor_df
