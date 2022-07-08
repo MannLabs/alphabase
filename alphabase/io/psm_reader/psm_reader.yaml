@@ -76,8 +76,8 @@ maxquant:
       - 'Y(ph)'
       - 'Y(UniMod:21)'
       - 'pY'
-    'Deamidated@N': ['N(Deamidation (NQ))']
-    'Deamidated@Q': ['Q(Deamidation (NQ))']
+    'Deamidated@N': ['N(Deamidation (NQ))','N(de)']
+    'Deamidated@Q': ['Q(Deamidation (NQ))','Q(de)']
     'GlyGly@K': ['K(GlyGly (K))', 'K(gl)']
 pfind:
   reader_type: pfind

@@ -74,7 +74,7 @@ class SpecLibBase(object):
     def precursor_df(self)->pd.DataFrame:
         """: pd.DataFrame : precursor dataframe with columns
         'sequence', 'mods', 'mod_sites', 'charge', ...
-        The same as `self.peptide_df`.
+        Identical to `self.peptide_df`.
         """
         return self._precursor_df
 
@@ -91,7 +91,7 @@ class SpecLibBase(object):
     def peptide_df(self)->pd.DataFrame:
         """: pd.DataFrame : peptide dataframe with columns
         'sequence', 'mods', 'mod_sites', 'charge', ...
-        The same as `self.precursor_df`.
+        Identical to `self.precursor_df`.
         """
         return self._precursor_df
 
