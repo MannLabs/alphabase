@@ -74,6 +74,7 @@ class SpecLibBase(object):
     def precursor_df(self)->pd.DataFrame:
         """: pd.DataFrame : precursor dataframe with columns
         'sequence', 'mods', 'mod_sites', 'charge', ...
+        Identical to `self.peptide_df`.
         """
         return self._precursor_df
 
@@ -85,6 +86,18 @@ class SpecLibBase(object):
             drop_frag_idx=False,
             ensure_data_validity=True,
         )
+
+    @property
+    def peptide_df(self)->pd.DataFrame:
+        """: pd.DataFrame : peptide dataframe with columns
+        'sequence', 'mods', 'mod_sites', 'charge', ...
+        Identical to `self.precursor_df`.
+        """
+        return self._precursor_df
+
+    @peptide_df.setter
+    def peptide_df(self, df:pd.DataFrame):
+        self.precursor_df = df
 
     @property
     def fragment_mz_df(self)->pd.DataFrame:
@@ -180,6 +193,7 @@ class SpecLibBase(object):
     ):
         if 'precursor_mz' not in self._precursor_df.columns:
             self.calc_precursor_mz()
+            self.clip_by_precursor_mz_()
         if multiprocessing and len(self.precursor_df)>min_num_for_mp:
             (
                 self._precursor_df
