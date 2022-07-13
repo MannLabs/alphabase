@@ -6,7 +6,7 @@
 
 
 # AlphaBase
-AlphaBase provides all basic python functionalities for AlphaPept ecosystem from the [Mann Labs at the Max Planck Institute of Biochemistry](https://www.biochem.mpg.de/mann) and the [University of Copenhagen](https://www.cpr.ku.dk/research/proteomics/mann/). To enable all hyperlinks in this document, please view it at [GitHub](https://github.com/MannLabs/alphabase).
+AlphaBase provides all basic python functionalities for AlphaPept ecosystem from the [Mann Labs at the Max Planck Institute of Biochemistry](https://www.biochem.mpg.de/mann) and the [University of Copenhagen](https://www.cpr.ku.dk/research/proteomics/mann/). To enable all hyperlinks in this document, please view it at [GitHub](https://github.com/MannLabs/alphabase). For documentation, please see [GitHub Pages](https://mannlabs.github.io/alphabase/)
 
 * [**About**](#about)
 * [**License**](#license)
