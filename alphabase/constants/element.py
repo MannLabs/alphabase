@@ -5,6 +5,11 @@ __all__ = ['common_const_dict', 'MASS_PROTON', 'MASS_ISOTOPE', 'truncate_isotope
            'MASS_H2O', 'MASS_NH3', 'parse_formula', 'calc_mass_from_formula']
 
 # Cell
+# for nbdev_build_docs
+# import os
+# __file__ = os.path.expanduser('~/Workspace/AlphaBase/alphabase/constants/element.py')
+
+# Cell
 
 import os
 import numpy as np

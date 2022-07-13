@@ -7,6 +7,12 @@ __all__ = ['protease_dict', 'get_uniprot_gene_name', 'read_fasta_file', 'load_al
            'create_labeling_peptide_df', 'protein_idxes_to_names', 'append_regular_modifications', 'FastaLib']
 
 # Cell
+# for nbdev_build_docs
+# import os
+# __file__ = os.path.expanduser('~/Workspace/AlphaBase/alphabase/protein/fasta.py')
+
+# Cell
+
 import regex as re
 import numpy as np
 import pandas as pd

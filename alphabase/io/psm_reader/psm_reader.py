@@ -4,6 +4,11 @@ __all__ = ['translate_other_modification', 'keep_modifications', 'psm_reader_yam
            'PSMReaderProvider', 'psm_reader_provider']
 
 # Cell
+# for nbdev_build_docs
+# import os
+# __file__ = os.path.expanduser('~/Workspace/AlphaBase/alphabase/io/psm_reader/psm_reader.py')
+
+# Cell
 import pandas as pd
 import numpy as np
 import alphabase.peptide.mobility as mobility

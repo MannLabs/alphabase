@@ -6,6 +6,12 @@ __all__ = ['update_all_by_MOD_DF', 'add_modifications_for_lower_case_AA', 'MOD_D
            'calc_modloss_mass_with_importance', 'calc_modloss_mass', 'add_new_modifications']
 
 # Cell
+# for nbdev_build_docs
+# import os
+# __file__ = os.path.expanduser('~/Workspace/AlphaBase/alphabase/constants/element.py')
+
+# Cell
+
 import os
 import numba
 import numpy as np
