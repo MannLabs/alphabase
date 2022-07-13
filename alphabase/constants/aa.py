@@ -5,6 +5,11 @@ __all__ = ['AA_CHEM', 'reset_AA_mass', 'reset_AA_df', 'AA_ASCII_MASS', 'AA_DF', 
            'calc_AA_masses_for_var_len_seqs']
 
 # Cell
+# for nbdev_build_docs
+# import os
+# __file__ = os.path.expanduser('~/Workspace/AlphaBase/alphabase/constants/element.py')
+
+# Cell
 
 import os
 import pandas as pd
