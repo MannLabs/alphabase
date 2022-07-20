@@ -126,7 +126,7 @@ diann:
     'raw_name': 'Run'
     'sequence': 'Stripped.Sequence'
     'charge': 'Precursor.Charge'
-    'rt': ['RT','iRT','Tr_recalibrated','RetentionTime']
+    'rt': 'RT'
     'ccs': 'CCS'
     'mobility': ['IM','IonMobility']
     'proteins': 'Protein.Names'
@@ -145,11 +145,12 @@ spectronaut:
     - 'ModifiedPeptide'
     - 'ModifiedSequence'
     - 'FullUniModPeptideName'
+    - 'ModifiedPeptideSequence'
   column_mapping:
     'raw_name': 'ReferenceRun'
     'sequence': ['StrippedPeptide','PeptideSequence']
     'charge': 'PrecursorCharge'
-    'rt': ['RT','iRT','Tr_recalibrated','RetentionTime']
+    'rt': ['RT','iRT','Tr_recalibrated','RetentionTime','NormalizedRetentionTime']
     'ccs': 'CCS'
     'precursor_mz': 'PrecursorMz'
     'mobility': ['Mobility','IonMobility']
