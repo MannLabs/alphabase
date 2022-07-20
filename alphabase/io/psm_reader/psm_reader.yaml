@@ -153,7 +153,7 @@ spectronaut:
     'rt': ['RT','iRT','Tr_recalibrated','RetentionTime','NormalizedRetentionTime']
     'ccs': 'CCS'
     'precursor_mz': 'PrecursorMz'
-    'mobility': ['Mobility','IonMobility']
+    'mobility': ['Mobility','IonMobility','PrecursorIonMobility']
     'proteins': 'Protein Name'
     'uniprot_ids': ['UniProtIds','UniProtID']
     'genes': 'Genes'
