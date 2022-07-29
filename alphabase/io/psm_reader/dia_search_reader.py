@@ -24,11 +24,9 @@ class SpectronautReader(MaxQuantReader):
         mod_sep = '[]',
         underscore_for_ncterm=True,
         fixed_C57 = False,
-        mod_seq_columns=[
-            'ModifiedPeptide',
-            'ModifiedSequence',
-            'FullUniModPeptideName',
-        ],
+        mod_seq_columns=psm_reader_yaml[
+            'spectronaut'
+        ]['mod_seq_columns'],
         csv_sep = '\t',
         **kwargs,
     ):
@@ -77,11 +75,9 @@ class SwathReader(SpectronautReader):
         mod_sep = '()',
         underscore_for_ncterm=False,
         fixed_C57 = False,
-        mod_seq_columns=[
-            'ModifiedPeptide',
-            'ModifiedSequence',
-            'FullUniModPeptideName',
-        ],
+        mod_seq_columns=psm_reader_yaml[
+            'spectronaut'
+        ]['mod_seq_columns'],
         csv_sep = '\t',
         **kwargs,
     ):
