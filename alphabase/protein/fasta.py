@@ -708,14 +708,16 @@ class FastaLib(SpecLibBase):
             for seq,miss,nterm,cterm in zip(
                 seq_list,miss_list,nterm_list, cterm_list
             ):
+                prot_id = str(i)
                 if seq in pep_dict:
-                    pep_dict[seq][0] += ';'+str(i)
+                    if not pep_dict[seq][0].endswith(prot_id):
+                        pep_dict[seq][0] += ';'+prot_id
                     if nterm:
                         pep_dict[seq][2] = nterm
                     if cterm:
                         pep_dict[seq][3] = cterm
                 else:
-                    pep_dict[seq] = [str(i),miss,nterm,cterm]
+                    pep_dict[seq] = [prot_id,miss,nterm,cterm]
         self._precursor_df = pd.DataFrame().from_dict(
             pep_dict, orient='index', columns = [
                 'protein_idxes','miss_cleavage',
