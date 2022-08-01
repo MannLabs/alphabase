@@ -7,7 +7,7 @@
     "Modification information": "modification.html",
     "HDF functionalities": "hdf.html",
     "AlphaPept PSM Reader": "alphapept_reader.html",
-    "DIA search engine PSM reader": "dia_search_reader.html",
+    "DIA search engine PSM reader": "dia_psm_reader.html",
     "MaxQuant PSM reader": "maxquant_reader.html",
     "MSFragger pepxml reader": "msfragger_reader.html",
     "pFind PSM reader": "pfind_reader.html",

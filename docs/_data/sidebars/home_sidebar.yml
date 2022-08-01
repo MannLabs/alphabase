@@ -29,7 +29,7 @@ entries:
       url: alphapept_reader.html
     - output: web,pdf
       title: DIA search engine PSM reader
-      url: dia_search_reader.html
+      url: dia_psm_reader.html
     - output: web,pdf
       title: MaxQuant PSM reader
       url: maxquant_reader.html
