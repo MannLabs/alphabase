@@ -238,9 +238,8 @@ class PSMReaderBase(object):
 
     def normalize_rt(self):
         if 'rt' in self.psm_df.columns:
-            if self._min_max_rt_norm:
-                min_rt = self.psm_df.rt.min()
-            else:
+            min_rt = self.psm_df.rt.min()
+            if not self._min_max_rt_norm or min_rt > 0:
                 min_rt = 0
             self.psm_df['rt_norm'] = (
                 self.psm_df.rt - min_rt
