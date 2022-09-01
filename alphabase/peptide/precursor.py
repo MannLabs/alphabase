@@ -13,6 +13,7 @@ import numba
 import multiprocessing as mp
 
 from mmh3 import hash64
+from functools import partial
 
 from alphabase.constants.element import (
     MASS_PROTON, MASS_ISOTOPE
@@ -83,12 +84,17 @@ def update_precursor_mz(
     """
     Calculate precursor_mz inplace in the precursor_df
     
-    Args:
-        precursor_df (pd.DataFrame): 
-          precursor_df with the 'charge' column
+    Parameters
+    ----------
+    precursor_df : pd.DataFrame
 
-    Returns:
-        pd.DataFrame: precursor_df with 'precursor_mz'
+        precursor_df with the 'charge' column
+
+    Returns
+    -------
+    pd.DataFrame
+        
+        precursor_df with 'precursor_mz'
     """
 
     if 'nAA' not in precursor_df:
@@ -137,15 +143,30 @@ def get_mod_seq_hash(
     """Get hash code value for a peptide:
       (sequence, mods, mod_sites)
 
-    Args:
-        sequence (str): amino acid sequence
-        mods (str): modification names in AlphaBase format
-        mod_sites (str): modification sites in AlphaBase format
-        seed (int, optional): seed for hashing
-          Defaults to 0.
+    Parameters
+    ----------
+        sequence : str
+            
+            Amino acid sequence
 
-    Returns:
-        np.int64: 64-bit hash code value
+        mods : str
+            
+            Modification names in AlphaBase format
+
+        mod_sites : str
+        
+            Modification sites in AlphaBase format
+
+        seed : int
+            
+            Seed for hashing.
+            Optional, by default 0
+
+    Returns
+    -------
+    np.int64
+
+        64-bit hash code value
     """
     return np.sum([
         hash64(sequence, seed=seed)[0],
@@ -161,16 +182,34 @@ def get_mod_seq_charge_hash(
     """Get hash code value for a precursor:
       (sequence, mods, mod_sites, charge)
 
-    Args:
-        sequence (str): amino acid sequence
-        mods (str): modification names in AlphaBase format
-        mod_sites (str): modification sites in AlphaBase format
-        charge (int): precursor charge state
-        seed (int, optional): seed for hashing
-          Defaults to 0.
+    Parameters
+    ----------
+    sequence : str
 
-    Returns:
-        np.int64: 64-bit hash code value
+        Amino acid sequence
+
+    mods : str
+        
+        Modification names in AlphaBase format
+
+    mod_sites : str
+    
+        Modification sites in AlphaBase format
+
+    charge : int
+    
+        Precursor charge state
+
+    seed : int
+    
+        Seed for hashing.
+        Optional, by default 0
+
+    Returns
+    -------
+    np.int64
+    
+        64-bit hash code value
     """
     return np.sum([
         get_mod_seq_hash(
@@ -226,10 +265,22 @@ def hash_precursor_df(
     into precursor_df (inplace). 
     The 64-bit hash function is from mmh3 (mmh3.hash64).
 
-    Args:
-        precursor_df (pd.DataFrame): precursor_df
-        seed (int, optional): seed for mmh3.hash64.
-          Defaults to 0
+    Parameters
+    ----------
+    precursor_df : pd.DataFrame
+        
+        precursor_df
+        
+    Seed : int
+    
+        Seed for mmh3.hash64.
+        Optional, by default 0
+
+    Returns
+    -------
+    pd.DataFrame
+
+        DataFrame with columns 'mod_seq_hash' and 'mod_seq_charge_hash'
     """
     hash_mod_seq_df(precursor_df, seed=seed)
 
@@ -318,29 +369,21 @@ def get_mod_seq_isotope_distribution(
 
     Returns
     -------
-    float
+    tuple
 
-        Abundance of mono+1 / mono
+        float - Abundance of mono+1 / mono
 
-    float
-    
-        Abundance of apex / mono
+        float - Abundance of apex / mono
 
-    int
+        int - Apex isotope position relative to mono, 
+            i.e. apex index - mono index and
+            0 refers to the position of mono itself
 
-        Apex isotope position relative to mono, 
-        i.e. apex index - mono index and
-        0 refers to the position of mono itself
+        float - Abundance of right-most peak which has at least `min_right_most_intensity`
+            intensity relative to the apex peak
 
-    float
-
-        Abundance of right-most peak which has at least `min_right_most_intensity`
-        intensity relative to the apex peak
-
-    int
-    
-        Right-most position relative to mono,
-        i.e. right-most index - mono index
+        int - Right-most position relative to mono,
+            i.e. right-most index - mono index
     """
     dist, mono = isotope_dist.calc_formula_distribution(
         get_mod_seq_formula(*seq_mods)
@@ -505,7 +548,10 @@ def calc_precursor_isotope_mp(
     df_group = precursor_df.groupby('nAA')
     with mp.Pool(processes) as p:
         processing = p.imap(
-            calc_precursor_isotope, _batchify_df(df_group, mp_batch_size)
+            partial(
+                calc_precursor_isotope,
+                min_right_most_intensity=min_right_most_intensity
+            ), _batchify_df(df_group, mp_batch_size)
         )
         if process_bar:
             processing = process_bar(
