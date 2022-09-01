@@ -135,3 +135,6 @@ alphabase/logs
 
 # vscode temp file
 **/.last_checked
+
+*_docs
+sidebar.yml
