@@ -7,6 +7,11 @@ import os
 # local
 import alphabase as package2install
 
+#nbdev2
+from configparser import ConfigParser
+nbdev_config = ConfigParser(delimiters=['='])
+nbdev_config.read('settings.ini')
+nbdev_cfg = nbdev_config['DEFAULT']
 
 def get_long_description():
     with open("README.md", "r") as readme_file:
@@ -58,6 +63,7 @@ def create_pip_wheel():
         include_package_data=True,
         entry_points={
             "console_scripts": package2install.__console_scripts__,
+            'nbdev': [f'{nbdev_cfg.get("lib_path")}={nbdev_cfg.get("lib_path")}._modidx:d'],
         },
         install_requires=requirements + [
             # TODO Remove hardcoded requirement?

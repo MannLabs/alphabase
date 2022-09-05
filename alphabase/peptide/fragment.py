@@ -10,7 +10,7 @@ __all__ = ['create_fragment_mz_dataframe_ignore_old_idxes', 'get_charged_frag_ty
 # %% ../../nbdev_nbs/peptide/fragment.ipynb 4
 import numpy as np
 import pandas as pd
-from typing import List, Union, Tuple
+from typing import List, Union, Tuple, Dict
 import warnings
 
 from .mass_calc import *

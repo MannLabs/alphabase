@@ -18,7 +18,7 @@ website:
   description: "Base functionalities for AlphaPept Ecosystems"
   twitter-card: true
   open-graph: true
-  repo-branch: main
+  repo-branch: nbdev2
   repo-url: "https://github.com/MannLabs/alphabase"
   repo-actions: [issue]
   navbar:
