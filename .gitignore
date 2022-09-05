@@ -135,3 +135,8 @@ alphabase/logs
 
 # vscode temp file
 **/.last_checked
+
+# nbdev2
+*_docs
+sidebar.yml
+*_proc
