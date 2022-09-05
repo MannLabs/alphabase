@@ -355,33 +355,25 @@ def get_mod_seq_isotope_distribution(
     Parameters
     ----------
     seq_mods : tuple
-
         (sequence, mods)
     
     isotope_dist : IsotopeDistribution
-
         See :class:`alphabase.constants.isotope.IsotopeDistribution`
 
     min_right_most_intensity : float
-
         The minimal intensity value of the right-most peak relative to apex peak. 
         Optional, by default 0.2
 
     Returns
     -------
     tuple
-
         float - Abundance of mono+1 / mono
-
         float - Abundance of apex / mono
-
         int - Apex isotope position relative to mono, 
             i.e. apex index - mono index and
             0 refers to the position of mono itself
-
         float - Abundance of right-most peak which has at least `min_right_most_intensity`
             intensity relative to the apex peak
-
         int - Right-most position relative to mono,
             i.e. right-most index - mono index
     """
@@ -413,18 +405,15 @@ def calc_precursor_isotope(
     Parameters
     ----------
     precursor_df : pd.DataFrame
-
         precursor_df to calculate
 
     min_right_most_intensity : float
-
         The minimal intensity value of the right-most peak relative to apex peak. 
         Optional, by default 0.2
 
     Returns
     -------
     pd.DataFrame
-
         precursor_df with additional columns:
         - isotope_m1_intensity
         - isotope_m1_mz
@@ -509,31 +498,25 @@ def calc_precursor_isotope_mp(
     Parameters
     ----------
     precursor_df : pd.DataFrame
-
         Precursor_df to calculate
         
     processes : int
-
         Process number. Optional, by default 8
     
     mp_batch_size : int
-
         Multiprocessing batch size. Optional, by default 100000.
         
     process_bar : Callable
-
         The tqdm-based callback function 
         to check multiprocessing. Defaults to None.
 
     min_right_most_intensity : float
-
         The minimal intensity value of the right-most peak relative to apex peak. 
         Optional, by default 0.2
 
     Returns
     -------
     pd.DataFrame
-
         precursor_df with additional columns:
         - isotope_m1_intensity
         - isotope_m1_mz

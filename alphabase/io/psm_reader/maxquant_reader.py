@@ -3,7 +3,7 @@
 # %% auto 0
 __all__ = ['parse_mod_seq', 'MaxQuantReader']
 
-# %% ../../../nbdev_nbs/io/psm_reader/maxquant_reader.ipynb 2
+# %% ../../../nbdev_nbs/io/psm_reader/maxquant_reader.ipynb 3
 import pandas as pd
 import numpy as np
 import numba

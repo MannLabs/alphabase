@@ -3,7 +3,7 @@
 # %% auto 0
 __all__ = ['convert_one_pFind_mod', 'translate_pFind_mod', 'get_pFind_mods', 'parse_pfind_protein', 'pFindReader']
 
-# %% ../../../nbdev_nbs/io/psm_reader/pfind_reader.ipynb 3
+# %% ../../../nbdev_nbs/io/psm_reader/pfind_reader.ipynb 4
 import pandas as pd
 import numpy as np
 
@@ -86,7 +86,7 @@ def parse_pfind_protein(protein, keep_reverse=True):
     )
 
 
-# %% ../../../nbdev_nbs/io/psm_reader/pfind_reader.ipynb 5
+# %% ../../../nbdev_nbs/io/psm_reader/pfind_reader.ipynb 6
 class pFindReader(PSMReaderBase):
     def __init__(self,
         *,

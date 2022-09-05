@@ -26,27 +26,52 @@ class SpecLibBase(object):
     ):
         """Base spectral library in alphabase and alphapeptdeep.
 
-        Args:
-            charged_frag_types (typing.List[str], optional): fragment types with charge. 
-                Defaults to [ 'b_z1','b_z2','y_z1', 'y_z2' ].
-            precursor_mz_min (int, optional): Use this to clip precursor df. 
-                Defaults to 400.
-            precursor_mz_max (int, optional): Use this to clip precursor df. 
-                Defaults to 6000.
-            decoy (str, optional): Decoy methods, could be "pseudo_reverse" or "diann".
-                Defaults to None.
+        Parameters
+        ----------
+        charged_frag_types : typing.List[str], optional
+            fragment types with charge. 
+            Defaults to [ 'b_z1','b_z2','y_z1', 'y_z2' ].
 
-        Attributes:
-            precursor_df (pd.DataFrame): precursor dataframe.
-            fragment_mz_df (pd.DataFrame): fragment m/z dataframe.
-            fragment_intensity_df (pd.DataFrame): fragment intensity dataframe.
-            charged_frag_types (list): same as `charged_frag_types` in Args.
-            min_precursor_mz (float): same as `precursor_mz_min` in Args.
-            max_precursor_mz (float): same as `precursor_mz_max` in Args.
-            decoy (str): same as `decoy` in Args.
-            key_numeric_columns (list of str): key numeric columns to be saved 
-                into library/precursor_df in the hdf file. Others will be saved into
-                library/mod_seq_df instead.
+        precursor_mz_min : int, optional
+            Use this to clip precursor df. 
+            Defaults to 400.
+
+        precursor_mz_max : int, optional
+            Use this to clip precursor df. 
+            Defaults to 6000.
+
+        decoy : str, optional
+            Decoy methods, could be "pseudo_reverse" or "diann".
+            Defaults to None.
+
+        Attributes
+        ----------
+        precursor_df : pd.DataFrame
+            precursor dataframe.
+
+        fragment_mz_df : pd.DataFrame
+            fragment m/z dataframe.
+
+        fragment_intensity_df : pd.DataFrame
+            fragment intensity dataframe.
+
+        charged_frag_types : list
+            same as `charged_frag_types` in Args.
+
+        min_precursor_mz : float
+            same as `precursor_mz_min` in Args.
+
+        max_precursor_mz : float
+            same as `precursor_mz_max` in Args.
+
+        decoy : str
+            same as `decoy` in Args.
+
+        key_numeric_columns : list of str
+            key numeric columns to be saved 
+            into library/precursor_df in the hdf file. Others will be saved into
+            library/mod_seq_df instead.
+            
         """
         self.charged_frag_types = charged_frag_types
         self._precursor_df = pd.DataFrame()
@@ -167,10 +192,16 @@ class SpecLibBase(object):
         They can be unraveled back using:
           `array.reshape(len(self._fragment_mz_df.columns), -1)`
 
-        Returns:
-            np.array: 1-D flattened mz array (a reference to 
+        Returns
+        -------
+        np.array
+        
+            1-D flattened mz array (a reference to 
             original fragment mz df data)
-            np.array: 1-D flattened intensity array (a reference to 
+
+        np.array
+        
+            1-D flattened intensity array (a reference to 
             original fragment intensity df data)
         '''
         return (
@@ -275,12 +306,18 @@ class SpecLibBase(object):
     )->pd.DataFrame:
         """Load specific dataset (dataframe) from hdf_file.
 
-        Args:
-            hdf_file (str): The hdf file name
-            df_name (str): The dataset/dataframe name in the hdf file
+        Parameters
+        ----------
+        hdf_file : str
+            The hdf file name
 
-        Returns:
-            pd.DataFrame: Loaded dataframe
+        df_name : str
+            The dataset/dataframe name in the hdf file
+
+        Returns
+        -------
+        pd.DataFrame
+            Loaded dataframe
         """
         return self._get_hdf_to_load(
             hdf_file
@@ -305,8 +342,11 @@ class SpecLibBase(object):
         back to `precursor_df`
 
 
-        Args:
-            hdf_file (str): the hdf file path to save
+        Parameters
+        ----------
+        hdf_file : str
+            the hdf file path to save
+            
         """
         _hdf = HDF_File(
             hdf_file, 
@@ -341,10 +381,15 @@ class SpecLibBase(object):
     def load_hdf(self, hdf_file:str, load_mod_seq:bool=False):
         """Load the hdf library from hdf_file
 
-        Args:
-            hdf_file (str): hdf library path to load
-            load_mod_seq (bool, optional): if also load mod_seq_df. 
-                Defaults to False.
+        Parameters
+        ----------
+        hdf_file : str
+            hdf library path to load
+
+        load_mod_seq : bool, optional
+            if also load mod_seq_df. 
+            Defaults to False.
+            
         """
         _hdf = HDF_File(
             hdf_file,

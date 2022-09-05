@@ -15,6 +15,7 @@ from alphabase.io.psm_reader.psm_reader import (
     psm_reader_yaml
 )
 
+# %% ../../../nbdev_nbs/io/psm_reader/alphapept_reader.ipynb 3
 @numba.njit
 def parse_ap(precursor):
     """

@@ -5,7 +5,7 @@ __all__ = ['AA_CHEM', 'AA_ASCII_MASS', 'AA_DF', 'AA_formula', 'reset_AA_mass', '
            'calc_AA_masses_for_same_len_seqs', 'calc_sequence_masses_for_same_len_seqs',
            'calc_AA_masses_for_var_len_seqs']
 
-# %% ../../nbdev_nbs/constants/aa.ipynb 2
+# %% ../../nbdev_nbs/constants/aa.ipynb 3
 import os
 import pandas as pd
 import numpy as np
@@ -21,13 +21,13 @@ from alphabase.constants.element import (
 
 from ._const import CONST_FILE_FOLDER
 
-# %% ../../nbdev_nbs/constants/aa.ipynb 3
+# %% ../../nbdev_nbs/constants/aa.ipynb 4
 AA_CHEM:dict = load_yaml(
     os.path.join(CONST_FILE_FOLDER, 'amino_acid.yaml')
 )
 
-# %% ../../nbdev_nbs/constants/aa.ipynb 5
-def reset_AA_mass()->np.array:
+# %% ../../nbdev_nbs/constants/aa.ipynb 6
+def reset_AA_mass()->np.ndarray:
     """AA mass in np.array with shape (128,)"""
     AA_ASCII_MASS = np.ones(128)*1e8
     for aa, chem in AA_CHEM.items():
@@ -35,7 +35,7 @@ def reset_AA_mass()->np.array:
     return AA_ASCII_MASS
 
 #: AA mass array with ASCII code, mass of 'A' is AA_ASCII_MASS[ord('A')]
-AA_ASCII_MASS:np.array = reset_AA_mass()
+AA_ASCII_MASS:np.ndarray = reset_AA_mass()
 
 def reset_AA_df():
     AA_DF = pd.DataFrame()
@@ -60,33 +60,44 @@ for aa, formula, mass in AA_DF.values:
         parse_formula(formula)
     )
 
-# %% ../../nbdev_nbs/constants/aa.ipynb 8
+# %% ../../nbdev_nbs/constants/aa.ipynb 9
 def calc_sequence_mass(
     sequence: str
-)->np.array:
+)->np.ndarray:
     '''
-    Args:
-        sequence (str): unmodified peptide sequence
-    Returns:
-        np.array: masses of each amino acid.
+    Parameters
+    ----------
+    sequence : str
+        Unmodified peptide sequence
+
+    Returns
+    -------
+    np.ndarray
+        Masses of each amino acid.
     '''
     return AA_ASCII_MASS[np.array(sequence,'c').view(np.int8)]
 
-# %% ../../nbdev_nbs/constants/aa.ipynb 10
+# %% ../../nbdev_nbs/constants/aa.ipynb 11
 def calc_AA_masses_for_same_len_seqs(
-    sequence_array: np.array
-)->np.array:
+    sequence_array: np.ndarray
+)->np.ndarray:
     '''
     Calculate AA masses for the array of same-len AA sequences.
 
-    Args:
-        sequence_array (np.array): unmodified sequences with the same length.
+    Parameters
+    ----------
+    sequence_array : np.ndarray
+        unmodified sequences with the same length.
 
-    Returns:
-        np.array: 2-D (array_size, sequence_len) array of masses.
+    Returns
+    -------
+    np.ndarray
+        2-D (array_size, sequence_len) array of masses.
 
-    Raises:
-        ValueError: if sequences are not with the same length.
+    Raises
+    -------
+    ValueError
+        If sequences are not with the same length.
     '''
     return AA_ASCII_MASS[
         # we use np.int32 here because unicode str 
@@ -95,19 +106,25 @@ def calc_AA_masses_for_same_len_seqs(
     ].reshape(len(sequence_array), -1)
 
 def calc_sequence_masses_for_same_len_seqs(
-    sequence_array: np.array
-)->np.array:
+    sequence_array: np.ndarray
+)->np.ndarray:
     '''
     Calculate sequence masses for the array of same-len AA sequences.
 
-    Args:
-        sequence_array (np.array): unmodified sequences with the same length.
+    Parameters
+    ----------
+    sequence_array : np.ndarray
+        unmodified sequences with the same length.
 
-    Returns:
-        np.array: 1-D (array_size, sequence_len) array of masses.
-        
-    Raises:
-        ValueError: if sequences are not with the same length.
+    Returns
+    -------
+    np.ndarray
+        1-D (array_size, sequence_len) array of masses.
+    
+    Raises
+    -------
+    ValueError
+        If sequences are not with the same length.
     '''
     return np.sum(
         calc_AA_masses_for_same_len_seqs(sequence_array),
@@ -115,18 +132,22 @@ def calc_sequence_masses_for_same_len_seqs(
     )+MASS_H2O
 
 
-# %% ../../nbdev_nbs/constants/aa.ipynb 19
+# %% ../../nbdev_nbs/constants/aa.ipynb 20
 def calc_AA_masses_for_var_len_seqs(
-    sequence_array: np.array
-)->np.array:
+    sequence_array: np.ndarray
+)->np.ndarray:
     '''
     We recommend to use `calc_AA_masses_for_same_len_seqs` as it is much faster.
 
-    Args:
-        sequence_array (np.array): sequences with variable lengths.
+    Parameters
+    ----------
+    sequence_array : np.ndarray
+        Sequences with variable lengths.
         
-    Returns:
-        np.array: 1D array of masses, zero values are padded to fill the max length.
+    Returns
+    -------
+    np.ndarray
+        1D array of masses, zero values are padded to fill the max length.
     '''
     return AA_ASCII_MASS[
         np.array(sequence_array).view(np.int32)

@@ -30,15 +30,27 @@ def calc_delta_modification_mass(
     mass deltas other than mod names. This function calculate
     modification masses from these delta masses.
     
-    Args:
-        pep_len (int): nAA
-        mass_deltas (list of floats): mass deltas on the peptide
-        mass_delta_sites (list of int): localized sites of corresponding mass deltas
+    Parameters
+    ----------
+    pep_len : int
     
-    Returns:
-        np.array: 1-D array with length=`peplen`.
-            Masses of modifications (mass deltas) through the peptide,
-            `0` if sites has no modifications
+        nAA
+    
+    mass_deltas : list of floats
+    
+        mass deltas on the peptide
+
+    mass_delta_sites : list of int
+    
+        localized sites of corresponding mass deltas
+
+    Returns
+    -------
+    np.array
+    
+        1-D array with length=`peplen`.
+        Masses of modifications (mass deltas) through the peptide,
+        `0` if sites has no modifications
     '''
     masses = np.zeros(pep_len)
     for site, mass in zip(mass_delta_sites, mass_deltas):
@@ -61,19 +73,31 @@ def calc_mod_delta_masses_for_same_len_seqs(
     mass deltas other than mod names. This function calculate
     modification masses from these delta masses.
     
-    Args:
-        nAA (int): peptide length
-        mod_names_list (List[List[str]]): list of modification list
-        mod_sites_list (List[List[int]]): list of modification site list corresponding 
-            to `mod_names_list`.
-            * `site=0` refers to an N-term modification
-            * `site=-1` refers to a C-term modification
-            * `1<=site<=peplen` refers to a normal modification
+    Parameters
+    ----------
+    nAA : int
     
-    Returns:
-        np.array: 2-D array with shape=`(nAA, pep_count or len(mod_names_list)))`. 
-            Masses of modifications through all the peptides, 
-            `0` if sites has no modifications
+        peptide length
+
+    mod_names_list : List[List[str]]
+        
+        list of modification list
+
+    mod_sites_list : List[List[int]]
+        
+        list of modification site list corresponding 
+        to `mod_names_list`.
+        * `site=0` refers to an N-term modification
+        * `site=-1` refers to a C-term modification
+        * `1<=site<=peplen` refers to a normal modification
+    
+    Returns
+    -------
+    np.array
+    
+        2-D array with shape=`(nAA, pep_count or len(mod_names_list)))`. 
+        Masses of modifications through all the peptides, 
+        `0` if sites has no modifications
     '''
     masses = np.zeros((len(mod_deltas_list),nAA))
     for i, (mod_deltas, mod_sites) in enumerate(
@@ -130,14 +154,23 @@ def calc_peptide_masses_for_same_len_seqs(
     with same length very fast. 
     See `alphabase.aa.calc_sequence_masses_for_same_len_seqs()`
 
-    Args:
-        mod_list (List[str]): list of modifications, 
-            e.g. `['Oxidation@M;Phospho@S','Phospho@S;Deamidated@N']`
-        mass_delta_list (List[str]): List of modifications as mass deltas,
-            e.g. `['15.9xx;79.9xxx','79.9xx;0.98xx']`
+    Parameters
+    ----------
+    mod_list : List[str]
+
+        list of modifications, 
+        e.g. `['Oxidation@M;Phospho@S','Phospho@S;Deamidated@N']`
+
+    mass_delta_list : List[str]
     
-    Returns:
-        np.array: peptide masses (1-D array, H2O already added)
+        List of modifications as mass deltas,
+        e.g. `['15.9xx;79.9xxx','79.9xx;0.98xx']`
+    
+    Returns
+    -------
+        np.array
+            
+            peptide masses (1-D array, H2O already added)
     '''
     seq_masses = calc_sequence_masses_for_same_len_seqs(
         sequences
@@ -170,21 +203,45 @@ def calc_b_y_and_peptide_masses_for_same_len_seqs(
     We need 'same_len' here because numpy can process AA sequences 
     with same length very fast.
 
-    Args:
-        sequence (np.array of str): np.array of peptie sequences with same length.
-        mod_list (List[List[str]]): list of modifications , 
-            e.g. `[['Oxidation@M','Phospho@S'],['Phospho@S','Deamidated@N']]` 
-        site_list (List[List[int]]): list of modification sites
-            corresponding to `mod_list`, e.g. `[[3,6],[4,17]]`
-        mod_delta_list (List[List[float]]): list of modifications, 
-            e.g. `[[15.994915,79.966331],[79.966331,0.984016]]` 
-        mod_delta_site_list (List[List[int]]): list of modification mass delta sites
-            corresponding to `mod_list`, e.g. `[[3,6],[4,17]]`
+    Parameters
+    ----------
+    sequence : np.array of str
+        
+        np.array of peptie sequences with same length.
+
+    mod_list : List[List[str]]
     
-    Returns:
-        np.array: neutral b fragment masses (2-D array)
-        np.array: neutral y fragmnet masses (2-D array)
-        np.array: neutral peptide masses (1-D array)
+        list of modifications , 
+        e.g. `[['Oxidation@M','Phospho@S'],['Phospho@S','Deamidated@N']]` 
+
+    site_list : List[List[int]]
+    
+        list of modification sites
+        corresponding to `mod_list`, e.g. `[[3,6],[4,17]]`
+
+    mod_delta_list : List[List[float]]
+        
+        list of modifications, 
+        e.g. `[[15.994915,79.966331],[79.966331,0.984016]]` 
+
+    mod_delta_site_list : List[List[int]]
+    
+        list of modification mass delta sites
+        corresponding to `mod_list`, e.g. `[[3,6],[4,17]]`
+    
+    Returns
+    -------
+    np.array
+        
+        neutral b fragment masses (2-D array)
+
+    np.array
+    
+        neutral y fragmnet masses (2-D array)
+
+    np.array
+    
+        neutral peptide masses (1-D array)
     '''
     aa_masses = calc_AA_masses_for_same_len_seqs(sequences)
     nAA = len(sequences[0])

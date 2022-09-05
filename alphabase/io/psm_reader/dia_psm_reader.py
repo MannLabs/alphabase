@@ -3,7 +3,7 @@
 # %% auto 0
 __all__ = ['SpectronautReader', 'SwathReader', 'DiannReader']
 
-# %% ../../../nbdev_nbs/io/psm_reader/dia_psm_reader.ipynb 2
+# %% ../../../nbdev_nbs/io/psm_reader/dia_psm_reader.ipynb 4
 import pandas as pd
 import numpy as np
 
@@ -15,6 +15,7 @@ from alphabase.io.psm_reader.maxquant_reader import (
     MaxQuantReader
 )
 
+# %% ../../../nbdev_nbs/io/psm_reader/dia_psm_reader.ipynb 5
 class SpectronautReader(MaxQuantReader):
     def __init__(self,
         *,

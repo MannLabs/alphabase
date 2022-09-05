@@ -19,13 +19,19 @@ class DecoyLib(SpecLibBase):
         but AlphaPeptDeep will add modifications onto both target and decoy sequences,
         so it is enough for practical uses.
 
-        Args:
-            target_lib (SpecLibBase): Target library to decoy.
-            fix_C_term (bool, optional): If fix C-term AA when decoy. 
-                Defaults to True.
+        Parameters
+        ----------
+        target_lib : SpecLibBase
+            Target library to decoy.
+
+        fix_C_term : bool, optional
+            If fix C-term AA when decoy. 
+            Defaults to True.
         
-        Attributes:
-            target_lib (SpecLibBase): same as 'target_lib' in Args.
+        Attributes
+        ----------
+        target_lib : SpecLibBase
+            same as 'target_lib' in Args.
         """
         self.__dict__ = copy.deepcopy(target_lib.__dict__)
         self.target_lib = target_lib
@@ -144,12 +150,19 @@ class DiaNNDecoyLib(DecoyLib):
     ):  
         """DiaNN-like decoy peptide generator
 
-        Args:
-            target_lib (SpecLibBase): Target library object
-            raw_AAs (str, optional): AAs those DiaNN decoy from. 
-                Defaults to 'GAVLIFMPWSCTYHKRQEND'.
-            mutated_AAs (str, optional): AAs those DiaNN decoy to. 
-                Defaults to 'LLLVVLLLLTSSSSLLNDQE'.
+        Parameters
+        ----------
+        target_lib : SpecLibBase
+            Target library object
+
+        raw_AAs : str, optional
+            AAs those DiaNN decoy from. 
+            Defaults to 'GAVLIFMPWSCTYHKRQEND'.
+
+        mutated_AAs : str, optional
+            AAs those DiaNN decoy to. 
+            Defaults to 'LLLVVLLLLTSSSSLLNDQE'.
+            
         """
         super().__init__(target_lib)
         self.raw_AAs = raw_AAs

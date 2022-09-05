@@ -4,7 +4,7 @@
 __all__ = ['psm_reader_yaml', 'psm_reader_provider', 'translate_other_modification', 'keep_modifications', 'PSMReaderBase',
            'PSMReaderProvider']
 
-# %% ../../../nbdev_nbs/io/psm_reader/psm_reader.ipynb 3
+# %% ../../../nbdev_nbs/io/psm_reader/psm_reader.ipynb 4
 import pandas as pd
 import numpy as np
 import alphabase.peptide.mobility as mobility
@@ -13,7 +13,7 @@ from alphabase.peptide.precursor import (
 )
 from ...constants._const import CONST_FILE_FOLDER
 
-# %% ../../../nbdev_nbs/io/psm_reader/psm_reader.ipynb 4
+# %% ../../../nbdev_nbs/io/psm_reader/psm_reader.ipynb 5
 def translate_other_modification(
     mod_str: str, 
     mod_dict: dict
@@ -21,15 +21,21 @@ def translate_other_modification(
     '''
     Translate modifications of `mod_str` to the AlphaBase 
     format mapped by mod_dict.
-    Args:
-        mod_str (str): mod list in str format, seperated by ';', 
+    
+    Parameters
+    ----------
+        mod_str : str
+            mod list in str format, seperated by ';', 
             e.g. ModA;ModB
-        mod_dict (dict): translate mod dict from others to AlphaBase, 
+        mod_dict : dict
+            translate mod dict from others to AlphaBase, 
             e.g. for pFind, key=['Phospho[S]','Oxidation[M]'], 
             value=['Phospho@S','Oxidation@M']
-    Returns:
-        str: new mods in AlphaBase format seperated by ';'. if any
-             modification is not in `mod_dict`, return pd.NA.
+    Returns
+    -------
+    str
+        new mods in AlphaBase format seperated by ';'. if any
+        modification is not in `mod_dict`, return pd.NA.
     '''
     if not mod_str: return ""
     ret_mods = []
@@ -46,13 +52,19 @@ def keep_modifications(
 )->str:
     '''
     Check if modifications of `mod_str` are in `mod_set`.
-    Args:
-        mod_str (str): mod list in str format, seperated by ';', 
-            e.g. Oxidation@M;Phospho@S.
-        mod_set (set): mod set to check
-    Returns:
-        str: original `mod_str` if all modifications are in mod_set 
-             else pd.NA.
+
+    Parameters
+    ----------
+    mod_str : str
+        mod list in str format, seperated by ';', 
+        e.g. Oxidation@M;Phospho@S.
+    mod_set : set
+        mod set to check
+    Returns
+    -------
+    str
+        original `mod_str` if all modifications are in mod_set 
+        else pd.NA.
     '''
     if not mod_str: return ""
     for mod in mod_str.split(';'):
@@ -61,7 +73,7 @@ def keep_modifications(
     return mod_str
 
 
-# %% ../../../nbdev_nbs/io/psm_reader/psm_reader.ipynb 6
+# %% ../../../nbdev_nbs/io/psm_reader/psm_reader.ipynb 7
 from ...yaml_utils import load_yaml
 import os
 import copy
@@ -73,7 +85,7 @@ psm_reader_yaml = load_yaml(
     )
 )
 
-# %% ../../../nbdev_nbs/io/psm_reader/psm_reader.ipynb 8
+# %% ../../../nbdev_nbs/io/psm_reader/psm_reader.ipynb 9
 class PSMReaderBase(object):
     def __init__(self,
         *,
@@ -86,48 +98,59 @@ class PSMReaderBase(object):
         """The Base class for all PSMReaders. The key of the sub-classes for different 
         search engine format is to re-define `column_mapping` and `modification_mapping`.
         
-        Args:
-            column_mapping (dict, optional): 
-                A dict that maps alphabase's columns to other search engine's.
-                The key of the column_mapping is alphabase's column name, and 
-                the value could be the column name or a list of column names
-                in other engine's result.
-                If it is None, this dict will be init by 
-                `self._init_column_mapping()`. The dict values could be 
-                either str or list, for exaplme:
-                columns_mapping = {
-                    'sequence': 'NakedSequence', #str
-                    'charge': 'Charge', #str
-                    'proteins':['Proteins','UniprotIDs'], # list, this reader will automatically detect all of them.
-                }
-                Defaults to None.
-            modification_mapping (dict, optional): 
-                A dict that maps alphabase's modifications to other engine's.
-                If it is None, this dict will be init by 
-                `self._init_modification_mapping()`. The dict values could be 
-                either str or list, for exaplme:
-                modification_mapping = {
-                    'Oxidation@M': 'Oxidation (M)', # str
-                    'Phospho@S': ['S(Phospho (STY))','S(ph)','pS'], # list, this reader will automatically detect all of them.
-                }
-                Defaults to None.
-            fdr (float, optional): FDR level to keep PSMs.
-                Defaults to 0.01.
-            keep_decoy(bool, optional): If keep decoy PSMs in self.psm_df.
-                Defautls to False.
+        Parameters
+        ----------
+        column_mapping : dict, optional
+            A dict that maps alphabase's columns to other search engine's.
+            The key of the column_mapping is alphabase's column name, and 
+            the value could be the column name or a list of column names
+            in other engine's result.
+            If it is None, this dict will be init by 
+            `self._init_column_mapping()`. The dict values could be 
+            either str or list, for exaplme:
+            columns_mapping = {
+                'sequence': 'NakedSequence', #str
+                'charge': 'Charge', #str
+                'proteins':['Proteins','UniprotIDs'], # list, this reader will automatically detect all of them.
+            }
+            Defaults to None.
+        modification_mapping : dict, optional
+            A dict that maps alphabase's modifications to other engine's.
+            If it is None, this dict will be init by 
+            `self._init_modification_mapping()`. The dict values could be 
+            either str or list, for exaplme:
+            modification_mapping = {
+                'Oxidation@M': 'Oxidation (M)', # str
+                'Phospho@S': ['S(Phospho (STY))','S(ph)','pS'], # list, this reader will automatically detect all of them.
+            }
+            Defaults to None.
+        fdr : float, optional
+            FDR level to keep PSMs.
+            Defaults to 0.01.
+        keep_decoy : bool, optional
+            If keep decoy PSMs in self.psm_df.
+            Defautls to False.
         
-        Attributes:
-            column_mapping (dict): dict structure same as column_mapping in Args.
-            modification_mapping (dict): dict structure same as modification_mapping in Args.
-                We must use self.set_modification_mapping(new_mapping) to update it.
-            _psm_df (pd.DataFrame): the PSM DataFrame after loading from search engines.
-            psm_df (pd.DataFrame): the getter of self._psm_df
-            keep_fdr (float): The only PSMs with FDR<=keep_fdr were returned in self._psm_df. 
-            keep_decoy (bool): If keep decoy PSMs in self.psm_df.
-            _min_max_rt_norm (bool): if True, the 'rt_norm' values in self._psm_df 
-                will be normalized by rt_norm = (self.psm_df.rt-rt_min)/(rt_max-rt_min).
-                It is useful to normalize iRT values as they contain negative values.
-                Defaults to False.
+        Attributes
+        ----------
+        column_mapping : dict
+            Dict structure same as column_mapping in Args.
+        modification_mapping : dict
+            Dict structure same as modification_mapping in Args.
+            We must use self.set_modification_mapping(new_mapping) to update it.
+        _psm_df : pd.DataFrame
+            the PSM DataFrame after loading from search engines.
+        psm_df : pd.DataFrame
+            the getter of self._psm_df
+        keep_fdr : float
+            The only PSMs with FDR<=keep_fdr were returned in self._psm_df. 
+        keep_decoy : bool
+            If keep decoy PSMs in self.psm_df.
+        _min_max_rt_norm : bool
+            if True, the 'rt_norm' values in self._psm_df 
+            will be normalized by rt_norm = (self.psm_df.rt-rt_min)/(rt_max-rt_min).
+            It is useful to normalize iRT values as they contain negative values.
+            Defaults to False.
         """
 
         self.set_modification_mapping(modification_mapping)
@@ -193,7 +216,7 @@ class PSMReaderBase(object):
         """
         This is the main entry function of PSM readers, 
         it imports the file with following steps:
-        --------
+        ```
         origin_df = self._load_file(_file)
         self._translate_columns(origin_df)
         self._translate_decoy(origin_df)
@@ -201,8 +224,10 @@ class PSMReaderBase(object):
         self._load_modifications(origin_df)
         self._translate_modifications()
         self._post_process(origin_df)
-        --------
-        Args:
+        ```
+        
+        Parameters
+        ----------
             _file: file path or file stream.
         """
         origin_df = self._load_file(_file)
@@ -406,7 +431,7 @@ class PSMReaderBase(object):
         self._psm_df.reset_index(drop=True, inplace=True)
 
 
-# %% ../../../nbdev_nbs/io/psm_reader/psm_reader.ipynb 11
+# %% ../../../nbdev_nbs/io/psm_reader/psm_reader.ipynb 12
 class PSMReaderProvider:
     def __init__(self):
         self.reader_dict = {}

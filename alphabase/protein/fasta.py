@@ -40,10 +40,17 @@ def get_uniprot_gene_name(description:str):
 def read_fasta_file(fasta_filename:str=""):
     """
     Read a FASTA file line by line
-    Args:
-        fasta_filename (str): fasta.
-    Yields:
-        dict {id:str, name:str, description:str, sequence:str}: protein information.
+
+    Parameters
+    ----------
+    fasta_filename : str
+        fasta.
+        
+    Yields
+    ------
+    dict 
+        protein information, 
+        {protein_id:str, full_name:str, gene_name:str, description:str, sequence:str}
     """
     with open(fasta_filename, "rt") as handle:
         iterator = SeqIO.parse(handle, "fasta")
@@ -79,11 +86,15 @@ def concat_proteins(protein_dict:dict, sep='$')->str:
     """Concatenate all protein sequences into a single sequence, 
     seperated by `sep ($ by default)`.
 
-    Args:
-        protein_dict (dict): protein_dict by read_fasta_file()
+    Parameters
+    ----------
+    protein_dict : dict
+        protein_dict by read_fasta_file()
 
-    Returns:
-        str: concatenated sequence seperated by `sep`.
+    Returns
+    -------
+    str
+        concatenated sequence seperated by `sep`.
     """
     seq_list = ['']
     seq_count = 1
@@ -102,7 +113,7 @@ def cleave_sequence_with_cut_pos(
     n_missed_cleavages:int=2,
     pep_length_min:int=6,
     pep_length_max:int=45,
-)->np.ndarray:
+)->tuple:
     """
     Cleave a sequence with cut postions (cut_pos). 
     Filters to have a minimum and maximum length.
@@ -110,40 +121,29 @@ def cleave_sequence_with_cut_pos(
     Parameters
     ----------
     sequence : str
-    
         protein sequence
 
     cut_pos : np.array
-
         cut postions determined by a given protease.
 
     n_missed_cleavages : int
-    
         the number of max missed cleavages.
 
     pep_length_min : int
-
         min peptide length.
 
     pep_length_max :int
-
         max peptide length.
 
     Returns
     -------
-    list:
-
+    tuple:
         List[str]. Cleaved peptide sequences with missed cleavages.
-        
-    list: 
-        
+
         List[int]. Number of miss cleavage of each peptide.
 
-    list:
-        
         List[bool]. If N-term peptide
 
-    list:
         List[bool]. If C-term pepetide
     """
     seq_list = []
@@ -195,10 +195,15 @@ class Digest(object):
     )->list:
         """
         Cleave a sequence.
-        Args:
-            sequence (str): the given (protein) sequence.
-        Returns:
-            list (of str): cleaved peptide sequences with missed cleavages.
+        Parameters
+        ----------
+        sequence : str
+            the given (protein) sequence.
+
+        Returns
+        -------
+        list (of str)
+            cleaved peptide sequences with missed cleavages.
         """
 
         cut_pos = [0]
@@ -255,12 +260,18 @@ def get_candidate_sites(
 )->list:
     """get candidate modification sites
 
-    Args:
-        sequence (str): peptide sequence
-        target_mod_aas (str): AAs that may have modifications
+    Parameters
+    ----------
+    sequence : str
+        peptide sequence
 
-    Returns:
-        list: candiadte mod sites in alphabase format (0: N-term, -1: C-term, 1-n:others)
+    target_mod_aas : str
+        AAs that may have modifications
+
+    Returns
+    -------
+    list
+        candiadte mod sites in alphabase format (0: N-term, -1: C-term, 1-n:others)
     """
     candidate_sites = []
     for i,aa in enumerate(sequence):
@@ -276,14 +287,24 @@ def get_var_mod_sites(
 )->list:
     """get all combinations of variable modification sites
 
-    Args:
-        sequence (str): peptide sequence
-        target_mod_aas (str): AAs that may have modifications
-        max_var_mod (int): max number of mods in a sequence
-        max_combs (int): max number of combinations for a sequence
+    Parameters
+    ----------
+    sequence : str
+        peptide sequence
 
-    Returns:
-        list: list of combinations of (tuple) modification sites 
+    target_mod_aas : str
+        AAs that may have modifications
+
+    max_var_mod : int
+        max number of mods in a sequence
+
+    max_combs : int
+        max number of combinations for a sequence
+
+    Returns
+    -------
+    list
+        list of combinations of (tuple) modification sites 
     """
     candidate_sites = get_candidate_sites(
         sequence, target_mod_aas
@@ -470,19 +491,31 @@ def append_regular_modifications(df:pd.DataFrame,
     Append regular (not N/C-term) variable modifications to the 
     exsiting modifications of each sequence in `df`.
 
-    Args:
-        df (pd.DataFrame): Precursor dataframe
-        var_mods (list, optional): Considered varialbe modification list. 
-            Defaults to ['Phospho@S','Phospho@T','Phospho@Y'].
-        max_mod_num (int, optional): Maximal modification number for 
-            each sequence of the `var_mods`. Defaults to 1.
-        max_combs (int, optional): One sequence is only allowed to explode 
-            to `max_combs` number of modified peptides. Defaults to 100.
-        keep_unmodified (bool, optional): If unmodified (only refered to `var_mods`)
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Precursor dataframe
+    
+    var_mods : list, optional
+        Considered varialbe modification list. 
+        Defaults to ['Phospho@S','Phospho@T','Phospho@Y'].
+
+    max_mod_num : int, optional
+        Maximal modification number for 
+        each sequence of the `var_mods`. Defaults to 1.
+
+    max_combs : int, optional
+        One sequence is only allowed to explode 
+        to `max_combs` number of modified peptides. Defaults to 100.
+
+    keep_unmodified : bool, optional
+        If unmodified (only refered to `var_mods`)
         peptides are also remained in the returned dataframe. Defaults to True.
 
-    Returns:
-        pd.DataFrame: The precursor_df with `var_mods` appended.
+    Returns
+    -------
+    pd.DataFrame
+        The precursor_df with `var_mods` appended.
     """
     mod_dict = dict([(mod[-1],mod) for mod in var_mods])
     var_mod_aas = ''.join(mod_dict.keys())
@@ -680,9 +713,13 @@ class FastaLib(SpecLibBase):
     def get_peptides_from_fasta(self, fasta_file:Union[str,list]):
         """Load peptide sequence from fasta file.
 
-        Args:
-            fasta_path (Union[str,list]): could be a fasta path or a list of fasta paths
-              or a list of fasta paths
+        Parameters
+        ----------
+        fasta_path : Union[str,list]
+
+            could be a fasta path or a list of fasta paths
+            or a list of fasta paths
+            
         """
         if isinstance(fasta_file, str):
             self.get_peptides_from_fasta_list([fasta_file])
@@ -692,8 +729,11 @@ class FastaLib(SpecLibBase):
     def get_peptides_from_fasta_list(self, fasta_files:list):
         """Load peptide sequences from fasta file list
 
-        Args:
-            fasta_files (list): fasta file list
+        Parameters
+        ----------
+        fasta_files : list
+            fasta file list
+            
         """
         protein_dict = load_all_proteins(fasta_files)
         self.get_peptides_from_protein_dict(protein_dict)
@@ -873,16 +913,18 @@ class FastaLib(SpecLibBase):
         """ 
         Add labeling onto peptides inplace of self._precursor_df
 
-        Args:
-            labeling_channel_dict (dict of list): for example:
-              {
-                  'reference': [], # not labelled for reference
-                  'light': ['Dimethyl@Any N-term','Dimethyl@K'],
-                  'median': ['Dimethyl:2H(4)@Any N-term','Dimethyl:2H(4)@K'],
-                  'heavy': ['Dimethyl:2H(6)13C(2)@Any N-term','Dimethyl:2H(6)13C(2)@K'],
-              }.
-              The key name could be arbitrary distinguished strings, and value must be a list of string.
-        
+        Parameters
+        ----------
+        labeling_channel_dict : dict of list
+            For example:
+            {
+                'reference': [], # not labelled for reference
+                'light': ['Dimethyl@Any N-term','Dimethyl@K'],
+                'median': ['Dimethyl:2H(4)@Any N-term','Dimethyl:2H(4)@K'],
+                'heavy': ['Dimethyl:2H(6)13C(2)@Any N-term','Dimethyl:2H(6)13C(2)@K'],
+            }.
+            The key name could be arbitrary distinguished strings, and value must be a list of string.
+    
         """
         df_list = []
         for channel, labels in labeling_channel_dict.items():

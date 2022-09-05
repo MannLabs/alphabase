@@ -28,6 +28,7 @@ from alphabase.peptide.precursor import (
     is_precursor_sorted
 )
 
+# %% ../../nbdev_nbs/peptide/fragment.ipynb 5
 def get_charged_frag_types(
     frag_types:List[str], 
     max_frag_charge:int = 2
@@ -35,18 +36,24 @@ def get_charged_frag_types(
     '''
     Combine fragment types and charge states.
 
-    Args:
-        frag_types (List[str]): e.g. ['b','y','b_modloss','y_modloss']
-        max_frag_charge (int): max fragment charge. (default: 2)
-    
-    Returns:
-        List[str]: charged fragment types
-    
-    Examples::
+    Parameters
+    ----------
+    frag_types : List[str]
+        e.g. ['b','y','b_modloss','y_modloss']
 
-        >>> frag_types=['b','y','b_modloss','y_modloss']
-        >>> get_charged_frag_types(frag_types, 2)
-        ['b_z1','b_z2','y_z1','y_z2','b_modloss_z1','b_modloss_z2','y_modloss_z1','y_modloss_z2']
+    max_frag_charge : int
+        max fragment charge. (default: 2)
+    
+    Returns
+    -------
+    List[str]
+        charged fragment types
+    
+    Examples
+    --------
+    >>> frag_types=['b','y','b_modloss','y_modloss']
+    >>> get_charged_frag_types(frag_types, 2)
+    ['b_z1','b_z2','y_z1','y_z2','b_modloss_z1','b_modloss_z2','y_modloss_z1','y_modloss_z2']
     '''
     charged_frag_types = []
     for _type in frag_types:
@@ -60,37 +67,49 @@ def parse_charged_frag_type(
     '''
     Oppsite to `get_charged_frag_types`.
     
-    Args:
-        charged_frag_type (str): e.g. 'y_z1', 'b_modloss_z1'
-    
-    Returns:
-        str: fragment type, e.g. 'b','y'
-        int: charge state
+    Parameters
+    ----------
+    charged_frag_type : str
+        e.g. 'y_z1', 'b_modloss_z1'
+
+    Returns
+    -------
+    tuple
+        str. Fragment type, e.g. 'b','y'
+
+        int. Charge state
     '''
     items = charged_frag_type.split('_')
     _ch = items[-1]
     _type = '_'.join(items[:-1])
     return _type, int(_ch[1:])
 
-# %% ../../nbdev_nbs/peptide/fragment.ipynb 9
+# %% ../../nbdev_nbs/peptide/fragment.ipynb 10
 def init_zero_fragment_dataframe(
-    peplen_array:np.array,
+    peplen_array:np.ndarray,
     charged_frag_types:List[str], 
     dtype=np.float64
-)->Tuple[pd.DataFrame, np.array, np.array]: 
+)->Tuple[pd.DataFrame, np.ndarray, np.ndarray]: 
     '''Initialize a zero dataframe based on peptide length 
     (nAA) array (peplen_array) and charge_frag_types (column number).
     The row number of returned dataframe is np.sum(peplen_array-1).
 
-    Args:
-        peplen_array (np.array): peptide lengths for the fragment dataframe
-        charged_frag_types (List[str]): 
-            `['b_z1','b_z2','y_z1','y_z2','b_modloss_z1','y_H2O_z1'...]`
+    Parameters
+    ----------
+    peplen_array : np.ndarray
+        peptide lengths for the fragment dataframe
+        
+    charged_frag_types : List[str]
+        `['b_z1','b_z2','y_z1','y_z2','b_modloss_z1','y_H2O_z1'...]`
     
-    Returns:
-        pd.DataFrame: `fragment_df` with zero values
-        np.array (int64): the start indices point to the `fragment_df` for each peptide
-        np.array (int64): the end indices point to the `fragment_df` for each peptide
+    Returns
+    -------
+    tuple
+        pd.DataFrame, `fragment_df` with zero values
+
+        np.ndarray (int64), the start indices point to the `fragment_df` for each peptide
+
+        np.ndarray (int64), the end indices point to the `fragment_df` for each peptide
     '''
     indices = np.zeros(len(peplen_array)+1, dtype=np.int64)
     indices[1:] = peplen_array-1
@@ -127,31 +146,42 @@ def init_fragment_by_precursor_dataframe(
     the dataframe based on the reference. Otherwise it 
     generates the dataframe from scratch.
     
-    Args:
-        precursor_df (pd.DataFrame): precursors to generate fragment masses,
-            if `precursor_df` contains the 'frag_start_idx' column, 
-            it is better to provide `reference_fragment_df` as 
-            `precursor_df.frag_start_idx` and `precursor.frag_end_idx` 
-            point to the indices in `reference_fragment_df`
-        charged_frag_types (List): 
-            `['b_z1','b_z2','y_z1','y_z2','b_modloss_z1','y_H2O_z1'...]`
-        reference_fragment_df (pd.DataFrame): init zero fragment_mz_df based
-            on this reference. If None, fragment_mz_df will be 
-            initialized by :func:`alphabase.peptide.fragment.init_zero_fragment_dataframe`.
-            Defaults to None.
-        inplace_in_reference (bool, optional): if calculate the fragment mz 
+    Parameters
+    ----------
+    precursor_df : pd.DataFrame
+        precursors to generate fragment masses,
+        if `precursor_df` contains the 'frag_start_idx' column, 
+        it is better to provide `reference_fragment_df` as 
+        `precursor_df.frag_start_idx` and `precursor.frag_end_idx` 
+        point to the indices in `reference_fragment_df`
+
+    charged_frag_types : List
+        `['b_z1','b_z2','y_z1','y_z2','b_modloss_z1','y_H2O_z1'...]`
+
+    reference_fragment_df : pd.DataFrame
+        init zero fragment_mz_df based
+        on this reference. If None, fragment_mz_df will be 
+        initialized by :func:`alphabase.peptide.fragment.init_zero_fragment_dataframe`.
+        Defaults to None.
+
+    inplace_in_reference : bool, optional
+        if calculate the fragment mz 
         inplace in the reference_fragment_df (default: False)
+
+    Returns
+    -------
+    pd.DataFrame
+        zero `fragment_df` with given `charged_frag_types` columns
     
-    Returns:
-        pd.DataFrame: zero `fragment_df` with given `charged_frag_types` columns
-    
-    Raises:
-        ValueError: if `reference_fragment_df` is None but there are 'frag_start_idx'
-            in the `precursor_df`, meaning that there are some other fragment 
-            dataframes linked to the `precursor_df`, these fragment dataframes must 
-            be provided as `reference_fragment_df`. 
-            If we are sure that other fragment dataframes are not needed any more, 
-            we can just `del precursor_df['frag_start_idx']` before call this function.
+    Raises
+    ------
+    ValueError
+        If `reference_fragment_df` is None but there are 'frag_start_idx'
+        in the `precursor_df`, meaning that there are some other fragment 
+        dataframes linked to the `precursor_df`, these fragment dataframes must 
+        be provided as `reference_fragment_df`. 
+        If we are sure that other fragment dataframes are not needed any more, 
+        we can just `del precursor_df['frag_start_idx']` before call this function.
     '''
     if 'frag_start_idx' not in precursor_df.columns:
         fragment_df, start_indices, end_indices = init_zero_fragment_dataframe(
@@ -189,10 +219,10 @@ def init_fragment_by_precursor_dataframe(
                 )
     return fragment_df
 
-# %% ../../nbdev_nbs/peptide/fragment.ipynb 11
+# %% ../../nbdev_nbs/peptide/fragment.ipynb 12
 def update_sliced_fragment_dataframe(
     fragment_df: pd.DataFrame,
-    values: np.array,
+    values: np.ndarray,
     frag_start_end_list: List[Tuple[int,int]],
     charged_frag_types: List[str]=None,
 )->pd.DataFrame:
@@ -200,17 +230,28 @@ def update_sliced_fragment_dataframe(
     Set the values of the slices `frag_start_end_list=[(start,end),(start,end),...]` 
     of fragment_df.
 
-    Args:
-        fragment_df (pd.DataFrame): fragment dataframe to set the values
-        frag_start_end_list (List[Tuple[int,int]]): e.g. `[(start,end),(start,end),...]`
-        charged_frag_types (List[str], optional): e.g. `['b_z1','b_z2','y_z1','y_z2']`.
-            If None, the columns of values should be the same as fragment_df's columns.
-            It is much faster if charged_frag_types is None as we use numpy slicing, 
-            otherwise we use pd.loc (much slower).
-            Defaults to None.
+    Parameters
+    ----------
+    fragment_df : pd.DataFrame
+        fragment dataframe to set the values
+
+    values : np.ndarray
+        values to set
+
+    frag_start_end_list : List[Tuple[int,int]]
+        e.g. `[(start,end),(start,end),...]`
+
+    charged_frag_types : List[str], optional
+        e.g. `['b_z1','b_z2','y_z1','y_z2']`.
+        If None, the columns of values should be the same as fragment_df's columns.
+        It is much faster if charged_frag_types is None as we use numpy slicing, 
+        otherwise we use pd.loc (much slower).
+        Defaults to None.
     
-    Returns:
-        pd.DataFrame: fragment_df after the values are set into slices
+    Returns
+    -------
+    pd.DataFrame
+        fragment_df after the values are set into slices
     '''
     frag_slice_list = [slice(start,end) for start,end in frag_start_end_list]
     frag_slices = np.r_[tuple(frag_slice_list)]
@@ -223,20 +264,29 @@ def update_sliced_fragment_dataframe(
 
 def get_sliced_fragment_dataframe(
     fragment_df: pd.DataFrame,
-    frag_start_end_list:Union[List,np.array],
+    frag_start_end_list:Union[List,np.ndarray],
     charged_frag_types:List = None,
 )->pd.DataFrame:
     '''
     Get the sliced fragment_df from `frag_start_end_list=[(start,end),(start,end),...]`.
     
-    Args:
-        fragment_df (pd.DataFrame): fragment dataframe to get values
-        frag_start_end_list (List[Tuple[int,int]]): e.g. `[(start,end),(start,end),...]`
-        charged_frag_types (List[str]): e.g. `['b_z1','b_z2','y_z1','y_z2']`.
-            if None, all columns will be considered
+    Parameters
+    ----------
+    fragment_df : pd.DataFrame
+        fragment dataframe to get values
+
+    frag_start_end_list : Union
+        List[Tuple[int,int]], e.g. `[(start,end),(start,end),...]` or np.ndarray
+
+    charged_frag_types : List[str]
+        e.g. `['b_z1','b_z2','y_z1','y_z2']`.
+        if None, all columns will be considered
     
-    Returns:
-        pd.DataFrame: sliced fragment_df. If `charged_frag_types` is None, 
+    Returns
+    -------
+    pd.DataFrame
+    
+        sliced fragment_df. If `charged_frag_types` is None, 
         return fragment_df with all columns
     '''
     frag_slice_list = [slice(start,end) for start,end in frag_start_end_list]
@@ -247,7 +297,7 @@ def get_sliced_fragment_dataframe(
         charged_frag_idxes = [fragment_df.columns.get_loc(c) for c in charged_frag_types]
     return fragment_df.iloc[frag_slices, charged_frag_idxes]
 
-# %% ../../nbdev_nbs/peptide/fragment.ipynb 13
+# %% ../../nbdev_nbs/peptide/fragment.ipynb 14
 def concat_precursor_fragment_dataframes(
     precursor_df_list: List[pd.DataFrame],
     fragment_df_list: List[pd.DataFrame],
@@ -259,14 +309,22 @@ def concat_precursor_fragment_dataframes(
     this function keeps the correct indexed positions of precursor_df when 
     concatenating multiple fragment_df dataframes.
     
-    Args:
-        precursor_df_list (List[pd.DataFrame]): precursor dataframe list to concatenate
-        fragment_df_list (List[pd.DataFrame]): fragment dataframe list to concatenate
-        *other_fragment_df_lists: arbitray other fragment dataframe list to concatenate, 
-            e.g. fragment_mass_df, fragment_inten_df, ...
+    Parameters
+    ----------
+    precursor_df_list : List[pd.DataFrame]
+        precursor dataframe list to concatenate
+
+    fragment_df_list : List[pd.DataFrame]
+        fragment dataframe list to concatenate
+
+    *other_fragment_df_lists
+        arbitray other fragment dataframe list to concatenate, 
+        e.g. fragment_mass_df, fragment_inten_df, ...
     
-    Returns:
-        Tuple[pd.DataFrame,...]: concatenated precursor_df, fragment_df, *other_fragment_df ...
+    Returns
+    -------
+    Tuple[pd.DataFrame,...]
+        concatenated precursor_df, fragment_df, *other_fragment_df ...
     '''
     fragment_df_lens = [len(fragment_df) for fragment_df in fragment_df_list]
     precursor_df_list = [precursor_df.copy() for precursor_df in precursor_df_list]
@@ -281,7 +339,7 @@ def concat_precursor_fragment_dataframes(
         ]
     )
 
-# %% ../../nbdev_nbs/peptide/fragment.ipynb 14
+# %% ../../nbdev_nbs/peptide/fragment.ipynb 15
 def calc_fragment_mz_values_for_same_nAA(
     df_group:pd.DataFrame, 
     nAA:int, 
@@ -378,7 +436,7 @@ def calc_fragment_mz_values_for_same_nAA(
             )
     return np.array(mz_values).T
 
-# %% ../../nbdev_nbs/peptide/fragment.ipynb 15
+# %% ../../nbdev_nbs/peptide/fragment.ipynb 16
 def mask_fragments_for_charge_greater_than_precursor_charge(
     fragment_df:pd.DataFrame, 
     precursor_charge_array:np.array,
@@ -397,7 +455,7 @@ def mask_fragments_for_charge_greater_than_precursor_charge(
                 fragment_df.loc[precursor_charge_array<charge,col] = 0
     return fragment_df
 
-# %% ../../nbdev_nbs/peptide/fragment.ipynb 17
+# %% ../../nbdev_nbs/peptide/fragment.ipynb 18
 def create_fragment_mz_dataframe_by_sort_precursor(
     precursor_df: pd.DataFrame,
     charged_frag_types:List,
@@ -410,11 +468,17 @@ def create_fragment_mz_dataframe_by_sort_precursor(
 
     Note that this function will change the order and index of precursor_df
 
-    Args:
-        precursor_df (pd.DataFrame): precursor dataframe
-        charged_frag_types (List): fragment types list
-        batch_size (int, optional): Calculate fragment mz values in batch. 
-            Defaults to 500000.
+    Parameters
+    ----------
+    precursor_df : pd.DataFrame
+        precursor dataframe
+
+    charged_frag_types : List
+        fragment types list
+
+    batch_size : int, optional
+        Calculate fragment mz values in batch. 
+        Defaults to 500000.
     """
     if 'frag_start_idx' in precursor_df.columns:
         precursor_df.drop(columns=[
@@ -458,8 +522,8 @@ def create_fragment_mz_dataframe(
     charged_frag_types:List,
     *,
     reference_fragment_df: pd.DataFrame = None,
-    inplace_in_reference = False,
-    batch_size=500000,
+    inplace_in_reference:bool = False,
+    batch_size:int=500000,
 )->pd.DataFrame:
     '''
     Generate fragment mass dataframe for the precursor_df. If 
@@ -467,22 +531,38 @@ def create_fragment_mz_dataframe(
     it will generate  the mz dataframe based on the reference. Otherwise it 
     generates the mz dataframe from scratch.
     
-    Args:
-        precursor_df (pd.DataFrame): precursors to generate fragment masses,
-            if `precursor_df` contains the 'frag_start_idx' column, 
-            `reference_fragment_df` must be provided
-        charged_frag_types (List): 
-            `['b_z1','b_z2','y_z1','y_z2','b_modloss_1','y_H2O_z1'...]`
-        reference_fragment_df (pd.DataFrame): generate fragment_mz_df based
-            on this reference, as `precursor_df.frag_start_idx` and 
-            `precursor.frag_end_idx` point to the indices in 
-            `reference_fragment_df`
+    Parameters
+    ----------
+    precursor_df : pd.DataFrame
+        precursors to generate fragment masses,
+        if `precursor_df` contains the 'frag_start_idx' column, 
+        `reference_fragment_df` must be provided
+    charged_frag_types : List
+        `['b_z1','b_z2','y_z1','y_z2','b_modloss_1','y_H2O_z1'...]`
+
+    reference_fragment_df : pd.DataFrame
+        kwargs only. Generate fragment_mz_df based on this reference, 
+        as `precursor_df.frag_start_idx` and 
+        `precursor.frag_end_idx` point to the indices in 
+        `reference_fragment_df`.
+        Defaults to None
+
+    inplace_in_reference : bool
+        kwargs only. Change values in place in the `reference_fragment_df`.
+        Defaults to False
+
+    batch_size: int
+        Number of peptides for each batch, to save RAM.
+
+    Returns
+    -------
+    pd.DataFrame
+        `fragment_mz_df` with given `charged_frag_types`
     
-    Returns:
-        pd.DataFrame: `fragment_mz_df` with given `charged_frag_types`
-    
-    Raises:
-        ValueError: when `precursor_df` contains 'frag_start_idx' but 
+    Raises
+    ------
+    ValueError
+        when `precursor_df` contains 'frag_start_idx' but 
         `reference_fragment_df` is not None
     '''
     if reference_fragment_df is None:
