@@ -286,14 +286,19 @@ class PSMReaderBase(object):
         Different search engines may store PSMs in different ways:
         tsv, csv, HDF, XML, ...
 
-        Args:
-            filename (str): psm filename
+        Parameters
+        ----------
+        filename : str
+            psm filename
 
-        Raises:
-            NotImplementedError: Subclasses must re-implement this method
+        Raises
+        ------
+        NotImplementedError
+            Subclasses must re-implement this method
 
         Returns:
-            pd.DataFrame: loaded dataframe
+        pd.DataFrame
+            loaded dataframe
         """
         raise NotImplementedError(
             f'"{self.__class__}" must implement "_load_file()"'
@@ -304,11 +309,15 @@ class PSMReaderBase(object):
         Translate the dataframe from other search engines 
         to AlphaBase format
 
-        Args:
-            origin_df (pd.DataFrame): df of other search engines
+        Parameters
+        ----------
+        origin_df : pd.DataFrame
+            df of other search engines
 
-        Returns: 
-            None. Add information inplace into self._psm_df
+        Returns
+        -------
+        None
+            Add information inplace into self._psm_df
         """
         self._psm_df = pd.DataFrame()
         for col, map_col in self.column_mapping.items():
@@ -333,12 +342,10 @@ class PSMReaderBase(object):
         Some of search engines use modified_sequence, some of them
         use additional columns to store modifications and the sites.
 
-        Args:
-            origin_df (pd.DataFrame): dataframe of original search engine.
-
-        Returns: 
-            None: Add information inplace into 
-            self._psm_df['mods'], self._psm_df['mod_sites'].
+        Parameters
+        ----------
+        origin_df : pd.DataFrame
+            dataframe of original search engine.
         """
         raise NotImplementedError(
             f'"{self.__class__}" must implement "_load_modifications()"'
@@ -348,7 +355,10 @@ class PSMReaderBase(object):
         '''
         Translate modifications to AlphaBase format.
 
-        Raises: KeyError if `mod` in `mod_names` is 
+        Raises
+        ------
+        KeyError
+            if `mod` in `mod_names` is 
             not in `self.modification_mapping`
         '''
         self._psm_df.mods = self._psm_df.mods.apply(
@@ -364,8 +374,10 @@ class PSMReaderBase(object):
         and perform other post processings, 
         e.g. get 'rt_norm', remove decoys, filter FDR...
 
-        Args:
-            origin_df (pd.DataFrame): the loaded original df
+        Parameters
+        ----------
+        origin_df : pd.DataFrame
+            the loaded original df
         """
         self._psm_df['nAA'] = self._psm_df.sequence.str.len()
 

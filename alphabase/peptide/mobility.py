@@ -15,27 +15,27 @@ CCS_IM_COEF = common_const_dict['MOBILITY']['CCS_IM_COEF']
 IM_GAS_MASS = common_const_dict['MOBILITY']['IM_GAS_MASS']
 
 def get_reduced_mass(
-    precursor_mzs: np.array, 
-    charges: np.array
-)->np.array:
+    precursor_mzs: np.ndarray, 
+    charges: np.ndarray
+)->np.ndarray:
     """ Reduced mass for CCS and mobility calculation """
     reduced_masses = precursor_mzs*charges
     return reduced_masses*IM_GAS_MASS/(reduced_masses+IM_GAS_MASS)
 
 def ccs_to_mobility_bruker(
-    ccs_values: np.array, 
-    charges: np.array, 
-    precursor_mzs: np.array
-)->np.array:
+    ccs_values: np.ndarray, 
+    charges: np.ndarray, 
+    precursor_mzs: np.ndarray
+)->np.ndarray:
     """ Convert CCS to mobility for Bruker (timsTOF) """
     reduced_masses = get_reduced_mass(precursor_mzs, charges)
     return ccs_values*np.sqrt(reduced_masses)/charges/CCS_IM_COEF
 
 def mobility_to_ccs_bruker(
-    im_values: np.array, 
-    charges: np.array, 
-    precursor_mzs: np.array
-)->np.array:
+    im_values: np.ndarray, 
+    charges: np.ndarray, 
+    precursor_mzs: np.ndarray
+)->np.ndarray:
     """ Convert mobility to CCS for Bruker (timsTOF) """
     reduced_masses = get_reduced_mass(precursor_mzs, charges)
     return im_values*charges*CCS_IM_COEF/np.sqrt(reduced_masses)
@@ -45,29 +45,25 @@ def ccs_to_mobility_for_df(
     ccs_column:str,
     *,
     vendor="bruker"
-)->np.array:
+)->np.ndarray:
     """
 
     Parameters
     ----------
     precursor_df : pd.DataFrame
-        
         precursor_df
 
     ccs_column : str
-    
         CCS column name in precursor_df
 
     vendor : str, optional
-    
         Different vender may have different IM calculation. 
         Defaults to "bruker".
         Note that other vendors are not implemented currently.
 
     Returns
     -------
-    np.array
-    
+    np.ndarray
         mobility values
     """
     if 'precursor_mz' not in precursor_df.columns:
@@ -83,29 +79,25 @@ def mobility_to_ccs_for_df(
     mobility_column:str,
     *,
     vendor="bruker"
-)->np.array:
+)->np.ndarray:
     """
 
     Parameters
     ----------
-    precursor_df : pd.DataFrame)
-    
+    precursor_df : pd.DataFrame
         precursor_df
 
     mobility_column : str
-    
         mobility column name in precursor_df
 
     vendor : str, optional
-    
         Different vender may have different IM calculation. 
         Defaults to "bruker".
         Note that other vendors are not implemented currently.
 
     Returns
     -------
-    np.array
-    
+    np.ndarray
         CCS values
     """
     

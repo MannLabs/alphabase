@@ -182,9 +182,9 @@ class SpecLibBase(object):
 
     def flatten_fragment_data(
         self
-    )->typing.Tuple[np.array, np.array]:
+    )->typing.Tuple[np.ndarray, np.ndarray]:
         '''
-        Create flattened (1-D) np.array for fragment mz and intensity 
+        Create flattened (1-D) np.ndarray for fragment mz and intensity 
         dataframes, respectively. The arrays are references to 
         original data, that means: 
           1. This method is fast; 
@@ -194,14 +194,11 @@ class SpecLibBase(object):
 
         Returns
         -------
-        np.array
-        
-            1-D flattened mz array (a reference to 
+        Tuple[np.ndarray, np.ndarray]
+            np.ndarray. 1-D flattened mz array (a reference to 
             original fragment mz df data)
 
-        np.array
-        
-            1-D flattened intensity array (a reference to 
+            np.ndarray. 1-D flattened intensity array (a reference to 
             original fragment intensity df data)
         '''
         return (

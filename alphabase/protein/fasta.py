@@ -123,7 +123,7 @@ def cleave_sequence_with_cut_pos(
     sequence : str
         protein sequence
 
-    cut_pos : np.array
+    cut_pos : np.ndarray
         cut postions determined by a given protease.
 
     n_missed_cleavages : int

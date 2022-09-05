@@ -439,8 +439,8 @@ def calc_fragment_mz_values_for_same_nAA(
 # %% ../../nbdev_nbs/peptide/fragment.ipynb 16
 def mask_fragments_for_charge_greater_than_precursor_charge(
     fragment_df:pd.DataFrame, 
-    precursor_charge_array:np.array,
-    nAA_array:np.array,
+    precursor_charge_array:np.ndarray,
+    nAA_array:np.ndarray,
     *,
     mask_fragment_charges = [2,3],
 ):

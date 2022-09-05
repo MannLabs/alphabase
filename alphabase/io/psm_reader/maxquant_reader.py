@@ -23,17 +23,28 @@ def parse_mod_seq(
 )->tuple:
     """Extract modifications and sites from the modified sequence (modseq)
 
-    Args:
-        modseq (str): modified sequence to extract modifications.
-        mod_sep (str, optional): separator to indicate the modification section. 
-            Defaults to '()'.
-        fixed_C (bool, optional): If Carbamidomethyl@C is a fixed modification 
-            and not displayed in the sequence. Defaults to True for MaxQuant.
-        underscore_for_ncterm (bool, optional): If modseq starts and ends with underscores. 
-            Defaults to True.
+    Parameters
+    ----------
+    modseq : str
+        modified sequence to extract modifications.
 
-    Returns:
+    mod_sep : str, optional
+        separator to indicate the modification section. 
+        Defaults to '()'
+
+    fixed_C : bool
+        If Carbamidomethyl@C is a fixed modification 
+        and not displayed in the sequence. Defaults to True for MaxQuant.
+
+    underscore_for_ncterm : bool
+        If modseq starts and ends with underscores. 
+        Defaults to True.
+
+    Returns
+    -------
+    tuple
         str: modification names, separated by ';'
+        
         str: modification sites, separated by ';'. 
             0 for N-term; -1 for C-term; 1 to N for normal modifications.
     """
