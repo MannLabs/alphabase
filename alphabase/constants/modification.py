@@ -79,7 +79,7 @@ def add_modifications_for_lower_case_AA():
     update_all_by_MOD_DF()
 
 # %% ../../nbdev_nbs/constants/modification.ipynb 6
-def keep_modloss_by_importance(modloss_importance_level=1):
+def keep_modloss_by_importance(modloss_importance_level:float=1.0):
     MOD_DF['modloss'] = MOD_DF['modloss_original']
     MOD_DF.loc[MOD_DF.modloss_importance<modloss_importance_level,"modloss"] = 0
     MOD_LOSS_MASS.clear()
