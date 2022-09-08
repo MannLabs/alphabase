@@ -14,6 +14,8 @@ import pandas as pd
 import numba
 import os
 import itertools
+import copy
+
 from Bio import SeqIO
 from typing import Union
 
@@ -23,14 +25,9 @@ from ..utils import explode_multiple_columns
 
 from ..constants._const import CONST_FILE_FOLDER
 
-protease_dict = load_yaml(
-    os.path.join(
-        CONST_FILE_FOLDER, 
-        'protease.yaml'
-    )
-)
+from ..spectral_library.library_base import SpecLibBase
 
-# %% ../../nbdev_nbs/protein/fasta.ipynb 4
+# %% ../../nbdev_nbs/protein/fasta.ipynb 3
 def get_uniprot_gene_name(description:str):
     idx = description.find(' GN=')
     if idx == -1: return ''
@@ -105,7 +102,14 @@ def concat_proteins(protein_dict:dict, sep='$')->str:
     seq_list.append('')
     return '$'.join(seq_list)
 
-# %% ../../nbdev_nbs/protein/fasta.ipynb 6
+# %% ../../nbdev_nbs/protein/fasta.ipynb 5
+protease_dict = load_yaml(
+    os.path.join(
+        CONST_FILE_FOLDER, 
+        'protease.yaml'
+    )
+)
+
 @numba.njit
 def cleave_sequence_with_cut_pos(
     sequence:str,
@@ -173,11 +177,30 @@ def cleave_sequence_with_cut_pos(
 
 class Digest(object):
     def __init__(self,
-        protease:str='trypsin',
+        protease:str='trypsin/P',
         max_missed_cleavages:int=2,
         peptide_length_min:int=6,
         peptide_length_max:int=45,
     ):
+        """Digest a protein sequence
+
+        Parameters
+        ----------
+        protease : str, optional
+            protease name, could be pre-defined name defined in `protease_dict`
+            or a regular expression. By default 'trypsin/P'
+
+        max_missed_cleavages : int, optional
+            Max number of misses cleavage sites.
+            By default 2
+
+        peptide_length_min : int, optional
+            Minimal cleaved peptide length, by default 6
+            
+        peptide_length_max : int, optional
+            Maximal cleaved peptide length, by default 45
+        """
+
         self.n_miss_cleave = max_missed_cleavages
         self.peptide_length_min = peptide_length_min
         self.peptide_length_max = peptide_length_max
@@ -192,9 +215,10 @@ class Digest(object):
 
     def cleave_sequence(self,
         sequence:str,
-    )->list:
+    )->tuple:
         """
         Cleave a sequence.
+
         Parameters
         ----------
         sequence : str
@@ -202,8 +226,11 @@ class Digest(object):
 
         Returns
         -------
-        list (of str)
-            cleaved peptide sequences with missed cleavages.
+        tuple[list]
+            list[str]: cleaved peptide sequences with missed cleavages
+            list[int]: miss cleavage list
+            list[bool]: is protein N-term
+            list[bool]: is protein C-term
         """
 
         cut_pos = [0]
@@ -237,7 +264,7 @@ class Digest(object):
                     cterm_list.append(cterm)
         return seq_list, miss_list, nterm_list, cterm_list
 
-# %% ../../nbdev_nbs/protein/fasta.ipynb 8
+# %% ../../nbdev_nbs/protein/fasta.ipynb 10
 def get_fix_mods(
     sequence:str,
     fix_mod_aas:str,
@@ -254,7 +281,7 @@ def get_fix_mods(
             mods.append(fix_mod_dict[aa])
     return ';'.join(mods), ';'.join(str(i) for i in mod_sites)
 
-# %% ../../nbdev_nbs/protein/fasta.ipynb 10
+# %% ../../nbdev_nbs/protein/fasta.ipynb 12
 def get_candidate_sites(
     sequence:str, target_mod_aas:str
 )->list:
@@ -304,7 +331,7 @@ def get_var_mod_sites(
     Returns
     -------
     list
-        list of combinations of (tuple) modification sites 
+        list of combinations (tuple) of modification sites 
     """
     candidate_sites = get_candidate_sites(
         sequence, target_mod_aas
@@ -322,8 +349,7 @@ def get_var_mod_sites(
         )
     return mod_sites
 
-# %% ../../nbdev_nbs/protein/fasta.ipynb 12
-import copy
+# %% ../../nbdev_nbs/protein/fasta.ipynb 14
 def get_var_mods_per_sites_multi_mods_on_aa(
     sequence:str,
     mod_sites:tuple,
@@ -396,7 +422,7 @@ def get_var_mods(
         ret_sites_list.append('')
     return ret_mods, ret_sites_list
 
-# %% ../../nbdev_nbs/protein/fasta.ipynb 15
+# %% ../../nbdev_nbs/protein/fasta.ipynb 17
 def parse_term_mod(term_mod_name:str):
     _mod, term = term_mod_name.split('@')
     if '^' in term:
@@ -404,7 +430,7 @@ def parse_term_mod(term_mod_name:str):
     else:
         return '', term
 
-# %% ../../nbdev_nbs/protein/fasta.ipynb 17
+# %% ../../nbdev_nbs/protein/fasta.ipynb 19
 def add_single_peptide_labeling(
     seq:str,
     mods:str,
@@ -474,18 +500,20 @@ def create_labeling_peptide_df(peptide_df:pd.DataFrame, labels:list):
 
     return df
 
-# %% ../../nbdev_nbs/protein/fasta.ipynb 19
+# %% ../../nbdev_nbs/protein/fasta.ipynb 21
 def protein_idxes_to_names(protein_idxes:str, protein_names:list):
     if len(protein_idxes) == 0: return ''
     proteins = [protein_names[int(i)] for i in protein_idxes.split(';')]
     proteins = [protein for protein in proteins if protein]
     return ';'.join(proteins)
 
-# %% ../../nbdev_nbs/protein/fasta.ipynb 21
+# %% ../../nbdev_nbs/protein/fasta.ipynb 23
 def append_regular_modifications(df:pd.DataFrame, 
     var_mods = ['Phospho@S','Phospho@T','Phospho@Y'], 
     max_mod_num=1, max_combs=100,
     keep_unmodified=True,
+    cannot_modify_pep_nterm_aa:bool=False,
+    cannot_modify_pep_cterm_aa:bool=False,
 )->pd.DataFrame:
     """
     Append regular (not N/C-term) variable modifications to the 
@@ -512,11 +540,31 @@ def append_regular_modifications(df:pd.DataFrame,
         If unmodified (only refered to `var_mods`)
         peptides are also remained in the returned dataframe. Defaults to True.
 
+    cannot_modify_pep_nterm_aa : bool, optional
+        Similar to `cannot_modify_pep_cterm_aa`, by default False
+
+    cannot_modify_pep_cterm_aa : bool, optional
+        If the modified AA is at C-term, then the modification cannot modified it.
+        For example GlyGly@K, for a peptide `ACDKEFGK`, if GlyGly is at the C-term, 
+        trypsin cannot cleave the C-term K, hence there will be no such a modified peptide ACDKEFGK(GlyGly).
+        by default False
+
     Returns
     -------
     pd.DataFrame
-        The precursor_df with `var_mods` appended.
+        The precursor_df with new modification added.
     """
+
+    if cannot_modify_pep_nterm_aa:
+        df['sequence'] = df['sequence'].apply(
+            lambda seq: seq[0].lower()+seq[1:]
+        )
+    
+    if cannot_modify_pep_cterm_aa:
+        df['sequence'] = df['sequence'].apply(
+            lambda seq: seq[:-1]+seq[-1].lower()
+        )
+
     mod_dict = dict([(mod[-1],mod) for mod in var_mods])
     var_mod_aas = ''.join(mod_dict.keys())
     
@@ -529,6 +577,16 @@ def append_regular_modifications(df:pd.DataFrame,
             keep_unmodified=keep_unmodified
         )
     )
+
+    if cannot_modify_pep_nterm_aa:
+        df['sequence'] = df['sequence'].apply(
+            lambda seq: seq[0].upper()+seq[1:]
+        )
+    
+    if cannot_modify_pep_cterm_aa:
+        df['sequence'] = df['sequence'].apply(
+            lambda seq: seq[:-1]+seq[-1].upper()
+        )
     
     if keep_unmodified:
         df = df.explode(['mods_app','mod_sites_app'])
@@ -546,15 +604,13 @@ def append_regular_modifications(df:pd.DataFrame,
     df.reset_index(drop=True, inplace=True)
     return df
 
-# %% ../../nbdev_nbs/protein/fasta.ipynb 22
-from ..spectral_library.library_base import SpecLibBase
-
+# %% ../../nbdev_nbs/protein/fasta.ipynb 24
 class FastaLib(SpecLibBase):
     def __init__(self,
         charged_frag_types:list = [
             'b_z1','b_z2','y_z1', 'y_z2'
         ],
-        protease:str = 'trypsin',
+        protease:str = 'trypsin/P',
         max_missed_cleavages:int = 2,
         peptide_length_min:int = 7,
         peptide_length_max:int = 35,
@@ -568,6 +624,74 @@ class FastaLib(SpecLibBase):
         decoy: str = None, # or pseudo_reverse or diann
         I_to_L=False,
     ):
+        """Class to process fasta files and generate libraries, including:
+        - Digest protein sequences
+        - Add fixed, variable or labeling modifications to the peptide sequences
+        - Add charge states
+        - Append decoy peptides
+        - Save libraries into hdf file
+
+        Parameters
+        ----------
+        charged_frag_types : list, optional
+            Fragment types with charge, 
+            by default [ 'b_z1','b_z2','y_z1', 'y_z2' ]
+
+        protease : str, optional
+            Could be pre-defined protease name defined in `protease_dict`,
+            or a regular expression. 
+            By default 'trypsin/P'
+
+        max_missed_cleavages : int, optional
+            Maximal missed cleavages, by default 2
+            
+        peptide_length_min : int, optional
+            Minimal cleaved peptide length, by default 7
+
+        peptide_length_max : int, optional
+            Maximal cleaved peptide length, by default 35
+
+        precursor_charge_min : int, optional
+            Minimal precursor charge, by default 2
+
+        precursor_charge_max : int, optional
+            Maximal precursor charge, by default 4
+
+        precursor_mz_min : float, optional
+            Minimal precursor mz, by default 200.0
+
+        precursor_mz_max : float, optional
+            Maximal precursor mz, by default 2000.0
+
+        var_mods : list, optional
+            list of variable modifications, 
+            by default ['Acetyl@Protein N-term','Oxidation@M']
+
+        max_var_mod_num : int, optional
+            Maximal number of variable modifications on a peptide sequence, 
+            by default 2
+
+        fix_mods : list, optional
+            list of fixed modifications, by default ['Carbamidomethyl@C']
+
+        decoy : str, optional
+            Decoy type, see `alphabase.spectral_library.decoy_library`,
+            by default None
+
+        Attributes
+        ----------
+        precursor_df : pd.DataFrame
+            The main peptide/precursor DataFrame containing peptide sequences, modifications, ...
+        
+        protein_df : pd.DataFrame
+            It contains protein sequences, gene names, protein ids ...
+
+        fragment_mz_df : pd.DataFrame
+            Fragment mz DataFrame
+
+        fragment_intensity_df : pd.DataFrame
+            Fragment intensity DataFrame
+        """
         super().__init__(
             charged_frag_types=charged_frag_types,
             precursor_mz_min=precursor_mz_min,
@@ -687,16 +811,58 @@ class FastaLib(SpecLibBase):
         return False
 
     def import_and_process_fasta(self, fasta_files:Union[str,list]):
+        """Import and process a fasta file or a list of fasta files.
+        It includes:
+        - Load the fasta file(s)
+        - Append decoy peptide sequences
+        - Add modifications to peptides
+        - Add charge
+
+        Parameters
+        ----------
+        fasta_files : Union[str,list]
+            A fasta file or a list of fasta files
+        """
         protein_dict = load_all_proteins(fasta_files)
         self.import_and_process_protein_dict(protein_dict)
 
     def import_and_process_protein_dict(self, protein_dict:dict):
+        """ Import the protein_dict instead of fasta files.
+        ```
+        protein_dict = load_all_proteins(fasta_files)
+        ```
+
+        Parameters
+        ----------
+        protein_dict : dict
+            Format:
+            {
+                'prot_id1':
+                    'protein_id': 'prot_id1'
+                    'sequence': string
+                    'gene_name': string
+                    'description': string
+                'prot_id2':
+                    ...
+            }
+        """
         self.get_peptides_from_protein_dict(protein_dict)
         self._process_after_load_pep_seqs()
 
     def import_and_process_peptide_sequences(self, 
-        pep_seq_list:list, protein_list=None,
+        pep_seq_list:list, protein_list:list=None,
     ):
+        """ Importing peptide sequences instead of proteins
+
+        Parameters
+        ----------
+        pep_seq_list : list
+            Peptide sequence list
+
+        protein_list : list, optional
+            Protein id list which maps to pep_seq_list one-by-one, 
+            by default None
+        """
         self.get_peptides_from_peptide_sequence_list(
             pep_seq_list, protein_list
         )
@@ -711,15 +877,12 @@ class FastaLib(SpecLibBase):
         self.add_charge()
 
     def get_peptides_from_fasta(self, fasta_file:Union[str,list]):
-        """Load peptide sequence from fasta file.
+        """Load peptide sequences from fasta files.
 
         Parameters
         ----------
-        fasta_path : Union[str,list]
-
-            could be a fasta path or a list of fasta paths
-            or a list of fasta paths
-            
+        fasta_file : Union[str,list]
+            Could be a fasta file (str) or a list of fasta files (list[str])
         """
         if isinstance(fasta_file, str):
             self.get_peptides_from_fasta_list([fasta_file])
@@ -733,13 +896,27 @@ class FastaLib(SpecLibBase):
         ----------
         fasta_files : list
             fasta file list
-            
         """
         protein_dict = load_all_proteins(fasta_files)
         self.get_peptides_from_protein_dict(protein_dict)
 
     def get_peptides_from_protein_dict(self, protein_dict:dict):
+        """Cleave the protein sequences in protein_dict.
 
+        Parameters
+        ----------
+        protein_dict : dict
+            Format:
+            {
+                'prot_id1':
+                    'protein_id': 'prot_id1'
+                    'sequence': string
+                    'gene_name': string
+                    'description': string
+                'prot_id2':
+                    ...
+            }
+        """
         self.protein_df = pd.DataFrame.from_dict(
             protein_dict, orient='index'
         ).reset_index(drop=True)
@@ -760,6 +937,15 @@ class FastaLib(SpecLibBase):
         protein_df:pd.DataFrame,
         protein_seq_column:str='sequence'
     ):
+        """Cleave protein sequences in protein_df
+
+        Parameters
+        ----------
+        protein_df : pd.DataFrame
+            Protein DataFrame containing `protein_seq_column`
+        protein_seq_column : str, optional
+            Target column containing protein sequences, by default 'sequence'
+        """
         pep_dict = {}
 
         for i,prot_seq in enumerate(
@@ -827,7 +1013,24 @@ class FastaLib(SpecLibBase):
 
     def add_mods_for_one_seq(self, sequence:str, 
         is_prot_nterm, is_prot_cterm
-    ):
+    )->tuple:
+        """Add fixed and variable modifications to a sequence
+
+        Parameters
+        ----------
+        sequence : str
+            Peptide sequence
+        is_prot_nterm : bool
+            if protein N-term
+        is_prot_cterm : bool
+            if protein C-term
+
+        Returns
+        -------
+        tuple
+            list[str]: list of modification names
+            list[str]: list of modification sites
+        """
         fix_mods, fix_mod_sites = get_fix_mods(
             sequence, self.fix_mod_aas, self.fix_mod_dict
         )
@@ -877,6 +1080,8 @@ class FastaLib(SpecLibBase):
         )
 
     def add_modifications(self):
+        """Add fixed and variable modifications to all peptide sequences in `self.precursor_df`
+        """
         if 'is_prot_nterm' not in self._precursor_df.columns:
             self._precursor_df['is_prot_nterm'] = False
         if 'is_prot_cterm' not in self._precursor_df.columns:
@@ -898,15 +1103,22 @@ class FastaLib(SpecLibBase):
 
     def add_additional_modifications(self,
         var_mods = ['Phospho@S','Phospho@T','Phospho@Y'], 
-        max_mod_num=1, max_combs=100,
-        keep_unmodified=True,
+        max_mod_num:int=1, max_combs:int=100,
+        keep_unmodified:bool=True,
+        cannot_modify_pep_nterm_aa:bool=False,
+        cannot_modify_pep_cterm_aa:bool=False,
     ):
+        """Add external defined variable modifications to all peptide sequences in `self.precursor_df`.
+        See `append_regular_modifications()` for details
+        """
         self._precursor_df = append_regular_modifications(
             self.precursor_df,
             var_mods=var_mods,
             max_mod_num=max_mod_num,
             max_combs=max_combs,
-            keep_unmodified=keep_unmodified
+            keep_unmodified=keep_unmodified,
+            cannot_modify_pep_nterm_aa=cannot_modify_pep_nterm_aa,
+            cannot_modify_pep_cterm_aa=cannot_modify_pep_cterm_aa,
         )
 
     def add_peptide_labeling(self, labeling_channel_dict:dict):
@@ -919,11 +1131,12 @@ class FastaLib(SpecLibBase):
             For example:
             {
                 'reference': [], # not labelled for reference
-                'light': ['Dimethyl@Any N-term','Dimethyl@K'],
-                'median': ['Dimethyl:2H(4)@Any N-term','Dimethyl:2H(4)@K'],
-                'heavy': ['Dimethyl:2H(6)13C(2)@Any N-term','Dimethyl:2H(6)13C(2)@K'],
+                '0': ['Dimethyl@Any N-term','Dimethyl@K'],
+                '4': ['Dimethyl:2H(4)@Any N-term','Dimethyl:2H(4)@K'],
+                '8': ['Dimethyl:2H(6)13C(2)@Any N-term','Dimethyl:2H(6)13C(2)@K'],
             }.
-            The key name could be arbitrary distinguished strings, and value must be a list of string.
+            The key name could be arbitrary distinguished strings for channel name,
+            and value must be a list of modification names (str) in alphabase format.
     
         """
         df_list = []
@@ -935,6 +1148,8 @@ class FastaLib(SpecLibBase):
         self._precursor_df.reset_index(drop=True, inplace=True)
 
     def add_charge(self):
+        """Add charge states
+        """
         self._precursor_df['charge'] = [
             np.arange(
                 self.min_precursor_charge, 
@@ -945,7 +1160,18 @@ class FastaLib(SpecLibBase):
         self._precursor_df['charge'] = self._precursor_df.charge.astype(np.int8)
         self._precursor_df.reset_index(drop=True, inplace=True)
 
-    def save_hdf(self, hdf_file):
+    def save_hdf(self, hdf_file:str):
+        """Save the contents into hdf file (attribute -> hdf_file):
+        - self.precursor_df -> library/precursor_df
+        - self.protein_df -> library/protein_df
+        - self.fragment_mz_df -> library/fragment_mz_df
+        - self.fragment_intensity_df -> library/fragment_intensity_df
+
+        Parameters
+        ----------
+        hdf_file : str
+            The hdf file path
+        """
         super().save_hdf(hdf_file)
         _hdf = HDF_File(
             hdf_file,
@@ -955,7 +1181,25 @@ class FastaLib(SpecLibBase):
         )
         _hdf.library.protein_df = self.protein_df
 
-    def load_hdf(self, hdf_file, load_mod_seq=False):
+    def load_hdf(self, hdf_file:str, load_mod_seq:bool=False):
+        """Load contents from hdf file:
+        - self.precursor_df <- library/precursor_df
+        - self.precursor_df <- library/mod_seq_df if load_mod_seq is True
+        - self.protein_df <- library/protein_df
+        - self.fragment_mz_df <- library/fragment_mz_df
+        - self.fragment_intensity_df <- library/fragment_intensity_df
+
+        Parameters
+        ----------
+        hdf_file : str
+            hdf file path
+
+        load_mod_seq : bool, optional
+            After library is generated with hash values (int64) for sequences (str) and modifications (str),
+            we don't need sequence information for searching. 
+            So we can skip loading sequences to make the loading much faster.
+            By default False
+        """
         super().load_hdf(hdf_file, load_mod_seq=load_mod_seq)
         try:
             _hdf = HDF_File(

@@ -147,7 +147,17 @@ class SpecLibBase(object):
         )
 
     def append_decoy_sequence(self):
-        """Append decoy sequence into precursor_df
+        """Append decoy sequence into precursor_df.
+        Decoy method is based on self.decoy(str).
+        ```
+        decoy_lib = (
+            decoy_lib_provider.get_decoy_lib(
+                self.decoy, self
+            )
+        )
+        decoy_lib.decoy_sequence()
+        ...
+        ```
         """
         from alphabase.spectral_library.decoy_library import (
             decoy_lib_provider
@@ -197,7 +207,6 @@ class SpecLibBase(object):
         Tuple[np.ndarray, np.ndarray]
             np.ndarray. 1-D flattened mz array (a reference to 
             original fragment mz df data)
-
             np.ndarray. 1-D flattened intensity array (a reference to 
             original fragment intensity df data)
         '''
@@ -207,11 +216,18 @@ class SpecLibBase(object):
         )
 
     def calc_precursor_mz(self):
+        """
+        Calculate precursor mz for self._precursor_df,
+        and clip the self._precursor_df using `self.clip_by_precursor_mz_()`
+        """
         fragment.update_precursor_mz(self._precursor_df)
         self.clip_by_precursor_mz_()
 
     def update_precursor_mz(self):
-        """Calculate precursor mz for self._precursor_df"""
+        """
+        Calculate precursor mz for self._precursor_df,
+        and clip the self._precursor_df using `self.clip_by_precursor_mz_()`
+        """
         self.calc_precursor_mz()
     
     def calc_precursor_isotope(self, 
@@ -220,6 +236,10 @@ class SpecLibBase(object):
         mp_process_bar=None,
         min_num_for_mp:int=1000,
     ):
+        """
+        Append isotope columns into self.precursor_df.
+        See `alphabase.peptide.precursor.calc_precursor_isotope()` for details.
+        """
         if 'precursor_mz' not in self._precursor_df.columns:
             self.calc_precursor_mz()
             self.clip_by_precursor_mz_()
@@ -337,7 +357,6 @@ class SpecLibBase(object):
             'sequence','mods','mod_sites', ['proteins', 'genes']...
         as well as 'mod_seq_hash', 'mod_seq_charge_hash' columns to map 
         back to `precursor_df`
-
 
         Parameters
         ----------

@@ -190,6 +190,7 @@ class IsotopeDistribution:
             {element: cumulated isotope distribution array},
             and the cumulated isotope distribution array is a 2-D float np.ndarray with 
             shape (element_max_number, MAX_ISOTOPE_LEN).
+
         element_to_cum_mono_idx : dict
             {element: mono position array of cumulated isotope distribution},
             and mono position array is a 1-D int np.ndarray.

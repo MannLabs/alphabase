@@ -8,6 +8,7 @@ import copy
 from .library_base import SpecLibBase
 from ..io.hdf import HDF_File
 
+# %% ../../nbdev_nbs/spectral_library/decoy_library.ipynb 3
 class DecoyLib(SpecLibBase):
     def __init__(self, 
         target_lib:SpecLibBase,
@@ -50,6 +51,7 @@ class DecoyLib(SpecLibBase):
         self._decoy_frags()
 
     def decoy_sequence(self):
+        """Generate decoy sequences from `self.target_lib`"""
         self._decoy_seq()
         self._remove_target_seqs()
 
@@ -177,17 +179,33 @@ class DiaNNDecoyLib(DecoyLib):
                 x[2:-2]+self.mutated_AAs[self.raw_AAs.index(x[-2])]+x[-1]
         )
 
-# %% ../../nbdev_nbs/spectral_library/decoy_library.ipynb 3
+# %% ../../nbdev_nbs/spectral_library/decoy_library.ipynb 6
 class DecoyLibProvider(object):
     def __init__(self):
         self.decoy_dict = {}
 
-    def register(self, name, decoy_class):
+    def register(self, name:str, decoy_class:DecoyLib):
+        """Register a new decoy class"""
         self.decoy_dict[name.lower()] = decoy_class
 
     def get_decoy_lib(self, name:str, 
-        target_lib, **kwargs
+        target_lib:SpecLibBase, **kwargs
     )->DecoyLib:
+        """Get an object of a subclass of `DecoyLib` based on 
+        registered name.
+
+        Parameters
+        ----------
+        name : str
+            Registered decoy class name
+        target_lib : SpecLibBase
+            Target library for decoy generation
+
+        Returns
+        -------
+        DecoyLib
+            Decoy library object
+        """
         if name is None: return None
         name = name.lower()
         if name in self.decoy_dict:
