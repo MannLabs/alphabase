@@ -3,7 +3,7 @@
 # %% auto 0
 __all__ = ['abundance_convolution', 'one_element_dist', 'formula_dist', 'IsotopeDistribution']
 
-# %% ../../nbdev_nbs/constants/isotope.ipynb 4
+# %% ../../nbdev_nbs/constants/isotope.ipynb 3
 import numba
 import numpy as np
 import typing
@@ -14,7 +14,7 @@ from alphabase.constants.element import (
     truncate_isotope, parse_formula
 )
 
-# %% ../../nbdev_nbs/constants/isotope.ipynb 5
+# %% ../../nbdev_nbs/constants/isotope.ipynb 4
 @numba.njit
 def abundance_convolution(
     d1:np.ndarray,
@@ -55,7 +55,7 @@ def abundance_convolution(
     mono_idx, start, end = truncate_isotope(ret, mono_idx)
     return ret[start:end], mono_idx
 
-# %% ../../nbdev_nbs/constants/isotope.ipynb 7
+# %% ../../nbdev_nbs/constants/isotope.ipynb 6
 @numba.njit
 def one_element_dist(
     elem: str,

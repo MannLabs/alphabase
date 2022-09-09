@@ -34,8 +34,8 @@ class SpectronautReader(MaxQuantReader):
     ):
         """Reader for Spectronaut's output library TSV/CSV.
 
-        Other parameters, please see 
-        `alphabase.psm_reader.maxquant_reader.MaxQuantReader`
+        Other parameters, please see `MaxQuantReader` 
+        in `alphabase.psm_reader.maxquant_reader`
 
         Parameters
         ----------

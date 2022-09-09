@@ -218,7 +218,7 @@ class SpecLibBase(object):
     def calc_precursor_mz(self):
         """
         Calculate precursor mz for self._precursor_df,
-        and clip the self._precursor_df using `self.clip_by_precursor_mz_()`
+        and clip the self._precursor_df using `self.clip_by_precursor_mz_`
         """
         fragment.update_precursor_mz(self._precursor_df)
         self.clip_by_precursor_mz_()
@@ -226,7 +226,7 @@ class SpecLibBase(object):
     def update_precursor_mz(self):
         """
         Calculate precursor mz for self._precursor_df,
-        and clip the self._precursor_df using `self.clip_by_precursor_mz_()`
+        and clip the self._precursor_df using `self.clip_by_precursor_mz_`
         """
         self.calc_precursor_mz()
     
@@ -238,7 +238,7 @@ class SpecLibBase(object):
     ):
         """
         Append isotope columns into self.precursor_df.
-        See `alphabase.peptide.precursor.calc_precursor_isotope()` for details.
+        See `alphabase.peptide.precursor.calc_precursor_isotope` for details.
         """
         if 'precursor_mz' not in self._precursor_df.columns:
             self.calc_precursor_mz()
@@ -261,7 +261,7 @@ class SpecLibBase(object):
     def calc_fragment_mz_df(self):
         """
         TODO: use multiprocessing here or in the
-        `create_fragment_mz_dataframe()` function.
+        `create_fragment_mz_dataframe` function.
         """
         if 'frag_start_idx' in self.precursor_df.columns:
             return

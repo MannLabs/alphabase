@@ -5,7 +5,7 @@ __all__ = ['AA_CHEM', 'AA_ASCII_MASS', 'AA_DF', 'AA_formula', 'reset_AA_mass', '
            'calc_AA_masses_for_same_len_seqs', 'calc_sequence_masses_for_same_len_seqs',
            'calc_AA_masses_for_var_len_seqs']
 
-# %% ../../nbdev_nbs/constants/aa.ipynb 3
+# %% ../../nbdev_nbs/constants/aa.ipynb 2
 import os
 import pandas as pd
 import numpy as np
@@ -21,12 +21,12 @@ from alphabase.constants.element import (
 
 from ._const import CONST_FILE_FOLDER
 
-# %% ../../nbdev_nbs/constants/aa.ipynb 4
+# %% ../../nbdev_nbs/constants/aa.ipynb 3
 AA_CHEM:dict = load_yaml(
     os.path.join(CONST_FILE_FOLDER, 'amino_acid.yaml')
 )
 
-# %% ../../nbdev_nbs/constants/aa.ipynb 6
+# %% ../../nbdev_nbs/constants/aa.ipynb 5
 def reset_AA_mass()->np.ndarray:
     """AA mass in np.array with shape (128,)"""
     AA_ASCII_MASS = np.ones(128)*1e8
@@ -60,7 +60,7 @@ for aa, formula, mass in AA_DF.values:
         parse_formula(formula)
     )
 
-# %% ../../nbdev_nbs/constants/aa.ipynb 9
+# %% ../../nbdev_nbs/constants/aa.ipynb 8
 def calc_sequence_mass(
     sequence: str
 )->np.ndarray:
@@ -77,7 +77,7 @@ def calc_sequence_mass(
     '''
     return AA_ASCII_MASS[np.array(sequence,'c').view(np.int8)]
 
-# %% ../../nbdev_nbs/constants/aa.ipynb 11
+# %% ../../nbdev_nbs/constants/aa.ipynb 10
 def calc_AA_masses_for_same_len_seqs(
     sequence_array: np.ndarray
 )->np.ndarray:
@@ -132,7 +132,7 @@ def calc_sequence_masses_for_same_len_seqs(
     )+MASS_H2O
 
 
-# %% ../../nbdev_nbs/constants/aa.ipynb 20
+# %% ../../nbdev_nbs/constants/aa.ipynb 19
 def calc_AA_masses_for_var_len_seqs(
     sequence_array: np.ndarray
 )->np.ndarray:

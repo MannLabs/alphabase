@@ -5,7 +5,7 @@ __all__ = ['common_const_dict', 'MASS_PROTON', 'MASS_ISOTOPE', 'MAX_ISOTOPE_LEN'
            'CHEM_MONO_MASS', 'CHEM_ISOTOPE_DIST', 'CHEM_MONO_IDX', 'MASS_H2O', 'MASS_NH3', 'truncate_isotope',
            'reset_elements', 'load_elem_yaml', 'parse_formula', 'calc_mass_from_formula']
 
-# %% ../../nbdev_nbs/constants/element.ipynb 3
+# %% ../../nbdev_nbs/constants/element.ipynb 2
 import os
 import numpy as np
 import numba
@@ -14,7 +14,7 @@ from ..yaml_utils import load_yaml
 
 from ._const import CONST_FILE_FOLDER
 
-# %% ../../nbdev_nbs/constants/element.ipynb 4
+# %% ../../nbdev_nbs/constants/element.ipynb 3
 common_const_dict:dict = load_yaml(
     os.path.join(CONST_FILE_FOLDER, 'common_constants.yaml')
 )
@@ -22,7 +22,7 @@ common_const_dict:dict = load_yaml(
 MASS_PROTON:float = common_const_dict['MASS_PROTON']
 MASS_ISOTOPE:float = common_const_dict['MASS_ISOTOPE']
 
-# %% ../../nbdev_nbs/constants/element.ipynb 6
+# %% ../../nbdev_nbs/constants/element.ipynb 5
 MAX_ISOTOPE_LEN = common_const_dict['MAX_ISOTOPE_LEN']
 EMPTY_DIST = np.zeros(MAX_ISOTOPE_LEN)
 EMPTY_DIST[0] = 1
@@ -75,7 +75,7 @@ def truncate_isotope(
             trunc_start = len(isotopes)-MAX_ISOTOPE_LEN-1
     return mono_idx-trunc_start-1, trunc_start+1, trunc_end
 
-# %% ../../nbdev_nbs/constants/element.ipynb 8
+# %% ../../nbdev_nbs/constants/element.ipynb 7
 #: chemical element information in dict defined by `nist_element.yaml`
 CHEM_INFO_DICT = {}
 
@@ -164,7 +164,7 @@ load_elem_yaml(
     )
 )
 
-# %% ../../nbdev_nbs/constants/element.ipynb 10
+# %% ../../nbdev_nbs/constants/element.ipynb 9
 def parse_formula(
     formula:str
 )->list:

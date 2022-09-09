@@ -358,7 +358,7 @@ def get_mod_seq_isotope_distribution(
         (sequence, mods)
     
     isotope_dist : IsotopeDistribution
-        See :class:`alphabase.constants.isotope.IsotopeDistribution`
+        See `IsotopeDistribution` in `alphabase.constants.isotope`
 
     min_right_most_intensity : float
         The minimal intensity value of the right-most peak relative to apex peak. 
@@ -491,7 +491,7 @@ def calc_precursor_isotope_mp(
     process_bar=None,
     min_right_most_intensity:float=0.2,
 )->pd.DataFrame:
-    """`calc_precursor_isotope()` is not that fast for large dataframes, 
+    """`calc_precursor_isotope` is not that fast for large dataframes, 
     so here we use multiprocessing for faster isotope pattern calculation. 
     The speed is acceptable with multiprocessing (3.8 min for 21M precursors, 8 processes).
 

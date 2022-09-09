@@ -106,7 +106,7 @@ class PSMReaderBase(object):
             the value could be the column name or a list of column names
             in other engine's result.
             If it is None, this dict will be init by 
-            `self._init_column_mapping()`. The dict values could be 
+            `self._init_column_mapping`. The dict values could be 
             either str or list, for exaplme:
             columns_mapping = {
                 'sequence': 'NakedSequence', #str
@@ -117,7 +117,7 @@ class PSMReaderBase(object):
         modification_mapping : dict, optional
             A dict that maps alphabase's modifications to other engine's.
             If it is None, this dict will be init by 
-            `self._init_modification_mapping()`. The dict values could be 
+            `self._init_modification_mapping`. The dict values could be 
             either str or list, for exaplme:
             modification_mapping = {
                 'Oxidation@M': 'Oxidation (M)', # str

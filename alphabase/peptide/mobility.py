@@ -11,6 +11,7 @@ import pandas as pd
 from .fragment import update_precursor_mz
 from ..constants.element import common_const_dict
 
+# %% ../../nbdev_nbs/peptide/mobility.ipynb 3
 CCS_IM_COEF = common_const_dict['MOBILITY']['CCS_IM_COEF']
 IM_GAS_MASS = common_const_dict['MOBILITY']['IM_GAS_MASS']
 

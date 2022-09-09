@@ -20,6 +20,7 @@ from alphabase.constants.modification import (
 )
 from ..constants.element import MASS_H2O
 
+# %% ../../nbdev_nbs/peptide/mass_calc.ipynb 4
 def calc_delta_modification_mass(
     pep_len:int,
     mass_deltas:List[float],
@@ -113,7 +114,7 @@ def calc_b_y_and_peptide_mass(
 )->Tuple[np.ndarray,np.ndarray,float]:
     '''
     It is highly recommend to use 
-    `calc_b_y_and_peptide_masses_for_same_len_seqs()`
+    `calc_b_y_and_peptide_masses_for_same_len_seqs`
     as it is much faster
     '''
     residue_masses = calc_sequence_mass(sequence)
@@ -134,7 +135,7 @@ def calc_b_y_and_peptide_mass(
     y_masses = pepmass - b_masses
     return b_masses, y_masses, pepmass
 
-# %% ../../nbdev_nbs/peptide/mass_calc.ipynb 5
+# %% ../../nbdev_nbs/peptide/mass_calc.ipynb 6
 def calc_peptide_masses_for_same_len_seqs(
     sequences: np.ndarray,
     mod_list: List[str],
@@ -144,7 +145,7 @@ def calc_peptide_masses_for_same_len_seqs(
     Calculate peptide masses for peptide sequences with same lengths.
     We need 'same_len' here because numpy can process AA sequences 
     with same length very fast. 
-    See `alphabase.aa.calc_sequence_masses_for_same_len_seqs()`
+    See `alphabase.aa.calc_sequence_masses_for_same_len_seqs`
 
     Parameters
     ----------

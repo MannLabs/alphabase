@@ -15,6 +15,12 @@ from .maxquant_reader import MaxQuantReader
 from ..constants.aa import AA_ASCII_MASS
 from ..constants.modification import MOD_INFO_DICT as mod_info
 
+#| export
+try:
+    import pyteomics.pepxml as pepxml
+except:
+    pepxml = None
+
 
 # %% ../../nbdev_nbs/psm_reader/msfragger_reader.ipynb 3
 def _is_fragger_decoy(proteins):
@@ -63,12 +69,6 @@ class MSFraggerReader(PSMReaderBase):
         raise NotImplementedError("MSFraggerReader for psm.tsv")
 
 # %% ../../nbdev_nbs/psm_reader/msfragger_reader.ipynb 5
-try:
-    import pyteomics.pepxml as pepxml
-except:
-    pepxml = None
-
-# %% ../../nbdev_nbs/psm_reader/msfragger_reader.ipynb 6
 if pepxml is None:
     class MSFraggerPepXML:
         def __init__(self): raise NotImplementedError("")

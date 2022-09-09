@@ -1109,7 +1109,7 @@ class FastaLib(SpecLibBase):
         cannot_modify_pep_cterm_aa:bool=False,
     ):
         """Add external defined variable modifications to all peptide sequences in `self.precursor_df`.
-        See `append_regular_modifications()` for details
+        See `append_regular_modifications` for details
         """
         self._precursor_df = append_regular_modifications(
             self.precursor_df,
