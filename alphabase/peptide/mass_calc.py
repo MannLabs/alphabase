@@ -4,7 +4,7 @@
 __all__ = ['calc_delta_modification_mass', 'calc_mod_delta_masses_for_same_len_seqs', 'calc_b_y_and_peptide_mass',
            'calc_peptide_masses_for_same_len_seqs', 'calc_b_y_and_peptide_masses_for_same_len_seqs']
 
-# %% ../../nbdev_nbs/peptide/mass_calc.ipynb 3
+# %% ../../nbdev_nbs/peptide/mass_calc.ipynb 4
 import numpy as np
 from typing import List, Tuple
 
@@ -20,7 +20,7 @@ from alphabase.constants.modification import (
 )
 from ..constants.element import MASS_H2O
 
-# %% ../../nbdev_nbs/peptide/mass_calc.ipynb 4
+# %% ../../nbdev_nbs/peptide/mass_calc.ipynb 5
 def calc_delta_modification_mass(
     pep_len:int,
     mass_deltas:List[float],
@@ -135,7 +135,7 @@ def calc_b_y_and_peptide_mass(
     y_masses = pepmass - b_masses
     return b_masses, y_masses, pepmass
 
-# %% ../../nbdev_nbs/peptide/mass_calc.ipynb 6
+# %% ../../nbdev_nbs/peptide/mass_calc.ipynb 7
 def calc_peptide_masses_for_same_len_seqs(
     sequences: np.ndarray,
     mod_list: List[str],
