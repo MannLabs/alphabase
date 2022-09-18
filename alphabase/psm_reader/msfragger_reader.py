@@ -65,8 +65,17 @@ def _get_msf_mods(sequence, msf_aa_mods):
 
 # %% ../../nbdev_nbs/psm_reader/msfragger_reader.ipynb 4
 class MSFragger_PSM_TSV_Reader(PSMReaderBase):
-    def __init__(self, *, column_mapping: dict = None, modification_mapping: dict = None, fdr=0.01, keep_decoy=False, **kwargs):
+    def __init__(self, *, 
+        column_mapping: dict = None, 
+        modification_mapping: dict = None, 
+        fdr=0.01, 
+        keep_decoy=False, 
+        **kwargs
+    ):
         raise NotImplementedError("MSFragger_PSM_TSV_Reader for psm.tsv")
+
+psm_reader_provider.register_reader('msfragger_psm_tsv', MSFragger_PSM_TSV_Reader)
+psm_reader_provider.register_reader('msfragger', MSFragger_PSM_TSV_Reader)
 
 # %% ../../nbdev_nbs/psm_reader/msfragger_reader.ipynb 5
 if pepxml is None:
