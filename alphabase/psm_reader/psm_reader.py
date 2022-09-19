@@ -169,6 +169,16 @@ class PSMReaderBase(object):
     def psm_df(self)->pd.DataFrame:
         return self._psm_df
 
+    def add_modification_mapping(self, modification_mapping:dict):
+        if (
+            modification_mapping is None or
+             len(modification_mapping) == 0
+        ):
+            return
+        
+        self.modification_mapping.update(modification_mapping)
+        self.set_modification_mapping(self.modification_mapping)
+
     def set_modification_mapping(self, modification_mapping:dict):
         if modification_mapping is None:
             self._init_modification_mapping()
@@ -444,7 +454,7 @@ class PSMReaderBase(object):
         self._psm_df.reset_index(drop=True, inplace=True)
 
 
-# %% ../../nbdev_nbs/psm_reader/psm_reader.ipynb 16
+# %% ../../nbdev_nbs/psm_reader/psm_reader.ipynb 18
 class PSMReaderProvider:
     def __init__(self):
         self.reader_dict = {}
