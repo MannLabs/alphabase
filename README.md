@@ -7,7 +7,7 @@ AlphaBase
 <img src="https://github.com/MannLabs/alphabase/workflows/Default%20installation%20and%20tests/badge.svg" /></a>
 <a href="https://github.com/MannLabs/alphabase/workflows/Publish%20on%20PyPi%20and%20release%20on%20GitHub/badge.svg" alt="GUI and PyPi releases">
 <img src="https://github.com/MannLabs/alphabase/workflows/Publish%20on%20PyPi%20and%20release%20on%20GitHub/badge.svg"/></a>
-<a href="https://pypi.org/project/peptdeep" alt="pypi">
+<a href="https://pypi.org/project/alphabase" alt="pypi">
 <img src="https://img.shields.io/pypi/v/alphabase" /></a>
 <a href="https://pypi.org/project/alphabase" alt="release">
 <img src="https://img.shields.io/pypi/dm/alphabase?color=blue&label=pip%20downloads"/></a>
