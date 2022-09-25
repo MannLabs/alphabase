@@ -142,8 +142,8 @@ def init_fragment_by_precursor_dataframe(
 ):
     '''
     Init zero fragment dataframe for the `precursor_df`. If 
-    the `reference_fragment_df` is provided, it will generate 
-    the dataframe based on the reference. Otherwise it 
+    the `reference_fragment_df` is provided, the result dataframe's 
+    length will be the same as reference_fragment_df. Otherwise it 
     generates the dataframe from scratch.
     
     Parameters
@@ -184,7 +184,9 @@ def init_fragment_by_precursor_dataframe(
     #     we can just `del precursor_df['frag_start_idx']` before call this function.
     '''
     if 'frag_start_idx' not in precursor_df.columns:
-        fragment_df, start_indices, end_indices = init_zero_fragment_dataframe(
+        (
+            fragment_df, start_indices, end_indices
+        ) = init_zero_fragment_dataframe(
             precursor_df.nAA.values,
             charged_frag_types,
             dtype=dtype
@@ -211,12 +213,12 @@ def init_fragment_by_precursor_dataframe(
                     if _fr in reference_fragment_df.columns
                 ]]
             else:
-                fragment_df = init_fragment_dataframe_from_other(
-                    reference_fragment_df[[
-                        _fr for _fr in charged_frag_types 
-                        if _fr in reference_fragment_df.columns
-                    ]],
-                    dtype=dtype
+                fragment_df = pd.DataFrame(
+                    np.zeros((
+                        len(reference_fragment_df), 
+                        len(charged_frag_types)
+                    )),
+                    columns = charged_frag_types
                 )
     return fragment_df
 
@@ -602,11 +604,12 @@ def create_fragment_mz_dataframe(
                     if _fr in reference_fragment_df.columns
                 ]]
             else:
-                fragment_mz_df = init_fragment_dataframe_from_other(
-                    reference_fragment_df[[
-                        _fr for _fr in charged_frag_types 
-                        if _fr in reference_fragment_df.columns
-                    ]]
+                fragment_mz_df = pd.DataFrame(
+                    np.zeros((
+                        len(reference_fragment_df), 
+                        len(charged_frag_types)
+                    )),
+                    columns = charged_frag_types
                 )
         else:
             fragment_mz_df = init_fragment_by_precursor_dataframe(
