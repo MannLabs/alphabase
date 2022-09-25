@@ -204,9 +204,9 @@ class Digest(object):
         self.n_miss_cleave = max_missed_cleavages
         self.peptide_length_min = peptide_length_min
         self.peptide_length_max = peptide_length_max
-        if protease in protease_dict:
+        if protease.lower() in protease_dict:
             self.regex_pattern = re.compile(
-                protease_dict[protease]
+                protease_dict[protease.lower()]
             )
         else:
             self.regex_pattern = re.compile(
