@@ -93,6 +93,7 @@ class PSMReaderBase(object):
         modification_mapping:dict = None,
         fdr = 0.01,
         keep_decoy = False,
+        rt_unit:str = 'minute',
         **kwargs,
     ):
         """The Base class for all PSMReaders. The key of the sub-classes for different 
@@ -164,6 +165,7 @@ class PSMReaderBase(object):
         self.keep_fdr = fdr
         self.keep_decoy = keep_decoy
         self._min_max_rt_norm = False
+        self._engine_rt_unit = rt_unit
 
     @property
     def psm_df(self)->pd.DataFrame:
@@ -269,6 +271,11 @@ class PSMReaderBase(object):
 
     def normalize_rt(self):
         if 'rt' in self.psm_df.columns:
+            if self._engine_rt_unit == 'minute':
+                self.psm_df['rt_sec'] = self.psm_df.rt*60
+            elif self._engine_rt_unit == 'second':
+                self.psm_df['rt_sec'] = self.psm_df.rt
+                self.psm_df['rt'] = self.psm_df.rt/60
             min_rt = self.psm_df.rt.min()
             if not self._min_max_rt_norm or min_rt > 0:
                 min_rt = 0

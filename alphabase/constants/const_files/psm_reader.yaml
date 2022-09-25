@@ -1,5 +1,6 @@
 alphapept:
   reader_type: alphapept
+  rt_unit: minute
   column_mapping:
     'rt': 'rt'
     'scan_num': 'scan_no'
@@ -21,6 +22,7 @@ alphapept:
     'Acetyl@Protein N-term': 'a'
 maxquant:
   reader_type: maxquant
+  rt_unit: minute
   mod_sep: '()'
   underscore_for_ncterm: True
   fixed_C57: True
@@ -81,6 +83,7 @@ maxquant:
     'GlyGly@K': ['K(GlyGly (K))', 'K(gl)']
 pfind:
   reader_type: pfind
+  rt_unit: minute
   column_mapping:
     'sequence': 'Sequence'
     'charge': 'Charge'
@@ -97,6 +100,7 @@ pfind:
     '': ''
 msfragger_psm_tsv:
   reader_type: msfragger_psm_tsv
+  rt_unit: second
   column_mapping:
     'sequence': 'Peptide'
     'charge': 'Charge'
@@ -117,6 +121,7 @@ msfragger_psm_tsv:
   mod_mass_tol: 0.1 # Da
 msfragger_pepxml:
   reader_type: msfragger_pepxml
+  rt_unit: second
   column_mapping:
     'sequence': 'peptide'
     'charge': 'assumed_charge'
@@ -138,6 +143,7 @@ msfragger_pepxml:
   mod_mass_tol: 0.1 # Da
 diann:
   reader_type: diann
+  rt_unit: minute
   mod_sep: '()'
   underscore_for_ncterm: False
   fixed_C57: False
@@ -157,6 +163,7 @@ diann:
   modification_mapping: 'maxquant'
 spectronaut:
   reader_type: spectronaut
+  rt_unit: irt
   mod_sep: '[]'
   underscore_for_ncterm: False
   fixed_C57: False

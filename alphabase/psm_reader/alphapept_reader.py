@@ -83,6 +83,7 @@ class AlphaPeptReader(PSMReaderBase):
             modification_mapping=modification_mapping,
             fdr = fdr,
             keep_decoy = keep_decoy,
+            **kwargs,
         )
         if fdr <= 0.1:
             self.hdf_dataset = 'peptide_fdr'
