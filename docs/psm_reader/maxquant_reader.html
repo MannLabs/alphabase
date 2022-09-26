@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.1.189">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>alphabase - MaxQuant PSM reader</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<link rel="stylesheet" href="../styles.css">
+<meta property="og:title" content="alphabase - MaxQuant PSM reader">
+<meta property="og:description" content="source">
+<meta property="og:site-name" content="alphabase">
+<meta name="twitter:title" content="alphabase - MaxQuant PSM reader">
+<meta name="twitter:description" content="source">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">alphabase</span>
+    </a>
+  </div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title">MaxQuant PSM reader</h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">AlphaBase</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../utils.html" class="sidebar-item-text sidebar-link">Utils</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../yaml_utils.html" class="sidebar-item-text sidebar-link">YAML Utils</a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">constants</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../constants/aa.html" class="sidebar-item-text sidebar-link">Amino acid information</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../constants/element.html" class="sidebar-item-text sidebar-link">Atom element information</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../constants/isotope.html" class="sidebar-item-text sidebar-link">Isotope distribution</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../constants/modification.html" class="sidebar-item-text sidebar-link">Modification information</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">io</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../io/hdf.html" class="sidebar-item-text sidebar-link">HDF functionalities</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">peptide</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../peptide/fragment.html" class="sidebar-item-text sidebar-link">Fragment Functionalities</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../peptide/mass_calc.html" class="sidebar-item-text sidebar-link">Mass Calculation</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../peptide/mobility.html" class="sidebar-item-text sidebar-link">CCS/Mobility Functionalities</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../peptide/precursor.html" class="sidebar-item-text sidebar-link">Precursor Functionalities</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">protein</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../protein/fasta.html" class="sidebar-item-text sidebar-link">Protein and Peptide Processing</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../protein/test_fasta.html" class="sidebar-item-text sidebar-link">Testing fasta</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true">psm_reader</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../psm_reader/alphapept_reader.html" class="sidebar-item-text sidebar-link">AlphaPept PSM Reader</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../psm_reader/dia_psm_reader.html" class="sidebar-item-text sidebar-link">DIA PSM reader</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../psm_reader/maxquant_reader.html" class="sidebar-item-text sidebar-link active">MaxQuant PSM reader</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../psm_reader/msfragger_reader.html" class="sidebar-item-text sidebar-link">MSFragger Reader</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../psm_reader/pfind_reader.html" class="sidebar-item-text sidebar-link">pFind PSM Reader</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../psm_reader/psm_reader.html" class="sidebar-item-text sidebar-link">Class Base for PSM Readers</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="true">spectral_library</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../spectral_library/decoy_library.html" class="sidebar-item-text sidebar-link">Decoy Libraries</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../spectral_library/library_base.html" class="sidebar-item-text sidebar-link">Base Class for Spectral Libraries</a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#maxquantreader" id="toc-maxquantreader" class="nav-link active" data-scroll-target="#maxquantreader">MaxQuantReader</a></li>
+  <li><a href="#parse_mod_seq" id="toc-parse_mod_seq" class="nav-link" data-scroll-target="#parse_mod_seq">parse_mod_seq</a></li>
+  <li><a href="#column-and-modification-mapping-from-alphabase-to-maxquant" id="toc-column-and-modification-mapping-from-alphabase-to-maxquant" class="nav-link" data-scroll-target="#column-and-modification-mapping-from-alphabase-to-maxquant">Column and modification mapping from alphabase to MaxQuant</a></li>
+  <li><a href="#testing" id="toc-testing" class="nav-link" data-scroll-target="#testing">Testing</a></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/MannLabs/alphabase/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block">MaxQuant PSM reader</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    
+  </div>
+  
+
+</header>
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/psm_reader/maxquant_reader.py#L89" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="maxquantreader" class="level3">
+<h3 class="anchored" data-anchor-id="maxquantreader">MaxQuantReader</h3>
+<blockquote class="blockquote">
+<pre><code> MaxQuantReader (column_mapping:dict=None, modification_mapping:dict=None,
+                 fdr=0.01, keep_decoy=False, mod_sep='()',
+                 underscore_for_ncterm=True, fixed_C57=True,
+                 mod_seq_columns=['Modified sequence'], **kwargs)</code></pre>
+</blockquote>
+<p>Reader for MaxQuant msms.txt and evidence.txt</p>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>column_mapping</td>
+<td>dict</td>
+<td>None</td>
+<td>By default None. If None, use <br><code>psm_reader_yaml['maxquant']['column_mapping']</code> <br>(alphabase.psm_reader.psm_reader_yaml).</td>
+</tr>
+<tr class="even">
+<td>modification_mapping</td>
+<td>dict</td>
+<td>None</td>
+<td>By default None. If None, use <br><code>psm_reader_yaml['maxquant']['modification_mapping']</code> <br>(alphabase.psm_reader.psm_reader_yaml).</td>
+</tr>
+<tr class="odd">
+<td>fdr</td>
+<td>float</td>
+<td>0.01</td>
+<td>Load PSMs with FDR &lt; this fdr, by default 0.01</td>
+</tr>
+<tr class="even">
+<td>keep_decoy</td>
+<td>bool</td>
+<td>False</td>
+<td>If keep decoy PSMs, by default False</td>
+</tr>
+<tr class="odd">
+<td>mod_sep</td>
+<td>str</td>
+<td>()</td>
+<td>Symbols to separate modified sequences,<br>e.g.&nbsp;<code>AM(Oxidation)PIC(+57)QMK</code>.<br>By default ‘()’</td>
+</tr>
+<tr class="even">
+<td>underscore_for_ncterm</td>
+<td>bool</td>
+<td>True</td>
+<td>If search engine uses an under score in N- and C-term, <br><code>_(Acetyl)AM(Oxidation)PIC(+57)QMK_</code>.<br>by default True</td>
+</tr>
+<tr class="odd">
+<td>fixed_C57</td>
+<td>bool</td>
+<td>True</td>
+<td>If true, the search engine will not show <code>Carbamidomethyl</code><br>in the modified sequences. <br>by default True</td>
+</tr>
+<tr class="even">
+<td>mod_seq_columns</td>
+<td>list</td>
+<td>[‘Modified sequence’]</td>
+<td>The columns to find modified sequences, <br>by default [‘Modified sequence’]</td>
+</tr>
+<tr class="odd">
+<td>kwargs</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/psm_reader/maxquant_reader.py#L19" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="parse_mod_seq" class="level3">
+<h3 class="anchored" data-anchor-id="parse_mod_seq">parse_mod_seq</h3>
+<blockquote class="blockquote">
+<pre><code> parse_mod_seq (modseq:str, mod_sep:str='()', fixed_C57:bool=True,
+                underscore_for_ncterm:bool=True)</code></pre>
+</blockquote>
+<p>Extract modifications and sites from the modified sequence (modseq)</p>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>modseq</td>
+<td>str</td>
+<td></td>
+<td>modified sequence to extract modifications.</td>
+</tr>
+<tr class="even">
+<td>mod_sep</td>
+<td>str</td>
+<td>()</td>
+<td>separator to indicate the modification section. <br>Defaults to ‘()’</td>
+</tr>
+<tr class="odd">
+<td>fixed_C57</td>
+<td>bool</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>underscore_for_ncterm</td>
+<td>bool</td>
+<td>True</td>
+<td>If modseq starts and ends with underscores. <br>Defaults to True.</td>
+</tr>
+<tr class="odd">
+<td><strong>Returns</strong></td>
+<td><strong>tuple</strong></td>
+<td></td>
+<td><strong>str: modification names, separated by ‘;’<br><br>str: modification sites, separated by ‘;’. <br> 0 for N-term; -1 for C-term; 1 to N for normal modifications.</strong></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="column-and-modification-mapping-from-alphabase-to-maxquant" class="level3">
+<h3 class="anchored" data-anchor-id="column-and-modification-mapping-from-alphabase-to-maxquant">Column and modification mapping from alphabase to MaxQuant</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>psm_reader_yaml[<span class="st">'maxquant'</span>][<span class="st">'column_mapping'</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>{'sequence': 'Sequence',
+ 'charge': 'Charge',
+ 'rt': 'Retention time',
+ 'ccs': 'CCS',
+ 'mobility': ['Mobility', 'IonMobility', 'K0', '1/K0'],
+ 'scan_num': ['Scan number', 'MS/MS scan number', 'Scan index'],
+ 'raw_name': 'Raw file',
+ 'precursor_mz': 'm/z',
+ 'score': 'Score',
+ 'proteins': 'Proteins',
+ 'genes': ['Gene Names', 'Gene names'],
+ 'decoy': 'Reverse'}</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>psm_reader_yaml[<span class="st">'maxquant'</span>][<span class="st">'modification_mapping'</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>{'Acetyl@Protein N-term': ['_(Acetyl (Protein N-term))',
+  '_(ac)',
+  '_(UniMod:1)'],
+ 'Carbamidomethyl@C': ['C(Carbamidomethyl (C))', 'C(UniMod:4)'],
+ 'Oxidation@M': ['M(Oxidation (M))', 'M(ox)', 'M(UniMod:35)'],
+ 'Phospho@S': ['S(Phospho (S))',
+  'S(Phospho (ST))',
+  'S(Phospho (STY))',
+  'S(ph)',
+  'S(UniMod:21)',
+  'pS'],
+ 'Phospho@T': ['T(Phospho (T))',
+  'T(Phospho (ST))',
+  'T(Phospho (STY))',
+  'T(ph)',
+  'T(UniMod:21)',
+  'pT'],
+ 'Phospho@Y': ['Y(Phospho (Y))',
+  'Y(Phospho (STY))',
+  'Y(ph)',
+  'Y(UniMod:21)',
+  'pY'],
+ 'Deamidated@N': ['N(Deamidation (NQ))', 'N(de)'],
+ 'Deamidated@Q': ['Q(Deamidation (NQ))', 'Q(de)'],
+ 'GlyGly@K': ['K(GlyGly (K))', 'K(gl)']}</code></pre>
+</div>
+</div>
+</section>
+<section id="testing" class="level3">
+<h3 class="anchored" data-anchor-id="testing">Testing</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> io</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>mq_tsv <span class="op">=</span> io.StringIO(<span class="st">'''Raw file    Scan number Scan index  Sequence    Length  Missed cleavages    Modifications   Modified sequence   Oxidation (M) Probabilities Oxidation (M) Score diffs   Acetyl (Protein N-term) Oxidation (M)   Proteins    Charge  Fragmentation   Mass analyzer   Type    Scan event number   Isotope index   m/z Mass    Mass error [ppm]    Mass error [Da] Simple mass error [ppm] Retention time  PEP Score   Delta score Score diff  Localization prob   Combinatorics   PIF Fraction of total spectrum  Base peak fraction  Precursor full scan number  Precursor Intensity Precursor apex fraction Precursor apex offset   Precursor apex offset time  Matches Intensities Mass deviations [Da]    Mass deviations [ppm]   Masses  Number of matches   Intensity coverage  Peak coverage   Neutral loss level  ETD identification type Reverse All scores  All sequences   All modified sequences  Reporter PIF    Reporter fraction   id  Protein group IDs   Peptide ID  Mod. peptide ID Evidence ID Oxidation (M) site IDs</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="st">20190402_QX1_SeVW_MA_HeLa_500ng_LC11    81358   73979   AAAAAAAAAPAAAATAPTTAATTAATAAQ   29  0   Unmodified  _(Acetyl (Protein N-term))AAAAAAAAM(Oxidation (M))PAAAATAPTTAATTAATAAQ_         0   0   sp|P37108|SRP14_HUMAN   3   HCD FTMS    MULTI-MSMS  13  1   790.07495   2367.203    0.35311 0.00027898  -0.061634807    70.261  0.012774    41.423  36.666  NaN NaN 1   0   0   0   81345   10653955    0.0338597821787898  -11 0.139877319335938   y1;y2;y3;y4;y11;y1-NH3;y2-NH3;a2;b2;b3;b4;b5;b6;b7;b8;b9;b11;b12;b6(2+);b8(2+);b13(2+);b18(2+)  2000000;2000000;300000;400000;200000;1000000;400000;300000;600000;1000000;2000000;3000000;3000000;3000000;3000000;2000000;600000;500000;1000000;2000000;300000;200000   5.2861228709844E-06;-6.86980268369553E-05;-0.00238178789771837;0.000624715964988809;-0.0145624692099773;-0.000143471782706683;-0.000609501446461991;-0.000524972720768346;0.00010190530804266;5.8620815195809E-05;0.000229901232955854;-0.000108750048696038;-0.000229593152369034;0.00183148682538103;0.00276641182404092;0.000193118923334623;0.00200988580445483;0.000102216846016745;5.86208151389656E-05;0.000229901232955854;-0.00104559184393338;0.00525030008475369 0.0359413365445091;-0.314964433555295;-8.23711898839045;1.60102421155213;-14.8975999917227;-1.10320467763838;-3.03102462870716;-4.56152475051625;0.712219104095465;0.273777366204575;0.806231096969562;-0.305312183824154;-0.537399178230218;3.67572664689217;4.85930954169285;0.301587577451224;2.48616190909398;0.116225745519871;0.273777365939099;0.806231096969562;-2.19774169175011;7.53961026980589  147.076413378177;218.113601150127;289.153028027798;390.197699998035;977.50437775671;130.050013034583;201.087592852046;115.087114392821;143.081402136892;214.118559209185;285.155501716567;356.192954155649;427.230188786552;498.265241494374;569.301420357176;640.341107437877;808.429168310795;879.468189767554;214.118559209185;285.155501716567;475.757386711244;696.362265007215    22  0.262893575628735   0.0826446280991736  None    Unknown     41.4230894199432;4.75668724862449;3.9515580701967   AAAAAAAAAPAAAATAPTTAATTAATAAQ;FHRGPPDKDDMVSVTQILQGK;PVTLWITVTHMQADEVSVWR    _AAAAAAAAAPAAAATAPTTAATTAATAAQ_;_FHRGPPDKDDMVSVTQILQGK_;_PVTLWITVTHMQADEVSVWR_          0   1443    0   0   0   </span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="st">20190402_QX1_SeVW_MA_HeLa_500ng_LC11    81391   74010   AAAAAAAAAAPAAAATAPTTAATTAATAAQ  29  0   Unmodified  _AAAAAAAAAPAAAATAPTTAATTAATAAQ_         0   0   sp|P37108|SRP14_HUMAN   2   HCD FTMS    MULTI-MSMS  14  0   1184.6088   2367.203    0.037108    4.3959E-05  1.7026696   70.287  7.1474E-09  118.21  100.52  NaN NaN 1   0   0   0   81377   9347701 0.166790347889974   -10 0.12664794921875    y1;y2;y3;y4;y5;y9;y12;y13;y14;y20;y13-H2O;y20-H2O;y1-NH3;y20-NH3;b3;b4;b5;b6;b7;b8;b9;b11;b12;b13;b14;b15;b16;b19;b15-H2O;b16-H2O   500000;600000;200000;400000;200000;100000;200000;1000000;200000;300000;200000;100000;100000;70000;300000;900000;2000000;3000000;5000000;8000000;6000000;600000;800000;600000;200000;300000;200000;300000;300000;1000000 -0.000194444760495571;0.000149986878682284;0.000774202587820128;-0.0002445094036716;0.000374520568641401;-0.00694293246522193;-0.0109837291331587;-0.0037745820627606;-0.000945546471939451;0.00152326440706929;0.00506054832726477;0.00996886361417637;6.25847393393997E-05;-0.024881067836759;-3.11821549132674E-05;-0.000183099230639527;0.000161332473453513;0.000265434980121881;0.000747070697229901;0.000975534518261156;0.00101513939785036;0.00651913000274362;0.0058584595163893;0.00579536744021425;0.00131097834105276;-0.0131378531671089;0.00472955218901916;-0.00161006322559842;-0.00201443239325272;0.0227149399370319 -1.32206444236914;0.687655553213019;2.6775131607882;-0.626628140021726;0.811995006209331;-8.6203492854282;-10.1838066275079;-3.21078702288986;-0.758483069159249;0.881072738747222;4.37168212373889;5.82682888353564;0.481236695337485;-14.5343986203644;-0.145630261806375;-0.642102166533079;0.452935954800214;0.621293379181583;1.49934012872483;1.71355878380837;1.58531240493271;8.06399202403175;6.6614096214532;6.09718023739784;1.28333378040908;-11.7030234519348;3.96235146626144;-1.07856912288932;-1.82370619437775;19.3220953109188    147.07661310906;218.113382465221;289.149872037312;390.198569223404;461.235063981231;805.411965958065;1078.54847749073;1175.59403219566;1246.62831694787;1728.87474561429;1157.57463237897;1710.85573532879;130.049806978061;1711.87460084504;214.118649012155;285.155914717031;356.192684073126;427.22969375842;498.266325910503;569.303211234482;640.340285417402;808.424659066597;879.462433524883;950.49961040476;1021.54120858166;1122.60333588727;1193.62258226971;1492.77704268533;1104.58164778019;1175.59403219566  30  0.474003002083763   0.167630057803468   None    Unknown     118.209976573419;17.6937689289157;17.2534171481793  AAAAAAAAAPAAAATAPTTAATTAATAAQ;SELKQEAMQSEQLQSVLYLK;VGSSVPSKASELVVMGDHDAARR  _AAAAAAAAAPAAAATAPTTAATTAATAAQ_;_SELKQEAM(Oxidation (M))QSEQLQSVLYLK_;_VGSSVPSKASELVVMGDHDAARR_         1   1443    0   0   1   </span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="st">20190402_QX1_SeVW_MA_HeLa_500ng_LC11    107307  98306   AAAAAAAGDSDSWDADAFSVEDPVRK  26  1   Acetyl (Protein N-term) _(Acetyl (Protein N-term))AAAAAAAGDSDSWDADAFSVEDPVRK_           1   0   sp|O75822|EIF3J_HUMAN   3   HCD FTMS    MULTI-MSMS  10  2   879.06841   2634.1834   -0.93926    -0.00082567 -3.2012471  90.978  2.1945E-12  148.95  141.24  NaN NaN 1   0   0   0   107297  10193939    0.267970762043589   -8  0.10211181640625    y1;y2;y4;y5;y6;y7;y8;y9;y10;y11;y12;y13;y14;y15;y17;y18;y19;y20;y21;y23;y21-H2O;y1-NH3;y19-NH3;y14(2+);y16(2+);y22(2+);a2;b2;b3;b4;b5;b6;b7 300000;200000;3000000;600000;1000000;500000;2000000;1000000;1000000;1000000;90000;1000000;400000;900000;1000000;400000;3000000;2000000;1000000;400000;100000;200000;200000;80000;100000;200000;200000;2000000;5000000;5000000;5000000;2000000;300000    1.34859050149316E-07;-6.05140996867704E-06;2.27812602133781E-05;0.00128986659160546;-0.00934536073077652;0.000941953783126337;-0.00160424237344614;-0.00239257341399934;-0.00111053968612396;-0.00331340710044969;0.00330702864630439;0.000963683996815234;0.00596290290945944;-0.00662057038289277;-0.0117122701335575;0.00777853472800416;0.0021841542961738;0.000144322111736983;-0.00087403893667215;0.0197121595674616;-0.021204007680808;-0.000308954599830713;-0.026636719419912;-0.0137790992353075;0.00596067266928912;-0.0077053835773313;9.11402199221811E-06;-0.000142539300128419;-0.000251999832926231;1.90791054137662E-05;-0.00236430185879044;-9.54583337602344E-05;-0.000556959493223985  0.000916705048437201;-0.0199575598103408;0.0456231928690862;2.09952637717462;-12.5708704058425;1.11808305811426;-1.72590731777249;-2.22239181008062;-0.967696370445928;-2.62418809422166;2.47964286628144;0.665205752892023;3.64753748704453;-3.84510115530963;-6.08782672045773;3.81508105974837;1.04209904973991;0.0666012719936656;-0.390545453668809;8.28224925531311;-9.55133250134922;-2.37499239179248;-12.8127653858411;-16.846761946123;6.48662354975264;-6.67117082062383;0.0580151981289049;-0.770098855873447;-0.983876895688683;0.0583162347158579;-5.93738717724506;-0.203431522818505;-1.03087538746314  147.112804035741;303.21392125011;499.33507018564;614.360746132308;743.413974455831;842.472101057517;929.506675663573;1076.57587791081;1147.61170966489;1262.6408555643;1333.67134891635;1448.700635293;1634.77494902759;1721.81956091078;1923.88362405243;2038.89107627957;2095.9181343836;2166.95728800359;2237.99542015244;2380.04906152953;2220.00518543488;130.0865640237;2078.92040615582;817.907873297785;918.917619246831;1155.02717356753;157.097144992378;185.0922112678;256.129434516133;327.166277224995;398.205774393759;469.240619338034;540.278194626993  33  0.574496146107112   0.14410480349345    None    Unknown     148.951235201399;7.71201258444522;7.36039532447559  AAAAAAAGDSDSWDADAFSVEDPVRK;PSRQESELMWQWVDQRSDGER;HTLTSFWNFKAGCEEKCYSNR  _(Acetyl (Protein N-term))AAAAAAAGDSDSWDADAFSVEDPVRK_;_PSRQESELM(Oxidation (M))WQWVDQRSDGER_;_HTLTSFWNFKAGCEEKCYSNR_            2   625 1   1   2   '''</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>mq_reader <span class="op">=</span> psm_reader_provider.get_reader(<span class="st">'maxquant'</span>)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>mq_reader.import_file(mq_tsv)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">len</span>(mq_reader.psm_df) <span class="op">==</span> <span class="dv">3</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> mq_reader.psm_df.mods.values[<span class="dv">1</span>] <span class="op">==</span> <span class="st">'Acetyl@Protein N-term;Oxidation@M'</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> mq_reader.psm_df.mod_sites.values[<span class="dv">1</span>] <span class="op">==</span> <span class="st">'0;9'</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> mq_reader.psm_df.mods.values[<span class="dv">2</span>] <span class="op">==</span> <span class="st">''</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> mq_reader.psm_df.mod_sites.values[<span class="dv">2</span>] <span class="op">==</span> <span class="st">''</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> np.<span class="bu">all</span>(np.array(mq_reader.modification_mapping[<span class="st">'Phospho@S'</span>])<span class="op">==</span>np.array([</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">'S(Phospho (S))'</span>,</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">'S(Phospho (ST))'</span>,</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">'S(Phospho (STY))'</span>,</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    <span class="st">'S(ph)'</span>,</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    <span class="st">'S(UniMod:21)'</span>,</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    <span class="st">'pS'</span>,</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    <span class="st">'S[Phospho (S)]'</span>,</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    <span class="st">'S[Phospho (ST)]'</span>,</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    <span class="st">'S[Phospho (STY)]'</span>,</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>    <span class="st">'S[ph]'</span>,</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>    <span class="st">'S[UniMod:21]'</span>])</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>mq_reader.psm_df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>sequence</th>
+      <th>charge</th>
+      <th>rt</th>
+      <th>scan_num</th>
+      <th>raw_name</th>
+      <th>precursor_mz</th>
+      <th>score</th>
+      <th>proteins</th>
+      <th>decoy</th>
+      <th>spec_idx</th>
+      <th>mods</th>
+      <th>mod_sites</th>
+      <th>nAA</th>
+      <th>rt_norm</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>AAAAAAAGDSDSWDADAFSVEDPVRK</td>
+      <td>3</td>
+      <td>90.978</td>
+      <td>107307</td>
+      <td>20190402_QX1_SeVW_MA_HeLa_500ng_LC11</td>
+      <td>879.06841</td>
+      <td>148.950</td>
+      <td>sp|O75822|EIF3J_HUMAN</td>
+      <td>0</td>
+      <td>107306</td>
+      <td>Acetyl@Protein N-term</td>
+      <td>0</td>
+      <td>26</td>
+      <td>1.000000</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>AAAAAAAAAPAAAATAPTTAATTAATAAQ</td>
+      <td>3</td>
+      <td>70.261</td>
+      <td>81358</td>
+      <td>20190402_QX1_SeVW_MA_HeLa_500ng_LC11</td>
+      <td>790.07495</td>
+      <td>41.423</td>
+      <td>sp|P37108|SRP14_HUMAN</td>
+      <td>0</td>
+      <td>81357</td>
+      <td>Acetyl@Protein N-term;Oxidation@M</td>
+      <td>0;9</td>
+      <td>29</td>
+      <td>0.772286</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>AAAAAAAAAAPAAAATAPTTAATTAATAAQ</td>
+      <td>2</td>
+      <td>70.287</td>
+      <td>81391</td>
+      <td>20190402_QX1_SeVW_MA_HeLa_500ng_LC11</td>
+      <td>1184.60880</td>
+      <td>118.210</td>
+      <td>sp|P37108|SRP14_HUMAN</td>
+      <td>0</td>
+      <td>81390</td>
+      <td></td>
+      <td></td>
+      <td>30</td>
+      <td>0.772571</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

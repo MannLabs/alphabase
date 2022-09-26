@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.1.189">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>alphabase - DIA PSM reader</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<link rel="stylesheet" href="../styles.css">
+<meta property="og:title" content="alphabase - DIA PSM reader">
+<meta property="og:description" content="This module includes: - DIA-NN PSM reader - Spectronaut TSV library PSM reader - Swath TSV library PSM reader">
+<meta property="og:site-name" content="alphabase">
+<meta name="twitter:title" content="alphabase - DIA PSM reader">
+<meta name="twitter:description" content="This module includes: - DIA-NN PSM reader - Spectronaut TSV library PSM reader - Swath TSV library PSM reader">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">alphabase</span>
+    </a>
+  </div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title">DIA PSM reader</h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">AlphaBase</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../utils.html" class="sidebar-item-text sidebar-link">Utils</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../yaml_utils.html" class="sidebar-item-text sidebar-link">YAML Utils</a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">constants</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../constants/aa.html" class="sidebar-item-text sidebar-link">Amino acid information</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../constants/element.html" class="sidebar-item-text sidebar-link">Atom element information</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../constants/isotope.html" class="sidebar-item-text sidebar-link">Isotope distribution</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../constants/modification.html" class="sidebar-item-text sidebar-link">Modification information</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">io</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../io/hdf.html" class="sidebar-item-text sidebar-link">HDF functionalities</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">peptide</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../peptide/fragment.html" class="sidebar-item-text sidebar-link">Fragment Functionalities</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../peptide/mass_calc.html" class="sidebar-item-text sidebar-link">Mass Calculation</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../peptide/mobility.html" class="sidebar-item-text sidebar-link">CCS/Mobility Functionalities</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../peptide/precursor.html" class="sidebar-item-text sidebar-link">Precursor Functionalities</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">protein</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../protein/fasta.html" class="sidebar-item-text sidebar-link">Protein and Peptide Processing</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../protein/test_fasta.html" class="sidebar-item-text sidebar-link">Testing fasta</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true">psm_reader</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../psm_reader/alphapept_reader.html" class="sidebar-item-text sidebar-link">AlphaPept PSM Reader</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../psm_reader/dia_psm_reader.html" class="sidebar-item-text sidebar-link active">DIA PSM reader</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../psm_reader/maxquant_reader.html" class="sidebar-item-text sidebar-link">MaxQuant PSM reader</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../psm_reader/msfragger_reader.html" class="sidebar-item-text sidebar-link">MSFragger Reader</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../psm_reader/pfind_reader.html" class="sidebar-item-text sidebar-link">pFind PSM Reader</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../psm_reader/psm_reader.html" class="sidebar-item-text sidebar-link">Class Base for PSM Readers</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="true">spectral_library</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../spectral_library/decoy_library.html" class="sidebar-item-text sidebar-link">Decoy Libraries</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../spectral_library/library_base.html" class="sidebar-item-text sidebar-link">Base Class for Spectral Libraries</a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#swathreader" id="toc-swathreader" class="nav-link active" data-scroll-target="#swathreader">SwathReader</a></li>
+  <li><a href="#spectronautreader" id="toc-spectronautreader" class="nav-link" data-scroll-target="#spectronautreader">SpectronautReader</a></li>
+  <li><a href="#column-and-modification-mapping-from-alphabase-to-spectronaut" id="toc-column-and-modification-mapping-from-alphabase-to-spectronaut" class="nav-link" data-scroll-target="#column-and-modification-mapping-from-alphabase-to-spectronaut">Column and modification mapping from alphabase to Spectronaut</a></li>
+  <li><a href="#diannreader" id="toc-diannreader" class="nav-link" data-scroll-target="#diannreader">DiannReader</a></li>
+  <li><a href="#column-and-modification-mapping-from-alphabase-to-diann" id="toc-column-and-modification-mapping-from-alphabase-to-diann" class="nav-link" data-scroll-target="#column-and-modification-mapping-from-alphabase-to-diann">Column and modification mapping from alphabase to DiaNN</a></li>
+  <li><a href="#testing" id="toc-testing" class="nav-link" data-scroll-target="#testing">Testing</a></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/MannLabs/alphabase/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block">DIA PSM reader</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    
+  </div>
+  
+
+</header>
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<p>This module includes: - DIA-NN PSM reader - Spectronaut TSV library PSM reader - Swath TSV library PSM reader</p>
+<p>As we know so far, all DIA search engines have similar tabular files to MaxQaunt, so here, all DIAReaders are inherited from <code>MaxQauntReader</code>.</p>
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/psm_reader/dia_psm_reader.py#L83" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="swathreader" class="level3">
+<h3 class="anchored" data-anchor-id="swathreader">SwathReader</h3>
+<blockquote class="blockquote">
+<pre><code> SwathReader (column_mapping:dict=None, modification_mapping:dict=None,
+              fdr=0.01, keep_decoy=False, mod_sep='()',
+              underscore_for_ncterm=False, fixed_C57=False,
+              mod_seq_columns=['ModifiedPeptide', 'ModifiedSequence',
+              'FullUniModPeptideName', 'ModifiedPeptideSequence',
+              'LabeledSequence', 'FullUniModPeptideName'], csv_sep='\t',
+              **kwargs)</code></pre>
+</blockquote>
+<p>SWATH or OpenSWATH library, similar to <code>SpectronautReader</code></p>
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/psm_reader/dia_psm_reader.py#L19" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="spectronautreader" class="level3">
+<h3 class="anchored" data-anchor-id="spectronautreader">SpectronautReader</h3>
+<blockquote class="blockquote">
+<pre><code> SpectronautReader (column_mapping:dict=None,
+                    modification_mapping:dict=None, fdr=0.01,
+                    keep_decoy=False, mod_sep='[]',
+                    underscore_for_ncterm=True, fixed_C57=False,
+                    mod_seq_columns=['ModifiedPeptide',
+                    'ModifiedSequence', 'FullUniModPeptideName',
+                    'ModifiedPeptideSequence', 'LabeledSequence',
+                    'FullUniModPeptideName'], csv_sep='\t', rt_unit='irt',
+                    **kwargs)</code></pre>
+</blockquote>
+<p>Reader for Spectronaut’s output library TSV/CSV.</p>
+<p>Other parameters, please see <code>MaxQuantReader</code> in <code>alphabase.psm_reader.maxquant_reader</code></p>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>column_mapping</td>
+<td>dict</td>
+<td>None</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>modification_mapping</td>
+<td>dict</td>
+<td>None</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>fdr</td>
+<td>float</td>
+<td>0.01</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>keep_decoy</td>
+<td>bool</td>
+<td>False</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>mod_sep</td>
+<td>str</td>
+<td>[]</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>underscore_for_ncterm</td>
+<td>bool</td>
+<td>True</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>fixed_C57</td>
+<td>bool</td>
+<td>False</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>mod_seq_columns</td>
+<td>list</td>
+<td>[‘ModifiedPeptide’, ‘ModifiedSequence’, ‘FullUniModPeptideName’, ‘ModifiedPeptideSequence’, ‘LabeledSequence’, ‘FullUniModPeptideName’]</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>csv_sep</td>
+<td>str</td>
+<td></td>
+<td>Delimiter for TSV/CSV, by default ’ ’</td>
+</tr>
+<tr class="even">
+<td>rt_unit</td>
+<td>str</td>
+<td>irt</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>kwargs</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="column-and-modification-mapping-from-alphabase-to-spectronaut" class="level3">
+<h3 class="anchored" data-anchor-id="column-and-modification-mapping-from-alphabase-to-spectronaut">Column and modification mapping from alphabase to Spectronaut</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>psm_reader_yaml[<span class="st">'spectronaut'</span>][<span class="st">'column_mapping'</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>{'raw_name': 'ReferenceRun',
+ 'sequence': ['StrippedPeptide', 'PeptideSequence'],
+ 'charge': 'PrecursorCharge',
+ 'rt': ['RT',
+  'iRT',
+  'Tr_recalibrated',
+  'RetentionTime',
+  'NormalizedRetentionTime'],
+ 'ccs': 'CCS',
+ 'precursor_mz': 'PrecursorMz',
+ 'mobility': ['Mobility', 'IonMobility', 'PrecursorIonMobility'],
+ 'proteins': ['Protein Name', 'ProteinId', 'ProteinID', 'ProteinName'],
+ 'uniprot_ids': ['UniProtIds', 'UniProtID', 'UniprotId'],
+ 'genes': ['Genes', 'Gene', 'GeneName']}</code></pre>
+</div>
+</div>
+<p><code>modification_mapping</code> is the same as <a href="https://MannLabs.github.io/alphabase/psm_reader/maxquant_reader.html#maxquantreader"><code>MaxQuantReader</code></a></p>
+<p>And alphabase will look for columns containing modified sequence on:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>psm_reader_yaml[<span class="st">'spectronaut'</span>][<span class="st">'mod_seq_columns'</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>['ModifiedPeptide',
+ 'ModifiedSequence',
+ 'FullUniModPeptideName',
+ 'ModifiedPeptideSequence',
+ 'LabeledSequence',
+ 'FullUniModPeptideName']</code></pre>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/psm_reader/dia_psm_reader.py#L115" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="diannreader" class="level3">
+<h3 class="anchored" data-anchor-id="diannreader">DiannReader</h3>
+<blockquote class="blockquote">
+<pre><code> DiannReader (column_mapping:dict=None, modification_mapping:dict=None,
+              fdr=0.01, keep_decoy=False, mod_sep='()',
+              underscore_for_ncterm=False, fixed_C57=False, csv_sep='\t',
+              rt_unit='minute', **kwargs)</code></pre>
+</blockquote>
+<p>Also similar to <code>MaxQuantReader</code>, but different in column_mapping and modificatin_mapping</p>
+</section>
+<section id="column-and-modification-mapping-from-alphabase-to-diann" class="level3">
+<h3 class="anchored" data-anchor-id="column-and-modification-mapping-from-alphabase-to-diann">Column and modification mapping from alphabase to DiaNN</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>psm_reader_yaml[<span class="st">'diann'</span>][<span class="st">'column_mapping'</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>{'raw_name': 'Run',
+ 'sequence': 'Stripped.Sequence',
+ 'charge': 'Precursor.Charge',
+ 'rt': 'RT',
+ 'ccs': 'CCS',
+ 'mobility': ['IM', 'IonMobility'],
+ 'proteins': 'Protein.Names',
+ 'uniprot_ids': 'Protein.Ids',
+ 'genes': 'Genes',
+ 'scan_num': 'MS2.Scan',
+ 'score': 'CScore'}</code></pre>
+</div>
+</div>
+<p>The modified sequence column in DiaNN is <code>Modified.Sequence</code></p>
+</section>
+<section id="testing" class="level3">
+<h3 class="anchored" data-anchor-id="testing">Testing</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> io <span class="im">import</span> StringIO</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>tsv <span class="op">=</span> StringIO(<span class="st">'''ReferenceRun  PrecursorCharge Workflow    IntModifiedPeptide  CV  AllowForNormalization   ModifiedPeptide StrippedPeptide iRT IonMobility iRTSourceSpecific   BGSInferenceId  IsProteotypic   IntLabeledPeptide   LabeledPeptide  PrecursorMz ReferenceRunQvalue  ReferenceRunMS1Response FragmentLossType    FragmentNumber  FragmentType    FragmentCharge  FragmentMz  RelativeIntensity   ExcludeFromAssay    Database    ProteinGroups   UniProtIds  Protein Name    ProteinDescription  Organisms   OrganismId  Genes   Protein Existence   Sequence Version    FASTAName</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="st">202106018_TIMS03_EVO03_PaSk_SA_HeLa_EGF_Phospho_100ug_test_S4-A1_1_25843    2       _ALVAT[+80]PGK_     True    _ALVAT[Phospho (STY)]PGK_   ALVATPGK    -5.032703   0.758   -5.032703   P19338  False   _ALVAT[+80]PGK_ _ALVAT[Phospho (STY)]PGK_   418.717511324722    0   10352   noloss  3   y   1   301.187031733932    53.1991 False   sp  P19338  P19338  NUCL_HUMAN  Nucleolin   Homo sapiens        NCL 1   3   MCT_human_UP000005640_9606</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="st">202106018_TIMS03_EVO03_PaSk_SA_HeLa_EGF_Phospho_100ug_test_S4-A1_1_25843    2       _ALVAT[+80]PGK_     True    _ALVAT[Phospho (STY)]PGK_   ALVATPGK    -5.032703   0.758   -5.032703   P19338  False   _ALVAT[+80]PGK_ _ALVAT[Phospho (STY)]PGK_   418.717511324722    0   10352   H3PO4   4   y   1   384.224142529733    26.31595    False   sp  P19338  P19338  NUCL_HUMAN  Nucleolin   Homo sapiens        NCL 1   3   MCT_human_UP000005640_9606</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="st">202106018_TIMS03_EVO03_PaSk_SA_HeLa_EGF_Phospho_100ug_test_S4-A1_1_25843    2       _TLT[+80]PCPLR_     True    _TLT[Phospho (STY)]PC[Carbamidomethyl (C)]PLR_  TLTPCPLR    27.71659    0.818   27.71659    Q5T200  False   _TLT[+80]PPLR_  _TLT[Phospho (STY)]PPLR_    439.230785875227    0.000138389150379226    23117   noloss  3   b   1   396.153027901512    6.3264  False   sp  Q5T200  Q5T200  ZC3HD_HUMAN Zinc finger CCCH domain-containing protein 13   Homo sapiens        ZC3H13  1   1   MCT_human_UP000005640_9606</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="st">202106018_TIMS03_EVO03_PaSk_SA_HeLa_EGF_Phospho_100ug_test_S4-A1_1_25843    2       _TLT[+80]PCPLR_     True    _TLT[Phospho (STY)]PC[Carbamidomethyl (C)]PLR_  TLTPCPLR    27.71659    0.818   27.71659    Q5T200  False   _TLT[+80]PPLR_  _TLT[Phospho (STY)]PPLR_    439.230785875227    0.000138389150379226    23117   noloss  3   y   1   385.255780000092    29.70625    False   sp  Q5T200  Q5T200  ZC3HD_HUMAN Zinc finger CCCH domain-containing protein 13   Homo sapiens        ZC3H13  1   1   MCT_human_UP000005640_9606</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="st">202106018_TIMS03_EVO03_PaSk_SA_HeLa_EGF_Phospho_library25_S4-C1_1_25867 2       _LFVT[+80]PPEGSSR_      True    _[Acetyl (Protein N-term)]LFVS[Phospho (STY)]PPEGSSR_   LFVSPPEGSSR 38.05031    0.917   38.05031    Q14244;Q14244-6;Q14244-7    False   _LFVT[+80]PPEGSSR_  _LFVT[Phospho (STY)]PPEGSSR_    635.297385373987    0   14164   H3PO4   4   b   1   443.265279065723    12.24525    False   sp  Q14244;Q14244-6;Q14244-7    Q14244;Q14244-6;Q14244-7    MAP7_HUMAN  Ensconsin;Isoform of Q14244, Isoform 6 of Ensconsin;Isoform of Q14244, Isoform 7 of Ensconsin   Homo sapiens        MAP7    1;; 1;; MCT_human_UP000005640_9606;MCT_human2_UP000005640_9606_additional;MCT_human2_UP000005640_9606_additional</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="st">202106018_TIMS03_EVO03_PaSk_SA_HeLa_EGF_Phospho_library25_S4-C1_1_25867 2       _LFVT[+80]PPEGSSR_      True    _[Acetyl (Protein N-term)]LFVS[Phospho (STY)]PPEGSSR_   LFVSPPEGSSR 38.05031    0.917   38.05031    Q14244;Q14244-6;Q14244-7    False   _LFVT[+80]PPEGSSR_  _LFVT[Phospho (STY)]PPEGSSR_    635.297385373987    0   14164   noloss  6   y   1   632.299829640042    46.07855    False   sp  Q14244;Q14244-6;Q14244-7    Q14244;Q14244-6;Q14244-7    MAP7_HUMAN  Ensconsin;Isoform of Q14244, Isoform 6 of Ensconsin;Isoform of Q14244, Isoform 7 of Ensconsin   Homo sapiens        MAP7    1;; 1;; MCT_human_UP000005640_9606;MCT_human2_UP000005640_9606_additional;MCT_human2_UP000005640_9606_additional</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="st">202106018_TIMS03_EVO03_PaSk_SA_HeLa_EGF_Phospho_library25_S4-C1_1_25867 2       _LFVT[+80]PPEGSSR_      True    _[Acetyl (Protein N-term)]LFVS[Phospho (STY)]PPEGSSR_   LFVSPPEGSSR 38.05031    0.917   38.05031    Q14244;Q14244-6;Q14244-7    False   _LFVT[+80]PPEGSSR_  _LFVT[Phospho (STY)]PPEGSSR_    635.297385373987    0   14164   noloss  7   y   1   729.352593488892    100 False   sp  Q14244;Q14244-6;Q14244-7    Q14244;Q14244-6;Q14244-7    MAP7_HUMAN  Ensconsin;Isoform of Q14244, Isoform 6 of Ensconsin;Isoform of Q14244, Isoform 7 of Ensconsin   Homo sapiens        MAP7    1;; 1;; MCT_human_UP000005640_9606;MCT_human2_UP000005640_9606_additional;MCT_human2_UP000005640_9606_additional</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="st">'''</span>)</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>spn_reader <span class="op">=</span> psm_reader_provider.get_reader(<span class="st">'spectronaut'</span>)</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>spn_reader.import_file(tsv)</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">len</span>(spn_reader.psm_df) <span class="op">==</span> <span class="dv">3</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> spn_reader.psm_df.mods.values[<span class="dv">0</span>] <span class="op">==</span> <span class="st">'Phospho@T'</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> spn_reader.psm_df.mod_sites.values[<span class="dv">0</span>] <span class="op">==</span> <span class="st">'5'</span></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> spn_reader.psm_df.mods.values[<span class="dv">1</span>] <span class="op">==</span> <span class="st">'Phospho@T;Carbamidomethyl@C'</span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> spn_reader.psm_df.mod_sites.values[<span class="dv">1</span>] <span class="op">==</span> <span class="st">'3;5'</span></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> spn_reader.psm_df.mods.values[<span class="dv">2</span>] <span class="op">==</span> <span class="st">'Acetyl@Protein N-term;Phospho@S'</span></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> spn_reader.psm_df.mod_sites.values[<span class="dv">2</span>] <span class="op">==</span> <span class="st">'0;4'</span></span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>spn_reader.psm_df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>raw_name</th>
+      <th>sequence</th>
+      <th>charge</th>
+      <th>rt</th>
+      <th>precursor_mz</th>
+      <th>mobility</th>
+      <th>proteins</th>
+      <th>uniprot_ids</th>
+      <th>genes</th>
+      <th>mods</th>
+      <th>mod_sites</th>
+      <th>nAA</th>
+      <th>rt_norm</th>
+      <th>ccs</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>202106018_TIMS03_EVO03_PaSk_SA_HeLa_EGF_Phosph...</td>
+      <td>ALVATPGK</td>
+      <td>2</td>
+      <td>-5.032703</td>
+      <td>418.717511</td>
+      <td>0.758</td>
+      <td>NUCL_HUMAN</td>
+      <td>P19338</td>
+      <td>NCL</td>
+      <td>Phospho@T</td>
+      <td>5</td>
+      <td>8</td>
+      <td>0.0</td>
+      <td>308.612143</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>202106018_TIMS03_EVO03_PaSk_SA_HeLa_EGF_Phosph...</td>
+      <td>TLTPCPLR</td>
+      <td>2</td>
+      <td>27.716590</td>
+      <td>439.230786</td>
+      <td>0.818</td>
+      <td>ZC3HD_HUMAN</td>
+      <td>Q5T200</td>
+      <td>ZC3H13</td>
+      <td>Phospho@T;Carbamidomethyl@C</td>
+      <td>3;5</td>
+      <td>8</td>
+      <td>1.0</td>
+      <td>332.788837</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>202106018_TIMS03_EVO03_PaSk_SA_HeLa_EGF_Phosph...</td>
+      <td>LFVSPPEGSSR</td>
+      <td>2</td>
+      <td>38.050310</td>
+      <td>635.297385</td>
+      <td>0.917</td>
+      <td>MAP7_HUMAN</td>
+      <td>Q14244;Q14244-6;Q14244-7</td>
+      <td>MAP7</td>
+      <td>Acetyl@Protein N-term;Phospho@S</td>
+      <td>0;4</td>
+      <td>11</td>
+      <td>1.0</td>
+      <td>371.282739</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>tsv <span class="op">=</span> StringIO(<span class="st">'''PrecursorMz   ProductMz   Tr_recalibrated transition_name CE  LibraryIntensity    transition_group_id decoy   PeptideSequence ProteinName Annotation  FullUniModPeptideName   PrecursorCharge GroupLabel  UniprotID   FragmentType    FragmentCharge  FragmentSeriesNumber</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="st">685.732240417   886.020494795   -10 255_AAAAAAAAAASGAAIPPLIPPRR_3   -1  5257.9  13_AAAAAAAAAASGAAIPPLIPPRR_3    0   AAAAAAAAAASGAAIPPLIPPRR 1/O14654    y19^2/0.002 AAAAAAAAAASGAAIPPLIPPRR 3   light   1/O14654    y   2   19</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="st">514.550999438   473.303261576   59.2    268_AAAAAAAAAASGAAIPPLIPPRR_4   -1  10000.0 14_AAAAAAAAAASGAAIPPLIPPRR_4    0   AAAAAAAAAASGAAIPPLIPPRR 1/O14654    y8^2/0.002  AAAAAAAAAASGAAIPPLIPPRR 4   light   1/O14654    y   2   8</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="st">514.550999438   629.39313922    59.2    276_AAAAAAAAAASGAAIPPLIPPRR_4   -1  5923.1  14_AAAAAAAAAASGAAIPPLIPPRR_4    0   AAAAAAAAAASGAAIPPLIPPRR 1/O14654    y12^2/0.001 AAAAAAAAAASGAAIPPLIPPRR 4   light   1/O14654    y   2   12</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="st">514.550999438   672.909153425   59.2    279_AAAAAAAAAASGAAIPPLIPPRR_4   -1  5249.8  14_AAAAAAAAAASGAAIPPLIPPRR_4    0   AAAAAAAAAASGAAIPPLIPPRR 1/O14654    y13^2/0.001 AAAAAAAAAASGAAIPPLIPPRR 4   light   1/O14654    y   2   13</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="st">514.550999438   356.19284545    59.2    262_AAAAAAAAAASGAAIPPLIPPRR_4   -1  5233.6  14_AAAAAAAAAASGAAIPPLIPPRR_4    0   AAAAAAAAAASGAAIPPLIPPRR 1/O14654    b5/0.001,b10^2/0.001,m6:10/0.001    AAAAAAAAAASGAAIPPLIPPRR 4   light   1/O14654    b   1   5</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="st">514.550999438   498.26707303    59.2    269_AAAAAAAAAASGAAIPPLIPPRR_4   -1  4976.0  14_AAAAAAAAAASGAAIPPLIPPRR_4    0   AAAAAAAAAASGAAIPPLIPPRR 1/O14654    b7/0.001,m4:10/0.001    AAAAAAAAAASGAAIPPLIPPRR 4   light   1/O14654    b   1   7</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="st">514.550999438   427.22995924    59.2    265_AAAAAAAAAASGAAIPPLIPPRR_4   -1  4859.4  14_AAAAAAAAAASGAAIPPLIPPRR_4    0   AAAAAAAAAASGAAIPPLIPPRR 1/O14654    b6/0.002,m5:10/0.002    AAAAAAAAAASGAAIPPLIPPRR 4   light   1/O14654    b   1   6</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="st">728.201724416   356.19284545    101.8   292_AAAAAAAAAASGAAIPPLIPPRRVITLYQC(UniMod:4)FSVSQR_5    -1  10000.0 15_AAAAAAAAAASGAAIPPLIPPRRVITLYQC(UniMod:4)FSVSQR_5 0   AAAAAAAAAASGAAIPPLIPPRRVITLYQCFSVSQR    1/O14654    b5/0.003,b10^2/0.003,m6:10/0.003    AAAAAAAAAASGAAIPPLIPPRRVITLYQC(UniMod:4)FSVSQR  5   light   1/O14654    b   1   5</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="st">728.201724416   576.310000482   101.8   297_AAAAAAAAAASGAAIPPLIPPRRVITLYQC(UniMod:4)FSVSQR_5    -1  7611.0  15_AAAAAAAAAASGAAIPPLIPPRRVITLYQC(UniMod:4)FSVSQR_5 0   AAAAAAAAAASGAAIPPLIPPRRVITLYQCFSVSQR    1/O14654    y5/0.002    AAAAAAAAAASGAAIPPLIPPRRVITLYQC(UniMod:4)FSVSQR  5   light   1/O14654    y   1   5</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="st">728.201724416   427.22995924    101.8   293_AAAAAAAAAASGAAIPPLIPPRRVITLYQC(UniMod:4)FSVSQR_5    -1  6805.1  15_AAAAAAAAAASGAAIPPLIPPRRVITLYQC(UniMod:4)FSVSQR_5 0   AAAAAAAAAASGAAIPPLIPPRRVITLYQCFSVSQR    1/O14654    b6/-0.002,m5:10/-0.002  AAAAAAAAAASGAAIPPLIPPRRVITLYQC(UniMod:4)FSVSQR  5   light   1/O14654    b   1   6</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="st">728.201724416   569.30418682    101.8   296_AAAAAAAAAASGAAIPPLIPPRRVITLYQC(UniMod:4)FSVSQR_5    -1  6312.7  15_AAAAAAAAAASGAAIPPLIPPRRVITLYQC(UniMod:4)FSVSQR_5 0   AAAAAAAAAASGAAIPPLIPPRRVITLYQCFSVSQR    1/O14654    b8/0.009,m3:10/0.009    AAAAAAAAAASGAAIPPLIPPRRVITLYQC(UniMod:4)FSVSQR  5   light   1/O14654    b   1   8</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="st">'''</span>)</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>osw_reader <span class="op">=</span> psm_reader_provider.get_reader(<span class="st">'openswath'</span>)</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>psm_df <span class="op">=</span> osw_reader.import_file(tsv)</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> psm_df.loc[<span class="dv">2</span>,<span class="st">'mod_sites'</span>] <span class="op">==</span> <span class="st">'30'</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> psm_df.loc[<span class="dv">2</span>,<span class="st">'mods'</span>] <span class="op">==</span> <span class="st">'Carbamidomethyl@C'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>tsv <span class="op">=</span> StringIO(<span class="st">'''File.Name Run Protein.Group   Protein.Ids Protein.Names   Genes   PG.Quantity PG.Normalised   PG.MaxLFQ   Genes.Quantity  Genes.Normalised    Genes.MaxLFQ    Genes.MaxLFQ.Unique Modified.Sequence   Stripped.Sequence   Precursor.Id    Precursor.Charge    Q.Value Global.Q.Value  Protein.Q.Value PG.Q.Value  Global.PG.Q.Value   GG.Q.Value  Translated.Q.Value  Proteotypic Precursor.Quantity  Precursor.Normalised    Precursor.Translated    Quantity.Quality    RT  RT.Start    RT.Stop iRT Predicted.RT    Predicted.iRT   Lib.Q.Value Ms1.Profile.Corr    Ms1.Area    Evidence    Spectrum.Similarity Mass.Evidence   CScore  Decoy.Evidence  Decoy.CScore    Fragment.Quant.Raw  Fragment.Quant.Corrected    Fragment.Correlations   MS2.Scan    IM  iIM Predicted.IM    Predicted.iIM</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="st">F:\XXX</span><span class="ch">\202</span><span class="st">01218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-A2_1_22636.d  20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-A2_1_22636   Q9UH36  Q9UH36      SRRD    3296.49 3428.89 3428.89 3296.49 3428.89 3428.89 3428.89 (UniMod:1)AAAAAAALESWQAAAPR AAAAAAALESWQAAAPR   (UniMod:1)AAAAAAALESWQAAAPR2    2   3.99074e-05 1.96448e-05 0.000159821 0.000159821 0.000146135 0.000161212 0   1   3296.49 3428.89 3296.49 0.852479    19.9208 19.8731 19.9685 123.9   19.8266 128.292 0   0.960106    5308.05 1.96902 0.683134    0.362287    0.999997    1.23691 3.43242e-05 1212.01;2178.03;1390.01;1020.01;714.008;778.008;    1212.01;1351.73;887.591;432.92;216.728;732.751; 0.956668;0.757581;0.670497;0.592489;0.47072;0.855203;   30053   1.19708 1.19328 1.19453 1.19469</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="st">F:\XXX</span><span class="ch">\202</span><span class="st">01218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-A8_1_22642.d  20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-A8_1_22642   Q9UH36  Q9UH36      SRRD    2365    2334.05 2334.05 2365    2334.05 2334.05 2334.05 (UniMod:1)AAAAAAALESWQAAAPR AAAAAAALESWQAAAPR   (UniMod:1)AAAAAAALESWQAAAPR2    2   0.000184434 1.96448e-05 0.000596659 0.000596659 0.000146135 0.000604961 0   1   2365    2334.05 2365    0.922581    19.905  19.8573 19.9527 123.9   19.782  128.535 0   0.940191    4594.04 1.31068 0.758988    0   0.995505    0.28633 2.12584e-06 1209.02;1210.02;1414.02;1051.01;236.003;130.002;    1209.02;1109.89;732.154;735.384;0;46.0967;  0.919244;0.937624;0.436748;0.639369;0.296736;0.647924;  30029   1.195   1.19328 1.19381 1.19339</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="st">F:\XXX</span><span class="ch">\202</span><span class="st">01218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-B2_1_22648.d  20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-B2_1_22648   Q9UH36  Q9UH36      SRRD    1664.51 1635.46 1635.47 1664.51 1635.46 1635.47 1635.47 (UniMod:1)AAAAAAALESWQAAAPR AAAAAAALESWQAAAPR   (UniMod:1)AAAAAAALESWQAAAPR2    2   0.000185123 1.96448e-05 0.000307409 0.000307409 0.000146135 0.000311332 0   1   1664.51 1635.46 1664.51 0.811147    19.8893 19.8416 19.937  123.9   19.7567 128.896 0   0.458773    6614.06 1.7503  0.491071    0.00111683  0.997286    1.92753 2.80543e-05 744.01;1708.02;1630.02;1475.02;0;533.006;   322.907;808.594;577.15;536.033;0;533.006;   0.760181;0.764072;0.542005;0.415779;0;0.913438; 30005   1.19409 1.19328 1.19323 1.19308</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="st">F:\XXX</span><span class="ch">\202</span><span class="st">01218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-B8_1_22654.d  20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-B8_1_22654   Q9UH36  Q9UH36      SRRD    3369.91 3343.38 3343.38 3369.91 3343.38 3343.38 3343.38 (UniMod:1)AAAAAAALESWQAAAPR AAAAAAALESWQAAAPR   (UniMod:1)AAAAAAALESWQAAAPR2    2   0.000153377 1.96448e-05 0.000298151 0.000298151 0.000146135 0.000302297 0   1   3369.91 3343.38 3369.91 0.798104    19.872  19.8243 19.9196 123.9   19.7347 128.576 0   0.892774    5026.05 1.01465 0.704953    0   0.996593    0.476378    7.76581e-06 1654.02;1286.02;1894.02;993.011;778.008;1190.01;    1638.42;1286.02;1293.97;466.705;292.465;445.475;    0.854908;0.860012;0.708773;0.584142;0.716032;0.410465;  29981   1.19136 1.19328 1.19169 1.1919</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="st">F:\XXX</span><span class="ch">\202</span><span class="st">01218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-A2_1_22636.d  20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-A2_1_22636   P51608-2    P51608-2        MECP2   1585.53 1649.21 7673.34 1585.53 1649.21 7673.34 7673.34 AAAAAAAPSGGGGGGEEERLEEK AAAAAAAPSGGGGGGEEERLEEK (UniMod:1)AAAAAAAPSGGGGGGEEERLEEK3  3   0.00014185  5.69066e-05 0.000159821 0.000159821 0.000146135 0.000161212 0   1   861.509 896.11  861.509 0.530747    7.34894 7.30125 7.39665 14.6582 7.35635 14.5905 0   0.85024 2010.02 1.27844 0.470734    0.117495    0.998266    0.848349    0.0613877   905.008;1021.01;1179.01;419.003;753.005;638.006;    422.004;0;439.505;419.003;325.502;119.251;  0.626628;-0.441015;0.438684;0.800641;0.794403;0.458813; 11077   1.01    1.01225 1.01075 1.01099</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="st">F:\XXX</span><span class="ch">\202</span><span class="st">01218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-A8_1_22642.d  20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-A8_1_22642   P51608-2    P51608-2        MECP2   16870.2 16649.4 7963.26 16870.2 16649.4 7963.26 7963.26 AAAAAAAPSGGGGGGEEERLEEK AAAAAAAPSGGGGGGEEERLEEK (UniMod:1)AAAAAAAPSGGGGGGEEERLEEK3  3   0.000200767 5.69066e-05 0.000152765 0.000152765 0.000146135 0.000154631 0   1   1832.12 1808.14 1832.12 0.438822    7.3176  7.26989 7.36527 14.6582 7.29706 14.8141 0   0.814702    3622.03 0.571375    0.278903    0.971334    0.994097    0.779006    0.0590956   1430.01;946.009;804.008;260.002;710.006;232.002;    886.115;946.009;0;0;431.102;0;  -0.0551893;0.901557;0.0979035;-0.326533;0.334642;-0.120337; 11029   1.01417 1.01225 1.01136 1.01447</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="st">F:\XXX</span><span class="ch">\202</span><span class="st">01218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-B2_1_22648.d  20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-B2_1_22648   P51608-2    P51608-2        MECP2   16242.7 15959.3 13129.8 16242.7 15959.3 13129.8 13129.8 AAAAAAAPSGGGGGGEEERLEEK AAAAAAAPSGGGGGGEEERLEEK (UniMod:1)AAAAAAAPSGGGGGGEEERLEEK3  3   6.98405e-05 5.69066e-05 0.000168492 0.000168492 0.000146135 0.000169578 0   1   2765.24 2716.99 2765.24 0.619188    7.28562 7.23794 7.33338 14.6582 7.22243 15.2233 0   0.859167    2180.02 1.50997 0.43755 0.191245    0.999939    0.420023    0.00548723  1807.01;1018.01;1230.01;554.005;1216.01;276.002;    954.327;1006.89;804.021;554.005;0;143.651;  0.483734;0.907585;0.418797;0.61368;-0.523993;0.70046;   10981   1.015   1.01225 1.01115 1.01558</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="st">F:\XXX</span><span class="ch">\202</span><span class="st">01218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-B8_1_22654.d  20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-B8_1_22654   P51608-2    P51608-2        MECP2   20914.7 20750   16106   20914.7 20750   16106   16106   AAAAAAAPSGGGGGGEEERLEEK AAAAAAAPSGGGGGGEEERLEEK (UniMod:1)AAAAAAAPSGGGGGGEEERLEEK3  3   0.000603914 5.69066e-05 0.000153516 0.000153516 0.000146135 0.000155304 0   1   4556.58 4520.72 4556.58 0.620251    7.26825 7.22055 7.31601 14.6582 7.18207 15.448  0   0.79218 3193.03 0.113147    0.344593    0.144439    0.971834    1.05178 0.112962    2855.02;1760.01;830.007;116.001;564.005;751.006;    2266.46;1760.01;530.111;0;0;317.258;    0.430169;0.867218;0.612985;-0.310664;-0.386197;0.286451;    10957   1.01208 1.01225 1.00965 1.01449</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="st">F:\XXX</span><span class="ch">\202</span><span class="st">01218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-A2_1_22636.d  20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-A2_1_22636   Q96P70  Q96P70      IPO9    155722  161976  160062  155722  161976  160062  160062  (UniMod:1)AAAAAAGAASGLPGPVAQGLK AAAAAAGAASGLPGPVAQGLK   (UniMod:1)AAAAAAGAASGLPGPVAQGLK2    2   3.99074e-05 1.96448e-05 0.000159821 0.000159821 0.000146135 0.000161212 0   1   44791.6 46590.6 44791.6 0.903543    14.709  14.6614 14.7567 77.7384 14.7374 77.4968 0   0.962703    395646  1.16168 0.790083    0   0.999999    0.491003    0.00391533  17738.2;18223.2;16218.2;17747.2;14484.2;12569.2;    17738.2;18223.2;16150;16115.2;14484.2;12569.2;  0.879361;0.89314;0.807683;0.73629;0.863152;0.984215;    22187   1.225   1.23344 1.23458 1.22263</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="st">F:\XXX</span><span class="ch">\202</span><span class="st">01218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-A8_1_22642.d  20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-A8_1_22642   Q96P70  Q96P70      IPO9    172360  170104  155889  172360  170104  155889  155889  (UniMod:1)AAAAAAGAASGLPGPVAQGLK AAAAAAGAASGLPGPVAQGLK   (UniMod:1)AAAAAAGAASGLPGPVAQGLK2    2   4.98766e-05 1.96448e-05 0.000152765 0.000152765 0.000146135 0.000154631 0   1   44700.5 44115.4 44700.5 0.615196    14.6456 14.5979 14.6933 77.7384 14.6419 77.8394 0   0.9107  553292  0.747052    0.814842    0   0.999996    0.830219    0.0331339   19349.2;20154.2;20586.2;20040.3;13620.2;12105.1;    19349.2;19014.1;19329.7;18862.6;13404.2;11947.1;    0.862894;0.42962;0.293099;0.655948;0.517625;0.323501;   22091   1.22042 1.23344 1.23392 1.21891</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="st">F:\XXX</span><span class="ch">\202</span><span class="st">01218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-B2_1_22648.d  20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-B2_1_22648   Q96P70  Q96P70      IPO9    153712  151030  152845  153712  151030  152845  152845  (UniMod:1)AAAAAAGAASGLPGPVAQGLK AAAAAAGAASGLPGPVAQGLK   (UniMod:1)AAAAAAGAASGLPGPVAQGLK2    2   6.08421e-05 1.96448e-05 0.000168492 0.000168492 0.000146135 0.000169578 0   1   40439.4 39733.8 40439.4 0.833327    14.6301 14.5824 14.6777 77.7384 14.5747 78.2527 0   0.989019    1.0768e+06  1.68843 0.759575    0   0.999999    0.674737    0.0631384   17597.2;19526.2;16647.2;16204.2;12871.2;11069.2;    17377.7;19526.2;16647.2;16204.2;12871.2;10190.5;    0.828262;0.979726;0.827511;0.9628;0.90466;0.751867; 22067   1.22708 1.23344 1.23332 1.2261</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="st">F:\XXX</span><span class="ch">\202</span><span class="st">01218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-B8_1_22654.d  20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-B8_1_22654   Q96P70  Q96P70      IPO9    147008  145850  159209  147008  145850  159209  159209  (UniMod:1)AAAAAAGAASGLPGPVAQGLK AAAAAAGAASGLPGPVAQGLK   (UniMod:1)AAAAAAGAASGLPGPVAQGLK2    2   4.42595e-05 1.96448e-05 0.000153516 0.000153516 0.000146135 0.000155304 0   1   41861.6 41532.1 41861.6 0.752921    14.549  14.5013 14.5967 77.7384 14.5155 78.0748 0   0.877873    939172  1.59762 0.821027    0   0.999997    0.397952    1.22212e-05 18143.2;19574.2;17444.2;17956.2;11427.2;13025.2;    17409.2;18432.7;16706.7;10820.4;11427.2;13025.2;    0.625292;0.399297;0.717726;0.321047;0.864595;0.825535;  21947   1.2275  1.23344 1.23199 1.2281</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="st">F:\XXX</span><span class="ch">\202</span><span class="st">01218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-A2_1_22636.d  20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-A2_1_22636   P28482  P28482      MAPK1   72652.7 75570.7 78604.9 72652.7 75570.7 78604.9 78604.9 (UniMod:1)AAAAAAGAGPEM(UniMod:35)VR AAAAAAGAGPEMVR  (UniMod:1)AAAAAAGAGPEM(UniMod:35)VR2    2   0.00693727  0.000834654 0.000159821 0.000159821 0.000146135 0.000161212 0   1   192.198 199.917 192.198 0.0197094   7.4249  7.37721 7.4726  15.9025 7.49813 15.2482 0   0.754191    8842.06 1.19725 0.470393    0.086229    0.843331    2.80548 0.384248    897.008;1032.01;279.002;377.003;440.004;286.003;    0;137.786;54.4117;0;89.692;286.003; -0.20379;-0.0679789;0.241761;-0.388501;-0.0459688;0.973644; 11191   1.01917 1.0262  1.02479 1.02031</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a><span class="st">F:\XXX</span><span class="ch">\202</span><span class="st">01218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-A8_1_22642.d  20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-A8_1_22642   P28482  P28482      MAPK1   69911.3 68996.2 63388.2 69911.3 68996.2 63388.2 63388.2 (UniMod:1)AAAAAAGAGPEM(UniMod:35)VR AAAAAAGAGPEMVR  (UniMod:1)AAAAAAGAGPEM(UniMod:35)VR2    2   0.00122498  0.000834654 0.000152765 0.000152765 0.000146135 0.000154631 0   1   1572.67 1552.08 1572.67 0.906427    7.45711 7.40943 7.50482 15.9025 7.43922 16.0749 0   0.371998    5937.05 0.30888 0.510876    0.72688 0.95182 1.96259 0.65474 1320.01;838.009;638.006;827.009;562.005;339.003;    1320.01;252.656;0;213.073;330.325;0;    0.976001;0.542934;0.346963;0.38014;0.442774;-0.259898;  11239   1.01773 1.0262  1.02509 1.01834</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="st">'''</span>)</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>diann_reader <span class="op">=</span> psm_reader_provider.get_reader(<span class="st">'diann'</span>)</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>_df <span class="op">=</span> diann_reader.import_file(tsv)</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'ccs'</span> <span class="kw">in</span> diann_reader.psm_df.columns</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">len</span>(diann_reader.psm_df) <span class="op">==</span> <span class="dv">14</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> np.<span class="bu">sum</span>(diann_reader.psm_df.mods.<span class="bu">str</span>.contains(<span class="st">'Acetyl@Protein N-term'</span>)) <span class="op">==</span> <span class="dv">10</span></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> np.<span class="bu">sum</span>(<span class="op">~</span>diann_reader.psm_df.mods.<span class="bu">str</span>.contains(<span class="st">'Acetyl@Protein N-term'</span>)) <span class="op">==</span> <span class="dv">4</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> np.<span class="bu">sum</span>(diann_reader.psm_df.mods.<span class="bu">str</span>.contains(<span class="st">'Oxidation@M'</span>)) <span class="op">==</span> <span class="dv">2</span></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> np.<span class="bu">all</span>(np.array(diann_reader.modification_mapping[<span class="st">'Phospho@S'</span>])<span class="op">==</span>np.array([</span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>    <span class="st">'S(Phospho (S))'</span>,</span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>    <span class="st">'S(Phospho (ST))'</span>,</span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>    <span class="st">'S(Phospho (STY))'</span>,</span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>    <span class="st">'S(ph)'</span>,</span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>    <span class="st">'S(UniMod:21)'</span>,</span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>    <span class="st">'pS'</span>,</span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>    <span class="st">'S[Phospho (S)]'</span>,</span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>    <span class="st">'S[Phospho (ST)]'</span>,</span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>    <span class="st">'S[Phospho (STY)]'</span>,</span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>    <span class="st">'S[ph]'</span>,</span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a>    <span class="st">'S[UniMod:21]'</span>])</span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a>_df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>raw_name</th>
+      <th>sequence</th>
+      <th>charge</th>
+      <th>rt</th>
+      <th>mobility</th>
+      <th>proteins</th>
+      <th>uniprot_ids</th>
+      <th>genes</th>
+      <th>scan_num</th>
+      <th>score</th>
+      <th>spec_idx</th>
+      <th>mods</th>
+      <th>mod_sites</th>
+      <th>nAA</th>
+      <th>rt_norm</th>
+      <th>precursor_mz</th>
+      <th>ccs</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_sp...</td>
+      <td>AAAAAAGAGPEMVR</td>
+      <td>2</td>
+      <td>7.42490</td>
+      <td>1.01917</td>
+      <td>NaN</td>
+      <td>P28482</td>
+      <td>MAPK1</td>
+      <td>11191</td>
+      <td>0.843331</td>
+      <td>11190</td>
+      <td>Acetyl@Protein N-term;Oxidation@M</td>
+      <td>0;12</td>
+      <td>14</td>
+      <td>0.372721</td>
+      <td>650.819344</td>
+      <td>412.544080</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_sp...</td>
+      <td>AAAAAAGAGPEMVR</td>
+      <td>2</td>
+      <td>7.45711</td>
+      <td>1.01773</td>
+      <td>NaN</td>
+      <td>P28482</td>
+      <td>MAPK1</td>
+      <td>11239</td>
+      <td>0.951820</td>
+      <td>11238</td>
+      <td>Acetyl@Protein N-term;Oxidation@M</td>
+      <td>0;12</td>
+      <td>14</td>
+      <td>0.374635</td>
+      <td>650.819344</td>
+      <td>411.961191</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_sp...</td>
+      <td>AAAAAAALESWQAAAPR</td>
+      <td>2</td>
+      <td>19.92080</td>
+      <td>1.19708</td>
+      <td>NaN</td>
+      <td>Q9UH36</td>
+      <td>SRRD</td>
+      <td>30053</td>
+      <td>0.999997</td>
+      <td>30052</td>
+      <td>Acetyl@Protein N-term</td>
+      <td>0</td>
+      <td>17</td>
+      <td>1.000000</td>
+      <td>834.428635</td>
+      <td>483.435307</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_sp...</td>
+      <td>AAAAAAALESWQAAAPR</td>
+      <td>2</td>
+      <td>19.90500</td>
+      <td>1.19500</td>
+      <td>NaN</td>
+      <td>Q9UH36</td>
+      <td>SRRD</td>
+      <td>30029</td>
+      <td>0.995505</td>
+      <td>30028</td>
+      <td>Acetyl@Protein N-term</td>
+      <td>0</td>
+      <td>17</td>
+      <td>1.000000</td>
+      <td>834.428635</td>
+      <td>482.595308</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_sp...</td>
+      <td>AAAAAAALESWQAAAPR</td>
+      <td>2</td>
+      <td>19.88930</td>
+      <td>1.19409</td>
+      <td>NaN</td>
+      <td>Q9UH36</td>
+      <td>SRRD</td>
+      <td>30005</td>
+      <td>0.997286</td>
+      <td>30004</td>
+      <td>Acetyl@Protein N-term</td>
+      <td>0</td>
+      <td>17</td>
+      <td>1.000000</td>
+      <td>834.428635</td>
+      <td>482.227809</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_sp...</td>
+      <td>AAAAAAALESWQAAAPR</td>
+      <td>2</td>
+      <td>19.87200</td>
+      <td>1.19136</td>
+      <td>NaN</td>
+      <td>Q9UH36</td>
+      <td>SRRD</td>
+      <td>29981</td>
+      <td>0.996593</td>
+      <td>29980</td>
+      <td>Acetyl@Protein N-term</td>
+      <td>0</td>
+      <td>17</td>
+      <td>1.000000</td>
+      <td>834.428635</td>
+      <td>481.125311</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_sp...</td>
+      <td>AAAAAAGAASGLPGPVAQGLK</td>
+      <td>2</td>
+      <td>14.70900</td>
+      <td>1.22500</td>
+      <td>NaN</td>
+      <td>Q96P70</td>
+      <td>IPO9</td>
+      <td>22187</td>
+      <td>0.999999</td>
+      <td>22186</td>
+      <td>Acetyl@Protein N-term</td>
+      <td>0</td>
+      <td>21</td>
+      <td>0.738374</td>
+      <td>895.991600</td>
+      <td>494.430146</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_sp...</td>
+      <td>AAAAAAGAASGLPGPVAQGLK</td>
+      <td>2</td>
+      <td>14.64560</td>
+      <td>1.22042</td>
+      <td>NaN</td>
+      <td>Q96P70</td>
+      <td>IPO9</td>
+      <td>22091</td>
+      <td>0.999996</td>
+      <td>22090</td>
+      <td>Acetyl@Protein N-term</td>
+      <td>0</td>
+      <td>21</td>
+      <td>0.735775</td>
+      <td>895.991600</td>
+      <td>492.581583</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_sp...</td>
+      <td>AAAAAAGAASGLPGPVAQGLK</td>
+      <td>2</td>
+      <td>14.63010</td>
+      <td>1.22708</td>
+      <td>NaN</td>
+      <td>Q96P70</td>
+      <td>IPO9</td>
+      <td>22067</td>
+      <td>0.999999</td>
+      <td>22066</td>
+      <td>Acetyl@Protein N-term</td>
+      <td>0</td>
+      <td>21</td>
+      <td>0.735576</td>
+      <td>895.991600</td>
+      <td>495.269668</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_sp...</td>
+      <td>AAAAAAGAASGLPGPVAQGLK</td>
+      <td>2</td>
+      <td>14.54900</td>
+      <td>1.22750</td>
+      <td>NaN</td>
+      <td>Q96P70</td>
+      <td>IPO9</td>
+      <td>21947</td>
+      <td>0.999997</td>
+      <td>21946</td>
+      <td>Acetyl@Protein N-term</td>
+      <td>0</td>
+      <td>21</td>
+      <td>0.732136</td>
+      <td>895.991600</td>
+      <td>495.439187</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_sp...</td>
+      <td>AAAAAAAPSGGGGGGEEERLEEK</td>
+      <td>3</td>
+      <td>7.34894</td>
+      <td>1.01000</td>
+      <td>NaN</td>
+      <td>P51608-2</td>
+      <td>MECP2</td>
+      <td>11077</td>
+      <td>0.998266</td>
+      <td>11076</td>
+      <td></td>
+      <td></td>
+      <td>23</td>
+      <td>0.368908</td>
+      <td>695.666290</td>
+      <td>610.813640</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_sp...</td>
+      <td>AAAAAAAPSGGGGGGEEERLEEK</td>
+      <td>3</td>
+      <td>7.31760</td>
+      <td>1.01417</td>
+      <td>NaN</td>
+      <td>P51608-2</td>
+      <td>MECP2</td>
+      <td>11029</td>
+      <td>0.994097</td>
+      <td>11028</td>
+      <td></td>
+      <td></td>
+      <td>23</td>
+      <td>0.367626</td>
+      <td>695.666290</td>
+      <td>613.335514</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_sp...</td>
+      <td>AAAAAAAPSGGGGGGEEERLEEK</td>
+      <td>3</td>
+      <td>7.28562</td>
+      <td>1.01500</td>
+      <td>NaN</td>
+      <td>P51608-2</td>
+      <td>MECP2</td>
+      <td>10981</td>
+      <td>0.999939</td>
+      <td>10980</td>
+      <td></td>
+      <td></td>
+      <td>23</td>
+      <td>0.366309</td>
+      <td>695.666290</td>
+      <td>613.837470</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_sp...</td>
+      <td>AAAAAAAPSGGGGGGEEERLEEK</td>
+      <td>3</td>
+      <td>7.26825</td>
+      <td>1.01208</td>
+      <td>NaN</td>
+      <td>P51608-2</td>
+      <td>MECP2</td>
+      <td>10957</td>
+      <td>0.971834</td>
+      <td>10956</td>
+      <td></td>
+      <td></td>
+      <td>23</td>
+      <td>0.365753</td>
+      <td>695.666290</td>
+      <td>612.071553</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>tsv <span class="op">=</span> StringIO(<span class="st">'''File.Name Run Protein.Group   Protein.Ids Protein.Names   Genes   PG.Quantity PG.Normalised   PG.MaxLFQ   Genes.Quantity  Genes.Normalised    Genes.MaxLFQ    Genes.MaxLFQ.Unique Modified.Sequence   Stripped.Sequence   Precursor.Id    Precursor.Charge    Q.Value Global.Q.Value  Protein.Q.Value PG.Q.Value  Global.PG.Q.Value   GG.Q.Value  Translated.Q.Value  Proteotypic Precursor.Quantity  Precursor.Normalised    Precursor.Translated    Quantity.Quality    RT  RT.Start    RT.Stop iRT Predicted.RT    Predicted.iRT   Lib.Q.Value Ms1.Profile.Corr    Ms1.Area    Evidence    Spectrum.Similarity Mass.Evidence   CScore  Decoy.Evidence  Decoy.CScore    Fragment.Quant.Raw  Fragment.Quant.Corrected    Fragment.Correlations   MS2.Scan    IM  iIM Predicted.IM    Predicted.iIM</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="st">F:\XXX</span><span class="ch">\202</span><span class="st">01218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-A2_1_22636.d  20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-A2_1_22636   Q9UH36  Q9UH36      SRRD    3296.49 3428.89 3428.89 3296.49 3428.89 3428.89 3428.89 (UniMod:1)AAAAAAALESWQAAAPR AAAAAAALESWQAAAPR   (UniMod:1)AAAAAAALESWQAAAPR2    2   3.99074e-05 1.96448e-05 0.000159821 0.000159821 0.000146135 0.000161212 0   1   3296.49 3428.89 3296.49 0.852479    19.9208 19.8731 19.9685 123.9   19.8266 128.292 0   0.960106    5308.05 1.96902 0.683134    0.362287    0.999997    1.23691 3.43242e-05 1212.01;2178.03;1390.01;1020.01;714.008;778.008;    1212.01;1351.73;887.591;432.92;216.728;732.751; 0.956668;0.757581;0.670497;0.592489;0.47072;0.855203;   30053   1.19708 1.19328 1.19453 1.19469</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="st">F:\XXX</span><span class="ch">\202</span><span class="st">01218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-A8_1_22642.d  20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-A8_1_22642   Q9UH36  Q9UH36      SRRD    2365    2334.05 2334.05 2365    2334.05 2334.05 2334.05 (UniMod:1)AAAAAAALESWQAAAPR AAAAAAALESWQAAAPR   (UniMod:1)AAAAAAALESWQAAAPR2    2   0.000184434 1.96448e-05 0.000596659 0.000596659 0.000146135 0.000604961 0   1   2365    2334.05 2365    0.922581    19.905  19.8573 19.9527 123.9   19.782  128.535 0   0.940191    4594.04 1.31068 0.758988    0   0.995505    0.28633 2.12584e-06 1209.02;1210.02;1414.02;1051.01;236.003;130.002;    1209.02;1109.89;732.154;735.384;0;46.0967;  0.919244;0.937624;0.436748;0.639369;0.296736;0.647924;  30029   1.195   1.19328 1.19381 1.19339</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="st">F:\XXX</span><span class="ch">\202</span><span class="st">01218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-B2_1_22648.d  20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-B2_1_22648   Q9UH36  Q9UH36      SRRD    1664.51 1635.46 1635.47 1664.51 1635.46 1635.47 1635.47 (UniMod:1)AAAAAAALESWQAAAPR AAAAAAALESWQAAAPR   (UniMod:1)AAAAAAALESWQAAAPR2    2   0.000185123 1.96448e-05 0.000307409 0.000307409 0.000146135 0.000311332 0   1   1664.51 1635.46 1664.51 0.811147    19.8893 19.8416 19.937  123.9   19.7567 128.896 0   0.458773    6614.06 1.7503  0.491071    0.00111683  0.997286    1.92753 2.80543e-05 744.01;1708.02;1630.02;1475.02;0;533.006;   322.907;808.594;577.15;536.033;0;533.006;   0.760181;0.764072;0.542005;0.415779;0;0.913438; 30005   1.19409 1.19328 1.19323 1.19308</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="st">F:\XXX</span><span class="ch">\202</span><span class="st">01218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-B8_1_22654.d  20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-B8_1_22654   Q9UH36  Q9UH36      SRRD    3369.91 3343.38 3343.38 3369.91 3343.38 3343.38 3343.38 (UniMod:1)AAAAAAALESWQAAAPR AAAAAAALESWQAAAPR   (UniMod:1)AAAAAAALESWQAAAPR2    2   0.000153377 1.96448e-05 0.000298151 0.000298151 0.000146135 0.000302297 0   1   3369.91 3343.38 3369.91 0.798104    19.872  19.8243 19.9196 123.9   19.7347 128.576 0   0.892774    5026.05 1.01465 0.704953    0   0.996593    0.476378    7.76581e-06 1654.02;1286.02;1894.02;993.011;778.008;1190.01;    1638.42;1286.02;1293.97;466.705;292.465;445.475;    0.854908;0.860012;0.708773;0.584142;0.716032;0.410465;  29981   1.19136 1.19328 1.19169 1.1919</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="st">F:\XXX</span><span class="ch">\202</span><span class="st">01218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-A2_1_22636.d  20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-A2_1_22636   P51608-2    P51608-2        MECP2   1585.53 1649.21 7673.34 1585.53 1649.21 7673.34 7673.34 AAAAAAAPSGGGGGGEEERLEEK AAAAAAAPSGGGGGGEEERLEEK (UniMod:1)AAAAAAAPSGGGGGGEEERLEEK3  3   0.00014185  5.69066e-05 0.000159821 0.000159821 0.000146135 0.000161212 0   1   861.509 896.11  861.509 0.530747    7.34894 7.30125 7.39665 14.6582 7.35635 14.5905 0   0.85024 2010.02 1.27844 0.470734    0.117495    0.998266    0.848349    0.0613877   905.008;1021.01;1179.01;419.003;753.005;638.006;    422.004;0;439.505;419.003;325.502;119.251;  0.626628;-0.441015;0.438684;0.800641;0.794403;0.458813; 11077   1.01    1.01225 1.01075 1.01099</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="st">F:\XXX</span><span class="ch">\202</span><span class="st">01218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-A8_1_22642.d  20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-A8_1_22642   P51608-2    P51608-2        MECP2   16870.2 16649.4 7963.26 16870.2 16649.4 7963.26 7963.26 AAAAAAAPSGGGGGGEEERLEEK AAAAAAAPSGGGGGGEEERLEEK (UniMod:1)AAAAAAAPSGGGGGGEEERLEEK3  3   0.000200767 5.69066e-05 0.000152765 0.000152765 0.000146135 0.000154631 0   1   1832.12 1808.14 1832.12 0.438822    7.3176  7.26989 7.36527 14.6582 7.29706 14.8141 0   0.814702    3622.03 0.571375    0.278903    0.971334    0.994097    0.779006    0.0590956   1430.01;946.009;804.008;260.002;710.006;232.002;    886.115;946.009;0;0;431.102;0;  -0.0551893;0.901557;0.0979035;-0.326533;0.334642;-0.120337; 11029   1.01417 1.01225 1.01136 1.01447</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="st">F:\XXX</span><span class="ch">\202</span><span class="st">01218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-B2_1_22648.d  20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-B2_1_22648   P51608-2    P51608-2        MECP2   16242.7 15959.3 13129.8 16242.7 15959.3 13129.8 13129.8 AAAAAAAPSGGGGGGEEERLEEK AAAAAAAPSGGGGGGEEERLEEK (UniMod:1)AAAAAAAPSGGGGGGEEERLEEK3  3   6.98405e-05 5.69066e-05 0.000168492 0.000168492 0.000146135 0.000169578 0   1   2765.24 2716.99 2765.24 0.619188    7.28562 7.23794 7.33338 14.6582 7.22243 15.2233 0   0.859167    2180.02 1.50997 0.43755 0.191245    0.999939    0.420023    0.00548723  1807.01;1018.01;1230.01;554.005;1216.01;276.002;    954.327;1006.89;804.021;554.005;0;143.651;  0.483734;0.907585;0.418797;0.61368;-0.523993;0.70046;   10981   1.015   1.01225 1.01115 1.01558</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="st">F:\XXX</span><span class="ch">\202</span><span class="st">01218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-B8_1_22654.d  20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-B8_1_22654   P51608-2    P51608-2        MECP2   20914.7 20750   16106   20914.7 20750   16106   16106   AAAAAAAPSGGGGGGEEERLEEK AAAAAAAPSGGGGGGEEERLEEK (UniMod:1)AAAAAAAPSGGGGGGEEERLEEK3  3   0.000603914 5.69066e-05 0.000153516 0.000153516 0.000146135 0.000155304 0   1   4556.58 4520.72 4556.58 0.620251    7.26825 7.22055 7.31601 14.6582 7.18207 15.448  0   0.79218 3193.03 0.113147    0.344593    0.144439    0.971834    1.05178 0.112962    2855.02;1760.01;830.007;116.001;564.005;751.006;    2266.46;1760.01;530.111;0;0;317.258;    0.430169;0.867218;0.612985;-0.310664;-0.386197;0.286451;    10957   1.01208 1.01225 1.00965 1.01449</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="st">F:\XXX</span><span class="ch">\202</span><span class="st">01218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-A2_1_22636.d  20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-A2_1_22636   Q96P70  Q96P70      IPO9    155722  161976  160062  155722  161976  160062  160062  (UniMod:1)AAAAAAGAASGLPGPVAQGLK AAAAAAGAASGLPGPVAQGLK   (UniMod:1)AAAAAAGAASGLPGPVAQGLK2    2   3.99074e-05 1.96448e-05 0.000159821 0.000159821 0.000146135 0.000161212 0   1   44791.6 46590.6 44791.6 0.903543    14.709  14.6614 14.7567 77.7384 14.7374 77.4968 0   0.962703    395646  1.16168 0.790083    0   0.999999    0.491003    0.00391533  17738.2;18223.2;16218.2;17747.2;14484.2;12569.2;    17738.2;18223.2;16150;16115.2;14484.2;12569.2;  0.879361;0.89314;0.807683;0.73629;0.863152;0.984215;    22187   1.225   1.23344 1.23458 1.22263</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="st">F:\XXX</span><span class="ch">\202</span><span class="st">01218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-A8_1_22642.d  20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-A8_1_22642   Q96P70  Q96P70      IPO9    172360  170104  155889  172360  170104  155889  155889  (UniMod:1)AAAAAAGAASGLPGPVAQGLK AAAAAAGAASGLPGPVAQGLK   (UniMod:1)AAAAAAGAASGLPGPVAQGLK2    2   4.98766e-05 1.96448e-05 0.000152765 0.000152765 0.000146135 0.000154631 0   1   44700.5 44115.4 44700.5 0.615196    14.6456 14.5979 14.6933 77.7384 14.6419 77.8394 0   0.9107  553292  0.747052    0.814842    0   0.999996    0.830219    0.0331339   19349.2;20154.2;20586.2;20040.3;13620.2;12105.1;    19349.2;19014.1;19329.7;18862.6;13404.2;11947.1;    0.862894;0.42962;0.293099;0.655948;0.517625;0.323501;   22091   1.22042 1.23344 1.23392 1.21891</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="st">F:\XXX</span><span class="ch">\202</span><span class="st">01218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-B2_1_22648.d  20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-B2_1_22648   Q96P70  Q96P70      IPO9    153712  151030  152845  153712  151030  152845  152845  (UniMod:1)AAAAAAGAASGLPGPVAQGLK AAAAAAGAASGLPGPVAQGLK   (UniMod:1)AAAAAAGAASGLPGPVAQGLK2    2   6.08421e-05 1.96448e-05 0.000168492 0.000168492 0.000146135 0.000169578 0   1   40439.4 39733.8 40439.4 0.833327    14.6301 14.5824 14.6777 77.7384 14.5747 78.2527 0   0.989019    1.0768e+06  1.68843 0.759575    0   0.999999    0.674737    0.0631384   17597.2;19526.2;16647.2;16204.2;12871.2;11069.2;    17377.7;19526.2;16647.2;16204.2;12871.2;10190.5;    0.828262;0.979726;0.827511;0.9628;0.90466;0.751867; 22067   1.22708 1.23344 1.23332 1.2261</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="st">F:\XXX</span><span class="ch">\202</span><span class="st">01218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-B8_1_22654.d  20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-B8_1_22654   Q96P70  Q96P70      IPO9    147008  145850  159209  147008  145850  159209  159209  (UniMod:1)AAAAAAGAASGLPGPVAQGLK AAAAAAGAASGLPGPVAQGLK   (UniMod:1)AAAAAAGAASGLPGPVAQGLK2    2   4.42595e-05 1.96448e-05 0.000153516 0.000153516 0.000146135 0.000155304 0   1   41861.6 41532.1 41861.6 0.752921    14.549  14.5013 14.5967 77.7384 14.5155 78.0748 0   0.877873    939172  1.59762 0.821027    0   0.999997    0.397952    1.22212e-05 18143.2;19574.2;17444.2;17956.2;11427.2;13025.2;    17409.2;18432.7;16706.7;10820.4;11427.2;13025.2;    0.625292;0.399297;0.717726;0.321047;0.864595;0.825535;  21947   1.2275  1.23344 1.23199 1.2281</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="st">F:\XXX</span><span class="ch">\202</span><span class="st">01218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-A2_1_22636.d  20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-A2_1_22636   P28482  P28482      MAPK1   72652.7 75570.7 78604.9 72652.7 75570.7 78604.9 78604.9 (UniMod:1)AAAAAAGAGPEM(UniMod:35)VR AAAAAAGAGPEMVR  (UniMod:1)AAAAAAGAGPEM(UniMod:35)VR2    2   0.00693727  0.000834654 0.000159821 0.000159821 0.000146135 0.000161212 0   1   192.198 199.917 192.198 0.0197094   7.4249  7.37721 7.4726  15.9025 7.49813 15.2482 0   0.754191    8842.06 1.19725 0.470393    0.086229    0.843331    2.80548 0.384248    897.008;1032.01;279.002;377.003;440.004;286.003;    0;137.786;54.4117;0;89.692;286.003; -0.20379;-0.0679789;0.241761;-0.388501;-0.0459688;0.973644; 11191   1.01917 1.0262  1.02479 1.02031</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a><span class="st">F:\XXX</span><span class="ch">\202</span><span class="st">01218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-A8_1_22642.d  20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-A8_1_22642   P28482  P28482      MAPK1   69911.3 68996.2 63388.2 69911.3 68996.2 63388.2 63388.2 (UniMod:1)AAAAAAGAGPEM(UniMod:35)VR AAAAAAGAGPEMVR  (UniMod:1)AAAAAAGAGPEM(UniMod:35)VR2    2   0.00122498  0.000834654 0.000152765 0.000152765 0.000146135 0.000154631 0   1   1572.67 1552.08 1572.67 0.906427    7.45711 7.40943 7.50482 15.9025 7.43922 16.0749 0   0.371998    5937.05 0.30888 0.510876    0.72688 0.95182 1.96259 0.65474 1320.01;838.009;638.006;827.009;562.005;339.003;    1320.01;252.656;0;213.073;330.325;0;    0.976001;0.542934;0.346963;0.38014;0.442774;-0.259898;  11239   1.01773 1.0262  1.02509 1.01834</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a><span class="st">'''</span>)</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>diann_reader <span class="op">=</span> psm_reader_provider.get_reader_by_yaml(psm_reader_yaml[<span class="st">'diann'</span>])</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>diann_reader.import_file(tsv)</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'ccs'</span> <span class="kw">in</span> diann_reader.psm_df.columns</span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">len</span>(diann_reader.psm_df) <span class="op">==</span> <span class="dv">14</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> np.<span class="bu">sum</span>(diann_reader.psm_df.mods.<span class="bu">str</span>.contains(<span class="st">'Acetyl@Protein N-term'</span>)) <span class="op">==</span> <span class="dv">10</span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> np.<span class="bu">sum</span>(<span class="op">~</span>diann_reader.psm_df.mods.<span class="bu">str</span>.contains(<span class="st">'Acetyl@Protein N-term'</span>)) <span class="op">==</span> <span class="dv">4</span></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> np.<span class="bu">sum</span>(diann_reader.psm_df.mods.<span class="bu">str</span>.contains(<span class="st">'Oxidation@M'</span>)) <span class="op">==</span> <span class="dv">2</span></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> np.<span class="bu">all</span>(np.array(diann_reader.modification_mapping[<span class="st">'Phospho@S'</span>])<span class="op">==</span>np.array([</span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>    <span class="st">'S(Phospho (S))'</span>,</span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>    <span class="st">'S(Phospho (ST))'</span>,</span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>    <span class="st">'S(Phospho (STY))'</span>,</span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>    <span class="st">'S(ph)'</span>,</span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>    <span class="st">'S(UniMod:21)'</span>,</span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>    <span class="st">'pS'</span>,</span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>    <span class="st">'S[Phospho (S)]'</span>,</span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>    <span class="st">'S[Phospho (ST)]'</span>,</span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>    <span class="st">'S[Phospho (STY)]'</span>,</span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>    <span class="st">'S[ph]'</span>,</span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a>    <span class="st">'S[UniMod:21]'</span>])</span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
