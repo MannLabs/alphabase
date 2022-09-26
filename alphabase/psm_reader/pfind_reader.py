@@ -95,12 +95,14 @@ class pFindReader(PSMReaderBase):
         modification_mapping:dict = None,
         fdr = 0.01,
         keep_decoy = False,
+        **kwargs,
     ):
         super().__init__(
             column_mapping=column_mapping,
             modification_mapping=modification_mapping,
             fdr = fdr,
             keep_decoy = keep_decoy,
+            **kwargs,
         )
 
     def _init_column_mapping(self):

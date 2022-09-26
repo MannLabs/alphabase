@@ -70,6 +70,7 @@ class MSFragger_PSM_TSV_Reader(PSMReaderBase):
         modification_mapping: dict = None, 
         fdr=0.01, 
         keep_decoy=False, 
+        rt_unit = 'second',
         **kwargs
     ):
         raise NotImplementedError("MSFragger_PSM_TSV_Reader for psm.tsv")
@@ -87,6 +88,7 @@ else:
             column_mapping: dict = None, 
             modification_mapping: dict = None,
             keep_decoy=True, 
+            rt_unit = 'second',
             **kwargs
         ):
             """MSFragger is not fully supported as we can only access the pepxml file.
@@ -95,6 +97,7 @@ else:
                 column_mapping=column_mapping, 
                 modification_mapping=modification_mapping,
                 keep_decoy=keep_decoy, 
+                rt_unit = 'second',
                 **kwargs
             )
 

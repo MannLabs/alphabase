@@ -1,0 +1,3301 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.1.189">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>alphabase - Protein and Peptide Processing</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<link rel="stylesheet" href="../styles.css">
+<meta property="og:title" content="alphabase - Protein and Peptide Processing">
+<meta property="og:description" content="source">
+<meta property="og:site-name" content="alphabase">
+<meta name="twitter:title" content="alphabase - Protein and Peptide Processing">
+<meta name="twitter:description" content="source">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">alphabase</span>
+    </a>
+  </div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title">Protein and Peptide Processing</h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">AlphaBase</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../utils.html" class="sidebar-item-text sidebar-link">Utils</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../yaml_utils.html" class="sidebar-item-text sidebar-link">YAML Utils</a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">constants</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../constants/aa.html" class="sidebar-item-text sidebar-link">Amino acid information</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../constants/element.html" class="sidebar-item-text sidebar-link">Atom element information</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../constants/isotope.html" class="sidebar-item-text sidebar-link">Isotope distribution</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../constants/modification.html" class="sidebar-item-text sidebar-link">Modification information</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">io</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../io/hdf.html" class="sidebar-item-text sidebar-link">HDF functionalities</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">peptide</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../peptide/fragment.html" class="sidebar-item-text sidebar-link">Fragment Functionalities</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../peptide/mass_calc.html" class="sidebar-item-text sidebar-link">Mass Calculation</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../peptide/mobility.html" class="sidebar-item-text sidebar-link">CCS/Mobility Functionalities</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../peptide/precursor.html" class="sidebar-item-text sidebar-link">Precursor Functionalities</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">protein</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../protein/fasta.html" class="sidebar-item-text sidebar-link active">Protein and Peptide Processing</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../protein/test_fasta.html" class="sidebar-item-text sidebar-link">Testing fasta</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true">psm_reader</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../psm_reader/alphapept_reader.html" class="sidebar-item-text sidebar-link">AlphaPept PSM Reader</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../psm_reader/dia_psm_reader.html" class="sidebar-item-text sidebar-link">DIA PSM reader</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../psm_reader/maxquant_reader.html" class="sidebar-item-text sidebar-link">MaxQuant PSM reader</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../psm_reader/msfragger_reader.html" class="sidebar-item-text sidebar-link">MSFragger Reader</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../psm_reader/pfind_reader.html" class="sidebar-item-text sidebar-link">pFind PSM Reader</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../psm_reader/psm_reader.html" class="sidebar-item-text sidebar-link">Class Base for PSM Readers</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="true">spectral_library</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../spectral_library/decoy_library.html" class="sidebar-item-text sidebar-link">Decoy Libraries</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../spectral_library/library_base.html" class="sidebar-item-text sidebar-link">Base Class for Spectral Libraries</a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#concat_proteins" id="toc-concat_proteins" class="nav-link active" data-scroll-target="#concat_proteins">concat_proteins</a></li>
+  <li><a href="#load_all_proteins" id="toc-load_all_proteins" class="nav-link" data-scroll-target="#load_all_proteins">load_all_proteins</a></li>
+  <li><a href="#read_fasta_file" id="toc-read_fasta_file" class="nav-link" data-scroll-target="#read_fasta_file">read_fasta_file</a></li>
+  <li><a href="#get_uniprot_gene_name" id="toc-get_uniprot_gene_name" class="nav-link" data-scroll-target="#get_uniprot_gene_name">get_uniprot_gene_name</a></li>
+  <li><a href="#digest" id="toc-digest" class="nav-link" data-scroll-target="#digest">Digest</a></li>
+  <li><a href="#cleave_sequence_with_cut_pos" id="toc-cleave_sequence_with_cut_pos" class="nav-link" data-scroll-target="#cleave_sequence_with_cut_pos">cleave_sequence_with_cut_pos</a></li>
+  <li><a href="#digest.cleave_sequence" id="toc-digest.cleave_sequence" class="nav-link" data-scroll-target="#digest.cleave_sequence">Digest.cleave_sequence</a></li>
+  <li><a href="#get_fix_mods" id="toc-get_fix_mods" class="nav-link" data-scroll-target="#get_fix_mods">get_fix_mods</a></li>
+  <li><a href="#get_var_mod_sites" id="toc-get_var_mod_sites" class="nav-link" data-scroll-target="#get_var_mod_sites">get_var_mod_sites</a></li>
+  <li><a href="#get_candidate_sites" id="toc-get_candidate_sites" class="nav-link" data-scroll-target="#get_candidate_sites">get_candidate_sites</a></li>
+  <li><a href="#get_var_mods" id="toc-get_var_mods" class="nav-link" data-scroll-target="#get_var_mods">get_var_mods</a></li>
+  <li><a href="#get_var_mods_per_sites_single_mod_on_aa" id="toc-get_var_mods_per_sites_single_mod_on_aa" class="nav-link" data-scroll-target="#get_var_mods_per_sites_single_mod_on_aa">get_var_mods_per_sites_single_mod_on_aa</a></li>
+  <li><a href="#get_var_mods_per_sites_multi_mods_on_aa" id="toc-get_var_mods_per_sites_multi_mods_on_aa" class="nav-link" data-scroll-target="#get_var_mods_per_sites_multi_mods_on_aa">get_var_mods_per_sites_multi_mods_on_aa</a></li>
+  <li><a href="#parse_term_mod" id="toc-parse_term_mod" class="nav-link" data-scroll-target="#parse_term_mod">parse_term_mod</a></li>
+  <li><a href="#create_labeling_peptide_df" id="toc-create_labeling_peptide_df" class="nav-link" data-scroll-target="#create_labeling_peptide_df">create_labeling_peptide_df</a></li>
+  <li><a href="#parse_labels" id="toc-parse_labels" class="nav-link" data-scroll-target="#parse_labels">parse_labels</a></li>
+  <li><a href="#add_single_peptide_labeling" id="toc-add_single_peptide_labeling" class="nav-link" data-scroll-target="#add_single_peptide_labeling">add_single_peptide_labeling</a></li>
+  <li><a href="#protein_idxes_to_names" id="toc-protein_idxes_to_names" class="nav-link" data-scroll-target="#protein_idxes_to_names">protein_idxes_to_names</a></li>
+  <li><a href="#append_regular_modifications" id="toc-append_regular_modifications" class="nav-link" data-scroll-target="#append_regular_modifications">append_regular_modifications</a></li>
+  <li><a href="#fastalib" id="toc-fastalib" class="nav-link" data-scroll-target="#fastalib">FastaLib</a></li>
+  <li><a href="#fastalib.add_modifications" id="toc-fastalib.add_modifications" class="nav-link" data-scroll-target="#fastalib.add_modifications">FastaLib.add_modifications</a></li>
+  <li><a href="#fastalib.add_additional_modifications" id="toc-fastalib.add_additional_modifications" class="nav-link" data-scroll-target="#fastalib.add_additional_modifications">FastaLib.add_additional_modifications</a></li>
+  <li><a href="#fastalib.add_mods_for_one_seq" id="toc-fastalib.add_mods_for_one_seq" class="nav-link" data-scroll-target="#fastalib.add_mods_for_one_seq">FastaLib.add_mods_for_one_seq</a></li>
+  <li><a href="#fastalib.add_peptide_labeling" id="toc-fastalib.add_peptide_labeling" class="nav-link" data-scroll-target="#fastalib.add_peptide_labeling">FastaLib.add_peptide_labeling</a></li>
+  <li><a href="#speclibbase.append_decoy_sequence" id="toc-speclibbase.append_decoy_sequence" class="nav-link" data-scroll-target="#speclibbase.append_decoy_sequence">SpecLibBase.append_decoy_sequence</a></li>
+  <li><a href="#fastalib.get_peptides_from_fasta" id="toc-fastalib.get_peptides_from_fasta" class="nav-link" data-scroll-target="#fastalib.get_peptides_from_fasta">FastaLib.get_peptides_from_fasta</a></li>
+  <li><a href="#fastalib.get_peptides_from_protein_dict" id="toc-fastalib.get_peptides_from_protein_dict" class="nav-link" data-scroll-target="#fastalib.get_peptides_from_protein_dict">FastaLib.get_peptides_from_protein_dict</a></li>
+  <li><a href="#fastalib.get_peptides_from_peptide_sequence_list" id="toc-fastalib.get_peptides_from_peptide_sequence_list" class="nav-link" data-scroll-target="#fastalib.get_peptides_from_peptide_sequence_list">FastaLib.get_peptides_from_peptide_sequence_list</a></li>
+  <li><a href="#fastalib.import_and_process_fasta" id="toc-fastalib.import_and_process_fasta" class="nav-link" data-scroll-target="#fastalib.import_and_process_fasta">FastaLib.import_and_process_fasta</a></li>
+  <li><a href="#fastalib.import_and_process_protein_dict" id="toc-fastalib.import_and_process_protein_dict" class="nav-link" data-scroll-target="#fastalib.import_and_process_protein_dict">FastaLib.import_and_process_protein_dict</a></li>
+  <li><a href="#fastalib.import_and_process_peptide_sequences" id="toc-fastalib.import_and_process_peptide_sequences" class="nav-link" data-scroll-target="#fastalib.import_and_process_peptide_sequences">FastaLib.import_and_process_peptide_sequences</a></li>
+  <li><a href="#fastalib.save_hdf" id="toc-fastalib.save_hdf" class="nav-link" data-scroll-target="#fastalib.save_hdf">FastaLib.save_hdf</a></li>
+  <li><a href="#fastalib.load_hdf" id="toc-fastalib.load_hdf" class="nav-link" data-scroll-target="#fastalib.load_hdf">FastaLib.load_hdf</a></li>
+  <li><a href="#testing" id="toc-testing" class="nav-link" data-scroll-target="#testing">Testing</a></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/MannLabs/alphabase/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block">Protein and Peptide Processing</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    
+  </div>
+  
+
+</header>
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/protein/fasta.py#L82" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="concat_proteins" class="level3">
+<h3 class="anchored" data-anchor-id="concat_proteins">concat_proteins</h3>
+<blockquote class="blockquote">
+<pre><code> concat_proteins (protein_dict:dict, sep='$')</code></pre>
+</blockquote>
+<p>Concatenate all protein sequences into a single sequence, seperated by <code>sep ($ by default)</code>.</p>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>protein_dict</td>
+<td>dict</td>
+<td></td>
+<td>protein_dict by read_fasta_file()</td>
+</tr>
+<tr class="even">
+<td>sep</td>
+<td>str</td>
+<td>$</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><strong>Returns</strong></td>
+<td><strong>str</strong></td>
+<td></td>
+<td><strong>concatenated sequence seperated by <code>sep</code>.</strong></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/protein/fasta.py#L75" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="load_all_proteins" class="level3">
+<h3 class="anchored" data-anchor-id="load_all_proteins">load_all_proteins</h3>
+<blockquote class="blockquote">
+<pre><code> load_all_proteins (fasta_file_list:list)</code></pre>
+</blockquote>
+<pre><code>/Users/zengwenfeng/opt/anaconda3/lib/python3.8/site-packages/fastcore/docscrape.py:225: UserWarning: Unknown section Yields
+  else: warn(msg)</code></pre>
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/protein/fasta.py#L37" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="read_fasta_file" class="level3">
+<h3 class="anchored" data-anchor-id="read_fasta_file">read_fasta_file</h3>
+<blockquote class="blockquote">
+<pre><code> read_fasta_file (fasta_filename:str='')</code></pre>
+</blockquote>
+<p>Read a FASTA file line by line</p>
+<table class="table">
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>fasta_filename</td>
+<td>str</td>
+<td></td>
+<td>fasta.</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/protein/fasta.py#L31" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="get_uniprot_gene_name" class="level3">
+<h3 class="anchored" data-anchor-id="get_uniprot_gene_name">get_uniprot_gene_name</h3>
+<blockquote class="blockquote">
+<pre><code> get_uniprot_gene_name (description:str)</code></pre>
+</blockquote>
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/protein/fasta.py#L178" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="digest" class="level3">
+<h3 class="anchored" data-anchor-id="digest">Digest</h3>
+<blockquote class="blockquote">
+<pre><code> Digest (protease:str='trypsin/P', max_missed_cleavages:int=2,
+         peptide_length_min:int=6, peptide_length_max:int=45)</code></pre>
+</blockquote>
+<p>Digest a protein sequence</p>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>protease</td>
+<td>str</td>
+<td>trypsin/P</td>
+<td>protease name, could be pre-defined name defined in <code>protease_dict</code><br>or a regular expression. By default ‘trypsin/P’</td>
+</tr>
+<tr class="even">
+<td>max_missed_cleavages</td>
+<td>int</td>
+<td>2</td>
+<td>Max number of misses cleavage sites.<br>By default 2</td>
+</tr>
+<tr class="odd">
+<td>peptide_length_min</td>
+<td>int</td>
+<td>6</td>
+<td>Minimal cleaved peptide length, by default 6</td>
+</tr>
+<tr class="even">
+<td>peptide_length_max</td>
+<td>int</td>
+<td>45</td>
+<td>Maximal cleaved peptide length, by default 45</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/protein/fasta.py#L114" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="cleave_sequence_with_cut_pos" class="level3">
+<h3 class="anchored" data-anchor-id="cleave_sequence_with_cut_pos">cleave_sequence_with_cut_pos</h3>
+<blockquote class="blockquote">
+<pre><code> cleave_sequence_with_cut_pos (sequence:str, cut_pos:numpy.ndarray,
+                               n_missed_cleavages:int=2,
+                               pep_length_min:int=6,
+                               pep_length_max:int=45)</code></pre>
+</blockquote>
+<p>Cleave a sequence with cut postions (cut_pos). Filters to have a minimum and maximum length.</p>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>sequence</td>
+<td>str</td>
+<td></td>
+<td>protein sequence</td>
+</tr>
+<tr class="even">
+<td>cut_pos</td>
+<td>ndarray</td>
+<td></td>
+<td>cut postions determined by a given protease.</td>
+</tr>
+<tr class="odd">
+<td>n_missed_cleavages</td>
+<td>int</td>
+<td>2</td>
+<td>the number of max missed cleavages.</td>
+</tr>
+<tr class="even">
+<td>pep_length_min</td>
+<td>int</td>
+<td>6</td>
+<td>min peptide length.</td>
+</tr>
+<tr class="odd">
+<td>pep_length_max</td>
+<td>int</td>
+<td>45</td>
+<td>max peptide length.</td>
+</tr>
+<tr class="even">
+<td><strong>Returns</strong></td>
+<td><strong>tuple</strong></td>
+<td></td>
+<td><strong>List[str]. Cleaved peptide sequences with missed cleavages.<br><br>List[int]. Number of miss cleavage of each peptide.<br><br>List[bool]. If N-term peptide<br><br>List[bool]. If C-term pepetide</strong></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/protein/fasta.py#L216" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="digest.cleave_sequence" class="level3">
+<h3 class="anchored" data-anchor-id="digest.cleave_sequence">Digest.cleave_sequence</h3>
+<blockquote class="blockquote">
+<pre><code> Digest.cleave_sequence (sequence:str)</code></pre>
+</blockquote>
+<p>Cleave a sequence.</p>
+<table class="table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 38%">
+<col style="width: 52%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>sequence</td>
+<td>str</td>
+<td>the given (protein) sequence.</td>
+</tr>
+<tr class="even">
+<td><strong>Returns</strong></td>
+<td><strong>tuple</strong></td>
+<td><strong>list[str]: cleaved peptide sequences with missed cleavages<br>list[int]: miss cleavage list<br>list[bool]: is protein N-term<br>list[bool]: is protein C-term</strong></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/protein/fasta.py#L268" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="get_fix_mods" class="level3">
+<h3 class="anchored" data-anchor-id="get_fix_mods">get_fix_mods</h3>
+<blockquote class="blockquote">
+<pre><code> get_fix_mods (sequence:str, fix_mod_aas:str, fix_mod_dict:dict)</code></pre>
+</blockquote>
+<p>Generate fix modifications for the sequence</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>seq <span class="op">=</span> <span class="st">'ACBCDCK'</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>_fix_mod_dict <span class="op">=</span> {}</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>_fix_mod_dict[<span class="st">'C'</span>] <span class="op">=</span> <span class="st">'mod@C'</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>mods, mod_sites <span class="op">=</span> get_fix_mods(seq, <span class="st">'C'</span>, _fix_mod_dict)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> mods<span class="op">==</span><span class="st">';'</span>.join([<span class="st">'mod@C'</span>]<span class="op">*</span><span class="dv">3</span>)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> mod_sites<span class="op">==</span><span class="st">'2;4;6'</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>get_fix_mods(seq, <span class="st">'C'</span>, _fix_mod_dict)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>('mod@C;mod@C;mod@C', '2;4;6')</code></pre>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/protein/fasta.py#L309" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="get_var_mod_sites" class="level3">
+<h3 class="anchored" data-anchor-id="get_var_mod_sites">get_var_mod_sites</h3>
+<blockquote class="blockquote">
+<pre><code> get_var_mod_sites (sequence:str, target_mod_aas:str, max_var_mod:int,
+                    max_combs:int)</code></pre>
+</blockquote>
+<p>get all combinations of variable modification sites</p>
+<table class="table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 38%">
+<col style="width: 52%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>sequence</td>
+<td>str</td>
+<td>peptide sequence</td>
+</tr>
+<tr class="even">
+<td>target_mod_aas</td>
+<td>str</td>
+<td>AAs that may have modifications</td>
+</tr>
+<tr class="odd">
+<td>max_var_mod</td>
+<td>int</td>
+<td>max number of mods in a sequence</td>
+</tr>
+<tr class="even">
+<td>max_combs</td>
+<td>int</td>
+<td>max number of combinations for a sequence</td>
+</tr>
+<tr class="odd">
+<td><strong>Returns</strong></td>
+<td><strong>list</strong></td>
+<td><strong>list of combinations (tuple) of modification sites </strong></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/protein/fasta.py#L285" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="get_candidate_sites" class="level3">
+<h3 class="anchored" data-anchor-id="get_candidate_sites">get_candidate_sites</h3>
+<blockquote class="blockquote">
+<pre><code> get_candidate_sites (sequence:str, target_mod_aas:str)</code></pre>
+</blockquote>
+<p>get candidate modification sites</p>
+<table class="table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 38%">
+<col style="width: 52%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>sequence</td>
+<td>str</td>
+<td>peptide sequence</td>
+</tr>
+<tr class="even">
+<td>target_mod_aas</td>
+<td>str</td>
+<td>AAs that may have modifications</td>
+</tr>
+<tr class="odd">
+<td><strong>Returns</strong></td>
+<td><strong>list</strong></td>
+<td><strong>candiadte mod sites in alphabase format (0: N-term, -1: C-term, 1-n:others)</strong></td>
+</tr>
+</tbody>
+</table>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>seq <span class="op">=</span> <span class="st">'AMCMSTYK'</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>candidate_sites <span class="op">=</span> get_candidate_sites(seq, <span class="st">'MSTY'</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> np.<span class="bu">all</span>(np.array(candidate_sites)<span class="op">==</span>np.array([<span class="dv">2</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span>,<span class="dv">7</span>]))</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>get_var_mod_sites(seq, <span class="st">'MSTY'</span>, <span class="dv">3</span>, <span class="dv">20</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>[(2,),
+ (4,),
+ (5,),
+ (6,),
+ (7,),
+ (2, 4),
+ (2, 5),
+ (2, 6),
+ (2, 7),
+ (4, 5),
+ (4, 6),
+ (4, 7),
+ (5, 6),
+ (5, 7),
+ (6, 7),
+ (2, 4, 5),
+ (2, 4, 6),
+ (2, 4, 7),
+ (2, 5, 6),
+ (2, 5, 7)]</code></pre>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/protein/fasta.py#L395" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="get_var_mods" class="level3">
+<h3 class="anchored" data-anchor-id="get_var_mods">get_var_mods</h3>
+<blockquote class="blockquote">
+<pre><code> get_var_mods (sequence:str, var_mod_aas:str, mod_dict:dict,
+               max_var_mod:int, max_combs:int, keep_unmodified:bool=False)</code></pre>
+</blockquote>
+<p>Generate all modification combinations and associated sites for the sequence.</p>
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/protein/fasta.py#L378" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="get_var_mods_per_sites_single_mod_on_aa" class="level3">
+<h3 class="anchored" data-anchor-id="get_var_mods_per_sites_single_mod_on_aa">get_var_mods_per_sites_single_mod_on_aa</h3>
+<blockquote class="blockquote">
+<pre><code> get_var_mods_per_sites_single_mod_on_aa (sequence:str, mod_sites:tuple,
+                                          var_mod_dict:dict)</code></pre>
+</blockquote>
+<p>Used when the var mod list contains only one mods on the each AA, for example: Mod1@A, Mod2@D …</p>
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/protein/fasta.py#L353" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="get_var_mods_per_sites_multi_mods_on_aa" class="level3">
+<h3 class="anchored" data-anchor-id="get_var_mods_per_sites_multi_mods_on_aa">get_var_mods_per_sites_multi_mods_on_aa</h3>
+<blockquote class="blockquote">
+<pre><code> get_var_mods_per_sites_multi_mods_on_aa (sequence:str, mod_sites:tuple,
+                                          var_mod_dict:dict)</code></pre>
+</blockquote>
+<p>Used only when the var mod list contains more than one mods on the same AA, for example: Mod1@A, Mod2@A …</p>
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/protein/fasta.py#L426" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="parse_term_mod" class="level3">
+<h3 class="anchored" data-anchor-id="parse_term_mod">parse_term_mod</h3>
+<blockquote class="blockquote">
+<pre><code> parse_term_mod (term_mod_name:str)</code></pre>
+</blockquote>
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/protein/fasta.py#L482" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="create_labeling_peptide_df" class="level3">
+<h3 class="anchored" data-anchor-id="create_labeling_peptide_df">create_labeling_peptide_df</h3>
+<blockquote class="blockquote">
+<pre><code> create_labeling_peptide_df (peptide_df:pandas.core.frame.DataFrame,
+                             labels:list)</code></pre>
+</blockquote>
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/protein/fasta.py#L466" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="parse_labels" class="level3">
+<h3 class="anchored" data-anchor-id="parse_labels">parse_labels</h3>
+<blockquote class="blockquote">
+<pre><code> parse_labels (labels:list)</code></pre>
+</blockquote>
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/protein/fasta.py#L434" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="add_single_peptide_labeling" class="level3">
+<h3 class="anchored" data-anchor-id="add_single_peptide_labeling">add_single_peptide_labeling</h3>
+<blockquote class="blockquote">
+<pre><code> add_single_peptide_labeling (seq:str, mods:str, mod_sites:str,
+                              label_aas:str, label_mod_dict:dict,
+                              nterm_label_mod:str, cterm_label_mod:str)</code></pre>
+</blockquote>
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/protein/fasta.py#L504" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="protein_idxes_to_names" class="level3">
+<h3 class="anchored" data-anchor-id="protein_idxes_to_names">protein_idxes_to_names</h3>
+<blockquote class="blockquote">
+<pre><code> protein_idxes_to_names (protein_idxes:str, protein_names:list)</code></pre>
+</blockquote>
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/protein/fasta.py#L511" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="append_regular_modifications" class="level3">
+<h3 class="anchored" data-anchor-id="append_regular_modifications">append_regular_modifications</h3>
+<blockquote class="blockquote">
+<pre><code> append_regular_modifications (df:pandas.core.frame.DataFrame,
+                               var_mods=['Phospho@S', 'Phospho@T',
+                               'Phospho@Y'], max_mod_num=1, max_combs=100,
+                               keep_unmodified=True,
+                               cannot_modify_pep_nterm_aa:bool=False,
+                               cannot_modify_pep_cterm_aa:bool=False)</code></pre>
+</blockquote>
+<p>Append regular (not N/C-term) variable modifications to the exsiting modifications of each sequence in <code>df</code>.</p>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>df</td>
+<td>DataFrame</td>
+<td></td>
+<td>Precursor dataframe</td>
+</tr>
+<tr class="even">
+<td>var_mods</td>
+<td>list</td>
+<td>[‘Phospho@S’, ‘Phospho@T’, ‘Phospho@Y’]</td>
+<td>Considered varialbe modification list. <br>Defaults to [‘Phospho@S’,‘Phospho@T’,‘Phospho@Y’].</td>
+</tr>
+<tr class="odd">
+<td>max_mod_num</td>
+<td>int</td>
+<td>1</td>
+<td>Maximal modification number for <br>each sequence of the <code>var_mods</code>. Defaults to 1.</td>
+</tr>
+<tr class="even">
+<td>max_combs</td>
+<td>int</td>
+<td>100</td>
+<td>One sequence is only allowed to explode <br>to <code>max_combs</code> number of modified peptides. Defaults to 100.</td>
+</tr>
+<tr class="odd">
+<td>keep_unmodified</td>
+<td>bool</td>
+<td>True</td>
+<td>If unmodified (only refered to <code>var_mods</code>)<br>peptides are also remained in the returned dataframe. Defaults to True.</td>
+</tr>
+<tr class="even">
+<td>cannot_modify_pep_nterm_aa</td>
+<td>bool</td>
+<td>False</td>
+<td>Similar to <code>cannot_modify_pep_cterm_aa</code>, by default False</td>
+</tr>
+<tr class="odd">
+<td>cannot_modify_pep_cterm_aa</td>
+<td>bool</td>
+<td>False</td>
+<td>If the modified AA is at C-term, then the modification cannot modified it.<br>For example GlyGly@K, for a peptide <code>ACDKEFGK</code>, if GlyGly is at the C-term, <br>trypsin cannot cleave the C-term K, hence there will be no such a modified peptide ACDKEFGK(GlyGly).<br>by default False</td>
+</tr>
+<tr class="even">
+<td><strong>Returns</strong></td>
+<td><strong>DataFrame</strong></td>
+<td></td>
+<td><strong>The precursor_df with new modification added.</strong></td>
+</tr>
+</tbody>
+</table>
+<pre><code>/Users/zengwenfeng/opt/anaconda3/lib/python3.8/site-packages/fastcore/docscrape.py:225: UserWarning: Unknown section Attributes
+  else: warn(msg)</code></pre>
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/protein/fasta.py#L608" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="fastalib" class="level3">
+<h3 class="anchored" data-anchor-id="fastalib">FastaLib</h3>
+<blockquote class="blockquote">
+<pre><code> FastaLib (charged_frag_types:list=['b_z1', 'b_z2', 'y_z1', 'y_z2'],
+           protease:str='trypsin/P', max_missed_cleavages:int=2,
+           peptide_length_min:int=7, peptide_length_max:int=35,
+           precursor_charge_min:int=2, precursor_charge_max:int=4,
+           precursor_mz_min:float=200.0, precursor_mz_max:float=2000.0,
+           var_mods:list=['Acetyl@Protein N-term', 'Oxidation@M'],
+           max_var_mod_num:int=2, fix_mods:list=['Carbamidomethyl@C'],
+           decoy:str=None, I_to_L=False)</code></pre>
+</blockquote>
+<p>Class to process fasta files and generate libraries, including: - Digest protein sequences - Add fixed, variable or labeling modifications to the peptide sequences - Add charge states - Append decoy peptides - Save libraries into hdf file</p>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>charged_frag_types</td>
+<td>list</td>
+<td>[‘b_z1’, ‘b_z2’, ‘y_z1’, ‘y_z2’]</td>
+<td>Fragment types with charge, <br>by default [ ‘b_z1’,‘b_z2’,‘y_z1’, ‘y_z2’ ]</td>
+</tr>
+<tr class="even">
+<td>protease</td>
+<td>str</td>
+<td>trypsin/P</td>
+<td>Could be pre-defined protease name defined in <code>protease_dict</code>,<br>or a regular expression. <br>By default ‘trypsin/P’</td>
+</tr>
+<tr class="odd">
+<td>max_missed_cleavages</td>
+<td>int</td>
+<td>2</td>
+<td>Maximal missed cleavages, by default 2</td>
+</tr>
+<tr class="even">
+<td>peptide_length_min</td>
+<td>int</td>
+<td>7</td>
+<td>Minimal cleaved peptide length, by default 7</td>
+</tr>
+<tr class="odd">
+<td>peptide_length_max</td>
+<td>int</td>
+<td>35</td>
+<td>Maximal cleaved peptide length, by default 35</td>
+</tr>
+<tr class="even">
+<td>precursor_charge_min</td>
+<td>int</td>
+<td>2</td>
+<td>Minimal precursor charge, by default 2</td>
+</tr>
+<tr class="odd">
+<td>precursor_charge_max</td>
+<td>int</td>
+<td>4</td>
+<td>Maximal precursor charge, by default 4</td>
+</tr>
+<tr class="even">
+<td>precursor_mz_min</td>
+<td>float</td>
+<td>200.0</td>
+<td>Minimal precursor mz, by default 200.0</td>
+</tr>
+<tr class="odd">
+<td>precursor_mz_max</td>
+<td>float</td>
+<td>2000.0</td>
+<td>Maximal precursor mz, by default 2000.0</td>
+</tr>
+<tr class="even">
+<td>var_mods</td>
+<td>list</td>
+<td>[‘Acetyl@Protein N-term’, ‘Oxidation@M’]</td>
+<td>list of variable modifications, <br>by default [‘Acetyl@Protein N-term’,‘Oxidation@M’]</td>
+</tr>
+<tr class="odd">
+<td>max_var_mod_num</td>
+<td>int</td>
+<td>2</td>
+<td>Maximal number of variable modifications on a peptide sequence, <br>by default 2</td>
+</tr>
+<tr class="even">
+<td>fix_mods</td>
+<td>list</td>
+<td>[‘Carbamidomethyl@C’]</td>
+<td>list of fixed modifications, by default [‘Carbamidomethyl@C’]</td>
+</tr>
+<tr class="odd">
+<td>decoy</td>
+<td>str</td>
+<td>None</td>
+<td>or pseudo_reverse or diann</td>
+</tr>
+<tr class="even">
+<td>I_to_L</td>
+<td>bool</td>
+<td>False</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/protein/fasta.py#L1082" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="fastalib.add_modifications" class="level3">
+<h3 class="anchored" data-anchor-id="fastalib.add_modifications">FastaLib.add_modifications</h3>
+<blockquote class="blockquote">
+<pre><code> FastaLib.add_modifications ()</code></pre>
+</blockquote>
+<p>Add fixed and variable modifications to all peptide sequences in <code>self.precursor_df</code></p>
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/protein/fasta.py#L1104" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="fastalib.add_additional_modifications" class="level3">
+<h3 class="anchored" data-anchor-id="fastalib.add_additional_modifications">FastaLib.add_additional_modifications</h3>
+<blockquote class="blockquote">
+<pre><code> FastaLib.add_additional_modifications (var_mods=['Phospho@S',
+                                        'Phospho@T', 'Phospho@Y'],
+                                        max_mod_num:int=1,
+                                        max_combs:int=100,
+                                        keep_unmodified:bool=True, cannot_
+                                        modify_pep_nterm_aa:bool=False, ca
+                                        nnot_modify_pep_cterm_aa:bool=Fals
+                                        e)</code></pre>
+</blockquote>
+<p>Add external defined variable modifications to all peptide sequences in <code>self.precursor_df</code>. See <code>append_regular_modifications</code> for details</p>
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/protein/fasta.py#L1014" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="fastalib.add_mods_for_one_seq" class="level3">
+<h3 class="anchored" data-anchor-id="fastalib.add_mods_for_one_seq">FastaLib.add_mods_for_one_seq</h3>
+<blockquote class="blockquote">
+<pre><code> FastaLib.add_mods_for_one_seq (sequence:str, is_prot_nterm,
+                                is_prot_cterm)</code></pre>
+</blockquote>
+<p>Add fixed and variable modifications to a sequence</p>
+<table class="table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 38%">
+<col style="width: 52%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>sequence</td>
+<td>str</td>
+<td>Peptide sequence</td>
+</tr>
+<tr class="even">
+<td>is_prot_nterm</td>
+<td>bool</td>
+<td>if protein N-term</td>
+</tr>
+<tr class="odd">
+<td>is_prot_cterm</td>
+<td>bool</td>
+<td>if protein C-term</td>
+</tr>
+<tr class="even">
+<td><strong>Returns</strong></td>
+<td><strong>tuple</strong></td>
+<td><strong>list[str]: list of modification names<br>list[str]: list of modification sites</strong></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/protein/fasta.py#L1124" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="fastalib.add_peptide_labeling" class="level3">
+<h3 class="anchored" data-anchor-id="fastalib.add_peptide_labeling">FastaLib.add_peptide_labeling</h3>
+<blockquote class="blockquote">
+<pre><code> FastaLib.add_peptide_labeling (labeling_channel_dict:dict)</code></pre>
+</blockquote>
+<p>Add labeling onto peptides inplace of self._precursor_df</p>
+<table class="table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 38%">
+<col style="width: 52%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>labeling_channel_dict</td>
+<td>dict</td>
+<td>For example:<br>{<br> ‘reference’: [], # not labelled for reference<br> ‘0’: [‘Dimethyl@Any N-term’,‘Dimethyl@K’],<br> ‘4’: [‘Dimethyl:2H(4)<span class="citation" data-cites="Any">@Any</span> N-term’,‘Dimethyl:2H(4)<span class="citation" data-cites="K">@K</span>’],<br> ‘8’: [‘Dimethyl:2H(6)13C(2)<span class="citation" data-cites="Any">@Any</span> N-term’,‘Dimethyl:2H(6)13C(2)<span class="citation" data-cites="K">@K</span>’],<br>}.<br>The key name could be arbitrary distinguished strings for channel name,<br>and value must be a list of modification names (str) in alphabase format.</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/spectral_library/library_base.py#LNone" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="speclibbase.append_decoy_sequence" class="level3">
+<h3 class="anchored" data-anchor-id="speclibbase.append_decoy_sequence">SpecLibBase.append_decoy_sequence</h3>
+<blockquote class="blockquote">
+<pre><code> SpecLibBase.append_decoy_sequence ()</code></pre>
+</blockquote>
+<p>Append decoy sequence into precursor_df. Decoy method is based on self.decoy(str).</p>
+<pre><code>decoy_lib = (
+    decoy_lib_provider.get_decoy_lib(
+        self.decoy, self
+    )
+)
+decoy_lib.decoy_sequence()
+...</code></pre>
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/protein/fasta.py#L879" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="fastalib.get_peptides_from_fasta" class="level3">
+<h3 class="anchored" data-anchor-id="fastalib.get_peptides_from_fasta">FastaLib.get_peptides_from_fasta</h3>
+<blockquote class="blockquote">
+<pre><code> FastaLib.get_peptides_from_fasta (fasta_file:Union[str,list])</code></pre>
+</blockquote>
+<p>Load peptide sequences from fasta files.</p>
+<table class="table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 38%">
+<col style="width: 52%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>fasta_file</td>
+<td>typing.Union[str, list]</td>
+<td>Could be a fasta file (str) or a list of fasta files (list[str])</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/protein/fasta.py#L903" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="fastalib.get_peptides_from_protein_dict" class="level3">
+<h3 class="anchored" data-anchor-id="fastalib.get_peptides_from_protein_dict">FastaLib.get_peptides_from_protein_dict</h3>
+<blockquote class="blockquote">
+<pre><code> FastaLib.get_peptides_from_protein_dict (protein_dict:dict)</code></pre>
+</blockquote>
+<p>Cleave the protein sequences in protein_dict.</p>
+<table class="table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 38%">
+<col style="width: 52%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>protein_dict</td>
+<td>dict</td>
+<td>Format:<br>{<br> ‘prot_id1’:<br> ‘protein_id’: ‘prot_id1’<br> ‘sequence’: string<br> ‘gene_name’: string<br> ‘description’: string<br> ‘prot_id2’:<br> …<br>}</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/protein/fasta.py#L1002" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="fastalib.get_peptides_from_peptide_sequence_list" class="level3">
+<h3 class="anchored" data-anchor-id="fastalib.get_peptides_from_peptide_sequence_list">FastaLib.get_peptides_from_peptide_sequence_list</h3>
+<blockquote class="blockquote">
+<pre><code> FastaLib.get_peptides_from_peptide_sequence_list (pep_seq_list:list,
+                                                   protein_list:list=None)</code></pre>
+</blockquote>
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/protein/fasta.py#L813" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="fastalib.import_and_process_fasta" class="level3">
+<h3 class="anchored" data-anchor-id="fastalib.import_and_process_fasta">FastaLib.import_and_process_fasta</h3>
+<blockquote class="blockquote">
+<pre><code> FastaLib.import_and_process_fasta (fasta_files:Union[str,list])</code></pre>
+</blockquote>
+<p>Import and process a fasta file or a list of fasta files. It includes: - Load the fasta file(s) - Append decoy peptide sequences - Add modifications to peptides - Add charge</p>
+<table class="table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 38%">
+<col style="width: 52%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>fasta_files</td>
+<td>typing.Union[str, list]</td>
+<td>A fasta file or a list of fasta files</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/protein/fasta.py#L829" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="fastalib.import_and_process_protein_dict" class="level3">
+<h3 class="anchored" data-anchor-id="fastalib.import_and_process_protein_dict">FastaLib.import_and_process_protein_dict</h3>
+<blockquote class="blockquote">
+<pre><code> FastaLib.import_and_process_protein_dict (protein_dict:dict)</code></pre>
+</blockquote>
+<p>Import the protein_dict instead of fasta files.</p>
+<pre><code>protein_dict = load_all_proteins(fasta_files)</code></pre>
+<table class="table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 38%">
+<col style="width: 52%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>protein_dict</td>
+<td>dict</td>
+<td>Format:<br>{<br> ‘prot_id1’:<br> ‘protein_id’: ‘prot_id1’<br> ‘sequence’: string<br> ‘gene_name’: string<br> ‘description’: string<br> ‘prot_id2’:<br> …<br>}</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/protein/fasta.py#L852" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="fastalib.import_and_process_peptide_sequences" class="level3">
+<h3 class="anchored" data-anchor-id="fastalib.import_and_process_peptide_sequences">FastaLib.import_and_process_peptide_sequences</h3>
+<blockquote class="blockquote">
+<pre><code> FastaLib.import_and_process_peptide_sequences (pep_seq_list:list,
+                                                protein_list:list=None)</code></pre>
+</blockquote>
+<p>Importing peptide sequences instead of proteins</p>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>pep_seq_list</td>
+<td>list</td>
+<td></td>
+<td>Peptide sequence list</td>
+</tr>
+<tr class="even">
+<td>protein_list</td>
+<td>list</td>
+<td>None</td>
+<td>Protein id list which maps to pep_seq_list one-by-one, <br>by default None</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/protein/fasta.py#L1163" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="fastalib.save_hdf" class="level3">
+<h3 class="anchored" data-anchor-id="fastalib.save_hdf">FastaLib.save_hdf</h3>
+<blockquote class="blockquote">
+<pre><code> FastaLib.save_hdf (hdf_file:str)</code></pre>
+</blockquote>
+<p>Save the contents into hdf file (attribute -&gt; hdf_file): - self.precursor_df -&gt; library/precursor_df - self.protein_df -&gt; library/protein_df - self.fragment_mz_df -&gt; library/fragment_mz_df - self.fragment_intensity_df -&gt; library/fragment_intensity_df</p>
+<table class="table">
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>hdf_file</td>
+<td>str</td>
+<td>The hdf file path</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/protein/fasta.py#L1184" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="fastalib.load_hdf" class="level3">
+<h3 class="anchored" data-anchor-id="fastalib.load_hdf">FastaLib.load_hdf</h3>
+<blockquote class="blockquote">
+<pre><code> FastaLib.load_hdf (hdf_file:str, load_mod_seq:bool=False)</code></pre>
+</blockquote>
+<p>Load contents from hdf file: - self.precursor_df &lt;- library/precursor_df - self.precursor_df &lt;- library/mod_seq_df if load_mod_seq is True - self.protein_df &lt;- library/protein_df - self.fragment_mz_df &lt;- library/fragment_mz_df - self.fragment_intensity_df &lt;- library/fragment_intensity_df</p>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>hdf_file</td>
+<td>str</td>
+<td></td>
+<td>hdf file path</td>
+</tr>
+<tr class="even">
+<td>load_mod_seq</td>
+<td>bool</td>
+<td>False</td>
+<td>After library is generated with hash values (int64) for sequences (str) and modifications (str),<br>we don’t need sequence information for searching. <br>So we can skip loading sequences to make the loading much faster.<br>By default False</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="testing" class="level3">
+<h3 class="anchored" data-anchor-id="testing">Testing</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame(</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">'sequence'</span>: [<span class="st">'ABSTY'</span>,<span class="st">'ACXSX'</span>,<span class="st">'ACDEFG'</span>],</span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">'mods'</span>: [<span class="st">''</span>, <span class="st">'Acetyl@Protein N-term'</span>, <span class="st">''</span>],</span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">'mod_sites'</span>: [<span class="st">''</span>, <span class="st">'0'</span>, <span class="st">''</span>]</span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> append_regular_modifications(df, keep_unmodified<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> np.<span class="bu">sum</span>(df.sequence<span class="op">==</span><span class="st">'ABSTY'</span>)<span class="op">==</span><span class="dv">4</span></span>
+<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> np.<span class="bu">sum</span>(df.sequence<span class="op">==</span><span class="st">'ACXSX'</span>)<span class="op">==</span><span class="dv">2</span></span>
+<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> np.<span class="bu">sum</span>(df.sequence<span class="op">==</span><span class="st">'ACDEFG'</span>)<span class="op">==</span><span class="dv">1</span></span>
+<span id="cb42-12"><a href="#cb42-12" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">all</span>(df[df.sequence<span class="op">==</span><span class="st">'ABSTY'</span>].mods.values <span class="op">==</span> np.array([<span class="st">'Phospho@S'</span>,<span class="st">'Phospho@T'</span>,<span class="st">'Phospho@Y'</span>,<span class="st">''</span>]))</span>
+<span id="cb42-13"><a href="#cb42-13" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">all</span>(df[df.sequence<span class="op">==</span><span class="st">'ABSTY'</span>].mod_sites.values <span class="op">==</span> np.array([<span class="st">'3'</span>,<span class="st">'4'</span>,<span class="st">'5'</span>,<span class="st">''</span>]))</span>
+<span id="cb42-14"><a href="#cb42-14" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">all</span>(df[df.sequence<span class="op">==</span><span class="st">'ACXSX'</span>].mods.values <span class="op">==</span> np.array([<span class="st">'Acetyl@Protein N-term;Phospho@S'</span>,<span class="st">'Acetyl@Protein N-term'</span>]))</span>
+<span id="cb42-15"><a href="#cb42-15" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">all</span>(df[df.sequence<span class="op">==</span><span class="st">'ACXSX'</span>].mod_sites.values <span class="op">==</span> np.array([<span class="st">'0;4'</span>,<span class="st">'0'</span>]))</span>
+<span id="cb42-16"><a href="#cb42-16" aria-hidden="true" tabindex="-1"></a>df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>sequence</th>
+      <th>mods</th>
+      <th>mod_sites</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>ABSTY</td>
+      <td>Phospho@S</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>ABSTY</td>
+      <td>Phospho@T</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>ABSTY</td>
+      <td>Phospho@Y</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>ABSTY</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>ACXSX</td>
+      <td>Acetyl@Protein N-term;Phospho@S</td>
+      <td>0;4</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>ACXSX</td>
+      <td>Acetyl@Protein N-term</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>ACDEFG</td>
+      <td></td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame(</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">'sequence'</span>: [<span class="st">'ABSTY'</span>,<span class="st">'ACXSX'</span>,<span class="st">'ACDEFG'</span>],</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">'mods'</span>: [<span class="st">''</span>, <span class="st">'Acetyl@Protein N-term'</span>, <span class="st">''</span>],</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">'mod_sites'</span>: [<span class="st">''</span>, <span class="st">'0'</span>, <span class="st">''</span>]</span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> append_regular_modifications(df, keep_unmodified<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> np.<span class="bu">sum</span>(df.sequence<span class="op">==</span><span class="st">'ABSTY'</span>)<span class="op">==</span><span class="dv">3</span></span>
+<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> np.<span class="bu">sum</span>(df.sequence<span class="op">==</span><span class="st">'ACXSX'</span>)<span class="op">==</span><span class="dv">1</span></span>
+<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> np.<span class="bu">sum</span>(df.sequence<span class="op">==</span><span class="st">'ACDEFG'</span>)<span class="op">==</span><span class="dv">0</span></span>
+<span id="cb43-12"><a href="#cb43-12" aria-hidden="true" tabindex="-1"></a>df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>sequence</th>
+      <th>mods</th>
+      <th>mod_sites</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>ABSTY</td>
+      <td>Phospho@S</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>ABSTY</td>
+      <td>Phospho@T</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>ABSTY</td>
+      <td>Phospho@Y</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>ACXSX</td>
+      <td>Acetyl@Protein N-term;Phospho@S</td>
+      <td>0;4</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>_lib <span class="op">=</span> FastaLib(<span class="va">None</span>, I_to_L<span class="op">=</span><span class="va">False</span>, decoy<span class="op">=</span><span class="st">'pseudo_reverse'</span>)</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>prot1 <span class="op">=</span> <span class="st">'MABCDESTKAFGHIJKLMNOPQRAFGHIJK'</span></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>prot2 <span class="op">=</span> <span class="st">'AFGHIJKLMNOPQR'</span></span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>protein_dict <span class="op">=</span> {</span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">'xx'</span>: {</span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">'protein_id'</span>: <span class="st">'xx'</span>,</span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">'gene_name'</span>: <span class="st">''</span>,</span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">'sequence'</span>: prot1</span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">'yy'</span>: {</span>
+<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">'protein_id'</span>: <span class="st">'yy'</span>,</span>
+<span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">'gene_name'</span>: <span class="st">'gene'</span>,</span>
+<span id="cb44-13"><a href="#cb44-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">'sequence'</span>: prot2</span>
+<span id="cb44-14"><a href="#cb44-14" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb44-15"><a href="#cb44-15" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb44-16"><a href="#cb44-16" aria-hidden="true" tabindex="-1"></a>_lib.get_peptides_from_protein_dict(protein_dict)</span>
+<span id="cb44-17"><a href="#cb44-17" aria-hidden="true" tabindex="-1"></a>_lib.precursor_df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>sequence</th>
+      <th>protein_idxes</th>
+      <th>miss_cleavage</th>
+      <th>is_prot_nterm</th>
+      <th>is_prot_cterm</th>
+      <th>mods</th>
+      <th>mod_sites</th>
+      <th>nAA</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>AFGHIJK</td>
+      <td>0;1</td>
+      <td>0</td>
+      <td>True</td>
+      <td>True</td>
+      <td></td>
+      <td></td>
+      <td>7</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>LMNOPQR</td>
+      <td>0;1</td>
+      <td>0</td>
+      <td>False</td>
+      <td>True</td>
+      <td></td>
+      <td></td>
+      <td>7</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>ABCDESTK</td>
+      <td>0</td>
+      <td>0</td>
+      <td>True</td>
+      <td>False</td>
+      <td></td>
+      <td></td>
+      <td>8</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>MABCDESTK</td>
+      <td>0</td>
+      <td>0</td>
+      <td>True</td>
+      <td>False</td>
+      <td></td>
+      <td></td>
+      <td>9</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>AFGHIJKLMNOPQR</td>
+      <td>0;1</td>
+      <td>1</td>
+      <td>True</td>
+      <td>True</td>
+      <td></td>
+      <td></td>
+      <td>14</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>LMNOPQRAFGHIJK</td>
+      <td>0</td>
+      <td>1</td>
+      <td>False</td>
+      <td>True</td>
+      <td></td>
+      <td></td>
+      <td>14</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>ABCDESTKAFGHIJK</td>
+      <td>0</td>
+      <td>1</td>
+      <td>True</td>
+      <td>False</td>
+      <td></td>
+      <td></td>
+      <td>15</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>MABCDESTKAFGHIJK</td>
+      <td>0</td>
+      <td>1</td>
+      <td>True</td>
+      <td>False</td>
+      <td></td>
+      <td></td>
+      <td>16</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>AFGHIJKLMNOPQRAFGHIJK</td>
+      <td>0</td>
+      <td>2</td>
+      <td>False</td>
+      <td>True</td>
+      <td></td>
+      <td></td>
+      <td>21</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>ABCDESTKAFGHIJKLMNOPQR</td>
+      <td>0</td>
+      <td>2</td>
+      <td>True</td>
+      <td>False</td>
+      <td></td>
+      <td></td>
+      <td>22</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>MABCDESTKAFGHIJKLMNOPQR</td>
+      <td>0</td>
+      <td>2</td>
+      <td>True</td>
+      <td>False</td>
+      <td></td>
+      <td></td>
+      <td>23</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>_lib.protein_df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>protein_id</th>
+      <th>gene_name</th>
+      <th>sequence</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>xx</td>
+      <td></td>
+      <td>MABCDESTKAFGHIJKLMNOPQRAFGHIJK</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>yy</td>
+      <td>gene</td>
+      <td>AFGHIJKLMNOPQR</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>_lib.append_protein_name()</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'proteins'</span> <span class="kw">in</span> _lib.precursor_df.columns</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>_lib.precursor_df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>sequence</th>
+      <th>protein_idxes</th>
+      <th>miss_cleavage</th>
+      <th>is_prot_nterm</th>
+      <th>is_prot_cterm</th>
+      <th>mods</th>
+      <th>mod_sites</th>
+      <th>nAA</th>
+      <th>proteins</th>
+      <th>genes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>AFGHIJK</td>
+      <td>0;1</td>
+      <td>0</td>
+      <td>True</td>
+      <td>True</td>
+      <td></td>
+      <td></td>
+      <td>7</td>
+      <td>xx;yy</td>
+      <td>gene</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>LMNOPQR</td>
+      <td>0;1</td>
+      <td>0</td>
+      <td>False</td>
+      <td>True</td>
+      <td></td>
+      <td></td>
+      <td>7</td>
+      <td>xx;yy</td>
+      <td>gene</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>ABCDESTK</td>
+      <td>0</td>
+      <td>0</td>
+      <td>True</td>
+      <td>False</td>
+      <td></td>
+      <td></td>
+      <td>8</td>
+      <td>xx</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>MABCDESTK</td>
+      <td>0</td>
+      <td>0</td>
+      <td>True</td>
+      <td>False</td>
+      <td></td>
+      <td></td>
+      <td>9</td>
+      <td>xx</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>AFGHIJKLMNOPQR</td>
+      <td>0;1</td>
+      <td>1</td>
+      <td>True</td>
+      <td>True</td>
+      <td></td>
+      <td></td>
+      <td>14</td>
+      <td>xx;yy</td>
+      <td>gene</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>LMNOPQRAFGHIJK</td>
+      <td>0</td>
+      <td>1</td>
+      <td>False</td>
+      <td>True</td>
+      <td></td>
+      <td></td>
+      <td>14</td>
+      <td>xx</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>ABCDESTKAFGHIJK</td>
+      <td>0</td>
+      <td>1</td>
+      <td>True</td>
+      <td>False</td>
+      <td></td>
+      <td></td>
+      <td>15</td>
+      <td>xx</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>MABCDESTKAFGHIJK</td>
+      <td>0</td>
+      <td>1</td>
+      <td>True</td>
+      <td>False</td>
+      <td></td>
+      <td></td>
+      <td>16</td>
+      <td>xx</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>AFGHIJKLMNOPQRAFGHIJK</td>
+      <td>0</td>
+      <td>2</td>
+      <td>False</td>
+      <td>True</td>
+      <td></td>
+      <td></td>
+      <td>21</td>
+      <td>xx</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>ABCDESTKAFGHIJKLMNOPQR</td>
+      <td>0</td>
+      <td>2</td>
+      <td>True</td>
+      <td>False</td>
+      <td></td>
+      <td></td>
+      <td>22</td>
+      <td>xx</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>MABCDESTKAFGHIJKLMNOPQR</td>
+      <td>0</td>
+      <td>2</td>
+      <td>True</td>
+      <td>False</td>
+      <td></td>
+      <td></td>
+      <td>23</td>
+      <td>xx</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>_lib.add_modifications()</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>_lib.precursor_df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>sequence</th>
+      <th>protein_idxes</th>
+      <th>miss_cleavage</th>
+      <th>is_prot_nterm</th>
+      <th>is_prot_cterm</th>
+      <th>mods</th>
+      <th>mod_sites</th>
+      <th>nAA</th>
+      <th>proteins</th>
+      <th>genes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>AFGHIJK</td>
+      <td>0;1</td>
+      <td>0</td>
+      <td>True</td>
+      <td>True</td>
+      <td></td>
+      <td></td>
+      <td>7</td>
+      <td>xx;yy</td>
+      <td>gene</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>AFGHIJK</td>
+      <td>0;1</td>
+      <td>0</td>
+      <td>True</td>
+      <td>True</td>
+      <td>Acetyl@Protein N-term</td>
+      <td>0</td>
+      <td>7</td>
+      <td>xx;yy</td>
+      <td>gene</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>LMNOPQR</td>
+      <td>0;1</td>
+      <td>0</td>
+      <td>False</td>
+      <td>True</td>
+      <td>Oxidation@M</td>
+      <td>2</td>
+      <td>7</td>
+      <td>xx;yy</td>
+      <td>gene</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>LMNOPQR</td>
+      <td>0;1</td>
+      <td>0</td>
+      <td>False</td>
+      <td>True</td>
+      <td></td>
+      <td></td>
+      <td>7</td>
+      <td>xx;yy</td>
+      <td>gene</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>ABCDESTK</td>
+      <td>0</td>
+      <td>0</td>
+      <td>True</td>
+      <td>False</td>
+      <td>Carbamidomethyl@C</td>
+      <td>3</td>
+      <td>8</td>
+      <td>xx</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>ABCDESTK</td>
+      <td>0</td>
+      <td>0</td>
+      <td>True</td>
+      <td>False</td>
+      <td>Carbamidomethyl@C;Acetyl@Protein N-term</td>
+      <td>3;0</td>
+      <td>8</td>
+      <td>xx</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>MABCDESTK</td>
+      <td>0</td>
+      <td>0</td>
+      <td>True</td>
+      <td>False</td>
+      <td>Carbamidomethyl@C;Oxidation@M</td>
+      <td>4;1</td>
+      <td>9</td>
+      <td>xx</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>MABCDESTK</td>
+      <td>0</td>
+      <td>0</td>
+      <td>True</td>
+      <td>False</td>
+      <td>Carbamidomethyl@C</td>
+      <td>4</td>
+      <td>9</td>
+      <td>xx</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>MABCDESTK</td>
+      <td>0</td>
+      <td>0</td>
+      <td>True</td>
+      <td>False</td>
+      <td>Carbamidomethyl@C;Acetyl@Protein N-term;Oxidat...</td>
+      <td>4;0;1</td>
+      <td>9</td>
+      <td>xx</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>MABCDESTK</td>
+      <td>0</td>
+      <td>0</td>
+      <td>True</td>
+      <td>False</td>
+      <td>Carbamidomethyl@C;Acetyl@Protein N-term</td>
+      <td>4;0</td>
+      <td>9</td>
+      <td>xx</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>AFGHIJKLMNOPQR</td>
+      <td>0;1</td>
+      <td>1</td>
+      <td>True</td>
+      <td>True</td>
+      <td>Oxidation@M</td>
+      <td>9</td>
+      <td>14</td>
+      <td>xx;yy</td>
+      <td>gene</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>AFGHIJKLMNOPQR</td>
+      <td>0;1</td>
+      <td>1</td>
+      <td>True</td>
+      <td>True</td>
+      <td></td>
+      <td></td>
+      <td>14</td>
+      <td>xx;yy</td>
+      <td>gene</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>AFGHIJKLMNOPQR</td>
+      <td>0;1</td>
+      <td>1</td>
+      <td>True</td>
+      <td>True</td>
+      <td>Acetyl@Protein N-term;Oxidation@M</td>
+      <td>0;9</td>
+      <td>14</td>
+      <td>xx;yy</td>
+      <td>gene</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>AFGHIJKLMNOPQR</td>
+      <td>0;1</td>
+      <td>1</td>
+      <td>True</td>
+      <td>True</td>
+      <td>Acetyl@Protein N-term</td>
+      <td>0</td>
+      <td>14</td>
+      <td>xx;yy</td>
+      <td>gene</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>LMNOPQRAFGHIJK</td>
+      <td>0</td>
+      <td>1</td>
+      <td>False</td>
+      <td>True</td>
+      <td>Oxidation@M</td>
+      <td>2</td>
+      <td>14</td>
+      <td>xx</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>LMNOPQRAFGHIJK</td>
+      <td>0</td>
+      <td>1</td>
+      <td>False</td>
+      <td>True</td>
+      <td></td>
+      <td></td>
+      <td>14</td>
+      <td>xx</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>ABCDESTKAFGHIJK</td>
+      <td>0</td>
+      <td>1</td>
+      <td>True</td>
+      <td>False</td>
+      <td>Carbamidomethyl@C</td>
+      <td>3</td>
+      <td>15</td>
+      <td>xx</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <td>ABCDESTKAFGHIJK</td>
+      <td>0</td>
+      <td>1</td>
+      <td>True</td>
+      <td>False</td>
+      <td>Carbamidomethyl@C;Acetyl@Protein N-term</td>
+      <td>3;0</td>
+      <td>15</td>
+      <td>xx</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>18</th>
+      <td>MABCDESTKAFGHIJK</td>
+      <td>0</td>
+      <td>1</td>
+      <td>True</td>
+      <td>False</td>
+      <td>Carbamidomethyl@C;Oxidation@M</td>
+      <td>4;1</td>
+      <td>16</td>
+      <td>xx</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>19</th>
+      <td>MABCDESTKAFGHIJK</td>
+      <td>0</td>
+      <td>1</td>
+      <td>True</td>
+      <td>False</td>
+      <td>Carbamidomethyl@C</td>
+      <td>4</td>
+      <td>16</td>
+      <td>xx</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>20</th>
+      <td>MABCDESTKAFGHIJK</td>
+      <td>0</td>
+      <td>1</td>
+      <td>True</td>
+      <td>False</td>
+      <td>Carbamidomethyl@C;Acetyl@Protein N-term;Oxidat...</td>
+      <td>4;0;1</td>
+      <td>16</td>
+      <td>xx</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>21</th>
+      <td>MABCDESTKAFGHIJK</td>
+      <td>0</td>
+      <td>1</td>
+      <td>True</td>
+      <td>False</td>
+      <td>Carbamidomethyl@C;Acetyl@Protein N-term</td>
+      <td>4;0</td>
+      <td>16</td>
+      <td>xx</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>22</th>
+      <td>AFGHIJKLMNOPQRAFGHIJK</td>
+      <td>0</td>
+      <td>2</td>
+      <td>False</td>
+      <td>True</td>
+      <td>Oxidation@M</td>
+      <td>9</td>
+      <td>21</td>
+      <td>xx</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>23</th>
+      <td>AFGHIJKLMNOPQRAFGHIJK</td>
+      <td>0</td>
+      <td>2</td>
+      <td>False</td>
+      <td>True</td>
+      <td></td>
+      <td></td>
+      <td>21</td>
+      <td>xx</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>24</th>
+      <td>ABCDESTKAFGHIJKLMNOPQR</td>
+      <td>0</td>
+      <td>2</td>
+      <td>True</td>
+      <td>False</td>
+      <td>Carbamidomethyl@C;Oxidation@M</td>
+      <td>3;17</td>
+      <td>22</td>
+      <td>xx</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>25</th>
+      <td>ABCDESTKAFGHIJKLMNOPQR</td>
+      <td>0</td>
+      <td>2</td>
+      <td>True</td>
+      <td>False</td>
+      <td>Carbamidomethyl@C</td>
+      <td>3</td>
+      <td>22</td>
+      <td>xx</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>26</th>
+      <td>ABCDESTKAFGHIJKLMNOPQR</td>
+      <td>0</td>
+      <td>2</td>
+      <td>True</td>
+      <td>False</td>
+      <td>Carbamidomethyl@C;Acetyl@Protein N-term;Oxidat...</td>
+      <td>3;0;17</td>
+      <td>22</td>
+      <td>xx</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>27</th>
+      <td>ABCDESTKAFGHIJKLMNOPQR</td>
+      <td>0</td>
+      <td>2</td>
+      <td>True</td>
+      <td>False</td>
+      <td>Carbamidomethyl@C;Acetyl@Protein N-term</td>
+      <td>3;0</td>
+      <td>22</td>
+      <td>xx</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>28</th>
+      <td>MABCDESTKAFGHIJKLMNOPQR</td>
+      <td>0</td>
+      <td>2</td>
+      <td>True</td>
+      <td>False</td>
+      <td>Carbamidomethyl@C;Oxidation@M</td>
+      <td>4;1</td>
+      <td>23</td>
+      <td>xx</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>29</th>
+      <td>MABCDESTKAFGHIJKLMNOPQR</td>
+      <td>0</td>
+      <td>2</td>
+      <td>True</td>
+      <td>False</td>
+      <td>Carbamidomethyl@C;Oxidation@M</td>
+      <td>4;18</td>
+      <td>23</td>
+      <td>xx</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>30</th>
+      <td>MABCDESTKAFGHIJKLMNOPQR</td>
+      <td>0</td>
+      <td>2</td>
+      <td>True</td>
+      <td>False</td>
+      <td>Carbamidomethyl@C;Oxidation@M;Oxidation@M</td>
+      <td>4;1;18</td>
+      <td>23</td>
+      <td>xx</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>31</th>
+      <td>MABCDESTKAFGHIJKLMNOPQR</td>
+      <td>0</td>
+      <td>2</td>
+      <td>True</td>
+      <td>False</td>
+      <td>Carbamidomethyl@C</td>
+      <td>4</td>
+      <td>23</td>
+      <td>xx</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>32</th>
+      <td>MABCDESTKAFGHIJKLMNOPQR</td>
+      <td>0</td>
+      <td>2</td>
+      <td>True</td>
+      <td>False</td>
+      <td>Carbamidomethyl@C;Acetyl@Protein N-term;Oxidat...</td>
+      <td>4;0;1</td>
+      <td>23</td>
+      <td>xx</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>33</th>
+      <td>MABCDESTKAFGHIJKLMNOPQR</td>
+      <td>0</td>
+      <td>2</td>
+      <td>True</td>
+      <td>False</td>
+      <td>Carbamidomethyl@C;Acetyl@Protein N-term;Oxidat...</td>
+      <td>4;0;18</td>
+      <td>23</td>
+      <td>xx</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>34</th>
+      <td>MABCDESTKAFGHIJKLMNOPQR</td>
+      <td>0</td>
+      <td>2</td>
+      <td>True</td>
+      <td>False</td>
+      <td>Carbamidomethyl@C;Acetyl@Protein N-term;Oxidat...</td>
+      <td>4;0;1;18</td>
+      <td>23</td>
+      <td>xx</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>35</th>
+      <td>MABCDESTKAFGHIJKLMNOPQR</td>
+      <td>0</td>
+      <td>2</td>
+      <td>True</td>
+      <td>False</td>
+      <td>Carbamidomethyl@C;Acetyl@Protein N-term</td>
+      <td>4;0</td>
+      <td>23</td>
+      <td>xx</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>_lib.add_additional_modifications([<span class="st">'Phospho@S'</span>,<span class="st">'Phospho@T'</span>])</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> _lib.precursor_df.mods.<span class="bu">str</span>.contains(<span class="st">'Phospho'</span>).<span class="bu">any</span>()</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>_lib.precursor_df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>sequence</th>
+      <th>protein_idxes</th>
+      <th>miss_cleavage</th>
+      <th>is_prot_nterm</th>
+      <th>is_prot_cterm</th>
+      <th>mods</th>
+      <th>mod_sites</th>
+      <th>nAA</th>
+      <th>proteins</th>
+      <th>genes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>AFGHIJK</td>
+      <td>0;1</td>
+      <td>0</td>
+      <td>True</td>
+      <td>True</td>
+      <td></td>
+      <td></td>
+      <td>7</td>
+      <td>xx;yy</td>
+      <td>gene</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>AFGHIJK</td>
+      <td>0;1</td>
+      <td>0</td>
+      <td>True</td>
+      <td>True</td>
+      <td>Acetyl@Protein N-term</td>
+      <td>0</td>
+      <td>7</td>
+      <td>xx;yy</td>
+      <td>gene</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>LMNOPQR</td>
+      <td>0;1</td>
+      <td>0</td>
+      <td>False</td>
+      <td>True</td>
+      <td>Oxidation@M</td>
+      <td>2</td>
+      <td>7</td>
+      <td>xx;yy</td>
+      <td>gene</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>LMNOPQR</td>
+      <td>0;1</td>
+      <td>0</td>
+      <td>False</td>
+      <td>True</td>
+      <td></td>
+      <td></td>
+      <td>7</td>
+      <td>xx;yy</td>
+      <td>gene</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>ABCDESTK</td>
+      <td>0</td>
+      <td>0</td>
+      <td>True</td>
+      <td>False</td>
+      <td>Carbamidomethyl@C;Phospho@S</td>
+      <td>3;6</td>
+      <td>8</td>
+      <td>xx</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>79</th>
+      <td>MABCDESTKAFGHIJKLMNOPQR</td>
+      <td>0</td>
+      <td>2</td>
+      <td>True</td>
+      <td>False</td>
+      <td>Carbamidomethyl@C;Acetyl@Protein N-term;Oxidat...</td>
+      <td>4;0;1;18;8</td>
+      <td>23</td>
+      <td>xx</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>80</th>
+      <td>MABCDESTKAFGHIJKLMNOPQR</td>
+      <td>0</td>
+      <td>2</td>
+      <td>True</td>
+      <td>False</td>
+      <td>Carbamidomethyl@C;Acetyl@Protein N-term;Oxidat...</td>
+      <td>4;0;1;18</td>
+      <td>23</td>
+      <td>xx</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>81</th>
+      <td>MABCDESTKAFGHIJKLMNOPQR</td>
+      <td>0</td>
+      <td>2</td>
+      <td>True</td>
+      <td>False</td>
+      <td>Carbamidomethyl@C;Acetyl@Protein N-term;Phospho@S</td>
+      <td>4;0;7</td>
+      <td>23</td>
+      <td>xx</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>82</th>
+      <td>MABCDESTKAFGHIJKLMNOPQR</td>
+      <td>0</td>
+      <td>2</td>
+      <td>True</td>
+      <td>False</td>
+      <td>Carbamidomethyl@C;Acetyl@Protein N-term;Phospho@T</td>
+      <td>4;0;8</td>
+      <td>23</td>
+      <td>xx</td>
+      <td></td>
+    </tr>
+    <tr>
+      <th>83</th>
+      <td>MABCDESTKAFGHIJKLMNOPQR</td>
+      <td>0</td>
+      <td>2</td>
+      <td>True</td>
+      <td>False</td>
+      <td>Carbamidomethyl@C;Acetyl@Protein N-term</td>
+      <td>4;0</td>
+      <td>23</td>
+      <td>xx</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+<p>84 rows × 10 columns</p>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>_lib <span class="op">=</span> FastaLib(</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>    [<span class="st">'b_z1'</span>,<span class="st">'y_z1'</span>], I_to_L<span class="op">=</span><span class="va">False</span>, </span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>    decoy<span class="op">=</span><span class="st">'pseudo_reverse'</span></span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>prot1 <span class="op">=</span> <span class="st">'MACDESTYKBKFGHIKLMNPQRST'</span></span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>prot2 <span class="op">=</span> <span class="st">'FGHIKLMNPQR'</span></span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>protein_dict <span class="op">=</span> {</span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">'xx'</span>: {</span>
+<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">'protein_id'</span>: <span class="st">'xx'</span>,</span>
+<span id="cb49-10"><a href="#cb49-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">'sequence'</span>: prot1</span>
+<span id="cb49-11"><a href="#cb49-11" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb49-12"><a href="#cb49-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">'yy'</span>: {</span>
+<span id="cb49-13"><a href="#cb49-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">'protein_id'</span>: <span class="st">'yy'</span>,</span>
+<span id="cb49-14"><a href="#cb49-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">'sequence'</span>: prot2</span>
+<span id="cb49-15"><a href="#cb49-15" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb49-16"><a href="#cb49-16" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb49-17"><a href="#cb49-17" aria-hidden="true" tabindex="-1"></a>_lib.import_and_process_protein_dict(protein_dict)</span>
+<span id="cb49-18"><a href="#cb49-18" aria-hidden="true" tabindex="-1"></a>_lib.calc_precursor_isotope()</span>
+<span id="cb49-19"><a href="#cb49-19" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> (_lib.precursor_df.charge <span class="op">==</span> _lib.min_precursor_charge).<span class="bu">any</span>()</span>
+<span id="cb49-20"><a href="#cb49-20" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> (_lib.precursor_df.charge <span class="op">==</span> _lib.max_precursor_charge).<span class="bu">any</span>()</span>
+<span id="cb49-21"><a href="#cb49-21" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> (_lib.precursor_df.decoy<span class="op">==</span><span class="dv">1</span>).<span class="bu">any</span>()</span>
+<span id="cb49-22"><a href="#cb49-22" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> (<span class="st">'MACDESTY'</span>[::<span class="op">-</span><span class="dv">1</span>]<span class="op">+</span><span class="st">'K'</span>) <span class="kw">in</span> _lib.precursor_df.sequence.values</span>
+<span id="cb49-23"><a href="#cb49-23" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'isotope_apex_index'</span> <span class="kw">in</span> _lib.precursor_df.columns</span>
+<span id="cb49-24"><a href="#cb49-24" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'isotope_apex_intensity'</span> <span class="kw">in</span> _lib.precursor_df.columns</span>
+<span id="cb49-25"><a href="#cb49-25" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="op">~</span>_lib.precursor_df.sequence.<span class="bu">str</span>.contains(<span class="st">'B'</span>).<span class="bu">any</span>()</span>
+<span id="cb49-26"><a href="#cb49-26" aria-hidden="true" tabindex="-1"></a>_lib.precursor_df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>sequence</th>
+      <th>protein_idxes</th>
+      <th>miss_cleavage</th>
+      <th>is_prot_nterm</th>
+      <th>is_prot_cterm</th>
+      <th>mods</th>
+      <th>mod_sites</th>
+      <th>nAA</th>
+      <th>decoy</th>
+      <th>charge</th>
+      <th>precursor_mz</th>
+      <th>isotope_m1_intensity</th>
+      <th>isotope_apex_intensity</th>
+      <th>isotope_apex_index</th>
+      <th>isotope_right_most_intensity</th>
+      <th>isotope_right_most_index</th>
+      <th>isotope_m1_mz</th>
+      <th>isotope_apex_mz</th>
+      <th>isotope_right_most_mz</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>LMNPQRST</td>
+      <td>0</td>
+      <td>1</td>
+      <td>False</td>
+      <td>True</td>
+      <td>Oxidation@M</td>
+      <td>2</td>
+      <td>8</td>
+      <td>0</td>
+      <td>2</td>
+      <td>481.739834</td>
+      <td>0.478814</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>0.478814</td>
+      <td>1</td>
+      <td>482.241484</td>
+      <td>481.739834</td>
+      <td>482.241484</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>LMNPQRST</td>
+      <td>0</td>
+      <td>1</td>
+      <td>False</td>
+      <td>True</td>
+      <td>Oxidation@M</td>
+      <td>2</td>
+      <td>8</td>
+      <td>0</td>
+      <td>3</td>
+      <td>321.495648</td>
+      <td>0.478814</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>0.478814</td>
+      <td>1</td>
+      <td>321.830081</td>
+      <td>321.495648</td>
+      <td>321.830081</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>LMNPQRST</td>
+      <td>0</td>
+      <td>1</td>
+      <td>False</td>
+      <td>True</td>
+      <td>Oxidation@M</td>
+      <td>2</td>
+      <td>8</td>
+      <td>0</td>
+      <td>4</td>
+      <td>241.373555</td>
+      <td>0.478814</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>0.478814</td>
+      <td>1</td>
+      <td>241.624380</td>
+      <td>241.373555</td>
+      <td>241.624380</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>LMNPQRST</td>
+      <td>0</td>
+      <td>1</td>
+      <td>False</td>
+      <td>True</td>
+      <td></td>
+      <td></td>
+      <td>8</td>
+      <td>0</td>
+      <td>2</td>
+      <td>473.742377</td>
+      <td>0.478433</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>0.478433</td>
+      <td>1</td>
+      <td>474.244027</td>
+      <td>473.742377</td>
+      <td>474.244027</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>LMNPQRST</td>
+      <td>0</td>
+      <td>1</td>
+      <td>False</td>
+      <td>True</td>
+      <td></td>
+      <td></td>
+      <td>8</td>
+      <td>0</td>
+      <td>3</td>
+      <td>316.164010</td>
+      <td>0.478433</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>0.478433</td>
+      <td>1</td>
+      <td>316.498443</td>
+      <td>316.164010</td>
+      <td>316.498443</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>79</th>
+      <td>FGHIKLMNPQRST</td>
+      <td>0</td>
+      <td>2</td>
+      <td>False</td>
+      <td>True</td>
+      <td>Oxidation@M</td>
+      <td>7</td>
+      <td>13</td>
+      <td>0</td>
+      <td>3</td>
+      <td>515.604920</td>
+      <td>0.828432</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>0.420789</td>
+      <td>2</td>
+      <td>515.939354</td>
+      <td>515.604920</td>
+      <td>516.273787</td>
+    </tr>
+    <tr>
+      <th>80</th>
+      <td>FGHIKLMNPQRST</td>
+      <td>0</td>
+      <td>2</td>
+      <td>False</td>
+      <td>True</td>
+      <td>Oxidation@M</td>
+      <td>7</td>
+      <td>13</td>
+      <td>0</td>
+      <td>4</td>
+      <td>386.955509</td>
+      <td>0.828432</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>0.420789</td>
+      <td>2</td>
+      <td>387.206334</td>
+      <td>386.955509</td>
+      <td>387.457159</td>
+    </tr>
+    <tr>
+      <th>81</th>
+      <td>FGHIKLMNPQRST</td>
+      <td>0</td>
+      <td>2</td>
+      <td>False</td>
+      <td>True</td>
+      <td></td>
+      <td></td>
+      <td>13</td>
+      <td>0</td>
+      <td>2</td>
+      <td>764.906285</td>
+      <td>0.828051</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>0.418418</td>
+      <td>2</td>
+      <td>765.407935</td>
+      <td>764.906285</td>
+      <td>765.909585</td>
+    </tr>
+    <tr>
+      <th>82</th>
+      <td>FGHIKLMNPQRST</td>
+      <td>0</td>
+      <td>2</td>
+      <td>False</td>
+      <td>True</td>
+      <td></td>
+      <td></td>
+      <td>13</td>
+      <td>0</td>
+      <td>3</td>
+      <td>510.273282</td>
+      <td>0.828051</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>0.418418</td>
+      <td>2</td>
+      <td>510.607715</td>
+      <td>510.273282</td>
+      <td>510.942149</td>
+    </tr>
+    <tr>
+      <th>83</th>
+      <td>FGHIKLMNPQRST</td>
+      <td>0</td>
+      <td>2</td>
+      <td>False</td>
+      <td>True</td>
+      <td></td>
+      <td></td>
+      <td>13</td>
+      <td>0</td>
+      <td>4</td>
+      <td>382.956781</td>
+      <td>0.828051</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>0.418418</td>
+      <td>2</td>
+      <td>383.207606</td>
+      <td>382.956781</td>
+      <td>383.458431</td>
+    </tr>
+  </tbody>
+</table>
+<p>84 rows × 19 columns</p>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>_lib.import_and_process_protein_dict(protein_dict)</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>_lib.add_peptide_labeling({</span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'light'</span>: [<span class="st">'Dimethyl@Any N-term'</span>,<span class="st">'Dimethyl@K'</span>],</span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">'heavy'</span>: [<span class="st">'Dimethyl:2H(6)13C(2)@Any N-term'</span>,<span class="st">'Dimethyl:2H(6)13C(2)@K'</span>],</span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>_lib.calc_precursor_isotope()</span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> (_lib.precursor_df.decoy<span class="op">==</span><span class="dv">1</span>).<span class="bu">any</span>()</span>
+<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> (<span class="st">'MACDESTY'</span>[::<span class="op">-</span><span class="dv">1</span>]<span class="op">+</span><span class="st">'K'</span>) <span class="kw">in</span> _lib.precursor_df.sequence.values</span>
+<span id="cb50-9"><a href="#cb50-9" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'isotope_apex_index'</span> <span class="kw">in</span> _lib.precursor_df.columns</span>
+<span id="cb50-10"><a href="#cb50-10" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'isotope_apex_intensity'</span> <span class="kw">in</span> _lib.precursor_df.columns</span>
+<span id="cb50-11"><a href="#cb50-11" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="op">~</span>_lib.precursor_df.sequence.<span class="bu">str</span>.contains(<span class="st">'B'</span>).<span class="bu">any</span>()</span>
+<span id="cb50-12"><a href="#cb50-12" aria-hidden="true" tabindex="-1"></a>_lib.precursor_df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>sequence</th>
+      <th>protein_idxes</th>
+      <th>miss_cleavage</th>
+      <th>is_prot_nterm</th>
+      <th>is_prot_cterm</th>
+      <th>mods</th>
+      <th>mod_sites</th>
+      <th>nAA</th>
+      <th>decoy</th>
+      <th>charge</th>
+      <th>label_channel</th>
+      <th>precursor_mz</th>
+      <th>isotope_m1_intensity</th>
+      <th>isotope_apex_intensity</th>
+      <th>isotope_apex_index</th>
+      <th>isotope_right_most_intensity</th>
+      <th>isotope_right_most_index</th>
+      <th>isotope_m1_mz</th>
+      <th>isotope_apex_mz</th>
+      <th>isotope_right_most_mz</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>LMNPQRST</td>
+      <td>0</td>
+      <td>1</td>
+      <td>False</td>
+      <td>True</td>
+      <td>Oxidation@M;Dimethyl@Any N-term</td>
+      <td>2;0</td>
+      <td>8</td>
+      <td>0</td>
+      <td>2</td>
+      <td>light</td>
+      <td>495.755484</td>
+      <td>0.500906</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>0.500906</td>
+      <td>1</td>
+      <td>496.257134</td>
+      <td>495.755484</td>
+      <td>496.257134</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>LMNPQRST</td>
+      <td>0</td>
+      <td>1</td>
+      <td>False</td>
+      <td>True</td>
+      <td>Oxidation@M;Dimethyl@Any N-term</td>
+      <td>2;0</td>
+      <td>8</td>
+      <td>0</td>
+      <td>3</td>
+      <td>light</td>
+      <td>330.839415</td>
+      <td>0.500906</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>0.500906</td>
+      <td>1</td>
+      <td>331.173848</td>
+      <td>330.839415</td>
+      <td>331.173848</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>LMNPQRST</td>
+      <td>0</td>
+      <td>1</td>
+      <td>False</td>
+      <td>True</td>
+      <td>Oxidation@M;Dimethyl@Any N-term</td>
+      <td>2;0</td>
+      <td>8</td>
+      <td>0</td>
+      <td>4</td>
+      <td>light</td>
+      <td>248.381380</td>
+      <td>0.500906</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>0.500906</td>
+      <td>1</td>
+      <td>248.632205</td>
+      <td>248.381380</td>
+      <td>248.632205</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>LMNPQRST</td>
+      <td>0</td>
+      <td>1</td>
+      <td>False</td>
+      <td>True</td>
+      <td>Dimethyl@Any N-term</td>
+      <td>0</td>
+      <td>8</td>
+      <td>0</td>
+      <td>2</td>
+      <td>light</td>
+      <td>487.758027</td>
+      <td>0.500525</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>0.500525</td>
+      <td>1</td>
+      <td>488.259677</td>
+      <td>487.758027</td>
+      <td>488.259677</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>LMNPQRST</td>
+      <td>0</td>
+      <td>1</td>
+      <td>False</td>
+      <td>True</td>
+      <td>Dimethyl@Any N-term</td>
+      <td>0</td>
+      <td>8</td>
+      <td>0</td>
+      <td>3</td>
+      <td>light</td>
+      <td>325.507777</td>
+      <td>0.500525</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>0.500525</td>
+      <td>1</td>
+      <td>325.842210</td>
+      <td>325.507777</td>
+      <td>325.842210</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>163</th>
+      <td>FGHIKLMNPQRST</td>
+      <td>0</td>
+      <td>2</td>
+      <td>False</td>
+      <td>True</td>
+      <td>Oxidation@M;Dimethyl:2H(6)13C(2)@Any N-term;Di...</td>
+      <td>7;0;5</td>
+      <td>13</td>
+      <td>0</td>
+      <td>3</td>
+      <td>heavy</td>
+      <td>539.655367</td>
+      <td>0.788273</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>0.392103</td>
+      <td>2</td>
+      <td>539.989801</td>
+      <td>539.655367</td>
+      <td>540.324234</td>
+    </tr>
+    <tr>
+      <th>164</th>
+      <td>FGHIKLMNPQRST</td>
+      <td>0</td>
+      <td>2</td>
+      <td>False</td>
+      <td>True</td>
+      <td>Oxidation@M;Dimethyl:2H(6)13C(2)@Any N-term;Di...</td>
+      <td>7;0;5</td>
+      <td>13</td>
+      <td>0</td>
+      <td>4</td>
+      <td>heavy</td>
+      <td>404.993344</td>
+      <td>0.788273</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>0.392103</td>
+      <td>2</td>
+      <td>405.244169</td>
+      <td>404.993344</td>
+      <td>405.494994</td>
+    </tr>
+    <tr>
+      <th>165</th>
+      <td>FGHIKLMNPQRST</td>
+      <td>0</td>
+      <td>2</td>
+      <td>False</td>
+      <td>True</td>
+      <td>Dimethyl:2H(6)13C(2)@Any N-term;Dimethyl:2H(6)...</td>
+      <td>0;5</td>
+      <td>13</td>
+      <td>0</td>
+      <td>2</td>
+      <td>heavy</td>
+      <td>800.981955</td>
+      <td>0.787646</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>0.389779</td>
+      <td>2</td>
+      <td>801.483605</td>
+      <td>800.981955</td>
+      <td>801.985255</td>
+    </tr>
+    <tr>
+      <th>166</th>
+      <td>FGHIKLMNPQRST</td>
+      <td>0</td>
+      <td>2</td>
+      <td>False</td>
+      <td>True</td>
+      <td>Dimethyl:2H(6)13C(2)@Any N-term;Dimethyl:2H(6)...</td>
+      <td>0;5</td>
+      <td>13</td>
+      <td>0</td>
+      <td>3</td>
+      <td>heavy</td>
+      <td>534.323729</td>
+      <td>0.787646</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>0.389779</td>
+      <td>2</td>
+      <td>534.658162</td>
+      <td>534.323729</td>
+      <td>534.992596</td>
+    </tr>
+    <tr>
+      <th>167</th>
+      <td>FGHIKLMNPQRST</td>
+      <td>0</td>
+      <td>2</td>
+      <td>False</td>
+      <td>True</td>
+      <td>Dimethyl:2H(6)13C(2)@Any N-term;Dimethyl:2H(6)...</td>
+      <td>0;5</td>
+      <td>13</td>
+      <td>0</td>
+      <td>4</td>
+      <td>heavy</td>
+      <td>400.994616</td>
+      <td>0.787646</td>
+      <td>1.0</td>
+      <td>0</td>
+      <td>0.389779</td>
+      <td>2</td>
+      <td>401.245441</td>
+      <td>400.994616</td>
+      <td>401.496266</td>
+    </tr>
+  </tbody>
+</table>
+<p>168 rows × 20 columns</p>
+</div>
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

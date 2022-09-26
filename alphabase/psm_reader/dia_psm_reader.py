@@ -30,6 +30,7 @@ class SpectronautReader(MaxQuantReader):
             'spectronaut'
         ]['mod_seq_columns'],
         csv_sep = '\t',
+        rt_unit = 'irt',
         **kwargs,
     ):
         """Reader for Spectronaut's output library TSV/CSV.
@@ -49,7 +50,9 @@ class SpectronautReader(MaxQuantReader):
             mod_sep=mod_sep,
             underscore_for_ncterm=underscore_for_ncterm,
             mod_seq_columns = mod_seq_columns,
-            fixed_C57=fixed_C57
+            fixed_C57=fixed_C57,
+            rt_unit=rt_unit,
+            **kwargs,
         )
         self.csv_sep = csv_sep
 
@@ -105,6 +108,7 @@ class SwathReader(SpectronautReader):
             fixed_C57=fixed_C57,
             mod_seq_columns=mod_seq_columns,
             csv_sep=csv_sep,
+            **kwargs,
         )
 
 # %% ../../nbdev_nbs/psm_reader/dia_psm_reader.ipynb 10
@@ -119,6 +123,7 @@ class DiannReader(SpectronautReader):
         underscore_for_ncterm=False,
         fixed_C57 = False,
         csv_sep = '\t',
+        rt_unit = 'minute',
         **kwargs,
     ):
         """
@@ -133,6 +138,8 @@ class DiannReader(SpectronautReader):
             underscore_for_ncterm=underscore_for_ncterm,
             fixed_C57=fixed_C57,
             csv_sep=csv_sep,
+            rt_unit=rt_unit,
+            **kwargs,
         )
         self.mod_seq_column = 'Modified.Sequence'
         self._min_max_rt_norm = False

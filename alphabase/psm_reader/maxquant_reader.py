@@ -143,6 +143,7 @@ class MaxQuantReader(PSMReaderBase):
             modification_mapping=modification_mapping,
             fdr = fdr,
             keep_decoy = keep_decoy,
+            **kwargs,
         )
 
         self.mod_sep = mod_sep
