@@ -137,6 +137,7 @@ alphabase/logs
 **/.last_checked
 
 # nbdev2
+*_docs*
 *sidebar.yml
 *_proc
 *_quarto.yml
