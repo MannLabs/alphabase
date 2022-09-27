@@ -10,33 +10,33 @@ from sklearn.preprocessing import PolynomialFeatures
 from sklearn.base import BaseEstimator, RegressorMixin
 
 from sklearn.utils.estimator_checks import check_estimator
-import matplotlib.pyplot as plt
 
-# %% ../../nbdev_nbs/statistics/regression.ipynb 3
+
+# %% ../../nbdev_nbs/statistics/regression.ipynb 4
 EPSILON = 1e-6
 
 class LOESSRegression(BaseEstimator, RegressorMixin):
+    """scikit-learn estimator which implements a LOESS style local polynomial regression. The number of basis functions or kernels can be explicitly defined which allows for faster and cheaper training and inference.
+        
+    Parameters
+    ----------
+
+    n_kernels : int 
+        default = 6, The number of local polynomial functions used to approximate the data. The location and extend of the kernels will be distributed to contain an equal number of datapoints in the training set.
+
+    kernel_size : float
+        default = 2, A factor increasing the kernel size to overlap with the neighboring kernel.
+
+    polynomial_degree : int
+        default = 2, Degree of the polynomial functions used for the local approximation.
+
+    """
 
     def __init__(self, 
                 n_kernels: int = 6, 
                 kernel_size: float = 2., 
                 polynomial_degree: int = 2):
-        """scikit-learn estimator which implements a LOESS style local polynomial regression.
-        The number of basis functions or kernels can be explicitly defined which allows for faster and cheaper training and inference.
-        
-        Parameters
-        -----------
 
-        n_kernels: int, default = 6
-            The number of local polynomial functions used to approximate the data. The location and extend of the kernels will be distributed to contain an equal number of datapoints in the training set.
-
-        kernel_size: float, default = 2
-            A factor increasing the kernel size to overlap with the neighboring kernel.
-
-        polynomial_degree: int, default = 2
-            Degree of the polynomial functions used for the local approximation.
-
-        """
         self.n_kernels = n_kernels
         self.kernel_size = kernel_size
         self.polynomial_degree = polynomial_degree
@@ -54,12 +54,14 @@ class LOESSRegression(BaseEstimator, RegressorMixin):
         """Determine the indices of the datapoints belonging to each kernel.
 
         Parameters
-        -----------
-        x : numpy.ndarray, float, of shape (n_datapoints)
+        ----------
+        x : numpy.ndarray
+            float, of shape (n_datapoints)
 
         Returns
-        --------
-        numpy.ndarray, int, of shape (n_kernels, 2)
+        -------
+        numpy.ndarray, int
+            of shape (n_kernels, 2)
         
         """
 
@@ -84,16 +86,16 @@ class LOESSRegression(BaseEstimator, RegressorMixin):
         """fit the model passed on provided training data.
         
         Parameters
-        -----------
+        ----------
 
-        x: numpy.ndarray, float, of shape (n_samples,) or (n_samples, 1)
-            Training data. Note that only a single feature is supported at the moment.
+        x : numpy.ndarray
+            float, of shape (n_samples,) or (n_samples, 1), Training data. Note that only a single feature is supported at the moment.
 
-        y: numpy.ndarray, float, of shape (n_samples,) or (n_samples, 1)
-            Target values.
+        y : numpy.ndarray, float
+            of shape (n_samples,) or (n_samples, 1) Target values.
 
         Returns
-        ---------
+        -------
 
         self: object
             Returns the fitted estimator.
@@ -155,15 +157,16 @@ class LOESSRegression(BaseEstimator, RegressorMixin):
         """Predict using the LOESS model.
         
         Parameters
-        -----------
+        ----------
 
-        x: numpy.ndarray, float, of shape (n_samples,) or (n_samples, 1)
-            Feature data. Note that only a single feature is supported at the moment.
+        x : numpy.ndarray
+            float, of shape (n_samples,) or (n_samples, 1) Feature data. Note that only a single feature is supported at the moment.
         
         Returns
-        ---------
+        -------
 
-        y: numpy.ndarray, float, of shape (n_samples,)
+        y : numpy.ndarray, float
+        of shape (n_samples,)
             Target values.
 
         """
@@ -192,7 +195,7 @@ class LOESSRegression(BaseEstimator, RegressorMixin):
 
 
         Returns
-        ----------
+        -------
         
         numpy.ndarray
             Weight matrix with the shape (n_datapoints, n_kernels).
