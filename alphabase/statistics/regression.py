@@ -206,19 +206,18 @@ class LOESSRegression(BaseEstimator, RegressorMixin):
         # apply weighting kernel
         w = self.tricubic(w)
         
-        # perform epsilon padding at the start and end of the weight matrix to allow for extrapolation.
-
-        # Does not work well yet
-
+       #perform epsilon padding at the start and end of the weight matrix to allow for extrapolation.
         # START
-        #idx_values = np.where(w[:,0] > 0)[0]
-        #min_idx, max_idx = idx_values[[0, -1]]
-        #w[:min_idx,0] = EPSILON
+        idx_values = np.where(w[:,0] > 0)[0]
+        if len(idx_values) > 0:
+            min_idx, max_idx = idx_values[[0, -1]]
+            w[:min_idx,0] = EPSILON
 
         # END
-        #idx_values = np.where(w[:,-1] > 0)[0]
-        #min_idx, max_idx = idx_values[[0, -1]]
-        #w[max_idx:,-1] = EPSILON
+        idx_values = np.where(w[:,-1] > 0)[0]
+        if len(idx_values) > 0:
+            min_idx, max_idx = idx_values[[0, -1]]
+            w[max_idx:,-1] = EPSILON
 
         # normalize column wise
 
