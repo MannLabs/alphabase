@@ -1,0 +1,37 @@
+website:
+  sidebar:
+    contents:
+      - index.ipynb
+      - utils.ipynb
+      - yaml_utils.ipynb
+      - section: constants
+        contents:
+          - constants/aa.ipynb
+          - constants/element.ipynb
+          - constants/isotope.ipynb
+          - constants/modification.ipynb
+      - section: io
+        contents:
+          - io/hdf.ipynb
+      - section: peptide
+        contents:
+          - peptide/fragment.ipynb
+          - peptide/mass_calc.ipynb
+          - peptide/mobility.ipynb
+          - peptide/precursor.ipynb
+      - section: protein
+        contents:
+          - protein/fasta.ipynb
+          - protein/test_fasta.ipynb
+      - section: psm_reader
+        contents:
+          - psm_reader/alphapept_reader.ipynb
+          - psm_reader/dia_psm_reader.ipynb
+          - psm_reader/maxquant_reader.ipynb
+          - psm_reader/msfragger_reader.ipynb
+          - psm_reader/pfind_reader.ipynb
+          - psm_reader/psm_reader.ipynb
+      - section: spectral_library
+        contents:
+          - spectral_library/decoy_library.ipynb
+          - spectral_library/library_base.ipynb
