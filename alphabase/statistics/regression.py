@@ -105,25 +105,50 @@ class LOESSRegression(BaseEstimator, RegressorMixin):
         # As required by scikit-learn estimator guidelines
         self.n_features_in_ = 1
 
+        # === start === sanity checks ===
         # Does not yet work with more than one input dimension
         # axis-wise scaling and improved distance function need to be implemented
         if len(x.shape) > 1:
             if x.shape[1] > 1:
                 raise ValueError('Input arrays with more than one feature not yet supported. Please provide a matrix of shape (n_datapoints, 1) or (n_datapoints,)')
 
-        # create flat version of the array for 
-        idx_sorted = np.argsort(x.flat)
-        x_sorted = x.flat[idx_sorted]
+        # at least two datapoints required
+        if len(x.flat) < 2:
+            raise ValueError('At least two datapoints required for fitting.')
 
+        # sanity check for number of datapoints, reduce n_kernels if needed
+        degrees_freedom = (1 + self.polynomial_degree) * self.n_kernels
+
+        if len(x.flat) < degrees_freedom:
+            print(f"Curve fitting with {self.n_kernels} kernels and polynomials of {self.polynomial_degree} degree requires at least {degrees_freedom} datapoints.")
+            
+            self.n_kernels = np.max([len(x.flat) // (1 + self.polynomial_degree),1])
+            
+            print(f"Number of kernels will be reduced to {self.n_kernels} kernels.")
+
+        # sanity check for number of datapoints, reduce degree of polynomial if necessary
+        degrees_freedom = (1 + self.polynomial_degree) * self.n_kernels
+        if len(x.flat) < degrees_freedom:
+            self.polynomial_degree = len(x.flat) - 1
+
+            print(f"Polynomial degree will be reduced to {self.polynomial_degree}.")
+
+        # reshape both arrays to column arrays
         if len(x.shape) == 1:
             x = x[...,np.newaxis]
 
         if len(y.shape) == 1:
             y = y[...,np.newaxis]
+        
+        # === end === sanity checks ===
+
+        # create flat version of the array for 
+        idx_sorted = np.argsort(x.flat)
+        x_sorted = x.flat[idx_sorted]
 
         # kernel indices will only be calculated during fitting
         kernel_indices = self.calculate_kernel_indices(x_sorted)
-
+  
         # scale max and scale mean will then be used for calculating the weighht matrix
         self.scale_mean = np.zeros((self.n_kernels))
         self.scale_max = np.zeros((self.n_kernels))
@@ -137,11 +162,13 @@ class LOESSRegression(BaseEstimator, RegressorMixin):
         # from here on, the original column arrays are used
         w = self.get_weight_matrix(x)
 
+
         # build design matrix
         polynomial_transform = PolynomialFeatures(self.polynomial_degree)
         x_design = polynomial_transform.fit_transform(x)
         number_of_dimensions = len(x_design[0])
 
+        
         self.beta = np.zeros((number_of_dimensions,self.n_kernels))
 
         for i, weights in enumerate(w.T):
@@ -150,7 +177,8 @@ class LOESSRegression(BaseEstimator, RegressorMixin):
             beta = (loadings*weights)@y
             y_m = np.sum(x_design @ beta, axis=1)
             self.beta[:,i] = np.ravel((loadings*weights)@y)
-        
+            
+
         return self
 
     def predict(self, x: np.ndarray):
