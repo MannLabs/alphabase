@@ -82,8 +82,9 @@ def parse_mod_seq(
             else: site_list.append(site+1)
             mod_list.append('C'+"Carbamidomethyl (C)".join(mod_sep))
             site = PeptideModSeq.find('C',site+1)
-    nAA = len(PeptideModSeq.strip('_'))
-    return ';'.join(mod_list), ';'.join([str(i) if i <= nAA else '-1' for i in site_list])
+    sequence = PeptideModSeq.strip('_')
+    nAA = len(sequence)
+    return sequence, ';'.join(mod_list), ';'.join([str(i) if i <= nAA else '-1' for i in site_list])
 
 
 class MaxQuantReader(PSMReaderBase):
@@ -209,6 +210,7 @@ class MaxQuantReader(PSMReaderBase):
 
     def _load_modifications(self, origin_df: pd.DataFrame):
         (
+            seqs,
             self._psm_df['mods'], 
             self._psm_df['mod_sites']
         ) = zip(
@@ -218,5 +220,7 @@ class MaxQuantReader(PSMReaderBase):
                 underscore_for_ncterm=self.underscore_for_ncterm
             )
         )
+        if 'sequence' not in self._psm_df.columns:
+            self._psm_df['sequence'] = seqs
 
 psm_reader_provider.register_reader('maxquant', MaxQuantReader)

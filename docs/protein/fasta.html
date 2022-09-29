@@ -146,7 +146,19 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     <span class="navbar-title">alphabase</span>
     </a>
   </div>
-          <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/MannLabs/alphabase"><i class="bi bi-github" role="img">
+</i> 
+ </a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
       </div> <!-- /container-fluid -->
     </nav>
   <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
@@ -935,8 +947,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </tr>
 </tbody>
 </table>
-<pre><code>/Users/zengwenfeng/opt/anaconda3/lib/python3.8/site-packages/fastcore/docscrape.py:225: UserWarning: Unknown section Attributes
-  else: warn(msg)</code></pre>
 <hr>
 <p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/protein/fasta.py#L608" target="_blank" style="float:right; font-size:smaller">source</a></p>
 </section>
@@ -1410,22 +1420,22 @@ decoy_lib.decoy_sequence()
 <section id="testing" class="level3">
 <h3 class="anchored" data-anchor-id="testing">Testing</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame(</span>
-<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>    {</span>
-<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">'sequence'</span>: [<span class="st">'ABSTY'</span>,<span class="st">'ACXSX'</span>,<span class="st">'ACDEFG'</span>],</span>
-<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">'mods'</span>: [<span class="st">''</span>, <span class="st">'Acetyl@Protein N-term'</span>, <span class="st">''</span>],</span>
-<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">'mod_sites'</span>: [<span class="st">''</span>, <span class="st">'0'</span>, <span class="st">''</span>]</span>
-<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> append_regular_modifications(df, keep_unmodified<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> np.<span class="bu">sum</span>(df.sequence<span class="op">==</span><span class="st">'ABSTY'</span>)<span class="op">==</span><span class="dv">4</span></span>
-<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> np.<span class="bu">sum</span>(df.sequence<span class="op">==</span><span class="st">'ACXSX'</span>)<span class="op">==</span><span class="dv">2</span></span>
-<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> np.<span class="bu">sum</span>(df.sequence<span class="op">==</span><span class="st">'ACDEFG'</span>)<span class="op">==</span><span class="dv">1</span></span>
-<span id="cb42-12"><a href="#cb42-12" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">all</span>(df[df.sequence<span class="op">==</span><span class="st">'ABSTY'</span>].mods.values <span class="op">==</span> np.array([<span class="st">'Phospho@S'</span>,<span class="st">'Phospho@T'</span>,<span class="st">'Phospho@Y'</span>,<span class="st">''</span>]))</span>
-<span id="cb42-13"><a href="#cb42-13" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">all</span>(df[df.sequence<span class="op">==</span><span class="st">'ABSTY'</span>].mod_sites.values <span class="op">==</span> np.array([<span class="st">'3'</span>,<span class="st">'4'</span>,<span class="st">'5'</span>,<span class="st">''</span>]))</span>
-<span id="cb42-14"><a href="#cb42-14" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">all</span>(df[df.sequence<span class="op">==</span><span class="st">'ACXSX'</span>].mods.values <span class="op">==</span> np.array([<span class="st">'Acetyl@Protein N-term;Phospho@S'</span>,<span class="st">'Acetyl@Protein N-term'</span>]))</span>
-<span id="cb42-15"><a href="#cb42-15" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">all</span>(df[df.sequence<span class="op">==</span><span class="st">'ACXSX'</span>].mod_sites.values <span class="op">==</span> np.array([<span class="st">'0;4'</span>,<span class="st">'0'</span>]))</span>
-<span id="cb42-16"><a href="#cb42-16" aria-hidden="true" tabindex="-1"></a>df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame(</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">'sequence'</span>: [<span class="st">'ABSTY'</span>,<span class="st">'ACXSX'</span>,<span class="st">'ACDEFG'</span>],</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">'mods'</span>: [<span class="st">''</span>, <span class="st">'Acetyl@Protein N-term'</span>, <span class="st">''</span>],</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">'mod_sites'</span>: [<span class="st">''</span>, <span class="st">'0'</span>, <span class="st">''</span>]</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> append_regular_modifications(df, keep_unmodified<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> np.<span class="bu">sum</span>(df.sequence<span class="op">==</span><span class="st">'ABSTY'</span>)<span class="op">==</span><span class="dv">4</span></span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> np.<span class="bu">sum</span>(df.sequence<span class="op">==</span><span class="st">'ACXSX'</span>)<span class="op">==</span><span class="dv">2</span></span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> np.<span class="bu">sum</span>(df.sequence<span class="op">==</span><span class="st">'ACDEFG'</span>)<span class="op">==</span><span class="dv">1</span></span>
+<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">all</span>(df[df.sequence<span class="op">==</span><span class="st">'ABSTY'</span>].mods.values <span class="op">==</span> np.array([<span class="st">'Phospho@S'</span>,<span class="st">'Phospho@T'</span>,<span class="st">'Phospho@Y'</span>,<span class="st">''</span>]))</span>
+<span id="cb41-13"><a href="#cb41-13" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">all</span>(df[df.sequence<span class="op">==</span><span class="st">'ABSTY'</span>].mod_sites.values <span class="op">==</span> np.array([<span class="st">'3'</span>,<span class="st">'4'</span>,<span class="st">'5'</span>,<span class="st">''</span>]))</span>
+<span id="cb41-14"><a href="#cb41-14" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">all</span>(df[df.sequence<span class="op">==</span><span class="st">'ACXSX'</span>].mods.values <span class="op">==</span> np.array([<span class="st">'Acetyl@Protein N-term;Phospho@S'</span>,<span class="st">'Acetyl@Protein N-term'</span>]))</span>
+<span id="cb41-15"><a href="#cb41-15" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">all</span>(df[df.sequence<span class="op">==</span><span class="st">'ACXSX'</span>].mod_sites.values <span class="op">==</span> np.array([<span class="st">'0;4'</span>,<span class="st">'0'</span>]))</span>
+<span id="cb41-16"><a href="#cb41-16" aria-hidden="true" tabindex="-1"></a>df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 
 <div>
@@ -1488,18 +1498,18 @@ decoy_lib.decoy_sequence()
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame(</span>
-<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>    {</span>
-<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">'sequence'</span>: [<span class="st">'ABSTY'</span>,<span class="st">'ACXSX'</span>,<span class="st">'ACDEFG'</span>],</span>
-<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">'mods'</span>: [<span class="st">''</span>, <span class="st">'Acetyl@Protein N-term'</span>, <span class="st">''</span>],</span>
-<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">'mod_sites'</span>: [<span class="st">''</span>, <span class="st">'0'</span>, <span class="st">''</span>]</span>
-<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> append_regular_modifications(df, keep_unmodified<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> np.<span class="bu">sum</span>(df.sequence<span class="op">==</span><span class="st">'ABSTY'</span>)<span class="op">==</span><span class="dv">3</span></span>
-<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> np.<span class="bu">sum</span>(df.sequence<span class="op">==</span><span class="st">'ACXSX'</span>)<span class="op">==</span><span class="dv">1</span></span>
-<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> np.<span class="bu">sum</span>(df.sequence<span class="op">==</span><span class="st">'ACDEFG'</span>)<span class="op">==</span><span class="dv">0</span></span>
-<span id="cb43-12"><a href="#cb43-12" aria-hidden="true" tabindex="-1"></a>df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame(</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">'sequence'</span>: [<span class="st">'ABSTY'</span>,<span class="st">'ACXSX'</span>,<span class="st">'ACDEFG'</span>],</span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">'mods'</span>: [<span class="st">''</span>, <span class="st">'Acetyl@Protein N-term'</span>, <span class="st">''</span>],</span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">'mod_sites'</span>: [<span class="st">''</span>, <span class="st">'0'</span>, <span class="st">''</span>]</span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> append_regular_modifications(df, keep_unmodified<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> np.<span class="bu">sum</span>(df.sequence<span class="op">==</span><span class="st">'ABSTY'</span>)<span class="op">==</span><span class="dv">3</span></span>
+<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> np.<span class="bu">sum</span>(df.sequence<span class="op">==</span><span class="st">'ACXSX'</span>)<span class="op">==</span><span class="dv">1</span></span>
+<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> np.<span class="bu">sum</span>(df.sequence<span class="op">==</span><span class="st">'ACDEFG'</span>)<span class="op">==</span><span class="dv">0</span></span>
+<span id="cb42-12"><a href="#cb42-12" aria-hidden="true" tabindex="-1"></a>df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 
 <div>
@@ -1544,23 +1554,23 @@ decoy_lib.decoy_sequence()
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>_lib <span class="op">=</span> FastaLib(<span class="va">None</span>, I_to_L<span class="op">=</span><span class="va">False</span>, decoy<span class="op">=</span><span class="st">'pseudo_reverse'</span>)</span>
-<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>prot1 <span class="op">=</span> <span class="st">'MABCDESTKAFGHIJKLMNOPQRAFGHIJK'</span></span>
-<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>prot2 <span class="op">=</span> <span class="st">'AFGHIJKLMNOPQR'</span></span>
-<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>protein_dict <span class="op">=</span> {</span>
-<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">'xx'</span>: {</span>
-<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">'protein_id'</span>: <span class="st">'xx'</span>,</span>
-<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">'gene_name'</span>: <span class="st">''</span>,</span>
-<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">'sequence'</span>: prot1</span>
-<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a>    },</span>
-<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">'yy'</span>: {</span>
-<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">'protein_id'</span>: <span class="st">'yy'</span>,</span>
-<span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">'gene_name'</span>: <span class="st">'gene'</span>,</span>
-<span id="cb44-13"><a href="#cb44-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">'sequence'</span>: prot2</span>
-<span id="cb44-14"><a href="#cb44-14" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb44-15"><a href="#cb44-15" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb44-16"><a href="#cb44-16" aria-hidden="true" tabindex="-1"></a>_lib.get_peptides_from_protein_dict(protein_dict)</span>
-<span id="cb44-17"><a href="#cb44-17" aria-hidden="true" tabindex="-1"></a>_lib.precursor_df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>_lib <span class="op">=</span> FastaLib(<span class="va">None</span>, I_to_L<span class="op">=</span><span class="va">False</span>, decoy<span class="op">=</span><span class="st">'pseudo_reverse'</span>)</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>prot1 <span class="op">=</span> <span class="st">'MABCDESTKAFGHIJKLMNOPQRAFGHIJK'</span></span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>prot2 <span class="op">=</span> <span class="st">'AFGHIJKLMNOPQR'</span></span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>protein_dict <span class="op">=</span> {</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">'xx'</span>: {</span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">'protein_id'</span>: <span class="st">'xx'</span>,</span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">'gene_name'</span>: <span class="st">''</span>,</span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">'sequence'</span>: prot1</span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">'yy'</span>: {</span>
+<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">'protein_id'</span>: <span class="st">'yy'</span>,</span>
+<span id="cb43-12"><a href="#cb43-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">'gene_name'</span>: <span class="st">'gene'</span>,</span>
+<span id="cb43-13"><a href="#cb43-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">'sequence'</span>: prot2</span>
+<span id="cb43-14"><a href="#cb43-14" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb43-15"><a href="#cb43-15" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb43-16"><a href="#cb43-16" aria-hidden="true" tabindex="-1"></a>_lib.get_peptides_from_protein_dict(protein_dict)</span>
+<span id="cb43-17"><a href="#cb43-17" aria-hidden="true" tabindex="-1"></a>_lib.precursor_df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 
 <div>
@@ -1707,7 +1717,7 @@ decoy_lib.decoy_sequence()
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>_lib.protein_df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>_lib.protein_df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 
 <div>
@@ -1740,9 +1750,9 @@ decoy_lib.decoy_sequence()
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>_lib.append_protein_name()</span>
-<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'proteins'</span> <span class="kw">in</span> _lib.precursor_df.columns</span>
-<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>_lib.precursor_df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>_lib.append_protein_name()</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'proteins'</span> <span class="kw">in</span> _lib.precursor_df.columns</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>_lib.precursor_df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 
 <div>
@@ -1913,8 +1923,8 @@ decoy_lib.decoy_sequence()
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>_lib.add_modifications()</span>
-<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>_lib.precursor_df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>_lib.add_modifications()</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>_lib.precursor_df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 
 <div>
@@ -2410,9 +2420,9 @@ decoy_lib.decoy_sequence()
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>_lib.add_additional_modifications([<span class="st">'Phospho@S'</span>,<span class="st">'Phospho@T'</span>])</span>
-<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> _lib.precursor_df.mods.<span class="bu">str</span>.contains(<span class="st">'Phospho'</span>).<span class="bu">any</span>()</span>
-<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>_lib.precursor_df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>_lib.add_additional_modifications([<span class="st">'Phospho@S'</span>,<span class="st">'Phospho@T'</span>])</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> _lib.precursor_df.mods.<span class="bu">str</span>.contains(<span class="st">'Phospho'</span>).<span class="bu">any</span>()</span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>_lib.precursor_df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 
 <div>
@@ -2584,32 +2594,32 @@ decoy_lib.decoy_sequence()
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>_lib <span class="op">=</span> FastaLib(</span>
-<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>    [<span class="st">'b_z1'</span>,<span class="st">'y_z1'</span>], I_to_L<span class="op">=</span><span class="va">False</span>, </span>
-<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>    decoy<span class="op">=</span><span class="st">'pseudo_reverse'</span></span>
-<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>prot1 <span class="op">=</span> <span class="st">'MACDESTYKBKFGHIKLMNPQRST'</span></span>
-<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>prot2 <span class="op">=</span> <span class="st">'FGHIKLMNPQR'</span></span>
-<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>protein_dict <span class="op">=</span> {</span>
-<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">'xx'</span>: {</span>
-<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">'protein_id'</span>: <span class="st">'xx'</span>,</span>
-<span id="cb49-10"><a href="#cb49-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">'sequence'</span>: prot1</span>
-<span id="cb49-11"><a href="#cb49-11" aria-hidden="true" tabindex="-1"></a>    },</span>
-<span id="cb49-12"><a href="#cb49-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">'yy'</span>: {</span>
-<span id="cb49-13"><a href="#cb49-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">'protein_id'</span>: <span class="st">'yy'</span>,</span>
-<span id="cb49-14"><a href="#cb49-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">'sequence'</span>: prot2</span>
-<span id="cb49-15"><a href="#cb49-15" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb49-16"><a href="#cb49-16" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb49-17"><a href="#cb49-17" aria-hidden="true" tabindex="-1"></a>_lib.import_and_process_protein_dict(protein_dict)</span>
-<span id="cb49-18"><a href="#cb49-18" aria-hidden="true" tabindex="-1"></a>_lib.calc_precursor_isotope()</span>
-<span id="cb49-19"><a href="#cb49-19" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> (_lib.precursor_df.charge <span class="op">==</span> _lib.min_precursor_charge).<span class="bu">any</span>()</span>
-<span id="cb49-20"><a href="#cb49-20" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> (_lib.precursor_df.charge <span class="op">==</span> _lib.max_precursor_charge).<span class="bu">any</span>()</span>
-<span id="cb49-21"><a href="#cb49-21" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> (_lib.precursor_df.decoy<span class="op">==</span><span class="dv">1</span>).<span class="bu">any</span>()</span>
-<span id="cb49-22"><a href="#cb49-22" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> (<span class="st">'MACDESTY'</span>[::<span class="op">-</span><span class="dv">1</span>]<span class="op">+</span><span class="st">'K'</span>) <span class="kw">in</span> _lib.precursor_df.sequence.values</span>
-<span id="cb49-23"><a href="#cb49-23" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'isotope_apex_index'</span> <span class="kw">in</span> _lib.precursor_df.columns</span>
-<span id="cb49-24"><a href="#cb49-24" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'isotope_apex_intensity'</span> <span class="kw">in</span> _lib.precursor_df.columns</span>
-<span id="cb49-25"><a href="#cb49-25" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="op">~</span>_lib.precursor_df.sequence.<span class="bu">str</span>.contains(<span class="st">'B'</span>).<span class="bu">any</span>()</span>
-<span id="cb49-26"><a href="#cb49-26" aria-hidden="true" tabindex="-1"></a>_lib.precursor_df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>_lib <span class="op">=</span> FastaLib(</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>    [<span class="st">'b_z1'</span>,<span class="st">'y_z1'</span>], I_to_L<span class="op">=</span><span class="va">False</span>, </span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>    decoy<span class="op">=</span><span class="st">'pseudo_reverse'</span></span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>prot1 <span class="op">=</span> <span class="st">'MACDESTYKBKFGHIKLMNPQRST'</span></span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>prot2 <span class="op">=</span> <span class="st">'FGHIKLMNPQR'</span></span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>protein_dict <span class="op">=</span> {</span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">'xx'</span>: {</span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">'protein_id'</span>: <span class="st">'xx'</span>,</span>
+<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">'sequence'</span>: prot1</span>
+<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb48-12"><a href="#cb48-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">'yy'</span>: {</span>
+<span id="cb48-13"><a href="#cb48-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">'protein_id'</span>: <span class="st">'yy'</span>,</span>
+<span id="cb48-14"><a href="#cb48-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">'sequence'</span>: prot2</span>
+<span id="cb48-15"><a href="#cb48-15" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb48-16"><a href="#cb48-16" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb48-17"><a href="#cb48-17" aria-hidden="true" tabindex="-1"></a>_lib.import_and_process_protein_dict(protein_dict)</span>
+<span id="cb48-18"><a href="#cb48-18" aria-hidden="true" tabindex="-1"></a>_lib.calc_precursor_isotope()</span>
+<span id="cb48-19"><a href="#cb48-19" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> (_lib.precursor_df.charge <span class="op">==</span> _lib.min_precursor_charge).<span class="bu">any</span>()</span>
+<span id="cb48-20"><a href="#cb48-20" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> (_lib.precursor_df.charge <span class="op">==</span> _lib.max_precursor_charge).<span class="bu">any</span>()</span>
+<span id="cb48-21"><a href="#cb48-21" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> (_lib.precursor_df.decoy<span class="op">==</span><span class="dv">1</span>).<span class="bu">any</span>()</span>
+<span id="cb48-22"><a href="#cb48-22" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> (<span class="st">'MACDESTY'</span>[::<span class="op">-</span><span class="dv">1</span>]<span class="op">+</span><span class="st">'K'</span>) <span class="kw">in</span> _lib.precursor_df.sequence.values</span>
+<span id="cb48-23"><a href="#cb48-23" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'isotope_apex_index'</span> <span class="kw">in</span> _lib.precursor_df.columns</span>
+<span id="cb48-24"><a href="#cb48-24" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'isotope_apex_intensity'</span> <span class="kw">in</span> _lib.precursor_df.columns</span>
+<span id="cb48-25"><a href="#cb48-25" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="op">~</span>_lib.precursor_df.sequence.<span class="bu">str</span>.contains(<span class="st">'B'</span>).<span class="bu">any</span>()</span>
+<span id="cb48-26"><a href="#cb48-26" aria-hidden="true" tabindex="-1"></a>_lib.precursor_df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 
 <div>
@@ -2889,18 +2899,18 @@ decoy_lib.decoy_sequence()
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>_lib.import_and_process_protein_dict(protein_dict)</span>
-<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>_lib.add_peptide_labeling({</span>
-<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'light'</span>: [<span class="st">'Dimethyl@Any N-term'</span>,<span class="st">'Dimethyl@K'</span>],</span>
-<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">'heavy'</span>: [<span class="st">'Dimethyl:2H(6)13C(2)@Any N-term'</span>,<span class="st">'Dimethyl:2H(6)13C(2)@K'</span>],</span>
-<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>})</span>
-<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>_lib.calc_precursor_isotope()</span>
-<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> (_lib.precursor_df.decoy<span class="op">==</span><span class="dv">1</span>).<span class="bu">any</span>()</span>
-<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> (<span class="st">'MACDESTY'</span>[::<span class="op">-</span><span class="dv">1</span>]<span class="op">+</span><span class="st">'K'</span>) <span class="kw">in</span> _lib.precursor_df.sequence.values</span>
-<span id="cb50-9"><a href="#cb50-9" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'isotope_apex_index'</span> <span class="kw">in</span> _lib.precursor_df.columns</span>
-<span id="cb50-10"><a href="#cb50-10" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'isotope_apex_intensity'</span> <span class="kw">in</span> _lib.precursor_df.columns</span>
-<span id="cb50-11"><a href="#cb50-11" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="op">~</span>_lib.precursor_df.sequence.<span class="bu">str</span>.contains(<span class="st">'B'</span>).<span class="bu">any</span>()</span>
-<span id="cb50-12"><a href="#cb50-12" aria-hidden="true" tabindex="-1"></a>_lib.precursor_df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>_lib.import_and_process_protein_dict(protein_dict)</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>_lib.add_peptide_labeling({</span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'light'</span>: [<span class="st">'Dimethyl@Any N-term'</span>,<span class="st">'Dimethyl@K'</span>],</span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">'heavy'</span>: [<span class="st">'Dimethyl:2H(6)13C(2)@Any N-term'</span>,<span class="st">'Dimethyl:2H(6)13C(2)@K'</span>],</span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>_lib.calc_precursor_isotope()</span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> (_lib.precursor_df.decoy<span class="op">==</span><span class="dv">1</span>).<span class="bu">any</span>()</span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> (<span class="st">'MACDESTY'</span>[::<span class="op">-</span><span class="dv">1</span>]<span class="op">+</span><span class="st">'K'</span>) <span class="kw">in</span> _lib.precursor_df.sequence.values</span>
+<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'isotope_apex_index'</span> <span class="kw">in</span> _lib.precursor_df.columns</span>
+<span id="cb49-10"><a href="#cb49-10" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">'isotope_apex_intensity'</span> <span class="kw">in</span> _lib.precursor_df.columns</span>
+<span id="cb49-11"><a href="#cb49-11" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="op">~</span>_lib.precursor_df.sequence.<span class="bu">str</span>.contains(<span class="st">'B'</span>).<span class="bu">any</span>()</span>
+<span id="cb49-12"><a href="#cb49-12" aria-hidden="true" tabindex="-1"></a>_lib.precursor_df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 
 <div>

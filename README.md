@@ -12,7 +12,6 @@ AlphaBase
 <a href="https://pypi.org/project/alphabase" alt="release">
 <img src="https://img.shields.io/pypi/dm/alphabase?color=blue&label=pip%20downloads"/></a>
 <img src="https://img.shields.io/pypi/pyversions/alphabase"/>
-<img src="https://img.shields.io/github/languages/code-size/mannlabs/alphabase"/>
 
 AlphaBase provides all basic python functionalities for AlphaPept
 ecosystem from the [Mann Labs at the Max Planck Institute of
