@@ -271,11 +271,11 @@ class PSMReaderBase(object):
 
     def normalize_rt(self):
         if 'rt' in self.psm_df.columns:
-            if self._engine_rt_unit == 'minute':
-                self.psm_df['rt_sec'] = self.psm_df.rt*60
-            elif self._engine_rt_unit == 'second':
-                self.psm_df['rt_sec'] = self.psm_df.rt
+            if self._engine_rt_unit == 'second':
+                # self.psm_df['rt_sec'] = self.psm_df.rt
                 self.psm_df['rt'] = self.psm_df.rt/60
+            # elif self._engine_rt_unit == 'minute':
+                # self.psm_df['rt_sec'] = self.psm_df.rt*60
             min_rt = self.psm_df.rt.min()
             if not self._min_max_rt_norm or min_rt > 0:
                 min_rt = 0

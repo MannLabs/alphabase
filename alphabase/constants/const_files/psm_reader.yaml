@@ -161,11 +161,25 @@ diann:
     'scan_num': 'MS2.Scan'
     'score': 'CScore'
   modification_mapping: 'maxquant'
+spectronaut_report:
+  reader_type: spectronaut_report
+  rt_unit: minute
+  mod_sep: '[]'
+  underscore_for_ncterm: True
+  fixed_C57: False
+  csv_sep: ','
+  column_mapping:
+    'raw_name': 'R.FileName'
+    'rt': 'EG.ApexRT'
+    'proteins': ['PG.ProteinNames','PG.ProteinGroups']
+    'genes': 'PG.Genes'
+    'uniprot_ids': 'PG.UniProtIds'
+    'charge': 'charge'
 spectronaut:
   reader_type: spectronaut
   rt_unit: irt
   mod_sep: '[]'
-  underscore_for_ncterm: False
+  underscore_for_ncterm: True
   fixed_C57: False
   csv_sep: "\t"
   mod_seq_columns:
