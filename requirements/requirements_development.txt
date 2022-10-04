@@ -8,6 +8,7 @@ pipdeptree
 ipykernel
 nbdev
 pyteomics
+scikit-learn
 
 tqdm
 psutil
