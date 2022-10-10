@@ -2,90 +2,106 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://MannLabs.github.io/alphabase/utils.html</loc>
-    <lastmod>2022-09-29T14:47:40.051Z</lastmod>
+    <lastmod>2022-10-10T20:03:27.395Z</lastmod>
+  </url>
+  <url>
+    <loc>https://MannLabs.github.io/alphabase/statistics/regression.html</loc>
+    <lastmod>2022-10-10T20:03:27.923Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphabase/psm_reader/msfragger_reader.html</loc>
-    <lastmod>2022-09-29T14:47:40.381Z</lastmod>
+    <lastmod>2022-10-10T20:03:28.408Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphabase/psm_reader/maxquant_reader.html</loc>
-    <lastmod>2022-09-29T14:47:40.833Z</lastmod>
+    <lastmod>2022-10-10T20:03:29.080Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphabase/psm_reader/psm_reader.html</loc>
-    <lastmod>2022-09-29T14:47:41.211Z</lastmod>
+    <lastmod>2022-10-10T20:03:29.557Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphabase/psm_reader/alphapept_reader.html</loc>
-    <lastmod>2022-09-29T14:47:41.591Z</lastmod>
+    <lastmod>2022-10-10T20:03:29.877Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphabase/psm_reader/pfind_reader.html</loc>
-    <lastmod>2022-09-29T14:47:41.874Z</lastmod>
+    <lastmod>2022-10-10T20:03:30.257Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphabase/psm_reader/dia_psm_reader.html</loc>
-    <lastmod>2022-09-29T14:47:42.481Z</lastmod>
+    <lastmod>2022-10-10T20:03:31.002Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphabase/peptide/precursor.html</loc>
-    <lastmod>2022-09-29T14:47:42.825Z</lastmod>
+    <lastmod>2022-10-10T20:03:31.427Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphabase/peptide/fragment.html</loc>
-    <lastmod>2022-09-29T14:47:43.314Z</lastmod>
+    <lastmod>2022-10-10T20:03:32.002Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphabase/peptide/mass_calc.html</loc>
-    <lastmod>2022-09-29T14:47:43.612Z</lastmod>
+    <lastmod>2022-10-10T20:03:32.413Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphabase/peptide/mobility.html</loc>
-    <lastmod>2022-09-29T14:47:43.904Z</lastmod>
+    <lastmod>2022-10-10T20:03:32.719Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphabase/spectral_library/decoy_library.html</loc>
-    <lastmod>2022-09-29T14:47:44.204Z</lastmod>
+    <lastmod>2022-10-10T20:03:33.058Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphabase/spectral_library/library_base.html</loc>
-    <lastmod>2022-09-29T14:47:44.564Z</lastmod>
+    <lastmod>2022-10-10T20:03:33.503Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphabase/constants/modification.html</loc>
-    <lastmod>2022-09-29T14:47:44.929Z</lastmod>
+    <lastmod>2022-10-10T20:03:33.952Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphabase/constants/element.html</loc>
-    <lastmod>2022-09-29T14:47:45.267Z</lastmod>
+    <lastmod>2022-10-10T20:03:34.291Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphabase/constants/isotope.html</loc>
-    <lastmod>2022-09-29T14:47:45.583Z</lastmod>
+    <lastmod>2022-10-10T20:03:34.685Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphabase/constants/aa.html</loc>
-    <lastmod>2022-09-29T14:47:45.887Z</lastmod>
+    <lastmod>2022-10-10T20:03:35.049Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphabase/protein/fasta.html</loc>
-    <lastmod>2022-09-29T14:47:46.453Z</lastmod>
+    <lastmod>2022-10-10T20:03:35.816Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphabase/protein/test_fasta.html</loc>
-    <lastmod>2022-09-29T14:47:46.726Z</lastmod>
+    <lastmod>2022-10-10T20:03:36.158Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphabase/io/hdf.html</loc>
-    <lastmod>2022-09-29T14:47:46.986Z</lastmod>
+    <lastmod>2022-10-10T20:03:36.506Z</lastmod>
+  </url>
+  <url>
+    <loc>https://MannLabs.github.io/alphabase/scoring/feature_extraction_base.html</loc>
+    <lastmod>2022-10-10T20:03:36.811Z</lastmod>
+  </url>
+  <url>
+    <loc>https://MannLabs.github.io/alphabase/scoring/ml_scoring_base.html</loc>
+    <lastmod>2022-10-10T20:03:37.270Z</lastmod>
+  </url>
+  <url>
+    <loc>https://MannLabs.github.io/alphabase/scoring/fdr.html</loc>
+    <lastmod>2022-10-10T20:03:37.687Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphabase/yaml_utils.html</loc>
-    <lastmod>2022-09-29T14:47:47.257Z</lastmod>
+    <lastmod>2022-10-10T20:03:38.068Z</lastmod>
   </url>
   <url>
     <loc>https://MannLabs.github.io/alphabase/index.html</loc>
-    <lastmod>2022-09-29T14:47:47.582Z</lastmod>
+    <lastmod>2022-10-10T20:03:38.510Z</lastmod>
   </url>
 </urlset>

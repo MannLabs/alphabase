@@ -35,15 +35,17 @@ class BaseFeatureExtractor:
         Extract the scoring features (self._feature_list) 
         and append them inplace into candidate PSMs (psm_df).
 
+        **All sub-classes must re-implement this method.**
+
         Parameters
         ----------
         psm_df : pd.DataFrame
-            PSMs to be rescore.
+            PSMs to be rescored
 
         Returns
         -------
         pd.DataFrame
-            psm_df with appended the feature list extracted by this extractor.
+            psm_df with appended feature columns extracted by this extractor
         """
         return psm_df
 

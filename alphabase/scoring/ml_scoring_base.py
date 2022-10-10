@@ -33,26 +33,35 @@ class Percolator:
         self.cv_fold = 1
         self.iter_num = 1
 
+        self._base_features = ['score','nAA','charge']
+
     @property
     def feature_list(self)->list:
-        """ The read-only property to get extracted feature_list """
-        return self.feature_extractor.feature_list
+        """ Get extracted feature_list. Property, read-only """
+        return list(set(
+            self._base_features+
+            self.feature_extractor.feature_list
+        ))
 
     @property
     def ml_model(self):
+        """ 
+        ML model in Percolator.
+        It can be sklearn models or other models but implement 
+        the methods `fit()` and `decision_function()` (or `predict_proba()`) 
+        which are the same as sklearn models.
+        """
         return self._ml_model
     
     @ml_model.setter
     def ml_model(self, model):
-        """ 
-        `model` must be sklearn models or other models but implement 
-        the same methods `fit()` and `decision_function()`/`predict_proba()` 
-        as sklearn models
-        """
         self._ml_model = model
 
     @property
     def feature_extractor(self)->BaseFeatureExtractor:
+        """
+        The feature extractor inherited from `BaseFeatureExtractor`
+        """
         return self._feature_extractor
     
     @feature_extractor.setter
@@ -88,7 +97,8 @@ class Percolator:
     def rescore(self, 
         df:pd.DataFrame
     )->pd.DataFrame:
-        """Rescore
+        """
+        Estimate ML scores and then FDRs (q-values)
 
         Parameters
         ----------
@@ -106,7 +116,61 @@ class Percolator:
         df = self._estimate_fdr(df)
         return df
 
-    def run(self,
+    def run_rerank_workflow(self,
+        top_k_psm_df:pd.DataFrame,
+        rerank_column:str='spec_idx',
+        *args, **kwargs
+    )->pd.DataFrame:
+        """
+        Run percolator workflow with reranking 
+        the peptides for each spectrum.
+
+        - self.extract_features()
+        - self.rescore()
+
+        *args and **kwargs are used for 
+        `self.feature_extractor.extract_features`.
+
+        Parameters
+        ----------
+        top_k_psm_df : pd.DataFrame
+            PSM DataFrame
+
+        rerank_column : str
+            The column use to rerank PSMs. 
+            
+            For example, use the following code to select 
+            the top-ranked peptide for each spectrum.
+            ```
+            rerank_column = 'spec_idx' # scan_num
+            idx = top_k_psm_df.groupby(
+                ['raw_name',rerank_column]
+            )['ml_score'].idxmax()
+            psm_df = top_k_psm_df.loc[idx].copy()
+            ```
+        Returns
+        -------
+        pd.DataFrame
+            Only top-scored PSM is returned for 
+            each group of the `rerank_column`.
+        """
+        top_k_psm_df = self.extract_features(
+            top_k_psm_df, *args, **kwargs
+        )
+        idxmax = top_k_psm_df.groupby(
+            ['raw_name',rerank_column]
+        )['ml_score'].idxmax()
+
+        df = top_k_psm_df.loc[idxmax].copy()
+        self._train_and_score(df)
+
+        top_k_psm_df = self._predict(top_k_psm_df)
+        idxmax = top_k_psm_df.groupby(
+            ['raw_name',rerank_column]
+        )['ml_score'].idxmax()
+        return top_k_psm_df.loc[idxmax].copy()
+
+    def run_rescore_workflow(self,
         psm_df:pd.DataFrame,
         *args, **kwargs
     )->pd.DataFrame:
@@ -114,7 +178,7 @@ class Percolator:
         Run percolator workflow:
 
         - self.extract_features()
-        - self.re_score()
+        - self.rescore()
 
         *args and **kwargs are used for 
         `self.feature_extractor.extract_features`.
@@ -200,12 +264,12 @@ class Percolator:
     ):
         train_t_df = train_t_df[train_t_df.fdr<=self.fdr]
 
-        if len(train_t_df) > self.max_train_sample:
+        if len(train_t_df) > self.max_training_sample:
             train_t_df = train_t_df.sample(
                 n=self.max_training_sample, 
                 random_state=1337
             )
-        if len(train_d_df) > self.max_train_sample:
+        if len(train_d_df) > self.max_training_sample:
             train_d_df = train_d_df.sample(
                 n=self.max_training_sample,
                 random_state=1337
@@ -231,6 +295,28 @@ class Percolator:
             )
         return test_df
 
+    def _train_and_score(self,
+        df:pd.DataFrame
+    )->pd.DataFrame:
+
+        df_target = df[df.decoy == 0]
+        df_decoy = df[df.decoy != 0]
+
+        if (
+            np.sum(df_target.fdr<=self.fdr) < 
+            self.min_training_sample or
+            len(df_decoy) < self.min_training_sample
+        ):
+            return df
+        
+        self._train(df_target, df_decoy)
+        test_df = pd.concat(
+            [df_target, df_decoy],
+            ignore_index=True
+        )
+    
+        return self._predict(test_df)
+
     def _cv_score(self, df:pd.DataFrame)->pd.DataFrame:
         """
         Apply cross-validation for rescoring.
@@ -249,9 +335,14 @@ class Percolator:
         pd.DataFrame
             PSMs after rescoring
         """
+
+        if self.cv_fold <= 1:
+            return self._train_and_score(df)
+
         df = df.sample(
             frac=1, random_state=1337
         ).reset_index(drop=True)
+
         df_target = df[df.decoy == 0]
         df_decoy = df[df.decoy != 0]
 
@@ -263,31 +354,24 @@ class Percolator:
         ):
             return df
         
-        if self.cv_fold > 1:
-            test_df_list = []
-            for i in range(self.cv_fold):
-                t_mask = np.ones(len(df_target), dtype=bool)
-                _slice = slice(i, len(df_target), self.cv_fold)
-                t_mask[_slice] = False
-                train_t_df = df_target[t_mask]
-                test_t_df = df_target[_slice]
-                
-                d_mask = np.ones(len(df_decoy), dtype=bool)
-                _slice = slice(i, len(df_decoy), self.cv_fold)
-                d_mask[_slice] = False
-                train_d_df = df_decoy[d_mask]
-                test_d_df = df_decoy[_slice]
+        test_df_list = []
+        for i in range(self.cv_fold):
+            t_mask = np.ones(len(df_target), dtype=bool)
+            _slice = slice(i, len(df_target), self.cv_fold)
+            t_mask[_slice] = False
+            train_t_df = df_target[t_mask]
+            test_t_df = df_target[_slice]
+            
+            d_mask = np.ones(len(df_decoy), dtype=bool)
+            _slice = slice(i, len(df_decoy), self.cv_fold)
+            d_mask[_slice] = False
+            train_d_df = df_decoy[d_mask]
+            test_d_df = df_decoy[_slice]
 
-                self._train(train_t_df, train_d_df)
+            self._train(train_t_df, train_d_df)
 
-                test_df = pd.concat((test_t_df, test_d_df))
-                test_df_list.append(self._predict(test_df))
-        
-            return pd.concat(test_df_list, ignore_index=True)
-        else:
-
-            self._train(df_target, df_decoy)
-            test_df = pd.concat((df_target, df_decoy),ignore_index=True)
-        
-            return self._predict(test_df)
+            test_df = pd.concat((test_t_df, test_d_df))
+            test_df_list.append(self._predict(test_df))
+    
+        return pd.concat(test_df_list, ignore_index=True)
     
