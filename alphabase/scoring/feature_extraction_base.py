@@ -49,3 +49,20 @@ class BaseFeatureExtractor:
         """
         return psm_df
 
+    def update_features(self,psm_df:pd.DataFrame)->pd.DataFrame:
+        """
+        This method allow us to update adaptive features
+        during the iteration of Percolator algorithm
+
+        Parameters
+        ----------
+        psm_df : pd.DataFrame
+            psm_df
+        
+        Returns
+        -------
+        pd.DataFrame
+            psm_df with updated feature values
+        """
+        return psm_df
+

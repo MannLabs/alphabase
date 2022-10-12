@@ -25,7 +25,7 @@ class Percolator:
         self._ml_model = LogisticRegression()
         
         self.fdr_level = 'psm' # psm, precursor, peptide, or sequence
-        self.fdr = 0.01
+        self.training_fdr = 0.01
         self.per_raw_fdr = False
 
         self.max_training_sample = 200000
@@ -113,6 +113,7 @@ class Percolator:
         for i in range(self.iter_num):
             df = self._cv_score(df)
             df = self._estimate_fdr(df, 'psm', False)
+            df = self.feature_extractor.update_features(df)
         df = self._estimate_fdr(df)
         return df
 
@@ -262,7 +263,7 @@ class Percolator:
         train_t_df:pd.DataFrame, 
         train_d_df:pd.DataFrame
     ):
-        train_t_df = train_t_df[train_t_df.fdr<=self.fdr]
+        train_t_df = train_t_df[train_t_df.fdr<=self.training_fdr]
 
         if len(train_t_df) > self.max_training_sample:
             train_t_df = train_t_df.sample(
@@ -303,7 +304,7 @@ class Percolator:
         df_decoy = df[df.decoy != 0]
 
         if (
-            np.sum(df_target.fdr<=self.fdr) < 
+            np.sum(df_target.fdr<=self.training_fdr) < 
             self.min_training_sample or
             len(df_decoy) < self.min_training_sample
         ):
@@ -347,7 +348,7 @@ class Percolator:
         df_decoy = df[df.decoy != 0]
 
         if (
-            np.sum(df_target.fdr<self.fdr) < 
+            np.sum(df_target.fdr<=self.training_fdr) < 
             self.min_training_sample*self.cv_fold 
             or len(df_decoy) < 
             self.min_training_sample*self.cv_fold
