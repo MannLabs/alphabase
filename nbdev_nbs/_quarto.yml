@@ -14,9 +14,6 @@ website:
   navbar:
     background: primary
     search: true
-    right:
-      - icon: github
-        href: "https://github.com/MannLabs/alphabase"
   sidebar:
     style: floating
 
