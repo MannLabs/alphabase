@@ -490,6 +490,7 @@ def calc_precursor_isotope_mp(
     mp_batch_size:int=100000,
     process_bar=None,
     min_right_most_intensity:float=0.2,
+    min_precursor_num_to_run_mp:int=1000,
 )->pd.DataFrame:
     """`calc_precursor_isotope` is not that fast for large dataframes, 
     so here we use multiprocessing for faster isotope pattern calculation. 
@@ -527,6 +528,11 @@ def calc_precursor_isotope_mp(
         - isotope_right_most_mz
         - isotope_right_most_index
     """
+    if len(precursor_df) < min_precursor_num_to_run_mp:
+        return calc_precursor_isotope(
+            precursor_df=precursor_df,
+            min_right_most_intensity=min_right_most_intensity,
+        )
     df_list = []
     df_group = precursor_df.groupby('nAA')
     with mp.Pool(processes) as p:

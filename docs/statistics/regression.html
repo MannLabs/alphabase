@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>alphabase - Precursor Functionalities</title>
+<title>alphabase – regression</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -124,12 +124,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 
 <link rel="stylesheet" href="../styles.css">
-<meta property="og:title" content="alphabase - Precursor Functionalities">
-<meta property="og:description" content="source">
-<meta property="og:site-name" content="alphabase">
-<meta name="twitter:title" content="alphabase - Precursor Functionalities">
-<meta name="twitter:description" content="source">
-<meta name="twitter:card" content="summary">
 </head>
 
 <body class="nav-sidebar floating nav-fixed">
@@ -160,7 +154,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     </nav>
   <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
     <div class="container-fluid d-flex justify-content-between">
-      <h1 class="quarto-secondary-nav-title">Precursor Functionalities</h1>
+      <h1 class="quarto-secondary-nav-title">(Untitled)</h1>
       <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
         <i class="bi bi-chevron-right"></i>
       </button>
@@ -258,7 +252,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../peptide/precursor.html" class="sidebar-item-text sidebar-link active">Precursor Functionalities</a>
+  <a href="../peptide/precursor.html" class="sidebar-item-text sidebar-link">Precursor Functionalities</a>
   </div>
 </li>
       </ul>
@@ -378,7 +372,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../statistics/regression.html" class="sidebar-item-text sidebar-link">Regression</a>
+  <a href="../statistics/regression.html" class="sidebar-item-text sidebar-link active">Regression</a>
   </div>
 </li>
       </ul>
@@ -392,52 +386,32 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#update_precursor_mz" id="toc-update_precursor_mz" class="nav-link active" data-scroll-target="#update_precursor_mz">update_precursor_mz</a></li>
-  <li><a href="#is_precursor_refined" id="toc-is_precursor_refined" class="nav-link" data-scroll-target="#is_precursor_refined">is_precursor_refined</a></li>
-  <li><a href="#refine_precursor_df" id="toc-refine_precursor_df" class="nav-link" data-scroll-target="#refine_precursor_df">refine_precursor_df</a></li>
-  <li><a href="#hash_precursor_df" id="toc-hash_precursor_df" class="nav-link" data-scroll-target="#hash_precursor_df">hash_precursor_df</a></li>
-  <li><a href="#hash_mod_seq_charge_df" id="toc-hash_mod_seq_charge_df" class="nav-link" data-scroll-target="#hash_mod_seq_charge_df">hash_mod_seq_charge_df</a></li>
-  <li><a href="#hash_mod_seq_df" id="toc-hash_mod_seq_df" class="nav-link" data-scroll-target="#hash_mod_seq_df">hash_mod_seq_df</a></li>
-  <li><a href="#get_mod_seq_charge_hash" id="toc-get_mod_seq_charge_hash" class="nav-link" data-scroll-target="#get_mod_seq_charge_hash">get_mod_seq_charge_hash</a></li>
-  <li><a href="#get_mod_seq_hash" id="toc-get_mod_seq_hash" class="nav-link" data-scroll-target="#get_mod_seq_hash">get_mod_seq_hash</a></li>
-  <li><a href="#calc_precursor_isotope_mp" id="toc-calc_precursor_isotope_mp" class="nav-link" data-scroll-target="#calc_precursor_isotope_mp">calc_precursor_isotope_mp</a></li>
-  <li><a href="#calc_precursor_isotope" id="toc-calc_precursor_isotope" class="nav-link" data-scroll-target="#calc_precursor_isotope">calc_precursor_isotope</a></li>
-  <li><a href="#get_mod_seq_isotope_distribution" id="toc-get_mod_seq_isotope_distribution" class="nav-link" data-scroll-target="#get_mod_seq_isotope_distribution">get_mod_seq_isotope_distribution</a></li>
-  <li><a href="#get_right_most_isotope_index" id="toc-get_right_most_isotope_index" class="nav-link" data-scroll-target="#get_right_most_isotope_index">get_right_most_isotope_index</a></li>
-  <li><a href="#get_mod_seq_formula" id="toc-get_mod_seq_formula" class="nav-link" data-scroll-target="#get_mod_seq_formula">get_mod_seq_formula</a></li>
-  <li><a href="#testing" id="toc-testing" class="nav-link" data-scroll-target="#testing">Testing</a></li>
+  <li><a href="#regression" id="toc-regression" class="nav-link active" data-scroll-target="#regression">Regression</a></li>
+  <li><a href="#loessregression" id="toc-loessregression" class="nav-link" data-scroll-target="#loessregression">LOESSRegression</a></li>
+  <li><a href="#loessregression.fit" id="toc-loessregression.fit" class="nav-link" data-scroll-target="#loessregression.fit">LOESSRegression.fit</a></li>
+  <li><a href="#loessregression.predict" id="toc-loessregression.predict" class="nav-link" data-scroll-target="#loessregression.predict">LOESSRegression.predict</a></li>
+  <li><a href="#application-example" id="toc-application-example" class="nav-link" data-scroll-target="#application-example">Application example</a></li>
   </ul>
 <div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/MannLabs/alphabase/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title d-none d-lg-block">Precursor Functionalities</h1>
-</div>
 
 
-
-<div class="quarto-title-meta">
-
-    
-    
-  </div>
-  
-
-</header>
-
+<section id="regression" class="level3">
+<h3 class="anchored" data-anchor-id="regression">Regression</h3>
 <!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
 <hr>
-<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/peptide/precursor.py#L80" target="_blank" style="float:right; font-size:smaller">source</a></p>
-<section id="update_precursor_mz" class="level3">
-<h3 class="anchored" data-anchor-id="update_precursor_mz">update_precursor_mz</h3>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/statistics/regression.py#L18" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="loessregression" class="level3">
+<h3 class="anchored" data-anchor-id="loessregression">LOESSRegression</h3>
 <blockquote class="blockquote">
-<pre><code> update_precursor_mz (precursor_df:pandas.core.frame.DataFrame,
-                      batch_size=500000)</code></pre>
+<pre><code> LOESSRegression (n_kernels:int=6, kernel_size:float=2.0,
+                  polynomial_degree:int=2)</code></pre>
 </blockquote>
-<p>Calculate precursor_mz inplace in the precursor_df</p>
+<p>scikit-learn estimator which implements a LOESS style local polynomial regression. The number of basis functions or kernels can be explicitly defined which allows for faster and cheaper training and inference.</p>
 <table class="table">
 <colgroup>
 <col style="width: 6%">
@@ -455,391 +429,34 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </thead>
 <tbody>
 <tr class="odd">
-<td>precursor_df</td>
-<td>DataFrame</td>
-<td></td>
-<td>precursor_df with the ‘charge’ column</td>
-</tr>
-<tr class="even">
-<td>batch_size</td>
+<td>n_kernels</td>
 <td>int</td>
-<td>500000</td>
-<td></td>
-</tr>
-<tr class="odd">
-<td><strong>Returns</strong></td>
-<td><strong>DataFrame</strong></td>
-<td></td>
-<td><strong>precursor_df with ‘precursor_mz’</strong></td>
-</tr>
-</tbody>
-</table>
-<hr>
-<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/peptide/precursor.py#L67" target="_blank" style="float:right; font-size:smaller">source</a></p>
-</section>
-<section id="is_precursor_refined" class="level3">
-<h3 class="anchored" data-anchor-id="is_precursor_refined">is_precursor_refined</h3>
-<blockquote class="blockquote">
-<pre><code> is_precursor_refined (precursor_df:pandas.core.frame.DataFrame)</code></pre>
-</blockquote>
-<hr>
-<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/peptide/precursor.py#L31" target="_blank" style="float:right; font-size:smaller">source</a></p>
-</section>
-<section id="refine_precursor_df" class="level3">
-<h3 class="anchored" data-anchor-id="refine_precursor_df">refine_precursor_df</h3>
-<blockquote class="blockquote">
-<pre><code> refine_precursor_df (df:pandas.core.frame.DataFrame, drop_frag_idx=True,
-                      ensure_data_validity=False)</code></pre>
-</blockquote>
-<p>Refine df inplace for faster precursor/fragment calculation.</p>
-<hr>
-<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/peptide/precursor.py#L260" target="_blank" style="float:right; font-size:smaller">source</a></p>
-</section>
-<section id="hash_precursor_df" class="level3">
-<h3 class="anchored" data-anchor-id="hash_precursor_df">hash_precursor_df</h3>
-<blockquote class="blockquote">
-<pre><code> hash_precursor_df (precursor_df:pandas.core.frame.DataFrame, seed:int=0)</code></pre>
-</blockquote>
-<p>Add columns ‘mod_seq_hash’ and ‘mod_seq_charge_hash’ into precursor_df (inplace). The 64-bit hash function is from mmh3 (mmh3.hash64).</p>
-<table class="table">
-<colgroup>
-<col style="width: 6%">
-<col style="width: 25%">
-<col style="width: 34%">
-<col style="width: 34%">
-</colgroup>
-<thead>
-<tr class="header">
-<th></th>
-<th><strong>Type</strong></th>
-<th><strong>Default</strong></th>
-<th><strong>Details</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>precursor_df</td>
-<td>DataFrame</td>
-<td></td>
-<td>precursor_df</td>
+<td>6</td>
+<td>default = 6, The number of local polynomial functions used to approximate the data. The location and extend of the kernels will be distributed to contain an equal number of datapoints in the training set.</td>
 </tr>
 <tr class="even">
-<td>seed</td>
-<td>int</td>
-<td>0</td>
-<td></td>
-</tr>
-<tr class="odd">
-<td><strong>Returns</strong></td>
-<td><strong>DataFrame</strong></td>
-<td></td>
-<td><strong>DataFrame with columns ‘mod_seq_hash’ and ‘mod_seq_charge_hash’</strong></td>
-</tr>
-</tbody>
-</table>
-<hr>
-<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/peptide/precursor.py#L242" target="_blank" style="float:right; font-size:smaller">source</a></p>
-</section>
-<section id="hash_mod_seq_charge_df" class="level3">
-<h3 class="anchored" data-anchor-id="hash_mod_seq_charge_df">hash_mod_seq_charge_df</h3>
-<blockquote class="blockquote">
-<pre><code> hash_mod_seq_charge_df (precursor_df:pandas.core.frame.DataFrame, seed=0)</code></pre>
-</blockquote>
-<p>Internal function</p>
-<hr>
-<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/peptide/precursor.py#L222" target="_blank" style="float:right; font-size:smaller">source</a></p>
-</section>
-<section id="hash_mod_seq_df" class="level3">
-<h3 class="anchored" data-anchor-id="hash_mod_seq_df">hash_mod_seq_df</h3>
-<blockquote class="blockquote">
-<pre><code> hash_mod_seq_df (precursor_df:pandas.core.frame.DataFrame, seed=0)</code></pre>
-</blockquote>
-<p>Internal function</p>
-<hr>
-<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/peptide/precursor.py#L177" target="_blank" style="float:right; font-size:smaller">source</a></p>
-</section>
-<section id="get_mod_seq_charge_hash" class="level3">
-<h3 class="anchored" data-anchor-id="get_mod_seq_charge_hash">get_mod_seq_charge_hash</h3>
-<blockquote class="blockquote">
-<pre><code> get_mod_seq_charge_hash (sequence:str, mods:str, mod_sites:str,
-                          charge:int, seed=0)</code></pre>
-</blockquote>
-<p>Get hash code value for a precursor: (sequence, mods, mod_sites, charge)</p>
-<table class="table">
-<thead>
-<tr class="header">
-<th></th>
-<th><strong>Type</strong></th>
-<th><strong>Default</strong></th>
-<th><strong>Details</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>sequence</td>
-<td>str</td>
-<td></td>
-<td>Amino acid sequence</td>
-</tr>
-<tr class="even">
-<td>mods</td>
-<td>str</td>
-<td></td>
-<td>Modification names in AlphaBase format</td>
-</tr>
-<tr class="odd">
-<td>mod_sites</td>
-<td>str</td>
-<td></td>
-<td>Modification sites in AlphaBase format</td>
-</tr>
-<tr class="even">
-<td>charge</td>
-<td>int</td>
-<td></td>
-<td>Precursor charge state</td>
-</tr>
-<tr class="odd">
-<td>seed</td>
-<td>int</td>
-<td>0</td>
-<td>Seed for hashing.<br>Optional, by default 0</td>
-</tr>
-<tr class="even">
-<td><strong>Returns</strong></td>
-<td><strong>np.int64</strong></td>
-<td></td>
-<td><strong>64-bit hash code value</strong></td>
-</tr>
-</tbody>
-</table>
-<hr>
-<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/peptide/precursor.py#L138" target="_blank" style="float:right; font-size:smaller">source</a></p>
-</section>
-<section id="get_mod_seq_hash" class="level3">
-<h3 class="anchored" data-anchor-id="get_mod_seq_hash">get_mod_seq_hash</h3>
-<blockquote class="blockquote">
-<pre><code> get_mod_seq_hash (sequence:str, mods:str, mod_sites:str, seed:int=0)</code></pre>
-</blockquote>
-<p>Get hash code value for a peptide: (sequence, mods, mod_sites)</p>
-<table class="table">
-<thead>
-<tr class="header">
-<th></th>
-<th><strong>Type</strong></th>
-<th><strong>Default</strong></th>
-<th><strong>Details</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>sequence</td>
-<td>str</td>
-<td></td>
-<td>Amino acid sequence</td>
-</tr>
-<tr class="even">
-<td>mods</td>
-<td>str</td>
-<td></td>
-<td>Modification names in AlphaBase format</td>
-</tr>
-<tr class="odd">
-<td>mod_sites</td>
-<td>str</td>
-<td></td>
-<td>Modification sites in AlphaBase format</td>
-</tr>
-<tr class="even">
-<td>seed</td>
-<td>int</td>
-<td>0</td>
-<td>Seed for hashing.<br>Optional, by default 0</td>
-</tr>
-<tr class="odd">
-<td><strong>Returns</strong></td>
-<td><strong>int64</strong></td>
-<td></td>
-<td><strong>64-bit hash code value</strong></td>
-</tr>
-</tbody>
-</table>
-<hr>
-<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/peptide/precursor.py#L487" target="_blank" style="float:right; font-size:smaller">source</a></p>
-</section>
-<section id="calc_precursor_isotope_mp" class="level3">
-<h3 class="anchored" data-anchor-id="calc_precursor_isotope_mp">calc_precursor_isotope_mp</h3>
-<blockquote class="blockquote">
-<pre><code> calc_precursor_isotope_mp (precursor_df:pandas.core.frame.DataFrame,
-                            processes:int=8, mp_batch_size:int=100000,
-                            process_bar=None,
-                            min_right_most_intensity:float=0.2)</code></pre>
-</blockquote>
-<p><code>calc_precursor_isotope</code> is not that fast for large dataframes, so here we use multiprocessing for faster isotope pattern calculation. The speed is acceptable with multiprocessing (3.8 min for 21M precursors, 8 processes).</p>
-<table class="table">
-<colgroup>
-<col style="width: 6%">
-<col style="width: 25%">
-<col style="width: 34%">
-<col style="width: 34%">
-</colgroup>
-<thead>
-<tr class="header">
-<th></th>
-<th><strong>Type</strong></th>
-<th><strong>Default</strong></th>
-<th><strong>Details</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>precursor_df</td>
-<td>DataFrame</td>
-<td></td>
-<td>Precursor_df to calculate</td>
-</tr>
-<tr class="even">
-<td>processes</td>
-<td>int</td>
-<td>8</td>
-<td>Process number. Optional, by default 8</td>
-</tr>
-<tr class="odd">
-<td>mp_batch_size</td>
-<td>int</td>
-<td>100000</td>
-<td>Multiprocessing batch size. Optional, by default 100000.</td>
-</tr>
-<tr class="even">
-<td>process_bar</td>
-<td>NoneType</td>
-<td>None</td>
-<td>The tqdm-based callback function <br>to check multiprocessing. Defaults to None.</td>
-</tr>
-<tr class="odd">
-<td>min_right_most_intensity</td>
+<td>kernel_size</td>
 <td>float</td>
-<td>0.2</td>
-<td>The minimal intensity value of the right-most peak relative to apex peak. <br>Optional, by default 0.2</td>
+<td>2.0</td>
+<td>default = 2, A factor increasing the kernel size to overlap with the neighboring kernel.</td>
 </tr>
-<tr class="even">
-<td><strong>Returns</strong></td>
-<td><strong>DataFrame</strong></td>
-<td></td>
-<td><strong>precursor_df with additional columns:<br>- isotope_m1_intensity<br>- isotope_m1_mz<br>- isotope_apex_intensity<br>- isotope_apex_mz<br>- isotope_apex_index<br>- isotope_right_most_intensity<br>- isotope_right_most_mz<br>- isotope_right_most_index</strong></td>
+<tr class="odd">
+<td>polynomial_degree</td>
+<td>int</td>
+<td>2</td>
+<td>default = 2, Degree of the polynomial functions used for the local approximation.</td>
 </tr>
 </tbody>
 </table>
 <hr>
-<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/peptide/precursor.py#L399" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/statistics/regression.py#L85" target="_blank" style="float:right; font-size:smaller">source</a></p>
 </section>
-<section id="calc_precursor_isotope" class="level3">
-<h3 class="anchored" data-anchor-id="calc_precursor_isotope">calc_precursor_isotope</h3>
+<section id="loessregression.fit" class="level3">
+<h3 class="anchored" data-anchor-id="loessregression.fit">LOESSRegression.fit</h3>
 <blockquote class="blockquote">
-<pre><code> calc_precursor_isotope (precursor_df:pandas.core.frame.DataFrame,
-                         min_right_most_intensity:float=0.2)</code></pre>
+<pre><code> LOESSRegression.fit (x:numpy.ndarray, y:numpy.ndarray)</code></pre>
 </blockquote>
-<p>Calculate isotope mz values and relative (to M0) intensity values for precursor_df inplace.</p>
-<table class="table">
-<colgroup>
-<col style="width: 6%">
-<col style="width: 25%">
-<col style="width: 34%">
-<col style="width: 34%">
-</colgroup>
-<thead>
-<tr class="header">
-<th></th>
-<th><strong>Type</strong></th>
-<th><strong>Default</strong></th>
-<th><strong>Details</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>precursor_df</td>
-<td>DataFrame</td>
-<td></td>
-<td>precursor_df to calculate</td>
-</tr>
-<tr class="even">
-<td>min_right_most_intensity</td>
-<td>float</td>
-<td>0.2</td>
-<td>The minimal intensity value of the right-most peak relative to apex peak. <br>Optional, by default 0.2</td>
-</tr>
-<tr class="odd">
-<td><strong>Returns</strong></td>
-<td><strong>pd.DataFrame</strong></td>
-<td></td>
-<td><strong>precursor_df with additional columns:<br>- isotope_m1_intensity<br>- isotope_m1_mz<br>- isotope_apex_intensity<br>- isotope_apex_mz<br>- isotope_apex_index<br>- isotope_right_most_intensity<br>- isotope_right_most_mz<br>- isotope_right_most_index</strong></td>
-</tr>
-</tbody>
-</table>
-<hr>
-<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/peptide/precursor.py#L347" target="_blank" style="float:right; font-size:smaller">source</a></p>
-</section>
-<section id="get_mod_seq_isotope_distribution" class="level3">
-<h3 class="anchored" data-anchor-id="get_mod_seq_isotope_distribution">get_mod_seq_isotope_distribution</h3>
-<blockquote class="blockquote">
-<pre><code> get_mod_seq_isotope_distribution (seq_mods:tuple,
-                                   isotope_dist:alphabase.constants.isotop
-                                   e.IsotopeDistribution,
-                                   min_right_most_intensity:float=0.2)</code></pre>
-</blockquote>
-<p>Get isotope abundance distribution by IsotopeDistribution. This function is designed for multiprocessing.</p>
-<table class="table">
-<colgroup>
-<col style="width: 6%">
-<col style="width: 25%">
-<col style="width: 34%">
-<col style="width: 34%">
-</colgroup>
-<thead>
-<tr class="header">
-<th></th>
-<th><strong>Type</strong></th>
-<th><strong>Default</strong></th>
-<th><strong>Details</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>seq_mods</td>
-<td>tuple</td>
-<td></td>
-<td>(sequence, mods)</td>
-</tr>
-<tr class="even">
-<td>isotope_dist</td>
-<td>IsotopeDistribution</td>
-<td></td>
-<td>See <code>IsotopeDistribution</code> in <code>alphabase.constants.isotope</code></td>
-</tr>
-<tr class="odd">
-<td>min_right_most_intensity</td>
-<td>float</td>
-<td>0.2</td>
-<td>The minimal intensity value of the right-most peak relative to apex peak. <br>Optional, by default 0.2</td>
-</tr>
-<tr class="even">
-<td><strong>Returns</strong></td>
-<td><strong>tuple</strong></td>
-<td></td>
-<td><strong>float - Abundance of mono+1 / mono<br>float - Abundance of apex / mono<br>int - Apex isotope position relative to mono, <br> i.e.&nbsp;apex index - mono index and<br> 0 refers to the position of mono itself<br>float - Abundance of right-most peak which has at least <code>min_right_most_intensity</code><br> intensity relative to the apex peak<br>int - Right-most position relative to mono,<br> i.e.&nbsp;right-most index - mono index</strong></td>
-</tr>
-</tbody>
-</table>
-<hr>
-<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/peptide/precursor.py#L313" target="_blank" style="float:right; font-size:smaller">source</a></p>
-</section>
-<section id="get_right_most_isotope_index" class="level3">
-<h3 class="anchored" data-anchor-id="get_right_most_isotope_index">get_right_most_isotope_index</h3>
-<blockquote class="blockquote">
-<pre><code> get_right_most_isotope_index (intensities:numpy.ndarray, apex_idx:int,
-                               min_right_most_intensity:float)</code></pre>
-</blockquote>
-<p>Get right-most isotope index</p>
+<p>fit the model passed on provided training data.</p>
 <table class="table">
 <colgroup>
 <col style="width: 9%">
@@ -855,55 +472,78 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </thead>
 <tbody>
 <tr class="odd">
-<td>intensities</td>
+<td>x</td>
 <td>ndarray</td>
-<td>Isotope intensities</td>
+<td>float, of shape (n_samples,) or (n_samples, 1), Training data. Note that only a single feature is supported at the moment.</td>
 </tr>
 <tr class="even">
-<td>apex_idx</td>
-<td>int</td>
-<td>The index or position of apex peak</td>
+<td>y</td>
+<td>ndarray</td>
+<td>of shape (n_samples,) or (n_samples, 1) Target values.</td>
 </tr>
 <tr class="odd">
-<td>min_right_most_intensity</td>
-<td>float</td>
-<td>Minimal intensity to consider for right-most peak relative to apex</td>
-</tr>
-<tr class="even">
 <td><strong>Returns</strong></td>
-<td><strong>int</strong></td>
-<td><strong>Index or position of the right-most peak</strong></td>
+<td><strong>self: object</strong></td>
+<td><strong>Returns the fitted estimator.</strong></td>
 </tr>
 </tbody>
 </table>
 <hr>
-<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/peptide/precursor.py#L292" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/statistics/regression.py#L184" target="_blank" style="float:right; font-size:smaller">source</a></p>
 </section>
-<section id="get_mod_seq_formula" class="level3">
-<h3 class="anchored" data-anchor-id="get_mod_seq_formula">get_mod_seq_formula</h3>
+<section id="loessregression.predict" class="level3">
+<h3 class="anchored" data-anchor-id="loessregression.predict">LOESSRegression.predict</h3>
 <blockquote class="blockquote">
-<pre><code> get_mod_seq_formula (seq:str, mods:str)</code></pre>
+<pre><code> LOESSRegression.predict (x:numpy.ndarray)</code></pre>
 </blockquote>
-<p>‘PEPTIDE’,‘Acetyl@Any N-term’ –&gt; [(‘C’,n), (‘H’,m), …]</p>
+<p>Predict using the LOESS model.</p>
+<table class="table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 38%">
+<col style="width: 52%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>x</td>
+<td>ndarray</td>
+<td>float, of shape (n_samples,) or (n_samples, 1) Feature data. Note that only a single feature is supported at the moment.</td>
+</tr>
+<tr class="even">
+<td><strong>Returns</strong></td>
+<td><strong>numpy.ndarray, float</strong></td>
+<td></td>
+</tr>
+</tbody>
+</table>
 </section>
-<section id="testing" class="level3">
-<h3 class="anchored" data-anchor-id="testing">Testing</h3>
+<section id="application-example" class="level3">
+<h3 class="anchored" data-anchor-id="application-example">Application example</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>repeat <span class="op">=</span> <span class="dv">2</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>peptides <span class="op">=</span> [<span class="st">'AGHCEWQMKAADER'</span>]<span class="op">*</span>repeat</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>mods <span class="op">=</span> [<span class="st">'Acetyl@Protein N-term;Carbamidomethyl@C;Oxidation@M'</span>]<span class="op">*</span>repeat</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>sites <span class="op">=</span> [<span class="st">'0;4;8'</span>]<span class="op">*</span>repeat</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>peptides <span class="op">+=</span> [<span class="st">'AGHCEWQMK'</span>]<span class="op">*</span>repeat</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>mods <span class="op">+=</span> [<span class="st">''</span>]<span class="op">*</span>repeat</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>sites <span class="op">+=</span> [<span class="st">''</span>]<span class="op">*</span>repeat</span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>precursor_df <span class="op">=</span> pd.DataFrame({</span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">'sequence'</span>: peptides,</span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">'mods'</span>: mods,</span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">'mod_sites'</span>: sites</span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>})</span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>precursor_df[<span class="st">'nAA'</span>] <span class="op">=</span> precursor_df[<span class="st">'sequence'</span>].<span class="bu">str</span>.<span class="bu">len</span>()</span>
-<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>precursor_df[<span class="st">'charge'</span>] <span class="op">=</span> <span class="dv">2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> noisy_1d(x):</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> np.sin(x)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    y_err <span class="op">=</span> np.random.normal(y,<span class="fl">0.5</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> y <span class="op">+</span> y_err <span class="op">+</span> <span class="fl">0.5</span> <span class="op">*</span> x</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>x_train <span class="op">=</span> np.linspace(<span class="dv">0</span>,<span class="dv">15</span>,<span class="dv">200</span>)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>y_train <span class="op">=</span> noisy_1d(x_train)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>x_test <span class="op">=</span> np.linspace(<span class="dv">0</span>,<span class="dv">15</span>,<span class="dv">200</span>)</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>y_test <span class="op">=</span> LOESSRegression().fit(x_train, y_train).predict(x_test)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>plt.scatter(x_train,y_train)</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>plt.plot(x_test,y_test,c<span class="op">=</span><span class="st">'r'</span>)</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="regression_files/figure-html/cell-5-output-1.png" class="img-fluid"></p>
+</div>
 </div>
 
 

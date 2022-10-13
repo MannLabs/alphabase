@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>alphabase - Precursor Functionalities</title>
+<title>alphabase - FDR functionalities</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -121,14 +121,17 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     "search-submit-button-title": "Submit"
   }
 }</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
 
 <link rel="stylesheet" href="../styles.css">
-<meta property="og:title" content="alphabase - Precursor Functionalities">
-<meta property="og:description" content="source">
+<meta property="og:title" content="alphabase - FDR functionalities">
+<meta property="og:description" content="Functionalities to calculate FDR.">
 <meta property="og:site-name" content="alphabase">
-<meta name="twitter:title" content="alphabase - Precursor Functionalities">
-<meta name="twitter:description" content="source">
+<meta name="twitter:title" content="alphabase - FDR functionalities">
+<meta name="twitter:description" content="Functionalities to calculate FDR.">
 <meta name="twitter:card" content="summary">
 </head>
 
@@ -160,7 +163,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     </nav>
   <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
     <div class="container-fluid d-flex justify-content-between">
-      <h1 class="quarto-secondary-nav-title">Precursor Functionalities</h1>
+      <h1 class="quarto-secondary-nav-title">FDR functionalities</h1>
       <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
         <i class="bi bi-chevron-right"></i>
       </button>
@@ -258,7 +261,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../peptide/precursor.html" class="sidebar-item-text sidebar-link active">Precursor Functionalities</a>
+  <a href="../peptide/precursor.html" class="sidebar-item-text sidebar-link">Precursor Functionalities</a>
   </div>
 </li>
       </ul>
@@ -333,7 +336,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../scoring/fdr.html" class="sidebar-item-text sidebar-link">FDR functionalities</a>
+  <a href="../scoring/fdr.html" class="sidebar-item-text sidebar-link active">FDR functionalities</a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -392,20 +395,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#update_precursor_mz" id="toc-update_precursor_mz" class="nav-link active" data-scroll-target="#update_precursor_mz">update_precursor_mz</a></li>
-  <li><a href="#is_precursor_refined" id="toc-is_precursor_refined" class="nav-link" data-scroll-target="#is_precursor_refined">is_precursor_refined</a></li>
-  <li><a href="#refine_precursor_df" id="toc-refine_precursor_df" class="nav-link" data-scroll-target="#refine_precursor_df">refine_precursor_df</a></li>
-  <li><a href="#hash_precursor_df" id="toc-hash_precursor_df" class="nav-link" data-scroll-target="#hash_precursor_df">hash_precursor_df</a></li>
-  <li><a href="#hash_mod_seq_charge_df" id="toc-hash_mod_seq_charge_df" class="nav-link" data-scroll-target="#hash_mod_seq_charge_df">hash_mod_seq_charge_df</a></li>
-  <li><a href="#hash_mod_seq_df" id="toc-hash_mod_seq_df" class="nav-link" data-scroll-target="#hash_mod_seq_df">hash_mod_seq_df</a></li>
-  <li><a href="#get_mod_seq_charge_hash" id="toc-get_mod_seq_charge_hash" class="nav-link" data-scroll-target="#get_mod_seq_charge_hash">get_mod_seq_charge_hash</a></li>
-  <li><a href="#get_mod_seq_hash" id="toc-get_mod_seq_hash" class="nav-link" data-scroll-target="#get_mod_seq_hash">get_mod_seq_hash</a></li>
-  <li><a href="#calc_precursor_isotope_mp" id="toc-calc_precursor_isotope_mp" class="nav-link" data-scroll-target="#calc_precursor_isotope_mp">calc_precursor_isotope_mp</a></li>
-  <li><a href="#calc_precursor_isotope" id="toc-calc_precursor_isotope" class="nav-link" data-scroll-target="#calc_precursor_isotope">calc_precursor_isotope</a></li>
-  <li><a href="#get_mod_seq_isotope_distribution" id="toc-get_mod_seq_isotope_distribution" class="nav-link" data-scroll-target="#get_mod_seq_isotope_distribution">get_mod_seq_isotope_distribution</a></li>
-  <li><a href="#get_right_most_isotope_index" id="toc-get_right_most_isotope_index" class="nav-link" data-scroll-target="#get_right_most_isotope_index">get_right_most_isotope_index</a></li>
-  <li><a href="#get_mod_seq_formula" id="toc-get_mod_seq_formula" class="nav-link" data-scroll-target="#get_mod_seq_formula">get_mod_seq_formula</a></li>
-  <li><a href="#testing" id="toc-testing" class="nav-link" data-scroll-target="#testing">Testing</a></li>
+  <li><a href="#calculate_fdr_from_ref" id="toc-calculate_fdr_from_ref" class="nav-link active" data-scroll-target="#calculate_fdr_from_ref">calculate_fdr_from_ref</a></li>
+  <li><a href="#fdr_from_ref" id="toc-fdr_from_ref" class="nav-link" data-scroll-target="#fdr_from_ref">fdr_from_ref</a></li>
+  <li><a href="#calculate_fdr" id="toc-calculate_fdr" class="nav-link" data-scroll-target="#calculate_fdr">calculate_fdr</a></li>
+  <li><a href="#fdr_to_q_values" id="toc-fdr_to_q_values" class="nav-link" data-scroll-target="#fdr_to_q_values">fdr_to_q_values</a></li>
   </ul>
 <div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/MannLabs/alphabase/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
     </div>
@@ -414,7 +407,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title d-none d-lg-block">Precursor Functionalities</h1>
+<h1 class="title d-none d-lg-block">FDR functionalities</h1>
 </div>
 
 
@@ -429,15 +422,21 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </header>
 
 <!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
-<hr>
-<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/peptide/precursor.py#L80" target="_blank" style="float:right; font-size:smaller">source</a></p>
-<section id="update_precursor_mz" class="level3">
-<h3 class="anchored" data-anchor-id="update_precursor_mz">update_precursor_mz</h3>
+<p>Functionalities to calculate FDR.</p>
 <blockquote class="blockquote">
-<pre><code> update_precursor_mz (precursor_df:pandas.core.frame.DataFrame,
-                      batch_size=500000)</code></pre>
+<p>In alphabase dataframes, we refer fdr values as q_values without loss of generacity.</p>
 </blockquote>
-<p>Calculate precursor_mz inplace in the precursor_df</p>
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/scoring/fdr.py#L120" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="calculate_fdr_from_ref" class="level3">
+<h3 class="anchored" data-anchor-id="calculate_fdr_from_ref">calculate_fdr_from_ref</h3>
+<blockquote class="blockquote">
+<pre><code> calculate_fdr_from_ref (df:pandas.core.frame.DataFrame,
+                         ref_scores:numpy.ndarray,
+                         ref_fdr_values:numpy.ndarray, score_column:str,
+                         decoy_column:str='decoy')</code></pre>
+</blockquote>
+<p>Calculate FDR values for a PSM dataframe from the given reference scores and fdr_values. It is used to extend peptide-level or sequence-level FDR (reference) to each PSM, as PSMs are more useful for quantification. ``</p>
 <table class="table">
 <colgroup>
 <col style="width: 6%">
@@ -455,391 +454,53 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </thead>
 <tbody>
 <tr class="odd">
-<td>precursor_df</td>
+<td>df</td>
 <td>DataFrame</td>
 <td></td>
-<td>precursor_df with the ‘charge’ column</td>
+<td>PSM dataframe</td>
 </tr>
 <tr class="even">
-<td>batch_size</td>
-<td>int</td>
-<td>500000</td>
+<td>ref_scores</td>
+<td>ndarray</td>
 <td></td>
+<td>reference scores that used to <br>calculate ref_fdr_values, also sorted in decending order.</td>
 </tr>
 <tr class="odd">
-<td><strong>Returns</strong></td>
-<td><strong>DataFrame</strong></td>
+<td>ref_fdr_values</td>
+<td>ndarray</td>
 <td></td>
-<td><strong>precursor_df with ‘precursor_mz’</strong></td>
-</tr>
-</tbody>
-</table>
-<hr>
-<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/peptide/precursor.py#L67" target="_blank" style="float:right; font-size:smaller">source</a></p>
-</section>
-<section id="is_precursor_refined" class="level3">
-<h3 class="anchored" data-anchor-id="is_precursor_refined">is_precursor_refined</h3>
-<blockquote class="blockquote">
-<pre><code> is_precursor_refined (precursor_df:pandas.core.frame.DataFrame)</code></pre>
-</blockquote>
-<hr>
-<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/peptide/precursor.py#L31" target="_blank" style="float:right; font-size:smaller">source</a></p>
-</section>
-<section id="refine_precursor_df" class="level3">
-<h3 class="anchored" data-anchor-id="refine_precursor_df">refine_precursor_df</h3>
-<blockquote class="blockquote">
-<pre><code> refine_precursor_df (df:pandas.core.frame.DataFrame, drop_frag_idx=True,
-                      ensure_data_validity=False)</code></pre>
-</blockquote>
-<p>Refine df inplace for faster precursor/fragment calculation.</p>
-<hr>
-<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/peptide/precursor.py#L260" target="_blank" style="float:right; font-size:smaller">source</a></p>
-</section>
-<section id="hash_precursor_df" class="level3">
-<h3 class="anchored" data-anchor-id="hash_precursor_df">hash_precursor_df</h3>
-<blockquote class="blockquote">
-<pre><code> hash_precursor_df (precursor_df:pandas.core.frame.DataFrame, seed:int=0)</code></pre>
-</blockquote>
-<p>Add columns ‘mod_seq_hash’ and ‘mod_seq_charge_hash’ into precursor_df (inplace). The 64-bit hash function is from mmh3 (mmh3.hash64).</p>
-<table class="table">
-<colgroup>
-<col style="width: 6%">
-<col style="width: 25%">
-<col style="width: 34%">
-<col style="width: 34%">
-</colgroup>
-<thead>
-<tr class="header">
-<th></th>
-<th><strong>Type</strong></th>
-<th><strong>Default</strong></th>
-<th><strong>Details</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>precursor_df</td>
-<td>DataFrame</td>
-<td></td>
-<td>precursor_df</td>
+<td>fdr values corresponding to ref_scores</td>
 </tr>
 <tr class="even">
-<td>seed</td>
-<td>int</td>
-<td>0</td>
-<td></td>
-</tr>
-<tr class="odd">
-<td><strong>Returns</strong></td>
-<td><strong>DataFrame</strong></td>
-<td></td>
-<td><strong>DataFrame with columns ‘mod_seq_hash’ and ‘mod_seq_charge_hash’</strong></td>
-</tr>
-</tbody>
-</table>
-<hr>
-<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/peptide/precursor.py#L242" target="_blank" style="float:right; font-size:smaller">source</a></p>
-</section>
-<section id="hash_mod_seq_charge_df" class="level3">
-<h3 class="anchored" data-anchor-id="hash_mod_seq_charge_df">hash_mod_seq_charge_df</h3>
-<blockquote class="blockquote">
-<pre><code> hash_mod_seq_charge_df (precursor_df:pandas.core.frame.DataFrame, seed=0)</code></pre>
-</blockquote>
-<p>Internal function</p>
-<hr>
-<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/peptide/precursor.py#L222" target="_blank" style="float:right; font-size:smaller">source</a></p>
-</section>
-<section id="hash_mod_seq_df" class="level3">
-<h3 class="anchored" data-anchor-id="hash_mod_seq_df">hash_mod_seq_df</h3>
-<blockquote class="blockquote">
-<pre><code> hash_mod_seq_df (precursor_df:pandas.core.frame.DataFrame, seed=0)</code></pre>
-</blockquote>
-<p>Internal function</p>
-<hr>
-<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/peptide/precursor.py#L177" target="_blank" style="float:right; font-size:smaller">source</a></p>
-</section>
-<section id="get_mod_seq_charge_hash" class="level3">
-<h3 class="anchored" data-anchor-id="get_mod_seq_charge_hash">get_mod_seq_charge_hash</h3>
-<blockquote class="blockquote">
-<pre><code> get_mod_seq_charge_hash (sequence:str, mods:str, mod_sites:str,
-                          charge:int, seed=0)</code></pre>
-</blockquote>
-<p>Get hash code value for a precursor: (sequence, mods, mod_sites, charge)</p>
-<table class="table">
-<thead>
-<tr class="header">
-<th></th>
-<th><strong>Type</strong></th>
-<th><strong>Default</strong></th>
-<th><strong>Details</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>sequence</td>
+<td>score_column</td>
 <td>str</td>
 <td></td>
-<td>Amino acid sequence</td>
+<td>score column in the dataframe</td>
 </tr>
-<tr class="even">
-<td>mods</td>
+<tr class="odd">
+<td>decoy_column</td>
 <td>str</td>
-<td></td>
-<td>Modification names in AlphaBase format</td>
-</tr>
-<tr class="odd">
-<td>mod_sites</td>
-<td>str</td>
-<td></td>
-<td>Modification sites in AlphaBase format</td>
-</tr>
-<tr class="even">
-<td>charge</td>
-<td>int</td>
-<td></td>
-<td>Precursor charge state</td>
-</tr>
-<tr class="odd">
-<td>seed</td>
-<td>int</td>
-<td>0</td>
-<td>Seed for hashing.<br>Optional, by default 0</td>
-</tr>
-<tr class="even">
-<td><strong>Returns</strong></td>
-<td><strong>np.int64</strong></td>
-<td></td>
-<td><strong>64-bit hash code value</strong></td>
-</tr>
-</tbody>
-</table>
-<hr>
-<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/peptide/precursor.py#L138" target="_blank" style="float:right; font-size:smaller">source</a></p>
-</section>
-<section id="get_mod_seq_hash" class="level3">
-<h3 class="anchored" data-anchor-id="get_mod_seq_hash">get_mod_seq_hash</h3>
-<blockquote class="blockquote">
-<pre><code> get_mod_seq_hash (sequence:str, mods:str, mod_sites:str, seed:int=0)</code></pre>
-</blockquote>
-<p>Get hash code value for a peptide: (sequence, mods, mod_sites)</p>
-<table class="table">
-<thead>
-<tr class="header">
-<th></th>
-<th><strong>Type</strong></th>
-<th><strong>Default</strong></th>
-<th><strong>Details</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>sequence</td>
-<td>str</td>
-<td></td>
-<td>Amino acid sequence</td>
-</tr>
-<tr class="even">
-<td>mods</td>
-<td>str</td>
-<td></td>
-<td>Modification names in AlphaBase format</td>
-</tr>
-<tr class="odd">
-<td>mod_sites</td>
-<td>str</td>
-<td></td>
-<td>Modification sites in AlphaBase format</td>
-</tr>
-<tr class="even">
-<td>seed</td>
-<td>int</td>
-<td>0</td>
-<td>Seed for hashing.<br>Optional, by default 0</td>
-</tr>
-<tr class="odd">
-<td><strong>Returns</strong></td>
-<td><strong>int64</strong></td>
-<td></td>
-<td><strong>64-bit hash code value</strong></td>
-</tr>
-</tbody>
-</table>
-<hr>
-<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/peptide/precursor.py#L487" target="_blank" style="float:right; font-size:smaller">source</a></p>
-</section>
-<section id="calc_precursor_isotope_mp" class="level3">
-<h3 class="anchored" data-anchor-id="calc_precursor_isotope_mp">calc_precursor_isotope_mp</h3>
-<blockquote class="blockquote">
-<pre><code> calc_precursor_isotope_mp (precursor_df:pandas.core.frame.DataFrame,
-                            processes:int=8, mp_batch_size:int=100000,
-                            process_bar=None,
-                            min_right_most_intensity:float=0.2)</code></pre>
-</blockquote>
-<p><code>calc_precursor_isotope</code> is not that fast for large dataframes, so here we use multiprocessing for faster isotope pattern calculation. The speed is acceptable with multiprocessing (3.8 min for 21M precursors, 8 processes).</p>
-<table class="table">
-<colgroup>
-<col style="width: 6%">
-<col style="width: 25%">
-<col style="width: 34%">
-<col style="width: 34%">
-</colgroup>
-<thead>
-<tr class="header">
-<th></th>
-<th><strong>Type</strong></th>
-<th><strong>Default</strong></th>
-<th><strong>Details</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>precursor_df</td>
-<td>DataFrame</td>
-<td></td>
-<td>Precursor_df to calculate</td>
-</tr>
-<tr class="even">
-<td>processes</td>
-<td>int</td>
-<td>8</td>
-<td>Process number. Optional, by default 8</td>
-</tr>
-<tr class="odd">
-<td>mp_batch_size</td>
-<td>int</td>
-<td>100000</td>
-<td>Multiprocessing batch size. Optional, by default 100000.</td>
-</tr>
-<tr class="even">
-<td>process_bar</td>
-<td>NoneType</td>
-<td>None</td>
-<td>The tqdm-based callback function <br>to check multiprocessing. Defaults to None.</td>
-</tr>
-<tr class="odd">
-<td>min_right_most_intensity</td>
-<td>float</td>
-<td>0.2</td>
-<td>The minimal intensity value of the right-most peak relative to apex peak. <br>Optional, by default 0.2</td>
+<td>decoy</td>
+<td>decoy column in the dataframe. <br>1=target, 0=decoy. Defaults to ‘decoy’.</td>
 </tr>
 <tr class="even">
 <td><strong>Returns</strong></td>
 <td><strong>DataFrame</strong></td>
 <td></td>
-<td><strong>precursor_df with additional columns:<br>- isotope_m1_intensity<br>- isotope_m1_mz<br>- isotope_apex_intensity<br>- isotope_apex_mz<br>- isotope_apex_index<br>- isotope_right_most_intensity<br>- isotope_right_most_mz<br>- isotope_right_most_index</strong></td>
+<td><strong>dataframe with ‘fdr’ column added</strong></td>
 </tr>
 </tbody>
 </table>
 <hr>
-<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/peptide/precursor.py#L399" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/scoring/fdr.py#L79" target="_blank" style="float:right; font-size:smaller">source</a></p>
 </section>
-<section id="calc_precursor_isotope" class="level3">
-<h3 class="anchored" data-anchor-id="calc_precursor_isotope">calc_precursor_isotope</h3>
+<section id="fdr_from_ref" class="level3">
+<h3 class="anchored" data-anchor-id="fdr_from_ref">fdr_from_ref</h3>
 <blockquote class="blockquote">
-<pre><code> calc_precursor_isotope (precursor_df:pandas.core.frame.DataFrame,
-                         min_right_most_intensity:float=0.2)</code></pre>
+<pre><code> fdr_from_ref (sorted_scores:numpy.ndarray, ref_scores:numpy.ndarray,
+               ref_fdr_values:numpy.ndarray)</code></pre>
 </blockquote>
-<p>Calculate isotope mz values and relative (to M0) intensity values for precursor_df inplace.</p>
-<table class="table">
-<colgroup>
-<col style="width: 6%">
-<col style="width: 25%">
-<col style="width: 34%">
-<col style="width: 34%">
-</colgroup>
-<thead>
-<tr class="header">
-<th></th>
-<th><strong>Type</strong></th>
-<th><strong>Default</strong></th>
-<th><strong>Details</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>precursor_df</td>
-<td>DataFrame</td>
-<td></td>
-<td>precursor_df to calculate</td>
-</tr>
-<tr class="even">
-<td>min_right_most_intensity</td>
-<td>float</td>
-<td>0.2</td>
-<td>The minimal intensity value of the right-most peak relative to apex peak. <br>Optional, by default 0.2</td>
-</tr>
-<tr class="odd">
-<td><strong>Returns</strong></td>
-<td><strong>pd.DataFrame</strong></td>
-<td></td>
-<td><strong>precursor_df with additional columns:<br>- isotope_m1_intensity<br>- isotope_m1_mz<br>- isotope_apex_intensity<br>- isotope_apex_mz<br>- isotope_apex_index<br>- isotope_right_most_intensity<br>- isotope_right_most_mz<br>- isotope_right_most_index</strong></td>
-</tr>
-</tbody>
-</table>
-<hr>
-<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/peptide/precursor.py#L347" target="_blank" style="float:right; font-size:smaller">source</a></p>
-</section>
-<section id="get_mod_seq_isotope_distribution" class="level3">
-<h3 class="anchored" data-anchor-id="get_mod_seq_isotope_distribution">get_mod_seq_isotope_distribution</h3>
-<blockquote class="blockquote">
-<pre><code> get_mod_seq_isotope_distribution (seq_mods:tuple,
-                                   isotope_dist:alphabase.constants.isotop
-                                   e.IsotopeDistribution,
-                                   min_right_most_intensity:float=0.2)</code></pre>
-</blockquote>
-<p>Get isotope abundance distribution by IsotopeDistribution. This function is designed for multiprocessing.</p>
-<table class="table">
-<colgroup>
-<col style="width: 6%">
-<col style="width: 25%">
-<col style="width: 34%">
-<col style="width: 34%">
-</colgroup>
-<thead>
-<tr class="header">
-<th></th>
-<th><strong>Type</strong></th>
-<th><strong>Default</strong></th>
-<th><strong>Details</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>seq_mods</td>
-<td>tuple</td>
-<td></td>
-<td>(sequence, mods)</td>
-</tr>
-<tr class="even">
-<td>isotope_dist</td>
-<td>IsotopeDistribution</td>
-<td></td>
-<td>See <code>IsotopeDistribution</code> in <code>alphabase.constants.isotope</code></td>
-</tr>
-<tr class="odd">
-<td>min_right_most_intensity</td>
-<td>float</td>
-<td>0.2</td>
-<td>The minimal intensity value of the right-most peak relative to apex peak. <br>Optional, by default 0.2</td>
-</tr>
-<tr class="even">
-<td><strong>Returns</strong></td>
-<td><strong>tuple</strong></td>
-<td></td>
-<td><strong>float - Abundance of mono+1 / mono<br>float - Abundance of apex / mono<br>int - Apex isotope position relative to mono, <br> i.e.&nbsp;apex index - mono index and<br> 0 refers to the position of mono itself<br>float - Abundance of right-most peak which has at least <code>min_right_most_intensity</code><br> intensity relative to the apex peak<br>int - Right-most position relative to mono,<br> i.e.&nbsp;right-most index - mono index</strong></td>
-</tr>
-</tbody>
-</table>
-<hr>
-<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/peptide/precursor.py#L313" target="_blank" style="float:right; font-size:smaller">source</a></p>
-</section>
-<section id="get_right_most_isotope_index" class="level3">
-<h3 class="anchored" data-anchor-id="get_right_most_isotope_index">get_right_most_isotope_index</h3>
-<blockquote class="blockquote">
-<pre><code> get_right_most_isotope_index (intensities:numpy.ndarray, apex_idx:int,
-                               min_right_most_intensity:float)</code></pre>
-</blockquote>
-<p>Get right-most isotope index</p>
+<p>Calculate FDR values from the given reference scores and fdr_values. It is used to extend peptide-level or sequence-level FDR (reference) to each PSM, as PSMs are more useful for quantification.</p>
 <table class="table">
 <colgroup>
 <col style="width: 9%">
@@ -855,55 +516,350 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </thead>
 <tbody>
 <tr class="odd">
-<td>intensities</td>
+<td>sorted_scores</td>
 <td>ndarray</td>
-<td>Isotope intensities</td>
+<td>the scores to calculate FDRs, <br>they must be sorted in decending order.</td>
 </tr>
 <tr class="even">
-<td>apex_idx</td>
-<td>int</td>
-<td>The index or position of apex peak</td>
+<td>ref_scores</td>
+<td>ndarray</td>
+<td>reference scores that used to <br>calculate ref_fdr_values, also sorted in decending order.</td>
 </tr>
 <tr class="odd">
-<td>min_right_most_intensity</td>
-<td>float</td>
-<td>Minimal intensity to consider for right-most peak relative to apex</td>
+<td>ref_fdr_values</td>
+<td>ndarray</td>
+<td>fdr values corresponding to ref_scores</td>
 </tr>
 <tr class="even">
 <td><strong>Returns</strong></td>
-<td><strong>int</strong></td>
-<td><strong>Index or position of the right-most peak</strong></td>
+<td><strong>ndarray</strong></td>
+<td><strong>fdr values corresponding to sorted_scores.</strong></td>
 </tr>
 </tbody>
 </table>
 <hr>
-<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/peptide/precursor.py#L292" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/scoring/fdr.py#L40" target="_blank" style="float:right; font-size:smaller">source</a></p>
 </section>
-<section id="get_mod_seq_formula" class="level3">
-<h3 class="anchored" data-anchor-id="get_mod_seq_formula">get_mod_seq_formula</h3>
+<section id="calculate_fdr" class="level3">
+<h3 class="anchored" data-anchor-id="calculate_fdr">calculate_fdr</h3>
 <blockquote class="blockquote">
-<pre><code> get_mod_seq_formula (seq:str, mods:str)</code></pre>
+<pre><code> calculate_fdr (df:pandas.core.frame.DataFrame, score_column:str,
+                decoy_column:str='decoy')</code></pre>
 </blockquote>
-<p>‘PEPTIDE’,‘Acetyl@Any N-term’ –&gt; [(‘C’,n), (‘H’,m), …]</p>
+<p>Calculate FDR values (q_values in fact) for the given dataframe</p>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>df</td>
+<td>DataFrame</td>
+<td></td>
+<td>PSM dataframe to calculate FDRs</td>
+</tr>
+<tr class="even">
+<td>score_column</td>
+<td>str</td>
+<td></td>
+<td>score column to sort in decending order</td>
+</tr>
+<tr class="odd">
+<td>decoy_column</td>
+<td>str</td>
+<td>decoy</td>
+<td>decoy column in the dataframe. <br>1=target, 0=decoy. Defaults to ‘decoy’.</td>
+</tr>
+<tr class="even">
+<td><strong>Returns</strong></td>
+<td><strong>DataFrame</strong></td>
+<td></td>
+<td><strong>PSM dataframe with ‘fdr’ column added</strong></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/scoring/fdr.py#L14" target="_blank" style="float:right; font-size:smaller">source</a></p>
 </section>
-<section id="testing" class="level3">
-<h3 class="anchored" data-anchor-id="testing">Testing</h3>
+<section id="fdr_to_q_values" class="level3">
+<h3 class="anchored" data-anchor-id="fdr_to_q_values">fdr_to_q_values</h3>
+<blockquote class="blockquote">
+<pre><code> fdr_to_q_values (fdr_values:numpy.ndarray)</code></pre>
+</blockquote>
+<p>convert FDR values to q_values.</p>
+<table class="table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 38%">
+<col style="width: 52%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>fdr_values</td>
+<td>ndarray</td>
+<td>FDR values, they should be <br>sorted according to the descending order of the <code>score</code></td>
+</tr>
+<tr class="even">
+<td><strong>Returns</strong></td>
+<td><strong>ndarray</strong></td>
+<td><strong>q_values</strong></td>
+</tr>
+</tbody>
+</table>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>repeat <span class="op">=</span> <span class="dv">2</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>peptides <span class="op">=</span> [<span class="st">'AGHCEWQMKAADER'</span>]<span class="op">*</span>repeat</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>mods <span class="op">=</span> [<span class="st">'Acetyl@Protein N-term;Carbamidomethyl@C;Oxidation@M'</span>]<span class="op">*</span>repeat</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>sites <span class="op">=</span> [<span class="st">'0;4;8'</span>]<span class="op">*</span>repeat</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>peptides <span class="op">+=</span> [<span class="st">'AGHCEWQMK'</span>]<span class="op">*</span>repeat</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>mods <span class="op">+=</span> [<span class="st">''</span>]<span class="op">*</span>repeat</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>sites <span class="op">+=</span> [<span class="st">''</span>]<span class="op">*</span>repeat</span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>precursor_df <span class="op">=</span> pd.DataFrame({</span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">'sequence'</span>: peptides,</span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">'mods'</span>: mods,</span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">'mod_sites'</span>: sites</span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>})</span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>precursor_df[<span class="st">'nAA'</span>] <span class="op">=</span> precursor_df[<span class="st">'sequence'</span>].<span class="bu">str</span>.<span class="bu">len</span>()</span>
-<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>precursor_df[<span class="st">'charge'</span>] <span class="op">=</span> <span class="dv">2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">'score'</span>: np.random.random(<span class="dv">500</span>)<span class="op">*</span><span class="dv">10</span><span class="op">+</span><span class="dv">11</span>,</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">'decoy'</span>: <span class="dv">0</span>,</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">'kind'</span>: <span class="va">True</span>,</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>f_score <span class="op">=</span> np.random.random(<span class="dv">500</span>)<span class="op">*</span><span class="fl">9.9</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df.append(</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    pd.DataFrame(</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        {</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>            <span class="st">'score'</span>: f_score<span class="op">+</span><span class="fl">0.01</span>,</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>            <span class="st">'decoy'</span>: <span class="dv">1</span>,</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>            <span class="st">'kind'</span>: <span class="va">False</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df.append(</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    pd.DataFrame(</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>        {</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>            <span class="st">'score'</span>: f_score,</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>            <span class="st">'decoy'</span>: <span class="dv">0</span>,</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>            <span class="st">'kind'</span>: <span class="va">False</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df.append(</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>    pd.DataFrame(</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>        {</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>            <span class="st">'score'</span>: np.random.random(<span class="dv">5</span>)<span class="op">+</span><span class="dv">10</span>,</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>            <span class="st">'decoy'</span>: <span class="dv">1</span>,</span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>            <span class="st">'kind'</span>: <span class="va">False</span></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> calculate_fdr(df, <span class="st">'score'</span>, <span class="st">'decoy'</span>)</span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>score</th>
+      <th>decoy</th>
+      <th>kind</th>
+      <th>fdr</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>417</th>
+      <td>20.986751</td>
+      <td>0</td>
+      <td>True</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>486</th>
+      <td>20.958803</td>
+      <td>0</td>
+      <td>True</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>46</th>
+      <td>20.954244</td>
+      <td>0</td>
+      <td>True</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>131</th>
+      <td>20.832440</td>
+      <td>0</td>
+      <td>True</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>236</th>
+      <td>20.809595</td>
+      <td>0</td>
+      <td>True</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>1111</th>
+      <td>0.046366</td>
+      <td>0</td>
+      <td>False</td>
+      <td>0.504008</td>
+    </tr>
+    <tr>
+      <th>709</th>
+      <td>0.040841</td>
+      <td>1</td>
+      <td>False</td>
+      <td>0.504505</td>
+    </tr>
+    <tr>
+      <th>1209</th>
+      <td>0.030841</td>
+      <td>0</td>
+      <td>False</td>
+      <td>0.504505</td>
+    </tr>
+    <tr>
+      <th>939</th>
+      <td>0.013704</td>
+      <td>1</td>
+      <td>False</td>
+      <td>0.505000</td>
+    </tr>
+    <tr>
+      <th>1439</th>
+      <td>0.003704</td>
+      <td>0</td>
+      <td>False</td>
+      <td>0.505000</td>
+    </tr>
+  </tbody>
+</table>
+<p>1505 rows × 4 columns</p>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>df[(df.fdr <span class="op">&lt;</span> <span class="fl">0.01</span>)<span class="op">&amp;</span>(df.decoy<span class="op">==</span><span class="dv">0</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>score</th>
+      <th>decoy</th>
+      <th>kind</th>
+      <th>fdr</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>417</th>
+      <td>20.986751</td>
+      <td>0</td>
+      <td>True</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>486</th>
+      <td>20.958803</td>
+      <td>0</td>
+      <td>True</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>46</th>
+      <td>20.954244</td>
+      <td>0</td>
+      <td>True</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>131</th>
+      <td>20.832440</td>
+      <td>0</td>
+      <td>True</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>236</th>
+      <td>20.809595</td>
+      <td>0</td>
+      <td>True</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>313</th>
+      <td>11.070695</td>
+      <td>0</td>
+      <td>True</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>227</th>
+      <td>11.028431</td>
+      <td>0</td>
+      <td>True</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>153</th>
+      <td>11.014330</td>
+      <td>0</td>
+      <td>True</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>113</th>
+      <td>11.013978</td>
+      <td>0</td>
+      <td>True</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>48</th>
+      <td>11.010629</td>
+      <td>0</td>
+      <td>True</td>
+      <td>0.0</td>
+    </tr>
+  </tbody>
+</table>
+<p>500 rows × 4 columns</p>
+</div>
+</div>
 </div>
 
 

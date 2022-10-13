@@ -234,7 +234,7 @@ class SpecLibBase(object):
         multiprocessing:bool=True,
         mp_process_num:int=8,
         mp_process_bar=None,
-        min_num_for_mp:int=1000,
+        min_precursor_num_to_run_mp:int=1000,
     ):
         """
         Append isotope columns into self.precursor_df.
@@ -243,7 +243,7 @@ class SpecLibBase(object):
         if 'precursor_mz' not in self._precursor_df.columns:
             self.calc_precursor_mz()
             self.clip_by_precursor_mz_()
-        if multiprocessing and len(self.precursor_df)>min_num_for_mp:
+        if multiprocessing and len(self.precursor_df)>min_precursor_num_to_run_mp:
             (
                 self._precursor_df
             ) = precursor.calc_precursor_isotope_mp(
