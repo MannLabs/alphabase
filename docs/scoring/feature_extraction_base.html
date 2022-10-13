@@ -80,19 +80,7 @@ ul.task-list li input[type="checkbox"] {
     <span class="navbar-title">alphabase</span>
     </a>
   </div>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
-  <span class="navbar-toggler-icon"></span>
-</button>
-          <div class="collapse navbar-collapse" id="navbarCollapse">
-            <ul class="navbar-nav navbar-nav-scroll ms-auto">
-  <li class="nav-item compact">
-    <a class="nav-link" href="https://github.com/MannLabs/alphabase"><i class="bi bi-github" role="img">
-</i> 
- </a>
-  </li>  
-</ul>
-              <div id="quarto-search" class="" title="Search"></div>
-          </div> <!-- /navcollapse -->
+          <div id="quarto-search" class="" title="Search"></div>
       </div> <!-- /container-fluid -->
     </nav>
   <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
@@ -303,6 +291,11 @@ ul.task-list li input[type="checkbox"] {
   <a href="../spectral_library/library_base.html" class="sidebar-item-text sidebar-link">Base Class for Spectral Libraries</a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../spectral_library/translate.html" class="sidebar-item-text sidebar-link">Translate Spectral Libraries</a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -331,6 +324,7 @@ ul.task-list li input[type="checkbox"] {
   <ul>
   <li><a href="#basefeatureextractor" id="toc-basefeatureextractor" class="nav-link active" data-scroll-target="#basefeatureextractor">BaseFeatureExtractor</a></li>
   <li><a href="#basefeatureextractor.extract_features" id="toc-basefeatureextractor.extract_features" class="nav-link" data-scroll-target="#basefeatureextractor.extract_features">BaseFeatureExtractor.extract_features</a></li>
+  <li><a href="#basefeatureextractor.update_features" id="toc-basefeatureextractor.update_features" class="nav-link" data-scroll-target="#basefeatureextractor.update_features">BaseFeatureExtractor.update_features</a></li>
   </ul>
 <div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/MannLabs/alphabase/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
     </div>
@@ -407,6 +401,36 @@ ul.task-list li input[type="checkbox"] {
 <td><strong>Returns</strong></td>
 <td><strong>DataFrame</strong></td>
 <td><strong>psm_df with appended feature columns extracted by this extractor</strong></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/scoring/feature_extraction_base.py#L52" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="basefeatureextractor.update_features" class="level3">
+<h3 class="anchored" data-anchor-id="basefeatureextractor.update_features">BaseFeatureExtractor.update_features</h3>
+<blockquote class="blockquote">
+<pre><code> BaseFeatureExtractor.update_features (psm_df:pandas.core.frame.DataFrame)</code></pre>
+</blockquote>
+<p>This method allow us to update adaptive features during the iteration of Percolator algorithm</p>
+<table class="table">
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>psm_df</td>
+<td>DataFrame</td>
+<td>psm_df</td>
+</tr>
+<tr class="even">
+<td><strong>Returns</strong></td>
+<td><strong>DataFrame</strong></td>
+<td><strong>psm_df with updated feature values</strong></td>
 </tr>
 </tbody>
 </table>

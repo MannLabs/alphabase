@@ -40,6 +40,7 @@ website:
         contents:
           - spectral_library/decoy_library.ipynb
           - spectral_library/library_base.ipynb
+          - spectral_library/translate.ipynb
       - section: statistics
         contents:
           - statistics/regression.ipynb

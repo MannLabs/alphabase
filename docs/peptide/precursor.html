@@ -143,19 +143,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     <span class="navbar-title">alphabase</span>
     </a>
   </div>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
-  <span class="navbar-toggler-icon"></span>
-</button>
-          <div class="collapse navbar-collapse" id="navbarCollapse">
-            <ul class="navbar-nav navbar-nav-scroll ms-auto">
-  <li class="nav-item compact">
-    <a class="nav-link" href="https://github.com/MannLabs/alphabase"><i class="bi bi-github" role="img">
-</i> 
- </a>
-  </li>  
-</ul>
-              <div id="quarto-search" class="" title="Search"></div>
-          </div> <!-- /navcollapse -->
+          <div id="quarto-search" class="" title="Search"></div>
       </div> <!-- /container-fluid -->
     </nav>
   <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
@@ -364,6 +352,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../spectral_library/library_base.html" class="sidebar-item-text sidebar-link">Base Class for Spectral Libraries</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../spectral_library/translate.html" class="sidebar-item-text sidebar-link">Translate Spectral Libraries</a>
   </div>
 </li>
       </ul>
@@ -673,7 +666,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <pre><code> calc_precursor_isotope_mp (precursor_df:pandas.core.frame.DataFrame,
                             processes:int=8, mp_batch_size:int=100000,
                             process_bar=None,
-                            min_right_most_intensity:float=0.2)</code></pre>
+                            min_right_most_intensity:float=0.2,
+                            min_precursor_num_to_run_mp:int=1000)</code></pre>
 </blockquote>
 <p><code>calc_precursor_isotope</code> is not that fast for large dataframes, so here we use multiprocessing for faster isotope pattern calculation. The speed is acceptable with multiprocessing (3.8 min for 21M precursors, 8 processes).</p>
 <table class="table">
@@ -723,6 +717,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <td>The minimal intensity value of the right-most peak relative to apex peak. <br>Optional, by default 0.2</td>
 </tr>
 <tr class="even">
+<td>min_precursor_num_to_run_mp</td>
+<td>int</td>
+<td>1000</td>
+<td></td>
+</tr>
+<tr class="odd">
 <td><strong>Returns</strong></td>
 <td><strong>DataFrame</strong></td>
 <td></td>
