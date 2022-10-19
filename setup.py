@@ -37,8 +37,11 @@ def get_requirements():
             extra_requirements[extra] = []
             for line in requirements_file:
                 extra_requirements[extra_stable].append(line)
+                # conditional req like: "pywin32==xxx; sys_platform=='win32'"
+                line, *conditions = line.split(';')
                 requirement, *comparison = re.split("[><=~!]", line)
-                requirement == requirement.strip()
+                requirement = requirement.strip()
+                requirement = ";".join([requirement] + conditions)
                 extra_requirements[extra].append(requirement)
     requirements = extra_requirements.pop("")
     return requirements, extra_requirements

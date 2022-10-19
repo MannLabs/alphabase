@@ -172,13 +172,39 @@ class PSMReaderBase(object):
         return self._psm_df
 
     def add_modification_mapping(self, modification_mapping:dict):
+        """
+        Append additional modifications from other search engines
+
+        Parameters
+        ----------
+        modification_mapping : dict
+            The key of dict is a modification name in AlphaBase format; 
+            the value could be a str or a list, see below
+            ```
+            add_modification_mapping({
+                'Dimethyl@K': ['K(Dimethyl)'], # list
+                'Dimethyl@Any N-term': '_(Dimethyl)', # str
+            })
+            ```
+        """
         if (
             modification_mapping is None or
-             len(modification_mapping) == 0
+            len(modification_mapping) == 0
         ):
             return
-        
-        self.modification_mapping.update(modification_mapping)
+
+        for key, val in list(modification_mapping.items()):
+            if key in self.modification_mapping:
+                if isinstance(val, str):
+                    self.modification_mapping[key].append(val)
+                else:
+                    self.modification_mapping[key].extend(val)
+            else:
+                if isinstance(val, str):
+                    self.modification_mapping[key] = [val]
+                else:
+                    self.modification_mapping[key] = val
+
         self.set_modification_mapping(self.modification_mapping)
 
     def set_modification_mapping(self, modification_mapping:dict):
