@@ -3,7 +3,7 @@
 # %% auto 0
 __all__ = ['reset_precursor_df', 'is_precursor_sorted', 'calc_precursor_mz', 'refine_precursor_df', 'is_precursor_refined',
            'update_precursor_mz', 'get_mod_seq_hash', 'get_mod_seq_charge_hash', 'hash_mod_seq_df',
-           'hash_mod_seq_charge_df', 'hash_precursor_df', 'get_mod_seq_formula', 'get_right_most_isotope_index',
+           'hash_mod_seq_charge_df', 'hash_precursor_df', 'get_mod_seq_formula', 'get_right_most_isotope_offset',
            'get_mod_seq_isotope_distribution', 'calc_precursor_isotope', 'calc_precursor_isotope_mp']
 
 # %% ../../nbdev_nbs/peptide/precursor.ipynb 2
@@ -310,7 +310,7 @@ def get_mod_seq_formula(seq:str, mods:str)->list:
     return list(formula.items())
 
 @numba.njit
-def get_right_most_isotope_index(
+def get_right_most_isotope_offset(
     intensities:np.ndarray, 
     apex_idx:int,
     min_right_most_intensity:float,
@@ -384,7 +384,7 @@ def get_mod_seq_isotope_distribution(
     apex_idx = np.argmax(dist)
 
     # find right-most peak
-    right_most_idx = get_right_most_isotope_index(
+    right_most_idx = get_right_most_isotope_offset(
         dist, apex_idx, min_right_most_intensity
     )
 
@@ -419,10 +419,10 @@ def calc_precursor_isotope(
         - isotope_m1_mz
         - isotope_apex_intensity
         - isotope_apex_mz
-        - isotope_apex_index
+        - isotope_apex_offset
         - isotope_right_most_intensity
         - isotope_right_most_mz
-        - isotope_right_most_index
+        - isotope_right_most_offset
     """
 
     if "precursor_mz" not in precursor_df.columns:
@@ -433,9 +433,9 @@ def calc_precursor_isotope(
     (
         precursor_df['isotope_m1_intensity'], 
         precursor_df['isotope_apex_intensity'],
-        precursor_df['isotope_apex_index'],
+        precursor_df['isotope_apex_offset'],
         precursor_df['isotope_right_most_intensity'],
-        precursor_df['isotope_right_most_index'],
+        precursor_df['isotope_right_most_offset'],
     ) = zip(
         *precursor_df[['sequence','mods']].apply(
             get_mod_seq_isotope_distribution, 
@@ -443,6 +443,21 @@ def calc_precursor_isotope(
             min_right_most_intensity=min_right_most_intensity,
         )
     )
+    precursor_df['isotope_m1_intensity'] = precursor_df[
+        'isotope_m1_intensity'
+    ].astype(np.float32)
+    precursor_df['isotope_apex_intensity'] = precursor_df[
+        'isotope_apex_intensity'
+    ].astype(np.float32)
+    precursor_df['isotope_apex_offset'] = precursor_df[
+        'isotope_apex_offset'
+    ].astype(np.int8)
+    precursor_df['isotope_right_most_intensity'] = precursor_df[
+        'isotope_right_most_intensity'
+    ].astype(np.float32)
+    precursor_df['isotope_right_most_offset'] = precursor_df[
+        'isotope_right_most_offset'
+    ].astype(np.int8)
 
     precursor_df['isotope_m1_mz'] = (
         precursor_df.precursor_mz + 
@@ -453,7 +468,7 @@ def calc_precursor_isotope(
         precursor_df.precursor_mz + 
         (
             MASS_ISOTOPE
-            *precursor_df.isotope_apex_index
+            *precursor_df.isotope_apex_offset
             /precursor_df.charge
         )
     )
@@ -461,7 +476,7 @@ def calc_precursor_isotope(
         precursor_df.precursor_mz + 
         (
             MASS_ISOTOPE
-            *precursor_df.isotope_right_most_index
+            *precursor_df.isotope_right_most_offset
             /precursor_df.charge
         )
     )
@@ -523,10 +538,10 @@ def calc_precursor_isotope_mp(
         - isotope_m1_mz
         - isotope_apex_intensity
         - isotope_apex_mz
-        - isotope_apex_index
+        - isotope_apex_offset
         - isotope_right_most_intensity
         - isotope_right_most_mz
-        - isotope_right_most_index
+        - isotope_right_most_offset
     """
     if len(precursor_df) < min_precursor_num_to_run_mp:
         return calc_precursor_isotope(

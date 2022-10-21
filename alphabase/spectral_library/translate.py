@@ -211,7 +211,7 @@ def mask_fragment_intensity_by_frag_nAA(
     if max_mask_frag_nAA <= 0: return
     b_mask = np.zeros(
         len(fragment_intensity_df), 
-        dtype=bool
+        dtype=np.bool_
     )
     y_mask = b_mask.copy()
     for i_frag in range(max_mask_frag_nAA):
@@ -222,7 +222,7 @@ def mask_fragment_intensity_by_frag_nAA(
         (
             len(fragment_intensity_df),
             len(fragment_intensity_df.columns)
-        ), dtype=bool
+        ), dtype=np.bool_
     )
     for i,col in enumerate(fragment_intensity_df.columns.values):
         if is_nterm_frag(col):
