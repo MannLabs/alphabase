@@ -146,8 +146,8 @@ class DecoyLib(SpecLibBase):
 class DiaNNDecoyLib(DecoyLib):
     def __init__(self, 
         target_lib:SpecLibBase,
-        raw_AAs:str = 'GAVLIFMPWSCTYHKRQEND',
-        mutated_AAs:str = 'LLLVVLLLLTSSSSLLNDQE', #DiaNN
+        raw_AAs:str = 'GAVLIFMPWSCTYHKRQENDU',
+        mutated_AAs:str = 'LLLVVLLLLTSSSSLLNDQEL', #DiaNN
         **kwargs,
     ):  
         """DiaNN-like decoy peptide generator
@@ -159,11 +159,11 @@ class DiaNNDecoyLib(DecoyLib):
 
         raw_AAs : str, optional
             AAs those DiaNN decoy from. 
-            Defaults to 'GAVLIFMPWSCTYHKRQEND'.
+            Defaults to 'GAVLIFMPWSCTYHKRQENDU'.
 
         mutated_AAs : str, optional
             AAs those DiaNN decoy to. 
-            Defaults to 'LLLVVLLLLTSSSSLLNDQE'.
+            Defaults to 'LLLVVLLLLTSSSSLLNDQEL'.
             
         """
         super().__init__(target_lib)

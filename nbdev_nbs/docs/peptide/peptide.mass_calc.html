@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.1.251">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>alphabase - Mass Calculation</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../styles.css">
+<meta property="og:title" content="alphabase - Mass Calculation">
+<meta property="og:description" content="source">
+<meta property="og:site-name" content="alphabase">
+<meta name="twitter:title" content="alphabase - Mass Calculation">
+<meta name="twitter:description" content="source">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">alphabase</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/MannLabs/alphabase"><i class="bi bi-github" role="img">
+</i> 
+ </a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title">Mass Calculation</h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">AlphaBase</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../utils.html" class="sidebar-item-text sidebar-link">Utils</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../yaml_utils.html" class="sidebar-item-text sidebar-link">YAML Utils</a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">constants</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../constants/constants.aa.html" class="sidebar-item-text sidebar-link">Amino acid information</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../constants/constants.element.html" class="sidebar-item-text sidebar-link">Atom element information</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../constants/constants.isotope.html" class="sidebar-item-text sidebar-link">Isotope distribution</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../constants/constants.modification.html" class="sidebar-item-text sidebar-link">Modification information</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">io</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../io/hdf.html" class="sidebar-item-text sidebar-link">HDF functionalities</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">peptide</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../peptide/peptide.fragment.html" class="sidebar-item-text sidebar-link">Fragment Functionalities</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../peptide/peptide.mass_calc.html" class="sidebar-item-text sidebar-link active">Mass Calculation</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../peptide/peptide.mobility.html" class="sidebar-item-text sidebar-link">CCS/Mobility Functionalities</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../peptide/peptide.precursor.html" class="sidebar-item-text sidebar-link">Precursor Functionalities</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">protein</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../protein/protein.fasta.html" class="sidebar-item-text sidebar-link">Protein and Peptide Processing</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../protein/test_fasta.html" class="sidebar-item-text sidebar-link">Testing fasta</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true">psm_reader</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../psm_reader/psm_reader.alphapept_reader.html" class="sidebar-item-text sidebar-link">AlphaPept PSM Reader</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../psm_reader/psm_reader.dia_psm_reader.html" class="sidebar-item-text sidebar-link">DIA PSM reader</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../psm_reader/psm_reader.maxquant_reader.html" class="sidebar-item-text sidebar-link">MaxQuant PSM reader</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../psm_reader/psm_reader.msfragger_reader.html" class="sidebar-item-text sidebar-link">MSFragger Reader</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../psm_reader/psm_reader.pfind_reader.html" class="sidebar-item-text sidebar-link">pFind PSM Reader</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../psm_reader/psm_reader.psm_reader.html" class="sidebar-item-text sidebar-link">Base Class for PSM Readers</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="true">scoring</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../scoring/scoring.fdr.html" class="sidebar-item-text sidebar-link">FDR functionalities</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../scoring/scoring.feature_extraction_base.html" class="sidebar-item-text sidebar-link">Base Class of Feature Extractors</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../scoring/scoring.ml_scoring_base.html" class="sidebar-item-text sidebar-link">Base Class of ML Scoring Methods</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" aria-expanded="true">spectral_library</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../spectral_library/spectral_library.decoy_library.html" class="sidebar-item-text sidebar-link">Decoy Libraries</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../spectral_library/spectral_library.library_base.html" class="sidebar-item-text sidebar-link">Base Class for Spectral Libraries</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../spectral_library/spectral_library.translate.html" class="sidebar-item-text sidebar-link">Translate Spectral Libraries</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" aria-expanded="true">statistics</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../statistics/regression.html" class="sidebar-item-text sidebar-link">Regression</a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#it-should-be-only-called-by-alphabase.peptide.fragment." id="toc-it-should-be-only-called-by-alphabase.peptide.fragment." class="nav-link active" data-scroll-target="#it-should-be-only-called-by-alphabase.peptide.fragment.">it should be only called by <code>alphabase.peptide.fragment</code>.</a></li>
+  <li><a href="#calc_b_y_and_peptide_mass" id="toc-calc_b_y_and_peptide_mass" class="nav-link" data-scroll-target="#calc_b_y_and_peptide_mass">calc_b_y_and_peptide_mass</a></li>
+  <li><a href="#calc_mod_delta_masses_for_same_len_seqs" id="toc-calc_mod_delta_masses_for_same_len_seqs" class="nav-link" data-scroll-target="#calc_mod_delta_masses_for_same_len_seqs">calc_mod_delta_masses_for_same_len_seqs</a></li>
+  <li><a href="#calc_delta_modification_mass" id="toc-calc_delta_modification_mass" class="nav-link" data-scroll-target="#calc_delta_modification_mass">calc_delta_modification_mass</a></li>
+  <li><a href="#calc_peptide_masses_for_same_len_seqs-and-calc_b_y_and_peptide_masses_for_same_len_seqs-are-key-functions-for-mass-calculation-in-this-module." id="toc-calc_peptide_masses_for_same_len_seqs-and-calc_b_y_and_peptide_masses_for_same_len_seqs-are-key-functions-for-mass-calculation-in-this-module." class="nav-link" data-scroll-target="#calc_peptide_masses_for_same_len_seqs-and-calc_b_y_and_peptide_masses_for_same_len_seqs-are-key-functions-for-mass-calculation-in-this-module."><code>calc_peptide_masses_for_same_len_seqs</code> and <code>calc_b_y_and_peptide_masses_for_same_len_seqs</code> are key functions for mass calculation in this module.</a></li>
+  <li><a href="#calc_b_y_and_peptide_masses_for_same_len_seqs" id="toc-calc_b_y_and_peptide_masses_for_same_len_seqs" class="nav-link" data-scroll-target="#calc_b_y_and_peptide_masses_for_same_len_seqs">calc_b_y_and_peptide_masses_for_same_len_seqs</a></li>
+  <li><a href="#calc_peptide_masses_for_same_len_seqs" id="toc-calc_peptide_masses_for_same_len_seqs" class="nav-link" data-scroll-target="#calc_peptide_masses_for_same_len_seqs">calc_peptide_masses_for_same_len_seqs</a></li>
+  <li><a href="#testing" id="toc-testing" class="nav-link" data-scroll-target="#testing">Testing</a></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/MannLabs/alphabase/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block">Mass Calculation</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    
+  </div>
+  
+
+</header>
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<section id="it-should-be-only-called-by-alphabase.peptide.fragment." class="level3">
+<h3 class="anchored" data-anchor-id="it-should-be-only-called-by-alphabase.peptide.fragment.">it should be only called by <code>alphabase.peptide.fragment</code>.</h3>
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/peptide/mass_calc.py#L108" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="calc_b_y_and_peptide_mass" class="level3">
+<h3 class="anchored" data-anchor-id="calc_b_y_and_peptide_mass">calc_b_y_and_peptide_mass</h3>
+<blockquote class="blockquote">
+<pre><code> calc_b_y_and_peptide_mass (sequence:str, mod_names:List[str],
+                            mod_sites:List[int],
+                            mod_deltas:List[float]=None,
+                            mod_delta_sites:List[int]=None)</code></pre>
+</blockquote>
+<p>It is highly recommend to use <a href="https://MannLabs.github.io/alphabase/peptide/mass_calc.html#calc_b_y_and_peptide_masses_for_same_len_seqs"><code>calc_b_y_and_peptide_masses_for_same_len_seqs</code></a> as it is much faster</p>
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/peptide/mass_calc.py#L62" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="calc_mod_delta_masses_for_same_len_seqs" class="level3">
+<h3 class="anchored" data-anchor-id="calc_mod_delta_masses_for_same_len_seqs">calc_mod_delta_masses_for_same_len_seqs</h3>
+<blockquote class="blockquote">
+<pre><code> calc_mod_delta_masses_for_same_len_seqs (nAA:int,
+                                          mod_deltas_list:List[List[float]
+                                          ],
+                                          mod_sites_list:List[List[int]])</code></pre>
+</blockquote>
+<p>Calculate delta modification masses for the given peptide length (<code>nAA</code>), For open-search, we may also get modification mass deltas other than mod names. This function calculate modification masses from these delta masses.</p>
+<table class="table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 38%">
+<col style="width: 52%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>nAA</td>
+<td>int</td>
+<td>peptide length</td>
+</tr>
+<tr class="even">
+<td>mod_deltas_list</td>
+<td>typing.List[typing.List[float]]</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>mod_sites_list</td>
+<td>typing.List[typing.List[int]]</td>
+<td>list of modification site list corresponding <br>to <code>mod_names_list</code>.<br>* <code>site=0</code> refers to an N-term modification<br>* <code>site=-1</code> refers to a C-term modification<br>* <code>1&lt;=site&lt;=peplen</code> refers to a normal modification</td>
+</tr>
+<tr class="even">
+<td><strong>Returns</strong></td>
+<td><strong>ndarray</strong></td>
+<td><strong>2-D array with shape=<code>(nAA, pep_count or len(mod_names_list)))</code>. <br>Masses of modifications through all the peptides, <br><code>0</code> if sites has no modifications</strong></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/peptide/mass_calc.py#L24" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="calc_delta_modification_mass" class="level3">
+<h3 class="anchored" data-anchor-id="calc_delta_modification_mass">calc_delta_modification_mass</h3>
+<blockquote class="blockquote">
+<pre><code> calc_delta_modification_mass (pep_len:int, mass_deltas:List[float],
+                               mass_delta_sites:List[int])</code></pre>
+</blockquote>
+<p>For open-search, we may also get modification mass deltas other than mod names. This function calculate modification masses from these delta masses.</p>
+<table class="table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 38%">
+<col style="width: 52%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>pep_len</td>
+<td>int</td>
+<td>nAA</td>
+</tr>
+<tr class="even">
+<td>mass_deltas</td>
+<td>typing.List[float]</td>
+<td>mass deltas on the peptide</td>
+</tr>
+<tr class="odd">
+<td>mass_delta_sites</td>
+<td>typing.List[int]</td>
+<td>localized sites of corresponding mass deltas</td>
+</tr>
+<tr class="even">
+<td><strong>Returns</strong></td>
+<td><strong>ndarray</strong></td>
+<td><strong>1-D array with length=<code>peplen</code>.<br>Masses of modifications (mass deltas) through the peptide,<br><code>0</code> if sites has no modifications</strong></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="calc_peptide_masses_for_same_len_seqs-and-calc_b_y_and_peptide_masses_for_same_len_seqs-are-key-functions-for-mass-calculation-in-this-module." class="level3">
+<h3 class="anchored" data-anchor-id="calc_peptide_masses_for_same_len_seqs-and-calc_b_y_and_peptide_masses_for_same_len_seqs-are-key-functions-for-mass-calculation-in-this-module."><a href="https://MannLabs.github.io/alphabase/peptide/mass_calc.html#calc_peptide_masses_for_same_len_seqs"><code>calc_peptide_masses_for_same_len_seqs</code></a> and <a href="https://MannLabs.github.io/alphabase/peptide/mass_calc.html#calc_b_y_and_peptide_masses_for_same_len_seqs"><code>calc_b_y_and_peptide_masses_for_same_len_seqs</code></a> are key functions for mass calculation in this module.</h3>
+<p><a href="https://MannLabs.github.io/alphabase/peptide/mass_calc.html#calc_peptide_masses_for_same_len_seqs"><code>calc_peptide_masses_for_same_len_seqs</code></a> calculates the peptide masses for the given sequence array and modification lists.</p>
+<p><a href="https://MannLabs.github.io/alphabase/peptide/mass_calc.html#calc_b_y_and_peptide_masses_for_same_len_seqs"><code>calc_b_y_and_peptide_masses_for_same_len_seqs</code></a> calculates b/y neutral masses and peptide masses for the given sequence array and modification lists. Note that all a/b/c neutral masses can be calculated from b fragment masses, and x/y/z from y masses. So the key are b/y masses.</p>
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/peptide/mass_calc.py#L186" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="calc_b_y_and_peptide_masses_for_same_len_seqs" class="level3">
+<h3 class="anchored" data-anchor-id="calc_b_y_and_peptide_masses_for_same_len_seqs">calc_b_y_and_peptide_masses_for_same_len_seqs</h3>
+<blockquote class="blockquote">
+<pre><code> calc_b_y_and_peptide_masses_for_same_len_seqs (sequences:numpy.ndarray,
+                                                mod_list:List[List[str]],
+                                                site_list:List[List[int]],
+                                                mod_delta_list:List[List[f
+                                                loat]]=None, mod_delta_sit
+                                                e_list:List[List[int]]=Non
+                                                e)</code></pre>
+</blockquote>
+<p>Calculate b/y fragment masses and peptide masses for peptide sequences with same lengths. We need ‘same_len’ here because numpy can process AA sequences with same length very fast.</p>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>sequences</td>
+<td>ndarray</td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>mod_list</td>
+<td>typing.List[typing.List[str]]</td>
+<td></td>
+<td>list of modifications , <br>e.g.&nbsp;<code>[['Oxidation@M','Phospho@S'],['Phospho@S','Deamidated@N']]</code></td>
+</tr>
+<tr class="odd">
+<td>site_list</td>
+<td>typing.List[typing.List[int]]</td>
+<td></td>
+<td>list of modification sites<br>corresponding to <code>mod_list</code>, e.g.&nbsp;<code>[[3,6],[4,17]]</code></td>
+</tr>
+<tr class="even">
+<td>mod_delta_list</td>
+<td>typing.List[typing.List[float]]</td>
+<td>None</td>
+<td>list of modifications, <br>e.g.&nbsp;<code>[[15.994915,79.966331],[79.966331,0.984016]]</code></td>
+</tr>
+<tr class="odd">
+<td>mod_delta_site_list</td>
+<td>typing.List[typing.List[int]]</td>
+<td>None</td>
+<td>list of modification mass delta sites<br>corresponding to <code>mod_list</code>, e.g.&nbsp;<code>[[3,6],[4,17]]</code></td>
+</tr>
+<tr class="even">
+<td><strong>Returns</strong></td>
+<td><strong>typing.Tuple[numpy.ndarray, numpy.ndarray, numpy.ndarray]</strong></td>
+<td></td>
+<td><strong>neutral b fragment masses (2-D array)</strong></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a href="https://github.com/MannLabs/alphabase/blob/main/alphabase/peptide/mass_calc.py#L139" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="calc_peptide_masses_for_same_len_seqs" class="level3">
+<h3 class="anchored" data-anchor-id="calc_peptide_masses_for_same_len_seqs">calc_peptide_masses_for_same_len_seqs</h3>
+<blockquote class="blockquote">
+<pre><code> calc_peptide_masses_for_same_len_seqs (sequences:numpy.ndarray,
+                                        mod_list:List[str],
+                                        mod_delta_list:List[str]=None)</code></pre>
+</blockquote>
+<p>Calculate peptide masses for peptide sequences with same lengths. We need ‘same_len’ here because numpy can process AA sequences with same length very fast. See <code>alphabase.aa.calc_sequence_masses_for_same_len_seqs</code></p>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>sequences</td>
+<td>ndarray</td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>mod_list</td>
+<td>typing.List[str]</td>
+<td></td>
+<td>list of modifications, <br>e.g.&nbsp;<code>['Oxidation@M;Phospho@S','Phospho@S;Deamidated@N']</code></td>
+</tr>
+<tr class="odd">
+<td>mod_delta_list</td>
+<td>typing.List[str]</td>
+<td>None</td>
+<td></td>
+</tr>
+<tr class="even">
+<td><strong>Returns</strong></td>
+<td><strong>ndarray</strong></td>
+<td></td>
+<td><strong>peptide masses (1-D array, H2O already added)</strong></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="testing" class="level3">
+<h3 class="anchored" data-anchor-id="testing">Testing</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>seq, mods, mod_sites <span class="op">=</span> <span class="st">'AGHCEWQMK'</span>, [<span class="st">'Carbamidomethyl@C'</span>, <span class="st">'Oxidation@M'</span>], [<span class="dv">4</span>, <span class="dv">8</span>]</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>b,y,pepmass <span class="op">=</span> calc_b_y_and_peptide_mass(seq, mods, mod_sites)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> np.allclose(b, [  <span class="fl">71.03711379</span>,  <span class="fl">128.05857751</span>,  <span class="fl">265.11748936</span>,  <span class="fl">425.14813804</span>,</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>         <span class="fl">554.19073113</span>,  <span class="fl">740.27004408</span>,  <span class="fl">868.32862159</span>, <span class="fl">1015.3640213</span> ]</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> np.allclose(y, [  [<span class="fl">1090.43243521</span>, <span class="fl">1033.41097149</span>,  <span class="fl">896.35205963</span>,  <span class="fl">736.32141095</span>,</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>         <span class="fl">607.27881786</span>,  <span class="fl">421.19950491</span>,  <span class="fl">293.14092741</span>,  <span class="fl">146.1055277</span> ] ]</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> np.allclose(pepmass, <span class="fl">1161.46954899713</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>b_frags,y_frags,pepmasses<span class="op">=</span>calc_b_y_and_peptide_masses_for_same_len_seqs([seq]<span class="op">*</span><span class="dv">2</span>, [mods,[]], [mod_sites,[]])</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> np.allclose(b_frags[<span class="dv">0</span>], [  <span class="fl">71.03711379</span>,  <span class="fl">128.05857751</span>,  <span class="fl">265.11748936</span>,  <span class="fl">425.14813804</span>,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>         <span class="fl">554.19073113</span>,  <span class="fl">740.27004408</span>,  <span class="fl">868.32862159</span>, <span class="fl">1015.3640213</span> ]</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> np.allclose(y_frags[<span class="dv">0</span>], [  [<span class="fl">1090.43243521</span>, <span class="fl">1033.41097149</span>,  <span class="fl">896.35205963</span>,  <span class="fl">736.32141095</span>,</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>         <span class="fl">607.27881786</span>,  <span class="fl">421.19950491</span>,  <span class="fl">293.14092741</span>,  <span class="fl">146.1055277</span> ] ]</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> np.allclose(pepmasses[<span class="dv">0</span>], <span class="fl">1161.46954899713</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> np.allclose(calc_peptide_masses_for_same_len_seqs([seq]<span class="op">*</span><span class="dv">2</span>, [<span class="st">';'</span>.join(mods),<span class="st">""</span>]), [<span class="fl">1161.469549</span>  , <span class="fl">1088.45317066</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
