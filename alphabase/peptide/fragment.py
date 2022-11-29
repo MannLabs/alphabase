@@ -5,8 +5,8 @@ __all__ = ['get_charged_frag_types', 'parse_charged_frag_type', 'init_zero_fragm
            'init_fragment_dataframe_from_other', 'init_fragment_by_precursor_dataframe',
            'update_sliced_fragment_dataframe', 'get_sliced_fragment_dataframe', 'concat_precursor_fragment_dataframes',
            'calc_fragment_mz_values_for_same_nAA', 'mask_fragments_for_charge_greater_than_precursor_charge',
-           'flatten_fragments', 'remove_unused_fragments', 'create_fragment_mz_dataframe_by_sort_precursor',
-           'create_fragment_mz_dataframe']
+           'annotate_fragments', 'flatten_fragments', 'compress_fragment_indices', 'remove_unused_fragments',
+           'create_fragment_mz_dataframe_by_sort_precursor', 'create_fragment_mz_dataframe']
 
 # %% ../../nbdev_nbs/peptide/fragment.ipynb 4
 import numpy as np
@@ -462,6 +462,20 @@ def mask_fragments_for_charge_greater_than_precursor_charge(
                 ] = 0
     return fragment_df
 
+# %% ../../nbdev_nbs/peptide/fragment.ipynb 17
+def annotate_fragments(in_arr):
+    a = in_arr.copy()
+    max_index = len(a)
+    for i, row in enumerate(a):
+        for j, string in enumerate(row):
+            if string[0] == 'b':
+                index = i+1
+                a[i,j] = f'{index}_{string}'
+            else:
+                index = max_index-i
+                a[i,j] = f'{index}_{string}'
+    return a
+
 # %% ../../nbdev_nbs/peptide/fragment.ipynb 18
 def flatten_fragments(precursor_df: pd.DataFrame, 
                         fragment_mz_df: pd.DataFrame,
@@ -528,6 +542,47 @@ def flatten_fragments(precursor_df: pd.DataFrame,
     precursor_new_df['frag_end_idx'] -= cum_sum_tresh[precursor_new_df['frag_end_idx']]
 
     return precursor_new_df, frag_df
+
+# %% ../../nbdev_nbs/peptide/fragment.ipynb 19
+@nb.njit()
+def compress_fragment_indices(frag_idx):
+    """recalculates fragment indices to remove unused fragments. Can be used to compress a fragment library.
+    Expects fragment indices to be ordered by increasing values (!!!).
+
+    should be O(N) runtime with N being the number of fragment rows.
+
+    frag_idx = [[6,  10],
+                [12, 14],
+                [20, 22]]
+
+    returns:
+    frag_idx = [[0, 4],
+                [4, 6],
+                [6, 8]]
+
+    fragment_pointer = [6,7,8,9,12,13,20,21]
+
+    """
+    frag_idx_len = frag_idx[:,1]-frag_idx[:,0]
+
+
+    # This sum does not include the fragment at the index position and has therefore len N +1
+    frag_idx_cumsum = np.zeros(shape=len(frag_idx_len)+1, dtype='int64')
+    frag_idx_cumsum[1:] = np.cumsum(frag_idx_len)
+
+    fragment_pointer = np.zeros(np.sum(frag_idx_len), dtype='int64')
+
+    for i in range(len(frag_idx)):
+        
+   
+        start_index = frag_idx_cumsum[i]
+
+        for j,k in enumerate(range(frag_idx[i,0],frag_idx[i,1])):
+            fragment_pointer[start_index+j]=k
+
+
+    new_frag_idx = np.column_stack((frag_idx_cumsum[:-1],frag_idx_cumsum[1:]))
+    return new_frag_idx, fragment_pointer
 
 # %% ../../nbdev_nbs/peptide/fragment.ipynb 20
 def remove_unused_fragments(
