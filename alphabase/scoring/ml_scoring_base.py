@@ -214,15 +214,7 @@ class Percolator:
     def _estimate_psm_fdr(self,
         df:pd.DataFrame,
     )->pd.DataFrame:
-        df = df.sort_values(
-            ['ml_score','decoy'], ascending=False
-        ).reset_index(drop=True)
-        target_values = 1-df['decoy'].values
-        decoy_cumsum = np.cumsum(df['decoy'].values)
-        target_cumsum = np.cumsum(target_values)
-        fdr_values = decoy_cumsum/target_cumsum
-        df['fdr'] = fdr_to_q_values(fdr_values)
-        return df
+        return calculate_fdr(df, 'ml_score', 'decoy')
         
     def _estimate_fdr(self, 
         df:pd.DataFrame,
@@ -277,7 +269,7 @@ class Percolator:
             )
 
         train_df = pd.concat((train_t_df, train_d_df))
-        train_label = np.ones(len(train_df),dtype=np.int32)
+        train_label = np.ones(len(train_df),dtype=np.int8)
         train_label[len(train_t_df):] = 0
 
         self._ml_model.fit(
