@@ -46,6 +46,7 @@ maxquant:
     'proteins': 'Proteins'
     'genes': ['Gene Names','Gene names']
     'decoy': 'Reverse'
+    'intensity': 'Intensity'
   modification_mapping:
     'Acetyl@Protein N-term': 
       - '_(Acetyl (Protein N-term))'
@@ -160,6 +161,7 @@ diann:
     'genes': 'Genes'
     'scan_num': 'MS2.Scan'
     'score': 'CScore'
+    'fdr': 'Q.Value'
   modification_mapping: 'maxquant'
 spectronaut_report:
   reader_type: spectronaut_report

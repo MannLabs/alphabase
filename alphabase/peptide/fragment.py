@@ -5,6 +5,7 @@ __all__ = ['get_charged_frag_types', 'parse_charged_frag_type', 'init_zero_fragm
            'init_fragment_dataframe_from_other', 'init_fragment_by_precursor_dataframe',
            'update_sliced_fragment_dataframe', 'get_sliced_fragment_dataframe', 'concat_precursor_fragment_dataframes',
            'calc_fragment_mz_values_for_same_nAA', 'mask_fragments_for_charge_greater_than_precursor_charge',
+           'annotate_fragments', 'flatten_fragments', 'compress_fragment_indices', 'remove_unused_fragments',
            'create_fragment_mz_dataframe_by_sort_precursor', 'create_fragment_mz_dataframe']
 
 # %% ../../nbdev_nbs/peptide/fragment.ipynb 4
@@ -12,6 +13,7 @@ import numpy as np
 import pandas as pd
 from typing import List, Union, Tuple, Dict
 import warnings
+import numba as nb
 
 from .mass_calc import *
 from alphabase.constants.modification import (
@@ -460,7 +462,168 @@ def mask_fragments_for_charge_greater_than_precursor_charge(
                 ] = 0
     return fragment_df
 
+# %% ../../nbdev_nbs/peptide/fragment.ipynb 17
+def annotate_fragments(in_arr):
+    a = in_arr.copy()
+    max_index = len(a)
+    for i, row in enumerate(a):
+        for j, string in enumerate(row):
+            if string[0] == 'b':
+                index = i+1
+                a[i,j] = f'{index}_{string}'
+            else:
+                index = max_index-i
+                a[i,j] = f'{index}_{string}'
+    return a
+
 # %% ../../nbdev_nbs/peptide/fragment.ipynb 18
+def flatten_fragments(precursor_df: pd.DataFrame, 
+                        fragment_mz_df: pd.DataFrame,
+                        fragment_intensity_df: pd.DataFrame,
+                        intensity_treshold: float = -1.):
+    """Converts the tabular fragment format consisting of the `fragment_mz_df` and the `fragment_intensity_df` into a linear fragment format.
+    The linear fragment format will only retain fragments above a given intensity treshold with `mz > 0`. It consists of three columns: `mz`, `intensity` and `type`.
+    The fragment pointers `frag_start_idx` and `frag_end_idx` will be reannotated to the new fragment format.
+
+    Parameters
+    ----------
+    precursor_df : pd.DataFrame
+        input precursor dataframe which contains the frag_start_idx and frag_end_idx columns
+
+    fragment_mz_df : pd.DataFrame
+        input fragment mz dataframe of shape (N, T) which contains N * T fragment mzs
+
+    fragment_intensity_df : pd.DataFrame
+        input fragment mz dataframe of shape (N, T) which contains N * T fragment mzs
+
+    intensity_treshold : float
+        minimum intensity which should be retained
+
+    Returns
+    -------
+    precursor_df : pd.DataFrame, frag_df
+        precursor dataframe whith reindexed frag_start_idx and frag_end_idx columns
+    """
+    
+    # new dataframes for fragments and precursors are created
+    frag_df = pd.DataFrame()
+    frag_df['mz'] = fragment_mz_df.values.reshape(-1)
+    frag_df['intensity'] = fragment_intensity_df.values.reshape(-1)
+
+    ion_type = np.array([fragment_mz_df.columns.to_list()]*len(fragment_mz_df), dtype='<U10')
+    frag_idxs = precursor_df[['frag_start_idx','frag_end_idx']].to_numpy()
+
+    for frag_idx in frag_idxs:
+        ion_type[slice(*frag_idx)] = annotate_fragments(ion_type[slice(*frag_idx)])
+
+    frag_df['type'] = ion_type.reshape(-1)
+
+   
+    # ion type column is created
+
+    precursor_new_df = precursor_df.copy()
+    precursor_new_df[['frag_start_idx','frag_end_idx']] *= len(fragment_mz_df.columns)
+
+    if intensity_treshold < 0:
+        return precursor_new_df, frag_df
+
+    # if desired, only keep precursors above a certain treshold
+    smaller_than_tresh = frag_df['intensity'].values <= 0
+    frag_df = frag_df[~smaller_than_tresh]
+    frag_df = frag_df.reset_index(drop=True)
+
+
+    # cumulative sum counts the number of fragments before the given fragment which were removed. 
+    # This sum does not include the fragment at the index position and has therefore len N +1
+    cum_sum_tresh = np.zeros(shape=len(smaller_than_tresh)+1, dtype='int64')
+    cum_sum_tresh[1:] = np.cumsum(smaller_than_tresh)
+
+    precursor_new_df['frag_start_idx'] -= cum_sum_tresh[precursor_new_df['frag_start_idx']]
+    precursor_new_df['frag_end_idx'] -= cum_sum_tresh[precursor_new_df['frag_end_idx']]
+
+    return precursor_new_df, frag_df
+
+# %% ../../nbdev_nbs/peptide/fragment.ipynb 19
+@nb.njit()
+def compress_fragment_indices(frag_idx):
+    """recalculates fragment indices to remove unused fragments. Can be used to compress a fragment library.
+    Expects fragment indices to be ordered by increasing values (!!!).
+
+    should be O(N) runtime with N being the number of fragment rows.
+
+    frag_idx = [[6,  10],
+                [12, 14],
+                [20, 22]]
+
+    returns:
+    frag_idx = [[0, 4],
+                [4, 6],
+                [6, 8]]
+
+    fragment_pointer = [6,7,8,9,12,13,20,21]
+
+    """
+    frag_idx_len = frag_idx[:,1]-frag_idx[:,0]
+
+
+    # This sum does not include the fragment at the index position and has therefore len N +1
+    frag_idx_cumsum = np.zeros(shape=len(frag_idx_len)+1, dtype='int64')
+    frag_idx_cumsum[1:] = np.cumsum(frag_idx_len)
+
+    fragment_pointer = np.zeros(np.sum(frag_idx_len), dtype='int64')
+
+    for i in range(len(frag_idx)):
+        
+   
+        start_index = frag_idx_cumsum[i]
+
+        for j,k in enumerate(range(frag_idx[i,0],frag_idx[i,1])):
+            fragment_pointer[start_index+j]=k
+
+
+    new_frag_idx = np.column_stack((frag_idx_cumsum[:-1],frag_idx_cumsum[1:]))
+    return new_frag_idx, fragment_pointer
+
+# %% ../../nbdev_nbs/peptide/fragment.ipynb 20
+def remove_unused_fragments(
+        precursor_df: pd.DataFrame, 
+        fragment_df_list: Tuple[pd.DataFrame]
+    ):
+    """Removes unused fragments and reannotates the frag_start_idx and frag_end_idx
+
+    Parameters
+    ----------
+    precursor_df : pd.DataFrame
+        Precursor dataframe which contains frag_start_idx and frag_end_idx columns
+
+    fragment_df_list : List[pd.DataFrame]
+        A list of fragment dataframes which should be compressed by removing unused fragments.
+        Multiple fragment dataframes can be provided which will all be sliced in the same way. 
+        This allows to slice both the fragment_mz_df and fragment_intensity_df. 
+        At least one fragment dataframe needs to be provided. 
+
+    Returns
+    -------
+    pd.DataFrame, List[pd.DataFrame]
+        returns the reindexed precursor DataFrame and the sliced fragment DataFrames
+    """
+
+    precursor_df = precursor_df.sort_values(['frag_start_idx'], ascending=True)
+    frag_idx = precursor_df[['frag_start_idx','frag_end_idx']].values
+
+    new_frag_idx, fragment_pointer = compress_fragment_indices(frag_idx)
+
+    precursor_df[['frag_start_idx','frag_end_idx']] = new_frag_idx
+    precursor_df = precursor_df.sort_index()
+
+    output_tuple = []
+
+    for i in range(len(fragment_df_list)):
+        output_tuple.append(fragment_df_list[i].iloc[fragment_pointer].copy().reset_index(drop=True))
+
+    return precursor_df, tuple(output_tuple)
+
+# %% ../../nbdev_nbs/peptide/fragment.ipynb 22
 def create_fragment_mz_dataframe_by_sort_precursor(
     precursor_df: pd.DataFrame,
     charged_frag_types:List,
