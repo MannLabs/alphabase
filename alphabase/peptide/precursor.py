@@ -68,7 +68,7 @@ def is_precursor_refined(precursor_df: pd.DataFrame):
     return (
         (len(precursor_df) == 0) or (
             (precursor_df.index.values[0] == 0) and
-            precursor_df.nAA.is_monotonic and
+            precursor_df.nAA.is_monotonic_increasing and
             np.all(
                 np.diff(precursor_df.index.values)==1
             )
