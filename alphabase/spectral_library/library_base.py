@@ -263,8 +263,6 @@ class SpecLibBase(object):
         TODO: use multiprocessing here or in the
         `create_fragment_mz_dataframe` function.
         """
-        if 'frag_start_idx' in self.precursor_df.columns:
-            return
         if (
             self.charged_frag_types is not None 
             or len(self.charged_frag_types)
@@ -275,7 +273,7 @@ class SpecLibBase(object):
                 self.precursor_df, self.charged_frag_types,
             )
         else:
-            print('Skip fragment calculation as fragment type is None')
+            print('Skip fragment calculation as self.charged_frag_types is None or empty')
 
     def hash_precursor_df(self):
         """Insert hash codes for peptides and precursors"""
