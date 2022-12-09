@@ -26,12 +26,20 @@ class FlatSpecLib:
     ----------
     min_fragment_intensity : float, optional
         minimal intensity to keep, by default 0.001
+
     keep_top_k_fragments : int, optional
         top k highest peaks to keep, by default 1000
+
+    custom_fragment_df_columns : list, optional
+        'mz' and 'intensity' columns are required. Others could be customized. 
+        Defaults to ['type','number','position','charge','loss_type']
     """
     def __init__(self,
         min_fragment_intensity:float = 0.001,
         keep_top_k_fragments:int = 1000,
+        custom_fragment_df_columns:list = [
+            'type','number','position','charge','loss_type'
+        ],
         **kwargs
     ):
         self.min_fragment_intensity = min_fragment_intensity
@@ -51,6 +59,8 @@ class FlatSpecLib:
             'precursor_mz', 
             'rt_pred', 'rt_norm_pred'
         ]
+
+        self.custom_fragment_df_columns = custom_fragment_df_columns
 
     @property
     def precursor_df(self)->pd.DataFrame:
@@ -101,7 +111,8 @@ class FlatSpecLib:
             library.fragment_mz_df, 
             library.fragment_intensity_df,
             min_fragment_intensity=self.min_fragment_intensity,
-            keep_top_k_fragments=self.keep_top_k_fragments
+            keep_top_k_fragments=self.keep_top_k_fragments,
+            custom_columns=self.custom_fragment_df_columns,
         )
 
     def save_hdf(self, hdf_file:str):

@@ -5,8 +5,9 @@ __all__ = ['get_charged_frag_types', 'parse_charged_frag_type', 'init_zero_fragm
            'init_fragment_dataframe_from_other', 'init_fragment_by_precursor_dataframe',
            'update_sliced_fragment_dataframe', 'get_sliced_fragment_dataframe', 'concat_precursor_fragment_dataframes',
            'calc_fragment_mz_values_for_same_nAA', 'mask_fragments_for_charge_greater_than_precursor_charge',
-           'parse_fragment_numbers', 'exclude_not_top_k', 'flatten_fragments', 'compress_fragment_indices',
-           'remove_unused_fragments', 'create_fragment_mz_dataframe_by_sort_precursor', 'create_fragment_mz_dataframe']
+           'parse_fragment_positions', 'parse_fragment_numbers', 'exclude_not_top_k', 'flatten_fragments',
+           'compress_fragment_indices', 'remove_unused_fragments', 'create_fragment_mz_dataframe_by_sort_precursor',
+           'create_fragment_mz_dataframe']
 
 # %% ../../nbdev_nbs/peptide/fragment.ipynb 4
 import numpy as np
@@ -464,15 +465,20 @@ def mask_fragments_for_charge_greater_than_precursor_charge(
 
 # %% ../../nbdev_nbs/peptide/fragment.ipynb 17
 @nb.njit
+def parse_fragment_positions(frag_directions, frag_start_idxes, frag_end_idxes):
+    frag_positions = np.zeros_like(frag_directions, dtype=np.uint32)
+    for frag_start, frag_end in zip(frag_start_idxes, frag_end_idxes):
+        frag_positions[frag_start:frag_end] = np.arange(0,frag_end-frag_start).reshape(-1,1)
+    return frag_positions
+
+@nb.njit
 def parse_fragment_numbers(frag_directions, frag_start_idxes, frag_end_idxes):
     frag_numbers = np.zeros_like(frag_directions, dtype=np.uint32)
-    frag_positions = frag_numbers.copy()
     for frag_start, frag_end in zip(frag_start_idxes, frag_end_idxes):
         frag_numbers[frag_start:frag_end] = _parse_fragment_number_of_one_peptide(
             frag_directions[frag_start:frag_end]
         )
-        frag_positions[frag_start:frag_end] = np.arange(0,frag_end-frag_start).reshape(-1,1)
-    return frag_numbers, frag_positions
+    return frag_numbers
 
 @nb.njit    
 def _parse_fragment_number_of_one_peptide(frag_directions):
@@ -508,6 +514,9 @@ def flatten_fragments(precursor_df: pd.DataFrame,
                       fragment_intensity_df: pd.DataFrame,
                       min_fragment_intensity: float = -1.,
                       keep_top_k_fragments: int = 1000,
+                      custom_columns:list = [
+                        'type','number','position','charge','loss_type'
+                      ],
 )->Tuple[pd.DataFrame, pd.DataFrame]:
     """Converts the tabular fragment format consisting of 
     the `fragment_mz_df` and the `fragment_intensity_df` 
@@ -546,8 +555,12 @@ def flatten_fragments(precursor_df: pd.DataFrame,
     fragment_intensity_df : pd.DataFrame
         input fragment mz dataframe of shape (N, T) which contains N * T fragment mzs
 
-    min_fragment_intensity : float
+    min_fragment_intensity : float, optional
         minimum intensity which should be retained. Defaults to -1.0
+
+    custom_columns : list, optional
+        'mz' and 'intensity' columns are required. Others could be customized. 
+        Defaults to ['type','number','position','charge','loss_type']
 
     Returns
     -------
@@ -601,24 +614,32 @@ def flatten_fragments(precursor_df: pd.DataFrame,
         else:
             frag_directions.append(0)
 
-    frag_df['type'] = np.array(frag_types*len(fragment_mz_df), dtype=np.int8)
-    frag_df['loss_type'] = np.array(frag_loss_types*len(fragment_mz_df), dtype=np.int16)
-    frag_df['charge'] = np.array(frag_charges*len(fragment_mz_df), dtype=np.int8)
+    if 'type' in custom_columns:
+        frag_df['type'] = np.array(frag_types*len(fragment_mz_df), dtype=np.int8)
+    if 'loss_type' in custom_columns:    
+        frag_df['loss_type'] = np.array(frag_loss_types*len(fragment_mz_df), dtype=np.int16)
+    if 'charge' in custom_columns:
+        frag_df['charge'] = np.array(frag_charges*len(fragment_mz_df), dtype=np.int8)
+    
     frag_directions = np.array([frag_directions]*len(fragment_mz_df), dtype=np.int8)
-    frag_numbers, frag_positions = parse_fragment_numbers(
-        frag_directions, 
-        precursor_df.frag_start_idx.values, 
-        precursor_df.frag_end_idx.values
-    )
-    frag_df['number'] = frag_numbers.reshape(-1)
-    frag_df['position'] = frag_positions.reshape(-1)
-   
-    # ion type column is created
+    if 'number' in custom_columns:
+        frag_df['number'] = parse_fragment_numbers(
+            frag_directions, 
+            precursor_df.frag_start_idx.values, 
+            precursor_df.frag_end_idx.values
+        ).reshape(-1)
+    if 'position' in custom_columns:
+        frag_df['position'] = parse_fragment_positions(
+            frag_directions, 
+            precursor_df.frag_start_idx.values, 
+            precursor_df.frag_end_idx.values
+        ).reshape(-1)
 
     precursor_new_df = precursor_df.copy()
     precursor_new_df[['frag_start_idx','frag_end_idx']] *= len(fragment_mz_df.columns)
 
-    # if desired, only keep precursors above a certain treshold
+    
+    frag_df.intensity.mask(frag_df.mz == 0.0, 0.0, inplace=True)
     excluded = (
         frag_df.intensity.values < min_fragment_intensity
     ) | (
@@ -639,8 +660,8 @@ def flatten_fragments(precursor_df: pd.DataFrame,
     cum_sum_tresh = np.zeros(shape=len(excluded)+1, dtype=np.int64)
     cum_sum_tresh[1:] = np.cumsum(excluded)
 
-    precursor_new_df['frag_start_idx'] -= cum_sum_tresh[precursor_new_df['frag_start_idx']]
-    precursor_new_df['frag_end_idx'] -= cum_sum_tresh[precursor_new_df['frag_end_idx']]
+    precursor_new_df['frag_start_idx'] -= cum_sum_tresh[precursor_new_df.frag_start_idx.values]
+    precursor_new_df['frag_end_idx'] -= cum_sum_tresh[precursor_new_df.frag_end_idx.values]
 
     return precursor_new_df, frag_df
 
