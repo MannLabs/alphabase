@@ -7,11 +7,26 @@ __all__ = ['FlatSpecLib']
 from alphabase.spectral_library.library_base import (
     SpecLibBase
 )
+from alphabase.peptide.fragment import (
+    flatten_fragments
+)
 
 # %% ../../nbdev_nbs/spectral_library/flat_library.ipynb 2
 class FlatSpecLib:
-    def __init__(self):
-        pass
+    def __init__(self,
+        min_fragment_intensity:float = 0.001,
+        keep_top_k_fragments:int = 1000,
+        **kwargs
+    ):
+        self.min_fragment_intensity = min_fragment_intensity
+        self.keep_top_k_fragments = keep_top_k_fragments
 
-    def parse_base_library(library:SpecLibBase):
-        pass
+    def parse_base_library(self, library:SpecLibBase):
+        self.precursor_df, self.fragment_df = flatten_fragments(
+            library.precursor_df, 
+            library.fragment_mz_df, 
+            library.fragment_intensity_df,
+            min_fragment_intensity=self.min_fragment_intensity,
+            keep_top_k_fragments=self.keep_top_k_fragments
+        )
+        

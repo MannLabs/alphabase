@@ -8,10 +8,10 @@ import typing
 import pandas as pd
 
 from ..psm_reader import psm_reader_provider
-from .library_reader import LibraryReaderBase
+from .library_reader import SpecLibBase
 
 # %% ../../nbdev_nbs/spectral_library/raw_library_generator.ipynb 4
-class RAWLibraryGenerator(LibraryReaderBase):
+class RAWLibraryGenerator(SpecLibBase):
     def __init__(self, 
         charged_frag_types:typing.List[str] = [
             'b_z1','b_z2','y_z1', 'y_z2', 

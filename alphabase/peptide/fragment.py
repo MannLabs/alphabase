@@ -508,7 +508,7 @@ def flatten_fragments(precursor_df: pd.DataFrame,
                       fragment_intensity_df: pd.DataFrame,
                       min_fragment_intensity: float = -1.,
                       keep_top_k_fragments: int = 1000,
-):
+)->Tuple[pd.DataFrame, pd.DataFrame]:
     """Converts the tabular fragment format consisting of 
     the `fragment_mz_df` and the `fragment_intensity_df` 
     into a linear fragment format.
@@ -520,12 +520,12 @@ def flatten_fragments(precursor_df: pd.DataFrame,
     where each column refers to:
         mz:        float, fragment mz value
         intensity: float32, fragment intensity value
-        type:      np.int8, ASCII code of a ion type 
+        type:      np.int8, ASCII code of the ion type 
                    (97=a, 98=b, 99=c, 120=x, 121=y, 122=z), 
                    or more ion types in the future. 
                    See https://en.wikipedia.org/wiki/ASCII for more ASCII information
         number:    uint32, fragment series number
-        position:  uint32, fragment position in sequence (from left to right)
+        position:  uint32, fragment position in sequence (from left to right, starts with 0)
         charge:    int16, fragment charge
         loss_type: int16, fragment loss type, 0=noloss, 
                    17=NH3, 18=H2O, 98=HPO4 (phos), ...
@@ -558,13 +558,13 @@ def flatten_fragments(precursor_df: pd.DataFrame,
           fragment dataframe with columns: `mz`, `intensity`, `type`, `number`, 
           `charge` and `loss_type`, where each column refers to:
               mz:        float, fragment mz value
-              intensity: float, fragment intensity value
-              type:      np.int8, ASCII code of a ion type 
+              intensity: float32, fragment intensity value
+              type:      np.int8, ASCII code of the ion type 
                          (97=a, 98=b, 99=c, 120=x, 121=y, 122=z), 
                          or more ion types in the future. 
                          See https://en.wikipedia.org/wiki/ASCII for more ASCII information
               number:    uint32, fragment series number
-              position:  uint32, fragment position in sequence (from left to right)
+              position:  uint32, fragment position in sequence (from left to right, starts with 0)
               charge:    int16, fragment charge
               loss_type: int16, fragment loss type, 0=noloss, 
                          17=NH3, 18=H2O, 98=HPO4 (phos), ...
@@ -573,7 +573,7 @@ def flatten_fragments(precursor_df: pd.DataFrame,
     # new dataframes for fragments and precursors are created
     frag_df = pd.DataFrame()
     frag_df['mz'] = fragment_mz_df.values.reshape(-1)
-    frag_df['intensity'] = fragment_intensity_df.values.reshape(-1)
+    frag_df['intensity'] = fragment_intensity_df.values.astype(np.float32).reshape(-1)
 
     frag_types = []
     frag_loss_types = []
