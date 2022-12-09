@@ -518,15 +518,15 @@ def flatten_fragments(precursor_df: pd.DataFrame,
     It consists of columns: `mz`, `intensity`, 
     `type`, `number`, `charge` and `loss_type`,  
     where each column refers to:
-        mz:        float, fragment mz value
+        mz:        float64, fragment mz value
         intensity: float32, fragment intensity value
-        type:      np.int8, ASCII code of the ion type 
+        type:      int8, ASCII code of the ion type 
                    (97=a, 98=b, 99=c, 120=x, 121=y, 122=z), 
                    or more ion types in the future. 
                    See https://en.wikipedia.org/wiki/ASCII for more ASCII information
         number:    uint32, fragment series number
         position:  uint32, fragment position in sequence (from left to right, starts with 0)
-        charge:    int16, fragment charge
+        charge:    int8, fragment charge
         loss_type: int16, fragment loss type, 0=noloss, 
                    17=NH3, 18=H2O, 98=HPO4 (phos), ...
 
@@ -559,13 +559,13 @@ def flatten_fragments(precursor_df: pd.DataFrame,
           `charge` and `loss_type`, where each column refers to:
               mz:        float, fragment mz value
               intensity: float32, fragment intensity value
-              type:      np.int8, ASCII code of the ion type 
+              type:      int8, ASCII code of the ion type 
                          (97=a, 98=b, 99=c, 120=x, 121=y, 122=z), 
                          or more ion types in the future. 
                          See https://en.wikipedia.org/wiki/ASCII for more ASCII information
               number:    uint32, fragment series number
               position:  uint32, fragment position in sequence (from left to right, starts with 0)
-              charge:    int16, fragment charge
+              charge:    int8, fragment charge
               loss_type: int16, fragment loss type, 0=noloss, 
                          17=NH3, 18=H2O, 98=HPO4 (phos), ...
     """
@@ -603,7 +603,7 @@ def flatten_fragments(precursor_df: pd.DataFrame,
 
     frag_df['type'] = np.array(frag_types*len(fragment_mz_df), dtype=np.int8)
     frag_df['loss_type'] = np.array(frag_loss_types*len(fragment_mz_df), dtype=np.int16)
-    frag_df['charge'] = np.array(frag_charges*len(fragment_mz_df), dtype=np.int16)
+    frag_df['charge'] = np.array(frag_charges*len(fragment_mz_df), dtype=np.int8)
     frag_directions = np.array([frag_directions]*len(fragment_mz_df), dtype=np.int8)
     frag_numbers, frag_positions = parse_fragment_numbers(
         frag_directions, 
