@@ -5,8 +5,8 @@ __all__ = ['get_charged_frag_types', 'parse_charged_frag_type', 'init_zero_fragm
            'init_fragment_dataframe_from_other', 'init_fragment_by_precursor_dataframe',
            'update_sliced_fragment_dataframe', 'get_sliced_fragment_dataframe', 'concat_precursor_fragment_dataframes',
            'calc_fragment_mz_values_for_same_nAA', 'mask_fragments_for_charge_greater_than_precursor_charge',
-           'parse_fragment_numbers', 'flatten_fragments', 'compress_fragment_indices', 'remove_unused_fragments',
-           'create_fragment_mz_dataframe_by_sort_precursor', 'create_fragment_mz_dataframe']
+           'parse_fragment_numbers', 'exclude_not_top_k', 'flatten_fragments', 'compress_fragment_indices',
+           'remove_unused_fragments', 'create_fragment_mz_dataframe_by_sort_precursor', 'create_fragment_mz_dataframe']
 
 # %% ../../nbdev_nbs/peptide/fragment.ipynb 4
 import numpy as np
@@ -466,11 +466,13 @@ def mask_fragments_for_charge_greater_than_precursor_charge(
 @nb.njit
 def parse_fragment_numbers(frag_directions, frag_start_idxes, frag_end_idxes):
     frag_numbers = np.zeros_like(frag_directions, dtype=np.uint32)
+    frag_positions = frag_numbers.copy()
     for frag_start, frag_end in zip(frag_start_idxes, frag_end_idxes):
         frag_numbers[frag_start:frag_end] = _parse_fragment_number_of_one_peptide(
             frag_directions[frag_start:frag_end]
         )
-    return frag_numbers
+        frag_positions[frag_start:frag_end] = np.arange(0,frag_end-frag_start).reshape(-1,1)
+    return frag_numbers, frag_positions
 
 @nb.njit    
 def _parse_fragment_number_of_one_peptide(frag_directions):
@@ -485,11 +487,27 @@ def _parse_fragment_number_of_one_peptide(frag_directions):
                 pass
     return frag_number
 
+@nb.njit
+def exclude_not_top_k(
+    fragment_intensities, top_k, 
+    frag_start_idxes, frag_end_idxes
+)->np.ndarray:
+    excluded = np.zeros_like(fragment_intensities, dtype=np.bool_)
+    for frag_start, frag_end in zip(frag_start_idxes, frag_end_idxes):
+        if top_k >= frag_end-frag_start: continue
+        idxes = np.argsort(fragment_intensities[frag_start:frag_end])
+        _excl = np.ones_like(idxes, dtype=np.bool_)
+        _excl[idxes[-top_k:]] = False
+        excluded[frag_start:frag_end] = _excl
+    return excluded
+
+
 # %% ../../nbdev_nbs/peptide/fragment.ipynb 18
 def flatten_fragments(precursor_df: pd.DataFrame, 
                       fragment_mz_df: pd.DataFrame,
                       fragment_intensity_df: pd.DataFrame,
                       min_fragment_intensity: float = -1.,
+                      keep_top_k_fragments: int = 1000,
 ):
     """Converts the tabular fragment format consisting of 
     the `fragment_mz_df` and the `fragment_intensity_df` 
@@ -502,15 +520,20 @@ def flatten_fragments(precursor_df: pd.DataFrame,
     where each column refers to:
         mz:        float, fragment mz value
         intensity: float32, fragment intensity value
-        type:      U1/str, a char in 'abcxyz', 
-                   or more char types in the future
+        type:      np.int8, ASCII code of a ion type 
+                   (97=a, 98=b, 99=c, 120=x, 121=y, 122=z), 
+                   or more ion types in the future. 
+                   See https://en.wikipedia.org/wiki/ASCII for more ASCII information
         number:    uint32, fragment series number
+        position:  uint32, fragment position in sequence (from left to right)
         charge:    int16, fragment charge
         loss_type: int16, fragment loss type, 0=noloss, 
                    17=NH3, 18=H2O, 98=HPO4 (phos), ...
 
     The fragment pointers `frag_start_idx` and `frag_end_idx` 
     will be reannotated to the new fragment format.
+
+    For ASCII code `type`, we can convert it into byte-str by using `frag_df.type.values.view('S1')`.
 
     Parameters
     ----------
@@ -536,8 +559,12 @@ def flatten_fragments(precursor_df: pd.DataFrame,
           `charge` and `loss_type`, where each column refers to:
               mz:        float, fragment mz value
               intensity: float, fragment intensity value
-              type:      U1, a char in 'abcxyz', or more char types in the future
+              type:      np.int8, ASCII code of a ion type 
+                         (97=a, 98=b, 99=c, 120=x, 121=y, 122=z), 
+                         or more ion types in the future. 
+                         See https://en.wikipedia.org/wiki/ASCII for more ASCII information
               number:    uint32, fragment series number
+              position:  uint32, fragment position in sequence (from left to right)
               charge:    int16, fragment charge
               loss_type: int16, fragment loss type, 0=noloss, 
                          17=NH3, 18=H2O, 98=HPO4 (phos), ...
@@ -555,7 +582,7 @@ def flatten_fragments(precursor_df: pd.DataFrame,
     
     for col in fragment_mz_df.columns.values:
         _types = col.split('_')
-        frag_types.append(_types[0])
+        frag_types.append(ord(_types[0])) # using ASCII code
         frag_charges.append(int(_types[-1][1:]))
         if len(_types) == 2:
             frag_loss_types.append(0)
@@ -574,15 +601,17 @@ def flatten_fragments(precursor_df: pd.DataFrame,
         else:
             frag_directions.append(0)
 
-    frag_df['type'] = np.array(frag_types*len(fragment_mz_df), dtype='U1')
+    frag_df['type'] = np.array(frag_types*len(fragment_mz_df), dtype=np.int8)
     frag_df['loss_type'] = np.array(frag_loss_types*len(fragment_mz_df), dtype=np.int16)
     frag_df['charge'] = np.array(frag_charges*len(fragment_mz_df), dtype=np.int16)
     frag_directions = np.array([frag_directions]*len(fragment_mz_df), dtype=np.int8)
-    frag_df['number'] = parse_fragment_numbers(
+    frag_numbers, frag_positions = parse_fragment_numbers(
         frag_directions, 
         precursor_df.frag_start_idx.values, 
         precursor_df.frag_end_idx.values
-    ).reshape(-1)
+    )
+    frag_df['number'] = frag_numbers.reshape(-1)
+    frag_df['position'] = frag_positions.reshape(-1)
    
     # ion type column is created
 
@@ -591,9 +620,15 @@ def flatten_fragments(precursor_df: pd.DataFrame,
 
     # if desired, only keep precursors above a certain treshold
     excluded = (
-        frag_df['intensity'].values < min_fragment_intensity
-    )|(
-        frag_df['mz'].values == 0
+        frag_df.intensity.values < min_fragment_intensity
+    ) | (
+        frag_df.mz.values == 0
+    ) | (
+        exclude_not_top_k(
+            frag_df.intensity.values, keep_top_k_fragments,
+            precursor_new_df.frag_start_idx.values,
+            precursor_new_df.frag_end_idx.values,
+        )
     )
     frag_df = frag_df[~excluded]
     frag_df = frag_df.reset_index(drop=True)
@@ -655,7 +690,8 @@ def remove_unused_fragments(
         precursor_df: pd.DataFrame, 
         fragment_df_list: Tuple[pd.DataFrame]
     ):
-    """Removes unused fragments and reannotates the frag_start_idx and frag_end_idx
+    """Removes unused fragments of removed precursors, 
+    reannotates the frag_start_idx and frag_end_idx
 
     Parameters
     ----------
