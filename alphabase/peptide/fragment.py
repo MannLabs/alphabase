@@ -537,7 +537,7 @@ def flatten_fragments(precursor_df: pd.DataFrame,
         position:  uint32, fragment position in sequence (from left to right, starts with 0)
         charge:    int8, fragment charge
         loss_type: int16, fragment loss type, 0=noloss, 
-                   17=NH3, 18=H2O, 98=HPO4 (phos), ...
+                   17=NH3, 18=H2O, 98=H3PO4 (phos), ...
 
     The fragment pointers `frag_start_idx` and `frag_end_idx` 
     will be reannotated to the new fragment format.
@@ -580,7 +580,7 @@ def flatten_fragments(precursor_df: pd.DataFrame,
               position:  uint32, fragment position in sequence (from left to right, starts with 0)
               charge:    int8, fragment charge
               loss_type: int16, fragment loss type, 0=noloss, 
-                         17=NH3, 18=H2O, 98=HPO4 (phos), ...
+                         17=NH3, 18=H2O, 98=H3PO4 (phos), ...
     """
     
     # new dataframes for fragments and precursors are created

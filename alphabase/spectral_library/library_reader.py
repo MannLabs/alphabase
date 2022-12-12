@@ -63,7 +63,7 @@ class SWATHLibraryReader(SpectronautReader, SpecLibBase):
         self._frag_loss_type_columns = "FragmentLossType FragmentIonLossType ProductLossType ProductIonLossType".split(' ')
         self._frag_inten_columns = "RelativeIntensity RelativeFragmentIntensity RelativeFragmentIonIntensity LibraryIntensity".split(' ')
 
-    def _find_key_columns(self, lib_df):
+    def _find_key_columns(self, lib_df:pd.DataFrame):
         def find_col(target_columns, df_columns):
             for col in target_columns:
                 if col in df_columns:
@@ -87,15 +87,17 @@ class SWATHLibraryReader(SpectronautReader, SpecLibBase):
 
         if self.frag_loss_type_col is None:
             self.frag_loss_type_col = 'FragmentLossType'
-            lib_df[self.frag_loss_type_col] = 'noloss'
+            lib_df[self.frag_loss_type_col] = ''
 
-    def _get_fragment_intensity(self, lib_df):
+    def _get_fragment_intensity(self, lib_df:pd.DataFrame):
         frag_col_dict = dict(zip(
             self.charged_frag_types, 
             range(len(self.charged_frag_types))
         ))
 
         self._find_key_columns(lib_df)
+        lib_df[self.frag_loss_type_col].fillna('', inplace=True)
+        lib_df[self.frag_loss_type_col].replace('noloss','',inplace=True)
 
         mod_seq_list = []
         seq_list = []
@@ -135,7 +137,7 @@ class SWATHLibraryReader(SpectronautReader, SpecLibBase):
                 else:
                     continue
                 
-                if loss_type == 'noloss':
+                if loss_type == '':
                     frag_type = f'{frag_type}_z{frag_charge}'
                 elif loss_type == 'H3PO4':
                     frag_type = f'{frag_type}_modloss_z{frag_charge}'
