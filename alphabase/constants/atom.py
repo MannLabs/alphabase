@@ -1,1 +1,1 @@
-from .element import *
+from alphabase.constants.element import *
