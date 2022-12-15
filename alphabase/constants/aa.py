@@ -13,6 +13,9 @@ from alphabase.constants.element import (
 
 from alphabase.constants._const import CONST_FILE_FOLDER
 
+# We use all 128 ASCII code to represent amino acids for flexible extensions in the future.
+# The amino acid masses are stored in 128-lengh array :py:data:`AA_ASCII_MASS`. 
+# If an ASCII code is not in `AA_CHEM`, the mass will be set as a large value to disable MS search.
 AA_CHEM:dict = load_yaml(
     os.path.join(CONST_FILE_FOLDER, 'amino_acid.yaml')
 )
@@ -43,7 +46,7 @@ def reset_AA_df():
 #: 128-len AA dataframe
 AA_DF:pd.DataFrame = reset_AA_df()
 
-#: AA to formula dict of dict. For example: {'K': {'C': n, 'O': m, ...}}
+# AA to formula dict of dict. For example: {'K': {'C': n, 'O': m, ...}}
 AA_formula:dict = {}
 for aa, formula, mass in AA_DF.values:
     AA_formula[aa] = dict(

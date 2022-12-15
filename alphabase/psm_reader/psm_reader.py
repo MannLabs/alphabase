@@ -236,11 +236,21 @@ class PSMReaderBase(object):
             f'"{self.__class__}" must implement "_init_column_mapping()"'
         )
     
-    def load(self, _file):
+    def load(self, _file)->pd.DataFrame:
         """ Wrapper for import_file() """
-        return self.import_file(_file)
+        if isinstance(_file, list): 
+            return self.import_files(_file)
+        else: 
+            return self.import_file(_file)
 
-    def import_file(self, _file:str):
+    def import_files(self, file_list:list):
+        df_list = []
+        for _file in file_list:
+            df_list.append(self.import_file(_file))
+        self._psm_df = pd.concat(df_list, ignore_index=True)
+        return self._psm_df
+
+    def import_file(self, _file:str)->pd.DataFrame:
         """
         This is the main entry function of PSM readers, 
         it imports the file with following steps:

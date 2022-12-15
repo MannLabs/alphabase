@@ -1,7 +1,12 @@
 jupyter
 jupyter_contrib_nbextensions
 autodocsumm
-sphinx-rtd-theme
+recommonmark
+sphinx
+nbsphinx
+jinja2
+contextfilter
+furo
 twine
 bumpversion
 pipdeptree

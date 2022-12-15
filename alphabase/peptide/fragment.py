@@ -161,16 +161,6 @@ def init_fragment_by_precursor_dataframe(
     -------
     pd.DataFrame
         zero `fragment_df` with given `charged_frag_types` columns
-    
-    # Raises
-    # ------
-    # ValueError
-    #     If `reference_fragment_df` is None but there are 'frag_start_idx'
-    #     in the `precursor_df`, meaning that there are some other fragment 
-    #     dataframes linked to the `precursor_df`, these fragment dataframes must 
-    #     be provided as `reference_fragment_df`. 
-    #     If we are sure that other fragment dataframes are not needed any more, 
-    #     we can just `del precursor_df['frag_start_idx']` before call this function.
     '''
     if 'frag_start_idx' not in precursor_df.columns:
         (
@@ -307,14 +297,14 @@ def concat_precursor_fragment_dataframes(
     fragment_df_list : List[pd.DataFrame]
         fragment dataframe list to concatenate
 
-    *other_fragment_df_lists
+    other_fragment_df_lists
         arbitray other fragment dataframe list to concatenate, 
         e.g. fragment_mass_df, fragment_inten_df, ...
     
     Returns
     -------
     Tuple[pd.DataFrame,...]
-        concatenated precursor_df, fragment_df, *other_fragment_df ...
+        concatenated precursor_df, fragment_df, other_fragment_dfs ...
     '''
     fragment_df_lens = [len(fragment_df) for fragment_df in fragment_df_list]
     precursor_df_list = [precursor_df.copy() for precursor_df in precursor_df_list]
@@ -490,77 +480,70 @@ def exclude_not_top_k(
 
 
 def flatten_fragments(precursor_df: pd.DataFrame, 
-                      fragment_mz_df: pd.DataFrame,
-                      fragment_intensity_df: pd.DataFrame,
-                      min_fragment_intensity: float = -1.,
-                      keep_top_k_fragments: int = 1000,
-                      custom_columns:list = [
-                        'type','number','position','charge','loss_type'
-                      ],
+    fragment_mz_df: pd.DataFrame,
+    fragment_intensity_df: pd.DataFrame,
+    min_fragment_intensity: float = -1.,
+    keep_top_k_fragments: int = 1000,
+    custom_columns:list = [
+        'type','number','position','charge','loss_type'
+    ],
 )->Tuple[pd.DataFrame, pd.DataFrame]:
-    """Converts the tabular fragment format consisting of 
+    """
+    Converts the tabular fragment format consisting of 
     the `fragment_mz_df` and the `fragment_intensity_df` 
     into a linear fragment format.
-
     The linear fragment format will only retain fragments 
     above a given intensity treshold with `mz > 0`. 
     It consists of columns: `mz`, `intensity`, 
     `type`, `number`, `charge` and `loss_type`,  
     where each column refers to:
-        mz:        float64, fragment mz value
-        intensity: float32, fragment intensity value
-        type:      int8, ASCII code of the ion type 
-                   (97=a, 98=b, 99=c, 120=x, 121=y, 122=z), 
-                   or more ion types in the future. 
-                   See https://en.wikipedia.org/wiki/ASCII for more ASCII information
-        number:    uint32, fragment series number
-        position:  uint32, fragment position in sequence (from left to right, starts with 0)
-        charge:    int8, fragment charge
-        loss_type: int16, fragment loss type, 0=noloss, 
-                   17=NH3, 18=H2O, 98=H3PO4 (phos), ...
 
+    - mz:        float64, fragment mz value
+    - intensity: float32, fragment intensity value
+    - type:      int8, ASCII code of the ion type (97=a, 98=b, 99=c, 120=x, 121=y, 122=z), or more ion types in the future. See https://en.wikipedia.org/wiki/ASCII for more ASCII information
+    - number:    uint32, fragment series number
+    - position:  uint32, fragment position in sequence (from left to right, starts with 0)
+    - charge:    int8, fragment charge
+    - loss_type: int16, fragment loss type, 0=noloss, 17=NH3, 18=H2O, 98=H3PO4 (phos), ...
+    
     The fragment pointers `frag_start_idx` and `frag_end_idx` 
     will be reannotated to the new fragment format.
 
     For ASCII code `type`, we can convert it into byte-str by using `frag_df.type.values.view('S1')`.
-
+    
     Parameters
     ----------
     precursor_df : pd.DataFrame
         input precursor dataframe which contains the frag_start_idx and frag_end_idx columns
-
+    
     fragment_mz_df : pd.DataFrame
         input fragment mz dataframe of shape (N, T) which contains N * T fragment mzs
-
+    
     fragment_intensity_df : pd.DataFrame
         input fragment mz dataframe of shape (N, T) which contains N * T fragment mzs
-
+    
     min_fragment_intensity : float, optional
         minimum intensity which should be retained. Defaults to -1.0
-
+    
     custom_columns : list, optional
         'mz' and 'intensity' columns are required. Others could be customized. 
         Defaults to ['type','number','position','charge','loss_type']
-
+    
     Returns
     -------
-    tuple
-        pd.DataFrame
-          precursor dataframe whith reindexed `frag_start_idx` and `frag_end_idx` columns
-        pd.DataFrame
-          fragment dataframe with columns: `mz`, `intensity`, `type`, `number`, 
-          `charge` and `loss_type`, where each column refers to:
-              mz:        float, fragment mz value
-              intensity: float32, fragment intensity value
-              type:      int8, ASCII code of the ion type 
-                         (97=a, 98=b, 99=c, 120=x, 121=y, 122=z), 
-                         or more ion types in the future. 
-                         See https://en.wikipedia.org/wiki/ASCII for more ASCII information
-              number:    uint32, fragment series number
-              position:  uint32, fragment position in sequence (from left to right, starts with 0)
-              charge:    int8, fragment charge
-              loss_type: int16, fragment loss type, 0=noloss, 
-                         17=NH3, 18=H2O, 98=H3PO4 (phos), ...
+    pd.DataFrame
+        precursor dataframe whith reindexed `frag_start_idx` and `frag_end_idx` columns
+    pd.DataFrame
+        fragment dataframe with columns: `mz`, `intensity`, `type`, `number`, 
+        `charge` and `loss_type`, where each column refers to:
+        
+        - mz:        float, fragment mz value
+        - intensity: float32, fragment intensity value
+        - type:      int8, ASCII code of the ion type (97=a, 98=b, 99=c, 120=x, 121=y, 122=z), or more ion types in the future. See https://en.wikipedia.org/wiki/ASCII for more ASCII information
+        - number:    uint32, fragment series number
+        - position:  uint32, fragment position in sequence (from left to right, starts with 0)
+        - charge:    int8, fragment charge
+        - loss_type: int16, fragment loss type, 0=noloss, 17=NH3, 18=H2O, 98=H3PO4 (phos), ...
     """
     
     # new dataframes for fragments and precursors are created
@@ -647,22 +630,19 @@ def flatten_fragments(precursor_df: pd.DataFrame,
 
 @nb.njit()
 def compress_fragment_indices(frag_idx):
-    """recalculates fragment indices to remove unused fragments. Can be used to compress a fragment library.
+    """
+    recalculates fragment indices to remove unused fragments. Can be used to compress a fragment library.
     Expects fragment indices to be ordered by increasing values (!!!).
-
-    should be O(N) runtime with N being the number of fragment rows.
-
-    frag_idx = [[6,  10],
+    It should be O(N) runtime with N being the number of fragment rows.
+    
+    >>> frag_idx = [[6,  10],
                 [12, 14],
                 [20, 22]]
-
-    returns:
-    frag_idx = [[0, 4],
+    
+    >>> frag_idx = [[0, 4],
                 [4, 6],
                 [6, 8]]
-
-    fragment_pointer = [6,7,8,9,12,13,20,21]
-
+    >>> fragment_pointer = [6,7,8,9,12,13,20,21]
     """
     frag_idx_len = frag_idx[:,1]-frag_idx[:,0]
 
@@ -691,18 +671,18 @@ def remove_unused_fragments(
     ):
     """Removes unused fragments of removed precursors, 
     reannotates the frag_start_idx and frag_end_idx
-
+    
     Parameters
     ----------
     precursor_df : pd.DataFrame
         Precursor dataframe which contains frag_start_idx and frag_end_idx columns
-
+    
     fragment_df_list : List[pd.DataFrame]
         A list of fragment dataframes which should be compressed by removing unused fragments.
         Multiple fragment dataframes can be provided which will all be sliced in the same way. 
         This allows to slice both the fragment_mz_df and fragment_intensity_df. 
         At least one fragment dataframe needs to be provided. 
-
+    
     Returns
     -------
     pd.DataFrame, List[pd.DataFrame]
@@ -730,20 +710,20 @@ def create_fragment_mz_dataframe_by_sort_precursor(
     batch_size:int=500000,
 )->pd.DataFrame:
     """Sort nAA in precursor_df for faster fragment mz dataframe creation.
-
+    
     Because the fragment mz values are continous in memory, so it is faster
     when setting values in pandas.
-
+    
     Note that this function will change the order and index of precursor_df
-
+    
     Parameters
     ----------
     precursor_df : pd.DataFrame
         precursor dataframe
-
+    
     charged_frag_types : List
         fragment types list
-
+    
     batch_size : int, optional
         Calculate fragment mz values in batch. 
         Defaults to 500000.
@@ -802,31 +782,25 @@ def create_fragment_mz_dataframe(
         `reference_fragment_df` must be provided
     charged_frag_types : List
         `['b_z1','b_z2','y_z1','y_z2','b_modloss_1','y_H2O_z1'...]`
-
+    
     reference_fragment_df : pd.DataFrame
         kwargs only. Generate fragment_mz_df based on this reference, 
         as `precursor_df.frag_start_idx` and 
         `precursor.frag_end_idx` point to the indices in 
         `reference_fragment_df`.
         Defaults to None
-
+    
     inplace_in_reference : bool
         kwargs only. Change values in place in the `reference_fragment_df`.
         Defaults to False
-
+    
     batch_size: int
         Number of peptides for each batch, to save RAM.
-
+    
     Returns
     -------
     pd.DataFrame
         `fragment_mz_df` with given `charged_frag_types`
-    
-    # Raises
-    # ------
-    # ValueError
-    #     when `precursor_df` contains 'frag_start_idx' but 
-    #     `reference_fragment_df` is not None
     '''
     if reference_fragment_df is None:
         if 'frag_start_idx' in precursor_df.columns:

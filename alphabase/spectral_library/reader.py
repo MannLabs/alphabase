@@ -6,6 +6,7 @@ from alphabase.peptide.mobility import mobility_to_ccs_for_df
 from alphabase.io.psm_reader.dia_search_reader import SpectronautReader
 from alphabase.spectral_library.base import SpecLibBase
 from alphabase.psm_reader.psm_reader import psm_reader_yaml
+from alphabase.psm_reader import psm_reader_provider
 
 class SWATHLibraryReader(SpectronautReader, SpecLibBase):
     def __init__(self,
@@ -223,3 +224,47 @@ class SWATHLibraryReader(SpectronautReader, SpecLibBase):
 
         self.calc_fragment_mz_df()
 
+
+class LibraryReaderFromRawData(SpecLibBase):
+    def __init__(self, 
+        charged_frag_types:typing.List[str] = [
+            'b_z1','b_z2','y_z1', 'y_z2', 
+            'b_modloss_z1','b_modloss_z2',
+            'y_modloss_z1', 'y_modloss_z2'
+        ],
+        precursor_mz_min:float = 400,
+        precursor_mz_max:float = 2000,
+        decoy:str = None,
+        **kwargs
+    ):
+        super().__init__(
+            charged_frag_types=charged_frag_types,
+            precursor_mz_min=precursor_mz_min,
+            precursor_mz_max=precursor_mz_max,
+            decoy=decoy,
+        )
+    
+    def import_psms(self, psm_files:list, psm_type:str):
+        psm_reader = psm_reader_provider.get_reader(psm_type)
+        if isinstance(psm_files, str):
+            self._precursor_df = psm_reader.import_file(psm_files)
+            self._psm_df = self._precursor_df
+        else:
+            psm_df_list = []
+            for psm_file in psm_files:
+                psm_df_list.append(psm_reader.import_file(psm_file))
+            self._precursor_df = pd.concat(psm_df_list, ignore_index=True)
+            self._psm_df = self._precursor_df
+
+    def extract_fragments(self, raw_files:list):
+        """ Include two steps:
+            1. self.calc_fragment_mz_df() to generate self.fragment_mz_df
+            2. Extract self.fragment_intensity_df from RAW files using AlphaRAW
+
+        Parameters
+        ----------
+        raw_files : list
+            RAW file paths
+        """
+        self.calc_fragment_mz_df()
+        # TODO Use AlphaRAW to extract fragment intensities

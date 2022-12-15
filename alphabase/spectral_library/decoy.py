@@ -32,11 +32,12 @@ class DecoyLib(SpecLibBase):
         self.fix_C_term = fix_C_term
 
     def translate_to_decoy(self):
-        """Main entry of this class, it calls follows methods:
-            self.decoy_sequence()
-            self._decoy_mods()
-            self._decoy_meta()
-            self._decoy_frags()
+        """
+        Main entry of this class, it calls follows methods:
+        * self.decoy_sequence()
+        * self._decoy_mods()
+        * self._decoy_meta()
+        * self._decoy_frags()
         """
         self.decoy_sequence()
         self._decoy_mods()

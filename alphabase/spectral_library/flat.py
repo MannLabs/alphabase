@@ -74,7 +74,7 @@ class FlatSpecLib:
 
     @property
     def peptide_df(self)->pd.DataFrame:
-        """: pd.DataFrame : peptide dataframe with columns
+        """Peptide dataframe with columns
         'sequence', 'mods', 'mod_sites', 'charge', ...
         Identical to `self.precursor_df`.
         """
@@ -86,7 +86,7 @@ class FlatSpecLib:
 
     @property
     def fragment_df(self)->pd.DataFrame:
-        """: pd.DataFrame : The fragment mz dataframe with 
+        """The fragment mz dataframe with 
         fragment types as columns (['b_z1', 'y_z2', ...])
         """
         return self._fragment_df
@@ -111,18 +111,17 @@ class FlatSpecLib:
     def save_hdf(self, hdf_file:str):
         """Save library dataframes into hdf_file.
         For `self.precursor_df`, this method will save it into two hdf groups:
-            hdf_file: `flat_library/precursor_df` and `library/mod_seq_df`.
+        hdf_file: `flat_library/precursor_df` and `library/mod_seq_df`.
 
         `flat_library/precursor_df` contains all essential numberic columns those 
         can be loaded faster from hdf file into memory:
-            'precursor_mz', 'charge', 'mod_seq_hash', 'mod_seq_charge_hash',
-            'frag_start_idx', 'frag_end_idx', 'decoy', 'rt_pred', 'ccs_pred',
-            'mobility_pred', 'miss_cleave', 'nAA', 
-            ['isotope_mz_m1', 'isotope_intensity_m1'], ...
+        `['precursor_mz', 'charge', 'mod_seq_hash', 'mod_seq_charge_hash',
+        'frag_start_idx', 'frag_end_idx', 'decoy', 'rt_pred', 'ccs_pred',
+        'mobility_pred', 'miss_cleave', 'nAA', 'isotope_mz_m1', 'isotope_intensity_m1', ...]`
 
         `flat_library/mod_seq_df` contains all string columns and the other 
         not essential columns:
-            'sequence','mods','mod_sites', ['proteins', 'genes']...
+        'sequence','mods','mod_sites', ['proteins', 'genes']...
         as well as 'mod_seq_hash', 'mod_seq_charge_hash' columns to map 
         back to `precursor_df`
 
