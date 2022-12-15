@@ -7,7 +7,7 @@ __all__ = ['get_charged_frag_types', 'parse_charged_frag_type', 'init_zero_fragm
            'calc_fragment_mz_values_for_same_nAA', 'mask_fragments_for_charge_greater_than_precursor_charge',
            'parse_fragment_positions', 'parse_fragment_numbers', 'exclude_not_top_k', 'flatten_fragments',
            'compress_fragment_indices', 'remove_unused_fragments', 'create_fragment_mz_dataframe_by_sort_precursor',
-           'create_fragment_mz_dataframe']
+           'create_fragment_mz_dataframe', 'join_left', 'annotate_fragments_from_speclib']
 
 # %% ../../nbdev_nbs/peptide/fragment.ipynb 4
 import numpy as np
@@ -15,6 +15,7 @@ import pandas as pd
 from typing import List, Union, Tuple, Dict
 import warnings
 import numba as nb
+import logging
 
 from .mass_calc import *
 from alphabase.constants.modification import (
@@ -29,6 +30,9 @@ from alphabase.peptide.precursor import (
     refine_precursor_df,
     update_precursor_mz,
     is_precursor_sorted
+)
+from alphabase.spectral_library.library_base import (
+    SpecLibBase
 )
 
 # %% ../../nbdev_nbs/peptide/fragment.ipynb 5
@@ -695,8 +699,7 @@ def compress_fragment_indices(frag_idx):
     fragment_pointer = np.zeros(np.sum(frag_idx_len), dtype='int64')
 
     for i in range(len(frag_idx)):
-        
-   
+
         start_index = frag_idx_cumsum[i]
 
         for j,k in enumerate(range(frag_idx[i,0],frag_idx[i,1])):
@@ -709,8 +712,8 @@ def compress_fragment_indices(frag_idx):
 # %% ../../nbdev_nbs/peptide/fragment.ipynb 20
 def remove_unused_fragments(
         precursor_df: pd.DataFrame, 
-        fragment_df_list: Tuple[pd.DataFrame]
-    ):
+        fragment_df_list: Tuple[pd.DataFrame, ...]
+    ) -> Tuple[pd.DataFrame, Tuple[pd.DataFrame, ...]]:
     """Removes unused fragments of removed precursors, 
     reannotates the frag_start_idx and frag_end_idx
 
@@ -924,3 +927,126 @@ def create_fragment_mz_dataframe(
             precursor_df.nAA.values,
         )
 
+
+# %% ../../nbdev_nbs/peptide/fragment.ipynb 38
+@nb.njit(nogil=True)
+def join_left(
+    left: np.ndarray, 
+    right: np.ndarray
+    ):
+    """joins all values in the left array to the values in the right array. 
+    The index to the element in the right array is returned. 
+    If the value wasn't found, -1 is returned. If the element appears more than once, the last appearance is used.
+
+    Parameters
+    ----------
+
+    left: numpy.ndarray
+        left array which should be matched
+
+    right: numpy.ndarray
+        right array which should be matched to
+
+    Returns
+    -------
+    numpy.ndarray, dtype = int64
+        array with length of the left array which indices pointing to the right array
+        -1 is returned if values could not be found in the right array
+    """
+    left_indices = np.argsort(left)
+    left_sorted = left[left_indices]
+
+    right_indices = np.argsort(right)
+    right_sorted = right[right_indices]
+
+    joined_index = -np.ones(len(left), dtype='int64')
+    
+    # from hereon sorted arrays are expected
+    lower_right = 0
+
+    for i in range(len(joined_index)):
+
+        for k in range(lower_right, len(right)):
+
+            if left_sorted[i] >= right_sorted[k]:
+                if left_sorted[i] == right_sorted[k]:
+                    joined_index[i] = k
+                    lower_right = k
+            else:
+                break
+
+    # the joined_index_sorted connects indices from the sorted left array with the sorted right array
+    # to get the original indices, the order of both sides needs to be restored
+    # First, the indices pointing to the right side are restored by masking the array for hits and looking up the right side
+    joined_index[joined_index >= 0] = right_indices[joined_index[joined_index >= 0]]
+
+    # Next, the left side is restored by arranging the items
+    joined_index[left_indices] =  joined_index
+
+    return joined_index
+
+
+# %% ../../nbdev_nbs/peptide/fragment.ipynb 39
+def annotate_fragments_from_speclib(
+    speclib: SpecLibBase, 
+    fragment_speclib: SpecLibBase,
+    verbose = True,
+):
+    """Reannotate an SpecLibBase library with fragments from a different SpecLibBase.
+    
+    Parameters
+    ----------
+    speclib: alphabase.spectral_library.library_base.SpecLibBase
+        Spectral library which contains the precursors to be annotated. All fragments mz and fragment intensities will be removed.
+
+    fragment_speclib: alphabase.spectral_library.library_base.SpecLibBase
+        Spectral library which contains the donor precursors whose fragments should be used.
+
+    Returns
+    -------
+
+    alphabase.spectral_library.library_base.SpecLibBase
+        newly annotated spectral library
+ 
+    """
+    if verbose:
+        num_precursor_left = len(speclib.precursor_df)
+        num_precursor_right = len(fragment_speclib.precursor_df)
+        num_fragments_right = len(fragment_speclib.fragment_mz_df) * len(fragment_speclib.fragment_mz_df.columns)
+        logging.info(f'Speclib with {num_precursor_left:,} precursors will be reannotated with speclib with {num_precursor_right:,} precursors and {num_fragments_right:,} fragments')
+
+    # reannotation is based on mod_seq_hash column
+    hash_column_name = 'mod_seq_hash'
+
+    # create hash columns if missing
+    if hash_column_name not in speclib.precursor_df.columns:
+        speclib.hash_precursor_df()
+
+    if fragment_speclib not in fragment_speclib.precursor_df.columns:
+        fragment_speclib.hash_precursor_df()
+
+    speclib_hash = speclib.precursor_df[hash_column_name].values
+    fragment_speclib_hash = fragment_speclib.precursor_df[hash_column_name].values
+
+    speclib_indices = join_left(speclib_hash, fragment_speclib_hash)
+
+    matched_mask = (speclib_indices >= 0)
+
+    if verbose:
+        matched_count = np.sum(matched_mask)
+        not_matched_count = np.sum(~matched_mask)
+    
+        logging.info(f'A total of {matched_count:,} precursors were succesfully annotated, {not_matched_count:,} precursors were not matched')
+
+
+    frag_start_idx = fragment_speclib.precursor_df['frag_start_idx'].values[speclib_indices]
+    frag_end_idx = fragment_speclib.precursor_df['frag_end_idx'].values[speclib_indices]
+    
+    speclib._precursor_df = speclib._precursor_df[matched_mask].copy()
+    speclib._precursor_df['frag_start_idx'] = frag_start_idx[matched_mask]
+    speclib._precursor_df['frag_end_idx'] = frag_end_idx[matched_mask]
+
+    speclib._fragment_mz_df = fragment_speclib._fragment_mz_df.copy()
+    speclib._fragment_intensity_df = fragment_speclib._fragment_intensity_df.copy()
+
+    return speclib

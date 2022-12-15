@@ -11,6 +11,8 @@ import typing
 import alphabase.peptide.fragment as fragment
 import alphabase.peptide.precursor as precursor
 from ..io.hdf import HDF_File
+import logging
+import numba as nb
 
 # %% ../../nbdev_nbs/spectral_library/library_base.ipynb 3
 class SpecLibBase(object):
@@ -280,6 +282,52 @@ class SpecLibBase(object):
         precursor.hash_precursor_df(
             self._precursor_df
         )
+    
+    def annotate_fragments_from_speclib(self, 
+        donor_speclib, 
+        verbose = True
+    ):
+        """
+        Annotate self.precursor_df with fragments from donor_speclib.
+        The donor_speclib must have a fragment_mz_df and can optionally have a fragment_intensity_df.
+        Fragment dataframes are updated inplace and overwritten.
+
+        Parameters
+        ----------
+        donor_speclib : SpecLibBase
+            The donor library to annotate fragments from.
+
+        verbose : bool, optional
+            Print progress, by default True, for example:
+            `2022-12-16 00:52:08> Speclib with 4 precursors will be reannotated with speclib with 12 precursors and 504 fragments
+            2022-12-16 00:52:08> A total of 4 precursors were succesfully annotated, 0 precursors were not matched`
+            
+        """
+        self = fragment.annotate_fragments_from_speclib(
+            self, donor_speclib, verbose = verbose
+        )
+    
+    def remove_unused_fragments(self):
+        """
+        Remove unused fragments from self._fragment_mz_df and self._fragment_intensity_df.
+        Fragment dataframes are updated inplace and overwritten.
+        """
+
+
+        if len(self._fragment_mz_df) > 0:
+            
+            # update both fragment mz and intensity df
+            if len(self.fragment_intensity_df > 0):
+                self._precursor_df,(self._fragment_mz_df, self._fragment_intensity_df) = fragment.remove_unused_fragments(
+                    self._precursor_df,(self._fragment_mz_df, self._fragment_intensity_df)
+                )
+            # only update fragment mz df
+            else:
+                (self._precursor_df, (self._fragment_mz_df,)) = fragment.remove_unused_fragments(
+                    self._precursor_df, (self._fragment_mz_df,)
+                )
+
+
 
     def _get_hdf_to_save(self, 
         hdf_file, 
