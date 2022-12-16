@@ -23,6 +23,7 @@ project = 'alphabase'
 copyright = '2022, Mann Labs, MPIB'
 author = 'Mann Labs, MPIB'
 
+release = "0.2.0"
 
 # -- General configuration ---------------------------------------------------
 
@@ -37,6 +38,7 @@ extensions = [
     'autodocsumm',
     'nbsphinx',
     'recommonmark',
+    'myst_parser',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
