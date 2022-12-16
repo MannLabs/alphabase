@@ -13,7 +13,7 @@ sphinx:
 formats: all
 
 conda:
-  environment: misc/conda_development_environment.yaml
+  environment: misc/conda_dev_env.yaml
 
 # # Optionally set the version of Python and requirements required to build your docs
 # python:
