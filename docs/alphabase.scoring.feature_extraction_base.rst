@@ -1,5 +1,5 @@
 alphabase.scoring.feature_extraction_base
-===========================
+===========================================
 
 .. automodule:: alphabase.scoring.feature_extraction_base
    :members:

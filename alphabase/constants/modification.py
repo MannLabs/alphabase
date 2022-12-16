@@ -359,13 +359,11 @@ def add_new_modifications(new_mods:list):
     Parameters
     ----------
     new_mods : list 
-    
         list of tuples. Tuple example:
-        (
-            modname@site:str (e.g. Mod@S), 
-            chemical compositions:str (e.g. "H(4)O(2)"),
-            [optional] modloss compositions:str (e.g. "H(2)O(1)"),
-        )
+        
+        modname@site:str (e.g. Mod@S), 
+        chemical compositions:str (e.g. "H(4)O(2)"),
+        [optional] modloss compositions:str (e.g. "H(2)O(1)"),
     """
     for items in new_mods:
         if len(items) == 2:

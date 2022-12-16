@@ -1,7 +1,6 @@
 jupyter
 jupyter_contrib_nbextensions
 autodocsumm
-recommonmark
 myst_parser
 sphinx
 nbsphinx

@@ -37,7 +37,6 @@ extensions = [
     'sphinx.ext.viewcode',
     'autodocsumm',
     'nbsphinx',
-    'recommonmark',
     'myst_parser',
 ]
 
