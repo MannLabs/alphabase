@@ -4,4 +4,4 @@ alphabase.protein
 .. toctree::
    :maxdepth: 1
    
-   alphabase.protein.fasta
+   protein/alphabase.protein.fasta

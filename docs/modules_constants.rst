@@ -4,7 +4,7 @@ alphabase.constants
 .. toctree::
    :maxdepth: 1
 
-   alphabase.constants.element
-   alphabase.constants.aa
-   alphabase.constants.modification
-   alphabase.constants.isotope
+   constants/alphabase.constants.element
+   constants/alphabase.constants.aa
+   constants/alphabase.constants.modification
+   constants/alphabase.constants.isotope

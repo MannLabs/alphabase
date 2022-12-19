@@ -4,4 +4,4 @@ alphabase.statistics
 .. toctree::
    :maxdepth: 1
    
-   alphabase.statistics.regression
+   statistics/alphabase.statistics.regression

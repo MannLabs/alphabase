@@ -1,15 +1,16 @@
-Documentation for AlphaBase.
+Documentation for AlphaBase
 =====================================
 
-This documentation is intended as AlphaBase API docs for direct Python use. For more information, see AlphaBase on `GitHub <https://github.com/MannLabs/alphabase/>`_.
+The infrastructure of AlphaX ecosystem for MS proteomics. 
+For more information, see AlphaBase on `GitHub <https://github.com/MannLabs/alphabase/>`_.
 
 .. toctree::
    :maxdepth: 2
 
    modules_spectral_library
-   modules_constants
-   modules_peptide
    modules_protein
+   modules_peptide
+   modules_constants
    modules_io
    modules_psm_reader
    modules_scoring
