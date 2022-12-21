@@ -1,12 +1,5 @@
 jupyter
 jupyter_contrib_nbextensions
-autodocsumm
-myst_parser
-sphinx
-nbsphinx
-jinja2
-contextfilter
-furo
 twine
 bumpversion
 pipdeptree
@@ -14,6 +7,15 @@ ipykernel
 nbdev
 pyteomics
 scikit-learn
+
+#sphinx
+autodocsumm
+myst_parser
+sphinx
+nbsphinx
+jinja2
+contextfilter
+furo
 
 tqdm
 psutil

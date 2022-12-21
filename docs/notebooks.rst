@@ -1,9 +1,11 @@
 Jupyter notebooks
 ====================
 
-Tutorials and API usage notebooks.
+Tutorials and notebooks for usages.
 
 .. toctree::
    :maxdepth: 2
 
-   nbs/tutorial_user
+   nbs/library_from_fasta
+   nbs/psm_readers
+   nbs/library_reader

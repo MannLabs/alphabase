@@ -8,7 +8,8 @@ class DecoyLib(SpecLibBase):
         fix_C_term = True,
         **kwargs,
     ):
-        """Pseudo-reverse peptide decoy generator
+        """
+        Pseudo-reverse peptide decoy generator
         Currently, only sequence-level decoy is implemented,
         but AlphaPeptDeep will add modifications onto both target and decoy sequences,
         so it is enough for practical uses.
@@ -34,10 +35,10 @@ class DecoyLib(SpecLibBase):
     def translate_to_decoy(self):
         """
         Main entry of this class, it calls follows methods:
-        * self.decoy_sequence()
-        * self._decoy_mods()
-        * self._decoy_meta()
-        * self._decoy_frags()
+        - self.decoy_sequence()
+        - self._decoy_mods()
+        - self._decoy_meta()
+        - self._decoy_frags()
         """
         self.decoy_sequence()
         self._decoy_mods()
@@ -144,7 +145,8 @@ class DiaNNDecoyLib(DecoyLib):
         mutated_AAs:str = 'LLLVVLLLLTSSSSLLNDQEVVVVVV', #DiaNN
         **kwargs,
     ):  
-        """DiaNN-like decoy peptide generator
+        """
+        DiaNN-like decoy peptide generator
 
         Parameters
         ----------
@@ -191,6 +193,7 @@ class DecoyLibProvider(object):
         ----------
         name : str
             Registered decoy class name
+            
         target_lib : SpecLibBase
             Target library for decoy generation
 

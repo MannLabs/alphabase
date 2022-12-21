@@ -18,8 +18,6 @@ class SWATHLibraryReader(SpectronautReader, SpecLibBase):
         column_mapping:dict = None,
         modification_mapping:dict = None,
         fdr = 0.01,
-        mod_sep = '[]',
-        underscore_for_ncterm=True,
         fixed_C57 = False,
         mod_seq_columns=psm_reader_yaml[
             'spectronaut'
@@ -43,8 +41,6 @@ class SWATHLibraryReader(SpectronautReader, SpecLibBase):
             modification_mapping = modification_mapping,
             fdr = fdr,
             keep_decoy = False,
-            mod_sep = mod_sep,
-            underscore_for_ncterm=underscore_for_ncterm,
             fixed_C57 = fixed_C57,
             mod_seq_columns=mod_seq_columns,
             csv_sep = csv_sep,

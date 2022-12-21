@@ -100,9 +100,9 @@ class PSMReaderBase(object):
             `self._init_column_mapping`. The dict values could be 
             either str or list, for exaplme:
             columns_mapping = {
-                'sequence': 'NakedSequence', #str
-                'charge': 'Charge', #str
-                'proteins':['Proteins','UniprotIDs'], # list, this reader will automatically detect all of them.
+            'sequence': 'NakedSequence', #str
+            'charge': 'Charge', #str
+            'proteins':['Proteins','UniprotIDs'], # list, this reader will automatically detect all of them.
             }
             Defaults to None.
         modification_mapping : dict, optional
@@ -111,8 +111,8 @@ class PSMReaderBase(object):
             `self._init_modification_mapping`. The dict values could be 
             either str or list, for exaplme:
             modification_mapping = {
-                'Oxidation@M': 'Oxidation (M)', # str
-                'Phospho@S': ['S(Phospho (STY))','S(ph)','pS'], # list, this reader will automatically detect all of them.
+            'Oxidation@M': 'Oxidation (M)', # str
+            'Phospho@S': ['S(Phospho (STY))','S(ph)','pS'], # list, this reader will automatically detect all of them.
             }
             Defaults to None.
         fdr : float, optional
@@ -172,8 +172,8 @@ class PSMReaderBase(object):
             the value could be a str or a list, see below
             ```
             add_modification_mapping({
-                'Dimethyl@K': ['K(Dimethyl)'], # list
-                'Dimethyl@Any N-term': '_(Dimethyl)', # str
+            'Dimethyl@K': ['K(Dimethyl)'], # list
+            'Dimethyl@Any N-term': '_(Dimethyl)', # str
             })
             ```
         """
@@ -516,3 +516,6 @@ class PSMReaderProvider:
         )
 
 psm_reader_provider = PSMReaderProvider()
+"""
+A factory :class:`PSMReaderProvider` object to register and get readers for different PSM types.
+"""

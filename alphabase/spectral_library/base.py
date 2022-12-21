@@ -7,6 +7,44 @@ import alphabase.peptide.precursor as precursor
 from alphabase.io.hdf import HDF_File
 
 class SpecLibBase(object):
+    """
+    Base spectral library in alphabase and alphapeptdeep.
+
+    Attributes
+    ----------
+    charged_frag_types : list
+        same as `charged_frag_types` in Parameters in :meth:`__init__`.
+
+    min_precursor_mz : float
+        same as `precursor_mz_min` in Parameters in :meth:`__init__`.
+
+    max_precursor_mz : float
+        same as `precursor_mz_max` in Parameters in :meth:`__init__`.
+
+    decoy : str
+        same as `decoy` in Parameters in :meth:`__init__`.
+    """
+
+    key_numeric_columns:list = [
+        'ccs_pred', 'charge', 
+        'decoy',
+        'frag_end_idx', 'frag_start_idx',
+        'isotope_m1_intensity', 'isotope_m1_mz',
+        'isotope_apex_mz', 'isotope_apex_intensity',
+        'isotope_apex_offset',
+        'isotope_right_most_mz', 'isotope_right_most_intensity',
+        'isotope_right_most_offset',
+        'miss_cleavage', 'mobility_pred',
+        'nAA', 
+        'precursor_mz', 
+        'rt_pred', 'rt_norm_pred'
+    ]
+    """
+    list of str: Key numeric columns to be saved 
+    into library/precursor_df in the hdf file for fast loading, 
+    others will be saved into library/mod_seq_df instead.
+    """
+
     def __init__(self,
         # ['b_z1','b_z2','y_z1','y_modloss_z1', ...]; 
         # 'b_z1': 'b' is the fragment type and 
@@ -17,8 +55,7 @@ class SpecLibBase(object):
         precursor_mz_min = 400, precursor_mz_max = 6000,
         decoy:str = None,
     ):
-        """Base spectral library in alphabase and alphapeptdeep.
-
+        """
         Parameters
         ----------
         charged_frag_types : typing.List[str], optional
@@ -36,35 +73,6 @@ class SpecLibBase(object):
         decoy : str, optional
             Decoy methods, could be "pseudo_reverse" or "diann".
             Defaults to None.
-
-        Attributes
-        ----------
-        precursor_df : pd.DataFrame
-            precursor dataframe.
-
-        fragment_mz_df : pd.DataFrame
-            fragment m/z dataframe.
-
-        fragment_intensity_df : pd.DataFrame
-            fragment intensity dataframe.
-
-        charged_frag_types : list
-            same as `charged_frag_types` in Args.
-
-        min_precursor_mz : float
-            same as `precursor_mz_min` in Args.
-
-        max_precursor_mz : float
-            same as `precursor_mz_max` in Args.
-
-        decoy : str
-            same as `decoy` in Args.
-
-        key_numeric_columns : list of str
-            key numeric columns to be saved 
-            into library/precursor_df in the hdf file. Others will be saved into
-            library/mod_seq_df instead.
-            
         """
         self.charged_frag_types = charged_frag_types
         self._precursor_df = pd.DataFrame()
@@ -73,27 +81,14 @@ class SpecLibBase(object):
         self.min_precursor_mz = precursor_mz_min
         self.max_precursor_mz = precursor_mz_max
 
-        self.key_numeric_columns = [
-            'ccs_pred', 'charge', 
-            'decoy',
-            'frag_end_idx', 'frag_start_idx',
-            'isotope_m1_intensity', 'isotope_m1_mz',
-            'isotope_apex_mz', 'isotope_apex_intensity',
-            'isotope_apex_index',
-            'isotope_right_most_mz', 'isotope_right_most_intensity',
-            'isotope_right_most_index',
-            'miss_cleavage', 'mobility_pred',
-            'nAA', 
-            'precursor_mz', 
-            'rt_pred', 'rt_norm_pred'
-        ]
         self.decoy = decoy
     
     @property
     def precursor_df(self)->pd.DataFrame:
-        """: pd.DataFrame : precursor dataframe with columns
-        'sequence', 'mods', 'mod_sites', 'charge', ...
-        Identical to `self.peptide_df`.
+        """
+        Precursor dataframe with columns
+        'sequence', 'mods', 'mod_sites', 'charge', etc,
+        identical to :attr:`peptide_df`.
         """
         return self._precursor_df
 
@@ -108,9 +103,10 @@ class SpecLibBase(object):
 
     @property
     def peptide_df(self)->pd.DataFrame:
-        """: pd.DataFrame : peptide dataframe with columns
-        'sequence', 'mods', 'mod_sites', 'charge', ...
-        Identical to `self.precursor_df`.
+        """
+        Peptide dataframe with columns
+        'sequence', 'mods', 'mod_sites', 'charge', etc,
+        identical to :attr:`precursor_df`. 
         """
         return self._precursor_df
 
@@ -120,35 +116,35 @@ class SpecLibBase(object):
 
     @property
     def fragment_mz_df(self)->pd.DataFrame:
-        """: pd.DataFrame : The fragment mz dataframe with 
+        """
+        The fragment mz dataframe with 
         fragment types as columns (['b_z1', 'y_z2', ...])
         """
         return self._fragment_mz_df
 
     @property
     def fragment_intensity_df(self)->pd.DataFrame:
-        """: pd.DataFrame : The fragment intensity dataframe with 
+        """
+        The fragment intensity dataframe with 
         fragment types as columns (['b_z1', 'y_z2', ...])
         """
         return self._fragment_intensity_df
 
     def refine_df(self):
-        """Sort nAA and reset_index for faster calculation (or prediction)
+        """
+        Sort nAA and reset_index for faster calculation (or prediction)
         """
         precursor.refine_precursor_df(
             self._precursor_df
         )
 
     def append_decoy_sequence(self):
-        """Append decoy sequence into precursor_df.
+        """
+        Append decoy sequence into precursor_df.
         Decoy method is based on self.decoy(str).
         ```
-        decoy_lib = (
-            decoy_lib_provider.get_decoy_lib(
-                self.decoy, self
-            )
-        )
-        decoy_lib.decoy_sequence()
+        >>> decoy_lib = (decoy_lib_provider.get_decoy_lib( self.decoy, self))
+        >>> decoy_lib.decoy_sequence()
         ...
         ```
         """
@@ -181,32 +177,6 @@ class SpecLibBase(object):
             ].index, inplace=True
         )
         self._precursor_df.reset_index(drop=True, inplace=True)
-
-
-    def flatten_fragment_data(
-        self
-    )->typing.Tuple[np.ndarray, np.ndarray]:
-        '''
-        Create flattened (1-D) np.ndarray for fragment mz and intensity 
-        dataframes, respectively. The arrays are references to 
-        original data, that means: 
-          1. This method is fast; 
-          2. Changing the array values will change the df values. 
-        They can be unraveled back using:
-          `array.reshape(len(self._fragment_mz_df.columns), -1)`
-
-        Returns
-        -------
-        Tuple[np.ndarray, np.ndarray]
-            np.ndarray. 1-D flattened mz array (a reference to 
-            original fragment mz df data)
-            np.ndarray. 1-D flattened intensity array (a reference to 
-            original fragment intensity df data)
-        '''
-        return (
-            self._fragment_mz_df.values.reshape(-1),
-            self._fragment_intensity_df.values.reshape(-1)
-        )
 
     def calc_precursor_mz(self):
         """
@@ -333,19 +303,20 @@ class SpecLibBase(object):
 
     def save_hdf(self, hdf_file:str):
         """Save library dataframes into hdf_file.
-        For `self.precursor_df`, this method will save it into two hdf groups:
-            hdf_file: `library/precursor_df` and `library/mod_seq_df`.
+        For `self.precursor_df`, this method will save it into two hdf groups in hdf_file:
+        `library/precursor_df` and `library/mod_seq_df`.
 
         `library/precursor_df` contains all essential numberic columns those 
         can be loaded faster from hdf file into memory:
-            'precursor_mz', 'charge', 'mod_seq_hash', 'mod_seq_charge_hash',
-            'frag_start_idx', 'frag_end_idx', 'decoy', 'rt_pred', 'ccs_pred',
-            'mobility_pred', 'miss_cleave', 'nAA', 
-            ['isotope_mz_m1', 'isotope_intensity_m1'], ...
+
+        'precursor_mz', 'charge', 'mod_seq_hash', 'mod_seq_charge_hash',
+        'frag_start_idx', 'frag_end_idx', 'decoy', 'rt_pred', 'ccs_pred',
+        'mobility_pred', 'miss_cleave', 'nAA', 
+        ['isotope_mz_m1', 'isotope_intensity_m1'], ...
 
         `library/mod_seq_df` contains all string columns and the other 
         not essential columns:
-            'sequence','mods','mod_sites', ['proteins', 'genes']...
+        'sequence','mods','mod_sites', ['proteins', 'genes']...
         as well as 'mod_seq_hash', 'mod_seq_charge_hash' columns to map 
         back to `precursor_df`
 

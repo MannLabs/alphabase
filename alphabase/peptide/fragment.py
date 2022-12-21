@@ -368,12 +368,13 @@ def calc_fragment_mz_values_for_same_nAA(
             break
 
     mz_values = []
-    # neutral masses also considered for future uses
-    # for charged_frag_type in charged_frag_types:
-    #     if charged_frag_type == 'b':
-    #         mz_values.append(b_mass)
-    #     elif charged_frag_type == 'y':
-    #         mz_values.append(y_mass)
+    # Neutral masses also considered for future uses
+    # for example when searching with spectral with neutral masses
+    for charged_frag_type in charged_frag_types:
+        if charged_frag_type == 'b':
+            mz_values.append(b_mass)
+        elif charged_frag_type == 'y':
+            mz_values.append(y_mass)
     add_proton = MASS_PROTON
     for charged_frag_type in charged_frag_types:
         frag_type, charge = parse_charged_frag_type(charged_frag_type)

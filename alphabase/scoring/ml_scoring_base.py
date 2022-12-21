@@ -137,9 +137,7 @@ class Percolator:
             the top-ranked peptide for each spectrum.
             ```
             rerank_column = 'spec_idx' # scan_num
-            idx = top_k_psm_df.groupby(
-                ['raw_name',rerank_column]
-            )['ml_score'].idxmax()
+            idx = top_k_psm_df.groupby(['raw_name',rerank_column])['ml_score'].idxmax()
             psm_df = top_k_psm_df.loc[idx].copy()
             ```
         Returns

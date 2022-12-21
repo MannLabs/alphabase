@@ -13,20 +13,26 @@ import alphabase.peptide.precursor as precursor
 
 class FlatSpecLib:
     """ 
-    Flatten the spectral library (SpecLibBase) with `parse_base_library()`
+    Flatten the spectral library (SpecLibBase) by using :meth:`parse_base_library`.
 
-    Parameters
+    Attributes
     ----------
-    min_fragment_intensity : float, optional
-        minimal intensity to keep, by default 0.001
+    custom_fragment_df_columns : list of str
+        'mz' and 'intensity' columns are required in :attr:`fragment_df`, 
+        others could be customized. 
+        It can include ['type','number','position','charge','loss_type'].
 
-    keep_top_k_fragments : int, optional
-        top k highest peaks to keep, by default 1000
+    min_fragment_intensity : float
+        minimal intensity to keep in :attr:`fragment_df`.
 
-    custom_fragment_df_columns : list, optional
-        'mz' and 'intensity' columns are required. Others could be customized. 
-        Defaults to ['type','number','position','charge','loss_type']
+    keep_top_k_fragments : float
+        top k highest peaks to keep in :attr:`fragment_df`.
+    
     """
+
+    key_numeric_columns = SpecLibBase.key_numeric_columns
+    """ Identical to :obj:`SpecLibBase.key_numeric_columns <alphabase.spectral_library.base.SpecLibBase.key_numeric_columns>`. """
+
     def __init__(self,
         min_fragment_intensity:float = 0.001,
         keep_top_k_fragments:int = 1000,
@@ -35,31 +41,28 @@ class FlatSpecLib:
         ],
         **kwargs
     ):
+        """
+        Parameters
+        ----------
+        min_fragment_intensity : float, optional
+            minimal intensity to keep, by default 0.001
+
+        keep_top_k_fragments : int, optional
+            top k highest peaks to keep, by default 1000
+
+        custom_fragment_df_columns : list, optional
+            See :attr:`custom_fragment_df_columns`, 
+            defaults to ['type','number','position','charge','loss_type']
+        """
         self.min_fragment_intensity = min_fragment_intensity
         self.keep_top_k_fragments = keep_top_k_fragments
-
-        self.key_numeric_columns = [
-            'ccs_pred', 'charge', 
-            'decoy',
-            'frag_end_idx', 'frag_start_idx',
-            'isotope_m1_intensity', 'isotope_m1_mz',
-            'isotope_apex_mz', 'isotope_apex_intensity',
-            'isotope_apex_index',
-            'isotope_right_most_mz', 'isotope_right_most_intensity',
-            'isotope_right_most_index',
-            'miss_cleavage', 'mobility_pred',
-            'nAA', 
-            'precursor_mz', 
-            'rt_pred', 'rt_norm_pred'
-        ]
 
         self.custom_fragment_df_columns = custom_fragment_df_columns
 
     @property
     def precursor_df(self)->pd.DataFrame:
-        """: pd.DataFrame : precursor dataframe with columns
-        'sequence', 'mods', 'mod_sites', 'charge', ...
-        Identical to `self.peptide_df`.
+        """
+        Similar to :obj:`SpecLibBase.precursor_df <alphabase.spectral_library.base.SpecLibBase.precursor_df>`
         """
         return self._precursor_df
 
@@ -74,9 +77,8 @@ class FlatSpecLib:
 
     @property
     def peptide_df(self)->pd.DataFrame:
-        """Peptide dataframe with columns
-        'sequence', 'mods', 'mod_sites', 'charge', ...
-        Identical to `self.precursor_df`.
+        """
+        Similar to :obj:`SpecLibBase.precursor_df <alphabase.spectral_library.base.SpecLibBase.precursor_df>` 
         """
         return self._precursor_df
 
@@ -87,17 +89,21 @@ class FlatSpecLib:
     @property
     def fragment_df(self)->pd.DataFrame:
         """The fragment mz dataframe with 
-        fragment types as columns (['b_z1', 'y_z2', ...])
+        fragment types as columns (['mz', 'intensity'] + :attr:`custom_fragment_df_columns`.)
         """
         return self._fragment_df
 
     def parse_base_library(self, library:SpecLibBase):
-        """ Flatten a SpecLibBase object
+        """ Flatten an library object of SpecLibBase or its inherited class. 
+        This method will generate :attr:`precursor_df` and :attr:`fragment_df`
+        The fragments in fragment_df can be located by 
+        `frag_start_idx` and `frag_end_idx` in precursor_df. 
 
         Parameters
         ----------
         library : SpecLibBase
-            the library with fragment_mz_df and fragment_intensity_df
+            A library object with attributes
+            `precursor_df`, `fragment_mz_df` and `fragment_intensity_df`.
         """
         self._precursor_df, self._fragment_df = flatten_fragments(
             library.precursor_df, 
@@ -111,7 +117,7 @@ class FlatSpecLib:
     def save_hdf(self, hdf_file:str):
         """Save library dataframes into hdf_file.
         For `self.precursor_df`, this method will save it into two hdf groups:
-        hdf_file: `flat_library/precursor_df` and `library/mod_seq_df`.
+        hdf_file: `flat_library/precursor_df` and `flat_library/mod_seq_df`.
 
         `flat_library/precursor_df` contains all essential numberic columns those 
         can be loaded faster from hdf file into memory:

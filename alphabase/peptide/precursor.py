@@ -357,13 +357,9 @@ def get_mod_seq_isotope_distribution(
     tuple
         float - Abundance of mono+1 / mono
         float - Abundance of apex / mono
-        int - Apex isotope position relative to mono, 
-            i.e. apex index - mono index and
-            0 refers to the position of mono itself
-        float - Abundance of right-most peak which has at least `min_right_most_intensity`
-            intensity relative to the apex peak
-        int - Right-most position relative to mono,
-            i.e. right-most index - mono index
+        int - Apex isotope position relative to mono, i.e. apex index - mono index and 0 refers to the position of mono itself
+        float - Abundance of right-most peak which has at least `min_right_most_intensity` intensity relative to the apex peak
+        int - Right-most position relative to mono, i.e. right-most index - mono index
     """
     dist, mono = isotope_dist.calc_formula_distribution(
         get_mod_seq_formula(*seq_mods)
