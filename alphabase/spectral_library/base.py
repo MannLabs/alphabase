@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import typing
+import logging
 
 import alphabase.peptide.fragment as fragment
 import alphabase.peptide.precursor as precursor
@@ -243,6 +244,54 @@ class SpecLibBase(object):
         precursor.hash_precursor_df(
             self._precursor_df
         )
+    
+    def annotate_fragments_from_speclib(self, 
+        donor_speclib, 
+        verbose = True
+    ):
+        """
+        Annotate self.precursor_df with fragments from donor_speclib.
+        The donor_speclib must have a fragment_mz_df and can optionally have a fragment_intensity_df.
+        Fragment dataframes are updated inplace and overwritten.
+
+        Parameters
+        ----------
+        donor_speclib : SpecLibBase
+            The donor library to annotate fragments from.
+
+        verbose : bool, optional
+            Print progress, by default True, for example::
+            
+                2022-12-16 00:52:08> Speclib with 4 precursors will be reannotated with speclib with 12 precursors and 504 fragments
+                2022-12-16 00:52:08> A total of 4 precursors were succesfully annotated, 0 precursors were not matched
+            
+            
+        """
+        self = annotate_fragments_from_speclib(
+            self, donor_speclib, verbose = verbose
+        )
+    
+    def remove_unused_fragments(self):
+        """
+        Remove unused fragments from self._fragment_mz_df and self._fragment_intensity_df.
+        Fragment dataframes are updated inplace and overwritten.
+        """
+
+
+        if len(self._fragment_mz_df) > 0:
+            
+            # update both fragment mz and intensity df
+            if len(self.fragment_intensity_df > 0):
+                self._precursor_df,(self._fragment_mz_df, self._fragment_intensity_df) = fragment.remove_unused_fragments(
+                    self._precursor_df,(self._fragment_mz_df, self._fragment_intensity_df)
+                )
+            # only update fragment mz df
+            else:
+                (self._precursor_df, (self._fragment_mz_df,)) = fragment.remove_unused_fragments(
+                    self._precursor_df, (self._fragment_mz_df,)
+                )
+
+
 
     def _get_hdf_to_save(self, 
         hdf_file, 
@@ -400,3 +449,66 @@ class SpecLibBase(object):
             ]
         ]
         
+def annotate_fragments_from_speclib(
+    speclib: SpecLibBase, 
+    fragment_speclib: SpecLibBase,
+    verbose = True,
+):
+    """Reannotate an SpecLibBase library with fragments from a different SpecLibBase.
+    
+    Parameters
+    ----------
+    speclib: alphabase.spectral_library.library_base.SpecLibBase
+        Spectral library which contains the precursors to be annotated. All fragments mz and fragment intensities will be removed.
+
+    fragment_speclib: alphabase.spectral_library.library_base.SpecLibBase
+        Spectral library which contains the donor precursors whose fragments should be used.
+
+    Returns
+    -------
+
+    alphabase.spectral_library.library_base.SpecLibBase
+        newly annotated spectral library
+ 
+    """
+    if verbose:
+        num_precursor_left = len(speclib.precursor_df)
+        num_precursor_right = len(fragment_speclib.precursor_df)
+        num_fragments_right = len(fragment_speclib.fragment_mz_df) * len(fragment_speclib.fragment_mz_df.columns)
+        logging.info(f'Speclib with {num_precursor_left:,} precursors will be reannotated with speclib with {num_precursor_right:,} precursors and {num_fragments_right:,} fragments')
+
+    # reannotation is based on mod_seq_hash column
+    hash_column_name = 'mod_seq_hash'
+
+    # create hash columns if missing
+    if hash_column_name not in speclib.precursor_df.columns:
+        speclib.hash_precursor_df()
+
+    if fragment_speclib not in fragment_speclib.precursor_df.columns:
+        fragment_speclib.hash_precursor_df()
+
+    speclib_hash = speclib.precursor_df[hash_column_name].values
+    fragment_speclib_hash = fragment_speclib.precursor_df[hash_column_name].values
+
+    speclib_indices = fragment.join_left(speclib_hash, fragment_speclib_hash)
+
+    matched_mask = (speclib_indices >= 0)
+
+    if verbose:
+        matched_count = np.sum(matched_mask)
+        not_matched_count = np.sum(~matched_mask)
+    
+        logging.info(f'A total of {matched_count:,} precursors were succesfully annotated, {not_matched_count:,} precursors were not matched')
+
+
+    frag_start_idx = fragment_speclib.precursor_df['frag_start_idx'].values[speclib_indices]
+    frag_end_idx = fragment_speclib.precursor_df['frag_end_idx'].values[speclib_indices]
+    
+    speclib._precursor_df = speclib._precursor_df[matched_mask].copy()
+    speclib._precursor_df['frag_start_idx'] = frag_start_idx[matched_mask]
+    speclib._precursor_df['frag_end_idx'] = frag_end_idx[matched_mask]
+
+    speclib._fragment_mz_df = fragment_speclib._fragment_mz_df.copy()
+    speclib._fragment_intensity_df = fragment_speclib._fragment_intensity_df.copy()
+
+    return speclib
