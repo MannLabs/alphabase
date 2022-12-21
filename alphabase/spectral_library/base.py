@@ -453,7 +453,7 @@ def annotate_fragments_from_speclib(
     speclib: SpecLibBase, 
     fragment_speclib: SpecLibBase,
     verbose = True,
-):
+)->SpecLibBase:
     """Reannotate an SpecLibBase library with fragments from a different SpecLibBase.
     
     Parameters
