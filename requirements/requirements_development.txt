@@ -7,6 +7,7 @@ ipykernel
 nbdev
 pyteomics
 scikit-learn
+matplotlib
 
 #sphinx
 autodocsumm
@@ -27,5 +28,6 @@ pandas
 h5py
 contextlib2
 mmh3
+regex
 pydivsufsort
 pyahocorasick
