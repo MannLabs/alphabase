@@ -2,7 +2,7 @@ import copy
 from alphabase.spectral_library.base import SpecLibBase
 from alphabase.io.hdf import HDF_File
 
-class DecoyLib(SpecLibBase):
+class SpecLibDecoy(SpecLibBase):
     def __init__(self, 
         target_lib:SpecLibBase,
         fix_C_term = True,
@@ -138,7 +138,7 @@ class DecoyLib(SpecLibBase):
         self._fragment_mz_df = _hdf_lib.decoy.fragment_mz_df.values
         self._fragment_intensity_df = _hdf_lib.decoy.fragment_intensity_df.values
 
-class DiaNNDecoyLib(DecoyLib):
+class SpecLibDecoyDiaNN(SpecLibDecoy):
     def __init__(self, 
         target_lib:SpecLibBase,
         raw_AAs:str = 'GAVLIFMPWSCTYHKRQENDBJOUXZ',
@@ -175,18 +175,18 @@ class DiaNNDecoyLib(DecoyLib):
                 x[2:-2]+self.mutated_AAs[self.raw_AAs.index(x[-2])]+x[-1]
         )
 
-class DecoyLibProvider(object):
+class SpecLibDecoyProvider(object):
     def __init__(self):
         self.decoy_dict = {}
 
-    def register(self, name:str, decoy_class:DecoyLib):
+    def register(self, name:str, decoy_class:SpecLibDecoy):
         """Register a new decoy class"""
         self.decoy_dict[name.lower()] = decoy_class
 
     def get_decoy_lib(self, name:str, 
         target_lib:SpecLibBase, **kwargs
-    )->DecoyLib:
-        """Get an object of a subclass of `DecoyLib` based on 
+    )->SpecLibDecoy:
+        """Get an object of a subclass of `SpecLibDecoy` based on 
         registered name.
 
         Parameters
@@ -199,7 +199,7 @@ class DecoyLibProvider(object):
 
         Returns
         -------
-        DecoyLib
+        SpecLibDecoy
             Decoy library object
         """
         if name is None: return None
@@ -211,6 +211,6 @@ class DecoyLibProvider(object):
         else:
             return None
 
-decoy_lib_provider = DecoyLibProvider()
-decoy_lib_provider.register('pseudo_reverse', DecoyLib)
-decoy_lib_provider.register('diann', DiaNNDecoyLib)
+decoy_lib_provider = SpecLibDecoyProvider()
+decoy_lib_provider.register('pseudo_reverse', SpecLibDecoy)
+decoy_lib_provider.register('diann', SpecLibDecoyDiaNN)
