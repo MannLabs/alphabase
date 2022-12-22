@@ -1,0 +1,2 @@
+cd ..
+nbdev_test
