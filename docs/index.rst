@@ -7,6 +7,8 @@ For more information, see AlphaBase on `GitHub <https://github.com/MannLabs/alph
 .. toctree::
    :maxdepth: 2
 
+   notebooks
+
    modules_spectral_library
    modules_protein
    modules_peptide
@@ -16,4 +18,3 @@ For more information, see AlphaBase on `GitHub <https://github.com/MannLabs/alph
    modules_scoring
    modules_statistics
    
-   notebooks

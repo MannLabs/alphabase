@@ -19,7 +19,7 @@ Biochemistry](https://www.biochem.mpg.de/mann) and the [University of
 Copenhagen](https://www.cpr.ku.dk/research/proteomics/mann/). To enable
 all hyperlinks in this document, please view it at
 [GitHub](https://github.com/MannLabs/alphabase). For documentation,
-please see [GitHub Pages](https://mannlabs.github.io/alphabase/)
+please see [readthedocs](https://alphabase.readthedocs.io/en/latest).
 
 - [**About**](#about)
 - [**License**](#license)
