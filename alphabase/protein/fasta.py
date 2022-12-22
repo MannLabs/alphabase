@@ -588,7 +588,7 @@ def append_regular_modifications(df:pd.DataFrame,
     df.reset_index(drop=True, inplace=True)
     return df
 
-class FastaLib(SpecLibBase):
+class SpecLibFasta(SpecLibBase):
     """
     This is the main entry of AlphaBase when generating spectral libraries from fasta files
     It includes functionalities to:

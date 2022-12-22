@@ -1,7 +1,7 @@
-Jupyter notebooks
+Tutorials and Notebooks
 ====================
 
-Tutorials and notebooks for usages.
+Tutorials and notebooks about how to use AlphaBase.
 
 .. toctree::
    :maxdepth: 2
