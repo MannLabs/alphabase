@@ -11,7 +11,7 @@ from alphabase.io.hdf import HDF_File
 
 import alphabase.peptide.precursor as precursor
 
-class FlatSpecLib:
+class SpecLibFlat:
     """ 
     Flatten the spectral library (SpecLibBase) by using :meth:`parse_base_library`.
 
