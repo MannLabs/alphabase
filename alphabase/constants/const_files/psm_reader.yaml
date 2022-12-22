@@ -23,8 +23,6 @@ alphapept:
 maxquant:
   reader_type: maxquant
   rt_unit: minute
-  mod_sep: '()'
-  underscore_for_ncterm: True
   fixed_C57: True
   column_mapping:
     'sequence': 'Sequence'
@@ -46,37 +44,32 @@ maxquant:
     'proteins': 'Proteins'
     'genes': ['Gene Names','Gene names']
     'decoy': 'Reverse'
+    'intensity': 'Intensity'
   modification_mapping:
     'Acetyl@Protein N-term': 
       - '_(Acetyl (Protein N-term))'
       - '_(ac)'
-      - '_(UniMod:1)'
     'Carbamidomethyl@C': 
       - 'C(Carbamidomethyl (C))'
-      - 'C(UniMod:4)'
     'Oxidation@M': 
       - 'M(Oxidation (M))'
       - 'M(ox)'
-      - 'M(UniMod:35)'
     'Phospho@S': 
       - 'S(Phospho (S))'
       - 'S(Phospho (ST))'
       - 'S(Phospho (STY))'
       - 'S(ph)'
-      - 'S(UniMod:21)'
       - 'pS'
     'Phospho@T': 
       - 'T(Phospho (T))'
       - 'T(Phospho (ST))'
       - 'T(Phospho (STY))'
       - 'T(ph)'
-      - 'T(UniMod:21)'
       - 'pT'
     'Phospho@Y': 
       - 'Y(Phospho (Y))'
       - 'Y(Phospho (STY))'
       - 'Y(ph)'
-      - 'Y(UniMod:21)'
       - 'pY'
     'Deamidated@N': ['N(Deamidation (NQ))','N(de)']
     'Deamidated@Q': ['Q(Deamidation (NQ))','Q(de)']
@@ -144,8 +137,6 @@ msfragger_pepxml:
 diann:
   reader_type: diann
   rt_unit: minute
-  mod_sep: '()'
-  underscore_for_ncterm: False
   fixed_C57: False
   csv_sep: "\t"
   column_mapping:
@@ -160,12 +151,11 @@ diann:
     'genes': 'Genes'
     'scan_num': 'MS2.Scan'
     'score': 'CScore'
+    'fdr': 'Q.Value'
   modification_mapping: 'maxquant'
 spectronaut_report:
   reader_type: spectronaut_report
   rt_unit: minute
-  mod_sep: '[]'
-  underscore_for_ncterm: True
   fixed_C57: False
   csv_sep: ','
   column_mapping:
@@ -175,11 +165,10 @@ spectronaut_report:
     'genes': 'PG.Genes'
     'uniprot_ids': 'PG.UniProtIds'
     'charge': 'charge'
+  modification_mapping: 'maxquant'
 spectronaut:
   reader_type: spectronaut
   rt_unit: irt
-  mod_sep: '[]'
-  underscore_for_ncterm: True
   fixed_C57: False
   csv_sep: "\t"
   mod_seq_columns:

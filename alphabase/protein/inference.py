@@ -1,5 +1,3 @@
-__all__ = ['build_AC', 'match_AC']
-
 import ahocorasick
 
 def build_AC(peptides:list):

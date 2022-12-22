@@ -8,3 +8,5 @@ mmh3
 biopython
 psutil
 tqdm
+scikit-learn
+regex

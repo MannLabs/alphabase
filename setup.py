@@ -8,10 +8,10 @@ import os
 import alphabase as package2install
 
 #nbdev2
-from configparser import ConfigParser
-nbdev_config = ConfigParser(delimiters=['='])
-nbdev_config.read('settings.ini')
-nbdev_cfg = nbdev_config['DEFAULT']
+# from configparser import ConfigParser
+# nbdev_config = ConfigParser(delimiters=['='])
+# nbdev_config.read('settings.ini')
+# nbdev_cfg = nbdev_config['DEFAULT']
 
 def get_long_description():
     with open("README.md", "r") as readme_file:
@@ -37,8 +37,11 @@ def get_requirements():
             extra_requirements[extra] = []
             for line in requirements_file:
                 extra_requirements[extra_stable].append(line)
+                # conditional req like: "pywin32==xxx; sys_platform=='win32'"
+                line, *conditions = line.split(';')
                 requirement, *comparison = re.split("[><=~!]", line)
-                requirement == requirement.strip()
+                requirement = requirement.strip()
+                requirement = ";".join([requirement] + conditions)
                 extra_requirements[extra].append(requirement)
     requirements = extra_requirements.pop("")
     return requirements, extra_requirements
@@ -63,7 +66,7 @@ def create_pip_wheel():
         include_package_data=True,
         entry_points={
             "console_scripts": package2install.__console_scripts__,
-            'nbdev': [f'{nbdev_cfg.get("lib_path")}={nbdev_cfg.get("lib_path")}._modidx:d'],
+            # 'nbdev': [f'{nbdev_cfg.get("lib_path")}={nbdev_cfg.get("lib_path")}._modidx:d'],
         },
         install_requires=requirements + [
             # TODO Remove hardcoded requirement?

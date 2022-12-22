@@ -31,7 +31,16 @@ website:
           - psm_reader/msfragger_reader.ipynb
           - psm_reader/pfind_reader.ipynb
           - psm_reader/psm_reader.ipynb
+      - section: scoring
+        contents:
+          - scoring/fdr.ipynb
+          - scoring/feature_extraction_base.ipynb
+          - scoring/ml_scoring_base.ipynb
       - section: spectral_library
         contents:
           - spectral_library/decoy_library.ipynb
           - spectral_library/library_base.ipynb
+          - spectral_library/translate.ipynb
+      - section: statistics
+        contents:
+          - statistics/regression.ipynb
