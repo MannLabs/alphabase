@@ -36,19 +36,13 @@ please see [GitHub Pages](https://mannlabs.github.io/alphabase/)
 
 ## About
 
-An open-source Python package of the AlphaPept ecosystem from the [Mann
-Labs at the Max Planck Institute of
-Biochemistry](https://www.biochem.mpg.de/mann) and the [University of
-Copenhagen](https://www.cpr.ku.dk/research/proteomics/mann/). It
-provides basic functionalities for AlphaPept ecosystem.
+The infrastructure package of AlphaX ecosystem for MS proteomics.
 
 ------------------------------------------------------------------------
 
 ## License
 
-AlphaBase was developed by the [Mann Labs at the Max Planck Institute of
-Biochemistry](https://www.biochem.mpg.de/mann) and the [University of
-Copenhagen](https://www.cpr.ku.dk/research/proteomics/mann/) and is
+AlphaBase was developed by the [Mann Labs at the Max Planck Institute of Biochemistry](https://www.biochem.mpg.de/mann) and the [University of Copenhagen](https://www.cpr.ku.dk/research/proteomics/mann/) and is
 freely available with an [Apache License](LICENSE.txt). External Python
 packages (available in the [requirements](requirements) folder) have
 their own licenses, which can be consulted on their respective websites.

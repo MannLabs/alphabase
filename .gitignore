@@ -70,6 +70,7 @@ instance/
 
 # Sphinx documentation
 docs/_build/
+docs/build/
 
 # PyBuilder
 target/
@@ -138,7 +139,7 @@ alphabase/logs
 
 # nbdev2
 *.gitattributes
-*_docs*
+_docs*
 # *_quarto.yml
 # *sidebar.yml
 *_proc*

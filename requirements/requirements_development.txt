@@ -1,7 +1,5 @@
 jupyter
 jupyter_contrib_nbextensions
-autodocsumm
-sphinx-rtd-theme
 twine
 bumpversion
 pipdeptree
@@ -9,6 +7,15 @@ ipykernel
 nbdev
 pyteomics
 scikit-learn
+
+#sphinx
+autodocsumm
+myst_parser
+sphinx
+nbsphinx
+jinja2
+contextfilter
+furo
 
 tqdm
 psutil

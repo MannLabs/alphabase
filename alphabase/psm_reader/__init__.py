@@ -5,7 +5,7 @@ from alphabase.psm_reader.psm_reader import (
 )
 from alphabase.psm_reader.alphapept_reader import AlphaPeptReader
 from alphabase.psm_reader.dia_psm_reader import (
-    DiannReader, SpectronautReader, SwathReader,
+    DiannReader, SpectronautReader, SwathReader, SpectronautReportReader
 )
 from alphabase.psm_reader.maxquant_reader import MaxQuantReader
 from alphabase.psm_reader.pfind_reader import pFindReader
