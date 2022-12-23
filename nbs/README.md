@@ -1,3 +1,3 @@
 # Jupyter notebooks for AlphaBase
 
-Check [docs/nbs](../docs/nbs)" for more tutorial notebooks.
+Check [docs/nbs](../docs/nbs) for more tutorial notebooks.
