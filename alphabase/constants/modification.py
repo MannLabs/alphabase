@@ -11,6 +11,9 @@ from alphabase.constants.element import (
 from alphabase.constants._const import CONST_FILE_FOLDER
 
 MOD_DF:pd.DataFrame = pd.DataFrame()
+"""
+Main entry of modification infomation (DataFrame fotmat).
+"""
 
 MOD_INFO_DICT:dict = {}
 #: Modification to formula str dict. {mod_name: formula str ('H(1)C(2)O(3)')}
@@ -353,36 +356,54 @@ def calc_modloss_mass(
     else:
         return _calc_modloss(mod_losses[::-1])[-3:0:-1]
 
-def add_new_modifications(new_mods:list):
-    """Add new modifications into MOD_DF
+def add_a_new_modification(
+    mod_name:str, composition:str,
+    modloss_composition:str=''
+):
+    """
+    Add a new modification into :data:`MOD_DF`.
 
     Parameters
     ----------
-    new_mods : list 
-        list of tuples. Tuple example:
-        
-        modname@site:str (e.g. Mod@S), 
-        chemical compositions:str (e.g. "H(4)O(2)"),
-        [optional] modloss compositions:str (e.g. "H(2)O(1)"),
+    mod_name : str
+        Mod name in alphabase format: mod@site, 
+        e.g. Mod@S
+    composition : str
+        chemical composition of this mod, 
+        e.g. "H(4)O(2)"
+    modloss_composition : str, optional
+        modloss compositions, e.g. "H(2)O(1)"), 
+        by default ''
     """
-    for items in new_mods:
-        if len(items) == 2:
-            mod, comp = items
-            modloss_comp = ''
-        else:
-            mod, comp, modloss_comp = items
-        MOD_DF.loc[mod,[
-            'mod_name','composition','modloss_composition',
-            'classification','unimod_id'
-        ]] = [
-            mod, comp, modloss_comp,
-            'User-added', 0
-        ]
-        MOD_DF.loc[mod,['mass','modloss']] = (
-            calc_mass_from_formula(comp),
-            calc_mass_from_formula(modloss_comp)
-        )
-        if MOD_DF.loc[mod, 'modloss'] > 0:
-            MOD_DF.loc[mod, 'modloss_importance'] = 1e6
+    MOD_DF.loc[mod_name,[
+        'mod_name','composition','modloss_composition',
+        'classification','unimod_id'
+    ]] = [
+        mod_name, composition, modloss_composition,
+        'User-added', 0
+    ]
+    MOD_DF.loc[mod_name,['mass','modloss']] = (
+        calc_mass_from_formula(composition),
+        calc_mass_from_formula(modloss_composition)
+    )
+    if MOD_DF.loc[mod_name, 'modloss'] > 0:
+        MOD_DF.loc[mod_name, 'modloss_importance'] = 1e6
     MOD_DF.fillna(0, inplace=True)
     update_all_by_MOD_DF()
+
+def add_new_modifications(new_mods:list):
+    """Add multiple modifications into :data:`MOD_DF`,
+    it uses :meth:`add_a_new_modification()`.
+
+    Parameters
+    ----------
+    new_mods : list of tuples
+        Tuple example:
+        (
+        modname@site:str (e.g. Mod@S), 
+        composition:str (e.g. "H(4)O(2)"),
+        [optional] modloss composition:str (e.g. "H(2)O(1)"),
+        )
+    """
+    for items in new_mods:
+        add_a_new_modification(*items)
