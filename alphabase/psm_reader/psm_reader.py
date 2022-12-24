@@ -1,10 +1,15 @@
+import os
+import copy
 import pandas as pd
 import numpy as np
+
 import alphabase.peptide.mobility as mobility
 from alphabase.peptide.precursor import (
     update_precursor_mz, reset_precursor_df
 )
 from alphabase.constants._const import CONST_FILE_FOLDER
+
+from alphabase.yaml_utils import load_yaml
 
 def translate_other_modification(
     mod_str: str, 
@@ -64,11 +69,7 @@ def keep_modifications(
             return pd.NA
     return mod_str
 
-
-from alphabase.yaml_utils import load_yaml
-import os
-import copy
-
+#: See `psm_reader.yaml <https://github.com/MannLabs/alphabase/blob/main/alphabase/constants/const_files/psm_reader.yaml>`_
 psm_reader_yaml = load_yaml(
     os.path.join(
         CONST_FILE_FOLDER,
@@ -99,21 +100,27 @@ class PSMReaderBase(object):
             If it is None, this dict will be init by 
             `self._init_column_mapping`. The dict values could be 
             either str or list, for exaplme:
+            ```
             columns_mapping = {
             'sequence': 'NakedSequence', #str
             'charge': 'Charge', #str
             'proteins':['Proteins','UniprotIDs'], # list, this reader will automatically detect all of them.
             }
+            ```
             Defaults to None.
         modification_mapping : dict, optional
             A dict that maps alphabase's modifications to other engine's.
             If it is None, this dict will be init by 
-            `self._init_modification_mapping`. The dict values could be 
+            default modification mapping for each search engine 
+            (see :data:`psm_reader_yaml`). 
+            The dict values can be 
             either str or list, for exaplme:
+            ```
             modification_mapping = {
             'Oxidation@M': 'Oxidation (M)', # str
             'Phospho@S': ['S(Phospho (STY))','S(ph)','pS'], # list, this reader will automatically detect all of them.
             }
+            ```
             Defaults to None.
         fdr : float, optional
             FDR level to keep PSMs.
@@ -144,7 +151,10 @@ class PSMReaderBase(object):
             Defaults to False.
         """
 
-        self.set_modification_mapping(modification_mapping)
+        self.set_modification_mapping(None)
+        self.add_modification_mapping(
+            modification_mapping
+        )
         
         if column_mapping is not None:
             self.column_mapping = column_mapping
@@ -163,7 +173,7 @@ class PSMReaderBase(object):
 
     def add_modification_mapping(self, modification_mapping:dict):
         """
-        Append additional modifications from other search engines
+        Append additional modification mappings for the search engine.
 
         Parameters
         ----------
@@ -179,7 +189,8 @@ class PSMReaderBase(object):
         """
         if (
             modification_mapping is None or
-            len(modification_mapping) == 0
+            len(modification_mapping) == 0 or
+            not isinstance(modification_mapping,dict)
         ):
             return
 
@@ -215,10 +226,16 @@ class PSMReaderBase(object):
             self.modification_mapping = copy.deepcopy(
                 modification_mapping
             )
+        self._mods_as_lists()
         self._reverse_mod_mapping()
 
     def _init_modification_mapping(self):
         self.modification_mapping = {}
+    
+    def _mods_as_lists(self):
+        for mod,val in list(self.modification_mapping.items()):
+            if isinstance(val, str):
+                self.modification_mapping[mod] = [val]
         
     def _reverse_mod_mapping(self):
         self.rev_mod_mapping = {}
