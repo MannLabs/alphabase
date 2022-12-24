@@ -538,6 +538,8 @@ def append_regular_modifications(df:pd.DataFrame,
     pd.DataFrame
         The precursor_df with new modification added.
     """
+    if len(var_mods) == 0: 
+        return df
 
     if cannot_modify_pep_nterm_aa:
         df['sequence'] = df['sequence'].apply(
@@ -614,6 +616,7 @@ class SpecLibFasta(SpecLibBase):
         charged_frag_types:list = [
             'b_z1','b_z2','y_z1', 'y_z2'
         ],
+        *,
         protease:str = 'trypsin',
         max_missed_cleavages:int = 2,
         peptide_length_min:int = 7,
@@ -625,6 +628,11 @@ class SpecLibFasta(SpecLibBase):
         var_mods:list = ['Acetyl@Protein N-term','Oxidation@M'],
         max_var_mod_num:int = 2,
         fix_mods:list = ['Carbamidomethyl@C'],
+        labeling_channels:dict = None,
+        rare_mods:list = [],
+        max_rare_mod_num:int = 1,
+        rare_mods_cannot_modify_pep_n_term:bool=False,
+        rare_mods_cannot_modify_pep_c_term:bool=False,
         decoy: str = None, # or pseudo_reverse or diann
         I_to_L=False,
     ):
@@ -672,6 +680,32 @@ class SpecLibFasta(SpecLibBase):
         fix_mods : list, optional
             list of fixed modifications, by default ['Carbamidomethyl@C']
 
+        labeling_channels : dict, optional
+            Add isotope labeling with different channels, 
+            see :meth:`add_peptide_labeling()`. 
+            Defaults to None
+
+        rare_mods : list, optional
+            Modifications with rare occurance per peptide.
+            It is useful for modificaitons like Phospho which may largely 
+            explode the number of candidate modified peptides.
+            The number of rare_mods per peptide 
+            is controlled by `max_append_mod_num`.
+            Defaults to [].
+
+        max_rare_mod_num : int, optional
+            Control the number of rare_mods per peptide, by default 1.
+
+        rare_mods_cannot_modify_pep_c_term : bool, optional
+            Some modifications cannot modify peptide C-term, 
+            this will be useful for GlyGly@K as if C-term is di-Glyed, 
+            it cannot be cleaved. 
+            Defaults to False.
+
+        rare_mods_cannot_modify_pep_n_term : bool, optional
+            Similar to `rare_mods_cannot_modify_pep_c_term`, but at N-term.
+            Defaults to False.
+
         decoy : str, optional
             Decoy type, see `alphabase.spectral_library.decoy_library`,
             by default None
@@ -695,6 +729,11 @@ class SpecLibFasta(SpecLibBase):
         self.var_mods = var_mods
         self.fix_mods = fix_mods
         self.max_var_mod_num = max_var_mod_num
+        self.labeling_channels = labeling_channels
+        self.rare_mods = rare_mods
+        self.max_rare_mod_num = max_rare_mod_num
+        self.rare_mods_cannot_modify_pep_n_term = rare_mods_cannot_modify_pep_n_term
+        self.rare_mods_cannot_modify_pep_c_term = rare_mods_cannot_modify_pep_c_term
 
         self.fix_mod_aas = ''
         self.fix_mod_prot_nterm_dict = {}
@@ -795,12 +834,13 @@ class SpecLibFasta(SpecLibBase):
         return False
 
     def import_and_process_fasta(self, fasta_files:Union[str,list]):
-        """Import and process a fasta file or a list of fasta files.
-        It includes:
-        - Load the fasta file(s)
-        - Append decoy peptide sequences
-        - Add modifications to peptides
-        - Add charge
+        """
+        Import and process a fasta file or a list of fasta files.
+        It includes 3 steps:
+        
+        1. Digest and get peptide sequences, it uses `self.get_peptides_from_...()`
+        2. Process the peptides including add modifications, 
+        it uses :meth:`_process_after_load_pep_seqs()`.
 
         Parameters
         ----------
@@ -811,7 +851,9 @@ class SpecLibFasta(SpecLibBase):
         self.import_and_process_protein_dict(protein_dict)
 
     def import_and_process_protein_dict(self, protein_dict:dict):
-        """ Import the protein_dict instead of fasta files.
+        """ 
+        Import and process the protein_dict.
+        The processing step is in :meth:`_process_after_load_pep_seqs()`.
         ```
         protein_dict = load_all_proteins(fasta_files)
         ```
@@ -832,7 +874,9 @@ class SpecLibFasta(SpecLibBase):
     def import_and_process_peptide_sequences(self, 
         pep_seq_list:list, protein_list:list=None,
     ):
-        """ Importing peptide sequences instead of proteins
+        """ 
+        Importing and process peptide sequences instead of proteins.
+        The processing step is in :meth:`_process_after_load_pep_seqs()`.
 
         Parameters
         ----------
@@ -850,10 +894,13 @@ class SpecLibFasta(SpecLibBase):
 
     def _process_after_load_pep_seqs(self):
         """
-        Called by `import_and_process_...` methods. 
+        The peptide processing step which is 
+        called by `import_and_process_...` methods.
         """
         self.append_decoy_sequence()
         self.add_modifications()
+        self.add_rare_modifications()
+        self.add_peptide_labeling()
         self.add_charge()
 
     def get_peptides_from_fasta(self, fasta_file:Union[str,list]):
@@ -887,11 +934,13 @@ class SpecLibFasta(SpecLibBase):
         ----------
         protein_dict : dict
             Format:
+            ```
             {
             'prot_id1': {'protein_id': 'prot_id1', 'sequence': string, 'gene_name': string, 'description': string
             'prot_id2': {...}
             ...
             }
+            ```
         """
         self.protein_df = pd.DataFrame.from_dict(
             protein_dict, orient='index'
@@ -1077,51 +1126,52 @@ class SpecLibFasta(SpecLibBase):
         )
         self._precursor_df.reset_index(drop=True, inplace=True)
 
-    def add_additional_modifications(self,
-        var_mods = ['Phospho@S','Phospho@T','Phospho@Y'], 
-        max_mod_num:int=1, max_peptidoform_num:int=100,
-        keep_unmodified:bool=True,
-        cannot_modify_pep_nterm_aa:bool=False,
-        cannot_modify_pep_cterm_aa:bool=False,
-    ):
-        """Add external defined variable modifications to all peptide sequences in `self.precursor_df`.
-        See :meth:`append_regular_modifications()` for details
+    def add_rare_modifications(self):
         """
+        Add external defined variable modifications to 
+        all peptide sequences in `self._precursor_df`.
+        See :meth:`append_regular_modifications()` for details.
+        """
+        if len(self.rare_mods) == 0: return
         self._precursor_df = append_regular_modifications(
-            self.precursor_df,
-            var_mods=var_mods,
-            max_mod_num=max_mod_num,
-            max_peptidoform_num=max_peptidoform_num,
-            keep_unmodified=keep_unmodified,
-            cannot_modify_pep_nterm_aa=cannot_modify_pep_nterm_aa,
-            cannot_modify_pep_cterm_aa=cannot_modify_pep_cterm_aa,
+            self._precursor_df, self.rare_mods,
+            self.max_rare_mod_num, self.max_peptidoform_num,
+            cannot_modify_pep_nterm_aa=self.rare_mods_cannot_modify_pep_n_term,
+            cannot_modify_pep_cterm_aa=self.rare_mods_cannot_modify_pep_c_term,
         )
 
-    def add_peptide_labeling(self, labeling_channel_dict:dict):
+    def add_peptide_labeling(self, labeling_channel_dict:dict=None):
         """ 
         Add labeling onto peptides inplace of self._precursor_df
 
         Parameters
         ----------
-        labeling_channel_dict : dict of list
+        labeling_channel_dict : dict, optional
             For example:
+            ```
             {
-            '': [], # not labelled for reference
+            '': [], # not labeled
             '0': ['Dimethyl@Any N-term','Dimethyl@K'],
             '4': ['Dimethyl:2H(4)@Any N-term','Dimethyl:2H(4)@K'],
             '8': ['Dimethyl:2H(6)13C(2)@Any N-term','Dimethyl:2H(6)13C(2)@K'],
-            }.
-            The key name could be arbitrary distinguished strings for channel name,
-            and value must be a list of modification names (str) in alphabase format.
+            }
+            ```.
+            The key name could be int or str, and the value must be 
+            a list of modification names (str) in alphabase format.
+            It is set to `self.labeling_channels` if None.
+            Defaults to None
     
         """
+        if labeling_channel_dict is None:
+            labeling_channel_dict = self.labeling_channels
+        if labeling_channel_dict is None or len(labeling_channel_dict) == 0:
+            return
         df_list = []
         for channel, labels in labeling_channel_dict.items():
             df = create_labeling_peptide_df(self._precursor_df, labels)
-            df['label_channel'] = channel
+            df['labeling_channel'] = channel
             df_list.append(df)
-        self._precursor_df = pd.concat(df_list)
-        self._precursor_df.reset_index(drop=True, inplace=True)
+        self._precursor_df = pd.concat(df_list, ignore_index=True)
 
     def add_charge(self):
         """Add charge states
