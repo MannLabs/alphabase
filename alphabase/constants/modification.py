@@ -375,8 +375,8 @@ def _add_a_new_modification(
         calc_mass_from_formula(modloss_composition)
     )
     if MOD_DF.loc[mod_name, 'modloss'] > 0:
-        MOD_DF.loc[mod_name, 'modloss_importance'] = 1e6
-    MOD_DF.loc[mod_name,:].fillna(0, inplace=True)
+        MOD_DF.loc[mod_name, 'modloss_importance'] = 1e100
+    MOD_DF.fillna(0, inplace=True)
     # update_all_by_MOD_DF()
 
 def add_new_modifications(new_mods:Union[list,dict]):
