@@ -499,7 +499,7 @@ def protein_idxes_to_names(protein_idxes:str, protein_names:list):
     proteins = [protein for protein in proteins if protein]
     return ';'.join(proteins)
 
-def append_regular_modifications(df:pd.DataFrame, 
+def append_special_modifications(df:pd.DataFrame, 
     var_mods:list = ['Phospho@S','Phospho@T','Phospho@Y'], 
     min_mod_num:int=0, max_mod_num:int=1, 
     max_peptidoform_num:int=100,
@@ -507,7 +507,7 @@ def append_regular_modifications(df:pd.DataFrame,
     cannot_modify_pep_cterm_aa:bool=False,
 )->pd.DataFrame:
     """
-    Append regular (not N/C-term) variable modifications to the 
+    Append special (not N/C-term) variable modifications to the 
     exsiting modifications of each sequence in `df`.
 
     Parameters
@@ -637,11 +637,11 @@ class SpecLibFasta(SpecLibBase):
         max_var_mod_num:int = 2,
         fix_mods:list = ['Carbamidomethyl@C'],
         labeling_channels:dict = None,
-        rare_mods:list = [],
-        min_rare_mod_num:int = 0,
-        max_rare_mod_num:int = 1,
-        rare_mods_cannot_modify_pep_n_term:bool=False,
-        rare_mods_cannot_modify_pep_c_term:bool=False,
+        special_mods:list = [],
+        min_special_mod_num:int = 0,
+        max_special_mod_num:int = 1,
+        special_mods_cannot_modify_pep_n_term:bool=False,
+        special_mods_cannot_modify_pep_c_term:bool=False,
         decoy: str = None, # or pseudo_reverse or diann
         I_to_L=False,
     ):
@@ -698,28 +698,28 @@ class SpecLibFasta(SpecLibBase):
             see :meth:`add_peptide_labeling()`. 
             Defaults to None
 
-        rare_mods : list, optional
-            Modifications with rare occurance per peptide.
+        special_mods : list, optional
+            Modifications with special occurance per peptide.
             It is useful for modificaitons like Phospho which may largely 
             explode the number of candidate modified peptides.
-            The number of rare_mods per peptide 
+            The number of special_mods per peptide 
             is controlled by `max_append_mod_num`.
             Defaults to [].
 
-        min_rare_mod_num : int, optional
-            Control the min number of rare_mods per peptide, by default 0.
+        min_special_mod_num : int, optional
+            Control the min number of special_mods per peptide, by default 0.
 
-        max_rare_mod_num : int, optional
-            Control the max number of rare_mods per peptide, by default 1.
+        max_special_mod_num : int, optional
+            Control the max number of special_mods per peptide, by default 1.
 
-        rare_mods_cannot_modify_pep_c_term : bool, optional
+        special_mods_cannot_modify_pep_c_term : bool, optional
             Some modifications cannot modify the peptide C-term, 
             this will be useful for GlyGly@K as if C-term is di-Glyed, 
             it cannot be cleaved/digested. 
             Defaults to False.
 
-        rare_mods_cannot_modify_pep_n_term : bool, optional
-            Similar to `rare_mods_cannot_modify_pep_c_term`, but at N-term.
+        special_mods_cannot_modify_pep_n_term : bool, optional
+            Similar to `special_mods_cannot_modify_pep_c_term`, but at N-term.
             Defaults to False.
 
         decoy : str, optional
@@ -747,11 +747,11 @@ class SpecLibFasta(SpecLibBase):
         self.min_var_mod_num = min_var_mod_num
         self.max_var_mod_num = max_var_mod_num
         self.labeling_channels = labeling_channels
-        self.rare_mods = rare_mods
-        self.min_rare_mod_num = min_rare_mod_num
-        self.max_rare_mod_num = max_rare_mod_num
-        self.rare_mods_cannot_modify_pep_n_term = rare_mods_cannot_modify_pep_n_term
-        self.rare_mods_cannot_modify_pep_c_term = rare_mods_cannot_modify_pep_c_term
+        self.special_mods = special_mods
+        self.min_special_mod_num = min_special_mod_num
+        self.max_special_mod_num = max_special_mod_num
+        self.special_mods_cannot_modify_pep_n_term = special_mods_cannot_modify_pep_n_term
+        self.special_mods_cannot_modify_pep_c_term = special_mods_cannot_modify_pep_c_term
 
         self.fix_mod_aas = ''
         self.fix_mod_prot_nterm_dict = {}
@@ -917,7 +917,7 @@ class SpecLibFasta(SpecLibBase):
         """
         self.append_decoy_sequence()
         self.add_modifications()
-        self.add_rare_modifications()
+        self.add_special_modifications()
         self.add_peptide_labeling()
         self.add_charge()
 
@@ -1144,19 +1144,19 @@ class SpecLibFasta(SpecLibBase):
         )
         self._precursor_df.reset_index(drop=True, inplace=True)
 
-    def add_rare_modifications(self):
+    def add_special_modifications(self):
         """
         Add external defined variable modifications to 
         all peptide sequences in `self._precursor_df`.
-        See :meth:`append_regular_modifications()` for details.
+        See :meth:`append_special_modifications()` for details.
         """
-        if len(self.rare_mods) == 0: return
-        self._precursor_df = append_regular_modifications(
-            self._precursor_df, self.rare_mods,
-            self.min_rare_mod_num, self.max_rare_mod_num, 
+        if len(self.special_mods) == 0: return
+        self._precursor_df = append_special_modifications(
+            self._precursor_df, self.special_mods,
+            self.min_special_mod_num, self.max_special_mod_num, 
             self.max_peptidoform_num,
-            cannot_modify_pep_nterm_aa=self.rare_mods_cannot_modify_pep_n_term,
-            cannot_modify_pep_cterm_aa=self.rare_mods_cannot_modify_pep_c_term,
+            cannot_modify_pep_nterm_aa=self.special_mods_cannot_modify_pep_n_term,
+            cannot_modify_pep_cterm_aa=self.special_mods_cannot_modify_pep_c_term,
         )
 
     def add_peptide_labeling(self, labeling_channel_dict:dict=None):

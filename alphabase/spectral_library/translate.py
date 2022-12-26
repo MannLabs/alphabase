@@ -13,7 +13,7 @@ from alphabase.utils import explode_multiple_columns
 
 #@numba.njit #(cannot use numba for pd.Series)
 def create_modified_sequence(
-    df_items:typing.Tuple, # must be ('sequence','mods','mod_sites')
+    seq_mods_sites:typing.Tuple, # must be ('sequence','mods','mod_sites')
     translate_mod_dict:dict=None,
     mod_sep='()',
     nterm = '_',
@@ -25,24 +25,28 @@ def create_modified_sequence(
 
     Parameters
     ----------
-    df_items : List
+    seq_mods_sites : List
         must be `(sequence, mods, mod_sites)`
 
     translate_mod_dict : dict
-        A dict to map alpha modification names to other software
+        A dict to map AlphaX modification names to other software,
+        use unimod name if None.
+        Defaults to None.
 
     mod_sep : str
         '[]' or '()', default '()'
 
     '''
-    mod_seq = df_items[0]
-    if df_items[1]:
-        mods = df_items[1].split(';')
-        mod_sites = [int(i) for i in df_items[2].split(';')]
+    mod_seq = seq_mods_sites[0]
+    if seq_mods_sites[1]:
+        mods = seq_mods_sites[1].split(';')
+        mod_sites = [int(i) for i in seq_mods_sites[2].split(';')]
         rev_order = np.argsort(mod_sites)[::-1]
         mod_sites = [mod_sites[rev_order[i]] for i in range(len(mod_sites))]
         mods = [mods[rev_order[i]] for i in range(len(mods))]
-        if translate_mod_dict is not None:
+        if translate_mod_dict is None:
+            mods = [mod[:mod.find('@')] for mod in mods]
+        else:
             mods = [translate_mod_dict[mod] for mod in mods]
         for _site, mod in zip(mod_sites, mods):
             if _site > 0:
@@ -174,11 +178,9 @@ def merge_precursor_fragment_df(
     #     return df
 
 mod_to_unimod_dict = {}
-mod_to_modname_dict = {}
 for mod_name,unimod_id in MOD_DF[['mod_name','unimod_id']].values:
     if unimod_id==-1 or unimod_id=='-1': continue
     mod_to_unimod_dict[mod_name] = f"UniMod:{unimod_id}"
-    mod_to_modname_dict[mod_name] = mod_name[:mod_name.find('@')]
 
 def is_nterm_frag(frag_type:str):
     return frag_type[0] in 'abc'
@@ -250,7 +252,9 @@ def speclib_to_single_df(
     Parameters
     ----------
     translate_mod_dict : dict
-        a dict map modifications from alphabase to other software. Default: build-in `alpha_to_other_mod_dict`
+        A dict to map AlphaX modification names to other software,
+        use unimod name if None.
+        Defaults to None.
     
     keep_k_highest_peaks : int
         only keep highest fragments for each precursor. Default: 12
@@ -349,7 +353,7 @@ def speclib_to_swath_df(
 )->pd.DataFrame:
     speclib_to_single_df(
         speclib, 
-        translate_mod_dict=mod_to_modname_dict,
+        translate_mod_dict=None,
         keep_k_highest_fragments=keep_k_highest_fragments,
         min_frag_mz = min_frag_mz,
         max_frag_mz = max_frag_mz,
@@ -379,7 +383,7 @@ def translate_to_tsv(
     min_frag_intensity:float = 0.01,
     min_frag_nAA:int = 0,
     batch_size:int = 100000,
-    translate_mod_dict:dict = mod_to_modname_dict,
+    translate_mod_dict:dict = None,
     multiprocessing:bool=True
 ):
     if multiprocessing:
