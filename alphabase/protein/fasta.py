@@ -329,7 +329,7 @@ def get_var_mod_sites(
     candidate_sites = get_candidate_sites(
         sequence, target_mod_aas
     )
-    if min_var_mod <= 1:
+    if min_var_mod <= 1 and max_var_mod >= 1:
         mod_sites = [(s,) for s in candidate_sites]
     else:
         mod_sites = []
