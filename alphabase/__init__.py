@@ -4,14 +4,14 @@
 __project__ = "alphabase"
 __version__ = "0.2.3"
 __license__ = "Apache"
-__description__ = "An open-source Python package of the AlphaPept ecosystem"
+__description__ = "An infrastructure Python package of the AlphaX ecosystem"
 __author__ = "Mann Labs"
-__author_email__ = "opensource@alphapept.com"
+__author_email__ = "jalew188@gmail.com"
 __github__ = "https://github.com/MannLabs/alphabase"
 __keywords__ = [
     "bioinformatics",
     "software",
-    "AlphaPept ecosystem",
+    "AlphaX ecosystem",
 ]
 __python_version__ = ">=3.8,<3.10"
 __classifiers__ = [
@@ -35,9 +35,8 @@ __urls__ = {
     "Mann Labs at MPIB": "https://www.biochem.mpg.de/mann",
     "Mann Labs at CPR": "https://www.cpr.ku.dk/research/proteomics/mann/",
     "GitHub": __github__,
-    # "ReadTheDocs": None,
-    # "PyPi": None,
-    # "Scientific paper": None,
+    "Docs": "https://alphabase.readthedocs.io/en/latest/",
+    "PyPi": "https://pypi.org/project/alphabase/",
 }
 __extra_requirements__ = {
     "development": "requirements_development.txt",
