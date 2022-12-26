@@ -298,6 +298,7 @@ def get_candidate_sites(
 def get_var_mod_sites(
     sequence:str,
     target_mod_aas:str,
+    min_var_mod: int,
     max_var_mod: int,
     max_combs: int,
 )->list:
@@ -310,6 +311,9 @@ def get_var_mod_sites(
 
     target_mod_aas : str
         AAs that may have modifications
+
+    min_var_mod : int
+        max number of mods in a sequence
 
     max_var_mod : int
         max number of mods in a sequence
@@ -325,8 +329,11 @@ def get_var_mod_sites(
     candidate_sites = get_candidate_sites(
         sequence, target_mod_aas
     )
-    mod_sites = [(s,) for s in candidate_sites]
-    for n_var_mod in range(2, max_var_mod+1):
+    if min_var_mod <= 1 and max_var_mod >= 1:
+        mod_sites = [(s,) for s in candidate_sites]
+    else:
+        mod_sites = []
+    for n_var_mod in range(max(2,min_var_mod), max_var_mod+1):
         if len(mod_sites)>=max_combs: break
         mod_sites.extend(
             itertools.islice(
@@ -384,9 +391,9 @@ def get_var_mods(
     sequence:str,
     var_mod_aas:str,
     mod_dict:dict,
+    min_var_mod:int,
     max_var_mod:int,
     max_combs:int,
-    keep_unmodified:bool=False,
 )->tuple:
     """
     Generate all modification combinations and associated sites
@@ -394,7 +401,7 @@ def get_var_mods(
     """
     mod_sites_list = get_var_mod_sites(
         sequence, var_mod_aas, 
-        max_var_mod, max_combs
+        min_var_mod, max_var_mod, max_combs
     )
     ret_mods = []
     ret_sites_list = []
@@ -405,7 +412,7 @@ def get_var_mods(
         mod_sites_str = ';'.join([str(i) for i in mod_sites])
         ret_mods.extend(_mods)
         ret_sites_list.extend([mod_sites_str]*len(_mods))
-    if keep_unmodified:
+    if min_var_mod == 0:
         ret_mods.append('')
         ret_sites_list.append('')
     return ret_mods, ret_sites_list
@@ -492,15 +499,15 @@ def protein_idxes_to_names(protein_idxes:str, protein_names:list):
     proteins = [protein for protein in proteins if protein]
     return ';'.join(proteins)
 
-def append_regular_modifications(df:pd.DataFrame, 
-    var_mods = ['Phospho@S','Phospho@T','Phospho@Y'], 
-    max_mod_num=1, max_peptidoform_num=100,
-    keep_unmodified=True,
+def append_special_modifications(df:pd.DataFrame, 
+    var_mods:list = ['Phospho@S','Phospho@T','Phospho@Y'], 
+    min_mod_num:int=0, max_mod_num:int=1, 
+    max_peptidoform_num:int=100,
     cannot_modify_pep_nterm_aa:bool=False,
     cannot_modify_pep_cterm_aa:bool=False,
 )->pd.DataFrame:
     """
-    Append regular (not N/C-term) variable modifications to the 
+    Append special (not N/C-term) variable modifications to the 
     exsiting modifications of each sequence in `df`.
 
     Parameters
@@ -512,6 +519,10 @@ def append_regular_modifications(df:pd.DataFrame,
         Considered varialbe modification list. 
         Defaults to ['Phospho@S','Phospho@T','Phospho@Y'].
 
+    min_mod_num : int, optional
+        Minimal modification number for 
+        each sequence of the `var_mods`. Defaults to 0.
+
     max_mod_num : int, optional
         Maximal modification number for 
         each sequence of the `var_mods`. Defaults to 1.
@@ -519,10 +530,6 @@ def append_regular_modifications(df:pd.DataFrame,
     max_peptidoform_num : int, optional
         One sequence is only allowed to explode 
         to `max_peptidoform_num` number of modified peptides. Defaults to 100.
-
-    keep_unmodified : bool, optional
-        If unmodified (only refered to `var_mods`)
-        peptides are also remained in the returned dataframe. Defaults to True.
 
     cannot_modify_pep_nterm_aa : bool, optional
         Similar to `cannot_modify_pep_cterm_aa`, by default False
@@ -538,6 +545,8 @@ def append_regular_modifications(df:pd.DataFrame,
     pd.DataFrame
         The precursor_df with new modification added.
     """
+    if len(var_mods) == 0: 
+        return df
 
     if cannot_modify_pep_nterm_aa:
         df['sequence'] = df['sequence'].apply(
@@ -555,10 +564,10 @@ def append_regular_modifications(df:pd.DataFrame,
     (
         df['mods_app'],
         df['mod_sites_app']
-    ) = zip(*df.sequence.apply(get_var_mods, 
+    ) = zip(*df.sequence.apply(get_var_mods,
             var_mod_aas=var_mod_aas, mod_dict=mod_dict, 
-            max_var_mod=max_mod_num, max_combs=max_peptidoform_num,
-            keep_unmodified=keep_unmodified
+            min_var_mod=min_mod_num, max_var_mod=max_mod_num, 
+            max_combs=max_peptidoform_num,
         )
     )
 
@@ -572,7 +581,7 @@ def append_regular_modifications(df:pd.DataFrame,
             lambda seq: seq[:-1]+seq[-1].upper()
         )
     
-    if keep_unmodified:
+    if min_mod_num==0:
         df = df.explode(['mods_app','mod_sites_app'])
         df.fillna('', inplace=True)
     else:
@@ -614,6 +623,7 @@ class SpecLibFasta(SpecLibBase):
         charged_frag_types:list = [
             'b_z1','b_z2','y_z1', 'y_z2'
         ],
+        *,
         protease:str = 'trypsin',
         max_missed_cleavages:int = 2,
         peptide_length_min:int = 7,
@@ -623,8 +633,15 @@ class SpecLibFasta(SpecLibBase):
         precursor_mz_min:float = 400.0, 
         precursor_mz_max:float = 2000.0,
         var_mods:list = ['Acetyl@Protein N-term','Oxidation@M'],
+        min_var_mod_num:int = 0,
         max_var_mod_num:int = 2,
         fix_mods:list = ['Carbamidomethyl@C'],
+        labeling_channels:dict = None,
+        special_mods:list = [],
+        min_special_mod_num:int = 0,
+        max_special_mod_num:int = 1,
+        special_mods_cannot_modify_pep_n_term:bool=False,
+        special_mods_cannot_modify_pep_c_term:bool=False,
         decoy: str = None, # or pseudo_reverse or diann
         I_to_L=False,
     ):
@@ -666,11 +683,44 @@ class SpecLibFasta(SpecLibBase):
             by default ['Acetyl@Protein N-term','Oxidation@M']
 
         max_var_mod_num : int, optional
+            Minimal number of variable modifications on a peptide sequence, 
+            by default 0
+
+        max_var_mod_num : int, optional
             Maximal number of variable modifications on a peptide sequence, 
             by default 2
 
         fix_mods : list, optional
             list of fixed modifications, by default ['Carbamidomethyl@C']
+
+        labeling_channels : dict, optional
+            Add isotope labeling with different channels, 
+            see :meth:`add_peptide_labeling()`. 
+            Defaults to None
+
+        special_mods : list, optional
+            Modifications with special occurance per peptide.
+            It is useful for modificaitons like Phospho which may largely 
+            explode the number of candidate modified peptides.
+            The number of special_mods per peptide 
+            is controlled by `max_append_mod_num`.
+            Defaults to [].
+
+        min_special_mod_num : int, optional
+            Control the min number of special_mods per peptide, by default 0.
+
+        max_special_mod_num : int, optional
+            Control the max number of special_mods per peptide, by default 1.
+
+        special_mods_cannot_modify_pep_c_term : bool, optional
+            Some modifications cannot modify the peptide C-term, 
+            this will be useful for GlyGly@K as if C-term is di-Glyed, 
+            it cannot be cleaved/digested. 
+            Defaults to False.
+
+        special_mods_cannot_modify_pep_n_term : bool, optional
+            Similar to `special_mods_cannot_modify_pep_c_term`, but at N-term.
+            Defaults to False.
 
         decoy : str, optional
             Decoy type, see `alphabase.spectral_library.decoy_library`,
@@ -694,7 +744,14 @@ class SpecLibFasta(SpecLibBase):
 
         self.var_mods = var_mods
         self.fix_mods = fix_mods
+        self.min_var_mod_num = min_var_mod_num
         self.max_var_mod_num = max_var_mod_num
+        self.labeling_channels = labeling_channels
+        self.special_mods = special_mods
+        self.min_special_mod_num = min_special_mod_num
+        self.max_special_mod_num = max_special_mod_num
+        self.special_mods_cannot_modify_pep_n_term = special_mods_cannot_modify_pep_n_term
+        self.special_mods_cannot_modify_pep_c_term = special_mods_cannot_modify_pep_c_term
 
         self.fix_mod_aas = ''
         self.fix_mod_prot_nterm_dict = {}
@@ -795,12 +852,13 @@ class SpecLibFasta(SpecLibBase):
         return False
 
     def import_and_process_fasta(self, fasta_files:Union[str,list]):
-        """Import and process a fasta file or a list of fasta files.
-        It includes:
-        - Load the fasta file(s)
-        - Append decoy peptide sequences
-        - Add modifications to peptides
-        - Add charge
+        """
+        Import and process a fasta file or a list of fasta files.
+        It includes 3 steps:
+
+        1. Digest and get peptide sequences, it uses `self.get_peptides_from_...()`
+        2. Process the peptides including add modifications, 
+        it uses :meth:`_process_after_load_pep_seqs()`.
 
         Parameters
         ----------
@@ -811,7 +869,9 @@ class SpecLibFasta(SpecLibBase):
         self.import_and_process_protein_dict(protein_dict)
 
     def import_and_process_protein_dict(self, protein_dict:dict):
-        """ Import the protein_dict instead of fasta files.
+        """ 
+        Import and process the protein_dict.
+        The processing step is in :meth:`_process_after_load_pep_seqs()`.
         ```
         protein_dict = load_all_proteins(fasta_files)
         ```
@@ -832,7 +892,9 @@ class SpecLibFasta(SpecLibBase):
     def import_and_process_peptide_sequences(self, 
         pep_seq_list:list, protein_list:list=None,
     ):
-        """ Importing peptide sequences instead of proteins
+        """ 
+        Importing and process peptide sequences instead of proteins.
+        The processing step is in :meth:`_process_after_load_pep_seqs()`.
 
         Parameters
         ----------
@@ -850,10 +912,13 @@ class SpecLibFasta(SpecLibBase):
 
     def _process_after_load_pep_seqs(self):
         """
-        Called by `import_and_process_...` methods. 
+        The peptide processing step which is 
+        called by `import_and_process_...` methods.
         """
         self.append_decoy_sequence()
         self.add_modifications()
+        self.add_special_modifications()
+        self.add_peptide_labeling()
         self.add_charge()
 
     def get_peptides_from_fasta(self, fasta_file:Union[str,list]):
@@ -887,11 +952,13 @@ class SpecLibFasta(SpecLibBase):
         ----------
         protein_dict : dict
             Format:
+            ```
             {
             'prot_id1': {'protein_id': 'prot_id1', 'sequence': string, 'gene_name': string, 'description': string
             'prot_id2': {...}
             ...
             }
+            ```
         """
         self.protein_df = pd.DataFrame.from_dict(
             protein_dict, orient='index'
@@ -1022,8 +1089,8 @@ class SpecLibFasta(SpecLibBase):
 
         var_mods_list, var_mod_sites_list = get_var_mods(
             sequence, self.var_mod_aas, self.var_mod_dict, 
-            self.max_var_mod_num, self.max_peptidoform_num-1, # 1 for unmodified
-            keep_unmodified=True
+            self.min_var_mod_num, self.max_var_mod_num, 
+            self.max_peptidoform_num-1, # 1 for unmodified
         )
 
         nterm_var_mods = ['']
@@ -1077,51 +1144,53 @@ class SpecLibFasta(SpecLibBase):
         )
         self._precursor_df.reset_index(drop=True, inplace=True)
 
-    def add_additional_modifications(self,
-        var_mods = ['Phospho@S','Phospho@T','Phospho@Y'], 
-        max_mod_num:int=1, max_peptidoform_num:int=100,
-        keep_unmodified:bool=True,
-        cannot_modify_pep_nterm_aa:bool=False,
-        cannot_modify_pep_cterm_aa:bool=False,
-    ):
-        """Add external defined variable modifications to all peptide sequences in `self.precursor_df`.
-        See :meth:`append_regular_modifications()` for details
+    def add_special_modifications(self):
         """
-        self._precursor_df = append_regular_modifications(
-            self.precursor_df,
-            var_mods=var_mods,
-            max_mod_num=max_mod_num,
-            max_peptidoform_num=max_peptidoform_num,
-            keep_unmodified=keep_unmodified,
-            cannot_modify_pep_nterm_aa=cannot_modify_pep_nterm_aa,
-            cannot_modify_pep_cterm_aa=cannot_modify_pep_cterm_aa,
+        Add external defined variable modifications to 
+        all peptide sequences in `self._precursor_df`.
+        See :meth:`append_special_modifications()` for details.
+        """
+        if len(self.special_mods) == 0: return
+        self._precursor_df = append_special_modifications(
+            self._precursor_df, self.special_mods,
+            self.min_special_mod_num, self.max_special_mod_num, 
+            self.max_peptidoform_num,
+            cannot_modify_pep_nterm_aa=self.special_mods_cannot_modify_pep_n_term,
+            cannot_modify_pep_cterm_aa=self.special_mods_cannot_modify_pep_c_term,
         )
 
-    def add_peptide_labeling(self, labeling_channel_dict:dict):
+    def add_peptide_labeling(self, labeling_channel_dict:dict=None):
         """ 
         Add labeling onto peptides inplace of self._precursor_df
 
         Parameters
         ----------
-        labeling_channel_dict : dict of list
+        labeling_channel_dict : dict, optional
             For example:
+            ```
             {
-            '': [], # not labelled for reference
-            '0': ['Dimethyl@Any N-term','Dimethyl@K'],
-            '4': ['Dimethyl:2H(4)@Any N-term','Dimethyl:2H(4)@K'],
-            '8': ['Dimethyl:2H(6)13C(2)@Any N-term','Dimethyl:2H(6)13C(2)@K'],
-            }.
-            The key name could be arbitrary distinguished strings for channel name,
-            and value must be a list of modification names (str) in alphabase format.
+            -1: [], # not labeled
+            0: ['Dimethyl@Any N-term','Dimethyl@K'],
+            4: ['Dimethyl:2H(4)@Any N-term','Dimethyl:2H(4)@K'],
+            8: ['Dimethyl:2H(6)13C(2)@Any N-term','Dimethyl:2H(6)13C(2)@K'],
+            }
+            ```.
+            The key name could be int (recommended) or str, and the value must be 
+            a list of modification names (str) in alphabase format.
+            It is set to `self.labeling_channels` if None.
+            Defaults to None
     
         """
+        if labeling_channel_dict is None:
+            labeling_channel_dict = self.labeling_channels
+        if labeling_channel_dict is None or len(labeling_channel_dict) == 0:
+            return
         df_list = []
         for channel, labels in labeling_channel_dict.items():
             df = create_labeling_peptide_df(self._precursor_df, labels)
-            df['label_channel'] = channel
+            df['labeling_channel'] = channel
             df_list.append(df)
-        self._precursor_df = pd.concat(df_list)
-        self._precursor_df.reset_index(drop=True, inplace=True)
+        self._precursor_df = pd.concat(df_list, ignore_index=True)
 
     def add_charge(self):
         """Add charge states
