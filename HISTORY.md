@@ -8,12 +8,13 @@ Follow the changelog format from https://keepachangelog.com/en/1.0.0/.
 
 ### Added
 
+- `alphabase.protein.fasta.SpecLibFasta.add_peptide_labeling()` supports mDIA.
 - `alphabase.spectral_library.flat.SpecLibFlat` class for flat spec_lib.
 - Move `alphabase.spectral_library.translate` module (.py) from alphapeptdeep to alphabase.
 - `alphabase.constants.modification.add_new_modifications()` to add user-defined modifications that are not in UniMod.
 - `alphabase.psm_reader.psm_reader.PSMReaderBase.add_modification_mapping()` to support arbitrary modifications of different search engines.
 - `alphabase.statistics.regression.LOESSRegression`
-- `alphabase.scoring` added but not finished yet
+- `alphabase.scoring` module added but not finished yet.
 
 ### Changed
 
