@@ -38,7 +38,8 @@ class SpecLibBase(object):
         'miss_cleavage', 'mobility_pred',
         'nAA', 
         'precursor_mz', 
-        'rt_pred', 'rt_norm_pred'
+        'rt_pred', 'rt_norm_pred',
+        'labeling_channel',
     ]
     """
     list of str: Key numeric columns to be saved 

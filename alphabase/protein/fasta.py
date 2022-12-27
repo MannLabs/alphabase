@@ -1175,7 +1175,8 @@ class SpecLibFasta(SpecLibBase):
             8: ['Dimethyl:2H(6)13C(2)@Any N-term','Dimethyl:2H(6)13C(2)@K'],
             }
             ```.
-            The key name could be int (recommended) or str, and the value must be 
+            The key name could be int (highly recommended or 
+            must be in the future) or str, and the value must be 
             a list of modification names (str) in alphabase format.
             It is set to `self.labeling_channels` if None.
             Defaults to None
@@ -1191,6 +1192,16 @@ class SpecLibFasta(SpecLibBase):
             df['labeling_channel'] = channel
             df_list.append(df)
         self._precursor_df = pd.concat(df_list, ignore_index=True)
+        try:
+            self._precursor_df[
+                'labeling_channel'
+            ] = self._precursor_df.labeling_channel.astype(np.int32)
+            if 'labeling_channel' not in self.key_numeric_columns:
+                self.key_numeric_columns.append('labeling_channel')
+        except:
+            if 'labeling_channel' in self.key_numeric_columns:
+                self.key_numeric_columns.remove('labeling_channel')
+
 
     def add_charge(self):
         """Add charge states
