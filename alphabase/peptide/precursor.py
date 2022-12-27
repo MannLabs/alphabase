@@ -43,7 +43,7 @@ def refine_precursor_df(
 
     if drop_frag_idx and 'frag_start_idx' in df.columns:
         df.drop(columns=[
-            'frag_start_idx','frag_end_idx'
+            'frag_start_idx','frag_stop_idx'
         ], inplace=True)
 
     if not is_precursor_refined(df):

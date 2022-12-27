@@ -4,6 +4,12 @@ Follow the changelog format from https://keepachangelog.com/en/1.0.0/.
 
 ## 1.0.0 - TODO Next Release
 
+## 0.4.0 - 2022.12.28
+
+### Changed
+
+- `frag_end_idx` -> `frag_stop_idx`
+
 ## 0.3.0 - 2022.12.27
 
 ### Added

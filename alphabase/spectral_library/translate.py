@@ -110,7 +110,7 @@ def merge_precursor_fragment_df(
     frag_mass_list = []
     frag_inten_list = []
     frag_num_list = []
-    iters =  enumerate(df[['frag_start_idx','frag_end_idx']].values)
+    iters =  enumerate(df[['frag_start_idx','frag_stop_idx']].values)
     if verbose:
         iters = tqdm.tqdm(iters)
     for i,(start, end) in iters:
@@ -208,7 +208,7 @@ def mask_fragment_intensity_by_frag_nAA(
     y_mask = b_mask.copy()
     for i_frag in range(max_mask_frag_nAA):
         b_mask[precursor_df.frag_start_idx.values+i_frag] = True
-        y_mask[precursor_df.frag_end_idx.values-i_frag-1] = True
+        y_mask[precursor_df.frag_stop_idx.values-i_frag-1] = True
     
     masks = np.zeros(
         (
@@ -276,7 +276,7 @@ def speclib_to_single_df(
     )
 
     df['frag_start_idx'] = speclib._precursor_df['frag_start_idx']
-    df['frag_end_idx'] = speclib._precursor_df['frag_end_idx']
+    df['frag_stop_idx'] = speclib._precursor_df['frag_stop_idx']
     
     df['PrecursorCharge'] = speclib._precursor_df['charge']
     if 'irt_pred' in speclib._precursor_df.columns:
@@ -341,7 +341,7 @@ def speclib_to_single_df(
     df = df[df['RelativeIntensity']>min_frag_intensity]
     df.loc[df[frag_loss_head]=='modloss',frag_loss_head] = modloss
 
-    return df.drop(['frag_start_idx','frag_end_idx'], axis=1)
+    return df.drop(['frag_start_idx','frag_stop_idx'], axis=1)
 
 def speclib_to_swath_df(
     speclib:SpecLibBase,

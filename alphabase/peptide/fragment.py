@@ -142,7 +142,7 @@ def init_fragment_by_precursor_dataframe(
         precursors to generate fragment masses,
         if `precursor_df` contains the 'frag_start_idx' column, 
         it is better to provide `reference_fragment_df` as 
-        `precursor_df.frag_start_idx` and `precursor.frag_end_idx` 
+        `precursor_df.frag_start_idx` and `precursor.frag_stop_idx` 
         point to the indices in `reference_fragment_df`
 
     charged_frag_types : List
@@ -172,7 +172,7 @@ def init_fragment_by_precursor_dataframe(
             dtype=dtype
         )
         precursor_df['frag_start_idx'] = start_indices
-        precursor_df['frag_end_idx'] = end_indices
+        precursor_df['frag_stop_idx'] = end_indices
     else:
         if reference_fragment_df is None:
             # raise ValueError(
@@ -181,7 +181,7 @@ def init_fragment_by_precursor_dataframe(
             # )
             fragment_df = pd.DataFrame(
                 np.zeros((
-                    precursor_df.frag_end_idx.max(), 
+                    precursor_df.frag_stop_idx.max(), 
                     len(charged_frag_types)
                 )),
                 columns = charged_frag_types
@@ -311,7 +311,7 @@ def concat_precursor_fragment_dataframes(
     precursor_df_list = [precursor_df.copy() for precursor_df in precursor_df_list]
     cum_frag_df_lens = np.cumsum(fragment_df_lens)
     for i,precursor_df in enumerate(precursor_df_list[1:]):
-        precursor_df[['frag_start_idx','frag_end_idx']] += cum_frag_df_lens[i]
+        precursor_df[['frag_start_idx','frag_stop_idx']] += cum_frag_df_lens[i]
     return (
         pd.concat(precursor_df_list, ignore_index=True),
         pd.concat(fragment_df_list, ignore_index=True),
@@ -438,16 +438,16 @@ def mask_fragments_for_charge_greater_than_precursor_charge(
     return fragment_df
 
 @nb.njit
-def parse_fragment_positions(frag_directions, frag_start_idxes, frag_end_idxes):
+def parse_fragment_positions(frag_directions, frag_start_idxes, frag_stop_idxes):
     frag_positions = np.zeros_like(frag_directions, dtype=np.uint32)
-    for frag_start, frag_end in zip(frag_start_idxes, frag_end_idxes):
+    for frag_start, frag_end in zip(frag_start_idxes, frag_stop_idxes):
         frag_positions[frag_start:frag_end] = np.arange(0,frag_end-frag_start).reshape(-1,1)
     return frag_positions
 
 @nb.njit
-def parse_fragment_numbers(frag_directions, frag_start_idxes, frag_end_idxes):
+def parse_fragment_numbers(frag_directions, frag_start_idxes, frag_stop_idxes):
     frag_numbers = np.zeros_like(frag_directions, dtype=np.uint32)
-    for frag_start, frag_end in zip(frag_start_idxes, frag_end_idxes):
+    for frag_start, frag_end in zip(frag_start_idxes, frag_stop_idxes):
         frag_numbers[frag_start:frag_end] = _parse_fragment_number_of_one_peptide(
             frag_directions[frag_start:frag_end]
         )
@@ -469,10 +469,10 @@ def _parse_fragment_number_of_one_peptide(frag_directions):
 @nb.njit
 def exclude_not_top_k(
     fragment_intensities, top_k, 
-    frag_start_idxes, frag_end_idxes
+    frag_start_idxes, frag_stop_idxes
 )->np.ndarray:
     excluded = np.zeros_like(fragment_intensities, dtype=np.bool_)
-    for frag_start, frag_end in zip(frag_start_idxes, frag_end_idxes):
+    for frag_start, frag_end in zip(frag_start_idxes, frag_stop_idxes):
         if top_k >= frag_end-frag_start: continue
         idxes = np.argsort(fragment_intensities[frag_start:frag_end])
         _excl = np.ones_like(idxes, dtype=np.bool_)
@@ -508,7 +508,7 @@ def flatten_fragments(precursor_df: pd.DataFrame,
     - charge:    int8, fragment charge
     - loss_type: int16, fragment loss type, 0=noloss, 17=NH3, 18=H2O, 98=H3PO4 (phos), ...
     
-    The fragment pointers `frag_start_idx` and `frag_end_idx` 
+    The fragment pointers `frag_start_idx` and `frag_stop_idx` 
     will be reannotated to the new fragment format.
 
     For ASCII code `type`, we can convert it into byte-str by using `frag_df.type.values.view('S1')`.
@@ -516,7 +516,7 @@ def flatten_fragments(precursor_df: pd.DataFrame,
     Parameters
     ----------
     precursor_df : pd.DataFrame
-        input precursor dataframe which contains the frag_start_idx and frag_end_idx columns
+        input precursor dataframe which contains the frag_start_idx and frag_stop_idx columns
     
     fragment_mz_df : pd.DataFrame
         input fragment mz dataframe of shape (N, T) which contains N * T fragment mzs
@@ -534,7 +534,7 @@ def flatten_fragments(precursor_df: pd.DataFrame,
     Returns
     -------
     pd.DataFrame
-        precursor dataframe whith reindexed `frag_start_idx` and `frag_end_idx` columns
+        precursor dataframe whith reindexed `frag_start_idx` and `frag_stop_idx` columns
     pd.DataFrame
         fragment dataframe with columns: `mz`, `intensity`, `type`, `number`, 
         `charge` and `loss_type`, where each column refers to:
@@ -591,17 +591,17 @@ def flatten_fragments(precursor_df: pd.DataFrame,
         frag_df['number'] = parse_fragment_numbers(
             frag_directions, 
             precursor_df.frag_start_idx.values, 
-            precursor_df.frag_end_idx.values
+            precursor_df.frag_stop_idx.values
         ).reshape(-1)
     if 'position' in custom_columns:
         frag_df['position'] = parse_fragment_positions(
             frag_directions, 
             precursor_df.frag_start_idx.values, 
-            precursor_df.frag_end_idx.values
+            precursor_df.frag_stop_idx.values
         ).reshape(-1)
 
     precursor_new_df = precursor_df.copy()
-    precursor_new_df[['frag_start_idx','frag_end_idx']] *= len(fragment_mz_df.columns)
+    precursor_new_df[['frag_start_idx','frag_stop_idx']] *= len(fragment_mz_df.columns)
 
     
     frag_df.intensity.mask(frag_df.mz == 0.0, 0.0, inplace=True)
@@ -613,7 +613,7 @@ def flatten_fragments(precursor_df: pd.DataFrame,
         exclude_not_top_k(
             frag_df.intensity.values, keep_top_k_fragments,
             precursor_new_df.frag_start_idx.values,
-            precursor_new_df.frag_end_idx.values,
+            precursor_new_df.frag_stop_idx.values,
         )
     )
     frag_df = frag_df[~excluded]
@@ -626,7 +626,7 @@ def flatten_fragments(precursor_df: pd.DataFrame,
     cum_sum_tresh[1:] = np.cumsum(excluded)
 
     precursor_new_df['frag_start_idx'] -= cum_sum_tresh[precursor_new_df.frag_start_idx.values]
-    precursor_new_df['frag_end_idx'] -= cum_sum_tresh[precursor_new_df.frag_end_idx.values]
+    precursor_new_df['frag_stop_idx'] -= cum_sum_tresh[precursor_new_df.frag_stop_idx.values]
 
     return precursor_new_df, frag_df
 
@@ -671,12 +671,12 @@ def remove_unused_fragments(
         fragment_df_list: Tuple[pd.DataFrame, ...]
     ) -> Tuple[pd.DataFrame, Tuple[pd.DataFrame, ...]]:
     """Removes unused fragments of removed precursors, 
-    reannotates the frag_start_idx and frag_end_idx
+    reannotates the frag_start_idx and frag_stop_idx
     
     Parameters
     ----------
     precursor_df : pd.DataFrame
-        Precursor dataframe which contains frag_start_idx and frag_end_idx columns
+        Precursor dataframe which contains frag_start_idx and frag_stop_idx columns
     
     fragment_df_list : List[pd.DataFrame]
         A list of fragment dataframes which should be compressed by removing unused fragments.
@@ -691,11 +691,11 @@ def remove_unused_fragments(
     """
 
     precursor_df = precursor_df.sort_values(['frag_start_idx'], ascending=True)
-    frag_idx = precursor_df[['frag_start_idx','frag_end_idx']].values
+    frag_idx = precursor_df[['frag_start_idx','frag_stop_idx']].values
 
     new_frag_idx, fragment_pointer = compress_fragment_indices(frag_idx)
 
-    precursor_df[['frag_start_idx','frag_end_idx']] = new_frag_idx
+    precursor_df[['frag_start_idx','frag_stop_idx']] = new_frag_idx
     precursor_df = precursor_df.sort_index()
 
     output_tuple = []
@@ -731,7 +731,7 @@ def create_fragment_mz_dataframe_by_sort_precursor(
     """
     if 'frag_start_idx' in precursor_df.columns:
         precursor_df.drop(columns=[
-            'frag_start_idx','frag_end_idx'
+            'frag_start_idx','frag_stop_idx'
         ], inplace=True)
 
     refine_precursor_df(precursor_df)
@@ -753,7 +753,7 @@ def create_fragment_mz_dataframe_by_sort_precursor(
 
             fragment_mz_df.iloc[
                 df_group.frag_start_idx.values[0]:
-                df_group.frag_end_idx.values[-1], :
+                df_group.frag_stop_idx.values[-1], :
             ] = mz_values
     return mask_fragments_for_charge_greater_than_precursor_charge(
             fragment_mz_df,
@@ -787,7 +787,7 @@ def create_fragment_mz_dataframe(
     reference_fragment_df : pd.DataFrame
         kwargs only. Generate fragment_mz_df based on this reference, 
         as `precursor_df.frag_start_idx` and 
-        `precursor.frag_end_idx` point to the indices in 
+        `precursor.frag_stop_idx` point to the indices in 
         `reference_fragment_df`.
         Defaults to None
     
@@ -867,7 +867,7 @@ def create_fragment_mz_dataframe(
                 
                 update_sliced_fragment_dataframe(
                     fragment_mz_df, mz_values, 
-                    df_group[['frag_start_idx','frag_end_idx']].values, 
+                    df_group[['frag_start_idx','frag_stop_idx']].values, 
                 )
 
     return mask_fragments_for_charge_greater_than_precursor_charge(

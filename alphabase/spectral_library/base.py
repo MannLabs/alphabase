@@ -29,7 +29,7 @@ class SpecLibBase(object):
     key_numeric_columns:list = [
         'ccs_pred', 'charge', 
         'decoy',
-        'frag_end_idx', 'frag_start_idx',
+        'frag_stop_idx', 'frag_start_idx',
         'isotope_m1_intensity', 'isotope_m1_mz',
         'isotope_apex_mz', 'isotope_apex_intensity',
         'isotope_apex_offset',
@@ -360,7 +360,7 @@ class SpecLibBase(object):
         can be loaded faster from hdf file into memory:
 
         'precursor_mz', 'charge', 'mod_seq_hash', 'mod_seq_charge_hash',
-        'frag_start_idx', 'frag_end_idx', 'decoy', 'rt_pred', 'ccs_pred',
+        'frag_start_idx', 'frag_stop_idx', 'decoy', 'rt_pred', 'ccs_pred',
         'mobility_pred', 'miss_cleave', 'nAA', 
         ['isotope_mz_m1', 'isotope_intensity_m1'], ...
 
@@ -503,11 +503,11 @@ def annotate_fragments_from_speclib(
 
 
     frag_start_idx = fragment_speclib.precursor_df['frag_start_idx'].values[speclib_indices]
-    frag_end_idx = fragment_speclib.precursor_df['frag_end_idx'].values[speclib_indices]
+    frag_stop_idx = fragment_speclib.precursor_df['frag_stop_idx'].values[speclib_indices]
     
     speclib._precursor_df = speclib._precursor_df[matched_mask].copy()
     speclib._precursor_df['frag_start_idx'] = frag_start_idx[matched_mask]
-    speclib._precursor_df['frag_end_idx'] = frag_end_idx[matched_mask]
+    speclib._precursor_df['frag_stop_idx'] = frag_stop_idx[matched_mask]
 
     speclib._fragment_mz_df = fragment_speclib._fragment_mz_df.copy()
     speclib._fragment_intensity_df = fragment_speclib._fragment_intensity_df.copy()

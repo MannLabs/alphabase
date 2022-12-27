@@ -180,7 +180,7 @@ class SWATHLibraryReader(SpectronautReader, SpecLibBase):
         indices = np.cumsum(indices)
 
         df['frag_start_idx'] = indices[:-1]
-        df['frag_end_idx'] = indices[1:]
+        df['frag_stop_idx'] = indices[1:]
 
         return df
 
@@ -197,8 +197,8 @@ class SWATHLibraryReader(SpectronautReader, SpecLibBase):
     ):  
         self._psm_df['nAA'] = self._psm_df.sequence.str.len()
         self._psm_df[
-            ['frag_start_idx','frag_end_idx']
-        ] = lib_df[['frag_start_idx','frag_end_idx']]
+            ['frag_start_idx','frag_stop_idx']
+        ] = lib_df[['frag_start_idx','frag_stop_idx']]
 
         self.normalize_rt_by_raw_name()
 
