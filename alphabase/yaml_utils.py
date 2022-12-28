@@ -7,4 +7,4 @@ def load_yaml(filename)->dict:
 
 def save_yaml(filename, settings):
     with open(filename, "w") as file:
-        yaml.dump(settings, file)
+        yaml.dump(settings, file, sort_keys=False)
