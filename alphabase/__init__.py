@@ -2,7 +2,7 @@
 
 
 __project__ = "alphabase"
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 __license__ = "Apache"
 __description__ = "An infrastructure Python package of the AlphaX ecosystem"
 __author__ = "Mann Labs"

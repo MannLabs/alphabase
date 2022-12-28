@@ -97,7 +97,7 @@ class SpecLibFlat:
         """ Flatten an library object of SpecLibBase or its inherited class. 
         This method will generate :attr:`precursor_df` and :attr:`fragment_df`
         The fragments in fragment_df can be located by 
-        `frag_start_idx` and `frag_end_idx` in precursor_df. 
+        `frag_start_idx` and `frag_stop_idx` in precursor_df. 
 
         Parameters
         ----------
@@ -122,7 +122,7 @@ class SpecLibFlat:
         `flat_library/precursor_df` contains all essential numberic columns those 
         can be loaded faster from hdf file into memory:
         `['precursor_mz', 'charge', 'mod_seq_hash', 'mod_seq_charge_hash',
-        'frag_start_idx', 'frag_end_idx', 'decoy', 'rt_pred', 'ccs_pred',
+        'frag_start_idx', 'frag_stop_idx', 'decoy', 'rt_pred', 'ccs_pred',
         'mobility_pred', 'miss_cleave', 'nAA', 'isotope_mz_m1', 'isotope_intensity_m1', ...]`
 
         `flat_library/mod_seq_df` contains all string columns and the other 
