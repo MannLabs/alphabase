@@ -359,3 +359,16 @@ class Percolator:
     
         return pd.concat(test_df_list, ignore_index=True)
     
+class SupervisedPercolator(Percolator):
+    """
+    DIA-NN like scoring.
+    """
+    def __init__(self):
+        super().__init__()
+        self.training_fdr = 100000 # disable target filtration on FDR, which is the same as DiaNN but different from Percolator
+
+    def rescore(self, psm_df:pd.DataFrame)->pd.DataFrame:
+        # We don't need iteration anymore, 
+        # but cross validation may be still necessary
+        psm_df = self._cv_score(psm_df)
+        return self._estimate_fdr(psm_df)
