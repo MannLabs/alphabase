@@ -1,7 +1,7 @@
-alphabase.scoring.ml_scoring_base
+alphabase.scoring.ml_scoring
 ===================================
 
-.. automodule:: alphabase.scoring.ml_scoring_base
+.. automodule:: alphabase.scoring.ml_scoring
    :members:
    :undoc-members:
    :show-inheritance:
