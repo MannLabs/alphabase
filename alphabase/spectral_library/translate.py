@@ -308,6 +308,9 @@ def speclib_to_single_df(
     if 'genes' in speclib._precursor_df.columns:
         df['Genes'] = speclib._precursor_df['genes']
 
+    if 'decoy' in speclib._precursor_df.columns:
+        df['Decoy'] = speclib._precursor_df['decoy']
+
     # if 'protein_group' in speclib._precursor_df.columns:
     #     df['ProteinGroups'] = speclib._precursor_df['protein_group']
 
