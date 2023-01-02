@@ -481,7 +481,8 @@ def exclude_not_top_k(
     return excluded
 
 
-def flatten_fragments(precursor_df: pd.DataFrame, 
+def flatten_fragments(
+    precursor_df: pd.DataFrame, 
     fragment_mz_df: pd.DataFrame,
     fragment_intensity_df: pd.DataFrame,
     min_fragment_intensity: float = -1.,
@@ -548,6 +549,8 @@ def flatten_fragments(precursor_df: pd.DataFrame,
         - loss_type: int16, fragment loss type, 0=noloss, 17=NH3, 18=H2O, 98=H3PO4 (phos), ...
     """
     
+    if len(precursor_df) == 0:
+        return precursor_df, pd.DataFrame()
     # new dataframes for fragments and precursors are created
     frag_df = pd.DataFrame()
     frag_df['mz'] = fragment_mz_df.values.reshape(-1)
