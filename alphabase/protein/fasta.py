@@ -647,7 +647,8 @@ class SpecLibFasta(SpecLibBase):
         special_mods_cannot_modify_pep_n_term:bool=False,
         special_mods_cannot_modify_pep_c_term:bool=False,
         decoy: str = None, # or pseudo_reverse or diann
-        I_to_L=False,
+        include_contaminants:bool=False,
+        I_to_L:bool=False,
     ):
         """
         Parameters
@@ -729,6 +730,9 @@ class SpecLibFasta(SpecLibBase):
         decoy : str, optional
             Decoy type, see `alphabase.spectral_library.decoy_library`,
             by default None
+
+        include_contaminants : bool, optional
+            If include contaminants.fasta, by default False
         """
         super().__init__(
             charged_frag_types=charged_frag_types,
@@ -738,6 +742,7 @@ class SpecLibFasta(SpecLibBase):
         )
         self.protein_df:pd.DataFrame() = pd.DataFrame()
         self.I_to_L = I_to_L
+        self.include_contaminants = include_contaminants
         self.max_peptidoform_num = 100
         self._digest = Digest(
             protease, max_missed_cleavages,
@@ -855,7 +860,9 @@ class SpecLibFasta(SpecLibBase):
                 mod_set.add(mod[-1])
         return False
 
-    def import_and_process_fasta(self, fasta_files:Union[str,list]):
+    def import_and_process_fasta(self, 
+        fasta_files:Union[str,list],
+    ):
         """
         Import and process a fasta file or a list of fasta files.
         It includes 3 steps:
@@ -869,6 +876,10 @@ class SpecLibFasta(SpecLibBase):
         fasta_files : Union[str,list]
             A fasta file or a list of fasta files
         """
+        if self.include_contaminants:
+            fasta_files.append(os.path.join(
+                CONST_FILE_FOLDER, 'contaminants.fasta'
+            ))
         protein_dict = load_all_proteins(fasta_files)
         self.import_and_process_protein_dict(protein_dict)
 
@@ -946,6 +957,10 @@ class SpecLibFasta(SpecLibBase):
         fasta_files : list
             fasta file list
         """
+        if self.include_contaminants:
+            fasta_files.append(os.path.join(
+                CONST_FILE_FOLDER, 'contaminants.fasta'
+            ))
         protein_dict = load_all_proteins(fasta_files)
         self.get_peptides_from_protein_dict(protein_dict)
 
