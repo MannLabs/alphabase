@@ -473,7 +473,10 @@ def parse_labels(labels:list):
     return label_aas, label_mod_dict, nterm_label_mod, cterm_label_mod
         
 def create_labeling_peptide_df(peptide_df:pd.DataFrame, labels:list):
+    if len(peptide_df) == 0: return peptide_df
+
     df = peptide_df.copy()
+
     (
         label_aas, label_mod_dict, 
         nterm_label_mod, cterm_label_mod
@@ -499,7 +502,8 @@ def protein_idxes_to_names(protein_idxes:str, protein_names:list):
     proteins = [protein for protein in proteins if protein]
     return ';'.join(proteins)
 
-def append_special_modifications(df:pd.DataFrame, 
+def append_special_modifications(
+    df:pd.DataFrame, 
     var_mods:list = ['Phospho@S','Phospho@T','Phospho@Y'], 
     min_mod_num:int=0, max_mod_num:int=1, 
     max_peptidoform_num:int=100,
@@ -545,7 +549,7 @@ def append_special_modifications(df:pd.DataFrame,
     pd.DataFrame
         The precursor_df with new modification added.
     """
-    if len(var_mods) == 0: 
+    if len(var_mods) == 0 or len(df) == 0: 
         return df
 
     if cannot_modify_pep_nterm_aa:
@@ -1133,20 +1137,21 @@ class SpecLibFasta(SpecLibBase):
         if len(self._precursor_df) == 0:
             self._precursor_df['mods'] = ""
             self._precursor_df['mod_sites'] = ""
-        else:
-            (
-                self._precursor_df['mods'],
-                self._precursor_df['mod_sites']
-            ) = zip(*self._precursor_df[
-                ['sequence','is_prot_nterm','is_prot_cterm']
-            ].apply(lambda x:
-                self.add_mods_for_one_seq(*x), axis=1
-            ))
-            self._precursor_df = explode_multiple_columns(
-                self._precursor_df,
-                ['mods','mod_sites']
-            )
-            self._precursor_df.reset_index(drop=True, inplace=True)
+            return
+            
+        (
+            self._precursor_df['mods'],
+            self._precursor_df['mod_sites']
+        ) = zip(*self._precursor_df[
+            ['sequence','is_prot_nterm','is_prot_cterm']
+        ].apply(lambda x:
+            self.add_mods_for_one_seq(*x), axis=1
+        ))
+        self._precursor_df = explode_multiple_columns(
+            self._precursor_df,
+            ['mods','mod_sites']
+        )
+        self._precursor_df.reset_index(drop=True, inplace=True)
 
     def add_special_modifications(self):
         """

@@ -131,6 +131,11 @@ class pFindReader(PSMReaderBase):
         )
 
     def _load_modifications(self, pfind_df):
+        if len(pfind_df) == 0:
+            self._psm_df['mods'] = ''
+            self._psm_df['mod_sites'] = ''
+            return
+            
         (
             self._psm_df['mods'], self._psm_df['mod_sites']
         ) = zip(*pfind_df['Modification'].apply(get_pFind_mods))
