@@ -861,7 +861,7 @@ class SpecLibFasta(SpecLibBase):
         return False
 
     def import_and_process_fasta(self, 
-        fasta_files:Union[str,list],
+        fasta_files:list,
     ):
         """
         Import and process a fasta file or a list of fasta files.
@@ -873,7 +873,7 @@ class SpecLibFasta(SpecLibBase):
 
         Parameters
         ----------
-        fasta_files : Union[str,list]
+        fasta_files : list
             A fasta file or a list of fasta files
         """
         if self.include_contaminants:

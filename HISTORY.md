@@ -10,6 +10,7 @@ Follow the changelog format from https://keepachangelog.com/en/1.0.0/.
 - `SpecLibFat` for flat fragment dataframes from `SpecLibBase` (`alphabase.spectral_library.flat.py`).
 - `SpecLibBase` from TSV library (`alphabase.spectral_library.reader.py`)
 - `LOESSRegression` for recalibration stuffs (`alphabase.statistics.regression.py`)
+- Auto include contaminants.fasta with `include_contaminants` in `alphabase.protein.fasta.SpecLibFasta`.
 
 ## 0.4.0 - 2022.12.28
 
