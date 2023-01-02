@@ -1130,19 +1130,23 @@ class SpecLibFasta(SpecLibBase):
         if 'is_prot_cterm' not in self._precursor_df.columns:
             self._precursor_df['is_prot_cterm'] = False
         
-        (
-            self._precursor_df['mods'],
-            self._precursor_df['mod_sites']
-        ) = zip(*self._precursor_df[
-            ['sequence','is_prot_nterm','is_prot_cterm']
-        ].apply(lambda x:
-            self.add_mods_for_one_seq(*x), axis=1
-        ))
-        self._precursor_df = explode_multiple_columns(
-            self._precursor_df,
-            ['mods','mod_sites']
-        )
-        self._precursor_df.reset_index(drop=True, inplace=True)
+        if len(self._precursor_df) == 0:
+            self._precursor_df['mods'] = ""
+            self._precursor_df['mod_sites'] = ""
+        else:
+            (
+                self._precursor_df['mods'],
+                self._precursor_df['mod_sites']
+            ) = zip(*self._precursor_df[
+                ['sequence','is_prot_nterm','is_prot_cterm']
+            ].apply(lambda x:
+                self.add_mods_for_one_seq(*x), axis=1
+            ))
+            self._precursor_df = explode_multiple_columns(
+                self._precursor_df,
+                ['mods','mod_sites']
+            )
+            self._precursor_df.reset_index(drop=True, inplace=True)
 
     def add_special_modifications(self):
         """
