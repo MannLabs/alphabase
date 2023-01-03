@@ -3,11 +3,9 @@ import numpy as np
 from pydivsufsort import divsufsort, kasai
 
 def get_lcp_array(cat_prot:str):
-    suffix_array = divsufsort(cat_prot)
-    lcp_array = kasai(
-        np.array(cat_prot,'c').view(np.int8), 
-        suffix_array
-    )
+    data = np.array(cat_prot,'c').view(np.int8)
+    suffix_array = divsufsort(data)
+    lcp_array = kasai(data, suffix_array)
     return lcp_array[np.argsort(suffix_array)]
 
 @numba.njit
