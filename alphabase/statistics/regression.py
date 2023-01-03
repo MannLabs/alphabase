@@ -23,16 +23,23 @@ class LOESSRegression(BaseEstimator, RegressorMixin):
     polynomial_degree : int
         default = 2, Degree of the polynomial functions used for the local approximation.
 
+    uniform : bool
+        default = False, If True, the kernels are distributed uniformly over the input space. 
+        If False, the kernels are distributed to contain an equal number of datapoints.
+        For every kernel at least polynomial_degree + 1 datapoints are required.
+
     """
 
     def __init__(self, 
                 n_kernels: int = 6, 
                 kernel_size: float = 2., 
-                polynomial_degree: int = 2):
+                polynomial_degree: int = 2,
+                uniform = False):
 
         self.n_kernels = n_kernels
         self.kernel_size = kernel_size
         self.polynomial_degree = polynomial_degree
+        self.uniform = uniform
 
     def get_params(self, deep: bool = True):
         return super().get_params(deep)
@@ -43,8 +50,53 @@ class LOESSRegression(BaseEstimator, RegressorMixin):
     def _more_tags(self):
         return {'X_types': ['1darray']}
 
-    def calculate_kernel_indices(self, x: np.ndarray):
+    def intervals_uniform(self, x: np.ndarray):
+        """Determine the intervals of the kernels.
+        The kernels are distributed uniformly over the input space.
+
+        Parameters
+        ----------
+        x : numpy.ndarray
+            float, of shape (n_datapoints)
+
+        Returns     
+        -------
+        numpy.ndarray, float
+            of shape (n_kernels, 2) 
+        """
+
+        minval = x[0]
+        maxval = x[-1]
+
+        interval_size = (maxval - minval)/self.n_kernels
+
+        start = np.arange(minval, maxval, interval_size) - (interval_size/2)*(self.kernel_size-1)
+        stop = start + interval_size + (interval_size)*(self.kernel_size-1)
+        return np.column_stack([start,stop])
+    
+    def kernel_indices_uniform(self, x: np.ndarray):
         """Determine the indices of the datapoints belonging to each kernel.
+        The kernels are distributed uniformly over the input space.
+
+        Parameters
+        ----------
+        x : numpy.ndarray
+            float, of shape (n_datapoints)
+
+        Returns
+        -------
+        numpy.ndarray, int
+            of shape (n_kernels, 2)
+        
+        """
+
+        indices = np.searchsorted(x, self.intervals_uniform(x))
+
+        return indices.astype(int)
+
+    def kernel_indices_density(self, x: np.ndarray):
+        """Determine the indices of the datapoints belonging to each kernel.
+        The kernels are distributed to contain an equal number of datapoints.
 
         Parameters
         ----------
@@ -139,22 +191,46 @@ class LOESSRegression(BaseEstimator, RegressorMixin):
         idx_sorted = np.argsort(x.flat)
         x_sorted = x.flat[idx_sorted]
 
-        # kernel indices will only be calculated during fitting
-        kernel_indices = self.calculate_kernel_indices(x_sorted)
-  
-        # scale max and scale mean will then be used for calculating the weighht matrix
-        self.scale_mean = np.zeros((self.n_kernels))
-        self.scale_max = np.zeros((self.n_kernels))
+        # stores if uniform training is still possible this round
+        uniform = self.uniform
 
-        # scale mean and max are calculated and contain the scaling before applying the kernel
-        for i, area in enumerate(kernel_indices):
-            area_slice = slice(*area)
-            self.scale_mean[i] = x_sorted[area_slice].mean()
-            self.scale_max[i] = np.max(np.abs(x_sorted[area_slice] - self.scale_mean[i]))
+        # === start === kernel indices ===
+        # get kernel indices matrix of shape (n_kernels, 2)
+        if uniform:
+            kernel_indices = self.kernel_indices_uniform(x_sorted)
+
+            # check number of datapoints per kernel
+            if np.any(np.diff(kernel_indices) < (1 + self.polynomial_degree)):
+                print('Too few datapoints per kernel. Uniform kernels will be replaced by density kernels.')
+                uniform = False
+
+        # a second if statement is used instead of an if-else to account for failed uniform training
+        if not uniform:  
+            kernel_indices = self.kernel_indices_density(x_sorted)
+
+        # === end === kernel indices ===
+
+        # === start === calculate kernel dimensions ===
+        if uniform:
+            start_stop = self.intervals_uniform(x_sorted)
+            self.scale_mean = np.mean(start_stop, axis=1)
+            self.scale_max = np.max(start_stop, axis=1) - self.scale_mean
+
+        else:
+            # scale max and scale mean will then be used for calculating the weighht matrix
+            self.scale_mean = np.zeros((self.n_kernels))
+            self.scale_max = np.zeros((self.n_kernels))
+
+            # scale mean and max are calculated and contain the scaling before applying the kernel
+            for i, area in enumerate(kernel_indices):
+                area_slice = slice(*area)
+                self.scale_mean[i] = x_sorted[area_slice].mean()
+                self.scale_max[i] = np.max(np.abs(x_sorted[area_slice] - self.scale_mean[i]))
+
+        # === end === calculate kernel dimensions ===
 
         # from here on, the original column arrays are used
         w = self.get_weight_matrix(x)
-
 
         # build design matrix
         polynomial_transform = PolynomialFeatures(self.polynomial_degree)

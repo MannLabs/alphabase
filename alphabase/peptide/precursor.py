@@ -534,7 +534,7 @@ def calc_precursor_isotope_mp(
         )
     df_list = []
     df_group = precursor_df.groupby('nAA')
-    with mp.Pool(processes) as p:
+    with mp.get_context("spawn").Pool(processes) as p:
         processing = p.imap(
             partial(
                 calc_precursor_isotope,

@@ -128,6 +128,13 @@ else:
                 )
 
         def _load_modifications(self, msf_df):
+            if len(msf_df) == 0:
+                self._psm_df['mods'] = ''
+                self._psm_df['mod_sites'] = ''
+                self._psm_df['mod_deltas'] = ''
+                self._psm_df['mod_delta_sites'] = ''
+                return
+
             (
                 self._psm_df['mods'], self._psm_df['mod_sites'],
                 self._psm_df['mod_deltas'], self._psm_df['mod_delta_sites'],

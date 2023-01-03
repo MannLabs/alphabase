@@ -110,6 +110,13 @@ class AlphaPeptReader(PSMReaderBase):
         return df
     
     def _load_modifications(self, df: pd.DataFrame):
+        if len(df) == 0: 
+            self._psm_df['sequence'] = '' 
+            self._psm_df['mods'] = ''
+            self._psm_df['mod_sites'] = ''
+            self._psm_df['decoy'] = 0
+            return
+            
         (
             self._psm_df['sequence'], self._psm_df['mods'],
             self._psm_df['mod_sites'], _charges,

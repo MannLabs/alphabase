@@ -2,9 +2,12 @@ import numba
 import numpy as np
 from pydivsufsort import divsufsort, kasai
 
-def get_lcp_array(cat_prot):
+def get_lcp_array(cat_prot:str):
     suffix_array = divsufsort(cat_prot)
-    lcp_array = kasai(cat_prot, suffix_array)
+    lcp_array = kasai(
+        np.array(cat_prot,'c').view(np.int8), 
+        suffix_array
+    )
     return lcp_array[np.argsort(suffix_array)]
 
 @numba.njit
@@ -35,7 +38,7 @@ def get_all_substring_indices_from_lcp(cat_prot, lcp_array, min_len, max_len, st
             pos_ends.append(end_pos)
     return np.array(pos_starts,dtype=np.uint32), np.array(pos_ends,dtype=np.uint32)
 
-def get_substring_indices(cat_prot, min_len=7, max_len=25, stop_char='$'):
+def get_substring_indices(cat_prot:str, min_len=7, max_len=25, stop_char='$'):
     lcp_array = get_lcp_array(cat_prot)
     return get_all_substring_indices_from_lcp(cat_prot, lcp_array, min_len, max_len, stop_char=stop_char)
 

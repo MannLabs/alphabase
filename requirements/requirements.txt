@@ -10,3 +10,4 @@ psutil
 tqdm
 scikit-learn
 regex
+pydivsufsort

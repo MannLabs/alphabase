@@ -6,4 +6,4 @@ alphabase.scoring
    
    scoring/fdr
    scoring/feature_extraction_base
-   scoring/ml_scoring_base
+   scoring/ml_scoring

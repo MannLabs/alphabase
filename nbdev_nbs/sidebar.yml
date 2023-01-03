@@ -35,7 +35,7 @@ website:
         contents:
           - scoring/fdr.ipynb
           - scoring/feature_extraction_base.ipynb
-          - scoring/ml_scoring_base.ipynb
+          - scoring/ml_scoring.ipynb
       - section: spectral_library
         contents:
           - spectral_library/decoy_library.ipynb
