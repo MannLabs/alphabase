@@ -20,7 +20,7 @@ python setup.py sdist bdist_wheel
 
 # Setting up the local package
 cd release/one_click_macos_gui
-pip install "../../dist/alphabase-0.5.0-py3-none-any.whl[stable]"
+pip install "../../dist/alphabase-1.0.0-py3-none-any.whl[stable]"
 
 # Creating the stand-alone pyinstaller folder
 pip install pyinstaller
@@ -40,5 +40,5 @@ cp ../../LICENSE.txt Resources/LICENSE.txt
 cp ../logos/alpha_logo.png Resources/alpha_logo.png
 chmod 777 scripts/*
 
-pkgbuild --root dist/alphabase --identifier de.mpg.biochem.alphabase.app --version 0.5.0 --install-location /Applications/AlphaBase.app --scripts scripts AlphaBase.pkg
+pkgbuild --root dist/alphabase --identifier de.mpg.biochem.alphabase.app --version 1.0.0 --install-location /Applications/AlphaBase.app --scripts scripts AlphaBase.pkg
 productbuild --distribution distribution.xml --resources Resources --package-path AlphaBase.pkg dist/alphabase_gui_installer_macos.pkg
