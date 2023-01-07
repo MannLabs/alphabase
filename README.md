@@ -32,6 +32,11 @@ please see [readthedocs](https://alphabase.readthedocs.io/en/latest).
 
 The infrastructure package of AlphaX ecosystem for MS proteomics.
 
+### Packages built upon AlphaBase
+
+- [AlphaPeptDeep](https://github.com/MannLabs/alphapeptdeep): deep learning framework for proteomics.
+- [AlphaRaw](https://github.com/MannLabs/alpharaw): raw data reader for different vendors.
+
 ------------------------------------------------------------------------
 
 ## License
