@@ -2,10 +2,10 @@
 
 ![Pip installation](https://github.com/MannLabs/alphabase/workflows/Default%20installation%20and%20tests/badge.svg)
 ![PyPi releases](https://github.com/MannLabs/alphabase/workflows/Publish%20on%20PyPi%20and%20release%20on%20GitHub/badge.svg)
+[![Documentation Status](https://readthedocs.org/projects/alphabase/badge/?version=latest)](https://alphabase.readthedocs.io/en/latest/?badge=latest)
 [![PyPI](https://img.shields.io/pypi/v/alphabase)](https://pypi.org/project/alphabase)
 [![pip downloads](https://img.shields.io/pypi/dm/alphabase?color=blue&label=pip%20downloads)](https://pypi.org/project/alphabase)
 ![Python](https://img.shields.io/pypi/pyversions/alphabase)
-[![Documentation Status](https://readthedocs.org/projects/alphabase/badge/?version=latest)](https://alphabase.readthedocs.io/en/latest/?badge=latest)
 
 AlphaBase provides all basic python functionalities for AlphaPept
 ecosystem from the [Mann Labs at the Max Planck Institute of
@@ -31,6 +31,11 @@ please see [readthedocs](https://alphabase.readthedocs.io/en/latest).
 ## About
 
 The infrastructure package of AlphaX ecosystem for MS proteomics.
+
+### Packages built upon AlphaBase
+
+- [AlphaPeptDeep](https://github.com/MannLabs/alphapeptdeep): deep learning framework for proteomics.
+- [AlphaRaw](https://github.com/MannLabs/alpharaw): raw data reader for different vendors.
 
 ------------------------------------------------------------------------
 
