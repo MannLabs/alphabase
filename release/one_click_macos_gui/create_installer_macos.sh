@@ -12,7 +12,7 @@ rm -rf dist
 rm -rf build
 
 # Creating a conda environment
-conda create -n alphabaseinstaller python=3.8 -y
+conda create -n alphabaseinstaller python=3.9 -y
 conda activate alphabaseinstaller
 
 # Creating the wheel
