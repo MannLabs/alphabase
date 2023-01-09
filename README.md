@@ -30,12 +30,18 @@ please see [readthedocs](https://alphabase.readthedocs.io/en/latest).
 
 ## About
 
-The infrastructure package of AlphaX ecosystem for MS proteomics.
+The infrastructure package of AlphaX ecosystem for MS proteomics. It was first published with AlphaPeptDeep, see [Citations](#citations).
 
 ### Packages built upon AlphaBase
 
 - [AlphaPeptDeep](https://github.com/MannLabs/alphapeptdeep): deep learning framework for proteomics.
 - [AlphaRaw](https://github.com/MannLabs/alpharaw): raw data reader for different vendors.
+
+------------------------------------------------------------------------
+
+## Citations
+
+Wen-Feng Zeng, Xie-Xuan Zhou, Sander Willems, Constantin Ammar, Maria Wahle, Isabell Bludau, Eugenia Voytik, Maximillian T. Strauss & Matthias Mann. AlphaPeptDeep: a modular deep learning framework to predict peptide properties for proteomics. Nat Commun 13, 7238 (2022). https://doi.org/10.1038/s41467-022-34904-3
 
 ------------------------------------------------------------------------
 
@@ -171,12 +177,6 @@ In case of issues, check out the following:
   encountered before
 - [Discussions](https://github.com/MannLabs/alphabase/discussions):
   Check if your problem or feature requests has been discussed before.
-
-------------------------------------------------------------------------
-
-## Citations
-
-There are currently no plans to draft a manuscript.
 
 ------------------------------------------------------------------------
 
