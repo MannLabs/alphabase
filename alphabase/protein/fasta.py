@@ -65,7 +65,7 @@ def load_all_proteins(fasta_file_list:list):
     protein_dict = {}
     for fasta in fasta_file_list:
         for protein in read_fasta_file(fasta):
-            protein_dict[protein['protein_id']] = protein
+            protein_dict[protein['full_name']] = protein
     return protein_dict
 
 def concat_proteins(protein_dict:dict, sep='$')->str:
