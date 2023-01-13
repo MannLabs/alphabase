@@ -2,7 +2,7 @@ import numpy as np
 from typing import List, Tuple
 
 from alphabase.constants.aa import (
-    calc_sequence_mass, 
+    calc_AA_masses, 
     calc_AA_masses_for_same_len_seqs,
     calc_sequence_masses_for_same_len_seqs
 )
@@ -109,7 +109,7 @@ def calc_b_y_and_peptide_mass(
     `calc_b_y_and_peptide_masses_for_same_len_seqs`
     as it is much faster
     '''
-    residue_masses = calc_sequence_mass(sequence)
+    residue_masses = calc_AA_masses(sequence)
     mod_masses = calc_modification_mass(
         len(sequence), mod_names, mod_sites
     )

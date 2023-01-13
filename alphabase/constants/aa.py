@@ -53,7 +53,7 @@ for aa, formula, mass in AA_DF.values:
         parse_formula(formula)
     )
 
-def calc_sequence_mass(
+def calc_AA_masses(
     sequence: str
 )->np.ndarray:
     '''
@@ -77,7 +77,7 @@ def calc_AA_masses_for_same_len_seqs(
 
     Parameters
     ----------
-    sequence_array : np.ndarray
+    sequence_array : np.ndarray or list
         unmodified sequences with the same length.
 
     Returns
@@ -104,7 +104,7 @@ def calc_sequence_masses_for_same_len_seqs(
 
     Parameters
     ----------
-    sequence_array : np.ndarray
+    sequence_array : np.ndarray or list
         unmodified sequences with the same length.
 
     Returns

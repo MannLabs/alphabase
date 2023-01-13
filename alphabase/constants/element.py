@@ -13,8 +13,8 @@ common_const_dict:dict = load_yaml(
 MASS_PROTON:float = common_const_dict['MASS_PROTON']
 MASS_ISOTOPE:float = common_const_dict['MASS_ISOTOPE']
 
-MAX_ISOTOPE_LEN = common_const_dict['MAX_ISOTOPE_LEN']
-EMPTY_DIST = np.zeros(MAX_ISOTOPE_LEN)
+MAX_ISOTOPE_LEN:int = common_const_dict['MAX_ISOTOPE_LEN']
+EMPTY_DIST:np.ndarray = np.zeros(MAX_ISOTOPE_LEN)
 EMPTY_DIST[0] = 1
 
 @numba.njit
@@ -83,8 +83,13 @@ CHEM_MONO_IDX:numba.typed.Dict = numba.typed.Dict.empty(
     value_type=numba.types.int64
 )
 
+MASS_H:int = None
+MASS_C:int = None
+MASS_O:int = None
+MASS_N:int = None
 MASS_H2O:int = None #raise errors if the value is not reset
 MASS_NH3:int = None
+MASS_CO:int = None
 
 def reset_elements():
     for elem, items in CHEM_INFO_DICT.items():
@@ -126,8 +131,8 @@ def load_elem_yaml(yaml_file:str):
     global CHEM_MONO_MASS
     global CHEM_ISOTOPE_DIST
     global CHEM_MONO_IDX
-    global MASS_H2O
-    global MASS_NH3
+    global MASS_C, MASS_H, MASS_O, MASS_N
+    global MASS_H2O, MASS_NH3, MASS_CO
 
     CHEM_INFO_DICT = load_yaml(yaml_file)
 
@@ -143,9 +148,14 @@ def load_elem_yaml(yaml_file:str):
     )
 
     reset_elements()
-        
+    
+    MASS_C = CHEM_MONO_MASS['C']
+    MASS_H = CHEM_MONO_MASS['H']
+    MASS_N = CHEM_MONO_MASS['N']
+    MASS_O = CHEM_MONO_MASS['O']
     MASS_H2O = CHEM_MONO_MASS['H']*2 + CHEM_MONO_MASS['O']
     MASS_NH3 = CHEM_MONO_MASS['H']*3 + CHEM_MONO_MASS['N']
+    MASS_CO = CHEM_MONO_MASS['C']+CHEM_MONO_MASS['O']
 
 load_elem_yaml(
     os.path.join(CONST_FILE_FOLDER,

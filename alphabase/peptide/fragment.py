@@ -10,8 +10,8 @@ from alphabase.constants.modification import (
     calc_modloss_mass
 )
 from alphabase.constants.element import (
-    MASS_H2O, MASS_PROTON, 
-    MASS_NH3, CHEM_MONO_MASS
+    MASS_H2O, MASS_PROTON, MASS_CO,
+    MASS_NH3, CHEM_MONO_MASS, MASS_H
 )
 
 from alphabase.peptide.precursor import (
@@ -380,41 +380,36 @@ def calc_fragment_mz_values_for_same_nAA(
     for charged_frag_type in charged_frag_types:
         frag_type, charge = parse_charged_frag_type(charged_frag_type)
         if frag_type == 'b':
-            mz_values.append(b_mass/charge + add_proton)
+            _mass = b_mass/charge + add_proton
         elif frag_type == 'y':
-            mz_values.append(y_mass/charge + add_proton)
+            _mass = y_mass/charge + add_proton
         elif frag_type == 'b_modloss':
             _mass = (b_mass-b_modloss)/charge + add_proton
             _mass[b_modloss == 0] = 0
-            mz_values.append(_mass)
         elif frag_type == 'y_modloss':
             _mass = (y_mass-y_modloss)/charge + add_proton
             _mass[y_modloss == 0] = 0
-            mz_values.append(_mass)
         elif frag_type == 'b_H2O':
             _mass = (b_mass-MASS_H2O)/charge + add_proton
-            mz_values.append(_mass)
         elif frag_type == 'y_H2O':
             _mass = (y_mass-MASS_H2O)/charge + add_proton
-            mz_values.append(_mass)
         elif frag_type == 'b_NH3':
             _mass = (b_mass-MASS_NH3)/charge + add_proton
-            mz_values.append(_mass)
         elif frag_type == 'y_NH3':
             _mass = (y_mass-MASS_NH3)/charge + add_proton
-            mz_values.append(_mass)
         elif frag_type == 'c':
             _mass = (b_mass+MASS_NH3)/charge + add_proton
-            mz_values.append(_mass)
         elif frag_type == 'z':
-            _mass = (
-                y_mass-(MASS_NH3-CHEM_MONO_MASS['H'])
-            )/charge + add_proton
-            mz_values.append(_mass)
+            _mass = (MASS_H-MASS_NH3+y_mass)/charge + add_proton
+        elif frag_type == 'a':
+            _mass = (b_mass-MASS_CO)/charge + add_proton
+        elif frag_type == 'x':
+            _mass = (MASS_CO-MASS_H*2+y_mass)/charge + add_proton
         else:
             raise NotImplementedError(
                 f'Fragment type "{frag_type}" is not in fragment_mz_df.'
             )
+        mz_values.append(_mass)
     return np.array(mz_values).T
 
 def mask_fragments_for_charge_greater_than_precursor_charge(

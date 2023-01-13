@@ -399,14 +399,14 @@ def calc_precursor_isotope(
     -------
     pd.DataFrame
         precursor_df with additional columns:
-        - isotope_m1_intensity
-        - isotope_m1_mz
-        - isotope_apex_intensity
-        - isotope_apex_mz
-        - isotope_apex_offset
-        - isotope_right_most_intensity
-        - isotope_right_most_mz
-        - isotope_right_most_offset
+        - isotope_m1_intensity: relative intensity of M1 to mono peak 
+        - isotope_m1_mz: mz of M1
+        - isotope_apex_intensity: relative intensity of the apex peak
+        - isotope_apex_mz: mz of the apex peak
+        - isotope_apex_offset: position offset of the apex peak to mono peak
+        - isotope_right_most_intensity: relative intensity of the right-most peak
+        - isotope_right_most_mz: mz of the right-most peak
+        - isotope_right_most_offset: position offset of the right-most peak
     """
 
     if "precursor_mz" not in precursor_df.columns:
