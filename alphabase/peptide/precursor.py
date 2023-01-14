@@ -9,7 +9,7 @@ from functools import partial
 from alphabase.constants.element import (
     MASS_PROTON, MASS_ISOTOPE
 )
-from alphabase.constants.aa import AA_formula
+from alphabase.constants.aa import AA_Composition
 from alphabase.constants.modification import MOD_formula
 from alphabase.constants.isotope import (
     IsotopeDistribution
@@ -283,7 +283,7 @@ def get_mod_seq_formula(seq:str, mods:str)->list:
     """
     formula = {}
     for aa in seq:
-        for chem,n in AA_formula[aa].items():
+        for chem,n in AA_Composition[aa].items():
             if chem in formula:
                 formula[chem]+=n
             else:
@@ -399,6 +399,7 @@ def calc_precursor_isotope(
     -------
     pd.DataFrame
         precursor_df with additional columns:
+
         - isotope_m1_intensity: relative intensity of M1 to mono peak 
         - isotope_m1_mz: mz of M1
         - isotope_apex_intensity: relative intensity of the apex peak
@@ -517,15 +518,8 @@ def calc_precursor_isotope_mp(
     Returns
     -------
     pd.DataFrame
-        precursor_df with additional columns:
-        - isotope_m1_intensity
-        - isotope_m1_mz
-        - isotope_apex_intensity
-        - isotope_apex_mz
-        - isotope_apex_offset
-        - isotope_right_most_intensity
-        - isotope_right_most_mz
-        - isotope_right_most_offset
+        DataFrame with `isotope_*` columns, 
+        see :meth:'calc_precursor_isotope()'.
     """
     if len(precursor_df) < min_precursor_num_to_run_mp:
         return calc_precursor_isotope(

@@ -89,7 +89,6 @@ MASS_O:int = None
 MASS_N:int = None
 MASS_H2O:int = None #raise errors if the value is not reset
 MASS_NH3:int = None
-MASS_CO:int = None
 
 def reset_elements():
     for elem, items in CHEM_INFO_DICT.items():
@@ -132,7 +131,7 @@ def load_elem_yaml(yaml_file:str):
     global CHEM_ISOTOPE_DIST
     global CHEM_MONO_IDX
     global MASS_C, MASS_H, MASS_O, MASS_N
-    global MASS_H2O, MASS_NH3, MASS_CO
+    global MASS_H2O, MASS_NH3
 
     CHEM_INFO_DICT = load_yaml(yaml_file)
 
@@ -155,7 +154,6 @@ def load_elem_yaml(yaml_file:str):
     MASS_O = CHEM_MONO_MASS['O']
     MASS_H2O = CHEM_MONO_MASS['H']*2 + CHEM_MONO_MASS['O']
     MASS_NH3 = CHEM_MONO_MASS['H']*3 + CHEM_MONO_MASS['N']
-    MASS_CO = CHEM_MONO_MASS['C']+CHEM_MONO_MASS['O']
 
 load_elem_yaml(
     os.path.join(CONST_FILE_FOLDER,

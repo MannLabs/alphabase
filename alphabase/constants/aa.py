@@ -15,15 +15,15 @@ from alphabase.constants._const import CONST_FILE_FOLDER
 
 # We use all 128 ASCII code to represent amino acids for flexible extensions in the future.
 # The amino acid masses are stored in 128-lengh array :py:data:`AA_ASCII_MASS`. 
-# If an ASCII code is not in `AA_CHEM`, the mass will be set as a large value to disable MS search.
-AA_CHEM:dict = load_yaml(
+# If an ASCII code is not in `AA_Formula`, the mass will be set as a large value to disable MS search.
+AA_Formula:dict = load_yaml(
     os.path.join(CONST_FILE_FOLDER, 'amino_acid.yaml')
 )
 
 def reset_AA_mass()->np.ndarray:
     """AA mass in np.array with shape (128,)"""
     AA_ASCII_MASS = np.ones(128)*1e8
-    for aa, chem in AA_CHEM.items():
+    for aa, chem in AA_Formula.items():
         AA_ASCII_MASS[ord(aa)] = calc_mass_from_formula(chem)
     return AA_ASCII_MASS
 
@@ -31,27 +31,36 @@ def reset_AA_mass()->np.ndarray:
 AA_ASCII_MASS:np.ndarray = reset_AA_mass()
 
 def reset_AA_df():
+    global AA_ASCII_MASS
     AA_DF = pd.DataFrame()
     AA_DF['aa'] = [chr(aa) for aa in range(len(AA_ASCII_MASS))]
     AA_DF['formula'] = ['']*len(AA_ASCII_MASS)
     aa_idxes = []
     formulas = []
-    for aa, formula in AA_CHEM.items():
+    for aa, formula in AA_Formula.items():
         aa_idxes.append(ord(aa))
         formulas.append(formula)
     AA_DF.loc[aa_idxes, 'formula'] = formulas
     AA_DF['mass'] = AA_ASCII_MASS
+    AA_ASCII_MASS = AA_DF.mass.to_numpy()
     return AA_DF
 
 #: 128-len AA dataframe
 AA_DF:pd.DataFrame = reset_AA_df()
 
 # AA to formula dict of dict. For example: {'K': {'C': n, 'O': m, ...}}
-AA_formula:dict = {}
+AA_Composition:dict = {}
 for aa, formula, mass in AA_DF.values:
-    AA_formula[aa] = dict(
+    AA_Composition[aa] = dict(
         parse_formula(formula)
     )
+
+def update_an_AA(aa:str, formula:str):
+    aa_idx = ord(aa)
+    AA_DF.loc[aa_idx,'formula'] = formula
+    AA_DF.loc[aa_idx,'mass'] = calc_mass_from_formula(formula)
+    AA_Formula[aa] = formula
+    AA_Composition[aa] = parse_formula(formula)
 
 def calc_AA_masses(
     sequence: str

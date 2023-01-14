@@ -1,5 +1,6 @@
 import copy
 from alphabase.spectral_library.base import SpecLibBase
+from alphabase.protein.fasta import SpecLibFasta
 from alphabase.io.hdf import HDF_File
 
 class SpecLibDecoy(SpecLibBase):
