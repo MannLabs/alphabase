@@ -21,12 +21,12 @@ class ProteinReverseDecoy(SpecLibDecoy):
         self.protein_df = pd.concat(
             [
                 pd.DataFrame({'sequence':[""]*len(self.target_lib.protein_df)}),
-                self.target_lib.protein_df.copy()
+                self.protein_df
             ], ignore_index=True
         ).fillna('')
 
     def _decoy_protein_df(self):
-        self._make_empty_loc_for_target_protein_df()
+        self.protein_df = self.target_lib.protein_df.copy()
         self.protein_df['sequence'] = self.protein_df.sequence.str[::-1]
         self._add_tag_to_a_column_in_protein_df(
             'protein_id'
@@ -37,6 +37,7 @@ class ProteinReverseDecoy(SpecLibDecoy):
         self._add_tag_to_a_column_in_protein_df(
             'gene_name'
         )
+        self._make_empty_loc_for_target_protein_df()
 
     def _generate_decoy_sequences(self):
         _target_prot_df = self.target_lib.protein_df
