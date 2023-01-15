@@ -646,7 +646,7 @@ class SpecLibFasta(SpecLibBase):
         max_special_mod_num:int = 1,
         special_mods_cannot_modify_pep_n_term:bool=False,
         special_mods_cannot_modify_pep_c_term:bool=False,
-        decoy: str = None, # or pseudo_reverse or diann
+        decoy: str = None,
         include_contaminants:bool=False,
         I_to_L:bool=False,
     ):
@@ -728,7 +728,13 @@ class SpecLibFasta(SpecLibBase):
             Defaults to False.
 
         decoy : str, optional
-            Decoy type, see `alphabase.spectral_library.decoy_library`,
+            Decoy type (see :meth:`alphabase.spectral_library.base.append_decoy_sequence()`)
+
+            - `protein_reverse`: Reverse on target protein sequences
+            - `pseudo_reverse`: Pseudo-reverse on target peptide sequences
+            - `diann`: DiaNN-like decoy
+            - None: no decoy
+
             by default None
 
         include_contaminants : bool, optional
