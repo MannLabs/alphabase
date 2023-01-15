@@ -44,10 +44,10 @@ class SpecLibDecoy(SpecLibBase):
         self._decoy_meta()
         self._decoy_frags()
 
-    def concat_to_target_lib(self):
+    def append_to_target_lib(self):
         """
-        A decoy method should define how to concat itself into 
-        target_lib inside the class, rather than externally.
+        A decoy method should define how to append itself to target_lib.
+        Sub-classes should override this method when necessary. 
         """
         self._precursor_df['decoy'] = 1
         self.target_lib._precursor_df['decoy'] = 0
@@ -58,7 +58,10 @@ class SpecLibDecoy(SpecLibBase):
         self.target_lib.refine_df()
 
     def decoy_sequence(self):
-        """Generate decoy sequences from `self.target_lib`"""
+        """
+        Generate decoy sequences from `self.target_lib`.
+        Sub-classes should override this method when necessary. 
+        """
         self._decoy_seq()
         self._remove_target_seqs()
 

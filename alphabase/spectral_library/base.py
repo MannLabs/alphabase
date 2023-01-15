@@ -147,6 +147,7 @@ class SpecLibBase(object):
         ```
         >>> decoy_lib = (decoy_lib_provider.get_decoy_lib( self.decoy, self))
         >>> decoy_lib.decoy_sequence()
+        >>> decoy_lib.append_to_target_lib()
         ...
         ```
         """
@@ -163,7 +164,7 @@ class SpecLibBase(object):
         )
         if decoy_lib is None: return None
         decoy_lib.decoy_sequence()
-        decoy_lib.concat_to_target_lib()
+        decoy_lib.append_to_target_lib()
 
     def clip_by_precursor_mz_(self):
         ''' 
