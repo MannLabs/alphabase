@@ -57,15 +57,15 @@ class ProteinReverseDecoy(SpecLibDecoy):
         self._generate_decoy_sequences()
         self._remove_target_seqs()
 
-    def concat_to_target_lib(self):
+    def append_to_target_lib(self):
         if (
             not hasattr(self.target_lib, 'protein_df')
             or len(self.target_lib.protein_df) == 0
         ): return
-        super().concat_to_target_lib()
-        self._concat_protein_df_to_target_lib()
+        super().append_to_target_lib()
+        self._append_protein_df_to_target_lib()
 
-    def _concat_protein_df_to_target_lib(self):
+    def _append_protein_df_to_target_lib(self):
         self.protein_df['decoy'] = 1
         self.target_lib.protein_df['decoy'] = 0
         self.target_lib.protein_df = pd.concat([

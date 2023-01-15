@@ -605,10 +605,12 @@ class SpecLibFasta(SpecLibBase):
     """
     This is the main entry of AlphaBase when generating spectral libraries from fasta files
     It includes functionalities to:
+    
+    - Load protein sequences
     - Digest protein sequences
+    - Append decoy peptides
     - Add fixed, variable or labeling modifications to the peptide sequences
     - Add charge states
-    - Append decoy peptides
     - Save libraries into hdf file
 
     Attributes
@@ -768,6 +770,9 @@ class SpecLibFasta(SpecLibBase):
         self.special_mods_cannot_modify_pep_n_term = special_mods_cannot_modify_pep_n_term
         self.special_mods_cannot_modify_pep_c_term = special_mods_cannot_modify_pep_c_term
 
+        self._parse_fix_and_var_mods()
+    
+    def _parse_fix_and_var_mods(self):
         self.fix_mod_aas = ''
         self.fix_mod_prot_nterm_dict = {}
         self.fix_mod_prot_cterm_dict = {}
@@ -807,7 +812,7 @@ class SpecLibFasta(SpecLibBase):
                     allow_conflicts
                 )
         
-        for mod in fix_mods:
+        for mod in self.fix_mods:
             if mod.find('@')+2 == len(mod):
                 self.fix_mod_aas += mod[-1]
                 self.fix_mod_dict[mod[-1]] = mod
@@ -829,8 +834,8 @@ class SpecLibFasta(SpecLibBase):
         self.var_mod_dict = {}
 
         global get_var_mods_per_sites
-        if self._check_if_multi_mods_on_aa(var_mods):
-            for mod in var_mods:
+        if self._check_if_multi_mods_on_aa(self.var_mods):
+            for mod in self.var_mods:
                 if mod.find('@')+2 == len(mod):
                     if mod[-1] in self.fix_mod_dict: continue
                     self.var_mod_aas += mod[-1]
@@ -840,14 +845,14 @@ class SpecLibFasta(SpecLibBase):
                         self.var_mod_dict[mod[-1]] = [mod]
             get_var_mods_per_sites = get_var_mods_per_sites_multi_mods_on_aa
         else:
-            for mod in var_mods:
+            for mod in self.var_mods:
                 if mod.find('@')+2 == len(mod):
                     if mod[-1] in self.fix_mod_dict: continue
                     self.var_mod_aas += mod[-1]
                     self.var_mod_dict[mod[-1]] = mod
             get_var_mods_per_sites = get_var_mods_per_sites_single_mod_on_aa
         
-        for mod in var_mods:
+        for mod in self.var_mods:
             if mod.find('@')+2 < len(mod):
                 _set_term_mod(
                     mod, 
@@ -875,7 +880,7 @@ class SpecLibFasta(SpecLibBase):
 
         1. Digest and get peptide sequences, it uses `self.get_peptides_from_...()`
         2. Process the peptides including add modifications, 
-        it uses :meth:`_process_after_load_pep_seqs()`.
+        it uses :meth:`process_from_naked_peptide_seqs()`.
 
         Parameters
         ----------
@@ -892,7 +897,7 @@ class SpecLibFasta(SpecLibBase):
     def import_and_process_protein_dict(self, protein_dict:dict):
         """ 
         Import and process the protein_dict.
-        The processing step is in :meth:`_process_after_load_pep_seqs()`.
+        The processing step is in :meth:`process_from_naked_peptide_seqs()`.
         ```
         protein_dict = load_all_proteins(fasta_files)
         ```
@@ -908,14 +913,14 @@ class SpecLibFasta(SpecLibBase):
             }
         """
         self.get_peptides_from_protein_dict(protein_dict)
-        self._process_after_load_pep_seqs()
+        self.process_from_naked_peptide_seqs()
 
     def import_and_process_peptide_sequences(self, 
         pep_seq_list:list, protein_list:list=None,
     ):
         """ 
         Importing and process peptide sequences instead of proteins.
-        The processing step is in :meth:`_process_after_load_pep_seqs()`.
+        The processing step is in :meth:`process_from_naked_peptide_seqs()`.
 
         Parameters
         ----------
@@ -929,9 +934,9 @@ class SpecLibFasta(SpecLibBase):
         self.get_peptides_from_peptide_sequence_list(
             pep_seq_list, protein_list
         )
-        self._process_after_load_pep_seqs()
+        self.process_from_naked_peptide_seqs()
 
-    def _process_after_load_pep_seqs(self):
+    def process_from_naked_peptide_seqs(self):
         """
         The peptide processing step which is 
         called by `import_and_process_...` methods.
