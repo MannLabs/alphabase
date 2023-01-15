@@ -2,7 +2,13 @@
 
 Follow the changelog format from https://keepachangelog.com/en/1.0.0/.
 
-## 1.0.0 - TODO Next Release
+## 1.0.1 - 2023.01.15
+
+### Added
+
+- 'protein_reverse' decoy added in `alphabase.protein.protein_level_decoy.py`.
+
+## 1.0.0 - 2023.01.10
 
 ### Added
 

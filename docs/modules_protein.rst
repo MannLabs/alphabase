@@ -5,3 +5,4 @@ alphabase.protein
    :maxdepth: 1
    
    protein/fasta
+   protein/protein_level_decoy

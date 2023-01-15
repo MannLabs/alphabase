@@ -226,6 +226,11 @@ class SpecLibDecoyProvider(object):
         else:
             return None
 
-decoy_lib_provider = SpecLibDecoyProvider()
+decoy_lib_provider:SpecLibDecoyProvider = SpecLibDecoyProvider()
+"""
+Factory object of `SpecLibDecoyProvider` to 
+register and get different types of decoy methods.
+"""
+
 decoy_lib_provider.register('pseudo_reverse', SpecLibDecoy)
 decoy_lib_provider.register('diann', SpecLibDecoyDiaNN)
