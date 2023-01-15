@@ -9,8 +9,8 @@ from functools import partial
 from alphabase.constants.element import (
     MASS_PROTON, MASS_ISOTOPE
 )
-from alphabase.constants.aa import AA_formula
-from alphabase.constants.modification import MOD_formula
+from alphabase.constants.aa import AA_Composition
+from alphabase.constants.modification import MOD_Composition
 from alphabase.constants.isotope import (
     IsotopeDistribution
 )
@@ -283,14 +283,14 @@ def get_mod_seq_formula(seq:str, mods:str)->list:
     """
     formula = {}
     for aa in seq:
-        for chem,n in AA_formula[aa].items():
+        for chem,n in AA_Composition[aa].items():
             if chem in formula:
                 formula[chem]+=n
             else:
                 formula[chem]=n
     if len(mods) > 0:
         for mod in mods.split(';'):
-            for chem,n in MOD_formula[mod].items():
+            for chem,n in MOD_Composition[mod].items():
                 if chem in formula:
                     formula[chem]+=n
                 else:
@@ -399,14 +399,15 @@ def calc_precursor_isotope(
     -------
     pd.DataFrame
         precursor_df with additional columns:
-        - isotope_m1_intensity
-        - isotope_m1_mz
-        - isotope_apex_intensity
-        - isotope_apex_mz
-        - isotope_apex_offset
-        - isotope_right_most_intensity
-        - isotope_right_most_mz
-        - isotope_right_most_offset
+
+        - isotope_m1_intensity: relative intensity of M1 to mono peak 
+        - isotope_m1_mz: mz of M1
+        - isotope_apex_intensity: relative intensity of the apex peak
+        - isotope_apex_mz: mz of the apex peak
+        - isotope_apex_offset: position offset of the apex peak to mono peak
+        - isotope_right_most_intensity: relative intensity of the right-most peak
+        - isotope_right_most_mz: mz of the right-most peak
+        - isotope_right_most_offset: position offset of the right-most peak
     """
 
     if "precursor_mz" not in precursor_df.columns:
@@ -517,15 +518,8 @@ def calc_precursor_isotope_mp(
     Returns
     -------
     pd.DataFrame
-        precursor_df with additional columns:
-        - isotope_m1_intensity
-        - isotope_m1_mz
-        - isotope_apex_intensity
-        - isotope_apex_mz
-        - isotope_apex_offset
-        - isotope_right_most_intensity
-        - isotope_right_most_mz
-        - isotope_right_most_offset
+        DataFrame with `isotope_*` columns, 
+        see :meth:'calc_precursor_isotope()'.
     """
     if len(precursor_df) < min_precursor_num_to_run_mp:
         return calc_precursor_isotope(

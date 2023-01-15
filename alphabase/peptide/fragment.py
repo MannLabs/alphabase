@@ -11,7 +11,7 @@ from alphabase.constants.modification import (
 )
 from alphabase.constants.element import (
     MASS_H2O, MASS_PROTON, 
-    MASS_NH3, CHEM_MONO_MASS
+    MASS_NH3, MASS_H, MASS_C, MASS_O,
 )
 
 from alphabase.peptide.precursor import (
@@ -380,41 +380,40 @@ def calc_fragment_mz_values_for_same_nAA(
     for charged_frag_type in charged_frag_types:
         frag_type, charge = parse_charged_frag_type(charged_frag_type)
         if frag_type == 'b':
-            mz_values.append(b_mass/charge + add_proton)
+            _mass = b_mass/charge + add_proton
         elif frag_type == 'y':
-            mz_values.append(y_mass/charge + add_proton)
+            _mass = y_mass/charge + add_proton
         elif frag_type == 'b_modloss':
             _mass = (b_mass-b_modloss)/charge + add_proton
             _mass[b_modloss == 0] = 0
-            mz_values.append(_mass)
         elif frag_type == 'y_modloss':
             _mass = (y_mass-y_modloss)/charge + add_proton
             _mass[y_modloss == 0] = 0
-            mz_values.append(_mass)
         elif frag_type == 'b_H2O':
             _mass = (b_mass-MASS_H2O)/charge + add_proton
-            mz_values.append(_mass)
         elif frag_type == 'y_H2O':
             _mass = (y_mass-MASS_H2O)/charge + add_proton
-            mz_values.append(_mass)
         elif frag_type == 'b_NH3':
             _mass = (b_mass-MASS_NH3)/charge + add_proton
-            mz_values.append(_mass)
         elif frag_type == 'y_NH3':
             _mass = (y_mass-MASS_NH3)/charge + add_proton
-            mz_values.append(_mass)
         elif frag_type == 'c':
-            _mass = (b_mass+MASS_NH3)/charge + add_proton
-            mz_values.append(_mass)
+            _mass = (MASS_NH3+b_mass)/charge + add_proton
+        elif frag_type == 'c_lossH': # H rearrangement: c-1
+            _mass = (MASS_NH3-MASS_H+b_mass)/charge + add_proton
         elif frag_type == 'z':
-            _mass = (
-                y_mass-(MASS_NH3-CHEM_MONO_MASS['H'])
-            )/charge + add_proton
-            mz_values.append(_mass)
+            _mass = (MASS_H-MASS_NH3+y_mass)/charge + add_proton
+        elif frag_type == 'z_addH': # H rearrangement: z+1
+            _mass = (MASS_H*2-MASS_NH3+y_mass)/charge + add_proton
+        elif frag_type == 'a':
+            _mass = (-MASS_C-MASS_O+b_mass)/charge + add_proton
+        elif frag_type == 'x':
+            _mass = (MASS_C+MASS_O-MASS_H*2+y_mass)/charge + add_proton
         else:
             raise NotImplementedError(
                 f'Fragment type "{frag_type}" is not in fragment_mz_df.'
             )
+        mz_values.append(_mass)
     return np.array(mz_values).T
 
 def mask_fragments_for_charge_greater_than_precursor_charge(
@@ -485,7 +484,7 @@ def flatten_fragments(
     precursor_df: pd.DataFrame, 
     fragment_mz_df: pd.DataFrame,
     fragment_intensity_df: pd.DataFrame,
-    min_fragment_intensity: float = -1.,
+    min_fragment_intensity: float = -1,
     keep_top_k_fragments: int = 1000,
     custom_columns:list = [
         'type','number','position','charge','loss_type'
@@ -526,7 +525,7 @@ def flatten_fragments(
         input fragment mz dataframe of shape (N, T) which contains N * T fragment mzs
     
     min_fragment_intensity : float, optional
-        minimum intensity which should be retained. Defaults to -1.0
+        minimum intensity which should be retained. Defaults to -1
     
     custom_columns : list, optional
         'mz' and 'intensity' columns are required. Others could be customized. 
@@ -554,7 +553,11 @@ def flatten_fragments(
     # new dataframes for fragments and precursors are created
     frag_df = pd.DataFrame()
     frag_df['mz'] = fragment_mz_df.values.reshape(-1)
-    frag_df['intensity'] = fragment_intensity_df.values.astype(np.float32).reshape(-1)
+    if len(fragment_intensity_df) > 0:
+        frag_df['intensity'] = fragment_intensity_df.values.astype(np.float32).reshape(-1)
+        use_intensity = True
+    else:
+        use_intensity = False
 
     frag_types = []
     frag_loss_types = []
@@ -607,16 +610,20 @@ def flatten_fragments(
     precursor_new_df[['frag_start_idx','frag_stop_idx']] *= len(fragment_mz_df.columns)
 
     
-    frag_df.intensity.mask(frag_df.mz == 0.0, 0.0, inplace=True)
+    if use_intensity:
+        frag_df.intensity.mask(frag_df.mz == 0.0, 0.0, inplace=True)
     excluded = (
-        frag_df.intensity.values < min_fragment_intensity
-    ) | (
-        frag_df.mz.values == 0
-    ) | (
-        exclude_not_top_k(
-            frag_df.intensity.values, keep_top_k_fragments,
-            precursor_new_df.frag_start_idx.values,
-            precursor_new_df.frag_stop_idx.values,
+        frag_df.mz.values == 0 if not use_intensity else
+        (
+            frag_df.intensity.values < min_fragment_intensity
+        ) | (
+            frag_df.mz.values == 0
+        ) | (
+            exclude_not_top_k(
+                frag_df.intensity.values, keep_top_k_fragments,
+                precursor_new_df.frag_start_idx.values,
+                precursor_new_df.frag_stop_idx.values,
+            )
         )
     )
     frag_df = frag_df[~excluded]

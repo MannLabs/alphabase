@@ -65,7 +65,7 @@ def load_all_proteins(fasta_file_list:list):
     protein_dict = {}
     for fasta in fasta_file_list:
         for protein in read_fasta_file(fasta):
-            protein_dict[protein['protein_id']] = protein
+            protein_dict[protein['full_name']] = protein
     return protein_dict
 
 def concat_proteins(protein_dict:dict, sep='$')->str:
@@ -646,7 +646,7 @@ class SpecLibFasta(SpecLibBase):
         max_special_mod_num:int = 1,
         special_mods_cannot_modify_pep_n_term:bool=False,
         special_mods_cannot_modify_pep_c_term:bool=False,
-        decoy: str = None, # or pseudo_reverse or diann
+        decoy: str = None,
         include_contaminants:bool=False,
         I_to_L:bool=False,
     ):
@@ -728,7 +728,13 @@ class SpecLibFasta(SpecLibBase):
             Defaults to False.
 
         decoy : str, optional
-            Decoy type, see `alphabase.spectral_library.decoy_library`,
+            Decoy type (see :meth:`alphabase.spectral_library.base.append_decoy_sequence()`)
+
+            - `protein_reverse`: Reverse on target protein sequences
+            - `pseudo_reverse`: Pseudo-reverse on target peptide sequences
+            - `diann`: DiaNN-like decoy
+            - None: no decoy
+
             by default None
 
         include_contaminants : bool, optional
@@ -740,7 +746,7 @@ class SpecLibFasta(SpecLibBase):
             precursor_mz_max=precursor_mz_max,
             decoy=decoy
         )
-        self.protein_df:pd.DataFrame() = pd.DataFrame()
+        self.protein_df:pd.DataFrame = pd.DataFrame()
         self.I_to_L = I_to_L
         self.include_contaminants = include_contaminants
         self.max_peptidoform_num = 100
@@ -964,6 +970,19 @@ class SpecLibFasta(SpecLibBase):
         protein_dict = load_all_proteins(fasta_files)
         self.get_peptides_from_protein_dict(protein_dict)
 
+    def _get_peptides_from_protein_df(self):
+        if self.I_to_L:
+            self.protein_df[
+                'sequence_I2L'
+            ] = self.protein_df.sequence.str.replace('I','L')
+            digest_seq = 'sequence_I2L'
+        else:
+            digest_seq = 'sequence'
+        self._cleave_to_peptides(
+            self.protein_df,
+            protein_seq_column=digest_seq
+        )
+
     def get_peptides_from_protein_dict(self, protein_dict:dict):
         """Cleave the protein sequences in protein_dict.
 
@@ -982,18 +1001,7 @@ class SpecLibFasta(SpecLibBase):
         self.protein_df = pd.DataFrame.from_dict(
             protein_dict, orient='index'
         ).reset_index(drop=True)
-
-        if self.I_to_L:
-            self.protein_df[
-                'sequence_I2L'
-            ] = self.protein_df.sequence.str.replace('I','L')
-            digest_seq = 'sequence_I2L'
-        else:
-            digest_seq = 'sequence'
-        self._cleave_to_peptides(
-            self.protein_df,
-            protein_seq_column=digest_seq
-        )
+        self._get_peptides_from_protein_df()
 
     def _cleave_to_peptides(self, 
         protein_df:pd.DataFrame,
