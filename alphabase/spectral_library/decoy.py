@@ -1,20 +1,18 @@
 import copy
+import pandas as pd
 from alphabase.spectral_library.base import SpecLibBase
-from alphabase.protein.fasta import SpecLibFasta
 from alphabase.io.hdf import HDF_File
 
 class SpecLibDecoy(SpecLibBase):
+    """
+    Pseudo-reverse peptide decoy generator.
+    """
     def __init__(self, 
         target_lib:SpecLibBase,
         fix_C_term = True,
         **kwargs,
     ):
         """
-        Pseudo-reverse peptide decoy generator
-        Currently, only sequence-level decoy is implemented,
-        but AlphaPeptDeep will add modifications onto both target and decoy sequences,
-        so it is enough for practical uses.
-
         Parameters
         ----------
         target_lib : SpecLibBase
@@ -45,6 +43,19 @@ class SpecLibDecoy(SpecLibBase):
         self._decoy_mods()
         self._decoy_meta()
         self._decoy_frags()
+
+    def concat_to_target_lib(self):
+        """
+        A decoy method should define how to concat itself into 
+        target_lib inside the class, rather than externally.
+        """
+        self._precursor_df['decoy'] = 1
+        self.target_lib._precursor_df['decoy'] = 0
+        self.target_lib._precursor_df = pd.concat((
+            self.target_lib._precursor_df,
+            self._precursor_df
+        ), ignore_index=True)
+        self.target_lib.refine_df()
 
     def decoy_sequence(self):
         """Generate decoy sequences from `self.target_lib`"""
