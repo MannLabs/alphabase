@@ -114,46 +114,6 @@ class SpecLibFlat:
             custom_columns=self.custom_fragment_df_columns,
         )
 
-    def parse_lib_in_batch(self, 
-        predict_lib:SpecLibBase, 
-        batch_size:int = 200000
-    ):
-        """Predict and flatten fragments in batch
-
-        Parameters
-        ----------
-        predict_lib : PredictSpecLib
-            spectral library to be predicted and flatten
-        batch_size : int, optional
-            the batch size, by default 200000
-        """
-        if len(predict_lib.precursor_df) <= batch_size:
-            predict_lib.predict_all()
-            self.parse_base_library(predict_lib)
-        else:
-            predict_lib.model_manager.verbose = False
-            predict_lib.refine_df()
-            df = predict_lib.precursor_df
-            precursor_df_list = []
-            fragment_df_list = []
-            for i in tqdm.tqdm(range(0, len(df), batch_size)):
-                predict_lib._precursor_df = df.iloc[i:i+batch_size].copy()
-                predict_lib.predict_all()
-                flat_df, frag_df = flatten_fragments(
-                    predict_lib.precursor_df,
-                    predict_lib.fragment_mz_df,
-                    predict_lib.fragment_intensity_df,
-                    min_fragment_intensity = self.min_fragment_intensity,
-                    keep_top_k_fragments = self.keep_top_k_fragments,
-                    custom_columns=self.custom_fragment_df_columns
-                )
-                precursor_df_list.append(flat_df)
-                fragment_df_list.append(frag_df)
-            predict_lib._precursor_df = df
-            self._precursor_df, self._fragment_df = concat_precursor_fragment_dataframes(
-                precursor_df_list, fragment_df_list
-            )
-
     def save_hdf(self, hdf_file:str):
         """Save library dataframes into hdf_file.
         For `self.precursor_df`, this method will save it into two hdf groups:
