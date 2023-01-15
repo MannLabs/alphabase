@@ -23,7 +23,7 @@ MOD_MASS:dict = {}
 #: Modification to modification neutral loss dict.
 MOD_LOSS_MASS:dict = {}
 #Modification to formula dict of dict, i.e. {modname: {'C': n, 'H': m, ...}}
-MOD_formula:dict = {}
+MOD_Composition:dict = {}
 #: Modification loss importance
 MOD_LOSS_IMPORTANCE:dict = {}
 
@@ -45,9 +45,9 @@ def update_all_by_MOD_DF():
     MOD_LOSS_IMPORTANCE.clear()
     MOD_LOSS_IMPORTANCE.update(MOD_DF['modloss_importance'].to_dict())
 
-    MOD_formula.clear()
+    MOD_Composition.clear()
     for mod, chem in MOD_CHEM.items():
-        MOD_formula[mod] = dict(parse_formula(chem))
+        MOD_Composition[mod] = dict(parse_formula(chem))
 
 def add_modifications_for_lower_case_AA():
     """ Add modifications for lower-case AAs for advanced usages """

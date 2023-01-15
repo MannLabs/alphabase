@@ -60,7 +60,7 @@ def update_an_AA(aa:str, formula:str):
     AA_DF.loc[aa_idx,'formula'] = formula
     AA_DF.loc[aa_idx,'mass'] = calc_mass_from_formula(formula)
     AA_Formula[aa] = formula
-    AA_Composition[aa] = parse_formula(formula)
+    AA_Composition[aa] = dict(parse_formula(formula))
 
 def calc_AA_masses(
     sequence: str

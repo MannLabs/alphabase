@@ -10,7 +10,7 @@ from alphabase.constants.element import (
     MASS_PROTON, MASS_ISOTOPE
 )
 from alphabase.constants.aa import AA_Composition
-from alphabase.constants.modification import MOD_formula
+from alphabase.constants.modification import MOD_Composition
 from alphabase.constants.isotope import (
     IsotopeDistribution
 )
@@ -290,7 +290,7 @@ def get_mod_seq_formula(seq:str, mods:str)->list:
                 formula[chem]=n
     if len(mods) > 0:
         for mod in mods.split(';'):
-            for chem,n in MOD_formula[mod].items():
+            for chem,n in MOD_Composition[mod].items():
                 if chem in formula:
                     formula[chem]+=n
                 else:
