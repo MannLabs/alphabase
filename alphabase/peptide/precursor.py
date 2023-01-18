@@ -3,7 +3,7 @@ import numpy as np
 import numba
 import multiprocessing as mp
 
-from mmh3 import hash64
+from xxhash import xxh64_intdigest
 from functools import partial
 
 from alphabase.constants.element import (
@@ -128,7 +128,7 @@ def get_mod_seq_hash(
     sequence:str, mods:str, 
     mod_sites:str,
     *, seed:int=0
-)->np.int64:
+)->np.uint64:
     """Get hash code value for a peptide:
       (sequence, mods, mod_sites)
 
@@ -153,15 +153,15 @@ def get_mod_seq_hash(
 
     Returns
     -------
-    np.int64
+    np.uint64
 
         64-bit hash code value
     """
-    return np.sum([
-        hash64(sequence, seed=seed)[0],
-        hash64(mods, seed=seed)[0],
-        hash64(mod_sites, seed=seed)[0],
-    ],dtype=np.int64) # use np.sum to prevent overflow
+    return np.array([
+        xxh64_intdigest(sequence, seed=seed),
+        xxh64_intdigest(mods, seed=seed),
+        xxh64_intdigest(mod_sites, seed=seed),
+    ],dtype=np.uint64).sum() # use np.sum to prevent overflow
 
 def get_mod_seq_charge_hash(
     sequence:str, mods:str, 
@@ -196,17 +196,17 @@ def get_mod_seq_charge_hash(
 
     Returns
     -------
-    np.int64
+    np.uint64
     
         64-bit hash code value
     """
-    return np.sum([
+    return np.array([
         get_mod_seq_hash(
             sequence, mods, mod_sites, 
             seed=seed
         ),
-        charge,
-    ],dtype=np.int64) # use np.sum to prevent overflow 
+        np.uint64(charge),
+    ],dtype=np.uint64).sum() # use np.sum to prevent overflow 
 
 def hash_mod_seq_df(
     precursor_df:pd.DataFrame,
@@ -214,14 +214,14 @@ def hash_mod_seq_df(
 ):
     """ Internal function """
     hash_vals = precursor_df.sequence.apply(
-        lambda x: hash64(x, seed=seed)[0]
-    ).astype(np.int64).values
+        lambda x: xxh64_intdigest(x, seed=seed)
+    ).astype(np.uint64).values
     hash_vals += precursor_df.mods.apply(
-        lambda x: hash64(x, seed=seed)[0]
-    ).values
+        lambda x: xxh64_intdigest(x, seed=seed)
+    ).astype(np.uint64).values
     hash_vals += precursor_df.mod_sites.apply(
-        lambda x: hash64(x, seed=seed)[0]
-    ).values
+        lambda x: xxh64_intdigest(x, seed=seed)
+    ).astype(np.uint64).values
 
     precursor_df[
         "mod_seq_hash"
@@ -236,13 +236,11 @@ def hash_mod_seq_charge_df(
     if "mod_seq_hash" not in precursor_df.columns:
         hash_mod_seq_df(precursor_df, seed=seed)
     if "charge" not in precursor_df.columns:
-        raise ValueError(
-            "DataFrame must contain 'charge' column"
-        )
+        return precursor_df
     
     precursor_df["mod_seq_charge_hash"] = (
         precursor_df["mod_seq_hash"].values
-        + precursor_df["charge"].values
+        + precursor_df["charge"].values.astype(np.uint64)
     )
     return precursor_df
 
@@ -252,7 +250,7 @@ def hash_precursor_df(
 )->pd.DataFrame:
     """Add columns 'mod_seq_hash' and 'mod_seq_charge_hash'
     into precursor_df (inplace). 
-    The 64-bit hash function is from mmh3 (mmh3.hash64).
+    The 64-bit hash function is from xxhash (xxhash.xxh64).
 
     Parameters
     ----------
@@ -262,7 +260,7 @@ def hash_precursor_df(
         
     Seed : int
     
-        Seed for mmh3.hash64.
+        Seed for xxhash.xxh64.
         Optional, by default 0
 
     Returns
