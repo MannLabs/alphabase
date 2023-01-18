@@ -205,7 +205,7 @@ def get_mod_seq_charge_hash(
             sequence, mods, mod_sites, 
             seed=seed
         ),
-        np.uint64(charge),
+        charge,
     ],dtype=np.uint64).sum() # use np.sum to prevent overflow 
 
 def hash_mod_seq_df(
