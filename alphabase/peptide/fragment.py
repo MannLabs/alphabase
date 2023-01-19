@@ -20,6 +20,59 @@ from alphabase.peptide.precursor import (
     is_precursor_sorted
 )
 
+from alphabase.constants.element import (
+    calc_mass_from_formula
+)
+
+frag_type_representation_dict = {
+    'c': 'b+N(1)H(3)',
+    'z': 'y+N(-1)H(-2)',
+    'a': 'b+C(-1)O(-1)',
+    'x': 'y+C(1)O(1)H(-2)',
+    'b_H2O': 'b+H(-2)O(-1)',
+    'y_H2O': 'y+H(-2)O(-1)',
+    'b_NH3': 'b+N(-1)H(-3)',
+    'y_NH3': 'y+N(-1)H(-3)',
+    'c_lossH': 'b+N(1)H(2)',
+    'z_addH': 'y+N(-1)H(-1)',
+}
+"""
+Represent fragment ion types from b/y ions.
+Modification neutral losses (i.e. modloss) are not here 
+as they have variable atoms added to b/y ions.
+"""
+
+frag_mass_from_ref_ion_dict = {}
+"""
+Masses parsed from :data:`frag_type_representation_dict`.
+"""
+
+def add_new_frag_type(frag_type:str, representation:str):
+    """Add new modifications into :data:`frag_type_representation_dict`
+    and update :data:`frag_mass_from_ref_ion_dict`.
+
+    Parameters
+    ----------
+    frag_type : str
+        New fragment type
+    representation : str
+        The representation similar to :data:`frag_type_representation_dict`
+    """
+    frag_type_representation_dict[frag_type] = representation
+    ref_ion, formula = representation.split('+')
+    frag_mass_from_ref_ion_dict[frag_type] = dict(
+        ref_ion=ref_ion, 
+        add_mass=calc_mass_from_formula(formula)
+    )
+
+def parse_all_frag_type_representation():
+    for frag, representation in frag_type_representation_dict.items():
+        add_new_frag_type(frag, representation)
+
+parse_all_frag_type_representation()
+
+
+
 def get_charged_frag_types(
     frag_types:List[str], 
     max_frag_charge:int = 2
@@ -70,10 +123,8 @@ def parse_charged_frag_type(
 
         int. Charge state
     '''
-    items = charged_frag_type.split('_')
-    _ch = items[-1]
-    _type = '_'.join(items[:-1])
-    return _type, int(_ch[1:])
+    _type, _ch = charged_frag_type.split('_z')
+    return _type, int(_ch)
 
 def init_zero_fragment_dataframe(
     peplen_array:np.ndarray,
@@ -376,6 +427,7 @@ def calc_fragment_mz_values_for_same_nAA(
             mz_values.append(b_mass)
         elif charged_frag_type == 'y':
             mz_values.append(y_mass)
+
     add_proton = MASS_PROTON
     for charged_frag_type in charged_frag_types:
         frag_type, charge = parse_charged_frag_type(charged_frag_type)
@@ -389,28 +441,37 @@ def calc_fragment_mz_values_for_same_nAA(
         elif frag_type == 'y_modloss':
             _mass = (y_mass-y_modloss)/charge + add_proton
             _mass[y_modloss == 0] = 0
-        elif frag_type == 'b_H2O':
-            _mass = (b_mass-MASS_H2O)/charge + add_proton
-        elif frag_type == 'y_H2O':
-            _mass = (y_mass-MASS_H2O)/charge + add_proton
-        elif frag_type == 'b_NH3':
-            _mass = (b_mass-MASS_NH3)/charge + add_proton
-        elif frag_type == 'y_NH3':
-            _mass = (y_mass-MASS_NH3)/charge + add_proton
-        elif frag_type == 'c':
-            _mass = (MASS_NH3+b_mass)/charge + add_proton
-        elif frag_type == 'c_lossH': # H rearrangement: c-1
-            _mass = (MASS_NH3-MASS_H+b_mass)/charge + add_proton
-        elif frag_type == 'z':
-            _mass = (MASS_H-MASS_NH3+y_mass)/charge + add_proton
-        elif frag_type == 'z_addH': # H rearrangement: z+1
-            _mass = (MASS_H*2-MASS_NH3+y_mass)/charge + add_proton
-        elif frag_type == 'a':
-            _mass = (-MASS_C-MASS_O+b_mass)/charge + add_proton
-        elif frag_type == 'x':
-            _mass = (MASS_C+MASS_O-MASS_H*2+y_mass)/charge + add_proton
+        elif frag_type in frag_mass_from_ref_ion_dict:
+            ref_ion = frag_mass_from_ref_ion_dict[frag_type]['ref_ion']
+            add_mass = frag_mass_from_ref_ion_dict[frag_type]['add_mass']
+            if ref_ion == 'b':
+                _mass = (b_mass+add_mass)/charge + add_proton
+            elif ref_ion == 'y':
+                _mass = (y_mass+add_mass)/charge + add_proton
+            else:
+                raise KeyError(f"ref_ion only allows `b` and `y`, but {ref_ion} is given")
+        # elif frag_type == 'b_H2O':
+        #     _mass = (b_mass-MASS_H2O)/charge + add_proton
+        # elif frag_type == 'y_H2O':
+        #     _mass = (y_mass-MASS_H2O)/charge + add_proton
+        # elif frag_type == 'b_NH3':
+        #     _mass = (b_mass-MASS_NH3)/charge + add_proton
+        # elif frag_type == 'y_NH3':
+        #     _mass = (y_mass-MASS_NH3)/charge + add_proton
+        # elif frag_type == 'c':
+        #     _mass = (MASS_NH3+b_mass)/charge + add_proton
+        # elif frag_type == 'c_lossH': # H rearrangement: c-1
+        #     _mass = (MASS_NH3-MASS_H+b_mass)/charge + add_proton
+        # elif frag_type == 'z':
+        #     _mass = (MASS_H-MASS_NH3+y_mass)/charge + add_proton
+        # elif frag_type == 'z_addH': # H rearrangement: z+1
+        #     _mass = (MASS_H*2-MASS_NH3+y_mass)/charge + add_proton
+        # elif frag_type == 'a':
+        #     _mass = (-MASS_C-MASS_O+b_mass)/charge + add_proton
+        # elif frag_type == 'x':
+        #     _mass = (MASS_C+MASS_O-MASS_H*2+y_mass)/charge + add_proton
         else:
-            raise NotImplementedError(
+            raise KeyError(
                 f'Fragment type "{frag_type}" is not in fragment_mz_df.'
             )
         mz_values.append(_mass)
