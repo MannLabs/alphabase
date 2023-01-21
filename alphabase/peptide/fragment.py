@@ -383,23 +383,23 @@ def calc_fragment_mz_values_for_same_nAA(
         lambda x: [int(s) for s in x if len(s)>0]
     ).values
 
-    if 'mod_deltas' in df_group.columns:
-        mod_delta_list = df_group.mod_deltas.str.split(';').apply(
+    if 'aa_mass_diffs' in df_group.columns:
+        mod_diff_list = df_group.aa_mass_diffs.str.split(';').apply(
             lambda x: [float(m) for m in x if len(m)>0]
         ).values
-        mod_delta_site_list = df_group.mod_delta_sites.str.split(';').apply(
+        mod_diff_site_list = df_group.aa_mass_diff_sites.str.split(';').apply(
             lambda x: [int(s) for s in x if len(s)>0]
         ).values
     else:
-        mod_delta_list = None
-        mod_delta_site_list = None
+        mod_diff_list = None
+        mod_diff_site_list = None
     (
         b_mass, y_mass, pepmass
     ) = calc_b_y_and_peptide_masses_for_same_len_seqs(
         df_group.sequence.values.astype('U'), 
         mod_list, site_list,
-        mod_delta_list,
-        mod_delta_site_list
+        mod_diff_list,
+        mod_diff_site_list
     )
     b_mass = b_mass.reshape(-1)
     y_mass = y_mass.reshape(-1)
@@ -420,16 +420,15 @@ def calc_fragment_mz_values_for_same_nAA(
             break
 
     mz_values = []
-    # Neutral masses also considered for future uses
-    # for example when searching with spectral with neutral masses
-    for charged_frag_type in charged_frag_types:
-        if charged_frag_type == 'b':
-            mz_values.append(b_mass)
-        elif charged_frag_type == 'y':
-            mz_values.append(y_mass)
-
     add_proton = MASS_PROTON
     for charged_frag_type in charged_frag_types:
+        # Neutral masses also considered for future uses
+        if charged_frag_type == 'b':
+            mz_values.append(b_mass)
+            continue
+        elif charged_frag_type == 'y':
+            mz_values.append(y_mass)
+            continue
         frag_type, charge = parse_charged_frag_type(charged_frag_type)
         if frag_type == 'b':
             _mass = b_mass/charge + add_proton

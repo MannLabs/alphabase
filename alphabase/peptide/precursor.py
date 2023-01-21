@@ -108,8 +108,8 @@ def update_precursor_mz(
             pep_mzs = calc_peptide_masses_for_same_len_seqs(
                 df_group.sequence.values.astype('U'),
                 df_group.mods.values,
-                df_group.mod_deltas.values if 
-                'mod_deltas' in df_group.columns else None
+                df_group.aa_mass_diffs.values if 
+                'aa_mass_diffs' in df_group.columns else None
             )/df_group.charge + MASS_PROTON
             if _calc_in_order:
                 precursor_df.iloc[:,precursor_mz_idx].values[

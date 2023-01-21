@@ -171,6 +171,44 @@ class PSMReaderBase(object):
     def psm_df(self)->pd.DataFrame:
         return self._psm_df
 
+    def import_files(self, file_list:list):
+        df_list = []
+        for _file in file_list:
+            df_list.append(self.import_file(_file))
+        self._psm_df = pd.concat(df_list, ignore_index=True)
+        return self._psm_df
+
+    def import_file(self, _file:str)->pd.DataFrame:
+        """
+        This is the main entry function of PSM readers, 
+        it imports the file with following steps:
+        ```
+        origin_df = self._load_file(_file)
+        self._translate_columns(origin_df)
+        self._translate_decoy(origin_df)
+        self._translate_score(origin_df)
+        self._load_modifications(origin_df)
+        self._translate_modifications()
+        self._post_process(origin_df)
+        ```
+        
+        Parameters
+        ----------
+        _file: str
+            file path or file stream (io).
+        """
+        origin_df = self._load_file(_file)
+        if len(origin_df) == 0:
+            self._psm_df = pd.DataFrame()
+        else:
+            self._translate_columns(origin_df)
+            self._translate_decoy(origin_df)
+            self._translate_score(origin_df)
+            self._load_modifications(origin_df)
+            self._translate_modifications()
+            self._post_process(origin_df)
+        return self._psm_df
+
     def add_modification_mapping(self, modification_mapping:dict):
         """
         Append additional modification mappings for the search engine.
@@ -262,44 +300,6 @@ class PSMReaderBase(object):
             return self.import_files(_file)
         else: 
             return self.import_file(_file)
-
-    def import_files(self, file_list:list):
-        df_list = []
-        for _file in file_list:
-            df_list.append(self.import_file(_file))
-        self._psm_df = pd.concat(df_list, ignore_index=True)
-        return self._psm_df
-
-    def import_file(self, _file:str)->pd.DataFrame:
-        """
-        This is the main entry function of PSM readers, 
-        it imports the file with following steps:
-        ```
-        origin_df = self._load_file(_file)
-        self._translate_columns(origin_df)
-        self._translate_decoy(origin_df)
-        self._translate_score(origin_df)
-        self._load_modifications(origin_df)
-        self._translate_modifications()
-        self._post_process(origin_df)
-        ```
-        
-        Parameters
-        ----------
-        _file: str
-            file path or file stream (io).
-        """
-        origin_df = self._load_file(_file)
-        if len(origin_df) == 0:
-            self._psm_df = pd.DataFrame()
-        else:
-            self._translate_columns(origin_df)
-            self._translate_decoy(origin_df)
-            self._translate_score(origin_df)
-            self._load_modifications(origin_df)
-            self._translate_modifications()
-            self._post_process(origin_df)
-        return self._psm_df
 
     def _translate_decoy(
         self, 
