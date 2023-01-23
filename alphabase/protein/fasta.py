@@ -586,11 +586,11 @@ def append_special_modifications(
         )
     
     if min_mod_num==0:
-        df = df.explode(['mods_app','mod_sites_app'])
+        df = explode_multiple_columns(df, ['mods_app','mod_sites_app'])
         df.fillna('', inplace=True)
     else:
         df.drop(df[df.mods_app.apply(lambda x: len(x)==0)].index, inplace=True)
-        df = df.explode(['mods_app','mod_sites_app'])
+        df = explode_multiple_columns(df, ['mods_app','mod_sites_app'])
     df['mods'] = df[['mods','mods_app']].apply(
         lambda x: ';'.join(i for i in x if i), axis=1
     )

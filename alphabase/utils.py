@@ -25,7 +25,7 @@ def explode_multiple_columns(df:pd.DataFrame, columns:list):
     try:
         return df.explode(columns)
     except ValueError:
-        # pandas <= 1.2.x?
+        # pandas < 1.3.0
         print(f'pandas=={pd.__version__} cannot explode multiple columns')
         ret_df = df.explode(columns[0])
         for col in columns[1:]:
