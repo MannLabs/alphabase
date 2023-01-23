@@ -33,13 +33,16 @@ def _get_msf_mods(sequence, msf_aa_mods):
     for mod in msf_aa_mods:
         mod_mass, site_str = mod.split('@')
         mod_mass = float(mod_mass)
-        site = int(site_str)-1
-        mod_mass = mod_mass - AA_ASCII_MASS[ord(sequence[site])]
+        site = max(0, int(site_str) - 1) #previously, site would become -1 for n-term mods, resulting in using last AA in sequence
+        if site_str == "0":
+            mod_mass -= 1.007276467 #proton. N-term variable mod is reported as mod mass + proton mass, not AA mass + mod mass
+        else:
+            mod_mass = mod_mass - AA_ASCII_MASS[ord(sequence[site])]
 
         mod_considered = False
         for mod_name in mass_mapped_mods:
             if abs(mod_mass-mod_info[mod_name]['mass'])<mod_mass_tol:
-                if site == 0 and mod_name.endswith('N-term'):
+                if site_str == "0" and mod_name.endswith('N-term'): #if site == 0, mods on first AA are considered, but they are never N-term
                     mods.append(mod_name)
                     mod_sites.append('0')
                     mod_considered = True
