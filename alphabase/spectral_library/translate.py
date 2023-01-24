@@ -15,7 +15,7 @@ from alphabase.utils import explode_multiple_columns
 def create_modified_sequence(
     seq_mods_sites:typing.Tuple, # must be ('sequence','mods','mod_sites')
     translate_mod_dict:dict=None,
-    mod_sep='()',
+    mod_sep='[]',
     nterm = '_',
     cterm = '_'
 ):
@@ -34,7 +34,7 @@ def create_modified_sequence(
         Defaults to None.
 
     mod_sep : str
-        '[]' or '()', default '()'
+        '[]' or '()', default '[]'
 
     '''
     mod_seq = seq_mods_sites[0]
@@ -272,7 +272,7 @@ def speclib_to_single_df(
         create_modified_sequence, 
         axis=1,
         translate_mod_dict=translate_mod_dict,
-        mod_sep='()'
+        mod_sep='[]'
     )
 
     df['frag_start_idx'] = speclib._precursor_df['frag_start_idx']
