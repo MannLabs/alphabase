@@ -115,7 +115,6 @@ else:
         def _load_file(self, filename):
             msf_df = pepxml.DataFrame(filename)
             msf_df.fillna('', inplace=True)
-            msf_df.retention_time_sec /= 60
             if 'ion_mobility' in msf_df.columns:
                 msf_df['ion_mobility'] = msf_df.ion_mobility.astype(float)
             msf_df['raw_name'] = msf_df[
