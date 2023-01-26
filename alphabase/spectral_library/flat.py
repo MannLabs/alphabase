@@ -78,9 +78,11 @@ class SpecLibFlat(SpecLibBase):
 
     def parse_base_library(self, 
         library:SpecLibBase,
-        keep_original_frag_dfs:bool=False
+        keep_original_frag_dfs:bool=False,
+        copy_precursor_df:bool=False,
     ):
-        """ Flatten an library object of SpecLibBase or its inherited class. 
+        """ 
+        Flatten an library object of SpecLibBase or its inherited class. 
         This method will generate :attr:`precursor_df` and :attr:`fragment_df`
         The fragments in fragment_df can be located by 
         `flat_frag_start_idx` and `flat_frag_stop_idx` in precursor_df. 
@@ -94,9 +96,14 @@ class SpecLibFlat(SpecLibBase):
         keep_original_frag_dfs : bool, optional
             If `fragment_mz_df` and `fragment_intensity_df` are 
             kept in this library, by default False.
+
+        copy_precursor_df:
+            If True, make a copy of `precursor_df` from `library`, 
+            otherwise `flat_frag_start_idx` and `flat_frag_stop_idx` 
+            columns will also append to the `library`.
         """
         self._precursor_df, self._fragment_df = flatten_fragments(
-            library.precursor_df, 
+            library.precursor_df.copy() if copy_precursor_df else library.precursor_df, 
             library.fragment_mz_df, 
             library.fragment_intensity_df,
             min_fragment_intensity=self.min_fragment_intensity,
