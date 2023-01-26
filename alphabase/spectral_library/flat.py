@@ -97,10 +97,10 @@ class SpecLibFlat(SpecLibBase):
             If `fragment_mz_df` and `fragment_intensity_df` are 
             kept in this library, by default False.
 
-        copy_precursor_df:
+        copy_precursor_df : bool, optional
             If True, make a copy of `precursor_df` from `library`, 
             otherwise `flat_frag_start_idx` and `flat_frag_stop_idx` 
-            columns will also append to the `library`.
+            columns will also append to the `library`. Defaults to False.
         """
         self._precursor_df, self._fragment_df = flatten_fragments(
             library.precursor_df.copy() if copy_precursor_df else library.precursor_df, 
