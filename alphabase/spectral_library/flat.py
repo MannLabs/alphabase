@@ -66,8 +66,8 @@ class SpecLibFlat(SpecLibBase):
 
     @property
     def fragment_df(self)->pd.DataFrame:
-        """The fragment mz dataframe with 
-        fragment types as columns (['mz', 'intensity'] + :attr:`custom_fragment_df_columns`.)
+        """The flat fragment dataframe with columns
+        (['mz', 'intensity'] + :attr:`custom_fragment_df_columns`.)
         """
         return self._fragment_df
 
@@ -78,7 +78,7 @@ class SpecLibFlat(SpecLibBase):
 
     def parse_base_library(self, 
         library:SpecLibBase,
-        keep_original_frag_dfs:bool=False,
+        keep_original_frag_dfs:bool=True,
         copy_precursor_df:bool=False,
     ):
         """ 
@@ -93,14 +93,14 @@ class SpecLibFlat(SpecLibBase):
             A library object with attributes
             `precursor_df`, `fragment_mz_df` and `fragment_intensity_df`.
         
-        keep_original_frag_dfs : bool, optional
+        keep_original_frag_dfs : bool, default True
             If `fragment_mz_df` and `fragment_intensity_df` are 
-            kept in this library, by default False.
+            kept in this library.
 
-        copy_precursor_df : bool, optional
+        copy_precursor_df : bool, default False
             If True, make a copy of `precursor_df` from `library`, 
             otherwise `flat_frag_start_idx` and `flat_frag_stop_idx` 
-            columns will also append to the `library`. Defaults to False.
+            columns will also append to the `library`.
         """
         self._precursor_df, self._fragment_df = flatten_fragments(
             library.precursor_df.copy() if copy_precursor_df else library.precursor_df, 
