@@ -37,6 +37,7 @@ class SpecLibFlat(SpecLibBase):
     """
 
     def __init__(self,
+        charged_frag_types:list = ['b_z1','b_z2','y_z1','y_z2'],
         min_fragment_intensity:float = 0.001,
         keep_top_k_fragments:int = 1000,
         custom_fragment_df_columns:list = [
@@ -57,6 +58,7 @@ class SpecLibFlat(SpecLibBase):
             See :attr:`custom_fragment_df_columns`, 
             defaults to ['type','number','position','charge','loss_type']
         """
+        super().__init__(charged_frag_types=charged_frag_types)
         self.min_fragment_intensity = min_fragment_intensity
         self.keep_top_k_fragments = keep_top_k_fragments
 
@@ -108,6 +110,7 @@ class SpecLibFlat(SpecLibBase):
             self._protein_df = pd.DataFrame()
 
         if keep_original_frag_dfs:
+            self.charged_frag_types = library.fragment_mz_df.columns.values
             self._fragment_mz_df = library.fragment_mz_df
             self._fragment_intensity_df = library.fragment_intensity_df
         else:
@@ -145,6 +148,7 @@ class SpecLibFlat(SpecLibBase):
             truncate=True,
             delete_existing=False
         )
+        _hdf.library.fragment_df = self.fragment_df
         _hdf.library.protein_df = self.protein_df
         _hdf.library.fragment_mz_df = self.fragment_mz_df
         _hdf.library.fragment_intensity_df = self.fragment_intensity_df
@@ -166,7 +170,8 @@ class SpecLibFlat(SpecLibBase):
         _hdf = HDF_File(
             hdf_file,
         )
+        self._fragment_df = _hdf.library.fragment_df.values
         self._protein_df = _hdf.library.protein_df.values
-        self.fragment_mz_df = _hdf.library.fragment_mz_df.values
-        self.fragment_intensity_df = _hdf.library.fragment_intensity_df.values
+        self._fragment_mz_df = _hdf.library.fragment_mz_df.values
+        self._fragment_intensity_df = _hdf.library.fragment_intensity_df.values
         
