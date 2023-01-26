@@ -83,7 +83,7 @@ class SpecLibFlat(SpecLibBase):
         """ Flatten an library object of SpecLibBase or its inherited class. 
         This method will generate :attr:`precursor_df` and :attr:`fragment_df`
         The fragments in fragment_df can be located by 
-        `frag_start_idx` and `frag_stop_idx` in precursor_df. 
+        `flat_frag_start_idx` and `flat_frag_stop_idx` in precursor_df. 
 
         Parameters
         ----------
