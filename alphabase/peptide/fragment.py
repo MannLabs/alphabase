@@ -594,7 +594,7 @@ def flatten_fragments(
     Returns
     -------
     pd.DataFrame
-        precursor dataframe whith reindexed `frag_start_idx` and `frag_stop_idx` columns
+        precursor dataframe with added `flat_frag_start_idx` and `flat_frag_stop_idx` columns
     pd.DataFrame
         fragment dataframe with columns: `mz`, `intensity`, `type`, `number`, 
         `charge` and `loss_type`, where each column refers to:
@@ -666,8 +666,9 @@ def flatten_fragments(
             precursor_df.frag_stop_idx.values
         ).reshape(-1)
 
-    precursor_new_df = precursor_df.copy()
-    precursor_new_df[['frag_start_idx','frag_stop_idx']] *= len(fragment_mz_df.columns)
+    precursor_df['flat_frag_start_idx'] = precursor_df.frag_start_idx
+    precursor_df['flat_frag_stop_idx'] = precursor_df.frag_stop_idx
+    precursor_df[['flat_frag_start_idx','flat_frag_stop_idx']] *= len(fragment_mz_df.columns)
 
     
     if use_intensity:
@@ -681,8 +682,8 @@ def flatten_fragments(
         ) | (
             exclude_not_top_k(
                 frag_df.intensity.values, keep_top_k_fragments,
-                precursor_new_df.frag_start_idx.values,
-                precursor_new_df.frag_stop_idx.values,
+                precursor_df.flat_frag_start_idx.values,
+                precursor_df.flat_frag_stop_idx.values,
             )
         )
     )
@@ -695,10 +696,10 @@ def flatten_fragments(
     cum_sum_tresh = np.zeros(shape=len(excluded)+1, dtype=np.int64)
     cum_sum_tresh[1:] = np.cumsum(excluded)
 
-    precursor_new_df['frag_start_idx'] -= cum_sum_tresh[precursor_new_df.frag_start_idx.values]
-    precursor_new_df['frag_stop_idx'] -= cum_sum_tresh[precursor_new_df.frag_stop_idx.values]
+    precursor_df['flat_frag_start_idx'] -= cum_sum_tresh[precursor_df.flat_frag_start_idx.values]
+    precursor_df['flat_frag_stop_idx'] -= cum_sum_tresh[precursor_df.flat_frag_stop_idx.values]
 
-    return precursor_new_df, frag_df
+    return precursor_df, frag_df
 
 @nb.njit()
 def compress_fragment_indices(frag_idx):

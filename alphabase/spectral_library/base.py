@@ -35,10 +35,10 @@ class SpecLibBase(object):
         'isotope_apex_offset',
         'isotope_right_most_mz', 'isotope_right_most_intensity',
         'isotope_right_most_offset',
-        'miss_cleavage', 'mobility_pred',
-        'nAA', 
-        'precursor_mz', 
-        'rt_pred', 'rt_norm_pred',
+        'miss_cleavage', 
+        'mobility_pred', 'mobility',
+        'nAA', 'precursor_mz', 
+        'rt_pred', 'rt_norm_pred', 'rt',
         'labeling_channel',
     ]
     """
