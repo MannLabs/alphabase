@@ -63,6 +63,8 @@ class SpecLibFlat(SpecLibBase):
         self.keep_top_k_fragments = keep_top_k_fragments
 
         self.custom_fragment_df_columns = custom_fragment_df_columns
+        if 'flat_frag_start_idx' not in self.key_numeric_columns:
+            self.key_numeric_columns += [['flat_frag_start_idx','flat_frag_stop_idx']]
 
     @property
     def fragment_df(self)->pd.DataFrame:
