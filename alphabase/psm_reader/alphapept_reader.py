@@ -27,17 +27,13 @@ def parse_ap(precursor):
     sites = []
     string = ""
 
-    if modseq[0] == 'a':
+    for i in range(len(modseq)):
+        if modseq[i].isupper():
+            break
+    if i > 0:
         sites.append('0')
-        mods.append('a')
-        modseq = modseq[1:]
-    elif modseq.startswith('tmt'):
-        for l in range(3, len(modseq)):
-            if modseq[l].isupper():
-                break
-        sites.append('0')
-        mods.append(modseq[:l])
-        modseq = modseq[l:]
+        mods.append(modseq[:i])
+        modseq = modseq[i:]
 
     for i in modseq:
         string += i
