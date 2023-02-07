@@ -6,7 +6,7 @@ from alphabase.psm_reader.psm_reader import (
     psm_reader_provider
 )
 from alphabase.constants.aa import AA_ASCII_MASS
-from alphabase.constants.atom import MASS_H
+from alphabase.constants.atom import MASS_H, MASS_O, MASS_PROTON
 from alphabase.constants.modification import MOD_MASS
 
 try:
@@ -32,8 +32,12 @@ def _get_mods_from_masses(sequence, msf_aa_mods):
         _mass_str, site_str = mod.split('@')
         mod_mass = float(_mass_str)
         site = int(site_str)
+        cterm_position = len(sequence) + 1
         if site > 0:
-            mod_mass = mod_mass - AA_ASCII_MASS[ord(sequence[site-1])]
+            if site < cterm_position:
+                mod_mass = mod_mass - AA_ASCII_MASS[ord(sequence[site-1])]
+            else:
+                mod_mass -= (MASS_H + MASS_O + MASS_PROTON)
         else:
             mod_mass -= MASS_H
 
@@ -48,6 +52,12 @@ def _get_mods_from_masses(sequence, msf_aa_mods):
                         site_str = '0'
                     else:
                         _mod = mod_name.split('@')[0]+'@'+sequence[0]
+                elif site==cterm_position:
+                    if mod_name.endswith('C-term'):
+                        _mod = mod_name
+                    else:
+                        _mod = mod_name.split('@')[0]+'@Any C-term' #what if only Protein C-term is listed?
+                    site_str = '-1'
                 else:
                     _mod = mod_name.split('@')[0]+'@'+sequence[site-1]
                 if _mod in MOD_MASS:

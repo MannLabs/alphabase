@@ -117,6 +117,7 @@ msfragger_pepxml:
     - 'Glu->pyro-Glu@E^Any N-term'
     - 'Gln->pyro-Glu@Q^Any N-term'
     - 'Dimethyl@K' # Any N-term is not needed here as it will be infered in-the-fly
+    - 'Methyl@E' #an example of a PTM that can be C-term
   mod_mass_tol: 0.1 # Da
 diann:
   reader_type: diann
