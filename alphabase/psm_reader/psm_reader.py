@@ -388,7 +388,7 @@ class PSMReaderBase(object):
             if isinstance(map_col, str):
                 if map_col in origin_df.columns:
                     self._psm_df[col] = origin_df[map_col]
-            else:
+            else:       
                 for other_col in map_col:
                     if other_col in origin_df.columns:
                         self._psm_df[col] = origin_df[other_col]

@@ -85,6 +85,8 @@ class SWATHLibraryReader(SpectronautReader, SpecLibBase):
             range(len(self.charged_frag_types))
         ))
 
+        print(lib_df.columns)
+
         self._find_key_columns(lib_df)
         lib_df[self.frag_loss_type_col].fillna('', inplace=True)
         lib_df[self.frag_loss_type_col].replace('noloss','',inplace=True)
@@ -97,8 +99,9 @@ class SWATHLibraryReader(SpectronautReader, SpecLibBase):
         frag_intens_list = []
         nAA_list = []
         raw_list = []
+        #pgroup_list = []
 
-        group_cols = [self.mod_seq_col, self.seq_col, 'PrecursorCharge']
+        group_cols = [self.mod_seq_col, self.seq_col, 'PrecursorCharge','ProteinName']
 
         if self.raw_col is not None:
             group_cols.append(self.raw_col)
@@ -107,9 +110,9 @@ class SWATHLibraryReader(SpectronautReader, SpecLibBase):
             group_cols
         ):
             if self.raw_col is None:
-                mod_seq, seq, charge = keys
+                mod_seq, seq, charge, pgroup = keys
             else:
-                mod_seq, seq, charge, raw = keys
+                mod_seq, seq, charge, pgroup, raw = keys
             nAA = len(seq)
             intens = np.zeros(
                 (nAA-1, len(self.charged_frag_types)),dtype=np.float32
@@ -150,6 +153,7 @@ class SWATHLibraryReader(SpectronautReader, SpecLibBase):
             seq_list.append(seq)
             charge_list.append(charge)
             rt_list.append(df_group[self.rt_col].values[0])
+            pgroup_list.append(pgroup)
             if self.mob_col: 
                 mob_list.append(df_group[self.mob_col].values[0])
             else:
@@ -165,6 +169,7 @@ class SWATHLibraryReader(SpectronautReader, SpecLibBase):
             'PrecursorCharge': charge_list,
             self.rt_col: rt_list,
             self.mob_col: mob_list,
+            'ProteinID': pgroup_list
         })
 
         if self.raw_col is not None:
