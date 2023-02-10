@@ -89,15 +89,7 @@ class SWATHLibraryReader(SpectronautReader, SpecLibBase):
         ]
 
         if 'raw_name' in self.mapped_peptide_columns:
-            raw_col = self.mapped_peptide_columns['raw_name']
-            group_cols.append(raw_col)
-        else:
-            raw_col = None
-        rt_col = self.mapped_peptide_columns['rt']
-        if 'mobility' in self.mapped_peptide_columns:
-            mob_col = self.mapped_peptide_columns['mobility']
-        else:
-            mob_col = None
+            group_cols.append(self.mapped_peptide_columns['raw_name'])
 
         col_list_dict = dict([(col, []) for col in self.mapped_peptide_columns.values()])
         col_list_dict[self.mod_seq_col] = []
@@ -108,12 +100,8 @@ class SWATHLibraryReader(SpectronautReader, SpecLibBase):
         for keys, df_group in lib_df.groupby(
             group_cols
         ):
-            if raw_col is None:
-                mod_seq, seq, charge = keys
-            else:
-                mod_seq, seq, charge, raw = keys
 
-            nAA = len(seq)
+            nAA = len(keys[1])
             nAA_list.append(nAA)
             intens = np.zeros(
                 (nAA-1, len(self.charged_frag_types)),dtype=np.float32
