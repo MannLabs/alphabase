@@ -1,5 +1,6 @@
 import os
 import copy
+import io
 import pandas as pd
 import numpy as np
 
@@ -10,6 +11,18 @@ from alphabase.peptide.precursor import (
 from alphabase.constants._const import CONST_FILE_FOLDER
 
 from alphabase.yaml_utils import load_yaml
+
+def _get_delimiter(tsv_file:str):
+    if isinstance(tsv_file, io.StringIO):
+        # for unit tests
+        line = tsv_file.readline().strip()
+        tsv_file.seek(0)
+    else:
+        with open(tsv_file, "r") as f:
+            line = f.readline().strip()
+    if '\t' in line: return '\t'
+    elif ',' in line: return ','
+    else: return '\t'
 
 def translate_other_modification(
     mod_str: str, 
@@ -315,6 +328,9 @@ class PSMReaderBase(object):
         # to -log(evalue), as score is the larger the better
         pass
 
+    def _get_table_delimiter(self, _filename):
+        return _get_delimiter(_filename)
+
     def normalize_rt(self):
         if 'rt' in self.psm_df.columns:
             if self._engine_rt_unit == 'second':
@@ -368,6 +384,19 @@ class PSMReaderBase(object):
             f'"{self.__class__}" must implement "_load_file()"'
         )
 
+    def _find_mapped_columns(self, origin_df:pd.DataFrame):
+        mapped_columns = {}
+        for col, map_col in self.column_mapping.items():
+            if isinstance(map_col, str):
+                if map_col in origin_df.columns:
+                    mapped_columns[col] = map_col
+            elif isinstance(map_col, (list,tuple)):
+                for other_col in map_col:
+                    if other_col in origin_df.columns:
+                        mapped_columns[col] = other_col
+                        break
+        return mapped_columns
+
     def _translate_columns(self, origin_df:pd.DataFrame):
         """
         Translate the dataframe from other search engines 
@@ -383,17 +412,11 @@ class PSMReaderBase(object):
         None
             Add information inplace into self._psm_df
         """
+        mapped_columns = self._find_mapped_columns(origin_df)
         self._psm_df = pd.DataFrame()
-        for col, map_col in self.column_mapping.items():
-            if isinstance(map_col, str):
-                if map_col in origin_df.columns:
-                    self._psm_df[col] = origin_df[map_col]
-            else:
-                for other_col in map_col:
-                    if other_col in origin_df.columns:
-                        self._psm_df[col] = origin_df[other_col]
-                        break
-                    
+        for col, map_col in mapped_columns.items():
+            self._psm_df[col] = origin_df[map_col]
+                
         if (
             'scan_num' in self._psm_df.columns and 
             not 'spec_idx' in self._psm_df.columns

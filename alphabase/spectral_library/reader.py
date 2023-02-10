@@ -22,7 +22,6 @@ class SWATHLibraryReader(SpectronautReader, SpecLibBase):
         mod_seq_columns=psm_reader_yaml[
             'spectronaut'
         ]['mod_seq_columns'],
-        csv_sep = '\t',
         rt_unit='irt',
         precursor_mz_min:float = 400,
         precursor_mz_max:float = 2000,
@@ -43,7 +42,6 @@ class SWATHLibraryReader(SpectronautReader, SpecLibBase):
             keep_decoy = False,
             fixed_C57 = fixed_C57,
             mod_seq_columns=mod_seq_columns,
-            csv_sep = csv_sep,
             rt_unit=rt_unit,
         )
 
@@ -59,16 +57,11 @@ class SWATHLibraryReader(SpectronautReader, SpecLibBase):
                 if col in df_columns:
                     return col
             return None
+
         self.mod_seq_col = find_col(self._mod_seq_columns, lib_df.columns)
-        self.seq_col = find_col(self.column_mapping['sequence'], lib_df.columns)
-        self.rt_col = find_col(self.column_mapping['rt'], lib_df.columns)
-        self.mob_col = find_col(self.column_mapping['mobility'], lib_df.columns)
-        self.raw_col = find_col(
-            [self.column_mapping['raw_name']] 
-            if isinstance(self.column_mapping['raw_name'],str)
-            else self.column_mapping['raw_name'], 
-            lib_df.columns
-        )
+        
+        self.mapped_peptide_columns = self._find_mapped_columns(lib_df)
+
         self.frag_type_col = find_col(self._frag_type_columns, lib_df.columns)
         self.frag_num_col = find_col(self._frag_number_columns, lib_df.columns)
         self.frag_charge_col = find_col(self._frag_charge_columns, lib_df.columns)
@@ -89,28 +82,39 @@ class SWATHLibraryReader(SpectronautReader, SpecLibBase):
         lib_df[self.frag_loss_type_col].fillna('', inplace=True)
         lib_df[self.frag_loss_type_col].replace('noloss','',inplace=True)
 
-        mod_seq_list = []
-        seq_list = []
-        charge_list = []
-        rt_list = []
-        mob_list = []
+        group_cols = [
+            self.mod_seq_col, 
+            self.mapped_peptide_columns['sequence'], 
+            self.mapped_peptide_columns['charge'],
+        ]
+
+        if 'raw_name' in self.mapped_peptide_columns:
+            raw_col = self.mapped_peptide_columns['raw_name']
+            group_cols.append(raw_col)
+        else:
+            raw_col = None
+        rt_col = self.mapped_peptide_columns['rt']
+        if 'mobility' in self.mapped_peptide_columns:
+            mob_col = self.mapped_peptide_columns['mobility']
+        else:
+            mob_col = None
+
+        col_list_dict = dict([(col, []) for col in self.mapped_peptide_columns.values()])
+        col_list_dict[self.mod_seq_col] = []
+
         frag_intens_list = []
         nAA_list = []
-        raw_list = []
-
-        group_cols = [self.mod_seq_col, self.seq_col, 'PrecursorCharge']
-
-        if self.raw_col is not None:
-            group_cols.append(self.raw_col)
         
         for keys, df_group in lib_df.groupby(
             group_cols
         ):
-            if self.raw_col is None:
+            if raw_col is None:
                 mod_seq, seq, charge = keys
             else:
                 mod_seq, seq, charge, raw = keys
+
             nAA = len(seq)
+            nAA_list.append(nAA)
             intens = np.zeros(
                 (nAA-1, len(self.charged_frag_types)),dtype=np.float32
             )
@@ -146,29 +150,11 @@ class SWATHLibraryReader(SpectronautReader, SpecLibBase):
             if max_inten <= 0: continue
             intens /= max_inten
 
-            mod_seq_list.append(mod_seq)
-            seq_list.append(seq)
-            charge_list.append(charge)
-            rt_list.append(df_group[self.rt_col].values[0])
-            if self.mob_col: 
-                mob_list.append(df_group[self.mob_col].values[0])
-            else:
-                mob_list.append(0)
+            for col, col_list in col_list_dict.items():
+                col_list.append(df_group[col].values[0])
             frag_intens_list.append(intens)
-            nAA_list.append(nAA)
-            if self.raw_col is not None:
-                raw_list.append(raw)
         
-        df = pd.DataFrame({
-            self.mod_seq_column: mod_seq_list,
-            self.seq_col: seq_list,
-            'PrecursorCharge': charge_list,
-            self.rt_col: rt_list,
-            self.mob_col: mob_list,
-        })
-
-        if self.raw_col is not None:
-            df[self.raw_col] = raw_list
+        df = pd.DataFrame(col_list_dict)
 
         self._fragment_intensity_df = pd.DataFrame(
             np.concatenate(frag_intens_list),
@@ -185,6 +171,7 @@ class SWATHLibraryReader(SpectronautReader, SpecLibBase):
         return df
 
     def _load_file(self, filename):
+        self.csv_sep = self._get_table_delimiter(filename)
         df = pd.read_csv(filename, sep=self.csv_sep)
         self._find_mod_seq_column(df)
 

@@ -122,7 +122,6 @@ diann:
   reader_type: diann
   rt_unit: minute
   fixed_C57: False
-  csv_sep: "\t"
   column_mapping:
     'raw_name': 'Run'
     'sequence': 'Stripped.Sequence'
@@ -141,7 +140,6 @@ spectronaut_report:
   reader_type: spectronaut_report
   rt_unit: minute
   fixed_C57: False
-  csv_sep: ','
   column_mapping:
     'raw_name': 'R.FileName'
     'rt': 'EG.ApexRT'
@@ -154,7 +152,6 @@ spectronaut:
   reader_type: spectronaut
   rt_unit: irt
   fixed_C57: False
-  csv_sep: "\t"
   mod_seq_columns:
     - 'ModifiedPeptide'
     - 'ModifiedSequence'
@@ -170,8 +167,8 @@ spectronaut:
     'ccs': 'CCS'
     'precursor_mz': 'PrecursorMz'
     'mobility': ['Mobility','IonMobility','PrecursorIonMobility']
-    'proteins': ['Protein Name','ProteinId','ProteinID','ProteinName']
+    'proteins': ['Protein Name','ProteinId','ProteinID','ProteinName','ProteinGroup','ProteinGroups']
     'uniprot_ids': ['UniProtIds','UniProtID','UniprotId']
-    'genes': ['Genes','Gene','GeneName']
+    'genes': ['Genes','Gene','GeneName','GeneNames']
   modification_mapping: 'maxquant'
   
