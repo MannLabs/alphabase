@@ -9,8 +9,8 @@ For more information, see AlphaBase on `GitHub <https://github.com/MannLabs/alph
 
    notebooks
 
-   modules_spectral_library
    modules_protein
+   modules_spectral_library
    modules_peptide
    modules_constants
    modules_io
