@@ -102,7 +102,6 @@ class SWATHLibraryReader(SpectronautReader, SpecLibBase):
         ):
 
             nAA = len(keys[1])
-            nAA_list.append(nAA)
             intens = np.zeros(
                 (nAA-1, len(self.charged_frag_types)),dtype=np.float32
             )
@@ -127,6 +126,8 @@ class SWATHLibraryReader(SpectronautReader, SpecLibBase):
                     frag_type = f'{frag_type}_H2O_z{frag_charge}'
                 elif loss_type == 'NH3':
                     frag_type = f'{frag_type}_NH3_z{frag_charge}'
+                elif loss_type == 'unknown': # DiaNN+fragger
+                    frag_type = f'{frag_type}_z{frag_charge}'
                 else:
                     continue
                 
@@ -138,6 +139,7 @@ class SWATHLibraryReader(SpectronautReader, SpecLibBase):
             if max_inten <= 0: continue
             intens /= max_inten
 
+            nAA_list.append(nAA)
             for col, col_list in col_list_dict.items():
                 col_list.append(df_group[col].values[0])
             frag_intens_list.append(intens)
