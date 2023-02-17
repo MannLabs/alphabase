@@ -10,7 +10,7 @@ from alphabase.peptide.precursor import (
 )
 from alphabase.constants._const import CONST_FILE_FOLDER
 
-from alphabase.utils import get_delimiter as _get_delimiter
+from alphabase.utils import get_delimiter
 from alphabase.yaml_utils import load_yaml
 
 def translate_other_modification(
@@ -318,7 +318,7 @@ class PSMReaderBase(object):
         pass
 
     def _get_table_delimiter(self, _filename):
-        return _get_delimiter(_filename)
+        return get_delimiter(_filename)
 
     def normalize_rt(self):
         if 'rt' in self.psm_df.columns:
