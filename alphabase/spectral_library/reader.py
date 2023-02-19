@@ -99,9 +99,9 @@ class SWATHLibraryReader(SpectronautReader, SpecLibBase):
         frag_intens_list = []
         nAA_list = []
         raw_list = []
-        #pgroup_list = []
+        pgroup_list = []
 
-        group_cols = [self.mod_seq_col, self.seq_col, 'PrecursorCharge','ProteinName']
+        group_cols = [self.mod_seq_col, self.seq_col, 'PrecursorCharge','ProteinGroups']
 
         if self.raw_col is not None:
             group_cols.append(self.raw_col)
