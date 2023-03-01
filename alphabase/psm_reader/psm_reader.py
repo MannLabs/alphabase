@@ -179,6 +179,7 @@ class PSMReaderBase(object):
         self.keep_decoy = keep_decoy
         self._min_max_rt_norm = False
         self._engine_rt_unit = rt_unit
+        self._min_irt_value = -100
 
     @property
     def psm_df(self)->pd.DataFrame:
@@ -341,6 +342,12 @@ class PSMReaderBase(object):
             min_rt = self.psm_df.rt.min()
             if not self._min_max_rt_norm or min_rt > 0:
                 min_rt = 0
+            elif min_rt < self._min_irt_value: # iRT
+                self.psm_df.rt.values[
+                    self.psm_df.rt.values<self._min_irt_value
+                ] = self._min_irt_value
+                min_rt = self._min_irt_value
+            
             self.psm_df['rt_norm'] = (
                 self.psm_df.rt - min_rt
             ) / (self.psm_df.rt.max()-min_rt)
