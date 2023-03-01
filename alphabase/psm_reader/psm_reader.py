@@ -10,19 +10,8 @@ from alphabase.peptide.precursor import (
 )
 from alphabase.constants._const import CONST_FILE_FOLDER
 
+from alphabase.utils import get_delimiter
 from alphabase.yaml_utils import load_yaml
-
-def _get_delimiter(tsv_file:str):
-    if isinstance(tsv_file, io.StringIO):
-        # for unit tests
-        line = tsv_file.readline().strip()
-        tsv_file.seek(0)
-    else:
-        with open(tsv_file, "r") as f:
-            line = f.readline().strip()
-    if '\t' in line: return '\t'
-    elif ',' in line: return ','
-    else: return '\t'
 
 def translate_other_modification(
     mod_str: str, 
@@ -330,7 +319,7 @@ class PSMReaderBase(object):
         pass
 
     def _get_table_delimiter(self, _filename):
-        return _get_delimiter(_filename)
+        return get_delimiter(_filename)
 
     def normalize_rt(self):
         if 'rt' in self.psm_df.columns:

@@ -3,6 +3,7 @@ import os
 import sys
 import pandas as pd
 import itertools
+import io
 
 # from alphatims
 def process_bar(iterator, len_iter):
@@ -31,3 +32,15 @@ def explode_multiple_columns(df:pd.DataFrame, columns:list):
         for col in columns[1:]:
             ret_df[col] = _flatten(df[col].values)
         return ret_df
+
+def get_delimiter(tsv_file:str):
+    if isinstance(tsv_file, io.StringIO):
+        # for unit tests
+        line = tsv_file.readline().strip()
+        tsv_file.seek(0)
+    else:
+        with open(tsv_file, "r") as f:
+            line = f.readline().strip()
+    if '\t' in line: return '\t'
+    elif ',' in line: return ','
+    else: return '\t'
