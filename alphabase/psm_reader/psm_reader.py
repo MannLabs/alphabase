@@ -2,6 +2,7 @@ import os
 import copy
 import pandas as pd
 import numpy as np
+import warnings
 
 import alphabase.peptide.mobility as mobility
 from alphabase.peptide.precursor import (
@@ -35,11 +36,14 @@ def translate_other_modification(
         modification is not in `mod_dict`, return pd.NA.
     '''
     if not mod_str: return ""
+
     ret_mods = []
+
     for mod in mod_str.split(';'):
         if mod in mod_dict:
             ret_mods.append(mod_dict[mod])
         else:
+            warnings.warn(f"Modification {mod} is not in the modification mapping dict. Precursors with this modification will be removed.")
             return pd.NA
     return ";".join(ret_mods)
 
@@ -429,6 +433,11 @@ class PSMReaderBase(object):
             translate_other_modification, 
             mod_dict=self.rev_mod_mapping
         )
+
+        # drop rows with unknown modifications
+        self._psm_df = self._psm_df[
+            ~self._psm_df.mods.isna()
+        ]
 
     def _post_process(self, 
         origin_df:pd.DataFrame

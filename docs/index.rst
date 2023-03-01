@@ -6,8 +6,15 @@ For more information, see AlphaBase on `GitHub <https://github.com/MannLabs/alph
 
 .. toctree::
    :maxdepth: 2
+   :caption: Documentation:
 
+   about_alphabase
+   installation
    notebooks
+   
+.. toctree::
+   :maxdepth: 2
+   :caption: API Reference
 
    modules_spectral_library
    modules_protein
