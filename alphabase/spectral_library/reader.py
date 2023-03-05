@@ -27,7 +27,6 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
         mod_seq_columns=psm_reader_yaml[
             'library_reader_base'
         ]['mod_seq_columns'],
-        csv_sep = '\t',
         rt_unit='irt',
         precursor_mz_min:float = 400,
         precursor_mz_max:float = 2000,
@@ -95,7 +94,6 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
             keep_decoy = False,
             fixed_C57 = fixed_C57,
             mod_seq_columns=mod_seq_columns,
-            csv_sep = csv_sep,
             rt_unit=rt_unit,
         )
 
@@ -108,6 +106,7 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
         ]['column_mapping']
 
     def _find_key_columns(self, lib_df:pd.DataFrame):
+
         """
         Find and create the key columns for the spectral library.
 
@@ -124,6 +123,7 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
 
         lib_df['fragment_loss_type'].fillna('', inplace=True)
         lib_df['fragment_loss_type'].replace('noloss','',inplace=True)
+
 
         if 'mods' not in lib_df.columns:
             lib_df['mods'] = ''
@@ -154,6 +154,7 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
         ))
 
         self._find_key_columns(lib_df)
+
         # drop all columns which are all NaN as they prohibit grouping
         lib_df = lib_df.dropna(axis=1, how='all')
 
@@ -168,6 +169,7 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
 
         # by default, all non-fragment columns are used to group the library
         non_fragment_columns = list(set(lib_df.columns) - set(fragment_columns))
+
         
         for keys, df_group in lib_df.groupby(
             non_fragment_columns
@@ -175,6 +177,7 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
             precursor_columns = dict(zip(non_fragment_columns, keys))
 
             nAA = len(precursor_columns['sequence'])
+
             intens = np.zeros(
                 (nAA-1, len(self.charged_frag_types)),dtype=np.float32
             )
@@ -199,6 +202,8 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
                     frag_type = f'{frag_type}_H2O_z{frag_charge}'
                 elif loss_type == 'NH3':
                     frag_type = f'{frag_type}_NH3_z{frag_charge}'
+                elif loss_type == 'unknown': # DiaNN+fragger
+                    frag_type = f'{frag_type}_z{frag_charge}'
                 else:
                     continue
                 
@@ -215,6 +220,7 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
             nAA_list.append(nAA)
 
         df = pd.DataFrame(precursor_df_list)
+
 
         self._fragment_intensity_df = pd.DataFrame(
             np.concatenate(frag_intens_list),
@@ -238,6 +244,8 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
         Load the spectral library from a csv file.
         Reimplementation of `PSMReaderBase._translate_columns`.
         """
+
+        self.csv_sep = self._get_table_delimiter(filename)
 
         df = pd.read_csv(filename, sep=self.csv_sep)
         self._find_mod_seq_column(df)

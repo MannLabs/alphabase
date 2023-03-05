@@ -94,27 +94,6 @@ pfind:
     'decoy': ['Target/Decoy', 'Targe/Decoy']
   modification_mapping:
     '': ''
-msfragger_psm_tsv:
-  reader_type: msfragger_psm_tsv
-  rt_unit: second
-  column_mapping:
-    'sequence': 'Peptide'
-    'charge': 'Charge'
-    'rt': 'Retention'
-    'query_id': 'Spectrum'
-    'score': 'Expectation'
-    'proteins': 'protein'
-    'raw_name': 'raw_name'
-  modification_mapping:
-    '': ''
-  mass_mapped_mods:
-    - 'Oxidation@M' #other Oxidation@X are not needed here
-    - 'Carbamidomethyl@C'
-    - 'Phospho@S' #TY are not needed here
-    - 'Acetyl@Any N-term'
-    - 'Glu->pyro-Glu@E^Any N-term'
-    - 'Gln->pyro-Glu@Q^Any N-term'
-  mod_mass_tol: 0.1 # Da
 msfragger_pepxml:
   reader_type: msfragger_pepxml
   rt_unit: second
@@ -125,24 +104,28 @@ msfragger_pepxml:
     'query_id': 'spectrum'
     'scan_num': 'start_scan'
     'score': 'expect'
+    'fdr': 'expect'
     'proteins': 'protein'
     'raw_name': 'raw_name'
+    'mobility': 'ion_mobility'
   modification_mapping:
     '': ''
   mass_mapped_mods:
     - 'Oxidation@M' #other Oxidation@X are not needed here
     - 'Carbamidomethyl@C'
     - 'Phospho@S' #TY are not needed here
+    - 'GlyGly@K'
+    - 'Cysteinyl@C'
     - 'Acetyl@Any N-term'
     - 'Glu->pyro-Glu@E^Any N-term'
     - 'Gln->pyro-Glu@Q^Any N-term'
+    - 'Dimethyl@K' # Any N-term is not needed here as it will be infered in-the-fly
   mod_mass_tol: 0.1 # Da
 
 diann:
   reader_type: diann
   rt_unit: minute
   fixed_C57: False
-  csv_sep: "\t"
   column_mapping:
     'raw_name': 'Run'
     'sequence': 'Stripped.Sequence'
@@ -161,7 +144,6 @@ spectronaut_report:
   reader_type: spectronaut_report
   rt_unit: minute
   fixed_C57: False
-  csv_sep: ','
   column_mapping:
     'raw_name': 'R.FileName'
     'rt': 'EG.ApexRT'
@@ -175,7 +157,6 @@ spectronaut:
   reader_type: spectronaut
   rt_unit: irt
   fixed_C57: False
-  csv_sep: "\t"
   mod_seq_columns:
     - 'ModifiedPeptide'
     - 'ModifiedSequence'
@@ -191,9 +172,9 @@ spectronaut:
     'ccs': 'CCS'
     'precursor_mz': 'PrecursorMz'
     'mobility': ['Mobility','IonMobility','PrecursorIonMobility']
-    'proteins': ['Protein Name','ProteinId','ProteinID','ProteinName']
+    'proteins': ['Protein Name','ProteinId','ProteinID','ProteinName','ProteinGroup','ProteinGroups']
     'uniprot_ids': ['UniProtIds','UniProtID','UniprotId']
-    'genes': ['Genes','Gene','GeneName']
+    'genes': ['Genes','Gene','GeneName','GeneNames']
   modification_mapping: 'maxquant'
   
 library_reader_base:

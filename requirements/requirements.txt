@@ -4,7 +4,7 @@ pyyaml
 pandas
 h5py
 contextlib2
-mmh3
+xxhash
 biopython
 psutil
 tqdm

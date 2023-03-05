@@ -2,7 +2,7 @@
 
 
 __project__ = "alphabase"
-__version__ = "0.5.0"
+__version__ = "1.0.2"
 __license__ = "Apache"
 __description__ = "An infrastructure Python package of the AlphaX ecosystem"
 __author__ = "Mann Labs"
@@ -13,13 +13,13 @@ __keywords__ = [
     "software",
     "AlphaX ecosystem",
 ]
-__python_version__ = ">=3.8,<3.10"
+__python_version__ = ">=3.8"
 __classifiers__ = [
-    "Development Status :: 1 - Planning",
+    # "Development Status :: 1 - Planning",
     # "Development Status :: 2 - Pre-Alpha",
     # "Development Status :: 3 - Alpha",
     # "Development Status :: 4 - Beta",
-    # "Development Status :: 5 - Production/Stable",
+    "Development Status :: 5 - Production/Stable",
     # "Development Status :: 6 - Mature",
     # "Development Status :: 7 - Inactive"
     "Intended Audience :: Science/Research",

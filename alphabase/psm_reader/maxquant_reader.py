@@ -43,10 +43,12 @@ def parse_mod_seq(
     Returns
     -------
     tuple
+        str: naked peptide sequence
+
         str: modification names, separated by ';'
         
         str: modification sites, separated by ';'. 
-            0 for N-term; -1 for C-term; 1 to N for normal modifications.
+        0 for N-term; -1 for C-term; 1 to N for normal modifications.
     """
     PeptideModSeq = modseq
     if modseq[0] == '_':

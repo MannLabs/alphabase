@@ -15,7 +15,7 @@ from alphabase.utils import explode_multiple_columns
 def create_modified_sequence(
     seq_mods_sites:typing.Tuple, # must be ('sequence','mods','mod_sites')
     translate_mod_dict:dict=None,
-    mod_sep='()',
+    mod_sep='[]',
     nterm = '_',
     cterm = '_'
 ):
@@ -34,7 +34,7 @@ def create_modified_sequence(
         Defaults to None.
 
     mod_sep : str
-        '[]' or '()', default '()'
+        '[]' or '()', default '[]'
 
     '''
     mod_seq = seq_mods_sites[0]
@@ -235,7 +235,7 @@ def speclib_to_single_df(
     max_frag_mz = 2000,
     min_frag_intensity = 0.01,
     min_frag_nAA = 0,
-    modloss='H3PO4',
+    modloss:str='H3PO4',
     frag_type_head:str='FragmentType',
     frag_mass_head:str='FragmentMz',
     frag_inten_head:str='RelativeIntensity',
@@ -272,38 +272,53 @@ def speclib_to_single_df(
         create_modified_sequence, 
         axis=1,
         translate_mod_dict=translate_mod_dict,
-        mod_sep='()'
+        mod_sep='[]'
     )
 
     df['frag_start_idx'] = speclib._precursor_df['frag_start_idx']
     df['frag_stop_idx'] = speclib._precursor_df['frag_stop_idx']
     
     df['PrecursorCharge'] = speclib._precursor_df['charge']
-    if 'irt_pred' in speclib._precursor_df.columns:
-        df['Tr_recalibrated'] = speclib._precursor_df['irt_pred']
-    elif 'rt_pred' in speclib._precursor_df.columns:
-        df['Tr_recalibrated'] = speclib._precursor_df['rt_pred']
-    elif 'rt_norm' in speclib._precursor_df.columns:
-        df['Tr_recalibrated'] = speclib._precursor_df['rt_norm']
-    else:
-        raise ValueError('precursor_df must contain the "rt_pred" or "rt_norm" column')
 
-    if 'mobility_pred' in speclib._precursor_df.columns:
-        df['IonMobility'] = speclib._precursor_df.mobility_pred
-    elif 'mobility' in speclib._precursor_df.columns:
-        df['IonMobility'] = speclib._precursor_df.mobility
+    for rt_col in ['irt_pred','rt_pred','rt','irt','rt_norm']:
+        if rt_col in speclib.precursor_df.columns:
+            df['Tr_recalibrated'] = speclib.precursor_df[rt_col]
+            break
+    if 'Tr_recalibrated' not in df.columns:
+        raise ValueError('precursor_df must contain the RT columns')
+    # if 'irt_pred' in speclib._precursor_df.columns:
+    #     df['Tr_recalibrated'] = speclib._precursor_df['irt_pred']
+    # elif 'rt_pred' in speclib._precursor_df.columns:
+    #     df['Tr_recalibrated'] = speclib._precursor_df['rt_pred']
+    # elif 'rt_norm' in speclib._precursor_df.columns:
+    #     df['Tr_recalibrated'] = speclib._precursor_df['rt_norm']
+    # else:
+    #     raise ValueError('precursor_df must contain the "rt_pred" or "rt_norm" column')
+
+    for im_col in ['mobility_pred','mobility']:
+        if im_col in speclib.precursor_df.columns:
+            df['IonMobility'] = speclib.precursor_df[im_col]
+            break
+    # if 'mobility_pred' in speclib._precursor_df.columns:
+    #     df['IonMobility'] = speclib._precursor_df.mobility_pred
+    # elif 'mobility' in speclib._precursor_df.columns:
+    #     df['IonMobility'] = speclib._precursor_df.mobility
     
     # df['LabelModifiedSequence'] = df['ModifiedPeptide']
-    df['StrippedPeptide'] = speclib._precursor_df['sequence']
+    df['StrippedPeptide'] = speclib.precursor_df['sequence']
 
     if 'precursor_mz' not in speclib._precursor_df.columns:
         speclib.calc_precursor_mz()
     df['PrecursorMz'] = speclib._precursor_df['precursor_mz']
 
-    if 'uniprot_ids' in speclib._precursor_df.columns:
-        df['ProteinID'] = speclib._precursor_df.uniprot_ids
-    elif 'proteins' in speclib._precursor_df.columns:
-        df['ProteinID'] = speclib._precursor_df.proteins
+    for prot_col in ['uniprot_ids','proteins']:
+        if prot_col in speclib.precursor_df.columns:
+            df['ProteinID'] = speclib.precursor_df[prot_col]
+            break
+    # if 'uniprot_ids' in speclib._precursor_df.columns:
+    #     df['ProteinID'] = speclib._precursor_df.uniprot_ids
+    # elif 'proteins' in speclib._precursor_df.columns:
+    #     df['ProteinID'] = speclib._precursor_df.proteins
 
     if 'genes' in speclib._precursor_df.columns:
         df['Genes'] = speclib._precursor_df['genes']
@@ -374,7 +389,6 @@ class WritingProcess(mp.Process):
             df, batch = self.task_queue.get()
             if df is None: break
             df.to_csv(self.tsv, header=(batch==0), sep="\t", mode="a", index=False)
-
 
 def translate_to_tsv(
     speclib:SpecLibBase,

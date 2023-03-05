@@ -37,10 +37,10 @@ class SpecLibBase(object):
         'isotope_apex_offset',
         'isotope_right_most_mz', 'isotope_right_most_intensity',
         'isotope_right_most_offset',
-        'miss_cleavage', 'mobility_pred',
-        'nAA', 
-        'precursor_mz', 
-        'rt_pred', 'rt_norm_pred',
+        'miss_cleavage', 
+        'mobility_pred', 'mobility',
+        'nAA', 'precursor_mz', 
+        'rt_pred', 'rt_norm_pred', 'rt',
         'labeling_channel',
     ]
     """
@@ -271,12 +271,16 @@ class SpecLibBase(object):
         ```
         >>> decoy_lib = (decoy_lib_provider.get_decoy_lib( self.decoy, self))
         >>> decoy_lib.decoy_sequence()
+        >>> decoy_lib.append_to_target_lib()
         ...
         ```
         """
         from alphabase.spectral_library.decoy import (
             decoy_lib_provider
         )
+        # register 'protein_reverse' to the decoy_lib_provider
+        import alphabase.protein.protein_level_decoy
+
         decoy_lib = (
             decoy_lib_provider.get_decoy_lib(
                 self.decoy, self
@@ -284,13 +288,7 @@ class SpecLibBase(object):
         )
         if decoy_lib is None: return None
         decoy_lib.decoy_sequence()
-        self._precursor_df['decoy'] = 0
-        decoy_lib._precursor_df['decoy'] = 1
-        self._precursor_df = pd.concat((
-            self._precursor_df,
-            decoy_lib._precursor_df
-        ))
-        self.refine_df()
+        decoy_lib.append_to_target_lib()
 
     def clip_by_precursor_mz_(self):
         ''' 

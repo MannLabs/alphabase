@@ -255,17 +255,10 @@ class IsotopeDistribution:
         0
             
         """
-        first_elem = 'H'
-        for elem, n in formula:
-            if elem == first_elem:
-                if n >= len(self.element_to_cum_mono_idx[elem]):
-                    n = len(self.element_to_cum_mono_idx[elem])-1
-                mono = self.element_to_cum_mono_idx[elem][n]
-                dist = self.element_to_cum_dist_dict[elem][n]
-                break
+        mono = 0
+        dist = EMPTY_DIST.copy()
         for elem, n in formula:
             if elem in self.element_to_cum_dist_dict:
-                if elem == first_elem: continue
                 if n >= len(self.element_to_cum_mono_idx[elem]):
                     n = len(self.element_to_cum_mono_idx[elem])-1
                 dist, mono = abundance_convolution(
