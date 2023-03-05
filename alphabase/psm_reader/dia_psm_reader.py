@@ -39,14 +39,13 @@ class SpectronautReader(MaxQuantReader):
             modification_mapping=modification_mapping,
             fdr=fdr, keep_decoy=keep_decoy,
             mod_seq_columns = mod_seq_columns,
+            csv_sep=csv_sep,
             fixed_C57=fixed_C57,
             rt_unit=rt_unit,
             **kwargs,
         )
-        self.csv_sep = csv_sep
 
         self.mod_seq_column = 'ModifiedPeptide'
-
         self._min_max_rt_norm = True
 
     def _init_column_mapping(self):

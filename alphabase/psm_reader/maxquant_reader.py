@@ -99,6 +99,7 @@ class MaxQuantReader(PSMReaderBase):
         keep_decoy = False,
         fixed_C57 = True,
         mod_seq_columns = ['Modified sequence'],
+        csv_sep = '\t',
         **kwargs,
     ):
         """Reader for MaxQuant msms.txt and evidence.txt
@@ -141,6 +142,7 @@ class MaxQuantReader(PSMReaderBase):
         self.fixed_C57 = fixed_C57
         self._mod_seq_columns = mod_seq_columns
         self.mod_seq_column = 'Modified sequence'
+        self.csv_sep = csv_sep
 
     def _find_mod_seq_column(self, df):
         for mod_seq_col in self._mod_seq_columns:
@@ -196,7 +198,7 @@ class MaxQuantReader(PSMReaderBase):
         ]['column_mapping']
 
     def _load_file(self, filename):
-        df = pd.read_csv(filename, sep='\t')
+        df = pd.read_csv(filename, sep=self.csv_sep)
         self._find_mod_seq_column(df)
         df = df[~pd.isna(df['Retention time'])]
         df.fillna('', inplace=True)

@@ -294,6 +294,7 @@ class PSMReaderBase(object):
             self._psm_df = pd.DataFrame()
         else:
             self._translate_columns(origin_df)
+            self._transform_table(origin_df)
             self._translate_decoy(origin_df)
             self._translate_score(origin_df)
             self._load_modifications(origin_df)
@@ -400,6 +401,22 @@ class PSMReaderBase(object):
         ):
             self._psm_df['spec_idx'] = self._psm_df.scan_num - 1
     
+    def _transform_table(self, origin_df:pd.DataFrame):
+        """
+        Transform the dataframe format if needed.
+        Usually only needed in combination with spectral libraries.
+
+        Parameters
+        ----------
+        origin_df : pd.DataFrame
+            df of other search engines
+
+        Returns
+        -------
+        None
+            Add information inplace into self._psm_df
+        """
+        pass
 
     def _load_modifications(self, origin_df:pd.DataFrame):
         """Read modification information from 'origin_df'. 
