@@ -229,19 +229,25 @@ class SpecLibBase(object):
             matching_columns
         ):
             if hasattr(self, attr) and hasattr(other, attr):
-
+                
                 current_df = getattr(self, attr)
 
                 # copy dataframes to avoid changing the original ones
                 other_df = getattr(other, attr)[matching_columns].copy()
 
-                if attr.startswith('_fragment'):
-                    frag_idx_increment = len(current_df)
-                    if 'frag_idx_start' in other_df.columns:
-                        other_df['frag_idx_start'] += frag_idx_increment
+                if attr.startswith('_precursor'):
+                    
+                    frag_idx_increment = 0
+                    for fragment_df in ['_fragment_intensity_df', '_fragment_mz_df']:
+                        if hasattr(self, fragment_df):
+                            if len(getattr(self, fragment_df)) > 0:
+                                frag_idx_increment = len(getattr(self, fragment_df))
+   
+                    if 'frag_start_idx' in other_df.columns:
+                        other_df['frag_start_idx'] += frag_idx_increment
 
-                    if 'frag_idx_stop' in other_df.columns:
-                        other_df['frag_idx_stop'] += frag_idx_increment
+                    if 'frag_stop_idx' in other_df.columns:
+                        other_df['frag_stop_idx'] += frag_idx_increment
 
                 setattr(
                     self, attr,

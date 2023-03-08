@@ -82,6 +82,7 @@ class SpecLibFlat(SpecLibBase):
         library:SpecLibBase,
         keep_original_frag_dfs:bool=True,
         copy_precursor_df:bool=False,
+        **kwargs
     ):
         """ 
         Flatten an library object of SpecLibBase or its inherited class. 
@@ -111,6 +112,7 @@ class SpecLibFlat(SpecLibBase):
             min_fragment_intensity=self.min_fragment_intensity,
             keep_top_k_fragments=self.keep_top_k_fragments,
             custom_columns=self.custom_fragment_df_columns,
+            **kwargs
         )
         
         if hasattr(library, 'protein_df'):
