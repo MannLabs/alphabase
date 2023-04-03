@@ -24,11 +24,7 @@ def get_requirements():
     requirement_file_names = package2install.__extra_requirements__
     requirement_file_names[""] = "requirements.txt"
     for extra, requirement_file_name in requirement_file_names.items():
-        full_requirement_file_name = os.path.join(
-            "requirements",
-            requirement_file_name,
-        )
-        with open(full_requirement_file_name) as requirements_file:
+        with open(requirement_file_name) as requirements_file:
             if extra != "":
                 extra_stable = f"{extra}-stable"
             else:
