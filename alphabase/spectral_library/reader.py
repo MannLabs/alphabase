@@ -259,7 +259,7 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
         
         if 'nAA' not in self._psm_df.columns:
             self._psm_df['nAA'] = self._psm_df.sequence.str.len()
-        
+
         self._psm_df = self._get_fragment_intensity(self._psm_df)
         
         self.normalize_rt_by_raw_name()
@@ -271,10 +271,6 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
                     'mobility'
                 )
             )
-        
-        self._psm_df = self._psm_df[
-            ~self._psm_df.mods.isna()
-        ].reset_index(drop=True)
 
         self._psm_df.drop('modified_sequence', axis=1, inplace=True)
         self._precursor_df = self._psm_df
