@@ -546,10 +546,10 @@ def flatten_fragments(
     fragment_intensity_df: pd.DataFrame,
     min_fragment_intensity: float = -1,
     keep_top_k_fragments: int = 1000,
-    custom_columns:list = [
+    custom_columns : list = [
         'type','number','position','charge','loss_type'
     ],
-    custom_df = {}
+    custom_df : Dict[str, pd.DataFrame] = {}
 )->Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Converts the tabular fragment format consisting of 
@@ -591,6 +591,9 @@ def flatten_fragments(
     custom_columns : list, optional
         'mz' and 'intensity' columns are required. Others could be customized. 
         Defaults to ['type','number','position','charge','loss_type']
+
+    custom_df : Dict[str, pd.DataFrame], optional
+        Append custom columns by providing additional dataframes of the same shape as fragment_mz_df and fragment_intensity_df. Defaults to {}.
     
     Returns
     -------
@@ -620,6 +623,8 @@ def flatten_fragments(
     else:
         use_intensity = False
 
+    # add additional columns to the fragment dataframe
+    # each column in the flat fragment dataframe is a whole pandas dataframe in the dense representation
     for col_name, df in custom_df.items():
         frag_df[col_name] = df.values.reshape(-1)
 
