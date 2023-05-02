@@ -1051,10 +1051,10 @@ def calc_fragment_cardinality(
         raise ValueError('Fragment dataframe is empty.')
     
     if group_column not in precursor_df.columns:
-        raise ValueError('Group column not in precursor dataframe.')
+        raise KeyError('Group column not in precursor dataframe.')
     
     if ('frag_start_idx' not in precursor_df.columns) or ('frag_stop_idx' not in precursor_df.columns):
-        raise ValueError('Precursor dataframe does not contain fragment indices.')
+        raise KeyError('Precursor dataframe does not contain fragment indices.')
     
     precursor_df = precursor_df.sort_values(group_column)
     fragment_mz = fragment_mz_df.values
