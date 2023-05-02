@@ -61,10 +61,6 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
             List of column names in the csv file containing the modified sequence.
             By default the mapping is taken from `psm_reader.yaml`
 
-        csv_sep: str
-            Separator for the csv file.
-            The default is '\t'
-
         rt_unit: str
             Unit of the retention time column in the csv file.
             The default is 'irt'
@@ -245,9 +241,9 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
         Reimplementation of `PSMReaderBase._translate_columns`.
         """
 
-        self.csv_sep = self._get_table_delimiter(filename)
+        csv_sep = self._get_table_delimiter(filename)
 
-        df = pd.read_csv(filename, sep=self.csv_sep)
+        df = pd.read_csv(filename, sep=csv_sep)
         self._find_mod_seq_column(df)
         
         return df
