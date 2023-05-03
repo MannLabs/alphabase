@@ -184,12 +184,19 @@ class LOESSRegression(BaseEstimator, RegressorMixin):
 
         if len(y.shape) == 1:
             y = y[...,np.newaxis]
+
+        # remove outliers by using only the 0.5 to 99.5 percentile
+        percentiles = np.percentile(x, [0.1, 99.9])
+        mask = (percentiles[0] < x[:,0]) & (x[:,0] < percentiles[1])
+        x = x[mask,...]
+        y = y[mask,...]
         
         # === end === sanity checks ===
 
         # create flat version of the array for 
         idx_sorted = np.argsort(x.flat)
         x_sorted = x.flat[idx_sorted]
+
 
         # stores if uniform training is still possible this round
         uniform = self.uniform
