@@ -4,10 +4,9 @@ import numba
 
 from alphabase.yaml_utils import load_yaml
 
-from alphabase.constants._const import CONST_FILE_FOLDER
-
-common_const_dict:dict = load_yaml(
-    os.path.join(CONST_FILE_FOLDER, 'common_constants.yaml')
+from alphabase.constants._const import (
+    CONST_FILE_FOLDER,
+    common_const_dict
 )
 
 MASS_PROTON:float = common_const_dict['MASS_PROTON']
