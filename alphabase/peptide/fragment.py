@@ -803,6 +803,7 @@ def create_fragment_mz_dataframe_by_sort_precursor(
     precursor_df: pd.DataFrame,
     charged_frag_types:List,
     batch_size:int=500000,
+    dtype:np.dtype=PEAK_MZ_DTYPE,
 )->pd.DataFrame:
     """Sort nAA in precursor_df for faster fragment mz dataframe creation.
     
@@ -832,7 +833,7 @@ def create_fragment_mz_dataframe_by_sort_precursor(
 
     fragment_mz_df = init_fragment_by_precursor_dataframe(
         precursor_df, charged_frag_types, 
-        dtype=PEAK_MZ_DTYPE,
+        dtype=dtype,
     )
 
     _grouped = precursor_df.groupby('nAA')
@@ -863,6 +864,7 @@ def create_fragment_mz_dataframe(
     reference_fragment_df: pd.DataFrame = None,
     inplace_in_reference:bool = False,
     batch_size:int=500000,
+    dtype:np.dtype=PEAK_MZ_DTYPE,
 )->pd.DataFrame:
     '''
     Generate fragment mass dataframe for the precursor_df. If 
@@ -906,7 +908,7 @@ def create_fragment_mz_dataframe(
             # )
             fragment_mz_df = init_fragment_by_precursor_dataframe(
                 precursor_df, charged_frag_types,
-                dtype=PEAK_MZ_DTYPE,
+                dtype=dtype,
             )
             return create_fragment_mz_dataframe(
                 precursor_df=precursor_df, 
@@ -914,11 +916,13 @@ def create_fragment_mz_dataframe(
                 reference_fragment_df=fragment_mz_df,
                 inplace_in_reference=True,
                 batch_size=batch_size,
+                dtype=dtype,
             )
     if 'nAA' not in precursor_df.columns:
         # fast
         return create_fragment_mz_dataframe_by_sort_precursor(
-            precursor_df, charged_frag_types, batch_size
+            precursor_df, charged_frag_types, 
+            batch_size, dtype=dtype,
         )
 
     if (is_precursor_sorted(precursor_df) and 
@@ -926,7 +930,8 @@ def create_fragment_mz_dataframe(
     ):
         # fast
         return create_fragment_mz_dataframe_by_sort_precursor(
-            precursor_df, charged_frag_types, batch_size
+            precursor_df, charged_frag_types, 
+            batch_size, dtype=dtype
         )
 
     else:
@@ -942,13 +947,13 @@ def create_fragment_mz_dataframe(
                     np.zeros((
                         len(reference_fragment_df), 
                         len(charged_frag_types)
-                    ), dtype=PEAK_MZ_DTYPE),
+                    ), dtype=dtype),
                     columns = charged_frag_types
                 )
         else:
             fragment_mz_df = init_fragment_by_precursor_dataframe(
                 precursor_df, charged_frag_types,
-                dtype=PEAK_MZ_DTYPE,
+                dtype=dtype,
             )
 
         _grouped = precursor_df.groupby('nAA')
