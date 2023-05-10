@@ -94,7 +94,7 @@ def merge_precursor_fragment_df(
     frag_inten_head:str='RelativeIntensity',
     frag_charge_head:str='FragmentCharge',
     frag_loss_head:str='FragmentLossType',
-    frag_num_head:str='FragmentNumber',
+    frag_series_head:str='FragmentSeriesNumber',
     verbose=True,
 ):
     '''
@@ -144,7 +144,7 @@ def merge_precursor_fragment_df(
     df[frag_inten_head] = frag_inten_list
     df[frag_charge_head] = frag_charge_list
     df[frag_loss_head] = frag_loss_list
-    df[frag_num_head] = frag_num_list
+    df[frag_series_head] = frag_num_list
 
     return explode_multiple_columns(df, 
         [
@@ -153,7 +153,7 @@ def merge_precursor_fragment_df(
             frag_inten_head,
             frag_charge_head,
             frag_loss_head,
-            frag_num_head
+            frag_series_head
         ]
     )
 
@@ -241,7 +241,7 @@ def speclib_to_single_df(
     frag_inten_head:str='RelativeIntensity',
     frag_charge_head:str='FragmentCharge',
     frag_loss_head:str='FragmentLossType',
-    frag_num_head:str='FragmentNumber',
+    frag_series_head:str='FragmentSeriesNumber',
     verbose = True,
 )->pd.DataFrame:
     '''
@@ -353,7 +353,7 @@ def speclib_to_single_df(
         frag_inten_head=frag_inten_head,
         frag_charge_head=frag_charge_head,
         frag_loss_head=frag_loss_head,
-        frag_num_head=frag_num_head,
+        frag_series_head=frag_series_head,
         verbose=verbose
     )
     df = df[df['RelativeIntensity']>min_frag_intensity]
