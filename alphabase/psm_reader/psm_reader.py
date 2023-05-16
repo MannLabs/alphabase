@@ -1,5 +1,6 @@
 import os
 import copy
+import io
 import pandas as pd
 import numpy as np
 
@@ -9,6 +10,7 @@ from alphabase.peptide.precursor import (
 )
 from alphabase.constants._const import CONST_FILE_FOLDER
 
+from alphabase.utils import get_delimiter
 from alphabase.yaml_utils import load_yaml
 
 def translate_other_modification(
@@ -166,47 +168,10 @@ class PSMReaderBase(object):
         self.keep_decoy = keep_decoy
         self._min_max_rt_norm = False
         self._engine_rt_unit = rt_unit
+        self._min_irt_value = -100
 
     @property
     def psm_df(self)->pd.DataFrame:
-        return self._psm_df
-
-    def import_files(self, file_list:list):
-        df_list = []
-        for _file in file_list:
-            df_list.append(self.import_file(_file))
-        self._psm_df = pd.concat(df_list, ignore_index=True)
-        return self._psm_df
-
-    def import_file(self, _file:str)->pd.DataFrame:
-        """
-        This is the main entry function of PSM readers, 
-        it imports the file with following steps:
-        ```
-        origin_df = self._load_file(_file)
-        self._translate_columns(origin_df)
-        self._translate_decoy(origin_df)
-        self._translate_score(origin_df)
-        self._load_modifications(origin_df)
-        self._translate_modifications()
-        self._post_process(origin_df)
-        ```
-        
-        Parameters
-        ----------
-        _file: str
-            file path or file stream (io).
-        """
-        origin_df = self._load_file(_file)
-        if len(origin_df) == 0:
-            self._psm_df = pd.DataFrame()
-        else:
-            self._translate_columns(origin_df)
-            self._translate_decoy(origin_df)
-            self._translate_score(origin_df)
-            self._load_modifications(origin_df)
-            self._translate_modifications()
-            self._post_process(origin_df)
         return self._psm_df
 
     def add_modification_mapping(self, modification_mapping:dict):
@@ -301,6 +266,45 @@ class PSMReaderBase(object):
         else: 
             return self.import_file(_file)
 
+    def import_files(self, file_list:list):
+        df_list = []
+        for _file in file_list:
+            df_list.append(self.import_file(_file))
+        self._psm_df = pd.concat(df_list, ignore_index=True)
+        return self._psm_df
+
+    def import_file(self, _file:str)->pd.DataFrame:
+        """
+        This is the main entry function of PSM readers, 
+        it imports the file with following steps:
+        ```
+        origin_df = self._load_file(_file)
+        self._translate_columns(origin_df)
+        self._translate_decoy(origin_df)
+        self._translate_score(origin_df)
+        self._load_modifications(origin_df)
+        self._translate_modifications()
+        self._post_process(origin_df)
+        ```
+        
+        Parameters
+        ----------
+        _file: str
+            file path or file stream (io).
+        """
+        origin_df = self._load_file(_file)
+        if len(origin_df) == 0:
+            self._psm_df = pd.DataFrame()
+        else:
+            self._translate_columns(origin_df)
+            self._transform_table(origin_df)
+            self._translate_decoy(origin_df)
+            self._translate_score(origin_df)
+            self._load_modifications(origin_df)
+            self._translate_modifications()
+            self._post_process(origin_df)
+        return self._psm_df
+
     def _translate_decoy(
         self, 
         origin_df:pd.DataFrame=None
@@ -315,6 +319,9 @@ class PSMReaderBase(object):
         # to -log(evalue), as score is the larger the better
         pass
 
+    def _get_table_delimiter(self, _filename):
+        return get_delimiter(_filename)
+
     def normalize_rt(self):
         if 'rt' in self.psm_df.columns:
             if self._engine_rt_unit == 'second':
@@ -325,6 +332,12 @@ class PSMReaderBase(object):
             min_rt = self.psm_df.rt.min()
             if not self._min_max_rt_norm or min_rt > 0:
                 min_rt = 0
+            elif min_rt < self._min_irt_value: # iRT
+                self.psm_df.rt.values[
+                    self.psm_df.rt.values<self._min_irt_value
+                ] = self._min_irt_value
+                min_rt = self._min_irt_value
+            
             self.psm_df['rt_norm'] = (
                 self.psm_df.rt - min_rt
             ) / (self.psm_df.rt.max()-min_rt)
@@ -368,6 +381,19 @@ class PSMReaderBase(object):
             f'"{self.__class__}" must implement "_load_file()"'
         )
 
+    def _find_mapped_columns(self, origin_df:pd.DataFrame):
+        mapped_columns = {}
+        for col, map_col in self.column_mapping.items():
+            if isinstance(map_col, str):
+                if map_col in origin_df.columns:
+                    mapped_columns[col] = map_col
+            elif isinstance(map_col, (list,tuple)):
+                for other_col in map_col:
+                    if other_col in origin_df.columns:
+                        mapped_columns[col] = other_col
+                        break
+        return mapped_columns
+
     def _translate_columns(self, origin_df:pd.DataFrame):
         """
         Translate the dataframe from other search engines 
@@ -383,23 +409,33 @@ class PSMReaderBase(object):
         None
             Add information inplace into self._psm_df
         """
+        mapped_columns = self._find_mapped_columns(origin_df)
         self._psm_df = pd.DataFrame()
-        for col, map_col in self.column_mapping.items():
-            if isinstance(map_col, str):
-                if map_col in origin_df.columns:
-                    self._psm_df[col] = origin_df[map_col]
-            else:
-                for other_col in map_col:
-                    if other_col in origin_df.columns:
-                        self._psm_df[col] = origin_df[other_col]
-                        break
-                    
+        for col, map_col in mapped_columns.items():
+            self._psm_df[col] = origin_df[map_col]
+               
         if (
             'scan_num' in self._psm_df.columns and 
             not 'spec_idx' in self._psm_df.columns
         ):
             self._psm_df['spec_idx'] = self._psm_df.scan_num - 1
     
+    def _transform_table(self, origin_df:pd.DataFrame):
+        """
+        Transform the dataframe format if needed.
+        Usually only needed in combination with spectral libraries.
+
+        Parameters
+        ----------
+        origin_df : pd.DataFrame
+            df of other search engines
+
+        Returns
+        -------
+        None
+            Add information inplace into self._psm_df
+        """
+        pass
 
     def _load_modifications(self, origin_df:pd.DataFrame):
         """Read modification information from 'origin_df'. 

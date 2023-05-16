@@ -4,6 +4,7 @@ import pandas as pd
 import re
 import contextlib
 import time
+import warnings
 
 
 class HDF_Object(object):
@@ -185,9 +186,8 @@ class HDF_Group(HDF_Object):
                     if not name.endswith("_mmap"):
                         dataset_names.append(name)
                 else:
-                    if "is_pd_dataframe" in hdf_object[name].attrs:
-                        if hdf_object[name].attrs["is_pd_dataframe"]:
-                            datafame_names.append(name)
+                    if name.endswith('_df') or "is_pd_dataframe" in hdf_object[name].attrs:
+                        datafame_names.append(name)
                     else:
                         group_names.append(name)
         return group_names, dataset_names, datafame_names
@@ -298,8 +298,10 @@ class HDF_Group(HDF_Object):
                 del hdf_object[name]
             hdf_object.create_group(name)
         if isinstance(group, pd.DataFrame):
+            if not name.endswith('_df'):
+                raise TypeError(f"DataFrame group name `{name}` must end with `_df`")
             group = dict(group)
-            group["is_pd_dataframe"] = True
+            # group["is_pd_dataframe"] = True
             new_group = HDF_Dataframe(
                 file_name=self.file_name,
                 name=f"{self.name}/{name}",
