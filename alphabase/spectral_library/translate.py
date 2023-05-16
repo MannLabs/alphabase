@@ -94,7 +94,7 @@ def merge_precursor_fragment_df(
     frag_inten_head:str='RelativeIntensity',
     frag_charge_head:str='FragmentCharge',
     frag_loss_head:str='FragmentLossType',
-    frag_series_head:str='FragmentSeriesNumber',
+    frag_series_head:str='FragmentNumber',
     verbose=True,
 ):
     '''
@@ -241,7 +241,7 @@ def speclib_to_single_df(
     frag_inten_head:str='RelativeIntensity',
     frag_charge_head:str='FragmentCharge',
     frag_loss_head:str='FragmentLossType',
-    frag_series_head:str='FragmentSeriesNumber',
+    frag_series_head:str='FragmentNumber',
     verbose = True,
 )->pd.DataFrame:
     '''
