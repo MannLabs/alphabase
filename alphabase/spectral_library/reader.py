@@ -10,7 +10,7 @@ from alphabase.spectral_library.base import SpecLibBase
 from alphabase.psm_reader.psm_reader import psm_reader_yaml
 from alphabase.psm_reader import psm_reader_provider
 
-from alphabase.constants._const import CONST_FILE_FOLDER
+from alphabase.constants._const import CONST_FILE_FOLDER, PEAK_INTENSITY_DTYPE
 from alphabase.yaml_utils import load_yaml
 
 class LibraryReaderBase(MaxQuantReader, SpecLibBase):
@@ -175,7 +175,8 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
             nAA = len(precursor_columns['sequence'])
 
             intens = np.zeros(
-                (nAA-1, len(self.charged_frag_types)),dtype=np.float32
+                (nAA-1, len(self.charged_frag_types)),
+                dtype=PEAK_INTENSITY_DTYPE,
             )
             for frag_type, frag_num, loss_type, frag_charge, inten in df_group[
                 [
