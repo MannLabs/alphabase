@@ -37,7 +37,7 @@ def _get_mods_from_masses(sequence, msf_aa_mods):
             if site < cterm_position:
                 mod_mass = mod_mass - AA_ASCII_MASS[ord(sequence[site-1])]
             else:
-                mod_mass -= (MASS_H + MASS_O + MASS_PROTON)
+                mod_mass -= (2* MASS_H + MASS_O)
         else:
             mod_mass -= MASS_H
 
