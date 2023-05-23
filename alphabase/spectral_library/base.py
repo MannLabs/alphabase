@@ -290,7 +290,41 @@ class SpecLibBase(object):
                     self._precursor_df, (self._fragment_mz_df,)
                 )
 
+    def calc_fragment_count(self):
+        """
+        Count the number of non-zero fragments for each precursor.
+        Creates the column 'n_fragments' in self._precursor_df.
+        """
 
+        self._precursor_df['n_fragments'] = fragment.calc_fragment_count(
+            self._precursor_df,
+            self._fragment_intensity_df
+        )
+    
+    def filter_fragment_number(
+            self, 
+            n_fragments_allowed_column_name='n_fragments_allowed', 
+            n_allowed=999
+        ):
+        """
+        Filter the top k fragments for each precursor based on a global setting and a precursor wise column.
+        The smaller one will be used. Can be used to make sure that target and decoy have the same number of fragments.
+
+        Parameters
+        ----------
+        n_fragments_allowed_column_name : str, optional, default 'n_fragments_allowed'
+            The column name in self._precursor_df that contains the number of fragments allowed for each precursor.
+
+        n_allowed : int, optional, default 999
+            The global setting for the number of fragments allowed for each precursor.
+        """
+
+        fragment.filter_fragment_number(
+            self._precursor_df,
+            self._fragment_intensity_df,
+            n_fragments_allowed_column_name=n_fragments_allowed_column_name,
+            n_allowed=n_allowed
+        )
 
     def _get_hdf_to_save(self, 
         hdf_file, 
