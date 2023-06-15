@@ -278,6 +278,8 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
 
         self.calc_fragment_mz_df()
 
+# legacy
+SWATHLibraryReader = LibraryReaderBase
 
 class LibraryReaderFromRawData(SpecLibBase):
     def __init__(self, 
