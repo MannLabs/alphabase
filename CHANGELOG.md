@@ -2,6 +2,13 @@
 
 Follow the changelog format from https://keepachangelog.com/en/1.0.0/.
 
+## 1.0.2 - 2023.02.10
+
+### Changed
+
+- Use `flat_frag_start/stop_idxes` for  `SpecLibFlat`.
+- Check if group name is `*_df` for DataFrame in hdf files; remove `is_pd_dataframe` attr.
+
 ## 1.0.1 - 2023.01.15
 
 ### Added

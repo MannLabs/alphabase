@@ -30,7 +30,6 @@ class SpectronautReader(MaxQuantReader):
         mod_seq_columns=psm_reader_yaml[
             'spectronaut'
         ]['mod_seq_columns'],
-        csv_sep = '\t',
         rt_unit = 'minute',
         **kwargs,
     ):
@@ -43,7 +42,6 @@ class SpectronautReader(MaxQuantReader):
             rt_unit=rt_unit,
             **kwargs,
         )
-        self.csv_sep = csv_sep
 
         self.mod_seq_column = 'ModifiedPeptide'
 
@@ -55,6 +53,7 @@ class SpectronautReader(MaxQuantReader):
         ]['column_mapping']
     
     def _load_file(self, filename):
+        self.csv_sep = self._get_table_delimiter(filename)
         df = pd.read_csv(filename, sep=self.csv_sep)
         self._find_mod_seq_column(df)
         if 'ReferenceRun' in df.columns:
@@ -80,7 +79,6 @@ class SwathReader(SpectronautReader):
         mod_seq_columns=psm_reader_yaml[
             'spectronaut'
         ]['mod_seq_columns'],
-        csv_sep = '\t',
         **kwargs,
     ):
         """ 
@@ -92,7 +90,6 @@ class SwathReader(SpectronautReader):
             fdr=fdr, keep_decoy=keep_decoy,
             fixed_C57=fixed_C57,
             mod_seq_columns=mod_seq_columns,
-            csv_sep=csv_sep,
             **kwargs,
         )
 
@@ -104,7 +101,6 @@ class DiannReader(SpectronautReader):
         fdr = 0.01,
         keep_decoy = False,
         fixed_C57 = False,
-        csv_sep = '\t',
         rt_unit = 'minute',
         **kwargs,
     ):
@@ -117,10 +113,10 @@ class DiannReader(SpectronautReader):
             modification_mapping=modification_mapping,
             fdr=fdr, keep_decoy=keep_decoy,
             fixed_C57=fixed_C57,
-            csv_sep=csv_sep,
             rt_unit=rt_unit,
             **kwargs,
         )
+
         self.mod_seq_column = 'Modified.Sequence'
         self._min_max_rt_norm = False
 
@@ -130,6 +126,7 @@ class DiannReader(SpectronautReader):
         ]['column_mapping']
     
     def _load_file(self, filename):
+        self.csv_sep = self._get_table_delimiter(filename)
         df = pd.read_csv(filename, sep=self.csv_sep)
 
         return df
@@ -165,7 +162,6 @@ class SpectronautReportReader(MaxQuantReader):
         fdr = 0.01,
         keep_decoy = False,
         fixed_C57 = False,
-        csv_sep = ',',
         rt_unit = 'minute',
         **kwargs,
     ):
@@ -177,7 +173,6 @@ class SpectronautReportReader(MaxQuantReader):
             rt_unit=rt_unit,
             **kwargs,
         )
-        self.csv_sep = csv_sep
 
         self.precursor_column = 'EG.PrecursorId'
 
@@ -190,6 +185,7 @@ class SpectronautReportReader(MaxQuantReader):
     
     def _load_file(self, filename):
         self.mod_seq_column = 'ModifiedSequence'
+        self.csv_sep = self._get_table_delimiter(filename)
         df = pd.read_csv(filename, sep=self.csv_sep)
         df[[self.mod_seq_column,'charge']] = df[
             self.precursor_column
