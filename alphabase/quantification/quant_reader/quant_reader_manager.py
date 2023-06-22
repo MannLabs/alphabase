@@ -20,7 +20,7 @@ def import_data(input_file, input_type_to_use = None, samples_subset = None, res
         file_to_read = reformat_and_save_input_file(input_file=input_file, input_type_to_use=input_type_to_use)
     
     input_reshaped = pd.read_csv(file_to_read, sep = "\t", encoding = 'latin1', usecols=samples_subset)
-    input_reshaped = input_reshaped.drop_duplicates(subset='ion')
+    input_reshaped = input_reshaped.drop_duplicates(subset='quant_id')
     return input_reshaped
 
 def add_ion_protein_headers_if_applicable(samples_subset):

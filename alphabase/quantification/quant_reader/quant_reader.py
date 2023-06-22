@@ -299,7 +299,7 @@ def merge_protein_and_ion_cols(input_df, config_dict):
     protein_cols =  config_dict.get("protein_cols")
     ion_cols = config_dict.get("ion_cols")
     input_df['protein'] = input_df.loc[:, protein_cols].astype('string').sum(axis=1)
-    input_df['ion'] = input_df.loc[:, ion_cols].astype('string').sum(axis=1)
+    input_df['quant_id'] = input_df.loc[:, ion_cols].astype('string').sum(axis=1)
     input_df = input_df.rename(columns = {config_dict.get('quant_ID') : "quant_val"})
     return input_df
 
@@ -431,7 +431,7 @@ def add_merged_ionnames(df_subset, ion_hierarchy_local, ion_headers_grouped, qua
                 ionstring+= f"_{row[count]}_"
                 count+=1
         ions.append(ionstring)
-    df_subset['ion'] = ions
+    df_subset['quant_id'] = ions
     df_subset = df_subset.reset_index()
     if quant_id_dict!= None:
         df_subset = df_subset.rename(columns = {quant_id_dict.get(hierarchy_type) : "quant_val"})
@@ -493,7 +493,7 @@ def process_with_dask(*, tmpfile_columnfilt, outfile_name, config_dict_for_type)
     df = dd.read_csv(tmpfile_columnfilt, sep = "\t")
     allcols = df[config_dict_for_type.get("sample_ID")].drop_duplicates().compute() # the columns of the output table are the sample IDs
     allcols = extend_sample_allcolumns_for_plexdia_case(allcols_samples=allcols, config_dict_for_type=config_dict_for_type)
-    allcols = ['protein', 'ion'] + sorted(allcols)
+    allcols = ['protein', 'quant_id'] + sorted(allcols)
     df = df.set_index('protein')
     sorted_filedir = f"{tmpfile_columnfilt}_sorted"
     df.to_csv(sorted_filedir, sep = "\t")
@@ -514,7 +514,7 @@ def process_with_dask(*, tmpfile_columnfilt, outfile_name, config_dict_for_type)
 def reshape_input_df(input_df, config_dict):
     input_df = input_df.astype({'quant_val': 'float'})
     input_df = adapt_input_df_columns_in_case_of_plexDIA(input_df=input_df, config_dict_for_type=config_dict)
-    input_reshaped = pd.pivot_table(input_df, index = ['protein', 'ion'], columns = config_dict.get("sample_ID"), values = 'quant_val', fill_value=0)
+    input_reshaped = pd.pivot_table(input_df, index = ['protein', 'quant_id'], columns = config_dict.get("sample_ID"), values = 'quant_val', fill_value=0)
 
     input_reshaped = input_reshaped.reset_index()
     return input_reshaped
@@ -556,8 +556,8 @@ def extend_sampleID_column_for_plexDIA_case(input_df,config_dict_for_type):
 
 
 def set_mtraq_reduced_ion_column_into_dataframe(input_df):
-    new_ions = remove_mtraq_modifications_from_ion_ids(input_df['ion'])
-    input_df['ion'] = new_ions
+    new_ions = remove_mtraq_modifications_from_ion_ids(input_df['quant_id'])
+    input_df['quant_id'] = new_ions
     return input_df
 
 def remove_mtraq_modifications_from_ion_ids(ions):
@@ -607,7 +607,7 @@ def reformat_and_write_wideformat_table(peptides_tsv, outfile_name, config_dict)
     input_df = merge_protein_cols_and_ion_dict(input_df, config_dict)
     if 'quant_prefix' in config_dict.keys():
         quant_prefix = config_dict.get('quant_prefix')
-        headers = ['protein', 'ion'] + list(filter(lambda x: x.startswith(quant_prefix), input_df.columns))
+        headers = ['protein', 'quant_id'] + list(filter(lambda x: x.startswith(quant_prefix), input_df.columns))
         input_df = input_df[headers]
         input_df = input_df.rename(columns = lambda x : x.replace(quant_prefix, ""))
 
@@ -648,7 +648,7 @@ def import_data(input_file, input_type_to_use = None, samples_subset = None, res
         file_to_read = reformat_and_save_input_file(input_file=input_file, input_type_to_use=input_type_to_use)
     
     input_reshaped = pd.read_csv(file_to_read, sep = "\t", encoding = 'latin1', usecols=samples_subset)
-    input_reshaped = input_reshaped.drop_duplicates(subset='ion')
+    input_reshaped = input_reshaped.drop_duplicates(subset='quant_id')
     return input_reshaped
 
 
@@ -1019,7 +1019,7 @@ class AcquisitionTableReformater(LongTableReformater):
     def __get_cols_to_use__(self):
         cols_to_use = self._header_infos._relevant_headers
         if self._dataframe_already_preformated:
-            return cols_to_use+['ion']
+            return cols_to_use+['quant_id']
         else:
             return cols_to_use
 
@@ -1046,12 +1046,12 @@ class AcquisitionTableHeaderFilter():
 def merge_acquisition_df_parameter_df(acquisition_df, parameter_df, groupby_merge_type = 'mean'):
     """acquisition df contains details on the acquisition, parameter df are the parameters derived from the tree
     """
-    merged_df = parameter_df.merge(acquisition_df, how = 'left', on = 'ion')
+    merged_df = parameter_df.merge(acquisition_df, how = 'left', on = 'quant_id')
     if groupby_merge_type == 'mean':
-        merged_df = merged_df.groupby('ion').mean().reset_index()
+        merged_df = merged_df.groupby('quant_id').mean().reset_index()
     if groupby_merge_type == 'min':
-        merged_df = merged_df.groupby('ion').min().reset_index()
+        merged_df = merged_df.groupby('quant_id').min().reset_index()
     if groupby_merge_type == 'max':
-        merged_df = merged_df.groupby('ion').max().reset_index()
+        merged_df = merged_df.groupby('quant_id').max().reset_index()
     merged_df = merged_df.dropna(axis=1, how='all')
     return merged_df

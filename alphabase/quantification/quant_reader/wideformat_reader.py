@@ -13,7 +13,7 @@ def reformat_and_write_wideformat_table(peptides_tsv, outfile_name, config_dict)
     input_df = table_reformatter.merge_protein_cols_and_config_dict(input_df, config_dict)
     if 'quant_prefix' in config_dict.keys():
         quant_prefix = config_dict.get('quant_prefix')
-        headers = ['protein', 'ion'] + list(filter(lambda x: x.startswith(quant_prefix), input_df.columns))
+        headers = ['protein', 'quant_id'] + list(filter(lambda x: x.startswith(quant_prefix), input_df.columns))
         input_df = input_df[headers]
         input_df = input_df.rename(columns = lambda x : x.replace(quant_prefix, ""))
 

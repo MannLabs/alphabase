@@ -63,7 +63,7 @@ def write_chunk_to_file(chunk, filepath ,write_header):
 def reshape_input_df(input_df, config_dict):
     input_df = input_df.astype({'quant_val': 'float'})
     input_df = plexdia_reformatter.adapt_input_df_columns_in_case_of_mDIA(input_df=input_df, config_dict_for_type=config_dict)
-    input_reshaped = pd.pivot_table(input_df, index = ['protein', 'ion'], columns = config_dict.get("sample_ID"), values = 'quant_val', fill_value=0)
+    input_reshaped = pd.pivot_table(input_df, index = ['protein', 'quant_id'], columns = config_dict.get("sample_ID"), values = 'quant_val', fill_value=0)
 
     input_reshaped = input_reshaped.reset_index()
     return input_reshaped
@@ -73,7 +73,7 @@ def process_with_dask(*, tmpfile_columnfilt, outfile_name, config_dict_for_type)
     df = dd.read_csv(tmpfile_columnfilt, sep = "\t")
     allcols = df[config_dict_for_type.get("sample_ID")].drop_duplicates().compute() # the columns of the output table are the sample IDs
     allcols = plexdia_reformatter.extend_sample_allcolumns_for_mDIA_case(allcols_samples=allcols, config_dict_for_type=config_dict_for_type)
-    allcols = ['protein', 'ion'] + sorted(allcols)
+    allcols = ['protein', 'quant_id'] + sorted(allcols)
     df = df.set_index('protein')
     sorted_filedir = f"{tmpfile_columnfilt}_sorted"
     df.to_csv(sorted_filedir, sep = "\t")

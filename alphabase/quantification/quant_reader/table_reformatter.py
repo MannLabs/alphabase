@@ -112,7 +112,7 @@ def merge_protein_and_ion_cols(input_df, config_dict):
     protein_cols =  config_dict.get("protein_cols")
     ion_cols = config_dict.get("ion_cols")
     input_df['protein'] = input_df.loc[:, protein_cols].astype('string').sum(axis=1)
-    input_df['ion'] = input_df.loc[:, ion_cols].astype('string').sum(axis=1)
+    input_df['quant_id'] = input_df.loc[:, ion_cols].astype('string').sum(axis=1)
     input_df = input_df.rename(columns = {config_dict.get('quant_ID') : "quant_val"})
     return input_df
 
@@ -136,7 +136,7 @@ def add_merged_ionnames(df_subset, ion_hierarchy_local, ion_headers_grouped, qua
                 ionstring+= f"_{row[count]}_"
                 count+=1
         ions.append(ionstring)
-    df_subset['ion'] = ions
+    df_subset['quant_id'] = ions
     df_subset = df_subset.reset_index()
     if quant_id_dict!= None:
         df_subset = df_subset.rename(columns = {quant_id_dict.get(hierarchy_type) : "quant_val"})

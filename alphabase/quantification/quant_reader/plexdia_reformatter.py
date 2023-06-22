@@ -28,8 +28,8 @@ def extend_sampleID_column_for_mDIA_case(input_df,config_dict_for_type):
 
 
 def set_mtraq_reduced_ion_column_into_dataframe(input_df):
-    new_ions = remove_mtraq_modifications_from_ion_ids(input_df['ion'])
-    input_df['ion'] = new_ions
+    new_ions = remove_mtraq_modifications_from_ion_ids(input_df['quant_id'])
+    input_df['quant_id'] = new_ions
     return input_df
 
 def remove_mtraq_modifications_from_ion_ids(ions):
