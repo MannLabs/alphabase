@@ -68,6 +68,12 @@ def load_all_proteins(fasta_file_list:list):
             protein_dict[protein['full_name']] = protein
     return protein_dict
 
+def load_fasta_list_as_protein_df(fasta_list:list):
+    protein_dict = load_all_proteins(fasta_list)
+    return pd.DataFrame().from_dict(
+        protein_dict, orient="index"
+    ).reset_index(drop=True)
+
 def concat_proteins(protein_dict:dict, sep='$')->str:
     """Concatenate all protein sequences into a single sequence, 
     seperated by `sep ($ by default)`.
