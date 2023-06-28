@@ -84,6 +84,11 @@ def load_mod_df(
 ):
     global MOD_DF
     MOD_DF = pd.read_table(tsv)
+    _df = MOD_DF[MOD_DF.mod_name.str.contains(' ', regex=False)].copy()
+    _df["mod_name"] = MOD_DF.mod_name.str.replace(' ', '_', regex=False)
+    MOD_DF = pd.concat(
+        [MOD_DF, _df], ignore_index=True
+    ).drop_duplicates("mod_name")
     MOD_DF.fillna('',inplace=True)
     MOD_DF['unimod_id'] = MOD_DF.unimod_id.astype(np.int32)
     MOD_DF.set_index('mod_name', drop=False, inplace=True)

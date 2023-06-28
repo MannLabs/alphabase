@@ -472,9 +472,9 @@ def parse_labels(labels:list):
         if len(aa) == 1:
             label_aas += aa
             label_mod_dict[aa] = label
-        elif aa == 'Any N-term':
+        elif aa == 'Any N-term' or aa == "Any_N-term":
             nterm_label_mod = label
-        elif aa == 'Any C-term':
+        elif aa == 'Any C-term' or aa == "Any_C-term":
             cterm_label_mod = label
     return label_aas, label_mod_dict, nterm_label_mod, cterm_label_mod
         
@@ -644,7 +644,7 @@ class SpecLibFasta(SpecLibBase):
         precursor_charge_max:int = 4,
         precursor_mz_min:float = 400.0, 
         precursor_mz_max:float = 2000.0,
-        var_mods:list = ['Acetyl@Protein N-term','Oxidation@M'],
+        var_mods:list = ['Acetyl@Protein_N-term','Oxidation@M'],
         min_var_mod_num:int = 0,
         max_var_mod_num:int = 2,
         fix_mods:list = ['Carbamidomethyl@C'],
@@ -693,7 +693,7 @@ class SpecLibFasta(SpecLibBase):
 
         var_mods : list, optional
             list of variable modifications, 
-            by default ['Acetyl@Protein N-term','Oxidation@M']
+            by default ['Acetyl@Protein_N-term','Oxidation@M']
 
         max_var_mod_num : int, optional
             Minimal number of variable modifications on a peptide sequence, 
@@ -801,19 +801,19 @@ class SpecLibFasta(SpecLibBase):
                 else:
                     term_dict[site] = term_mod
             site, term = parse_term_mod(term_mod)
-            if term == "Any N-term":
+            if term == "Any N-term" or term == "Any_N-term":
                 _set_dict(pep_nterm, site, term_mod, 
                     allow_conflicts
                 )
-            elif term == 'Protein N-term':
+            elif term == 'Protein N-term' or term == "Protein_N-term":
                 _set_dict(prot_nterm, site, term_mod, 
                     allow_conflicts
                 )
-            elif term == 'Any C-term':
+            elif term == 'Any C-term' or term == "Any_C-term":
                 _set_dict(pep_cterm, site, term_mod, 
                     allow_conflicts
                 )
-            elif term == 'Protein C-term':
+            elif term == 'Protein C-term' or term == "Protein_C-term":
                 _set_dict(prot_cterm, site, term_mod, 
                     allow_conflicts
                 )
@@ -1213,9 +1213,9 @@ class SpecLibFasta(SpecLibBase):
             ```
             {
             -1: [], # not labeled
-            0: ['Dimethyl@Any N-term','Dimethyl@K'],
-            4: ['Dimethyl:2H(4)@Any N-term','Dimethyl:2H(4)@K'],
-            8: ['Dimethyl:2H(6)13C(2)@Any N-term','Dimethyl:2H(6)13C(2)@K'],
+            0: ['Dimethyl@Any_N-term','Dimethyl@K'],
+            4: ['Dimethyl:2H(4)@Any_N-term','Dimethyl:2H(4)@K'],
+            8: ['Dimethyl:2H(6)13C(2)@Any_N-term','Dimethyl:2H(6)13C(2)@K'],
             }
             ```.
             The key name could be int (highly recommended or 
