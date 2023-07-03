@@ -169,6 +169,7 @@ class PSMReaderBase(object):
         self._min_max_rt_norm = False
         self._engine_rt_unit = rt_unit
         self._min_irt_value = -100
+        self._max_irt_value = 200
 
     @property
     def psm_df(self)->pd.DataFrame:
@@ -330,17 +331,19 @@ class PSMReaderBase(object):
             # elif self._engine_rt_unit == 'minute':
                 # self.psm_df['rt_sec'] = self.psm_df.rt*60
             min_rt = self.psm_df.rt.min()
-            if not self._min_max_rt_norm or min_rt > 0:
+            max_rt = self.psm_df.rt.max()
+            if min_rt < 0: # iRT
+                if min_rt < self._min_irt_value:
+                    min_rt = self._min_irt_value
+                if max_rt > self._max_irt_value:
+                    max_rt = self._max_irt_value
+
+            elif not self._min_max_rt_norm :
                 min_rt = 0
-            elif min_rt < self._min_irt_value: # iRT
-                self.psm_df.rt.values[
-                    self.psm_df.rt.values<self._min_irt_value
-                ] = self._min_irt_value
-                min_rt = self._min_irt_value
             
-            self.psm_df['rt_norm'] = (
+            self.psm_df['rt_norm'] = ((
                 self.psm_df.rt - min_rt
-            ) / (self.psm_df.rt.max()-min_rt)
+            ) / (max_rt-min_rt)).clip(0, 1)
 
     def norm_rt(self):
         self.normalize_rt()
