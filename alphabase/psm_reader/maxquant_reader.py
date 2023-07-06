@@ -198,7 +198,8 @@ class MaxQuantReader(PSMReaderBase):
         ]['column_mapping']
 
     def _load_file(self, filename):
-        df = pd.read_csv(filename, sep='\t')
+        csv_sep = self._get_table_delimiter(filename)
+        df = pd.read_csv(filename, sep=csv_sep)
         self._find_mod_seq_column(df)
         df = df[~pd.isna(df['Retention time'])]
         df.fillna('', inplace=True)

@@ -39,5 +39,5 @@ __urls__ = {
     "PyPi": "https://pypi.org/project/alphabase/",
 }
 __extra_requirements__ = {
-    "development": "requirements_development.txt",
+    "development": "extra_requirements/development.txt",
 }

@@ -5,6 +5,9 @@ import warnings
 import numba as nb
 import logging
 
+from alphabase.constants._const import (
+    PEAK_MZ_DTYPE, PEAK_INTENSITY_DTYPE
+)
 from alphabase.peptide.mass_calc import *
 from alphabase.constants.modification import (
     calc_modloss_mass
@@ -129,7 +132,7 @@ def parse_charged_frag_type(
 def init_zero_fragment_dataframe(
     peplen_array:np.ndarray,
     charged_frag_types:List[str], 
-    dtype=np.float64
+    dtype=PEAK_MZ_DTYPE
 )->Tuple[pd.DataFrame, np.ndarray, np.ndarray]: 
     '''Initialize a zero dataframe based on peptide length 
     (nAA) array (peplen_array) and charge_frag_types (column number).
@@ -163,7 +166,7 @@ def init_zero_fragment_dataframe(
 
 def init_fragment_dataframe_from_other(
     reference_fragment_df: pd.DataFrame,
-    dtype=np.float64
+    dtype=PEAK_MZ_DTYPE
 ):
     '''
     Init zero fragment dataframe from the `reference_fragment_df` (same rows and same columns)
@@ -178,7 +181,7 @@ def init_fragment_by_precursor_dataframe(
     charged_frag_types: List[str],
     *,
     reference_fragment_df: pd.DataFrame = None,
-    dtype:np.dtype=np.float64,
+    dtype:np.dtype=PEAK_MZ_DTYPE,
     inplace_in_reference:bool=False,
 ):
     '''
@@ -204,6 +207,9 @@ def init_fragment_by_precursor_dataframe(
         on this reference. If None, fragment_mz_df will be 
         initialized by :func:`alphabase.peptide.fragment.init_zero_fragment_dataframe`.
         Defaults to None.
+
+    dtype: np.dtype
+        dtype of fragment mz values, Defaults to :data:`PEAK_MZ_DTYPE`.
 
     inplace_in_reference : bool, optional
         if calculate the fragment mz 
@@ -234,7 +240,7 @@ def init_fragment_by_precursor_dataframe(
                 np.zeros((
                     precursor_df.frag_stop_idx.max(), 
                     len(charged_frag_types)
-                )),
+                ), dtype=dtype),
                 columns = charged_frag_types
             )
         else:
@@ -248,7 +254,7 @@ def init_fragment_by_precursor_dataframe(
                     np.zeros((
                         len(reference_fragment_df), 
                         len(charged_frag_types)
-                    )),
+                    ), dtype=dtype),
                     columns = charged_frag_types
                 )
     return fragment_df
@@ -289,10 +295,12 @@ def update_sliced_fragment_dataframe(
     frag_slice_list = [slice(start,end) for start,end in frag_start_end_list]
     frag_slices = np.r_[tuple(frag_slice_list)]
     if charged_frag_types is None or len(charged_frag_types)==0:
-        fragment_df.values[frag_slices, :] = values
+        fragment_df.values[frag_slices, :] = values.astype(fragment_df.dtypes[0])
     else:
         charged_frag_idxes = [fragment_df.columns.get_loc(c) for c in charged_frag_types]
-        fragment_df.iloc[frag_slices, charged_frag_idxes] = values
+        fragment_df.iloc[
+            frag_slices, charged_frag_idxes
+        ] = values.astype(fragment_df.dtypes[0])
     return fragment_df
 
 def get_sliced_fragment_dataframe(
@@ -546,9 +554,10 @@ def flatten_fragments(
     fragment_intensity_df: pd.DataFrame,
     min_fragment_intensity: float = -1,
     keep_top_k_fragments: int = 1000,
-    custom_columns:list = [
+    custom_columns : list = [
         'type','number','position','charge','loss_type'
     ],
+    custom_df : Dict[str, pd.DataFrame] = {}
 )->Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Converts the tabular fragment format consisting of 
@@ -560,8 +569,8 @@ def flatten_fragments(
     `type`, `number`, `charge` and `loss_type`,  
     where each column refers to:
 
-    - mz:        float64, fragment mz value
-    - intensity: float32, fragment intensity value
+    - mz:        :data:`PEAK_MZ_DTYPE`, fragment mz value
+    - intensity: :data:`PEAK_INTENSITY_DTYPE`, fragment intensity value
     - type:      int8, ASCII code of the ion type (97=a, 98=b, 99=c, 120=x, 121=y, 122=z), or more ion types in the future. See https://en.wikipedia.org/wiki/ASCII for more ASCII information
     - number:    uint32, fragment series number
     - position:  uint32, fragment position in sequence (from left to right, starts with 0)
@@ -590,6 +599,9 @@ def flatten_fragments(
     custom_columns : list, optional
         'mz' and 'intensity' columns are required. Others could be customized. 
         Defaults to ['type','number','position','charge','loss_type']
+
+    custom_df : Dict[str, pd.DataFrame], optional
+        Append custom columns by providing additional dataframes of the same shape as fragment_mz_df and fragment_intensity_df. Defaults to {}.
     
     Returns
     -------
@@ -599,8 +611,8 @@ def flatten_fragments(
         fragment dataframe with columns: `mz`, `intensity`, `type`, `number`, 
         `charge` and `loss_type`, where each column refers to:
         
-        - mz:        float, fragment mz value
-        - intensity: float32, fragment intensity value
+        - mz:        :data:`PEAK_MZ_DTYPE`, fragment mz value
+        - intensity: :data:`PEAK_INTENSITY_DTYPE`, fragment intensity value
         - type:      int8, ASCII code of the ion type (97=a, 98=b, 99=c, 120=x, 121=y, 122=z), or more ion types in the future. See https://en.wikipedia.org/wiki/ASCII for more ASCII information
         - number:    uint32, fragment series number
         - position:  uint32, fragment position in sequence (from left to right, starts with 0)
@@ -614,10 +626,17 @@ def flatten_fragments(
     frag_df = pd.DataFrame()
     frag_df['mz'] = fragment_mz_df.values.reshape(-1)
     if len(fragment_intensity_df) > 0:
-        frag_df['intensity'] = fragment_intensity_df.values.astype(np.float32).reshape(-1)
+        frag_df['intensity'] = fragment_intensity_df.values.astype(
+            PEAK_INTENSITY_DTYPE
+        ).reshape(-1)
         use_intensity = True
     else:
         use_intensity = False
+
+    # add additional columns to the fragment dataframe
+    # each column in the flat fragment dataframe is a whole pandas dataframe in the dense representation
+    for col_name, df in custom_df.items():
+        frag_df[col_name] = df.values.reshape(-1)
 
     frag_types = []
     frag_loss_types = []
@@ -772,7 +791,11 @@ def remove_unused_fragments(
     output_tuple = []
 
     for i in range(len(fragment_df_list)):
-        output_tuple.append(fragment_df_list[i].iloc[fragment_pointer].copy().reset_index(drop=True))
+        output_tuple.append(
+            fragment_df_list[i].iloc[
+                fragment_pointer
+            ].copy().reset_index(drop=True)
+        )
 
     return precursor_df, tuple(output_tuple)
 
@@ -780,6 +803,7 @@ def create_fragment_mz_dataframe_by_sort_precursor(
     precursor_df: pd.DataFrame,
     charged_frag_types:List,
     batch_size:int=500000,
+    dtype:np.dtype=PEAK_MZ_DTYPE,
 )->pd.DataFrame:
     """Sort nAA in precursor_df for faster fragment mz dataframe creation.
     
@@ -808,7 +832,8 @@ def create_fragment_mz_dataframe_by_sort_precursor(
     refine_precursor_df(precursor_df)
 
     fragment_mz_df = init_fragment_by_precursor_dataframe(
-        precursor_df, charged_frag_types
+        precursor_df, charged_frag_types, 
+        dtype=dtype,
     )
 
     _grouped = precursor_df.groupby('nAA')
@@ -825,7 +850,7 @@ def create_fragment_mz_dataframe_by_sort_precursor(
             fragment_mz_df.iloc[
                 df_group.frag_start_idx.values[0]:
                 df_group.frag_stop_idx.values[-1], :
-            ] = mz_values
+            ] = mz_values.astype(PEAK_MZ_DTYPE)
     return mask_fragments_for_charge_greater_than_precursor_charge(
             fragment_mz_df,
             precursor_df.charge.values,
@@ -839,6 +864,7 @@ def create_fragment_mz_dataframe(
     reference_fragment_df: pd.DataFrame = None,
     inplace_in_reference:bool = False,
     batch_size:int=500000,
+    dtype:np.dtype=PEAK_MZ_DTYPE,
 )->pd.DataFrame:
     '''
     Generate fragment mass dataframe for the precursor_df. If 
@@ -882,6 +908,7 @@ def create_fragment_mz_dataframe(
             # )
             fragment_mz_df = init_fragment_by_precursor_dataframe(
                 precursor_df, charged_frag_types,
+                dtype=dtype,
             )
             return create_fragment_mz_dataframe(
                 precursor_df=precursor_df, 
@@ -889,11 +916,13 @@ def create_fragment_mz_dataframe(
                 reference_fragment_df=fragment_mz_df,
                 inplace_in_reference=True,
                 batch_size=batch_size,
+                dtype=dtype,
             )
     if 'nAA' not in precursor_df.columns:
         # fast
         return create_fragment_mz_dataframe_by_sort_precursor(
-            precursor_df, charged_frag_types, batch_size
+            precursor_df, charged_frag_types, 
+            batch_size, dtype=dtype,
         )
 
     if (is_precursor_sorted(precursor_df) and 
@@ -901,7 +930,8 @@ def create_fragment_mz_dataframe(
     ):
         # fast
         return create_fragment_mz_dataframe_by_sort_precursor(
-            precursor_df, charged_frag_types, batch_size
+            precursor_df, charged_frag_types, 
+            batch_size, dtype=dtype
         )
 
     else:
@@ -917,12 +947,13 @@ def create_fragment_mz_dataframe(
                     np.zeros((
                         len(reference_fragment_df), 
                         len(charged_frag_types)
-                    )),
+                    ), dtype=dtype),
                     columns = charged_frag_types
                 )
         else:
             fragment_mz_df = init_fragment_by_precursor_dataframe(
                 precursor_df, charged_frag_types,
+                dtype=dtype,
             )
 
         _grouped = precursor_df.groupby('nAA')
@@ -1004,3 +1035,118 @@ def join_left(
     joined_index[left_indices] =  joined_index
 
     return joined_index
+
+def calc_fragment_cardinality(
+        precursor_df,
+        fragment_mz_df,
+        group_column = 'elution_group_idx',
+        split_target_decoy = True
+    ):
+
+    """
+    Calculate the cardinality for a given fragment across a group of precursors.
+    The cardinality is the number of precursors that have a given fragment at a given position.
+
+    All precursors within a group are expected to have the same number of fragments.
+
+    Parameters
+    ----------
+
+    precursor_df : pd.DataFrame
+        The precursor dataframe.
+
+    fragment_mz_df : pd.DataFrame
+        The fragment mz dataframe.
+
+    group_column : str
+        The column to group the precursors by. Integer column is expected.
+
+    split_target_decoy : bool
+        If True, the cardinality is calculated for the target and decoy precursors separately.
+
+    """
+    
+    if len(precursor_df) == 0:
+        raise ValueError('Precursor dataframe is empty.')
+    
+    if len(fragment_mz_df) == 0:
+        raise ValueError('Fragment dataframe is empty.')
+    
+    if group_column not in precursor_df.columns:
+        raise KeyError('Group column not in precursor dataframe.')
+    
+    if ('frag_start_idx' not in precursor_df.columns) or ('frag_stop_idx' not in precursor_df.columns):
+        raise KeyError('Precursor dataframe does not contain fragment indices.')
+    
+    precursor_df = precursor_df.sort_values(group_column)
+    fragment_mz = fragment_mz_df.values
+    fragment_cardinality = np.ones(fragment_mz.shape, dtype=np.uint8)
+
+    @nb.njit
+    def _calc_fragment_cardinality(
+        elution_group_idx,
+        start_idx,
+        stop_idx,
+        fragment_mz,
+        fragment_cardinality,
+    ):
+        elution_group = elution_group_idx[0]
+        elution_group_start = 0
+
+        for i in range(len(elution_group_idx)):
+            if i == len(elution_group_idx)-1 or elution_group_idx[i] != elution_group_idx[i+1]:
+                elution_group_stop = i+1
+
+            # check if whole elution group is covered
+            n_precursor = elution_group_stop - elution_group_start
+            
+            # Check that all precursors within a group have the same number of fragments.
+            nAA = stop_idx[elution_group_start:elution_group_stop] - start_idx[elution_group_start:elution_group_stop]
+            if not np.all(nAA[0] == nAA):
+                raise ValueError('All precursors within a group must have the same number of fragments.')
+
+            # within a group, check for each precursor if it has the same fragment as another precursor
+            for i in range(n_precursor):
+
+                precursor_start_idx = start_idx[elution_group_start + i]
+                precursor_stop_idx = stop_idx[elution_group_start + i]
+
+                precursor_fragment_mz = fragment_mz[precursor_start_idx:precursor_stop_idx]
+
+                for j in range(n_precursor):
+                    if i == j:
+                        continue
+
+                    other_precursor_start_idx = start_idx[elution_group_start + j]
+                    other_precursor_stop_idx = stop_idx[elution_group_start + j]
+                    other_precursor_fragment_mz = fragment_mz[other_precursor_start_idx:other_precursor_stop_idx]
+                    
+                    binary_mask = np.abs(precursor_fragment_mz - other_precursor_fragment_mz) < 0.00001
+                    
+                    fragment_cardinality[precursor_start_idx:precursor_stop_idx] += binary_mask.astype(np.uint8)
+                    
+            elution_group_start = elution_group_stop
+    if ('decoy' in precursor_df.columns) and (split_target_decoy):
+        decoy_classes = precursor_df['decoy'].unique()
+        for decoy_class in decoy_classes:
+            df = precursor_df[precursor_df['decoy'] == decoy_class]
+            _calc_fragment_cardinality(
+                df[group_column].values,
+                df['frag_start_idx'].values,
+                df['frag_stop_idx'].values,
+                fragment_mz,
+                fragment_cardinality,
+            )
+    else:
+        _calc_fragment_cardinality(
+            precursor_df[group_column].values,
+            precursor_df['frag_start_idx'].values,
+            precursor_df['frag_stop_idx'].values,
+            fragment_mz,
+            fragment_cardinality,
+        )
+
+    return pd.DataFrame(
+        fragment_cardinality, 
+        columns = fragment_mz_df.columns
+    )

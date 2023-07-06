@@ -10,5 +10,5 @@ psutil
 tqdm
 scikit-learn
 regex
-pydivsufsort
+# pydivsufsort
 dask

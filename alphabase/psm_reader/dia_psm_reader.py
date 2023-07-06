@@ -44,7 +44,6 @@ class SpectronautReader(MaxQuantReader):
         )
 
         self.mod_seq_column = 'ModifiedPeptide'
-
         self._min_max_rt_norm = True
 
     def _init_column_mapping(self):
