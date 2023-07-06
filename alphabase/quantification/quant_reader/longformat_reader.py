@@ -33,14 +33,17 @@ def reformat_and_write_longtable_according_to_config(input_file, outfile_name, c
     input_df_it = pd.read_csv(input_file, sep = sep, decimal=decimal, usecols = relevant_cols, encoding ='latin1', chunksize = chunksize)
     input_df_list = []
     header = True
+    index_names = []
     for input_df_subset in input_df_it:
+        index_names += input_df_subset.index.names
         input_df_subset = adapt_subtable(input_df_subset, config_dict_for_type)
         if file_is_large:
-            write_chunk_to_file(input_df_subset,tmpfile_large, header)
+            write_chunk_to_file(input_df_subset,tmpfile_large, header, write_index=True)
         else:
             input_df_list.append(input_df_subset)
         header = False
-        
+    
+    index_names = list(set(index_names))
     if file_is_large:
         process_with_dask(tmpfile_columnfilt=tmpfile_large , outfile_name = outfile_name, config_dict_for_type=config_dict_for_type)
     else:
@@ -56,14 +59,17 @@ def adapt_subtable(input_df_subset, config_dict):
     else:
         return table_reformatter.merge_protein_and_ion_cols(input_df_subset, config_dict)
 
-def write_chunk_to_file(chunk, filepath ,write_header):
+def write_chunk_to_file(chunk, filepath ,write_header, write_index):
     """write chunk of pandas dataframe to a file"""
-    chunk.to_csv(filepath, header=write_header, mode='a', sep = "\t", index = None)
+    chunk.to_csv(filepath, header=write_header, mode='a', sep = "\t", index = write_index)
 
 def reshape_input_df(input_df, config_dict):
     input_df = input_df.astype({'quant_val': 'float'})
     input_df = plexdia_reformatter.adapt_input_df_columns_in_case_of_mDIA(input_df=input_df, config_dict_for_type=config_dict)
-    input_reshaped = pd.pivot_table(input_df, index = ['protein', 'quant_id'], columns = config_dict.get("sample_ID"), values = 'quant_val', fill_value=0)
+    column_names = input_df.index.names
+    input_df = input_df.reset_index()
+    input_df[column_names] = input_df[column_names].astype(str)
+    input_reshaped = pd.pivot_table(input_df, index = ['protein', 'quant_id'] + column_names, columns = config_dict.get("sample_ID"), values = 'quant_val', fill_value=0)
 
     input_reshaped = input_reshaped.reset_index()
     return input_reshaped
@@ -74,6 +80,8 @@ def process_with_dask(*, tmpfile_columnfilt, outfile_name, config_dict_for_type)
     allcols = df[config_dict_for_type.get("sample_ID")].drop_duplicates().compute() # the columns of the output table are the sample IDs
     allcols = plexdia_reformatter.extend_sample_allcolumns_for_mDIA_case(allcols_samples=allcols, config_dict_for_type=config_dict_for_type)
     allcols = ['protein', 'quant_id'] + sorted(allcols)
+    hierarchy_columns = get_hierarchy_names_from_config_dict(config_dict_for_type)
+    allcols = allcols + hierarchy_columns
     df = df.set_index('protein')
     sorted_filedir = f"{tmpfile_columnfilt}_sorted"
     df.to_csv(sorted_filedir, sep = "\t")
@@ -81,16 +89,26 @@ def process_with_dask(*, tmpfile_columnfilt, outfile_name, config_dict_for_type)
     files_dask = glob.glob(f"{sorted_filedir}/*part")
     header = True
     for file in files_dask:
-        input_df = pd.read_csv(file, sep = "\t")
+        input_df = pd.read_csv(file, sep = "\t", index_col=hierarchy_columns)
         if len(input_df.index) <2:
             continue
         input_reshaped = reshape_input_df(input_df, config_dict_for_type)
         input_reshaped = sort_and_add_columns(input_reshaped, allcols)
-        write_chunk_to_file(input_reshaped, outfile_name, header)
+        write_chunk_to_file(input_reshaped, outfile_name, header, write_index = False)
         header = False
     os.remove(tmpfile_columnfilt)
     shutil.rmtree(sorted_filedir)
 
+def get_hierarchy_names_from_config_dict(config_dict_for_type):
+    hierarchy_names = []
+    if "ion_hierarchy" in config_dict_for_type.keys():
+        ion_hierarchy = config_dict_for_type.get("ion_hierarchy")
+        for hierarchy_type in ion_hierarchy.keys():
+            hierarchy_names += ion_hierarchy.get(hierarchy_type).get("order")
+        return list(set(hierarchy_names))
+    else:
+        return []
+    
 
 def sort_and_add_columns(input_reshaped, allcols):
     missing_cols = set(allcols) - set(input_reshaped.columns)

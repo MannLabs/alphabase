@@ -21,6 +21,7 @@ def merge_protein_cols_and_config_dict(input_df, config_dict):
     input_df['protein'] = input_df.loc[:, protein_cols].astype('string').sum(axis=1)
 
     input_df = input_df.drop(columns = [x for x in protein_cols if x!='protein'])
+    index_names = []
     for hierarchy_type in ion_hierarchy.keys():
         df_subset = input_df.copy()
         ion_hierarchy_local = ion_hierarchy.get(hierarchy_type).get("order")
@@ -38,9 +39,13 @@ def merge_protein_cols_and_config_dict(input_df, config_dict):
 
         #df_subset = df_subset.set_index(quant_columns)
 
-        df_subset = add_merged_ionnames(df_subset, ion_hierarchy_local, ion_headers_grouped, quant_id_dict, hierarchy_type)
-        ion_dfs.append(df_subset)
+        df_subset = add_index_and_metadata_columns(df_subset, ion_hierarchy_local, ion_headers_grouped, quant_id_dict, hierarchy_type)
+        index_names += df_subset.index.names
+        #add_merged_ionnames(df_subset, ion_hierarchy_local, ion_headers_grouped, quant_id_dict, hierarchy_type)
+        ion_dfs.append(df_subset.reset_index())
+    
     input_df = pd.concat(ion_dfs, ignore_index=True)
+    input_df = input_df.set_index(list(set(index_names)))
     return input_df
 
 
@@ -117,42 +122,16 @@ def merge_protein_and_ion_cols(input_df, config_dict):
     return input_df
 
 
-
-def add_merged_ionnames(df_subset, ion_hierarchy_local, ion_headers_grouped, quant_id_dict, hierarchy_type):
-    """puts together the hierarchical ion names as a column in a given input dataframe"""
-    all_ion_headers = list(itertools.chain.from_iterable(ion_headers_grouped))
-    columns_to_index = [x for x in df_subset.columns if x not in all_ion_headers]
-    df_subset = df_subset.set_index(columns_to_index)
-
-    rows = df_subset[all_ion_headers].to_numpy()
-    ions = []
-
-    for row in rows: #iterate through dataframe
-        count = 0
-        ionstring = ""
-        for lvl_idx in range(len(ion_hierarchy_local)):
-            ionstring += f"{ion_hierarchy_local[lvl_idx]}"
-            for sublvl in ion_headers_grouped[lvl_idx]:
-                ionstring+= f"_{row[count]}_"
-                count+=1
-        ions.append(ionstring)
-    df_subset['quant_id'] = ions
-    df_subset = df_subset.reset_index()
-    if quant_id_dict!= None:
-        df_subset = df_subset.rename(columns = {quant_id_dict.get(hierarchy_type) : "quant_val"})
-    return df_subset
-
-
 def add_index_and_metadata_columns(df_subset, ion_hierarchy_local, ion_headers_grouped, quant_id_dict, hierarchy_type):
     """puts together the hierarchical ion names as a column in a given input dataframe"""
-
-    for idx in range(ion_hierarchy_local):
+    
+    for idx in range(len(ion_hierarchy_local)):
         hierarchy_name = ion_hierarchy_local[idx]
         headers = ion_headers_grouped[idx]
         df_subset[hierarchy_name] = df_subset[headers].apply(lambda x: '_'.join(x.astype(str)), axis=1)
     
     df_subset['quant_id'] = df_subset[ion_hierarchy_local].apply(lambda x: '_AND_'.join(x.astype(str)), axis=1)
-
+    df_subset = df_subset.set_index(ion_hierarchy_local)
     if quant_id_dict!= None:
         df_subset = df_subset.rename(columns = {quant_id_dict.get(hierarchy_type) : "quant_val"})
     return df_subset
