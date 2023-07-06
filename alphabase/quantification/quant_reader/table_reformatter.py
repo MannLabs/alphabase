@@ -18,7 +18,7 @@ def merge_protein_cols_and_config_dict(input_df, config_dict):
     quant_id_dict = config_dict.get('quant_ID')
 
     ion_dfs = []
-    input_df['protein'] = input_df.loc[:, protein_cols].astype('string').sum(axis=1)
+    input_df['protein'] = input_df.apply(lambda row : "_".join(row[protein_cols].astype('string')), axis = 1)
 
     input_df = input_df.drop(columns = [x for x in protein_cols if x!='protein'])
     index_names = []
@@ -116,8 +116,8 @@ def adapt_headers_on_extended_df(ion_headers_grouped, splitcol2sep):
 def merge_protein_and_ion_cols(input_df, config_dict):
     protein_cols =  config_dict.get("protein_cols")
     ion_cols = config_dict.get("ion_cols")
-    input_df['protein'] = input_df.loc[:, protein_cols].astype('string').sum(axis=1)
-    input_df['quant_id'] = input_df.loc[:, ion_cols].astype('string').sum(axis=1)
+    input_df['protein'] = input_df.apply(lambda row : "_".join(row[protein_cols].astype('string')), axis = 1)
+    input_df['quant_id'] = input_df.apply(lambda row : "_".join(row[ion_cols].astype('string')), axis = 1)
     input_df = input_df.rename(columns = {config_dict.get('quant_ID') : "quant_val"})
     return input_df
 
