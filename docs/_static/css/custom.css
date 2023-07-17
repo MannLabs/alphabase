@@ -1,0 +1,12 @@
+.toc-drawer {
+    width: 20em !important;
+}
+
+.sidebar-container {
+    width: 20em !important;
+}
+
+
+.autosummary.longtable{
+    width: 100%;
+}
