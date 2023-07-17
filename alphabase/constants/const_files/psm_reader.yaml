@@ -20,6 +20,7 @@ alphapept:
     'Phospho@T': 'pT'
     'Phospho@Y': 'pY'
     'Acetyl@Protein N-term': 'a'
+
 maxquant:
   reader_type: maxquant
   rt_unit: minute
@@ -45,6 +46,7 @@ maxquant:
     'genes': ['Gene Names','Gene names']
     'decoy': 'Reverse'
     'intensity': 'Intensity'
+
   modification_mapping:
     'Acetyl@Protein N-term': 
       - '_(Acetyl (Protein N-term))'
@@ -74,6 +76,7 @@ maxquant:
     'Deamidated@N': ['N(Deamidation (NQ))','N(de)']
     'Deamidated@Q': ['Q(Deamidation (NQ))','Q(de)']
     'GlyGly@K': ['K(GlyGly (K))', 'K(gl)']
+
 pfind:
   reader_type: pfind
   rt_unit: minute
@@ -117,7 +120,9 @@ msfragger_pepxml:
     - 'Glu->pyro-Glu@E^Any N-term'
     - 'Gln->pyro-Glu@Q^Any N-term'
     - 'Dimethyl@K' # Any N-term is not needed here as it will be infered in-the-fly
+    - 'Methyl@E' #an example of a PTM that can be C-term
   mod_mass_tol: 0.1 # Da
+
 diann:
   reader_type: diann
   rt_unit: minute
@@ -148,6 +153,7 @@ spectronaut_report:
     'uniprot_ids': 'PG.UniProtIds'
     'charge': 'charge'
   modification_mapping: 'maxquant'
+
 spectronaut:
   reader_type: spectronaut
   rt_unit: irt
@@ -172,3 +178,34 @@ spectronaut:
     'genes': ['Genes','Gene','GeneName','GeneNames']
   modification_mapping: 'maxquant'
   
+library_reader_base:
+  reader_type: library_reader_base
+  rt_unit: irt
+  fixed_C57: False
+  csv_sep: "\t"
+  mod_seq_columns:
+    - 'ModifiedPeptideSequence'
+    - 'ModifiedPeptide'
+    - 'ModifiedSequence'
+    - 'FullUniModPeptideName'
+    - 'LabeledSequence'
+    - 'FullUniModPeptideName'
+  column_mapping:
+    'raw_name': 'ReferenceRun'
+    'sequence': ['PeptideSequence', 'StrippedPeptide']
+    'modified_sequence': ['ModifiedPeptideSequence','ModifiedPeptide']
+    'charge': 'PrecursorCharge'
+    'rt': ['RT','iRT','Tr_recalibrated','RetentionTime','NormalizedRetentionTime']
+    'ccs': 'CCS'
+    'precursor_mz': 'PrecursorMz'
+    'mobility': ['Mobility','IonMobility','PrecursorIonMobility']
+    'proteins': ['ProteinId','ProteinID','ProteinName','Protein Name',]
+    'uniprot_ids': ['UniProtIds','UniProtID','UniprotId']
+    'genes': ['GeneName','Genes','Gene',]
+    'fragment_intensity': ['LibraryIntensity','RelativeIntensity', 'RelativeFragmentIntensity', 'RelativeFragmentIonIntensity']
+    'fragment_mz': ['ProductMz']
+    'fragment_type': ['FragmentType', 'FragmentIonType', 'ProductType', 'ProductIonType']
+    'fragment_charge' : ['FragmentCharge', 'FragmentIonCharge', 'ProductCharge', 'ProductIonCharge']
+    'fragment_series': ['FragmentSeriesNumber','FragmentNumber']
+    'fragment_loss_type': ['FragmentLossType', 'FragmentIonLossType', 'ProductLossType', 'ProductIonLossType']
+  modification_mapping: 'maxquant'
