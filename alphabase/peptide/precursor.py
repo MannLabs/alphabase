@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import numba
 import multiprocessing as mp
+from tqdm import tqdm
 
 from xxhash import xxh64_intdigest
 from functools import partial
@@ -542,3 +543,109 @@ def calc_precursor_isotope_mp(
         for df in processing:
             df_list.append(df)
     return pd.concat(df_list)
+
+def calc_precursor_isotope_intensity(
+    precursor_df,
+    max_isotope = 6, 
+    min_right_most_intensity = 0.001
+    ):
+    """Calculate isotope intensity values for precursor_df inplace.
+
+    Parameters
+    ----------
+
+    precursor_df : pd.DataFrame
+        Precursor_df to calculate isotope intensity
+
+    max_isotope : int
+        Max isotope number to calculate. Optional, by default 6
+
+    min_right_most_intensity : float
+        The minimal intensity value of the right-most peak relative to apex peak.
+
+    Returns
+    -------
+
+    pd.DataFrame
+        precursor_df with additional columns:
+    
+    """
+
+    isotope_dist = IsotopeDistribution()
+
+    col_names = ['i_{}'.format(i) for i in range(max_isotope)]
+
+    precursor_dist = np.zeros((len(precursor_df), max_isotope), dtype=np.float32)
+
+    for i in range(len(precursor_df)):
+
+        row = precursor_df.iloc[i]
+        dist, mono = isotope_dist.calc_formula_distribution(
+            get_mod_seq_formula(row['sequence'], row['mods'])
+        )
+        dist[dist <= min_right_most_intensity] = 0.
+        dist = dist / dist.sum()
+        precursor_dist[i] = dist[:max_isotope]
+
+    precursor_df[col_names] = precursor_dist
+
+    return precursor_df
+
+def calc_precursor_isotope_intensity_mp(
+    precursor_df,
+    max_isotope = 6,
+    min_right_most_intensity = 0.001,
+    mp_batch_size = 1000,
+    mp_process_num = 8,
+    progress_bar = True
+    ):
+
+    """Calculate isotope intensity values for precursor_df using multiprocessing.
+
+    Parameters
+    ----------
+
+    precursor_df : pd.DataFrame
+        Precursor_df to calculate isotope intensity
+
+    max_isotope : int
+        Max isotope number to calculate. Optional, by default 6
+
+    min_right_most_intensity : float
+        The minimal intensity value of the right-most peak relative to apex peak.
+
+    mp_batch_size : int
+        Multiprocessing batch size. Optional, by default 1000.
+
+    mp_process_num : int
+        Process number. Optional, by default 8
+
+    progress_bar : bool
+        Whether to show progress bar. Optional, by default True
+
+    Returns
+    -------
+
+    pd.DataFrame
+        precursor_df with additional columns i_0, i_1, i_2, ... i_{max_isotope-1}
+    
+    """
+
+    df_list = []
+    df_group = precursor_df.groupby('nAA')
+
+    with mp.get_context("spawn").Pool(mp_process_num) as p:
+        processing = p.imap(
+            partial(
+                calc_precursor_isotope_intensity,
+                max_isotope=max_isotope,
+                min_right_most_intensity=min_right_most_intensity
+            ), _batchify_df(df_group, mp_batch_size)
+        )
+
+        if progress_bar:
+            df_list = list(tqdm(processing, total=_count_batchify_df(df_group, mp_batch_size)))
+        else:
+            df_list = list(processing)
+
+    return pd.concat(df_list, ignore_index=True)

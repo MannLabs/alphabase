@@ -10,19 +10,8 @@ from alphabase.peptide.precursor import (
 )
 from alphabase.constants._const import CONST_FILE_FOLDER
 
+from alphabase.utils import get_delimiter
 from alphabase.yaml_utils import load_yaml
-
-def _get_delimiter(tsv_file:str):
-    if isinstance(tsv_file, io.StringIO):
-        # for unit tests
-        line = tsv_file.readline().strip()
-        tsv_file.seek(0)
-    else:
-        with open(tsv_file, "r") as f:
-            line = f.readline().strip()
-    if '\t' in line: return '\t'
-    elif ',' in line: return ','
-    else: return '\t'
 
 def translate_other_modification(
     mod_str: str, 
@@ -179,47 +168,11 @@ class PSMReaderBase(object):
         self.keep_decoy = keep_decoy
         self._min_max_rt_norm = False
         self._engine_rt_unit = rt_unit
+        self._min_irt_value = -100
+        self._max_irt_value = 200
 
     @property
     def psm_df(self)->pd.DataFrame:
-        return self._psm_df
-
-    def import_files(self, file_list:list):
-        df_list = []
-        for _file in file_list:
-            df_list.append(self.import_file(_file))
-        self._psm_df = pd.concat(df_list, ignore_index=True)
-        return self._psm_df
-
-    def import_file(self, _file:str)->pd.DataFrame:
-        """
-        This is the main entry function of PSM readers, 
-        it imports the file with following steps:
-        ```
-        origin_df = self._load_file(_file)
-        self._translate_columns(origin_df)
-        self._translate_decoy(origin_df)
-        self._translate_score(origin_df)
-        self._load_modifications(origin_df)
-        self._translate_modifications()
-        self._post_process(origin_df)
-        ```
-        
-        Parameters
-        ----------
-        _file: str
-            file path or file stream (io).
-        """
-        origin_df = self._load_file(_file)
-        if len(origin_df) == 0:
-            self._psm_df = pd.DataFrame()
-        else:
-            self._translate_columns(origin_df)
-            self._translate_decoy(origin_df)
-            self._translate_score(origin_df)
-            self._load_modifications(origin_df)
-            self._translate_modifications()
-            self._post_process(origin_df)
         return self._psm_df
 
     def add_modification_mapping(self, modification_mapping:dict):
@@ -314,6 +267,45 @@ class PSMReaderBase(object):
         else: 
             return self.import_file(_file)
 
+    def import_files(self, file_list:list):
+        df_list = []
+        for _file in file_list:
+            df_list.append(self.import_file(_file))
+        self._psm_df = pd.concat(df_list, ignore_index=True)
+        return self._psm_df
+
+    def import_file(self, _file:str)->pd.DataFrame:
+        """
+        This is the main entry function of PSM readers, 
+        it imports the file with following steps:
+        ```
+        origin_df = self._load_file(_file)
+        self._translate_columns(origin_df)
+        self._translate_decoy(origin_df)
+        self._translate_score(origin_df)
+        self._load_modifications(origin_df)
+        self._translate_modifications()
+        self._post_process(origin_df)
+        ```
+        
+        Parameters
+        ----------
+        _file: str
+            file path or file stream (io).
+        """
+        origin_df = self._load_file(_file)
+        if len(origin_df) == 0:
+            self._psm_df = pd.DataFrame()
+        else:
+            self._translate_columns(origin_df)
+            self._transform_table(origin_df)
+            self._translate_decoy(origin_df)
+            self._translate_score(origin_df)
+            self._load_modifications(origin_df)
+            self._translate_modifications()
+            self._post_process(origin_df)
+        return self._psm_df
+
     def _translate_decoy(
         self, 
         origin_df:pd.DataFrame=None
@@ -329,7 +321,7 @@ class PSMReaderBase(object):
         pass
 
     def _get_table_delimiter(self, _filename):
-        return _get_delimiter(_filename)
+        return get_delimiter(_filename)
 
     def normalize_rt(self):
         if 'rt' in self.psm_df.columns:
@@ -339,11 +331,19 @@ class PSMReaderBase(object):
             # elif self._engine_rt_unit == 'minute':
                 # self.psm_df['rt_sec'] = self.psm_df.rt*60
             min_rt = self.psm_df.rt.min()
-            if not self._min_max_rt_norm or min_rt > 0:
+            max_rt = self.psm_df.rt.max()
+            if min_rt < 0: # iRT
+                if min_rt < self._min_irt_value:
+                    min_rt = self._min_irt_value
+                if max_rt > self._max_irt_value:
+                    max_rt = self._max_irt_value
+
+            elif not self._min_max_rt_norm :
                 min_rt = 0
-            self.psm_df['rt_norm'] = (
+            
+            self.psm_df['rt_norm'] = ((
                 self.psm_df.rt - min_rt
-            ) / (self.psm_df.rt.max()-min_rt)
+            ) / (max_rt-min_rt)).clip(0, 1)
 
     def norm_rt(self):
         self.normalize_rt()
@@ -416,13 +416,29 @@ class PSMReaderBase(object):
         self._psm_df = pd.DataFrame()
         for col, map_col in mapped_columns.items():
             self._psm_df[col] = origin_df[map_col]
-                
+               
         if (
             'scan_num' in self._psm_df.columns and 
             not 'spec_idx' in self._psm_df.columns
         ):
             self._psm_df['spec_idx'] = self._psm_df.scan_num - 1
     
+    def _transform_table(self, origin_df:pd.DataFrame):
+        """
+        Transform the dataframe format if needed.
+        Usually only needed in combination with spectral libraries.
+
+        Parameters
+        ----------
+        origin_df : pd.DataFrame
+            df of other search engines
+
+        Returns
+        -------
+        None
+            Add information inplace into self._psm_df
+        """
+        pass
 
     def _load_modifications(self, origin_df:pd.DataFrame):
         """Read modification information from 'origin_df'. 

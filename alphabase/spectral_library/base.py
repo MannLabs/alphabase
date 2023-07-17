@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 import typing
 import logging
+import copy
+import warnings
 
 import alphabase.peptide.fragment as fragment
 import alphabase.peptide.precursor as precursor
@@ -131,6 +133,134 @@ class SpecLibBase(object):
         fragment types as columns (['b_z1', 'y_z2', ...])
         """
         return self._fragment_intensity_df
+    
+    def copy(self):
+        """
+        Return a copy of the spectral library object.
+        
+        Returns
+        -------
+        SpecLibBase
+            A copy of the spectral library object.
+        """
+        new_instance = self.__class__()
+        new_instance.__dict__ = copy.deepcopy(self.__dict__)
+
+        return new_instance
+    
+    def append(
+            self, 
+            other : 'SpecLibBase',
+            dfs_to_append : typing.List[str] = ['_precursor_df','_fragment_intensity_df', '_fragment_mz_df','_fragment_intensity_predicted_df'],
+        ):
+        """
+
+        Append another SpecLibBase object to the current one in place. 
+        All matching dataframes in the second object will be appended to the current one. Dataframes missing in the current object will be ignored.
+        All matching columns in the second object will be appended to the current one. Columns missing in the current object will be ignored.
+        Dataframes and columns missing in the second object will raise an error.
+        
+        Parameters
+        ----------
+        other : SpecLibBase
+            Second SpecLibBase object to be appended.
+            
+        dfs_to_append : list, optional
+            List of dataframes to be appended.
+            Defaults to ['_precursor_df','_fragment_intensity_df', '_fragment_mz_df','_fragment_intensity_predicted_df'].
+            
+        Returns
+        -------
+        None
+            
+        """
+
+        def check_matching_columns(df1, df2):
+            # check if the columns are compatible
+            # the first dataframe should have all the columns of the second dataframe, otherwise raise error
+            # the second dataframe may have more columns, but they will be dropped with a warning
+            missing_columns = set(df1.columns) - set(df2.columns)
+            if len(missing_columns) > 0:
+                raise ValueError(
+                    f"The columns are not compatible. {missing_columns} are missing in the dataframe which should be appended."
+                )
+            
+            missing_columns = set(df2.columns) - set(df1.columns)
+            if len(missing_columns) > 0:
+                warnings.warn(
+                    f"Unmatched columns in second dataframe will be dropped: {missing_columns}."
+                )
+
+            return df1.columns.values
+        
+        # get subset of dataframes and columns to append
+        # will fail if the speclibs are not compatible
+        matching_columns = []
+        for attr in dfs_to_append:
+            if hasattr(self, attr) and hasattr(other, attr):
+                matching_columns.append(
+                    check_matching_columns(
+                        getattr(self, attr), getattr(other, attr)
+                    )
+                )
+            elif hasattr(self, attr) and not hasattr(other, attr):
+                raise ValueError(
+                    f"The libraries can't be appended as {attr} is missing in the second library."
+                )
+            else:
+                matching_columns.append([])
+
+        n_fragments = []
+        # get subset of dfs_to_append starting with _fragment
+        for attr in dfs_to_append:
+            if attr.startswith('_fragment'):
+                if hasattr(self, attr):
+                    n_current_fragments = len(getattr(self, attr))
+                    if n_current_fragments > 0:
+                        n_fragments += [n_current_fragments]
+
+        if not np.all(np.array(n_fragments) == n_fragments[0]):
+            raise ValueError(
+                f"The libraries can't be appended as the number of fragments in the current libraries are not the same."
+            )
+        
+        for attr, matching_columns in zip(
+            dfs_to_append,
+            matching_columns
+        ):
+            if hasattr(self, attr) and hasattr(other, attr):
+                
+                current_df = getattr(self, attr)
+
+                # copy dataframes to avoid changing the original ones
+                other_df = getattr(other, attr)[matching_columns].copy()
+
+                if attr.startswith('_precursor'):
+                    
+                    frag_idx_increment = 0
+                    for fragment_df in ['_fragment_intensity_df', '_fragment_mz_df']:
+                        if hasattr(self, fragment_df):
+                            if len(getattr(self, fragment_df)) > 0:
+                                frag_idx_increment = len(getattr(self, fragment_df))
+   
+                    if 'frag_start_idx' in other_df.columns:
+                        other_df['frag_start_idx'] += frag_idx_increment
+
+                    if 'frag_stop_idx' in other_df.columns:
+                        other_df['frag_stop_idx'] += frag_idx_increment
+
+                setattr(
+                    self, attr,
+                    pd.concat(
+                        [
+                            current_df,
+                            other_df
+                        ],
+                        axis=0,
+                        ignore_index=True,
+                        sort=False
+                    ).reset_index(drop=True)
+                )
 
     def refine_df(self):
         """
@@ -192,6 +322,57 @@ class SpecLibBase(object):
         and clip the self._precursor_df using `self.clip_by_precursor_mz_`
         """
         self.calc_precursor_mz()
+
+    def calc_precursor_isotope_intensity(self,
+        multiprocessing : bool=True,
+        max_isotope = 6,
+        min_right_most_intensity = 0.001,
+        mp_batch_size = 1000,
+        mp_process_num = 8
+        ):
+        """
+        Calculate and append the isotope intensity columns into self.precursor_df.
+        See `alphabase.peptide.precursor.calc_precursor_isotope_intensity` for details.
+    
+        Parameters
+        ----------
+
+        max_isotope : int, optional
+            The maximum isotope to calculate.
+
+        min_right_most_intensity : float, optional
+            The minimum intensity of the right most isotope.
+
+        mp_batch_size : int, optional
+            The batch size for multiprocessing.
+
+        mp_processes : int, optional
+            The number of processes for multiprocessing.
+        
+        """
+
+        if 'precursor_mz' not in self._precursor_df.columns:
+            self.calc_precursor_mz()
+            self.clip_by_precursor_mz_()
+
+        if multiprocessing and len(self.precursor_df)>mp_batch_size:
+            (
+                self._precursor_df
+            ) = precursor.calc_precursor_isotope_intensity_mp(
+                self.precursor_df, 
+                max_isotope = max_isotope,
+                min_right_most_intensity = min_right_most_intensity,
+                mp_process_num = mp_process_num,
+            )
+        else:
+            (
+                self._precursor_df
+            ) = precursor.calc_precursor_isotope_intensity(
+                self.precursor_df, 
+                max_isotope = max_isotope,
+                min_right_most_intensity = min_right_most_intensity,
+            )
+            
     
     def calc_precursor_isotope(self, 
         multiprocessing:bool=True,
@@ -290,7 +471,41 @@ class SpecLibBase(object):
                     self._precursor_df, (self._fragment_mz_df,)
                 )
 
+    def calc_fragment_count(self):
+        """
+        Count the number of non-zero fragments for each precursor.
+        Creates the column 'n_fragments' in self._precursor_df.
+        """
 
+        self._precursor_df['n_fragments'] = fragment.calc_fragment_count(
+            self._precursor_df,
+            self._fragment_intensity_df
+        )
+    
+    def filter_fragment_number(
+            self, 
+            n_fragments_allowed_column_name='n_fragments_allowed', 
+            n_allowed=999
+        ):
+        """
+        Filter the top k fragments for each precursor based on a global setting and a precursor wise column.
+        The smaller one will be used. Can be used to make sure that target and decoy have the same number of fragments.
+
+        Parameters
+        ----------
+        n_fragments_allowed_column_name : str, optional, default 'n_fragments_allowed'
+            The column name in self._precursor_df that contains the number of fragments allowed for each precursor.
+
+        n_allowed : int, optional, default 999
+            The global setting for the number of fragments allowed for each precursor.
+        """
+
+        fragment.filter_fragment_number(
+            self._precursor_df,
+            self._fragment_intensity_df,
+            n_fragments_allowed_column_name=n_fragments_allowed_column_name,
+            n_allowed=n_allowed
+        )
 
     def _get_hdf_to_save(self, 
         hdf_file, 

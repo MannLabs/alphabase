@@ -2,7 +2,7 @@
 
 
 __project__ = "alphabase"
-__version__ = "1.0.2"
+__version__ = "1.0.3"
 __license__ = "Apache"
 __description__ = "An infrastructure Python package of the AlphaX ecosystem"
 __author__ = "Mann Labs"
@@ -39,5 +39,5 @@ __urls__ = {
     "PyPi": "https://pypi.org/project/alphabase/",
 }
 __extra_requirements__ = {
-    "development": "requirements_development.txt",
+    "development": "extra_requirements/development.txt",
 }
