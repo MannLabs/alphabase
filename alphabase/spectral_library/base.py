@@ -322,6 +322,57 @@ class SpecLibBase(object):
         and clip the self._precursor_df using `self.clip_by_precursor_mz_`
         """
         self.calc_precursor_mz()
+
+    def calc_precursor_isotope_intensity(self,
+        multiprocessing : bool=True,
+        max_isotope = 6,
+        min_right_most_intensity = 0.001,
+        mp_batch_size = 1000,
+        mp_process_num = 8
+        ):
+        """
+        Calculate and append the isotope intensity columns into self.precursor_df.
+        See `alphabase.peptide.precursor.calc_precursor_isotope_intensity` for details.
+    
+        Parameters
+        ----------
+
+        max_isotope : int, optional
+            The maximum isotope to calculate.
+
+        min_right_most_intensity : float, optional
+            The minimum intensity of the right most isotope.
+
+        mp_batch_size : int, optional
+            The batch size for multiprocessing.
+
+        mp_processes : int, optional
+            The number of processes for multiprocessing.
+        
+        """
+
+        if 'precursor_mz' not in self._precursor_df.columns:
+            self.calc_precursor_mz()
+            self.clip_by_precursor_mz_()
+
+        if multiprocessing and len(self.precursor_df)>mp_batch_size:
+            (
+                self._precursor_df
+            ) = precursor.calc_precursor_isotope_intensity_mp(
+                self.precursor_df, 
+                max_isotope = max_isotope,
+                min_right_most_intensity = min_right_most_intensity,
+                mp_process_num = mp_process_num,
+            )
+        else:
+            (
+                self._precursor_df
+            ) = precursor.calc_precursor_isotope_intensity(
+                self.precursor_df, 
+                max_isotope = max_isotope,
+                min_right_most_intensity = min_right_most_intensity,
+            )
+            
     
     def calc_precursor_isotope(self, 
         multiprocessing:bool=True,
