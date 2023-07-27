@@ -314,7 +314,6 @@ class SpecLibBase(object):
         and clip the self._precursor_df using `self.clip_by_precursor_mz_`
         """
         fragment.update_precursor_mz(self._precursor_df)
-        self.clip_by_precursor_mz_()
 
     def update_precursor_mz(self):
         """

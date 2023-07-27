@@ -21,7 +21,7 @@ from alphabase.peptide.mass_calc import (
 
 def refine_precursor_df(
     df:pd.DataFrame, 
-    drop_frag_idx = True,
+    drop_frag_idx = False,
     ensure_data_validity = False,
 )->pd.DataFrame:
     """ 
