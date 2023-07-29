@@ -174,7 +174,7 @@ def cleave_sequence_with_cut_pos(
 
 class Digest(object):
     def __init__(self,
-        protease:str='trypsin/P',
+        protease:str='trypsin',
         max_missed_cleavages:int=2,
         peptide_length_min:int=6,
         peptide_length_max:int=45,
@@ -210,6 +210,15 @@ class Digest(object):
                 protease
             )
 
+    def get_cut_positions(self, sequence):
+        cut_pos = [0]
+        cut_pos.extend([
+            m.start()+1 for m in 
+            self.regex_pattern.finditer(sequence)
+        ])
+        cut_pos.append(len(sequence))
+        return np.array(cut_pos, dtype=np.int64)
+
     def cleave_sequence(self,
         sequence:str,
     )->tuple:
@@ -230,13 +239,7 @@ class Digest(object):
             list[bool]: is protein C-term
         """
 
-        cut_pos = [0]
-        cut_pos.extend([
-            m.start()+1 for m in 
-            self.regex_pattern.finditer(sequence)
-        ])
-        cut_pos.append(len(sequence))
-        cut_pos = np.array(cut_pos, dtype=np.int64)
+        cut_pos = self.get_cut_positions(sequence)
 
         (
             seq_list, miss_list, nterm_list, cterm_list
