@@ -314,7 +314,6 @@ class SpecLibBase(object):
         and clip the self._precursor_df using `self.clip_by_precursor_mz_`
         """
         fragment.update_precursor_mz(self._precursor_df)
-        self.clip_by_precursor_mz_()
 
     def update_precursor_mz(self):
         """
@@ -322,6 +321,57 @@ class SpecLibBase(object):
         and clip the self._precursor_df using `self.clip_by_precursor_mz_`
         """
         self.calc_precursor_mz()
+
+    def calc_precursor_isotope_intensity(self,
+        multiprocessing : bool=True,
+        max_isotope = 6,
+        min_right_most_intensity = 0.001,
+        mp_batch_size = 1000,
+        mp_process_num = 8
+        ):
+        """
+        Calculate and append the isotope intensity columns into self.precursor_df.
+        See `alphabase.peptide.precursor.calc_precursor_isotope_intensity` for details.
+    
+        Parameters
+        ----------
+
+        max_isotope : int, optional
+            The maximum isotope to calculate.
+
+        min_right_most_intensity : float, optional
+            The minimum intensity of the right most isotope.
+
+        mp_batch_size : int, optional
+            The batch size for multiprocessing.
+
+        mp_processes : int, optional
+            The number of processes for multiprocessing.
+        
+        """
+
+        if 'precursor_mz' not in self._precursor_df.columns:
+            self.calc_precursor_mz()
+            self.clip_by_precursor_mz_()
+
+        if multiprocessing and len(self.precursor_df)>mp_batch_size:
+            (
+                self._precursor_df
+            ) = precursor.calc_precursor_isotope_intensity_mp(
+                self.precursor_df, 
+                max_isotope = max_isotope,
+                min_right_most_intensity = min_right_most_intensity,
+                mp_process_num = mp_process_num,
+            )
+        else:
+            (
+                self._precursor_df
+            ) = precursor.calc_precursor_isotope_intensity(
+                self.precursor_df, 
+                max_isotope = max_isotope,
+                min_right_most_intensity = min_right_most_intensity,
+            )
+            
     
     def calc_precursor_isotope(self, 
         multiprocessing:bool=True,
@@ -420,7 +470,41 @@ class SpecLibBase(object):
                     self._precursor_df, (self._fragment_mz_df,)
                 )
 
+    def calc_fragment_count(self):
+        """
+        Count the number of non-zero fragments for each precursor.
+        Creates the column 'n_fragments' in self._precursor_df.
+        """
 
+        self._precursor_df['n_fragments'] = fragment.calc_fragment_count(
+            self._precursor_df,
+            self._fragment_intensity_df
+        )
+    
+    def filter_fragment_number(
+            self, 
+            n_fragments_allowed_column_name='n_fragments_allowed', 
+            n_allowed=999
+        ):
+        """
+        Filter the top k fragments for each precursor based on a global setting and a precursor wise column.
+        The smaller one will be used. Can be used to make sure that target and decoy have the same number of fragments.
+
+        Parameters
+        ----------
+        n_fragments_allowed_column_name : str, optional, default 'n_fragments_allowed'
+            The column name in self._precursor_df that contains the number of fragments allowed for each precursor.
+
+        n_allowed : int, optional, default 999
+            The global setting for the number of fragments allowed for each precursor.
+        """
+
+        fragment.filter_fragment_number(
+            self._precursor_df,
+            self._fragment_intensity_df,
+            n_fragments_allowed_column_name=n_fragments_allowed_column_name,
+            n_allowed=n_allowed
+        )
 
     def _get_hdf_to_save(self, 
         hdf_file, 
