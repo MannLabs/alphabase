@@ -4,7 +4,7 @@ from . import longformat_reader
 from . import wideformat_reader
 
 
-def import_data(input_file, input_type_to_use = None, samples_subset = None, results_dir = None):
+def import_data(input_file, input_type_to_use = None, samples_subset = None, results_dir = None, use_alphaquant_format = False):
     """
     Function to import peptide level data. Depending on available columns in the provided file,
     the function identifies the type of input used (e.g. Spectronaut, MaxQuant, DIA-NN), reformats if necessary
@@ -17,7 +17,7 @@ def import_data(input_file, input_type_to_use = None, samples_subset = None, res
     if "aq_reformat" in input_file:
         file_to_read = input_file
     else:
-        file_to_read = reformat_and_save_input_file(input_file=input_file, input_type_to_use=input_type_to_use)
+        file_to_read = reformat_and_save_input_file(input_file=input_file, input_type_to_use=input_type_to_use, use_alphaquant_format = use_alphaquant_format)
     
     input_reshaped = pd.read_csv(file_to_read, sep = "\t", encoding = 'latin1', usecols=samples_subset)
     input_reshaped = input_reshaped.drop_duplicates(subset='quant_id')
@@ -29,7 +29,7 @@ def add_ion_protein_headers_if_applicable(samples_subset):
     else:
         return None
 
-def reformat_and_save_input_file(input_file, input_type_to_use = None):
+def reformat_and_save_input_file(input_file, input_type_to_use = None, use_alphaquant_format = False):
     
     input_type, config_dict_for_type, sep = config_dict_loader.get_input_type_and_config_dict(input_file, input_type_to_use)
     print(f"using input type {input_type}")
@@ -37,7 +37,7 @@ def reformat_and_save_input_file(input_file, input_type_to_use = None):
     outfile_name = f"{input_file}.{input_type}.aq_reformat.tsv"
 
     if format == "longtable":
-        longformat_reader.reformat_and_write_longtable_according_to_config(input_file, outfile_name,config_dict_for_type, sep = sep)
+        longformat_reader.reformat_and_write_longtable_according_to_config(input_file, outfile_name,config_dict_for_type, sep = sep, use_alphaquant_format=use_alphaquant_format)
     elif format == "widetable":
         wideformat_reader.reformat_and_write_wideformat_table(input_file, outfile_name, config_dict_for_type)
     else:

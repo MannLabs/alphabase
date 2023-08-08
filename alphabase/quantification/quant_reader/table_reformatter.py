@@ -2,7 +2,7 @@ import itertools
 import pandas as pd
 import copy
 
-def merge_protein_cols_and_config_dict(input_df, config_dict):
+def merge_protein_cols_and_config_dict(input_df, config_dict, use_alphaquant_format = False):
     """[summary]
     
     Args:
@@ -39,13 +39,17 @@ def merge_protein_cols_and_config_dict(input_df, config_dict):
 
         #df_subset = df_subset.set_index(quant_columns)
 
-        df_subset = add_index_and_metadata_columns(df_subset, ion_hierarchy_local, ion_headers_grouped, quant_id_dict, hierarchy_type)
+        df_subset = add_index_and_metadata_columns(df_subset, ion_hierarchy_local, ion_headers_grouped, quant_id_dict, hierarchy_type, use_alphaquant_format)
         index_names += df_subset.index.names
         #add_merged_ionnames(df_subset, ion_hierarchy_local, ion_headers_grouped, quant_id_dict, hierarchy_type)
         ion_dfs.append(df_subset.reset_index())
     
     input_df = pd.concat(ion_dfs, ignore_index=True)
-    input_df = input_df.set_index(list(set(index_names)))
+    if use_alphaquant_format:
+        input_df = input_df.drop(columns=list(set(index_names)))
+    else:
+        input_df = input_df.set_index(list(set(index_names)))
+
     return input_df
 
 
@@ -122,7 +126,7 @@ def merge_protein_and_ion_cols(input_df, config_dict):
     return input_df
 
 
-def add_index_and_metadata_columns(df_subset, ion_hierarchy_local, ion_headers_grouped, quant_id_dict, hierarchy_type):
+def add_index_and_metadata_columns(df_subset, ion_hierarchy_local, ion_headers_grouped, quant_id_dict, hierarchy_type, use_alphaquant_format):
     """puts together the hierarchical ion names as a column in a given input dataframe"""
     
     for idx in range(len(ion_hierarchy_local)):
@@ -131,6 +135,8 @@ def add_index_and_metadata_columns(df_subset, ion_hierarchy_local, ion_headers_g
         df_subset[hierarchy_name] = df_subset[headers].apply(lambda x: '_'.join(x.astype(str)), axis=1)
     
     df_subset['quant_id'] = df_subset[ion_hierarchy_local].apply(lambda x: '_AND_'.join(x.astype(str)), axis=1)
+
+
     df_subset = df_subset.set_index(ion_hierarchy_local)
     if quant_id_dict!= None:
         df_subset = df_subset.rename(columns = {quant_id_dict.get(hierarchy_type) : "quant_val"})
