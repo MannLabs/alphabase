@@ -18,7 +18,7 @@ def merge_protein_cols_and_config_dict(input_df, config_dict, use_alphaquant_for
     quant_id_dict = config_dict.get('quant_ID')
 
     ion_dfs = []
-    input_df['protein'] = input_df.apply(lambda row : "_".join(row[protein_cols].astype('string')), axis = 1)
+    input_df['protein'] = join_columns(input_df, protein_cols)
 
     input_df = input_df.drop(columns = [x for x in protein_cols if x!='protein'])
     index_names = []
@@ -39,7 +39,7 @@ def merge_protein_cols_and_config_dict(input_df, config_dict, use_alphaquant_for
 
         #df_subset = df_subset.set_index(quant_columns)
 
-        df_subset = add_index_and_metadata_columns(df_subset, ion_hierarchy_local, ion_headers_grouped, quant_id_dict, hierarchy_type, use_alphaquant_format)
+        df_subset = add_index_and_metadata_columns(df_subset, ion_hierarchy_local, ion_headers_grouped, quant_id_dict, hierarchy_type)
         index_names += df_subset.index.names
         #add_merged_ionnames(df_subset, ion_hierarchy_local, ion_headers_grouped, quant_id_dict, hierarchy_type)
         ion_dfs.append(df_subset.reset_index())
@@ -51,6 +51,13 @@ def merge_protein_cols_and_config_dict(input_df, config_dict, use_alphaquant_for
         input_df = input_df.set_index(list(set(index_names)))
 
     return input_df
+
+def join_columns(df, columns, separator='_'):
+    if len(columns) == 1:
+        return df[columns[0]].fillna('nan').astype(str)
+    else:
+        return df[columns].fillna('nan').astype(str).agg(separator.join, axis=1)
+
 
 
 def get_ionname_columns(ion_dict, ion_hierarchy_local):
@@ -120,21 +127,22 @@ def adapt_headers_on_extended_df(ion_headers_grouped, splitcol2sep):
 def merge_protein_and_ion_cols(input_df, config_dict):
     protein_cols =  config_dict.get("protein_cols")
     ion_cols = config_dict.get("ion_cols")
-    input_df['protein'] = input_df.apply(lambda row : "_".join(row[protein_cols].astype('string')), axis = 1)
-    input_df['quant_id'] = input_df.apply(lambda row : "_".join(row[ion_cols].astype('string')), axis = 1)
+    input_df['protein'] = join_columns(input_df, protein_cols)
+    input_df['quant_id'] = join_columns(input_df, ion_cols)
     input_df = input_df.rename(columns = {config_dict.get('quant_ID') : "quant_val"})
     return input_df
 
 
-def add_index_and_metadata_columns(df_subset, ion_hierarchy_local, ion_headers_grouped, quant_id_dict, hierarchy_type, use_alphaquant_format):
+def add_index_and_metadata_columns(df_subset, ion_hierarchy_local, ion_headers_grouped, quant_id_dict, hierarchy_type):
     """puts together the hierarchical ion names as a column in a given input dataframe"""
     
     for idx in range(len(ion_hierarchy_local)):
         hierarchy_name = ion_hierarchy_local[idx]
         headers = ion_headers_grouped[idx]
-        df_subset[hierarchy_name] = df_subset[headers].apply(lambda x: '_'.join(x.astype(str)), axis=1)
+        df_subset[hierarchy_name] = join_columns(df_subset, headers)# df_subset[headers].apply(lambda x: '_'.join(x.astype(str)), axis=1)
+        df_subset[hierarchy_name] = f"{hierarchy_name}_" +df_subset[hierarchy_name]
     
-    df_subset['quant_id'] = df_subset[ion_hierarchy_local].apply(lambda x: '_AND_'.join(x.astype(str)), axis=1)
+    df_subset['quant_id'] = join_columns(df_subset, ion_hierarchy_local, separator='_')# df_subset[ion_hierarchy_local].apply(lambda x: '_AND_'.join(x.astype(str)), axis=1)
 
 
     df_subset = df_subset.set_index(ion_hierarchy_local)
