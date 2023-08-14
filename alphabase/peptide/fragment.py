@@ -1036,6 +1036,87 @@ def join_left(
 
     return joined_index
 
+def calc_fragment_count(
+        precursor_df : pd.DataFrame, 
+        fragment_intensity_df : pd.DataFrame
+    ):
+
+    """
+    Calculates the number of fragments for each precursor.
+
+    Parameters
+    ----------
+
+    precursor_df : pd.DataFrame
+        precursor dataframe which contains the frag_start_idx and frag_stop_idx columns
+
+    fragment_intensity_df : pd.DataFrame
+        fragment intensity dataframe which contains the fragment intensities
+
+    Returns
+    ------- 
+    numpy.ndarray
+        array with the number of fragments for each precursor
+    """
+    if not set(['frag_start_idx', 'frag_stop_idx']).issubset(precursor_df.columns):
+        raise KeyError('frag_start_idx and frag_stop_idx not in dataframe')
+    
+    n_fragments = []
+    
+    for start, stop in zip(precursor_df['frag_start_idx'].values, precursor_df['frag_stop_idx'].values):
+        n_fragments += [np.sum(fragment_intensity_df.iloc[start:stop].values > 0)]
+
+    return np.array(n_fragments)
+  
+def filter_fragment_number(
+        precursor_df : pd.DataFrame, 
+        fragment_intensity_df : pd.DataFrame,
+        n_fragments_allowed_column_name : str = 'n_fragments_allowed',
+        n_allowed : int = 999
+    ):
+
+    """
+    Filters the number of fragments for each precursor.
+        
+    Parameters
+    ----------
+
+    precursor_df : pd.DataFrame
+
+        precursor dataframe which contains the frag_start_idx and frag_stop_idx columns
+
+    fragment_intensity_df : pd.DataFrame
+        fragment intensity dataframe which contains the fragment intensities
+
+    n_fragments_allowed_column_name : str, default = 'n_fragments_allowed'
+        column name in precursor_df which contains the number of allowed fragments
+
+    n_allowed : int, default = 999
+        number of fragments which should be allowed
+
+    Returns
+    -------
+    None
+    """
+
+    if not set(['frag_start_idx', 'frag_stop_idx']).issubset(precursor_df.columns):
+        raise KeyError('frag_start_idx and frag_stop_idx not in dataframe')
+
+    for i, (start_idx, stop_idx, n_allowed_lib) in enumerate(
+        zip(
+            precursor_df['frag_start_idx'].values, 
+            precursor_df['frag_stop_idx'].values, 
+            precursor_df[n_fragments_allowed_column_name].values
+            )
+        ):
+
+        _allowed = min(n_allowed_lib, n_allowed)
+
+        intensies = fragment_intensity_df.iloc[start_idx:stop_idx].values
+        flat_intensities = np.sort(intensies.flatten())[::-1]
+        intensies[intensies <= flat_intensities[_allowed]] = 0
+        fragment_intensity_df.iloc[start_idx:stop_idx] = intensies
+        
 def calc_fragment_cardinality(
         precursor_df,
         fragment_mz_df,
@@ -1047,13 +1128,8 @@ def calc_fragment_cardinality(
     Calculate the cardinality for a given fragment across a group of precursors.
     The cardinality is the number of precursors that have a given fragment at a given position.
 
-    All precursors within a group are expected to have the same number of fragments.
-
-    Parameters
-    ----------
-
-    precursor_df : pd.DataFrame
-        The precursor dataframe.
+    All precursors within a group are expected to have the same number of fragments.    
+    The precursor dataframe.
 
     fragment_mz_df : pd.DataFrame
         The fragment mz dataframe.

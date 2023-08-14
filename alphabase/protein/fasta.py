@@ -68,6 +68,12 @@ def load_all_proteins(fasta_file_list:list):
             protein_dict[protein['full_name']] = protein
     return protein_dict
 
+def load_fasta_list_as_protein_df(fasta_list:list):
+    protein_dict = load_all_proteins(fasta_list)
+    return pd.DataFrame().from_dict(
+        protein_dict, orient="index"
+    ).reset_index(drop=True)
+
 def concat_proteins(protein_dict:dict, sep='$')->str:
     """Concatenate all protein sequences into a single sequence, 
     seperated by `sep ($ by default)`.
@@ -168,7 +174,7 @@ def cleave_sequence_with_cut_pos(
 
 class Digest(object):
     def __init__(self,
-        protease:str='trypsin/P',
+        protease:str='trypsin',
         max_missed_cleavages:int=2,
         peptide_length_min:int=6,
         peptide_length_max:int=45,
@@ -204,6 +210,15 @@ class Digest(object):
                 protease
             )
 
+    def get_cut_positions(self, sequence):
+        cut_pos = [0]
+        cut_pos.extend([
+            m.start()+1 for m in 
+            self.regex_pattern.finditer(sequence)
+        ])
+        cut_pos.append(len(sequence))
+        return np.array(cut_pos, dtype=np.int64)
+
     def cleave_sequence(self,
         sequence:str,
     )->tuple:
@@ -224,13 +239,7 @@ class Digest(object):
             list[bool]: is protein C-term
         """
 
-        cut_pos = [0]
-        cut_pos.extend([
-            m.start()+1 for m in 
-            self.regex_pattern.finditer(sequence)
-        ])
-        cut_pos.append(len(sequence))
-        cut_pos = np.array(cut_pos, dtype=np.int64)
+        cut_pos = self.get_cut_positions(sequence)
 
         (
             seq_list, miss_list, nterm_list, cterm_list
@@ -466,9 +475,9 @@ def parse_labels(labels:list):
         if len(aa) == 1:
             label_aas += aa
             label_mod_dict[aa] = label
-        elif aa == 'Any N-term':
+        elif aa == 'Any N-term' or aa == "Any_N-term":
             nterm_label_mod = label
-        elif aa == 'Any C-term':
+        elif aa == 'Any C-term' or aa == "Any_C-term":
             cterm_label_mod = label
     return label_aas, label_mod_dict, nterm_label_mod, cterm_label_mod
         
@@ -638,7 +647,7 @@ class SpecLibFasta(SpecLibBase):
         precursor_charge_max:int = 4,
         precursor_mz_min:float = 400.0, 
         precursor_mz_max:float = 2000.0,
-        var_mods:list = ['Acetyl@Protein N-term','Oxidation@M'],
+        var_mods:list = ['Acetyl@Protein_N-term','Oxidation@M'],
         min_var_mod_num:int = 0,
         max_var_mod_num:int = 2,
         fix_mods:list = ['Carbamidomethyl@C'],
@@ -687,7 +696,7 @@ class SpecLibFasta(SpecLibBase):
 
         var_mods : list, optional
             list of variable modifications, 
-            by default ['Acetyl@Protein N-term','Oxidation@M']
+            by default ['Acetyl@Protein_N-term','Oxidation@M']
 
         max_var_mod_num : int, optional
             Minimal number of variable modifications on a peptide sequence, 
@@ -795,19 +804,19 @@ class SpecLibFasta(SpecLibBase):
                 else:
                     term_dict[site] = term_mod
             site, term = parse_term_mod(term_mod)
-            if term == "Any N-term":
+            if term == "Any N-term" or term == "Any_N-term":
                 _set_dict(pep_nterm, site, term_mod, 
                     allow_conflicts
                 )
-            elif term == 'Protein N-term':
+            elif term == 'Protein N-term' or term == "Protein_N-term":
                 _set_dict(prot_nterm, site, term_mod, 
                     allow_conflicts
                 )
-            elif term == 'Any C-term':
+            elif term == 'Any C-term' or term == "Any_C-term":
                 _set_dict(pep_cterm, site, term_mod, 
                     allow_conflicts
                 )
-            elif term == 'Protein C-term':
+            elif term == 'Protein C-term' or term == "Protein_C-term":
                 _set_dict(prot_cterm, site, term_mod, 
                     allow_conflicts
                 )
@@ -1207,9 +1216,9 @@ class SpecLibFasta(SpecLibBase):
             ```
             {
             -1: [], # not labeled
-            0: ['Dimethyl@Any N-term','Dimethyl@K'],
-            4: ['Dimethyl:2H(4)@Any N-term','Dimethyl:2H(4)@K'],
-            8: ['Dimethyl:2H(6)13C(2)@Any N-term','Dimethyl:2H(6)13C(2)@K'],
+            0: ['Dimethyl@Any_N-term','Dimethyl@K'],
+            4: ['Dimethyl:2H(4)@Any_N-term','Dimethyl:2H(4)@K'],
+            8: ['Dimethyl:2H(6)13C(2)@Any_N-term','Dimethyl:2H(6)13C(2)@K'],
             }
             ```.
             The key name could be int (highly recommended or 

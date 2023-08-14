@@ -23,7 +23,7 @@ project = 'alphabase'
 copyright = '2022, Mann Labs, MPIB'
 author = 'Mann Labs, MPIB'
 
-release = "1.0.2"
+release = "1.0.3"
 
 # -- General configuration ---------------------------------------------------
 
@@ -100,6 +100,10 @@ html_theme = 'furo'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+html_css_files = [
+    'css/custom.css',
+]
 
 autodoc_default_options = {
     'autosummary': True,

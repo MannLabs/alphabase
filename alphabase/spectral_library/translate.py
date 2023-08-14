@@ -93,8 +93,8 @@ def merge_precursor_fragment_df(
     frag_mass_head:str='FragmentMz',
     frag_inten_head:str='RelativeIntensity',
     frag_charge_head:str='FragmentCharge',
-    frag_loss_head:str='FragmentLossType',
     frag_series_head:str='FragmentNumber',
+    frag_loss_head:str='FragmentLossType',
     verbose=True,
 ):
     '''
@@ -143,8 +143,8 @@ def merge_precursor_fragment_df(
     df[frag_mass_head] = frag_mass_list
     df[frag_inten_head] = frag_inten_list
     df[frag_charge_head] = frag_charge_list
-    df[frag_loss_head] = frag_loss_list
     df[frag_series_head] = frag_num_list
+    df[frag_loss_head] = frag_loss_list
 
     return explode_multiple_columns(df, 
         [
@@ -152,8 +152,8 @@ def merge_precursor_fragment_df(
             frag_mass_head,
             frag_inten_head,
             frag_charge_head,
+            frag_series_head,
             frag_loss_head,
-            frag_series_head
         ]
     )
 
