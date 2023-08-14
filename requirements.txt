@@ -11,3 +11,4 @@ tqdm
 scikit-learn
 regex
 # pydivsufsort
+dask
