@@ -25,7 +25,7 @@ def import_data(input_file, input_type_to_use = None, samples_subset = None, res
 
 def add_ion_protein_headers_if_applicable(samples_subset):
     if samples_subset is not None:
-        return samples_subset + ["ion", "protein"]
+        return samples_subset + ["quant_id", "protein"]
     else:
         return None
 
