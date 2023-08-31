@@ -132,6 +132,8 @@ diann:
     'sequence': 'Stripped.Sequence'
     'charge': 'Precursor.Charge'
     'rt': 'RT'
+    'rt_start': 'RT.Start'
+    'rt_stop': 'RT.Stop'
     'ccs': 'CCS'
     'mobility': ['IM','IonMobility']
     'proteins': 'Protein.Names'

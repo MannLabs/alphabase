@@ -238,7 +238,7 @@ class MaxQuantReader(PSMReaderBase):
             mod_sep = "[]"
         else:
             mod_sep = "()"
-
+        
         (
             seqs,
             self._psm_df['mods'], 
