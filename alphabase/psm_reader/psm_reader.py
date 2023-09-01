@@ -425,6 +425,7 @@ class PSMReaderBase(object):
             not 'spec_idx' in self._psm_df.columns
         ):
             self._psm_df['spec_idx'] = self._psm_df.scan_num - 1
+        self._psm_df.fillna("",inplace=True)
     
     def _transform_table(self, origin_df:pd.DataFrame):
         """
