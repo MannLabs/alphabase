@@ -149,7 +149,7 @@ spectronaut_report:
   fixed_C57: False
   column_mapping:
     'raw_name': 'R.FileName'
-    'rt': 'EG.ApexRT'
+    'rt': ['EG.ApexRT','EG.MeanApexRT']
     'proteins': ['PG.ProteinNames','PG.ProteinGroups']
     'genes': 'PG.Genes'
     'uniprot_ids': 'PG.UniProtIds'

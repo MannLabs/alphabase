@@ -266,6 +266,7 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
         self.normalize_rt_by_raw_name()
         
         if 'mobility' in self._psm_df.columns:
+            self._psm_df['mobility'] = self._psm_df.mobility.replace("",0.0).astype(np.float64)
             self._psm_df['ccs'] = (
                 mobility_to_ccs_for_df(
                     self._psm_df,
