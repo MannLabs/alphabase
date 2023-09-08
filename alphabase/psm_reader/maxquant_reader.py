@@ -20,6 +20,27 @@ for mod_name,unimod_id in MOD_DF[['mod_name','unimod_id']].values:
         mod_to_unimod_dict[mod_name] = f"_(UniMod:{unimod_id})"
 
 @numba.njit
+def replace_parentheses_with_brackets(
+    modseq:str,
+):
+    mod_depth = 0
+    for i,aa in enumerate(modseq):
+        if aa == '(':
+            if mod_depth <= 0:
+                modseq = modseq[:i] + '[' + modseq[i+1:]
+            mod_depth += 1
+        elif aa == '[':
+            mod_depth += 1
+        elif aa == ')':
+            mod_depth -= 1
+            if mod_depth <= 0:
+                modseq = modseq[:i] + ']' + modseq[i+1:]
+        elif aa == ']':
+            mod_depth -= 1
+    return modseq
+        
+
+@numba.njit
 def parse_mod_seq(
     modseq:str,
     mod_sep:str='()',
@@ -209,11 +230,15 @@ class MaxQuantReader(PSMReaderBase):
         return df
 
     def _load_modifications(self, origin_df: pd.DataFrame):
-        if origin_df[self.mod_seq_column].str.contains('[',regex=False).any():
-            mod_sep = '[]'
+        if origin_df[self.mod_seq_column].str.contains('[', regex=False).any():
+            if origin_df[self.mod_seq_column].str.contains('(', regex=False).any():
+                origin_df[self.mod_seq_column] = origin_df[self.mod_seq_column].apply(
+                    replace_parentheses_with_brackets
+                )
+            mod_sep = "[]"
         else:
-            mod_sep = '()'
-
+            mod_sep = "()"
+        
         (
             seqs,
             self._psm_df['mods'], 

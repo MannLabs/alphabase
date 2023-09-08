@@ -134,6 +134,9 @@ psm_reader_provider.register_reader(
     'spectronaut', SpectronautReader
 )
 psm_reader_provider.register_reader(
+    "speclib_tsv", SpectronautReader
+)
+psm_reader_provider.register_reader(
     'openswath', SwathReader
 )
 psm_reader_provider.register_reader(

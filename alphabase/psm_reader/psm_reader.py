@@ -328,6 +328,9 @@ class PSMReaderBase(object):
             if self._engine_rt_unit == 'second':
                 # self.psm_df['rt_sec'] = self.psm_df.rt
                 self.psm_df['rt'] = self.psm_df.rt/60
+                if "rt_start" in self.psm_df.columns:
+                    self.psm_df["rt_start"] = self.psm_df.rt_start/60
+                    self.psm_df["rt_stop"] = self.psm_df.rt_stop/60
             # elif self._engine_rt_unit == 'minute':
                 # self.psm_df['rt_sec'] = self.psm_df.rt*60
             min_rt = self.psm_df.rt.min()
@@ -422,6 +425,7 @@ class PSMReaderBase(object):
             not 'spec_idx' in self._psm_df.columns
         ):
             self._psm_df['spec_idx'] = self._psm_df.scan_num - 1
+        self._psm_df.fillna("",inplace=True)
     
     def _transform_table(self, origin_df:pd.DataFrame):
         """
