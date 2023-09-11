@@ -244,7 +244,7 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
 
         csv_sep = self._get_table_delimiter(filename)
 
-        df = pd.read_csv(filename, sep=csv_sep)
+        df = pd.read_csv(filename, sep=csv_sep,keep_default_na=False)
         self._find_mod_seq_column(df)
         
         return df

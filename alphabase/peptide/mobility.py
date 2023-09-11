@@ -97,9 +97,10 @@ def mobility_to_ccs_for_df(
     if 'precursor_mz' not in precursor_df.columns:
         precursor_df = update_precursor_mz(precursor_df)
     if precursor_df[mobility_column].isna().any():
-        print(f"pd.NA is detected in the {mobility_column}, fillna with 0.0")
+        print(f"NA/nan is detected in the `{mobility_column}` column, fillna with 0.0")
         precursor_df[mobility_column] = precursor_df[mobility_column].fillna(0.0).astype(np.float64)
     if (precursor_df[mobility_column]=="").any():
+        print(f"Empty string is detected in the `{mobility_column}` column, fill with 0.0")
         precursor_df[mobility_column] = precursor_df[mobility_column].replace("",0.0).astype(np.float64)
     return mobility_to_ccs_bruker(
         precursor_df[mobility_column].values,

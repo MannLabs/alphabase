@@ -83,7 +83,7 @@ def load_mod_df(
     modloss_importance_level=1,
 ):
     global MOD_DF
-    MOD_DF = pd.read_table(tsv)
+    MOD_DF = pd.read_table(tsv,keep_default_na=False)
     _df = MOD_DF[MOD_DF.mod_name.str.contains(' ', regex=False)].copy()
     _df["mod_name"] = MOD_DF.mod_name.str.replace(' ', '_', regex=False)
     MOD_DF = pd.concat(

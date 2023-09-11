@@ -109,7 +109,7 @@ class pFindReader(PSMReaderBase):
         pass
 
     def _load_file(self, filename):
-        pfind_df = pd.read_csv(filename, index_col=False, sep='\t')
+        pfind_df = pd.read_csv(filename, index_col=False, sep='\t',keep_default_na=False)
         pfind_df.fillna('', inplace=True)
         pfind_df = pfind_df[pfind_df.Sequence != '']
         pfind_df['raw_name'] = pfind_df[

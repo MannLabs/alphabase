@@ -53,7 +53,7 @@ class SpectronautReader(MaxQuantReader):
     
     def _load_file(self, filename):
         self.csv_sep = self._get_table_delimiter(filename)
-        df = pd.read_csv(filename, sep=self.csv_sep)
+        df = pd.read_csv(filename, sep=self.csv_sep,keep_default_na=False)
         self._find_mod_seq_column(df)
         if 'ReferenceRun' in df.columns:
             df.drop_duplicates([
@@ -126,7 +126,7 @@ class DiannReader(SpectronautReader):
     
     def _load_file(self, filename):
         self.csv_sep = self._get_table_delimiter(filename)
-        df = pd.read_csv(filename, sep=self.csv_sep)
+        df = pd.read_csv(filename, sep=self.csv_sep,keep_default_na=False)
 
         return df
 
@@ -188,7 +188,7 @@ class SpectronautReportReader(MaxQuantReader):
     def _load_file(self, filename):
         self.mod_seq_column = 'ModifiedSequence'
         self.csv_sep = self._get_table_delimiter(filename)
-        df = pd.read_csv(filename, sep=self.csv_sep)
+        df = pd.read_csv(filename, sep=self.csv_sep,keep_default_na=False)
         df[[self.mod_seq_column,'charge']] = df[
             self.precursor_column
         ].str.split('.', expand=True, n=2)
