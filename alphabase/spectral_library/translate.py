@@ -37,10 +37,10 @@ def create_modified_sequence(
         '[]' or '()', default '[]'
 
     '''
-    mod_seq = seq_mods_sites[0]
-    if seq_mods_sites[1]:
-        mods = seq_mods_sites[1].split(';')
-        mod_sites = [int(i) for i in seq_mods_sites[2].split(';')]
+    mod_seq, mods, mod_sites = seq_mods_sites
+    if mods:
+        mods = mods.split(';')
+        mod_sites = [int(i) for i in mod_sites.split(';')]
         rev_order = np.argsort(mod_sites)[::-1]
         mod_sites = [mod_sites[rev_order[i]] for i in range(len(mod_sites))]
         mods = [mods[rev_order[i]] for i in range(len(mods))]
