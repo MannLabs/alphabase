@@ -224,7 +224,7 @@ class SpecLibDecoyProvider(object):
                 target_lib, **kwargs
             )
         else:
-            return None
+            raise ValueError(f'Decoy method {name} not found.')
 
 decoy_lib_provider:SpecLibDecoyProvider = SpecLibDecoyProvider()
 """
