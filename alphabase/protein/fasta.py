@@ -1340,6 +1340,11 @@ def annotate_precursor_df(
         updated precursor_df with `genes`, `proteins` and `cardinality` columns.
     
     """
+    if len(precursor_df) == 0:
+        return precursor_df
+    
+    if len(protein_df) == 0:
+        return precursor_df
 
     if 'sequence' not in precursor_df.columns:
         raise SystemError('precursor_df must contain a sequence column')
@@ -1378,6 +1383,9 @@ def annotate_precursor_df(
 
     if 'proteotypic' in precursor_df.columns:
         precursor_df.drop(columns=['proteotypic'], inplace=True)
+
+    if 'cardinality' in precursor_df.columns:
+        precursor_df.drop(columns=['cardinality'], inplace=True)
 
     failed_annotation = np.sum(peptide_df['genes'] == '')
     if failed_annotation > 0:
