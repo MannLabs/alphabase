@@ -5,6 +5,10 @@ import numba
 import os
 import itertools
 import copy
+import ahocorasick
+from tqdm import tqdm
+
+import warnings
 
 from Bio import SeqIO
 from typing import Union
@@ -46,13 +50,16 @@ def read_fasta_file(fasta_filename:str=""):
                 parts = record.id.split("|")  # pipe char
                 if len(parts) > 1:
                     id = parts[1]
+                    gene_org = parts[2]
                 else:
                     id = record.name
+                    gene_org = record.name
                 sequence = str(record.seq)
                 entry = {
                     "protein_id": id,
                     "full_name": record.name,
                     "gene_name": get_uniprot_gene_name(record.description),
+                    "gene_org": gene_org,
                     "description": record.description,
                     "sequence": sequence,
                 }
@@ -1310,3 +1317,78 @@ class SpecLibFasta(SpecLibBase):
             self.protein_df = _hdf.library.protein_df.values
         except (AttributeError, KeyError, ValueError, TypeError):
             print(f"No protein_df in {hdf_file}")
+
+def annotate_precursor_df(
+        precursor_df : pd.DataFrame,
+        protein_df : pd.DataFrame,
+    ):
+    """Annotate a list of peptides with genes and proteins by using an ahocorasick automaton.
+
+    Parameters
+    ----------
+
+    precursor_df : pd.DataFrame
+        A dataframe containing a sequence column.
+
+    protein_df : pd.DataFrame
+        protein dataframe containing `sequence` column.
+
+    Returns
+    -------
+
+    pd.DataFrame
+        updated precursor_df with `genes`, `proteins` and `cardinality` columns.
+    
+    """
+    if len(precursor_df) == 0:
+        return precursor_df
+    
+    if len(protein_df) == 0:
+        return precursor_df
+
+    if 'sequence' not in precursor_df.columns:
+        raise SystemError('precursor_df must contain a sequence column')
+        
+    peptide_df = pd.DataFrame({
+        'sequence': precursor_df['sequence'].unique()
+    })
+
+    # ahocorasick automaton will be used to index the protein_df
+    automaton = ahocorasick.Automaton()
+    for i, peptide_sequence in enumerate(peptide_df['sequence']):
+        automaton.add_word(peptide_sequence, i)
+    automaton.make_automaton()
+
+    genes = [[] for _ in range(len(peptide_df))]
+    proteins = [[] for _ in range(len(peptide_df))]
+
+    # iter as dictionary
+    for protein_entry in tqdm(protein_df.to_dict('records')):
+        idx = [idx for _, idx in automaton.iter(protein_entry['sequence'])]
+        idx = np.unique(idx)
+        if len(idx) > 0:
+            for i in idx:
+                genes[i].append(protein_entry['gene_org'])
+                proteins[i].append(protein_entry['protein_id'])
+
+    peptide_df['genes'] = [';'.join(g) for g in genes]
+    peptide_df['proteins'] = [';'.join(g) for g in proteins]
+    peptide_df['cardinality'] = [len(g) for g in genes]
+
+    if 'genes' in precursor_df.columns:
+        precursor_df.drop(columns=['genes'], inplace=True)
+
+    if 'proteins' in precursor_df.columns:
+        precursor_df.drop(columns=['proteins'], inplace=True)
+
+    if 'proteotypic' in precursor_df.columns:
+        precursor_df.drop(columns=['proteotypic'], inplace=True)
+
+    if 'cardinality' in precursor_df.columns:
+        precursor_df.drop(columns=['cardinality'], inplace=True)
+
+    failed_annotation = np.sum(peptide_df['genes'] == '')
+    if failed_annotation > 0:
+        warnings.warn(f'{failed_annotation} peptides could not be annotated')
+
+    return precursor_df.merge(peptide_df, on='sequence', how='left')
