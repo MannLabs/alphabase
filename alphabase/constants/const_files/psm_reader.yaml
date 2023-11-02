@@ -48,12 +48,19 @@ maxquant:
     'intensity': 'Intensity'
 
   modification_mapping:
+    'Dimethyl@K': 
+      - 'K(Dimethyl)'
+    'Dimethyl@R':
+      - 'R(Dimethyl)'
+    'Dimethyl@Any N-term':
+      - '(Dimethyl)'
     'Acetyl@Protein N-term': 
       - '_(Acetyl (Protein N-term))'
       - '_(ac)'
     'Carbamidomethyl@C': 
       - 'C(Carbamidomethyl (C))'
     'Oxidation@M': 
+      - 'M(Oxidation)'
       - 'M(Oxidation (M))'
       - 'M(ox)'
     'Phospho@S': 
