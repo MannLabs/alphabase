@@ -59,6 +59,7 @@ maxquant:
       - '_(ac)'
     'Carbamidomethyl@C': 
       - 'C(Carbamidomethyl (C))'
+      - 'C(Carbamidomethyl)'
     'Oxidation@M': 
       - 'M(Oxidation)'
       - 'M(Oxidation (M))'

@@ -214,8 +214,12 @@ class MaxQuantReader(PSMReaderBase):
                     mod_set.add(f'{mod[1:]}')
                 elif mod.startswith('('):
                     mod_set.add(f'_{mod}')
+                    mod_set.add(f'[{mod[1:-1]}]')
+                    mod_set.add(f'_[{mod[1:-1]}]')
                 elif mod.startswith('['):
                     mod_set.add(f'_{mod}')
+                    mod_set.add(f'({mod[1:-1]})')
+                    mod_set.add(f'_({mod[1:-1]})')
 
             self.modification_mapping[key] = list(mod_set)
 

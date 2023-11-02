@@ -42,6 +42,7 @@ def translate_other_modification(
         if mod in mod_dict:
             ret_mods.append(mod_dict[mod])
         else:
+            print(f'Warning: unknown modification: {mod}')
             return pd.NA
     return ";".join(ret_mods)
 
@@ -68,6 +69,7 @@ def keep_modifications(
     if not mod_str: return ""
     for mod in mod_str.split(';'):
         if not mod in mod_set:
+            print(f'Warning: unknown modification: {mod}')
             return pd.NA
     return mod_str
 

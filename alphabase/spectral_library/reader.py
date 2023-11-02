@@ -2,6 +2,7 @@ import typing
 import os
 import numpy as np
 import pandas as pd
+from tqdm import tqdm
 
 from alphabase.peptide.mobility import mobility_to_ccs_for_df
 from alphabase.io.psm_reader.dia_search_reader import SpectronautReader
@@ -167,9 +168,9 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
         non_fragment_columns = list(set(lib_df.columns) - set(fragment_columns))
 
         
-        for keys, df_group in lib_df.groupby(
+        for keys, df_group in tqdm(lib_df.groupby(
             non_fragment_columns
-        ):
+        )):
             precursor_columns = dict(zip(non_fragment_columns, keys))
 
             nAA = len(precursor_columns['sequence'])
@@ -248,6 +249,7 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
         self._find_mod_seq_column(df)
         
         return df
+
         
     def _post_process(
         self, 
@@ -257,6 +259,15 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
         Process the spectral library and create the `fragment_intensity`, `fragment_mz`dataframe.
         Reimplementation of `PSMReaderBase._post_process`.
         """
+
+        # identify unknown modifications
+        unknown_mods_df = self._psm_df[self._psm_df['mods'].isna()]['modified_sequence']
+
+        if len(unknown_mods_df) > 0:
+            self._identify_unknown_mods(unknown_mods_df.values)
+            print(f'Removing {len(unknown_mods_df)} precursor with unknown modifications')
+
+            self._psm_df = self._psm_df[~self._psm_df['mods'].isna()]
         
         if 'nAA' not in self._psm_df.columns:
             self._psm_df['nAA'] = self._psm_df.sequence.str.len()
