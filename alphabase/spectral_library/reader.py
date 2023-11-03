@@ -264,9 +264,7 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
         unknown_mods_df = self._psm_df[self._psm_df['mods'].isna()]['modified_sequence']
 
         if len(unknown_mods_df) > 0:
-            self._identify_unknown_mods(unknown_mods_df.values)
             print(f'Removing {len(unknown_mods_df)} precursor with unknown modifications')
-
             self._psm_df = self._psm_df[~self._psm_df['mods'].isna()]
         
         if 'nAA' not in self._psm_df.columns:
