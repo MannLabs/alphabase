@@ -30,3 +30,4 @@ xxhash
 regex
 pydivsufsort
 pyahocorasick
+pytest

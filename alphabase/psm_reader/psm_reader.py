@@ -3,6 +3,7 @@ import copy
 import io
 import pandas as pd
 import numpy as np
+import warnings
 
 import alphabase.peptide.mobility as mobility
 from alphabase.peptide.precursor import (
@@ -12,6 +13,8 @@ from alphabase.constants._const import CONST_FILE_FOLDER
 
 from alphabase.utils import get_delimiter
 from alphabase.yaml_utils import load_yaml
+
+
 
 def translate_other_modification(
     mod_str: str, 
@@ -36,17 +39,20 @@ def translate_other_modification(
         new mods in AlphaBase format seperated by ';'. if any
         modification is not in `mod_dict`, return pd.NA.
     '''
-    
-    if not mod_str: return ""
+
+    if mod_str == "" : return "", []
     ret_mods = []
+    unknown_mods = []
     for mod in mod_str.split(';'):
-        print(mod)
-        print(mod_dict)
         if mod in mod_dict:
             ret_mods.append(mod_dict[mod])
         else:
-            return pd.NA
-    return ";".join(ret_mods)
+            unknown_mods.append(mod)
+
+    if len(unknown_mods) > 0:
+        return pd.NA, unknown_mods
+    else:
+        return ";".join(ret_mods), []
 
 def keep_modifications(
     mod_str: str, 
@@ -470,10 +476,23 @@ class PSMReaderBase(object):
             if `mod` in `mod_names` is 
             not in `self.modification_mapping`
         '''
-        self._psm_df.mods = self._psm_df.mods.apply(
+
+        self._psm_df.mods, unknown_mods = zip(*self._psm_df.mods.apply(
             translate_other_modification, 
             mod_dict=self.rev_mod_mapping
-        )
+        ))
+
+        # accumulate unknown mods
+        unknwon_mod_set = set()
+        for mod_list in unknown_mods:
+            if len(mod_list) > 0:
+                unknwon_mod_set.update(mod_list)
+
+        if len(unknwon_mod_set) > 0:
+            warnings.warn(
+                f'Unknown modifications: {unknwon_mod_set}. Precursors with unknown modifications will be removed.'
+            )
+
 
     def _post_process(self, 
         origin_df:pd.DataFrame
