@@ -36,9 +36,12 @@ def translate_other_modification(
         new mods in AlphaBase format seperated by ';'. if any
         modification is not in `mod_dict`, return pd.NA.
     '''
+    
     if not mod_str: return ""
     ret_mods = []
     for mod in mod_str.split(';'):
+        print(mod)
+        print(mod_dict)
         if mod in mod_dict:
             ret_mods.append(mod_dict[mod])
         else:
