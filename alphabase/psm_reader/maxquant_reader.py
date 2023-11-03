@@ -210,7 +210,8 @@ class MaxQuantReader(PSMReaderBase):
                     mod_set.add(f'{mod[0]}[{mod[2:-1]}]')
                 elif mod[1] == '[':
                     mod_set.add(f'{mod[0]}({mod[2:-1]})')
-                elif mod.startswith('_'):
+                    
+                if mod.startswith('_'):
                     mod_set.add(f'{mod[1:]}')
                 elif mod.startswith('('):
                     mod_set.add(f'_{mod}')
