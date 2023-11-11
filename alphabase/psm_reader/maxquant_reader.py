@@ -193,19 +193,37 @@ class MaxQuantReader(PSMReaderBase):
                 self.modification_mapping[mod_name] = [unimod]
 
     def _extend_mod_brackets(self):
-        for key, mod_list in list(self.modification_mapping.items()):
-            extend_mods = []
-            for mod in mod_list:
-                if mod[1] == '(':
-                    extend_mods.append(f'{mod[0]}[{mod[2:-1]}]')
-                elif mod[1] == '[':
-                    extend_mods.append(f'{mod[0]}({mod[2:-1]})')
+        """update modification_mapping to include different bracket types.
+                
+        """
 
-            self.modification_mapping[key].extend(extend_mods)
-            
-            self.modification_mapping[key].extend(
-                [f'{mod[1:]}' for mod in mod_list if mod.startswith('_')]
-            )
+        for key, mod_list in list(self.modification_mapping.items()):
+
+            mod_set = set(mod_list)
+            # extend bracket types of modifications
+            # K(Acetyl) -> K[Acetyl]
+            # (Phospho) -> _(Phospho)
+            # _[Phospho] -> _(Phospho)
+            for mod in mod_list:
+
+                if mod[1] == '(':
+                    mod_set.add(f'{mod[0]}[{mod[2:-1]}]')
+                elif mod[1] == '[':
+                    mod_set.add(f'{mod[0]}({mod[2:-1]})')
+                    
+                if mod.startswith('_'):
+                    mod_set.add(f'{mod[1:]}')
+                elif mod.startswith('('):
+                    mod_set.add(f'_{mod}')
+                    mod_set.add(f'[{mod[1:-1]}]')
+                    mod_set.add(f'_[{mod[1:-1]}]')
+                elif mod.startswith('['):
+                    mod_set.add(f'_{mod}')
+                    mod_set.add(f'({mod[1:-1]})')
+                    mod_set.add(f'_({mod[1:-1]})')
+
+            self.modification_mapping[key] = list(mod_set)
+
     
     def _translate_decoy(self, origin_df=None):
         if 'decoy' in self._psm_df.columns:
@@ -220,7 +238,7 @@ class MaxQuantReader(PSMReaderBase):
 
     def _load_file(self, filename):
         csv_sep = self._get_table_delimiter(filename)
-        df = pd.read_csv(filename, sep=csv_sep)
+        df = pd.read_csv(filename, sep=csv_sep,keep_default_na=False)
         self._find_mod_seq_column(df)
         df = df[~pd.isna(df['Retention time'])]
         df.fillna('', inplace=True)
