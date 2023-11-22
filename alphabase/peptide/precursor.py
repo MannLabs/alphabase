@@ -577,6 +577,8 @@ def calc_precursor_isotope_intensity(
 
     precursor_dist = np.zeros((len(precursor_df), max_isotope), dtype=np.float32)
 
+    mono_idxes = np.zeros(len(precursor_df),dtype=np.int32)
+
     for i in range(len(precursor_df)):
 
         row = precursor_df.iloc[i]
@@ -584,10 +586,30 @@ def calc_precursor_isotope_intensity(
             get_mod_seq_formula(row['sequence'], row['mods'])
         )
         dist[dist <= min_right_most_intensity] = 0.
-        dist = dist / dist.sum()
-        precursor_dist[i] = dist[:max_isotope]
+        dist = dist / dist[mono] # normalize on mono peak
+
+        # mono should be always included in the i_x list
+        # after clipping max_isotope isotopes
+        mono_left_half_isotope = max_isotope//2
+        mono_right_half_isotope = (
+            mono_left_half_isotope if max_isotope%2==0 
+            else (mono_left_half_isotope+1)
+        )
+        if mono < mono_left_half_isotope:
+            precursor_dist[i] = dist[:max_isotope]
+            mono_idxes[i] = mono
+        elif mono + mono_right_half_isotope >= len(dist):
+            precursor_dist[i] = dist[-max_isotope:]
+            mono_idxes[i] = max_isotope+mono-len(dist)+1
+        else:
+            precursor_dist[i] = dist[
+                mono-mono_left_half_isotope:
+                mono+mono_right_half_isotope
+            ]
+            mono_idxes[i] = mono-mono_left_half_isotope
 
     precursor_df[col_names] = precursor_dist
+    precursor_df["mono_isotope_idx"] = mono_idxes
 
     return precursor_df
 
