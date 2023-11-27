@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import numba
+import typing
 import multiprocessing as mp
 from tqdm import tqdm
 
@@ -547,8 +548,9 @@ def calc_precursor_isotope_mp(
 def calc_precursor_isotope_intensity(
     precursor_df,
     max_isotope = 6, 
-    min_right_most_intensity = 0.001
-    ):
+    min_right_most_intensity = 0.001,
+    normalize:typing.Literal['mono','sum'] = "sum",
+):
     """Calculate isotope intensity values for precursor_df inplace.
 
     Parameters
@@ -586,7 +588,6 @@ def calc_precursor_isotope_intensity(
             get_mod_seq_formula(row['sequence'], row['mods'])
         )
         dist[dist <= min_right_most_intensity] = 0.
-        dist = dist / dist[mono] # normalize on mono peak
 
         # mono should be always included in the i_x list
         # after clipping max_isotope isotopes
@@ -608,6 +609,13 @@ def calc_precursor_isotope_intensity(
             ]
             mono_idxes[i] = mono-mono_left_half_isotope
 
+    if normalize == "sum":
+        precursor_dist /= np.sum(precursor_dist, axis=1, keepdims=True)
+    else:
+        precursor_dist /= precursor_dist[
+            np.arange(len(precursor_dist)), mono_idxes
+        ].reshape(-1,1)
+
     precursor_df[col_names] = precursor_dist
     precursor_df["mono_isotope_idx"] = mono_idxes
 
@@ -617,10 +625,11 @@ def calc_precursor_isotope_intensity_mp(
     precursor_df,
     max_isotope = 6,
     min_right_most_intensity = 0.001,
+    normalize:typing.Literal['mono','sum'] = "sum",
     mp_batch_size = 1000,
     mp_process_num = 8,
-    progress_bar = True
-    ):
+    progress_bar = True,
+):
 
     """Calculate isotope intensity values for precursor_df using multiprocessing.
 
@@ -661,7 +670,8 @@ def calc_precursor_isotope_intensity_mp(
             partial(
                 calc_precursor_isotope_intensity,
                 max_isotope=max_isotope,
-                min_right_most_intensity=min_right_most_intensity
+                min_right_most_intensity=min_right_most_intensity,
+                normalize=normalize,
             ), _batchify_df(df_group, mp_batch_size)
         )
 
