@@ -550,7 +550,7 @@ def calc_precursor_isotope_intensity(
     max_isotope = 6, 
     min_right_most_intensity = 0.001,
     normalize:typing.Literal['mono','sum'] = "sum",
-):
+)->pd.DataFrame:
     """Calculate isotope intensity values for precursor_df inplace.
 
     Parameters
@@ -629,7 +629,7 @@ def calc_precursor_isotope_intensity_mp(
     mp_batch_size = 1000,
     mp_process_num = 8,
     progress_bar = True,
-):
+)->pd.DataFrame:
 
     """Calculate isotope intensity values for precursor_df using multiprocessing.
 

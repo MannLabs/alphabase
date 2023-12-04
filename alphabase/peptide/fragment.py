@@ -588,10 +588,12 @@ def flatten_fragments(
         input precursor dataframe which contains the frag_start_idx and frag_stop_idx columns
     
     fragment_mz_df : pd.DataFrame
-        input fragment mz dataframe of shape (N, T) which contains N * T fragment mzs
+        input fragment mz dataframe of shape (N, T) which contains N * T fragment mzs.
+        Fragments with mz==0 will be excluded.
     
     fragment_intensity_df : pd.DataFrame
-        input fragment mz dataframe of shape (N, T) which contains N * T fragment mzs
+        input fragment intensity dataframe of shape (N, T) which contains N * T fragment mzs.
+        Could be empty (len==0) to exclude intensity values.
     
     min_fragment_intensity : float, optional
         minimum intensity which should be retained. Defaults to -1
