@@ -30,8 +30,12 @@ AA_Composition:dict = {}
 
 def replace_atoms(atom_replace_dict:typing.Dict):
     for aa, formula in list(AA_Formula.items()):
-        for aa_from, aa_to in atom_replace_dict.items():
-            AA_Formula[aa] = formula.replace(aa_from, aa_to)
+        atom_comp = dict(parse_formula(formula))
+        for atom_from, atom_to in atom_replace_dict.items():
+            if atom_from in atom_comp:
+                atom_comp[atom_to] = atom_comp[atom_from]
+                del atom_comp[atom_from]
+        AA_Formula[aa] = "".join([f"{atom}({n})" for atom, n in atom_comp.items()])
 
 def reset_AA_mass()->np.ndarray:
     """AA mass in np.array with shape (128,)"""
