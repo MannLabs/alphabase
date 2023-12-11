@@ -486,10 +486,10 @@ def _count_batchify_df(df_group, mp_batch_size):
 def calc_precursor_isotope_mp(
     precursor_df:pd.DataFrame, 
     processes:int=8,
-    mp_batch_size:int=100000,
+    mp_batch_size:int=10000,
     process_bar=None,
     min_right_most_intensity:float=0.2,
-    min_precursor_num_to_run_mp:int=1000,
+    min_precursor_num_to_run_mp:int=10000,
 )->pd.DataFrame:
     """`calc_precursor_isotope` is not that fast for large dataframes, 
     so here we use multiprocessing for faster isotope pattern calculation. 
