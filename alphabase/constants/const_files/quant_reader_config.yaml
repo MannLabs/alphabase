@@ -1068,12 +1068,12 @@ fragpipe_precursors:
   quant_pre_or_suffix: " Intensity"
   protein_cols:
    - Protein
-  ion_cols:
-   - Modified Sequence
   ion_hierarchy:
     sequence_int:
-      order: [MOD]
+      order: [SEQ, MOD]
       mapping:
+        SEQ:
+          - Peptide Sequence
         MOD: 
           - Modified Sequence
   use_iontree: False
