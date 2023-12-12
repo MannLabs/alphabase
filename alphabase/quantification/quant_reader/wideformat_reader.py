@@ -11,11 +11,11 @@ def reformat_and_write_wideformat_table(peptides_tsv, outfile_name, config_dict)
     input_df = quantreader_utils.filter_input(filter_dict, input_df)
     #input_df = merge_protein_and_ion_cols(input_df, config_dict)
     input_df = table_reformatter.merge_protein_cols_and_config_dict(input_df, config_dict)
-    if 'quant_prefix' in config_dict.keys():
-        quant_prefix = config_dict.get('quant_prefix')
-        headers = ['protein', 'quant_id'] + list(filter(lambda x: x.startswith(quant_prefix), input_df.columns))
+    if 'quant_pre_or_suffix' in config_dict.keys():
+        quant_pre_or_suffix = config_dict.get('quant_pre_or_suffix')
+        headers = ['protein', 'quant_id'] + list(filter(lambda x: x.startswith(quant_pre_or_suffix) or x.endswith(quant_pre_or_suffix), input_df.columns))
         input_df = input_df[headers]
-        input_df = input_df.rename(columns = lambda x : x.replace(quant_prefix, ""))
+        input_df = input_df.rename(columns = lambda x : x.replace(quant_pre_or_suffix, ""))
 
     #input_df = input_df.reset_index()
     

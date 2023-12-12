@@ -21,9 +21,10 @@ alphapept_peptides:
          
   use_iontree: False
 
-maxquant_peptides:
+
+maxquant_peptides_leading_razor_protein:
   format: widetable
-  quant_prefix: "Intensity "
+  quant_pre_or_suffix: "Intensity "
   protein_cols:
    - Leading razor protein
   ion_cols:
@@ -45,33 +46,10 @@ maxquant_peptides:
       param: Potential contaminant
       comparator: "!="
       value: "+"
-  ml_level: SEQ
-  use_iontree: False
-
-maxquant_peptides_benchmarking:
-  format: widetable
-  quant_prefix: "Intensity "
-  protein_cols:
-   - Protein group IDs
-  ion_cols:
-   - Sequence
-  ion_hierarchy:
-    sequence_int:
-      order: [SEQ, MOD]
-      mapping:
-        SEQ: 
-          - Sequence
-        MOD:
-          - Mass
-  filters:
-    reverse:
-      param: Reverse
+    amino_acid:
+      param: Amino acid before
       comparator: "!="
-      value: "+"
-    contaminant:
-      param: Potential contaminant
-      comparator: "!="
-      value: "+"
+      value: "XYZ"
   ml_level: SEQ
   use_iontree: False
 
@@ -1084,3 +1062,18 @@ diann_fragion_isotopes_gene_level:
          - Precursor.Charge
   use_iontree: True
   ml_level: CHARGE
+
+fragpipe_precursors:
+  format: widetable
+  quant_pre_or_suffix: " Intensity"
+  protein_cols:
+   - Protein
+  ion_cols:
+   - Modified Sequence
+  ion_hierarchy:
+    sequence_int:
+      order: [MOD]
+      mapping:
+        MOD: 
+          - Modified Sequence
+  use_iontree: False
