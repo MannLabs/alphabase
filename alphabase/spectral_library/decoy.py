@@ -1,15 +1,92 @@
 import copy
+from typing import Any
 import pandas as pd
+import multiprocessing as mp
+from functools import partial
 from alphabase.spectral_library.base import SpecLibBase
 from alphabase.io.hdf import HDF_File
+
+def _batchify_series(series, mp_batch_size):
+    """Internal funciton for multiprocessing"""
+    for i in range(0, len(series), mp_batch_size):
+        yield series.iloc[i:i+mp_batch_size]
+class BaseDecoyGenerator(object):
+    """
+    Base class for decoy generator.
+    A class is used instead of a function to make as it needs to be pickled for multiprocessing.
+    """
+    def __call__(self, series: pd.Series) -> pd.Series:
+        """
+        Main entry of this class, it calls follows methods:
+        - self._decoy()
+        """
+
+        return series.apply(self._decoy)
+
+    def _decoy(self, sequence:str) -> str:
+        raise NotImplementedError('Subclass should implement this method.')
+
+class DIANNDecoyGenerator(BaseDecoyGenerator):
+    def __init__(self, 
+            raw_AAs:str = 'GAVLIFMPWSCTYHKRQENDBJOUXZ',
+            mutated_AAs:str = 'LLLVVLLLLTSSSSLLNDQEVVVVVV'
+        ):
+
+        """
+        DiaNN-like decoy peptide generator
+
+        Parameters
+        ----------
+
+        raw_AAs : str, optional
+            AAs those DiaNN decoy from. 
+            Defaults to 'GAVLIFMPWSCTYHKRQENDBJOUXZ'.
+
+        mutated_AAs : str, optional
+            AAs those DiaNN decoy to. 
+            Defaults to 'LLLVVLLLLTSSSSLLNDQEVVVVVV'.
+            
+        """
+        self.raw_AAs = raw_AAs
+        self.mutated_AAs = mutated_AAs
+
+
+    def _decoy(self, sequence: str) -> str:
+        return sequence[0]+ \
+        self.mutated_AAs[self.raw_AAs.index(sequence[1])]+ \
+        sequence[2:-2]+ \
+        self.mutated_AAs[self.raw_AAs.index(sequence[-2])]+ \
+        sequence[-1]
+
+class PseudoReverseDecoyGenerator(BaseDecoyGenerator):
+    def __init__(self, fix_C_term:bool=True):
+        """
+        Pseudo-reverse decoy generator.
+
+        Parameters
+        ----------
+
+        fix_C_term : bool, optional
+            If fix C-term AA when decoy. 
+            Defaults to True.
+        """
+
+        self.fix_C_term = fix_C_term
+
+    def _decoy(self, sequence: str) -> str:
+        if self.fix_C_term:
+            return (sequence[:-1][::-1] + sequence[-1])
+        else:
+            return sequence[::-1]
 
 class SpecLibDecoy(SpecLibBase):
     """
     Pseudo-reverse peptide decoy generator.
     """
+
     def __init__(self, 
         target_lib:SpecLibBase,
-        fix_C_term = True,
+        decoy_generator: Any = PseudoReverseDecoyGenerator,
         **kwargs,
     ):
         """
@@ -29,26 +106,48 @@ class SpecLibDecoy(SpecLibBase):
         """
         self.__dict__ = copy.deepcopy(target_lib.__dict__)
         self.target_lib = target_lib
-        self.fix_C_term = fix_C_term
 
-    def translate_to_decoy(self):
+        self.generator = decoy_generator(
+            **kwargs
+        )
+
+    def translate_to_decoy(
+            self, 
+            multiprocessing : bool = True,
+            mp_batch_size=10000, 
+            mp_process_num: int = 8):
         """
         Main entry of this class, it calls follows methods:
         - self.decoy_sequence()
-        - self._decoy_mods()
-        - self._decoy_meta()
-        - self._decoy_frags()
+
+        Parameters
+        ----------
+
+        multiprocessing : bool, optional
+            If true use multiprocessing.
+            Defaults to True.
+
+        mp_batch_size : int, optional
+            Batch size for multiprocessing.
+            Defaults to 10000.
+
+        mp_process_num : int, optional
+            Number of processes for multiprocessing.
+            Defaults to 8.
+            
         """
-        self.decoy_sequence()
-        self._decoy_mods()
-        self._decoy_meta()
-        self._decoy_frags()
+        self.decoy_sequence(
+            multiprocessing=multiprocessing,
+            mp_batch_size=mp_batch_size,
+            mp_process_num=mp_process_num
+        )
 
     def append_to_target_lib(self):
         """
         A decoy method should define how to append itself to target_lib.
         Sub-classes should override this method when necessary. 
         """
+        self._remove_target_seqs()
         self._precursor_df['decoy'] = 1
         self.target_lib._precursor_df['decoy'] = 0
         self.target_lib._precursor_df = pd.concat((
@@ -57,24 +156,51 @@ class SpecLibDecoy(SpecLibBase):
         ), ignore_index=True)
         self.target_lib.refine_df()
 
-    def decoy_sequence(self):
+    def decoy_sequence(
+            self, 
+            multiprocessing: bool = True, 
+            mp_batch_size=10000, 
+            mp_process_num: int = 8
+        ):
         """
         Generate decoy sequences from `self.target_lib`.
-        Sub-classes should override this method when necessary. 
+        Sub-classes should override the `_decoy_seq` method when necessary.
+
+        Parameters
+        ----------
+
+        multiprocessing : bool, optional
+            If true use multiprocessing.
+            Defaults to True.
+
+        mp_batch_size : int, optional
+            Batch size for multiprocessing.
+            Defaults to 10000.
+
+        mp_process_num : int, optional
+            Number of processes for multiprocessing.
+            Defaults to 8.
         """
-        self._decoy_seq()
+
+        if not multiprocessing or self._precursor_df.shape[0] < mp_batch_size:
+            self._precursor_df['sequence'] = self.generator(self._precursor_df['sequence'])
+            self._remove_target_seqs()
+            return
+            
+        sequence_batches = list(_batchify_series(
+            self._precursor_df['sequence'], mp_batch_size
+        ))
+
+        series_list = []
+        with mp.get_context("spawn").Pool(mp_process_num) as p:
+            processing = p.imap(
+                self.generator,
+                sequence_batches
+            )
+            for df in processing:
+                series_list.append(df)
+        self._precursor_df['sequence'] = pd.concat(series_list)
         self._remove_target_seqs()
-
-    def append_decoy_sequence(self):
-        pass
-
-    def _decoy_seq(self):
-        (
-            self._precursor_df.sequence
-        ) = self._precursor_df.sequence.apply(
-            lambda x: (x[:-1][::-1]+x[-1])
-             if self.fix_C_term else x[::-1]
-        )
 
     def _remove_target_seqs(self):
         target_seqs = set(
@@ -86,110 +212,6 @@ class SpecLibDecoy(SpecLibBase):
             ].index, inplace=True
         )
 
-    def _decoy_meta(self):
-        """
-        Decoy for CCS/RT or other meta data
-        """
-        pass
-
-    def _decoy_mods(self):
-        """
-        Decoy for modifications and modification sites
-        """
-        pass
-
-    def _decoy_frags(self):
-        """
-        Decoy for fragment masses and intensities
-        """
-        self._decoy_fragment_mz()
-        self._decoy_fragment_intensity()
-    
-    def _decoy_fragment_mz(self):
-        pass
-        
-    def _decoy_fragment_intensity(self):
-        pass
-
-    def _get_hdf_to_save(self, 
-        hdf_file, 
-        delete_existing=False
-    ):
-        _hdf = HDF_File(
-            hdf_file, 
-            read_only=False, 
-            truncate=True,
-            delete_existing=delete_existing
-        )
-        return _hdf.library.decoy
-
-    def _get_hdf_to_load(self,
-        hdf_file, 
-    ):
-        _hdf = HDF_File(
-            hdf_file,
-        )
-        return _hdf.library.decoy
-
-    def save_hdf(self, hdf_file):
-        _hdf = HDF_File(
-            hdf_file, 
-            read_only=False, 
-            truncate=True,
-            delete_existing=False
-        )
-        _hdf.library.decoy = {
-            'precursor_df': self._precursor_df,
-            'fragment_mz_df': self._fragment_mz_df,
-            'fragment_intensity_df': self._fragment_intensity_df,
-        }
-
-    def load_hdf(self, hdf_file):
-        _hdf = HDF_File(
-            hdf_file,
-        )
-        _hdf_lib = _hdf.library
-        self._precursor_df = _hdf_lib.decoy.precursor_df.values
-        self._fragment_mz_df = _hdf_lib.decoy.fragment_mz_df.values
-        self._fragment_intensity_df = _hdf_lib.decoy.fragment_intensity_df.values
-
-class SpecLibDecoyDiaNN(SpecLibDecoy):
-    def __init__(self, 
-        target_lib:SpecLibBase,
-        raw_AAs:str = 'GAVLIFMPWSCTYHKRQENDBJOUXZ',
-        mutated_AAs:str = 'LLLVVLLLLTSSSSLLNDQEVVVVVV', #DiaNN
-        **kwargs,
-    ):  
-        """
-        DiaNN-like decoy peptide generator
-
-        Parameters
-        ----------
-        target_lib : SpecLibBase
-            Target library object
-
-        raw_AAs : str, optional
-            AAs those DiaNN decoy from. 
-            Defaults to 'GAVLIFMPWSCTYHKRQENDBJOUXZ'.
-
-        mutated_AAs : str, optional
-            AAs those DiaNN decoy to. 
-            Defaults to 'LLLVVLLLLTSSSSLLNDQEVVVVVV'.
-            
-        """
-        super().__init__(target_lib)
-        self.raw_AAs = raw_AAs
-        self.mutated_AAs = mutated_AAs
-
-    def _decoy_seq(self):
-        (
-            self._precursor_df.sequence
-        ) = self._precursor_df.sequence.apply(
-            lambda x:
-                x[0]+self.mutated_AAs[self.raw_AAs.index(x[1])]+
-                x[2:-2]+self.mutated_AAs[self.raw_AAs.index(x[-2])]+x[-1]
-        )
-
 class SpecLibDecoyProvider(object):
     def __init__(self):
         self.decoy_dict = {}
@@ -198,8 +220,10 @@ class SpecLibDecoyProvider(object):
         """Register a new decoy class"""
         self.decoy_dict[name.lower()] = decoy_class
 
-    def get_decoy_lib(self, name:str, 
-        target_lib:SpecLibBase, **kwargs
+    def get_decoy_lib(self, 
+        name:str, 
+        target_lib:SpecLibBase, 
+        **kwargs
     )->SpecLibDecoy:
         """Get an object of a subclass of `SpecLibDecoy` based on 
         registered name.
@@ -220,8 +244,10 @@ class SpecLibDecoyProvider(object):
         if name is None: return None
         name = name.lower()
         if name in self.decoy_dict:
-            return self.decoy_dict[name](
-                target_lib, **kwargs
+            return SpecLibDecoy(
+                target_lib,
+                decoy_generator = self.decoy_dict[name],
+                **kwargs
             )
         else:
             raise ValueError(f'Decoy method {name} not found.')
@@ -232,5 +258,5 @@ Factory object of `SpecLibDecoyProvider` to
 register and get different types of decoy methods.
 """
 
-decoy_lib_provider.register('pseudo_reverse', SpecLibDecoy)
-decoy_lib_provider.register('diann', SpecLibDecoyDiaNN)
+decoy_lib_provider.register('pseudo_reverse', PseudoReverseDecoyGenerator)
+decoy_lib_provider.register('diann', DIANNDecoyGenerator)
