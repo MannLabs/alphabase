@@ -326,7 +326,7 @@ class SpecLibBase(object):
         multiprocessing : bool=True,
         max_isotope = 6,
         min_right_most_intensity = 0.001,
-        mp_batch_size = 1000,
+        mp_batch_size = 10000,
         mp_process_num = 8
         ):
         """
