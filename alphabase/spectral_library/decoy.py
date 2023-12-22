@@ -241,8 +241,10 @@ class SpecLibDecoyProvider(object):
         SpecLibDecoy
             Decoy library object
         """
-        if name is None: return None
+        if not name: return None
         name = name.lower()
+        if name == "none" or name == "null":
+            return None
         if name in self.decoy_dict:
             return SpecLibDecoy(
                 target_lib,
