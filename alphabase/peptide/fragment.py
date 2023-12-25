@@ -588,10 +588,12 @@ def flatten_fragments(
         input precursor dataframe which contains the frag_start_idx and frag_stop_idx columns
     
     fragment_mz_df : pd.DataFrame
-        input fragment mz dataframe of shape (N, T) which contains N * T fragment mzs
+        input fragment mz dataframe of shape (N, T) which contains N * T fragment mzs.
+        Fragments with mz==0 will be excluded.
     
     fragment_intensity_df : pd.DataFrame
-        input fragment mz dataframe of shape (N, T) which contains N * T fragment mzs
+        input fragment intensity dataframe of shape (N, T) which contains N * T fragment mzs.
+        Could be empty (len==0) to exclude intensity values.
     
     min_fragment_intensity : float, optional
         minimum intensity which should be retained. Defaults to -1
@@ -758,10 +760,12 @@ def compress_fragment_indices(frag_idx):
 
 def remove_unused_fragments(
         precursor_df: pd.DataFrame, 
-        fragment_df_list: Tuple[pd.DataFrame, ...]
+        fragment_df_list: Tuple[pd.DataFrame, ...],
+        frag_start_col:str = 'frag_start_idx',
+        frag_stop_col:str = 'frag_stop_idx',
     ) -> Tuple[pd.DataFrame, Tuple[pd.DataFrame, ...]]:
     """Removes unused fragments of removed precursors, 
-    reannotates the frag_start_idx and frag_stop_idx
+    reannotates the `frag_start_col` and `frag_stop_col`
     
     Parameters
     ----------
@@ -773,6 +777,14 @@ def remove_unused_fragments(
         Multiple fragment dataframes can be provided which will all be sliced in the same way. 
         This allows to slice both the fragment_mz_df and fragment_intensity_df. 
         At least one fragment dataframe needs to be provided. 
+
+    frag_start_col : str, optional
+        Fragment start idx column in `precursor_df`, such as "frag_start_idx" and "peak_start_idx".
+        Defaults to "frag_start_idx".
+
+    frag_stop_col : str, optional
+        Fragment stop idx column in `precursor_df`, such as "frag_stop_idx" and "peak_stop_idx".
+        Defaults to "frag_stop_idx".
     
     Returns
     -------
@@ -780,12 +792,12 @@ def remove_unused_fragments(
         returns the reindexed precursor DataFrame and the sliced fragment DataFrames
     """
 
-    precursor_df = precursor_df.sort_values(['frag_start_idx'], ascending=True)
-    frag_idx = precursor_df[['frag_start_idx','frag_stop_idx']].values
+    precursor_df = precursor_df.sort_values([frag_start_col], ascending=True)
+    frag_idx = precursor_df[[frag_start_col,frag_stop_col]].values
 
     new_frag_idx, fragment_pointer = compress_fragment_indices(frag_idx)
 
-    precursor_df[['frag_start_idx','frag_stop_idx']] = new_frag_idx
+    precursor_df[[frag_start_col,frag_stop_col]] = new_frag_idx
     precursor_df = precursor_df.sort_index()
 
     output_tuple = []

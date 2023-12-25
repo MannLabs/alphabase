@@ -36,6 +36,10 @@ The infrastructure package of AlphaX ecosystem for MS proteomics. It was first p
 
 - [AlphaPeptDeep](https://github.com/MannLabs/alphapeptdeep): deep learning framework for proteomics.
 - [AlphaRaw](https://github.com/MannLabs/alpharaw): raw data reader for different vendors.
+- [AlphaDIA](https://github.com/MannLabs/alphadia): DIA search engine.
+- [PeptDeep-HLA](https://github.com/MannLabs/peptdeep-hla): personalized HLA-binding peptide prediction.
+- [AlphaViz](https://github.com/MannLabs/alphaviz): visualization for MS-based proteomics.
+- [AlphaQuant](https://github.com/MannLabs/alphaquant): quantification for MS-based proteomics.
 
 ------------------------------------------------------------------------
 

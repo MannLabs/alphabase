@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import numba
+import typing
 import multiprocessing as mp
 from tqdm import tqdm
 
@@ -486,10 +487,10 @@ def _count_batchify_df(df_group, mp_batch_size):
 def calc_precursor_isotope_mp(
     precursor_df:pd.DataFrame, 
     processes:int=8,
-    mp_batch_size:int=100000,
+    mp_batch_size:int=10000,
     process_bar=None,
     min_right_most_intensity:float=0.2,
-    min_precursor_num_to_run_mp:int=1000,
+    min_precursor_num_to_run_mp:int=10000,
 )->pd.DataFrame:
     """`calc_precursor_isotope` is not that fast for large dataframes, 
     so here we use multiprocessing for faster isotope pattern calculation. 
@@ -547,8 +548,9 @@ def calc_precursor_isotope_mp(
 def calc_precursor_isotope_intensity(
     precursor_df,
     max_isotope = 6, 
-    min_right_most_intensity = 0.001
-    ):
+    min_right_most_intensity = 0.001,
+    normalize:typing.Literal['mono','sum'] = "sum",
+)->pd.DataFrame:
     """Calculate isotope intensity values for precursor_df inplace.
 
     Parameters
@@ -577,6 +579,8 @@ def calc_precursor_isotope_intensity(
 
     precursor_dist = np.zeros((len(precursor_df), max_isotope), dtype=np.float32)
 
+    mono_idxes = np.zeros(len(precursor_df),dtype=np.int32)
+
     for i in range(len(precursor_df)):
 
         row = precursor_df.iloc[i]
@@ -584,10 +588,36 @@ def calc_precursor_isotope_intensity(
             get_mod_seq_formula(row['sequence'], row['mods'])
         )
         dist[dist <= min_right_most_intensity] = 0.
-        dist = dist / dist.sum()
-        precursor_dist[i] = dist[:max_isotope]
+
+        # mono should be always included in the i_x list
+        # after clipping max_isotope isotopes
+        mono_left_half_isotope = max_isotope//2
+        mono_right_half_isotope = (
+            mono_left_half_isotope if max_isotope%2==0 
+            else (mono_left_half_isotope+1)
+        )
+        if mono < mono_left_half_isotope:
+            precursor_dist[i] = dist[:max_isotope]
+            mono_idxes[i] = mono
+        elif mono + mono_right_half_isotope >= len(dist):
+            precursor_dist[i] = dist[-max_isotope:]
+            mono_idxes[i] = max_isotope+mono-len(dist)+1
+        else:
+            precursor_dist[i] = dist[
+                mono-mono_left_half_isotope:
+                mono+mono_right_half_isotope
+            ]
+            mono_idxes[i] = mono-mono_left_half_isotope
+
+    if normalize == "sum":
+        precursor_dist /= np.sum(precursor_dist, axis=1, keepdims=True)
+    else:
+        precursor_dist /= precursor_dist[
+            np.arange(len(precursor_dist)), mono_idxes
+        ].reshape(-1,1)
 
     precursor_df[col_names] = precursor_dist
+    precursor_df["mono_isotope_idx"] = mono_idxes
 
     return precursor_df
 
@@ -595,10 +625,11 @@ def calc_precursor_isotope_intensity_mp(
     precursor_df,
     max_isotope = 6,
     min_right_most_intensity = 0.001,
+    normalize:typing.Literal['mono','sum'] = "sum",
     mp_batch_size = 1000,
     mp_process_num = 8,
-    progress_bar = True
-    ):
+    progress_bar = True,
+)->pd.DataFrame:
 
     """Calculate isotope intensity values for precursor_df using multiprocessing.
 
@@ -639,7 +670,8 @@ def calc_precursor_isotope_intensity_mp(
             partial(
                 calc_precursor_isotope_intensity,
                 max_isotope=max_isotope,
-                min_right_most_intensity=min_right_most_intensity
+                min_right_most_intensity=min_right_most_intensity,
+                normalize=normalize,
             ), _batchify_df(df_group, mp_batch_size)
         )
 

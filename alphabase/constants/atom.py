@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import numba
+import typing
 
 from alphabase.yaml_utils import load_yaml
 
@@ -89,7 +90,25 @@ MASS_N:int = None
 MASS_H2O:int = None #raise errors if the value is not reset
 MASS_NH3:int = None
 
+def update_atom_infos(new_atom_info:typing.Dict):
+    """
+    Args:
+        atom_dict (Dict): Example, replacing N with 15N
+          {"N":
+            {"abundance": [0.01,0.99]},
+            {"mass": [14.00307400443, 15.00010889888]},
+          }
+    """
+    for atom, info in new_atom_info.items():
+        CHEM_INFO_DICT[atom] = info
+
+    reset_elements()
+
 def reset_elements():
+
+    global MASS_C, MASS_H, MASS_O, MASS_N
+    global MASS_H2O, MASS_NH3
+
     for elem, items in CHEM_INFO_DICT.items():
         isotopes = np.array(items['abundance'])
         masses = np.array(items['mass'])
@@ -120,6 +139,13 @@ def reset_elements():
 
             CHEM_ISOTOPE_DIST[elem] = _isos[start:end]
             CHEM_MONO_IDX[elem] = _mono_idx
+    
+    MASS_C = CHEM_MONO_MASS['C']
+    MASS_H = CHEM_MONO_MASS['H']
+    MASS_N = CHEM_MONO_MASS['N']
+    MASS_O = CHEM_MONO_MASS['O']
+    MASS_H2O = CHEM_MONO_MASS['H']*2 + CHEM_MONO_MASS['O']
+    MASS_NH3 = CHEM_MONO_MASS['H']*3 + CHEM_MONO_MASS['N']
 
 def load_elem_yaml(yaml_file:str):
     '''Load built-in or user-defined element yaml file. Default yaml is: 
@@ -129,8 +155,6 @@ def load_elem_yaml(yaml_file:str):
     global CHEM_MONO_MASS
     global CHEM_ISOTOPE_DIST
     global CHEM_MONO_IDX
-    global MASS_C, MASS_H, MASS_O, MASS_N
-    global MASS_H2O, MASS_NH3
 
     CHEM_INFO_DICT = load_yaml(yaml_file)
 
@@ -146,13 +170,6 @@ def load_elem_yaml(yaml_file:str):
     )
 
     reset_elements()
-    
-    MASS_C = CHEM_MONO_MASS['C']
-    MASS_H = CHEM_MONO_MASS['H']
-    MASS_N = CHEM_MONO_MASS['N']
-    MASS_O = CHEM_MONO_MASS['O']
-    MASS_H2O = CHEM_MONO_MASS['H']*2 + CHEM_MONO_MASS['O']
-    MASS_NH3 = CHEM_MONO_MASS['H']*3 + CHEM_MONO_MASS['N']
 
 load_elem_yaml(
     os.path.join(CONST_FILE_FOLDER,
