@@ -488,10 +488,16 @@ def parse_labels(labels:list):
             cterm_label_mod = label
     return label_aas, label_mod_dict, nterm_label_mod, cterm_label_mod
         
-def create_labeling_peptide_df(peptide_df:pd.DataFrame, labels:list):
+def create_labeling_peptide_df(
+        peptide_df:pd.DataFrame, labels:list,
+        inplace:bool=False
+    ):
     if len(peptide_df) == 0: return peptide_df
 
-    df = peptide_df.copy()
+    if inplace:
+        df = peptide_df
+    else:
+        df = peptide_df.copy()
 
     (
         label_aas, label_mod_dict, 
@@ -789,12 +795,12 @@ class SpecLibFasta(SpecLibBase):
         self._parse_fix_and_var_mods()
     
     def _parse_fix_and_var_mods(self):
-        self.fix_mod_aas = ''
-        self.fix_mod_prot_nterm_dict = {}
-        self.fix_mod_prot_cterm_dict = {}
-        self.fix_mod_pep_nterm_dict = {}
-        self.fix_mod_pep_cterm_dict = {}
-        self.fix_mod_dict = {}
+        # self.fix_mod_aas = ''
+        # self.fix_mod_prot_nterm_dict = {}
+        # self.fix_mod_prot_cterm_dict = {}
+        # self.fix_mod_pep_nterm_dict = {}
+        # self.fix_mod_pep_cterm_dict = {}
+        # self.fix_mod_dict = {}
 
         def _set_term_mod(term_mod,
             prot_nterm, prot_cterm, pep_nterm, pep_cterm,
@@ -828,19 +834,19 @@ class SpecLibFasta(SpecLibBase):
                     allow_conflicts
                 )
         
-        for mod in self.fix_mods:
-            if mod.find('@')+2 == len(mod):
-                self.fix_mod_aas += mod[-1]
-                self.fix_mod_dict[mod[-1]] = mod
-            else:
-                _set_term_mod(
-                    mod, 
-                    self.fix_mod_prot_nterm_dict,
-                    self.fix_mod_prot_cterm_dict,
-                    self.fix_mod_pep_nterm_dict,
-                    self.fix_mod_pep_cterm_dict,
-                    allow_conflicts=False
-                )
+        # for mod in self.fix_mods:
+        #     if mod.find('@')+2 == len(mod):
+        #         self.fix_mod_aas += mod[-1]
+        #         self.fix_mod_dict[mod[-1]] = mod
+        #     else:
+        #         _set_term_mod(
+        #             mod, 
+        #             self.fix_mod_prot_nterm_dict,
+        #             self.fix_mod_prot_cterm_dict,
+        #             self.fix_mod_pep_nterm_dict,
+        #             self.fix_mod_pep_cterm_dict,
+        #             allow_conflicts=False
+        #         )
 
         self.var_mod_aas = ''
         self.var_mod_prot_nterm_dict = {}
@@ -863,7 +869,7 @@ class SpecLibFasta(SpecLibBase):
         else:
             for mod in self.var_mods:
                 if mod.find('@')+2 == len(mod):
-                    if mod[-1] in self.fix_mod_dict: continue
+                    # if mod[-1] in self.fix_mod_dict: continue
                     self.var_mod_aas += mod[-1]
                     self.var_mod_dict[mod[-1]] = mod
             get_var_mods_per_sites = get_var_mods_per_sites_single_mod_on_aa
@@ -1122,18 +1128,18 @@ class SpecLibFasta(SpecLibBase):
             list[str]: list of modification names
             list[str]: list of modification sites
         """
-        fix_mods, fix_mod_sites = get_fix_mods(
-            sequence, self.fix_mod_aas, self.fix_mod_dict
-        )
-        #TODO add prot and pep C-term fix mods
-        #TODO add prot and pep N-term fix mods
+        # fix_mods, fix_mod_sites = get_fix_mods(
+        #     sequence, self.fix_mod_aas, self.fix_mod_dict
+        # )
+        # #TODO add prot and pep C-term fix mods
+        # #TODO add prot and pep N-term fix mods
 
-        if len(fix_mods) == 0:
-            fix_mods = ['']
-            fix_mod_sites = ['']
-        else:
-            fix_mods = [fix_mods]
-            fix_mod_sites = [fix_mod_sites]
+        # if len(fix_mods) == 0:
+        #     fix_mods = ['']
+        #     fix_mod_sites = ['']
+        # else:
+        #     fix_mods = [fix_mods]
+        #     fix_mod_sites = [fix_mod_sites]
 
         var_mods_list, var_mod_sites_list = get_var_mods(
             sequence, self.var_mod_aas, self.var_mod_dict, 
@@ -1160,12 +1166,12 @@ class SpecLibFasta(SpecLibBase):
         return (
             list(
                 ';'.join([i for i in items if i]) for items in itertools.product(
-                    fix_mods, nterm_var_mods, var_mods_list
+                    nterm_var_mods, var_mods_list
                 )
             ),
             list(
                 ';'.join([i for i in items if i]) for items in itertools.product(
-                    fix_mod_sites, nterm_var_mod_sites, var_mod_sites_list
+                    nterm_var_mod_sites, var_mod_sites_list
                 )
             ),
         )
@@ -1194,6 +1200,11 @@ class SpecLibFasta(SpecLibBase):
         self._precursor_df = explode_multiple_columns(
             self._precursor_df,
             ['mods','mod_sites']
+        )
+        self._precursor_df.dropna(subset=['mods'], inplace=True)
+        self._precursor_df = create_labeling_peptide_df(
+            self._precursor_df, self.fix_mods,
+            inplace=True
         )
         self._precursor_df.reset_index(drop=True, inplace=True)
 
