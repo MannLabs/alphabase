@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "AlphaBase"
-#define MyAppVersion "1.1.2"
+#define MyAppVersion "1.2.0"
 #define MyAppPublisher "Max Planck Institute of Biochemistry and the University of Copenhagen, Mann Labs"
 #define MyAppURL "https://github.com/MannLabs/alphabase"
 #define MyAppExeName "alphabase_gui.exe"
