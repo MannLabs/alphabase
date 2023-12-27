@@ -997,7 +997,8 @@ class SpecLibFasta(SpecLibBase):
         protein_dict = load_all_proteins(fasta_files)
         self.get_peptides_from_protein_dict(protein_dict)
 
-    def _get_peptides_from_protein_df(self):
+    def get_peptides_from_protein_df(self, protein_df:pd.DataFrame):
+        self.protein_df = protein_df
         if self.I_to_L:
             self.protein_df[
                 'sequence_I2L'
@@ -1025,10 +1026,10 @@ class SpecLibFasta(SpecLibBase):
             }
             ```
         """
-        self.protein_df = pd.DataFrame.from_dict(
+        protein_df = pd.DataFrame.from_dict(
             protein_dict, orient='index'
         ).reset_index(drop=True)
-        self._get_peptides_from_protein_df()
+        self.get_peptides_from_protein_df(protein_df)
 
     def _cleave_to_peptides(self, 
         protein_df:pd.DataFrame,
