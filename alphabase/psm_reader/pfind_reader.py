@@ -145,3 +145,4 @@ class pFindReader(PSMReaderBase):
         )
         
 psm_reader_provider.register_reader('pfind', pFindReader)
+psm_reader_provider.register_reader('pfind3', pFindReader)
