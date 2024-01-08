@@ -310,17 +310,17 @@ class SpecLibBase(object):
 
     def calc_precursor_mz(self):
         """
-        Calculate precursor mz for self._precursor_df,
-        and clip the self._precursor_df using `self.clip_by_precursor_mz_`
+        Calculate precursor mz for self._precursor_df
         """
         fragment.update_precursor_mz(self._precursor_df)
 
-    def update_precursor_mz(self):
+    def calc_and_clip_precursor_mz(self):
         """
         Calculate precursor mz for self._precursor_df,
         and clip the self._precursor_df using `self.clip_by_precursor_mz_`
         """
         self.calc_precursor_mz()
+        self.clip_by_precursor_mz_()
 
     def calc_precursor_isotope_intensity(self,
         multiprocessing : bool=True,
@@ -351,8 +351,7 @@ class SpecLibBase(object):
         """
 
         if 'precursor_mz' not in self._precursor_df.columns:
-            self.calc_precursor_mz()
-            self.clip_by_precursor_mz_()
+            self.calc_and_clip_precursor_mz()
 
         if multiprocessing and len(self.precursor_df)>mp_batch_size:
             (
@@ -384,8 +383,7 @@ class SpecLibBase(object):
         See `alphabase.peptide.precursor.calc_precursor_isotope` for details.
         """
         if 'precursor_mz' not in self._precursor_df.columns:
-            self.calc_precursor_mz()
-            self.clip_by_precursor_mz_()
+            self.calc_and_clip_precursor_mz()
         if multiprocessing and len(self.precursor_df)>min_precursor_num_to_run_mp:
             (
                 self._precursor_df

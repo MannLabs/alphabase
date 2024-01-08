@@ -968,6 +968,7 @@ class SpecLibFasta(SpecLibBase):
         self.add_special_modifications()
         self.add_peptide_labeling()
         self.add_charge()
+        self.calc_and_clip_precursor_mz()
 
     def get_peptides_from_fasta(self, fasta_file:Union[str,list]):
         """Load peptide sequences from fasta files.
@@ -1271,6 +1272,8 @@ class SpecLibFasta(SpecLibBase):
     def add_charge(self):
         """Add charge states
         """
+        if "charge" in self._precursor_df.columns:
+            return
         self._precursor_df['charge'] = [
             np.arange(
                 self.min_precursor_charge, 
