@@ -326,7 +326,8 @@ class SpecLibBase(object):
         max_isotope = 6,
         min_right_most_intensity = 0.001,
         mp_batch_size = 10000,
-        mp_process_num = 8
+        mp_process_num = 8,
+        normalize:typing.Literal['mono','sum'] = "sum",
     ):
         """
         Calculate and append the isotope intensity columns into self.precursor_df.
@@ -359,7 +360,9 @@ class SpecLibBase(object):
                 self.precursor_df, 
                 max_isotope = max_isotope,
                 min_right_most_intensity = min_right_most_intensity,
+                normalize=normalize,
                 mp_process_num = mp_process_num,
+                mp_batch_size=mp_batch_size,
             )
         else:
             (
@@ -367,6 +370,7 @@ class SpecLibBase(object):
             ) = precursor.calc_precursor_isotope_intensity(
                 self.precursor_df, 
                 max_isotope = max_isotope,
+                normalize=normalize,
                 min_right_most_intensity = min_right_most_intensity,
             )
 
@@ -374,11 +378,13 @@ class SpecLibBase(object):
         max_isotope = 6,
         min_right_most_intensity = 0.001,
         mp_batch_size = 10000,
-        mp_process_num = 8
+        mp_process_num = 8,
+        normalize:typing.Literal['mono','sum'] = "sum",
     ):
         return self.calc_precursor_isotope_intensity(
             max_isotope=max_isotope,
             min_right_most_intensity=min_right_most_intensity,
+            normalize=normalize,
             mp_batch_size=mp_batch_size,
             mp_process_num=mp_process_num,
         )     
