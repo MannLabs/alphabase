@@ -323,12 +323,11 @@ class SpecLibBase(object):
         self.clip_by_precursor_mz_()
 
     def calc_precursor_isotope_intensity(self,
-        multiprocessing : bool=True,
         max_isotope = 6,
         min_right_most_intensity = 0.001,
         mp_batch_size = 10000,
         mp_process_num = 8
-        ):
+    ):
         """
         Calculate and append the isotope intensity columns into self.precursor_df.
         See `alphabase.peptide.precursor.calc_precursor_isotope_intensity` for details.
@@ -353,7 +352,7 @@ class SpecLibBase(object):
         if 'precursor_mz' not in self._precursor_df.columns:
             self.calc_and_clip_precursor_mz()
 
-        if multiprocessing and len(self.precursor_df)>mp_batch_size:
+        if mp_process_num>1 and len(self.precursor_df)>mp_batch_size:
             (
                 self._precursor_df
             ) = precursor.calc_precursor_isotope_intensity_mp(
@@ -370,13 +369,24 @@ class SpecLibBase(object):
                 max_isotope = max_isotope,
                 min_right_most_intensity = min_right_most_intensity,
             )
-            
+
+    def calc_precursor_isotope(self,
+        max_isotope = 6,
+        min_right_most_intensity = 0.001,
+        mp_batch_size = 10000,
+        mp_process_num = 8
+    ):
+        return self.calc_precursor_isotope_intensity(
+            max_isotope=max_isotope,
+            min_right_most_intensity=min_right_most_intensity,
+            mp_batch_size=mp_batch_size,
+            mp_process_num=mp_process_num,
+        )     
     
-    def calc_precursor_isotope(self, 
-        multiprocessing:bool=True,
+    def calc_precursor_isotope_info(self, 
         mp_process_num:int=8,
         mp_process_bar=None,
-        min_precursor_num_to_run_mp:int=1000,
+        mp_batch_size = 10000,
     ):
         """
         Append isotope columns into self.precursor_df.
@@ -384,10 +394,13 @@ class SpecLibBase(object):
         """
         if 'precursor_mz' not in self._precursor_df.columns:
             self.calc_and_clip_precursor_mz()
-        if multiprocessing and len(self.precursor_df)>min_precursor_num_to_run_mp:
+        if (
+            mp_process_num > 1 and 
+            len(self.precursor_df)>mp_batch_size
+        ):
             (
                 self._precursor_df
-            ) = precursor.calc_precursor_isotope_mp(
+            ) = precursor.calc_precursor_isotope_info_mp(
                 self.precursor_df, 
                 processes=mp_process_num,
                 process_bar=mp_process_bar,
@@ -395,7 +408,7 @@ class SpecLibBase(object):
         else:
             (
                 self._precursor_df
-            ) = precursor.calc_precursor_isotope(
+            ) = precursor.calc_precursor_isotope_info(
                 self.precursor_df
             )
 
