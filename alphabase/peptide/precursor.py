@@ -380,7 +380,7 @@ def get_mod_seq_isotope_distribution(
         right_most_idx-mono,
     )
 
-def calc_precursor_isotope(
+def calc_precursor_isotope_info(
     precursor_df:pd.DataFrame,
     min_right_most_intensity:float=0.2,
 ):
@@ -484,7 +484,7 @@ def _count_batchify_df(df_group, mp_batch_size):
 
 # `process_bar` should be replaced by more advanced tqdm wrappers created by Sander
 # I will leave it to alphabase.utils
-def calc_precursor_isotope_mp(
+def calc_precursor_isotope_info_mp(
     precursor_df:pd.DataFrame, 
     processes:int=8,
     mp_batch_size:int=10000,
@@ -521,8 +521,8 @@ def calc_precursor_isotope_mp(
         DataFrame with `isotope_*` columns, 
         see :meth:'calc_precursor_isotope()'.
     """
-    if len(precursor_df) < min_precursor_num_to_run_mp:
-        return calc_precursor_isotope(
+    if len(precursor_df) < min_precursor_num_to_run_mp or processes<=1:
+        return calc_precursor_isotope_info(
             precursor_df=precursor_df,
             min_right_most_intensity=min_right_most_intensity,
         )
@@ -531,7 +531,7 @@ def calc_precursor_isotope_mp(
     with mp.get_context("spawn").Pool(processes) as p:
         processing = p.imap(
             partial(
-                calc_precursor_isotope,
+                calc_precursor_isotope_info,
                 min_right_most_intensity=min_right_most_intensity
             ), _batchify_df(df_group, mp_batch_size)
         )
@@ -662,6 +662,14 @@ def calc_precursor_isotope_intensity_mp(
     
     """
 
+    if mp_process_num <= 1:
+        return calc_precursor_isotope_intensity(
+            precursor_df=precursor_df,
+            max_isotope=max_isotope,
+            min_right_most_intensity=min_right_most_intensity,
+            normalize=normalize
+        )
+
     df_list = []
     df_group = precursor_df.groupby('nAA')
 
@@ -681,3 +689,6 @@ def calc_precursor_isotope_intensity_mp(
             df_list = list(processing)
 
     return pd.concat(df_list, ignore_index=True)
+
+calc_precursor_isotope = calc_precursor_isotope_intensity
+calc_precursor_isotope_mp = calc_precursor_isotope_intensity_mp

@@ -310,25 +310,25 @@ class SpecLibBase(object):
 
     def calc_precursor_mz(self):
         """
-        Calculate precursor mz for self._precursor_df,
-        and clip the self._precursor_df using `self.clip_by_precursor_mz_`
+        Calculate precursor mz for self._precursor_df
         """
         fragment.update_precursor_mz(self._precursor_df)
 
-    def update_precursor_mz(self):
+    def calc_and_clip_precursor_mz(self):
         """
         Calculate precursor mz for self._precursor_df,
         and clip the self._precursor_df using `self.clip_by_precursor_mz_`
         """
         self.calc_precursor_mz()
+        self.clip_by_precursor_mz_()
 
     def calc_precursor_isotope_intensity(self,
-        multiprocessing : bool=True,
         max_isotope = 6,
         min_right_most_intensity = 0.001,
         mp_batch_size = 10000,
-        mp_process_num = 8
-        ):
+        mp_process_num = 8,
+        normalize:typing.Literal['mono','sum'] = "sum",
+    ):
         """
         Calculate and append the isotope intensity columns into self.precursor_df.
         See `alphabase.peptide.precursor.calc_precursor_isotope_intensity` for details.
@@ -351,17 +351,18 @@ class SpecLibBase(object):
         """
 
         if 'precursor_mz' not in self._precursor_df.columns:
-            self.calc_precursor_mz()
-            self.clip_by_precursor_mz_()
+            self.calc_and_clip_precursor_mz()
 
-        if multiprocessing and len(self.precursor_df)>mp_batch_size:
+        if mp_process_num>1 and len(self.precursor_df)>mp_batch_size:
             (
                 self._precursor_df
             ) = precursor.calc_precursor_isotope_intensity_mp(
                 self.precursor_df, 
                 max_isotope = max_isotope,
                 min_right_most_intensity = min_right_most_intensity,
+                normalize=normalize,
                 mp_process_num = mp_process_num,
+                mp_batch_size=mp_batch_size,
             )
         else:
             (
@@ -369,27 +370,43 @@ class SpecLibBase(object):
             ) = precursor.calc_precursor_isotope_intensity(
                 self.precursor_df, 
                 max_isotope = max_isotope,
+                normalize=normalize,
                 min_right_most_intensity = min_right_most_intensity,
             )
-            
+
+    def calc_precursor_isotope(self,
+        max_isotope = 6,
+        min_right_most_intensity = 0.001,
+        mp_batch_size = 10000,
+        mp_process_num = 8,
+        normalize:typing.Literal['mono','sum'] = "sum",
+    ):
+        return self.calc_precursor_isotope_intensity(
+            max_isotope=max_isotope,
+            min_right_most_intensity=min_right_most_intensity,
+            normalize=normalize,
+            mp_batch_size=mp_batch_size,
+            mp_process_num=mp_process_num,
+        )     
     
-    def calc_precursor_isotope(self, 
-        multiprocessing:bool=True,
+    def calc_precursor_isotope_info(self, 
         mp_process_num:int=8,
         mp_process_bar=None,
-        min_precursor_num_to_run_mp:int=1000,
+        mp_batch_size = 10000,
     ):
         """
         Append isotope columns into self.precursor_df.
         See `alphabase.peptide.precursor.calc_precursor_isotope` for details.
         """
         if 'precursor_mz' not in self._precursor_df.columns:
-            self.calc_precursor_mz()
-            self.clip_by_precursor_mz_()
-        if multiprocessing and len(self.precursor_df)>min_precursor_num_to_run_mp:
+            self.calc_and_clip_precursor_mz()
+        if (
+            mp_process_num > 1 and 
+            len(self.precursor_df)>mp_batch_size
+        ):
             (
                 self._precursor_df
-            ) = precursor.calc_precursor_isotope_mp(
+            ) = precursor.calc_precursor_isotope_info_mp(
                 self.precursor_df, 
                 processes=mp_process_num,
                 process_bar=mp_process_bar,
@@ -397,7 +414,7 @@ class SpecLibBase(object):
         else:
             (
                 self._precursor_df
-            ) = precursor.calc_precursor_isotope(
+            ) = precursor.calc_precursor_isotope_info(
                 self.precursor_df
             )
 

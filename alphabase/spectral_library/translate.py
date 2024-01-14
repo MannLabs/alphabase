@@ -388,7 +388,11 @@ class WritingProcess(mp.Process):
         while True:
             df, batch = self.task_queue.get()
             if df is None: break
-            df.to_csv(self.tsv, header=(batch==0), sep="\t", mode="a", index=False, lineterminator="\n")
+            if tuple([int(i) for i in pd.__version__.split(".")[:2]]) >= (1,5):
+                newline=dict(lineterminator="\n")
+            else:
+                newline=dict(line_terminator="\n")
+            df.to_csv(self.tsv, header=(batch==0), sep="\t", mode="a", index=False, **newline)
 
 def translate_to_tsv(
     speclib:SpecLibBase,
@@ -443,7 +447,11 @@ def translate_to_tsv(
         if multiprocessing:
             df_head_queue.put((df, i))
         else:
-            df.to_csv(tsv, header=(i==0), sep="\t", mode='a', index=False, lineterminator="\n")
+            if tuple([int(i) for i in pd.__version__.split(".")[:2]]) >= (1,5):
+                newline=dict(lineterminator="\n")
+            else:
+                newline=dict(line_terminator="\n")
+            df.to_csv(tsv, header=(i==0), sep="\t", mode='a', index=False, **newline)
     if multiprocessing:
         df_head_queue.put((None, None))
         print("Translation finished, it will take several minutes to export the rest precursors to the tsv file...")

@@ -968,6 +968,7 @@ class SpecLibFasta(SpecLibBase):
         self.add_special_modifications()
         self.add_peptide_labeling()
         self.add_charge()
+        self.calc_and_clip_precursor_mz()
 
     def get_peptides_from_fasta(self, fasta_file:Union[str,list]):
         """Load peptide sequences from fasta files.
@@ -997,7 +998,8 @@ class SpecLibFasta(SpecLibBase):
         protein_dict = load_all_proteins(fasta_files)
         self.get_peptides_from_protein_dict(protein_dict)
 
-    def _get_peptides_from_protein_df(self):
+    def get_peptides_from_protein_df(self, protein_df:pd.DataFrame):
+        self.protein_df = protein_df
         if self.I_to_L:
             self.protein_df[
                 'sequence_I2L'
@@ -1025,10 +1027,10 @@ class SpecLibFasta(SpecLibBase):
             }
             ```
         """
-        self.protein_df = pd.DataFrame.from_dict(
+        protein_df = pd.DataFrame.from_dict(
             protein_dict, orient='index'
         ).reset_index(drop=True)
-        self._get_peptides_from_protein_df()
+        self.get_peptides_from_protein_df(protein_df)
 
     def _cleave_to_peptides(self, 
         protein_df:pd.DataFrame,
@@ -1270,6 +1272,8 @@ class SpecLibFasta(SpecLibBase):
     def add_charge(self):
         """Add charge states
         """
+        if "charge" in self._precursor_df.columns:
+            return
         self._precursor_df['charge'] = [
             np.arange(
                 self.min_precursor_charge, 

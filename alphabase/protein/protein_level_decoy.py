@@ -42,8 +42,7 @@ class ProteinReverseDecoy(SpecLibDecoy):
     def _generate_decoy_sequences(self):
         _target_prot_df = self.target_lib.protein_df
         _target_pep_df = self.target_lib.precursor_df
-        self.target_lib.protein_df = self.protein_df
-        self.target_lib._get_peptides_from_protein_df()
+        self.target_lib.get_peptides_from_protein_df(self.protein_df)
         self._precursor_df = self.target_lib.precursor_df
         self.target_lib.protein_df = _target_prot_df
         self.target_lib._precursor_df = _target_pep_df
