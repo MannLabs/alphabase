@@ -527,20 +527,28 @@ def fill_in_indices(
     ----------
     frag_start_idxes : np.ndarray
         start indices of fragments for each peptide
+
     frag_stop_idxes : np.ndarray
         stop indices of fragments for each peptide
+
     indices : np.ndarray
         index of fragment per peptide (from 0 to max_index-1) it will be filled in this function
+
     max_indices : np.ndarray
         max index of fragments per peptide (number of fragments per peptide) it will be filled in this function
+
     excluded_indices : np.ndarray
         not top k excluded indices per peptide it will be filled in this function
+
     top_k : int
         top k highest peaks to keep
+
     flattened_intensity : np.ndarray
         Flattened fragment intensities
+
     number_of_fragment_types : int
         number of types of fragments (e.g. b,y,b_modloss,y_modloss, ...) equals to the number of columns in fragment mz dataframe
+
     max_frag_per_peptide : int, optional
         maximum number of fragments per peptide, Defaults to 300
 
@@ -572,10 +580,13 @@ def calculate_fragment_numbers(frag_direction:np.int8, frag_number:np.uint32, in
     ----------
     frag_direction : np.int8
         directions of fragments for each peptide
+
     frag_number : np.uint32
         fragment numbers for each peptide
+
     index : np.uint32
         index of fragment per peptide (from 0 to max_index-1)
+
     max_index : np.uint32
         max index of fragments per peptide (number of fragments per peptide) 
     """
@@ -603,14 +614,19 @@ def parse_fragment(
     ----------
     frag_directions : np.ndarray
         directions of fragments for each peptide
+
     frag_start_idxes : np.ndarray
         start indices of fragments for each peptide
+
     frag_stop_idxes : np.ndarray
         stop indices of fragments for each peptide
+
     top_k : int
         top k highest peaks to keep
+
     intensities : np.ndarray
         Flattened fragment intensities
+
     number_of_fragment_types : int
         number of types of fragments (e.g. b,y,b_modloss,y_modloss, ...) equals to the number of columns in fragment mz dataframe
     
@@ -977,6 +993,7 @@ def create_fragment_mz_dataframe(
         precursors to generate fragment masses,
         if `precursor_df` contains the 'frag_start_idx' column, 
         `reference_fragment_df` must be provided
+        
     charged_frag_types : List
         `['b_z1','b_z2','y_z1','y_z2','b_modloss_1','y_H2O_z1'...]`
     
