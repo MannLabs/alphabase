@@ -800,7 +800,7 @@ class SpecLibFasta(SpecLibBase):
         # self.fix_mod_prot_cterm_dict = {}
         # self.fix_mod_pep_nterm_dict = {}
         # self.fix_mod_pep_cterm_dict = {}
-        # self.fix_mod_dict = {}
+        self.fix_mod_dict = {}
 
         def _set_term_mod(term_mod,
             prot_nterm, prot_cterm, pep_nterm, pep_cterm,
