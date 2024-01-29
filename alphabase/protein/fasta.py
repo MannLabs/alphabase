@@ -1272,6 +1272,8 @@ class SpecLibFasta(SpecLibBase):
     def add_charge(self):
         """Add charge states
         """
+        if "charge" in self._precursor_df.columns:
+            return
         self._precursor_df['charge'] = [
             np.arange(
                 self.min_precursor_charge, 
