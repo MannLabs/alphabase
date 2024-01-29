@@ -48,7 +48,7 @@ def read_fasta_file(fasta_filename:str=""):
             try:
                 record = next(iterator)
                 parts = record.id.split("|")  # pipe char
-                if len(parts) > 1:
+                if len(parts) > 2:
                     id = parts[1]
                     gene_org = parts[2]
                 else:
