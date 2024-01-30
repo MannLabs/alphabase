@@ -937,6 +937,22 @@ class SpecLibFasta(SpecLibBase):
         self.get_peptides_from_protein_dict(protein_dict)
         self.process_from_naked_peptide_seqs()
 
+    def import_and_process_protein_df(self, protein_df:pd.DataFrame):
+        """ 
+        Import and process the protein_dict.
+        The processing step is in :meth:`process_from_naked_peptide_seqs()`.
+        ```
+        protein_dict = load_all_proteins(fasta_files)
+        ```
+
+        Parameters
+        ----------
+        protein_df : pd.DataFrame
+            DataFrame with columns 'protein_id', 'sequence', 'gene_name', 'description'
+        """
+        self.get_peptides_from_protein_df(protein_df)
+        self.process_from_naked_peptide_seqs()
+
     def import_and_process_peptide_sequences(self, 
         pep_seq_list:list, protein_list:list=None,
     ):
