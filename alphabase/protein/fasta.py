@@ -800,7 +800,7 @@ class SpecLibFasta(SpecLibBase):
         # self.fix_mod_prot_cterm_dict = {}
         # self.fix_mod_pep_nterm_dict = {}
         # self.fix_mod_pep_cterm_dict = {}
-        self.fix_mod_dict = {}
+        # self.fix_mod_dict = {}
 
         def _set_term_mod(term_mod,
             prot_nterm, prot_cterm, pep_nterm, pep_cterm,
@@ -859,7 +859,7 @@ class SpecLibFasta(SpecLibBase):
         if self._check_if_multi_mods_on_aa(self.var_mods):
             for mod in self.var_mods:
                 if mod.find('@')+2 == len(mod):
-                    if mod[-1] in self.fix_mod_dict: continue
+                    # if mod[-1] in self.fix_mod_dict: continue
                     self.var_mod_aas += mod[-1]
                     if mod[-1] in self.var_mod_dict:
                         self.var_mod_dict[mod[-1]].append(mod)
