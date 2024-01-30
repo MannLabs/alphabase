@@ -48,7 +48,7 @@ def read_fasta_file(fasta_filename:str=""):
             try:
                 record = next(iterator)
                 parts = record.id.split("|")  # pipe char
-                if len(parts) > 1:
+                if len(parts) > 2:
                     id = parts[1]
                     gene_org = parts[2]
                 else:
@@ -859,7 +859,7 @@ class SpecLibFasta(SpecLibBase):
         if self._check_if_multi_mods_on_aa(self.var_mods):
             for mod in self.var_mods:
                 if mod.find('@')+2 == len(mod):
-                    if mod[-1] in self.fix_mod_dict: continue
+                    # if mod[-1] in self.fix_mod_dict: continue
                     self.var_mod_aas += mod[-1]
                     if mod[-1] in self.var_mod_dict:
                         self.var_mod_dict[mod[-1]].append(mod)
@@ -935,6 +935,22 @@ class SpecLibFasta(SpecLibBase):
             }
         """
         self.get_peptides_from_protein_dict(protein_dict)
+        self.process_from_naked_peptide_seqs()
+
+    def import_and_process_protein_df(self, protein_df:pd.DataFrame):
+        """ 
+        Import and process the protein_dict.
+        The processing step is in :meth:`process_from_naked_peptide_seqs()`.
+        ```
+        protein_dict = load_all_proteins(fasta_files)
+        ```
+
+        Parameters
+        ----------
+        protein_df : pd.DataFrame
+            DataFrame with columns 'protein_id', 'sequence', 'gene_name', 'description'
+        """
+        self.get_peptides_from_protein_df(protein_df)
         self.process_from_naked_peptide_seqs()
 
     def import_and_process_peptide_sequences(self, 
