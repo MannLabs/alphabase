@@ -758,9 +758,9 @@ def flatten_fragments(
                 frag_loss_types.append(18)
             else:
                 frag_loss_types.append(98)
-        if _types[0] in 'abc':
+        if ord(_types[0]) >= 97 and ord(_types[0]) <= 109: # a-m
             frag_directions.append(1)
-        elif _types[0] in 'xyz':
+        elif ord(_types[0]) >= 110 and ord(_types[0]) <= 122: #n-z
             frag_directions.append(-1)
         else:
             frag_directions.append(0)
