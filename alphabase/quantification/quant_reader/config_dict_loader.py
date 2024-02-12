@@ -17,7 +17,7 @@ def get_input_type_and_config_dict(input_file, input_type_to_use = None):
 
     sep = _get_seperator(input_file)
 
-    uploaded_data_columns = set(pd.read_csv(input_file, sep=sep, nrows=1, encoding ='latin1').columns)
+    uploaded_data_columns = set(pd.read_csv(input_file, sep=sep, nrows=1).columns)
 
     for input_type in type2relevant_columns.keys():
         if (input_type_to_use is not None) and (input_type!=input_type_to_use):
@@ -45,6 +45,7 @@ def _get_seperator(input_file):
 
     if 'sep' not in locals():
         raise TypeError(f"neither of the file extensions (.tsv, .csv, .txt) detected for file {input_file}! Your filename has to contain one of these extensions. Please modify your file name accordingly.")
+    return sep
 
 
 
