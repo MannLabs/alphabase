@@ -563,7 +563,7 @@ def fill_in_indices(
         max_index = frag_end-frag_start
         indices[frag_start:frag_end] = array[:max_index]
         max_indices[frag_start:frag_end] = ones[:max_index]*max_index
-        if top_k >= max_index*number_of_fragment_types: continue
+        if flattened_intensity is None or top_k >= max_index*number_of_fragment_types: continue
         idxes = np.argsort(flattened_intensity[frag_start*number_of_fragment_types:frag_end*number_of_fragment_types])
         _excl = np.ones_like(idxes, dtype=np.bool_)
         _excl[idxes[-top_k:]] = False
@@ -599,13 +599,13 @@ def calculate_fragment_numbers(frag_direction:np.int8, frag_number:np.uint32, in
 
 
 def parse_fragment(
-        frag_directions:np.ndarray, 
-        frag_start_idxes:np.ndarray, 
-        frag_stop_idxes: np.ndarray, 
-        top_k: int, 
-        intensities:np.ndarray, 
-        number_of_fragment_types:int
-        ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    frag_directions:np.ndarray, 
+    frag_start_idxes:np.ndarray, 
+    frag_stop_idxes: np.ndarray, 
+    top_k: int, 
+    intensities:np.ndarray, 
+    number_of_fragment_types:int
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Parse fragments to get fragment numbers, fragment positions and not top k excluded indices in one hit 
     faster than doing each operation individually, and makes the most of the operations that are done in parallel. 
@@ -774,14 +774,14 @@ def flatten_fragments(
     
     frag_directions = np.array(np.tile(frag_directions,(len(fragment_mz_df),1)), dtype=np.int8)
 
-    numbers, positions,excluded_indices = parse_fragment(
-            frag_directions, 
-            precursor_df.frag_start_idx.values, 
-            precursor_df.frag_stop_idx.values,
-            keep_top_k_fragments,
-            frag_df['intensity'],
-            len(fragment_mz_df.columns)
-        )
+    numbers, positions, excluded_indices = parse_fragment(
+        frag_directions, 
+        precursor_df.frag_start_idx.values, 
+        precursor_df.frag_stop_idx.values,
+        keep_top_k_fragments,
+        frag_df['intensity'] if use_intensity else None,
+        len(fragment_mz_df.columns)
+    )
    
     if 'number' in custom_columns:
 
