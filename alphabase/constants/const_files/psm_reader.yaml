@@ -219,3 +219,21 @@ library_reader_base:
     'fragment_series': ['FragmentSeriesNumber','FragmentNumber']
     'fragment_loss_type': ['FragmentLossType', 'FragmentIonLossType', 'ProductLossType', 'ProductIonLossType']
   modification_mapping: 'maxquant'
+
+sage:
+  reader_type: sage
+  rt_unit: minute
+  column_mapping:
+    'modified_sequence': 'peptide'
+    'sequence': 'stripped_peptide'
+    'charge': 'charge'
+    'rt': 'rt'
+    'mobility': 'mobility'
+    'raw_name': 'filename'
+    'scannr': 'scannr'
+    'score': 'sage_discriminant_score'
+    'proteins': 'proteins'
+    'fdr': 'spectrum_q'
+    'peptide_fdr': 'peptide_q'
+    'protein_fdr': 'protein_q'
+    'decoy': 'is_decoy'
