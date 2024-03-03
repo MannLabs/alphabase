@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import typing
 import re
 from functools import partial
 
@@ -10,12 +11,49 @@ from alphabase.psm_reader.psm_reader import (
 
 from alphabase.constants.modification import MOD_DF
 
-def sage_spec_idx_from_scannr(scannr):
+def sage_spec_idx_from_scannr(scannr: str) -> int:
+    """Extract the spectrum index from the scannr field in Sage output.
+
+    Parameters
+    ----------
+
+    scannr : str
+        The scannr field in Sage output.
+    
+    """
     return int(scannr.split('=')[-1])
 
-def lookup_modification(mass_observed, previous_aa, mod_annotated_df, ppm_tolerance=10):
+def lookup_modification(
+        mass_observed: float, 
+        previous_aa: str, 
+        mod_annotated_df: pd.DataFrame, 
+        ppm_tolerance:int=10,
+    ) -> str:
+    """
+    Look up a single modification based on the observed mass and the previous amino acid.
 
+    Parameters
+    ----------
+
+    mass_observed : float
+        The observed mass of the modification.
+
+    previous_aa : str
+        The previous amino acid.
+
+    mod_annotated_df : pd.DataFrame
+        The annotated modification dataframe.
+
+    ppm_tolerance : int
+        The ppm tolerance for matching the observed mass to the annotated modification mass.
+
+    Returns
+    -------
+
+    str
+        The name of the matched modification in alphabase format.
     
+    """
 
     mass_distance = mod_annotated_df['mass'].values - mass_observed
     ppm_distance = mass_distance / mass_observed * 1e6
@@ -37,7 +75,32 @@ def lookup_modification(mass_observed, previous_aa, mod_annotated_df, ppm_tolera
     
     return matched_mod['mod_name']
 
-def capture_modifications(sequence, mod_annotated_df, ppm_tolerance=10):
+def capture_modifications(
+        sequence: str,
+        mod_annotated_df: pd.DataFrame,
+        ppm_tolerance: int=10
+    ) -> typing.Tuple[str, str]:
+    """ Capture modifications from a sequence string.
+
+    Parameters
+    ----------
+
+    sequence : str
+        The modified sequence string.
+
+    mod_annotated_df : pd.DataFrame
+        The annotated modification dataframe.
+
+    ppm_tolerance : int
+        The ppm tolerance for matching the observed mass to the annotated modification mass.
+
+    Returns
+    -------
+
+    typing.Tuple[str, str]
+        A tuple of two strings, the first string is the list of modification sites, and the second string is the list of modifications.
+
+    """
 
     # get index of matches
     matches = re.finditer(r'\[(\+|-)(\d+\.\d+)\]', sequence)
@@ -67,6 +130,7 @@ def capture_modifications(sequence, mod_annotated_df, ppm_tolerance=10):
         return ';'.join(site_list), ';'.join(mod_list)
     
 def get_annotated_mod_df():
+    """ Annotates the modification dataframe with the location of the modification."""
     mod_annotated_df = MOD_DF.copy()
     mod_annotated_df['location'] = mod_annotated_df['mod_name'].str.split('@').str[1].str.split('^').str[0]
     mod_annotated_df = mod_annotated_df.sort_values(by='mass').reset_index(drop=True)
