@@ -110,6 +110,8 @@ def capture_modifications(
 
     error = False
 
+    match_delta = 0
+
     for match in matches:
         match_start, match_end = match.start(), match.end()
         previous_aa = sequence[match_start-1] if match_start > 0 else 'Any_N-term'
@@ -117,12 +119,14 @@ def capture_modifications(
 
         mod = lookup_modification(mass_observed, previous_aa, mod_annotated_df, ppm_tolerance=ppm_tolerance)
         if mod is not None:
-            site_list.append(str(match_start))
+            site_list.append(str(match_start-1-match_delta))
             mod_list.append(mod)
         
         else:
             error = True
             print(f'No modification found for mass {mass_observed} at position {match_start} with previous aa {previous_aa}')
+
+        match_delta += (match_end - match_start)
 
     if error:
         return np.nan, np.nan
