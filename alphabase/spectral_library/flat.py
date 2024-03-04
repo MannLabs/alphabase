@@ -310,7 +310,8 @@ class SpecLibFlat(SpecLibBase):
         self._precursor_df = self._precursor_df.drop(columns = ['precursor_idx'])
 
 
-
+        #Drop flat indices from precursor_df
+        self._precursor_df = self._precursor_df.drop(columns = ['flat_frag_start_idx','flat_frag_stop_idx'])
         
          
 
