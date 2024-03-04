@@ -1,5 +1,5 @@
 import pandas as pd
-
+import numpy as np
 from alphabase.spectral_library.base import (
     SpecLibBase
 )
@@ -186,3 +186,149 @@ class SpecLibFlat(SpecLibBase):
         self._fragment_mz_df = _hdf.library.fragment_mz_df.values
         self._fragment_intensity_df = _hdf.library.fragment_intensity_df.values
         
+    def get_full_charged_types(self,frag_df:pd.DataFrame) -> list:
+        """
+        Infer the full set of charged fragment types from the fragment dataframe
+        by full we mean a complete set of fragment types for each charge
+        so if we have a fragment b_z1 we should also have a fragment y_z1 and vice versa
+
+        Parameters
+        ----------
+        frag_df : pd.DataFrame
+            The fragment dataframe
+
+        Returns
+        -------
+        charged_frag_types : list
+            The full set of charged fragment types in the form of a list of strings such as ['a_z1','b_z1','c_z1','x_z1','y_z1','z_z1']
+
+        """
+        unique_charge_type_pairs = frag_df[['type','loss_type','charge']].drop_duplicates()
+        #Fragtypes from ascii to char
+        self.frag_types_as_char = {i: chr(i) for i in unique_charge_type_pairs['type'].unique()}
+
+        charged_frag_types = set()
+        # Now if we have a fragment type that is a,b,c we should have the corresponding x,y,z
+        
+        corresponding = {
+            'a':'x',
+            'b':'y',
+            'c':'z',
+            'x':'a',
+            'y':'b',
+            'z':'c'
+        }
+        loss_number_to_type = {0: '', 18: '_H2O', 17: '_NH3',98: '_modloss'}
+        for type,loss,charge in unique_charge_type_pairs.values:
+            # Add the string for this pair
+            charged_frag_types.add(f"{self.frag_types_as_char[type]}{loss_number_to_type[loss]}_z{charge}")
+            # Add the string for the corresponding pair
+            charged_frag_types.add(f"{corresponding[self.frag_types_as_char[type]]}{loss_number_to_type[loss]}_z{charge}")
+        return list(charged_frag_types)
+    def to_SpecLibBase(self) -> SpecLibBase:
+        """
+        Convert the flat library to SpecLibBase object.
+
+        Returns:
+        --------
+        SpecLibBase
+            A SpecLibBase object with `precursor_df`, `fragment_mz_df` and `fragment_intensity_df`, and 
+            '_additional_fragment_columns_df' if there was more than mz and intensity in the original fragment_df.
+        """
+        # Check that fragment_df has the following columns ['mz', 'intensity', 'type', 'charge', 'position', 'loss_type']
+        assert  set(['mz', 'intensity', 'type', 'charge', 'position', 'loss_type']).issubset(self._fragment_df.columns), f'fragment_df does not have the following columns: {set(["mz", "intensity", "type", "charge", "position", "loss_type"]) - set(self._fragment_df.columns)}'
+        self.charged_frag_types = self.get_full_charged_types(self._fragment_df) # Infer the full set of charged fragment types from data
+        
+        # charged_frag_types = self.charged_frag_types #Use pre-defined charged_frag_types
+        frag_type_to_col_dict = dict(zip(
+            self.charged_frag_types,  
+            range(len(self.charged_frag_types))
+        ))
+        loss_number_to_type = {0: '', 18: '_H2O', 17: '_NH3',98: '_modloss'}
+    
+        available_frag_types = self._fragment_df['type'].unique()
+        self.frag_types_as_char = {i: chr(i) for i in available_frag_types}
+
+        frag_types_z_charge = self._fragment_df[['type','charge','loss_type']].apply(lambda x: f"{self.frag_types_as_char[x['type']]}{loss_number_to_type[x['loss_type']]}_z{x['charge']}", axis=1)
+        
+        #Print number of nAA less 1
+        accumlated_nAA = (self._precursor_df['nAA']-1).cumsum()
+        # Define intensity and mz as a matrix of shape (accumlated_nAA[-1], len(self.charged_frag_types), 2) - 2 for mz and intensity
+        intensity_and_mz = np.zeros((accumlated_nAA.iloc[-1], len(self.charged_frag_types), 2))
+
+        # Start indices for each precursor is the accumlated nAA of the previous precursor and for the first precursor is 0
+        start_indexes = accumlated_nAA.shift(1).fillna(0).astype(int)
+        
+        
+        column_indices = frag_types_z_charge.map(frag_type_to_col_dict)
+
+        # We need to calculate for each fragment the precursor_idx that maps a fragment to a precursor
+        if 'precursor_idx' not in self._fragment_df.columns:            
+            # Sort precursor_df by 'flat_frag_start_idx'
+            self._precursor_df = self._precursor_df.sort_values('flat_frag_start_idx')
+            # Add precursor_idx to precursor_df as 0,1,2,3...
+            self._precursor_df['precursor_idx'] = range(self._precursor_df.shape[0])
+
+            # Add precursor_idx to fragment_df
+            frag_precursor_idx = np.repeat(self._precursor_df['precursor_idx'], self._precursor_df['flat_frag_stop_idx'] - self._precursor_df['flat_frag_start_idx'])
+
+            assert len(frag_precursor_idx) == self._fragment_df.shape[0], f'Number of fragments {len(frag_precursor_idx)} is not equal to the number of rows in fragment_df {self._fragment_df.shape[0]}'
+        
+            self._fragment_df['precursor_idx'] = frag_precursor_idx.values
+
+        #Row indices of a fragment being the accumlated nAA of the precursor + fragment position -1
+        precursor_idx_to_accumlated_nAA = dict(zip(self._precursor_df['precursor_idx'], start_indexes))
+        row_indices = self._fragment_df['precursor_idx'].map(precursor_idx_to_accumlated_nAA,na_action = 'ignore') + self._fragment_df['position'] 
+        
+        # Drop elements were the column_indices is nan and drop them from both row_indices and column_indices
+        nan_indices = column_indices.index[column_indices.isna()]
+        row_indices = row_indices.drop(nan_indices)
+        column_indices = column_indices.drop(nan_indices)
+
+        assert row_indices.shape[0] == column_indices.shape[0], f'row_indices {row_indices.shape[0]} is not equal to column_indices {column_indices.shape[0]}'
+
+
+        assert np.max(row_indices) <= intensity_and_mz.shape[0], f'row_indices {np.max(row_indices)} is greater than the number of fragments {intensity_and_mz.shape[0]}'
+        
+        # Assign the intensity and mz to the correct position in the matrix
+        intensity_indices = np.array((row_indices, column_indices,np.zeros_like(row_indices)), dtype=int).tolist()
+        mz_indices = np.array((row_indices, column_indices,np.ones_like(row_indices)), dtype=int).tolist()
+        
+        intensity_and_mz[tuple(intensity_indices)] = self._fragment_df['intensity']
+        intensity_and_mz[tuple(mz_indices)] = self._fragment_df['mz']
+
+        #Create fragment_mz_df and fragment_intensity_df
+        fragment_mz_df = pd.DataFrame(intensity_and_mz[:,:,1], columns = self.charged_frag_types)
+        fragment_intensity_df = pd.DataFrame(intensity_and_mz[:,:,0], columns = self.charged_frag_types)
+
+        #Add columns frag_start_idx and frag_stop_idx to the precursor_df
+        self._precursor_df['frag_start_idx'] = start_indexes
+        self._precursor_df['frag_stop_idx'] = accumlated_nAA
+
+        #Drop precursor Idx from both fragment_df and precursor_df
+        self._fragment_df = self._fragment_df.drop(columns = ['precursor_idx'])
+        self._precursor_df = self._precursor_df.drop(columns = ['precursor_idx'])
+
+
+
+        
+         
+
+        #Create SpecLibBase object
+        spec_lib_base = SpecLibBase()
+        spec_lib_base._precursor_df = self._precursor_df
+        spec_lib_base._fragment_mz_df = fragment_mz_df
+        spec_lib_base._fragment_intensity_df = fragment_intensity_df
+        spec_lib_base.charged_frag_types = self.charged_frag_types
+        
+        #  Add additional columns from frag_df that were not mz and intensity
+        additional_columns = set(self._fragment_df.columns) - set(['mz','intensity','type','charge','position','loss_type'])
+        for col in additional_columns:
+            additional_matrix = np.zeros((accumlated_nAA.iloc[-1], len(self.charged_frag_types)))
+            data_indices = np.array((row_indices, column_indices), dtype=int).tolist()
+            additional_matrix[tuple(data_indices)] = self._fragment_df[col]
+            additional_df = pd.DataFrame(additional_matrix, columns = self.charged_frag_types)
+            setattr(spec_lib_base,f'_fragment_{col}_df',additional_df)
+
+
+        return spec_lib_base

@@ -134,6 +134,23 @@ class SpecLibBase(object):
         """
         return self._fragment_intensity_df
     
+
+    def available_fragment_dfs(self)->list:
+        """
+        Return the available fragment dataframes
+        By dynamically checking the attributes of the object.
+        a fragment dataframe is matched with the pattern '_fragment_[attribute_name]_df'
+
+        Returns
+        -------
+        list
+            List of available fragment dataframes
+        """
+        return [
+            attr for attr in dir(self) 
+            if attr.startswith('_fragment') and attr.endswith('_df')
+        ]
+    
     def copy(self):
         """
         Return a copy of the spectral library object.
