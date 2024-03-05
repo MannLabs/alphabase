@@ -263,7 +263,9 @@ class SpecLibFlat(SpecLibBase):
         column_indices = frag_types_z_charge.map(frag_type_to_col_dict)
 
         # We need to calculate for each fragment the precursor_idx that maps a fragment to a precursor
-        if 'precursor_idx' not in self._fragment_df.columns:            
+        drop_precursor_idx = False
+        if 'precursor_idx' not in self._fragment_df.columns:        
+            drop_precursor_idx = True    
             # Sort precursor_df by 'flat_frag_start_idx'
             self._precursor_df = self._precursor_df.sort_values('flat_frag_start_idx')
             # Add precursor_idx to precursor_df as 0,1,2,3...
@@ -306,8 +308,9 @@ class SpecLibFlat(SpecLibBase):
         self._precursor_df['frag_stop_idx'] = accumlated_nAA
 
         #Drop precursor Idx from both fragment_df and precursor_df
-        self._fragment_df = self._fragment_df.drop(columns = ['precursor_idx'])
-        self._precursor_df = self._precursor_df.drop(columns = ['precursor_idx'])
+        if drop_precursor_idx:
+            self._fragment_df = self._fragment_df.drop(columns = ['precursor_idx'])
+            self._precursor_df = self._precursor_df.drop(columns = ['precursor_idx'])
 
 
         #Drop flat indices from precursor_df
