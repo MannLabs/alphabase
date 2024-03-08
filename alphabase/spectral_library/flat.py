@@ -219,11 +219,12 @@ class SpecLibFlat(SpecLibBase):
             'z':'c'
         }
         loss_number_to_type = {0: '', 18: '_H2O', 17: '_NH3',98: '_modloss'}
-        for type,loss,charge in unique_charge_type_pairs.values:
-            # Add the string for this pair
-            charged_frag_types.add(f"{self.frag_types_as_char[type]}{loss_number_to_type[loss]}_z{charge}")
-            # Add the string for the corresponding pair
-            charged_frag_types.add(f"{corresponding[self.frag_types_as_char[type]]}{loss_number_to_type[loss]}_z{charge}")
+        for type,loss,max_charge in unique_charge_type_pairs.values:
+            for possible_charge  in range(1,max_charge+1):
+                # Add the string for this pair
+                charged_frag_types.add(f"{self.frag_types_as_char[type]}{loss_number_to_type[loss]}_z{possible_charge}")
+                # Add the string for the corresponding pair
+                charged_frag_types.add(f"{corresponding[self.frag_types_as_char[type]]}{loss_number_to_type[loss]}_z{possible_charge}")
         return list(charged_frag_types)
     def to_SpecLibBase(self) -> SpecLibBase:
         """
@@ -238,7 +239,6 @@ class SpecLibFlat(SpecLibBase):
         # Check that fragment_df has the following columns ['mz', 'intensity', 'type', 'charge', 'position', 'loss_type']
         assert  set(['mz', 'intensity', 'type', 'charge', 'position', 'loss_type']).issubset(self._fragment_df.columns), f'fragment_df does not have the following columns: {set(["mz", "intensity", "type", "charge", "position", "loss_type"]) - set(self._fragment_df.columns)}'
         self.charged_frag_types = self.get_full_charged_types(self._fragment_df) # Infer the full set of charged fragment types from data
-        
         # charged_frag_types = self.charged_frag_types #Use pre-defined charged_frag_types
         frag_type_to_col_dict = dict(zip(
             self.charged_frag_types,  

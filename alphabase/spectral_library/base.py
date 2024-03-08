@@ -486,23 +486,25 @@ class SpecLibBase(object):
     
     def remove_unused_fragments(self):
         """
-        Remove unused fragments from self._fragment_mz_df and self._fragment_intensity_df.
+        Remove unused fragments from all available fragment dataframes.
         Fragment dataframes are updated inplace and overwritten.
         """
 
+        available_fragments_df = self.available_fragment_dfs()
+        non_zero_dfs = [
+            df for df in available_fragments_df 
+            if len(getattr(self, df)) > 0
+        ]
+        to_compress = [
+            getattr(self, df) for df in non_zero_dfs
+        ]
+        self._precursor_df, compressed_dfs = fragment.remove_unused_fragments(
+            self._precursor_df, to_compress
+        )
 
-        if len(self._fragment_mz_df) > 0:
-            
-            # update both fragment mz and intensity df
-            if len(self.fragment_intensity_df > 0):
-                self._precursor_df,(self._fragment_mz_df, self._fragment_intensity_df) = fragment.remove_unused_fragments(
-                    self._precursor_df,(self._fragment_mz_df, self._fragment_intensity_df)
-                )
-            # only update fragment mz df
-            else:
-                (self._precursor_df, (self._fragment_mz_df,)) = fragment.remove_unused_fragments(
-                    self._precursor_df, (self._fragment_mz_df,)
-                )
+        for df, compressed_df in zip(non_zero_dfs, compressed_dfs):
+            setattr(self, df, compressed_df)
+
 
     def calc_fragment_count(self):
         """
