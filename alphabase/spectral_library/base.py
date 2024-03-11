@@ -169,6 +169,7 @@ class SpecLibBase(object):
             self, 
             other : 'SpecLibBase',
             dfs_to_append : typing.List[str] = ['_precursor_df','_fragment_intensity_df', '_fragment_mz_df','_fragment_intensity_predicted_df'],
+            remove_unused_dfs:bool = True,
         ):
         """
 
@@ -185,12 +186,21 @@ class SpecLibBase(object):
         dfs_to_append : list, optional
             List of dataframes to be appended.
             Defaults to ['_precursor_df','_fragment_intensity_df', '_fragment_mz_df','_fragment_intensity_predicted_df'].
+
+        remove_unused_dfs : bool, optional
+            Remove dataframes from the current library that are not used in the append, this is crucial when using the remove unused fragments function
+            after appending a library, inorder to have all fragment dataframes of the same size. When set to false the unused dataframes will be kept.
             
         Returns
         -------
         None
             
         """
+        if remove_unused_dfs:
+            current_frag_dfs = self.available_fragment_dfs()
+            for attr in current_frag_dfs:
+                if attr not in dfs_to_append:
+                    delattr(self, attr)
 
         def check_matching_columns(df1, df2):
             # check if the columns are compatible

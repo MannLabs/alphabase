@@ -249,8 +249,13 @@ class SpecLibFlat(SpecLibBase):
         available_frag_types = self._fragment_df['type'].unique()
         self.frag_types_as_char = {i: chr(i) for i in available_frag_types}
 
-        frag_types_z_charge = self._fragment_df[['type','charge','loss_type']].apply(lambda x: f"{self.frag_types_as_char[x['type']]}{loss_number_to_type[x['loss_type']]}_z{x['charge']}", axis=1)
-        
+        frag_types_z_charge = (
+            self._fragment_df['type'].map(self.frag_types_as_char) + 
+            self._fragment_df['loss_type'].map(loss_number_to_type) + 
+            '_z' + 
+            self._fragment_df['charge'].astype(str)
+        )
+
         #Print number of nAA less 1
         accumlated_nAA = (self._precursor_df['nAA']-1).cumsum()
         # Define intensity and mz as a matrix of shape (accumlated_nAA[-1], len(self.charged_frag_types), 2) - 2 for mz and intensity
@@ -334,5 +339,5 @@ class SpecLibFlat(SpecLibBase):
             additional_df = pd.DataFrame(additional_matrix, columns = self.charged_frag_types)
             setattr(spec_lib_base,f'_fragment_{col}_df',additional_df)
 
-
+        
         return spec_lib_base
