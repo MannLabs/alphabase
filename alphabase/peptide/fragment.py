@@ -673,10 +673,12 @@ def flatten_fragments(
 
     - mz:        :data:`PEAK_MZ_DTYPE`, fragment mz value
     - intensity: :data:`PEAK_INTENSITY_DTYPE`, fragment intensity value
-    - type:      int8, ASCII code of the ion type (97=a, 98=b, 99=c, 120=x, 121=y, 122=z), or more ion types in the future. See https://en.wikipedia.org/wiki/ASCII for more ASCII information
+    - type:      uint8, ASCII code of the ion type. Small caps are for regular scoring ions used during search: (97=a, 98=b, 99=c, 120=x, 121=y, 122=z).
+                        Small caps subtracted by 64 are used for ions only quantified and not scored: (33=a, 34=b, 35=c, 56=x, 57=y, 58=z).
+                        By default all ions are scored and quantified. It is left to the user or search engine to decide which ions to use.
     - number:    uint32, fragment series number
     - position:  uint32, fragment position in sequence (from left to right, starts with 0)
-    - charge:    int8, fragment charge
+    - charge:    uint8, fragment charge
     - loss_type: int16, fragment loss type, 0=noloss, 17=NH3, 18=H2O, 98=H3PO4 (phos), ...
     
     The fragment pointers `frag_start_idx` and `frag_stop_idx` 
@@ -717,10 +719,12 @@ def flatten_fragments(
         
         - mz:        :data:`PEAK_MZ_DTYPE`, fragment mz value
         - intensity: :data:`PEAK_INTENSITY_DTYPE`, fragment intensity value
-        - type:      int8, ASCII code of the ion type (97=a, 98=b, 99=c, 120=x, 121=y, 122=z), or more ion types in the future. See https://en.wikipedia.org/wiki/ASCII for more ASCII information
+        - type:      uint8, ASCII code of the ion type. Small caps are for regular scoring ions used during search: (97=a, 98=b, 99=c, 120=x, 121=y, 122=z).
+                            Small caps subtracted by 64 are used for ions only quantified and not scored: (33=a, 34=b, 35=c, 56=x, 57=y, 58=z).
+                            By default all ions are scored and quantified. It is left to the user or search engine to decide which ions to use.
         - number:    uint32, fragment series number
         - position:  uint32, fragment position in sequence (from left to right, starts with 0)
-        - charge:    int8, fragment charge
+        - charge:    uint8, fragment charge
         - loss_type: int16, fragment loss type, 0=noloss, 17=NH3, 18=H2O, 98=H3PO4 (phos), ...
     """
     if len(precursor_df) == 0:
