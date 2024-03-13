@@ -297,9 +297,10 @@ def update_sliced_fragment_dataframe(
         fragment_mzs[frag_slices, :] = values.astype(fragment_mzs.dtype)
     else:
         charged_frag_idxes = [fragment_df.columns.get_loc(c) for c in charged_frag_types]
-        fragment_mzs[
+        fragment_df.iloc[
             frag_slices, charged_frag_idxes
         ] = values.astype(fragment_mzs.dtype)
+        fragment_mzs[frag_slices] = fragment_df.values[frag_slices]
 
 def get_sliced_fragment_dataframe(
     fragment_df: pd.DataFrame,
