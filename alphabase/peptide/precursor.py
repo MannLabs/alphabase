@@ -220,7 +220,7 @@ def hash_mod_seq_df(
     """ Internal function """
     hash_vals = precursor_df.sequence.apply(
         lambda x: xxh64_intdigest(x, seed=seed)
-    ).astype(np.uint64).values
+    ).to_numpy(copy=True, dtype=np.uint64)
     hash_vals += precursor_df.mods.apply(
         lambda x: xxh64_intdigest(x, seed=seed)
     ).astype(np.uint64).values
