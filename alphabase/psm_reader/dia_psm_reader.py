@@ -129,6 +129,12 @@ class DiannReader(SpectronautReader):
         df = pd.read_csv(filename, sep=self.csv_sep,keep_default_na=False)
 
         return df
+    
+    def _post_process(self, origin_df: pd.DataFrame):
+        super()._post_process(origin_df)
+        self._psm_df.rename(
+            columns={"spec_idx":"diann_spec_idx"}, inplace=True
+        )
 
 psm_reader_provider.register_reader(
     'spectronaut', SpectronautReader
