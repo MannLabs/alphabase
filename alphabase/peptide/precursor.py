@@ -98,9 +98,9 @@ def update_precursor_mz(
         _calc_in_order = False
     precursor_df['precursor_mz'] = 0.
     _grouped = precursor_df.groupby('nAA')
-    precursor_mz_idx = precursor_df.columns.get_loc(
-        'precursor_mz'
-    )
+    # precursor_mz_idx = precursor_df.columns.get_loc(
+    #     'precursor_mz'
+    # )
     for nAA, big_df_group in _grouped:
         for i in range(0, len(big_df_group), batch_size):
             batch_end = i+batch_size
@@ -114,7 +114,7 @@ def update_precursor_mz(
                 'aa_mass_diffs' in df_group.columns else None
             )/df_group.charge + MASS_PROTON
             if _calc_in_order:
-                precursor_df.iloc[:,precursor_mz_idx].values[
+                precursor_df.precursor_mz.values[
                     df_group.index.values[0]:
                     df_group.index.values[-1]+1
                 ] = pep_mzs
