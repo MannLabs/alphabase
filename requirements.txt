@@ -12,4 +12,5 @@ scikit-learn
 regex
 # pydivsufsort
 dask
+dask_expr
 pyahocorasick

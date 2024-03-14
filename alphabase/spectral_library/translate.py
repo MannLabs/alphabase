@@ -114,7 +114,7 @@ def merge_precursor_fragment_df(
     if verbose:
         iters = tqdm.tqdm(iters)
     for i,(start, end) in iters:
-        intens = fragment_inten_df.iloc[start:end,:].values # is loc[start:end-1,:] faster?
+        intens = fragment_inten_df.iloc[start:end,:].to_numpy(copy=True) # is loc[start:end-1,:] faster?
         max_inten = np.amax(intens)
         if max_inten > 0:
             intens /= max_inten

@@ -261,10 +261,11 @@ def init_fragment_by_precursor_dataframe(
 
 def update_sliced_fragment_dataframe(
     fragment_df: pd.DataFrame,
+    fragment_mzs: np.ndarray,
     values: np.ndarray,
     frag_start_end_list: List[Tuple[int,int]],
     charged_frag_types: List[str]=None,
-)->pd.DataFrame:
+):
     '''
     Set the values of the slices `frag_start_end_list=[(start,end),(start,end),...]` 
     of fragment_df.
@@ -273,6 +274,9 @@ def update_sliced_fragment_dataframe(
     ----------
     fragment_df : pd.DataFrame
         fragment dataframe to set the values
+
+    fragment_mzs : np.ndarray
+        The copy np.ndarry of fragment_df
 
     values : np.ndarray
         values to set
@@ -286,22 +290,17 @@ def update_sliced_fragment_dataframe(
         It is much faster if charged_frag_types is None as we use numpy slicing, 
         otherwise we use pd.loc (much slower).
         Defaults to None.
-    
-    Returns
-    -------
-    pd.DataFrame
-        fragment_df after the values are set into slices
     '''
     frag_slice_list = [slice(start,end) for start,end in frag_start_end_list]
     frag_slices = np.r_[tuple(frag_slice_list)]
     if charged_frag_types is None or len(charged_frag_types)==0:
-        fragment_df.values[frag_slices, :] = values.astype(fragment_df.dtypes.iloc[0])
+        fragment_mzs[frag_slices, :] = values.astype(fragment_mzs.dtype)
     else:
         charged_frag_idxes = [fragment_df.columns.get_loc(c) for c in charged_frag_types]
         fragment_df.iloc[
             frag_slices, charged_frag_idxes
-        ] = values.astype(fragment_df.dtypes.iloc[0])
-    return fragment_df
+        ] = values.astype(fragment_mzs.dtype)
+        fragment_mzs[frag_slices] = fragment_df.values[frag_slices]
 
 def get_sliced_fragment_dataframe(
     fragment_df: pd.DataFrame,
@@ -1076,6 +1075,8 @@ def create_fragment_mz_dataframe(
                 dtype=dtype,
             )
 
+        frag_mz_values = fragment_mz_df.to_numpy(copy=True)
+
         _grouped = precursor_df.groupby('nAA')
         for nAA, big_df_group in _grouped:
             for i in range(0, len(big_df_group), batch_size):
@@ -1088,9 +1089,11 @@ def create_fragment_mz_dataframe(
                 )
                 
                 update_sliced_fragment_dataframe(
-                    fragment_mz_df, mz_values, 
+                    fragment_mz_df, frag_mz_values, mz_values, 
                     df_group[['frag_start_idx','frag_stop_idx']].values, 
                 )
+
+    fragment_mz_df.iloc[:] = frag_mz_values
 
     return mask_fragments_for_charge_greater_than_precursor_charge(
             fragment_mz_df,
