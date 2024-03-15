@@ -114,13 +114,14 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
             Dataframe containing the spectral library.
         
         """
-
         if 'fragment_loss_type' not in lib_df.columns:
             lib_df['fragment_loss_type'] = ''
 
-        lib_df['fragment_loss_type'].fillna('', inplace=True)
-        lib_df['fragment_loss_type'].replace('noloss','',inplace=True)
-
+        lib_df.fillna({'fragment_loss_type':''}, inplace=True)
+        lib_df.replace(
+            {'fragment_loss_type':'noloss'},
+            {'fragment_loss_type':''},inplace=True
+        )
 
         if 'mods' not in lib_df.columns:
             lib_df['mods'] = ''

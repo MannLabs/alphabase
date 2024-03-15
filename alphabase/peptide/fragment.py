@@ -261,10 +261,11 @@ def init_fragment_by_precursor_dataframe(
 
 def update_sliced_fragment_dataframe(
     fragment_df: pd.DataFrame,
+    fragment_mzs: np.ndarray,
     values: np.ndarray,
     frag_start_end_list: List[Tuple[int,int]],
     charged_frag_types: List[str]=None,
-)->pd.DataFrame:
+):
     '''
     Set the values of the slices `frag_start_end_list=[(start,end),(start,end),...]` 
     of fragment_df.
@@ -273,6 +274,9 @@ def update_sliced_fragment_dataframe(
     ----------
     fragment_df : pd.DataFrame
         fragment dataframe to set the values
+
+    fragment_mzs : np.ndarray
+        The copy np.ndarry of fragment_df
 
     values : np.ndarray
         values to set
@@ -286,22 +290,17 @@ def update_sliced_fragment_dataframe(
         It is much faster if charged_frag_types is None as we use numpy slicing, 
         otherwise we use pd.loc (much slower).
         Defaults to None.
-    
-    Returns
-    -------
-    pd.DataFrame
-        fragment_df after the values are set into slices
     '''
     frag_slice_list = [slice(start,end) for start,end in frag_start_end_list]
     frag_slices = np.r_[tuple(frag_slice_list)]
     if charged_frag_types is None or len(charged_frag_types)==0:
-        fragment_df.values[frag_slices, :] = values.astype(fragment_df.dtypes.iloc[0])
+        fragment_mzs[frag_slices, :] = values.astype(fragment_mzs.dtype)
     else:
         charged_frag_idxes = [fragment_df.columns.get_loc(c) for c in charged_frag_types]
         fragment_df.iloc[
             frag_slices, charged_frag_idxes
-        ] = values.astype(fragment_df.dtypes.iloc[0])
-    return fragment_df
+        ] = values.astype(fragment_mzs.dtype)
+        fragment_mzs[frag_slices] = fragment_df.values[frag_slices]
 
 def get_sliced_fragment_dataframe(
     fragment_df: pd.DataFrame,
@@ -563,7 +562,7 @@ def fill_in_indices(
         max_index = frag_end-frag_start
         indices[frag_start:frag_end] = array[:max_index]
         max_indices[frag_start:frag_end] = ones[:max_index]*max_index
-        if top_k >= max_index*number_of_fragment_types: continue
+        if flattened_intensity is None or top_k >= max_index*number_of_fragment_types: continue
         idxes = np.argsort(flattened_intensity[frag_start*number_of_fragment_types:frag_end*number_of_fragment_types])
         _excl = np.ones_like(idxes, dtype=np.bool_)
         _excl[idxes[-top_k:]] = False
@@ -599,13 +598,13 @@ def calculate_fragment_numbers(frag_direction:np.int8, frag_number:np.uint32, in
 
 
 def parse_fragment(
-        frag_directions:np.ndarray, 
-        frag_start_idxes:np.ndarray, 
-        frag_stop_idxes: np.ndarray, 
-        top_k: int, 
-        intensities:np.ndarray, 
-        number_of_fragment_types:int
-        ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    frag_directions:np.ndarray, 
+    frag_start_idxes:np.ndarray, 
+    frag_stop_idxes: np.ndarray, 
+    top_k: int, 
+    intensities:np.ndarray, 
+    number_of_fragment_types:int
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Parse fragments to get fragment numbers, fragment positions and not top k excluded indices in one hit 
     faster than doing each operation individually, and makes the most of the operations that are done in parallel. 
@@ -673,10 +672,12 @@ def flatten_fragments(
 
     - mz:        :data:`PEAK_MZ_DTYPE`, fragment mz value
     - intensity: :data:`PEAK_INTENSITY_DTYPE`, fragment intensity value
-    - type:      int8, ASCII code of the ion type (97=a, 98=b, 99=c, 120=x, 121=y, 122=z), or more ion types in the future. See https://en.wikipedia.org/wiki/ASCII for more ASCII information
+    - type:      uint8, ASCII code of the ion type. Small caps are for regular scoring ions used during search: (97=a, 98=b, 99=c, 120=x, 121=y, 122=z).
+                        Small caps subtracted by 64 are used for ions only quantified and not scored: (33=a, 34=b, 35=c, 56=x, 57=y, 58=z).
+                        By default all ions are scored and quantified. It is left to the user or search engine to decide which ions to use.
     - number:    uint32, fragment series number
     - position:  uint32, fragment position in sequence (from left to right, starts with 0)
-    - charge:    int8, fragment charge
+    - charge:    uint8, fragment charge
     - loss_type: int16, fragment loss type, 0=noloss, 17=NH3, 18=H2O, 98=H3PO4 (phos), ...
     
     The fragment pointers `frag_start_idx` and `frag_stop_idx` 
@@ -717,10 +718,12 @@ def flatten_fragments(
         
         - mz:        :data:`PEAK_MZ_DTYPE`, fragment mz value
         - intensity: :data:`PEAK_INTENSITY_DTYPE`, fragment intensity value
-        - type:      int8, ASCII code of the ion type (97=a, 98=b, 99=c, 120=x, 121=y, 122=z), or more ion types in the future. See https://en.wikipedia.org/wiki/ASCII for more ASCII information
+        - type:      uint8, ASCII code of the ion type. Small caps are for regular scoring ions used during search: (97=a, 98=b, 99=c, 120=x, 121=y, 122=z).
+                            Small caps subtracted by 64 are used for ions only quantified and not scored: (33=a, 34=b, 35=c, 56=x, 57=y, 58=z).
+                            By default all ions are scored and quantified. It is left to the user or search engine to decide which ions to use.
         - number:    uint32, fragment series number
         - position:  uint32, fragment position in sequence (from left to right, starts with 0)
-        - charge:    int8, fragment charge
+        - charge:    uint8, fragment charge
         - loss_type: int16, fragment loss type, 0=noloss, 17=NH3, 18=H2O, 98=H3PO4 (phos), ...
     """
     if len(precursor_df) == 0:
@@ -758,9 +761,9 @@ def flatten_fragments(
                 frag_loss_types.append(18)
             else:
                 frag_loss_types.append(98)
-        if _types[0] in 'abc':
+        if ord(_types[0]) >= 97 and ord(_types[0]) <= 109: # a-m
             frag_directions.append(1)
-        elif _types[0] in 'xyz':
+        elif ord(_types[0]) >= 110 and ord(_types[0]) <= 122: #n-z
             frag_directions.append(-1)
         else:
             frag_directions.append(0)
@@ -774,14 +777,14 @@ def flatten_fragments(
     
     frag_directions = np.array(np.tile(frag_directions,(len(fragment_mz_df),1)), dtype=np.int8)
 
-    numbers, positions,excluded_indices = parse_fragment(
-            frag_directions, 
-            precursor_df.frag_start_idx.values, 
-            precursor_df.frag_stop_idx.values,
-            keep_top_k_fragments,
-            frag_df['intensity'],
-            len(fragment_mz_df.columns)
-        )
+    numbers, positions, excluded_indices = parse_fragment(
+        frag_directions, 
+        precursor_df.frag_start_idx.values, 
+        precursor_df.frag_stop_idx.values,
+        keep_top_k_fragments,
+        frag_df['intensity'] if use_intensity else None,
+        len(fragment_mz_df.columns)
+    )
    
     if 'number' in custom_columns:
 
@@ -1072,6 +1075,8 @@ def create_fragment_mz_dataframe(
                 dtype=dtype,
             )
 
+        frag_mz_values = fragment_mz_df.to_numpy(copy=True)
+
         _grouped = precursor_df.groupby('nAA')
         for nAA, big_df_group in _grouped:
             for i in range(0, len(big_df_group), batch_size):
@@ -1084,9 +1089,11 @@ def create_fragment_mz_dataframe(
                 )
                 
                 update_sliced_fragment_dataframe(
-                    fragment_mz_df, mz_values, 
+                    fragment_mz_df, frag_mz_values, mz_values, 
                     df_group[['frag_start_idx','frag_stop_idx']].values, 
                 )
+
+    fragment_mz_df.iloc[:] = frag_mz_values
 
     return mask_fragments_for_charge_greater_than_precursor_charge(
             fragment_mz_df,

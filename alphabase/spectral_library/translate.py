@@ -114,7 +114,7 @@ def merge_precursor_fragment_df(
     if verbose:
         iters = tqdm.tqdm(iters)
     for i,(start, end) in iters:
-        intens = fragment_inten_df.iloc[start:end,:].values # is loc[start:end-1,:] faster?
+        intens = fragment_inten_df.iloc[start:end,:].to_numpy(copy=True) # is loc[start:end-1,:] faster?
         max_inten = np.amax(intens)
         if max_inten > 0:
             intens /= max_inten
@@ -282,16 +282,16 @@ def speclib_to_single_df(
 
     for rt_col in ['irt_pred','rt_pred','rt','irt','rt_norm']:
         if rt_col in speclib.precursor_df.columns:
-            df['Tr_recalibrated'] = speclib.precursor_df[rt_col]
+            df['RT'] = speclib.precursor_df[rt_col]
             break
-    if 'Tr_recalibrated' not in df.columns:
+    if 'RT' not in df.columns:
         raise ValueError('precursor_df must contain the RT columns')
     # if 'irt_pred' in speclib._precursor_df.columns:
-    #     df['Tr_recalibrated'] = speclib._precursor_df['irt_pred']
+    #     df['RT'] = speclib._precursor_df['irt_pred']
     # elif 'rt_pred' in speclib._precursor_df.columns:
-    #     df['Tr_recalibrated'] = speclib._precursor_df['rt_pred']
+    #     df['RT'] = speclib._precursor_df['rt_pred']
     # elif 'rt_norm' in speclib._precursor_df.columns:
-    #     df['Tr_recalibrated'] = speclib._precursor_df['rt_norm']
+    #     df['RT'] = speclib._precursor_df['rt_norm']
     # else:
     #     raise ValueError('precursor_df must contain the "rt_pred" or "rt_norm" column')
 
