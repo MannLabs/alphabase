@@ -4,6 +4,7 @@ import typing
 import logging
 import copy
 import warnings
+import re
 
 import alphabase.peptide.fragment as fragment
 import alphabase.peptide.precursor as precursor
@@ -137,7 +138,7 @@ class SpecLibBase(object):
 
     def available_fragment_dfs(self)->list:
         """
-        Return the available fragment dataframes
+        Return the available dense fragment dataframes
         By dynamically checking the attributes of the object.
         a fragment dataframe is matched with the pattern '_fragment_[attribute_name]_df'
 
@@ -148,7 +149,7 @@ class SpecLibBase(object):
         """
         return [
             attr for attr in dir(self) 
-            if attr.startswith('_fragment') and attr.endswith('_df')
+            if re.match(r'_fragment_.*_df', attr)
         ]
     
     def copy(self):
