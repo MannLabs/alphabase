@@ -261,7 +261,7 @@ def init_fragment_by_precursor_dataframe(
 
 def update_sliced_fragment_dataframe(
     fragment_df: pd.DataFrame,
-    fragment_mzs: np.ndarray,
+    fragment_df_vals: np.ndarray,
     values: np.ndarray,
     frag_start_end_list: List[Tuple[int,int]],
     charged_frag_types: List[str]=None,
@@ -275,8 +275,8 @@ def update_sliced_fragment_dataframe(
     fragment_df : pd.DataFrame
         fragment dataframe to set the values
 
-    fragment_mzs : np.ndarray
-        The copy np.ndarry of fragment_df
+    fragment_df_vals : np.ndarray
+        The `fragment_df.to_numpy(copy=True)`, to prevent readonly assignment.
 
     values : np.ndarray
         values to set
@@ -294,13 +294,13 @@ def update_sliced_fragment_dataframe(
     frag_slice_list = [slice(start,end) for start,end in frag_start_end_list]
     frag_slices = np.r_[tuple(frag_slice_list)]
     if charged_frag_types is None or len(charged_frag_types)==0:
-        fragment_mzs[frag_slices, :] = values.astype(fragment_mzs.dtype)
+        fragment_df_vals[frag_slices, :] = values.astype(fragment_df_vals.dtype)
     else:
         charged_frag_idxes = [fragment_df.columns.get_loc(c) for c in charged_frag_types]
         fragment_df.iloc[
             frag_slices, charged_frag_idxes
-        ] = values.astype(fragment_mzs.dtype)
-        fragment_mzs[frag_slices] = fragment_df.values[frag_slices]
+        ] = values.astype(fragment_df_vals.dtype)
+        fragment_df_vals[frag_slices] = fragment_df.values[frag_slices]
 
 def get_sliced_fragment_dataframe(
     fragment_df: pd.DataFrame,
