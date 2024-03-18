@@ -138,7 +138,7 @@ class SpecLibFlat(SpecLibBase):
 
             self.charged_frag_types = library.fragment_mz_df.columns.values
             for dense_frag_df in library.available_dense_fragment_dfs():
-                setattr(self, dense_frag_df), getattr(library, dense_frag_df)
+                setattr(self, dense_frag_df, getattr(library, dense_frag_df))
 
             warnings.warn(
                 "The SpecLibFlat object will have a strictly flat representation in the future. keep_original_frag_dfs=True will be deprecated.",
