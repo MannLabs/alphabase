@@ -77,8 +77,8 @@ def get_quantitative_columns(input_df, hierarchy_type, config_dict, ion_headers_
 
     if config_dict.get("format") == 'widetable':
         quantcolumn_candidates = [x for x in input_df.columns if x not in naming_columns]
-        if "quant_prefix" in config_dict.keys():
-            return [x for x in quantcolumn_candidates if x.startswith(config_dict.get("quant_prefix"))] # in the case that the quantitative columns have a prefix (like "Intensity " in MQ peptides.txt), only columns with the prefix are filtered
+        if "quant_pre_or_suffix" in config_dict.keys():
+            return [x for x in quantcolumn_candidates if x.startswith(config_dict.get("quant_pre_or_suffix")) or x.endswith(config_dict.get("quant_pre_or_suffix"))] # in the case that the quantitative columns have a prefix (like "Intensity " in MQ peptides.txt), only columns with the prefix are filtered
         else:
             return quantcolumn_candidates #in this case, we assume that all non-ionname/proteinname columns are quantitative columns
 
