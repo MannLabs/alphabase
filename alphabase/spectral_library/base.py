@@ -136,7 +136,7 @@ class SpecLibBase(object):
         return self._fragment_intensity_df
     
 
-    def available_fragment_dfs(self)->list:
+    def available_dense_fragment_dfs(self)->list:
         """
         Return the available dense fragment dataframes
         By dynamically checking the attributes of the object.
@@ -198,7 +198,7 @@ class SpecLibBase(object):
             
         """
         if remove_unused_dfs:
-            current_frag_dfs = self.available_fragment_dfs()
+            current_frag_dfs = self.available_dense_fragment_dfs()
             for attr in current_frag_dfs:
                 if attr not in dfs_to_append:
                     delattr(self, attr)
@@ -501,7 +501,7 @@ class SpecLibBase(object):
         Fragment dataframes are updated inplace and overwritten.
         """
 
-        available_fragments_df = self.available_fragment_dfs()
+        available_fragments_df = self.available_dense_fragment_dfs()
         non_zero_dfs = [
             df for df in available_fragments_df 
             if len(getattr(self, df)) > 0
