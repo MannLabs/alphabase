@@ -1,5 +1,7 @@
 import pandas as pd
 import numpy as np
+import warnings
+
 from alphabase.spectral_library.base import (
     SpecLibBase
 )
@@ -77,10 +79,22 @@ class SpecLibFlat(SpecLibBase):
     def protein_df(self)->pd.DataFrame:
         """ Protein dataframe """
         return self._protein_df
-
+    
+    def available_dense_fragment_dfs(self):
+        """Return the available dense fragment dataframes.
+        This method is inherited from :class:`SpecLibBase` and will return an empty list for a flat library.
+        """
+        return []
+    
+    def remove_unused_fragments(self):
+        """Remove unused fragments from fragment_df.
+        This method is inherited from :class:`SpecLibBase` and has not been implemented for a flat library.
+        """
+        raise NotImplementedError("remove_unused_fragments is not implemented for a flat library")
+    
     def parse_base_library(self, 
         library:SpecLibBase,
-        keep_original_frag_dfs:bool=True,
+        keep_original_frag_dfs:bool=False,
         copy_precursor_df:bool=False,
         **kwargs
     ):
@@ -121,12 +135,16 @@ class SpecLibFlat(SpecLibBase):
             self._protein_df = pd.DataFrame()
 
         if keep_original_frag_dfs:
+
             self.charged_frag_types = library.fragment_mz_df.columns.values
-            self._fragment_mz_df = library.fragment_mz_df
-            self._fragment_intensity_df = library.fragment_intensity_df
-        else:
-            self._fragment_mz_df = pd.DataFrame()
-            self._fragment_intensity_df = pd.DataFrame()
+            for dense_frag_df in library.available_dense_fragment_dfs():
+                setattr(self, dense_frag_df, getattr(library, dense_frag_df))
+
+            warnings.warn(
+                "The SpecLibFlat object will have a strictly flat representation in the future. keep_original_frag_dfs=True will be deprecated.",
+                DeprecationWarning
+            )
+
 
     def save_hdf(self, hdf_file:str):
         """Save library dataframes into hdf_file.

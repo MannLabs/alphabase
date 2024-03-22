@@ -44,5 +44,8 @@ def reformat_and_save_input_file(input_file, input_type_to_use = None, use_alpha
         raise Exception('Format not recognized!')
     return outfile_name
 
+def set_quanttable_config_location(quanttable_config_file):
+    config_dict_loader.INTABLE_CONFIG = quanttable_config_file
+
 
 

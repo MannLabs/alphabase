@@ -485,13 +485,13 @@ def _count_batchify_df(df_group, mp_batch_size):
             count += 1
     return count
 
-# `process_bar` should be replaced by more advanced tqdm wrappers created by Sander
+# `progress_bar` should be replaced by more advanced tqdm wrappers created by Sander
 # I will leave it to alphabase.utils
 def calc_precursor_isotope_info_mp(
     precursor_df:pd.DataFrame, 
     processes:int=8,
     mp_batch_size:int=10000,
-    process_bar=None,
+    progress_bar=None,
     min_right_most_intensity:float=0.2,
     min_precursor_num_to_run_mp:int=10000,
 )->pd.DataFrame:
@@ -510,7 +510,7 @@ def calc_precursor_isotope_info_mp(
     mp_batch_size : int
         Multiprocessing batch size. Optional, by default 100000.
         
-    process_bar : Callable
+    progress_bar : Callable
         The tqdm-based callback function 
         to check multiprocessing. Defaults to None.
 
@@ -538,8 +538,8 @@ def calc_precursor_isotope_info_mp(
                 min_right_most_intensity=min_right_most_intensity
             ), _batchify_df(df_group, mp_batch_size)
         )
-        if process_bar:
-            processing = process_bar(
+        if progress_bar:
+            processing = progress_bar(
                 processing, _count_batchify_df(
                     df_group, mp_batch_size
                 )
