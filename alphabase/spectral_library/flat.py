@@ -6,7 +6,7 @@ from alphabase.spectral_library.base import (
     SpecLibBase
 )
 from alphabase.peptide.fragment import (
-    flatten_fragments
+    flatten_fragments, remove_unused_fragments
 )
 
 from alphabase.io.hdf import HDF_File
@@ -90,7 +90,11 @@ class SpecLibFlat(SpecLibBase):
         """Remove unused fragments from fragment_df.
         This method is inherited from :class:`SpecLibBase` and has not been implemented for a flat library.
         """
-        raise NotImplementedError("remove_unused_fragments is not implemented for a flat library")
+        self._precursor_df, (self._fragment_df,) = remove_unused_fragments(
+            self._precursor_df, (self._fragment_df,),
+            frag_start_col="flat_frag_start_idx",
+            frag_stop_col="flat_frag_stop_idx",
+        )
     
     def parse_base_library(self, 
         library:SpecLibBase,
