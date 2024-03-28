@@ -584,8 +584,26 @@ def append_special_modifications(
             lambda seq: seq[:-1]+seq[-1].lower()
         )
 
-    mod_dict = dict([(mod[-1],mod) for mod in var_mods])
-    var_mod_aas = ''.join(mod_dict.keys())
+    global get_var_mods_per_sites
+    var_mod_aas = ""
+    mod_dict = {}
+    if _check_if_multi_mods_on_aa(var_mods):
+        for mod in var_mods:
+            if mod.find('@')+2 == len(mod):
+                # if mod[-1] in self.fix_mod_dict: continue
+                if mod[-1] in mod_dict:
+                    mod_dict[mod[-1]].append(mod)
+                else:
+                    var_mod_aas += mod[-1]
+                    mod_dict[mod[-1]] = [mod]
+        get_var_mods_per_sites = get_var_mods_per_sites_multi_mods_on_aa
+    else:
+        for mod in var_mods:
+            if mod.find('@')+2 == len(mod):
+                # if mod[-1] in self.fix_mod_dict: continue
+                var_mod_aas += mod[-1]
+                mod_dict[mod[-1]] = mod
+        get_var_mods_per_sites = get_var_mods_per_sites_single_mod_on_aa
     
     (
         df['mods_app'],
@@ -856,14 +874,14 @@ class SpecLibFasta(SpecLibBase):
         self.var_mod_dict = {}
 
         global get_var_mods_per_sites
-        if self._check_if_multi_mods_on_aa(self.var_mods):
+        if _check_if_multi_mods_on_aa(self.var_mods):
             for mod in self.var_mods:
                 if mod.find('@')+2 == len(mod):
                     # if mod[-1] in self.fix_mod_dict: continue
-                    self.var_mod_aas += mod[-1]
                     if mod[-1] in self.var_mod_dict:
                         self.var_mod_dict[mod[-1]].append(mod)
                     else:
+                        self.var_mod_aas += mod[-1]
                         self.var_mod_dict[mod[-1]] = [mod]
             get_var_mods_per_sites = get_var_mods_per_sites_multi_mods_on_aa
         else:
@@ -884,14 +902,6 @@ class SpecLibFasta(SpecLibBase):
                     self.var_mod_pep_cterm_dict,
                     allow_conflicts=True
                 )
-
-    def _check_if_multi_mods_on_aa(self, var_mods):
-        mod_set = set()
-        for mod in var_mods:
-            if mod.find('@')+2 == len(mod):
-                if mod[-1] in mod_set: return True
-                mod_set.add(mod[-1])
-        return False
 
     def import_and_process_fasta(self, 
         fasta_files:list,
@@ -1423,3 +1433,11 @@ def annotate_precursor_df(
         warnings.warn(f'{failed_annotation} peptides could not be annotated')
 
     return precursor_df.merge(peptide_df, on='sequence', how='left')
+
+def _check_if_multi_mods_on_aa(var_mods):
+    mod_set = set()
+    for mod in var_mods:
+        if mod.find('@')+2 == len(mod):
+            if mod[-1] in mod_set: return True
+            mod_set.add(mod[-1])
+    return False
