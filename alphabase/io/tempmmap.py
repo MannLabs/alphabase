@@ -92,7 +92,7 @@ def array(shape: tuple, dtype: np.dtype) -> np.ndarray:
             offset=offset
         ).reshape(shape)
 
-def map_array(hdf_file: str) -> np.ndarray:
+def mmap_array(hdf_file: str) -> np.ndarray:
     """reconnect to an exisiting HDF5 file to generate a writable temporary mmapped array.
 
     Parameters
