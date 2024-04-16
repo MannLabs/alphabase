@@ -22,6 +22,7 @@ logging.warning(
     "and might need to be triggered manually!"
 )
 
+
 def redefine_temp_location(path):
     """
     Redfine the location where the temp arrays are written to.
@@ -38,17 +39,22 @@ def redefine_temp_location(path):
     """
 
     global _TEMP_DIR, _TEMP_DIR, TEMP_DIR_NAME
-    logging.warning(f'''Folder {TEMP_DIR_NAME} with temp mmap arrays is being deleted.All existing temp mmapp arrays will be unusable!''')
-    
-    #cleaup old temporary directory
-    shutil.rmtree(TEMP_DIR_NAME, ignore_errors = True)
+    logging.warning(
+        f"""Folder {TEMP_DIR_NAME} with temp mmap arrays is being deleted.All existing temp mmapp arrays will be unusable!"""
+    )
+
+    # cleaup old temporary directory
+    shutil.rmtree(TEMP_DIR_NAME, ignore_errors=True)
     del _TEMP_DIR
 
-    #create new tempfile at desired location
-    _TEMP_DIR = tempfile.TemporaryDirectory(prefix = os.path.join(path, 'temp_mmap'))
+    # create new tempfile at desired location
+    _TEMP_DIR = tempfile.TemporaryDirectory(prefix=os.path.join(path, "temp_mmap"))
     TEMP_DIR_NAME = _TEMP_DIR.name
-    logging.warning(f'''New temp folder location. Temp mmap arrays are written to {TEMP_DIR_NAME}. Cleanup of this folder is OS dependant, and might need to be triggered manually!''')
+    logging.warning(
+        f"""New temp folder location. Temp mmap arrays are written to {TEMP_DIR_NAME}. Cleanup of this folder is OS dependant, and might need to be triggered manually!"""
+    )
     return TEMP_DIR_NAME
+
 
 def array(shape: tuple, dtype: np.dtype) -> np.ndarray:
     """Create a writable temporary mmapped array.
@@ -66,36 +72,25 @@ def array(shape: tuple, dtype: np.dtype) -> np.ndarray:
         A writable temporary mmapped array.
     """
     temp_file_name = os.path.join(
-        TEMP_DIR_NAME,
-        f"temp_mmap_{np.random.randint(2**63)}.hdf"
+        TEMP_DIR_NAME, f"temp_mmap_{np.random.randint(2**63)}.hdf"
     )
-    
+
     with h5py.File(temp_file_name, "w") as hdf_file:
-        array = hdf_file.create_dataset(
-            "array",
-            shape=shape,
-            dtype=dtype
-        )
+        array = hdf_file.create_dataset("array", shape=shape, dtype=dtype)
         array[0] = 0
         offset = array.id.get_offset()
-    
+
     with open(temp_file_name, "rb+") as raw_hdf_file:
-        mmap_obj = mmap.mmap(
-            raw_hdf_file.fileno(),
-            0,
-            access=mmap.ACCESS_WRITE
-        )
+        mmap_obj = mmap.mmap(raw_hdf_file.fileno(), 0, access=mmap.ACCESS_WRITE)
         return np.frombuffer(
-            mmap_obj,
-            dtype=dtype,
-            count=np.prod(shape),
-            offset=offset
+            mmap_obj, dtype=dtype, count=np.prod(shape), offset=offset
         ).reshape(shape)
 
-def create_empty_mmap(shape: tuple, dtype: np.dtype, path: str = None, overwrite = False):
+
+def create_empty_mmap(shape: tuple, dtype: np.dtype, path: str = None, overwrite=False):
     """Initialize a new HDF5 file compatible with mmap. Returns the path to the initialized file.
     File can be mapped using the mmap_array_from_path function.
-    
+
     Parameters
     ----------
     shape : tuple
@@ -115,34 +110,34 @@ def create_empty_mmap(shape: tuple, dtype: np.dtype, path: str = None, overwrite
     str
         path to the newly created file.
     """
-    
-    #if path does not exist generate a random file name in the TEMP directory
+
+    # if path does not exist generate a random file name in the TEMP directory
     if path is None:
         temp_file_name = os.path.join(
-            TEMP_DIR_NAME,
-            f"temp_mmap_{np.random.randint(2**63)}.hdf"
+            TEMP_DIR_NAME, f"temp_mmap_{np.random.randint(2**63)}.hdf"
         )
     else:
-        #check that if overwrite is false the file does not already exist
+        # check that if overwrite is false the file does not already exist
         if not overwrite:
             if os.path.exists(path):
-                raise ValueError("The file already exists. Set overwrite to True to overwrite the file or choose a different name.")
-        if not os.path.basename.endswith('.hdf'):
+                raise ValueError(
+                    "The file already exists. Set overwrite to True to overwrite the file or choose a different name."
+                )
+        if not os.path.basename.endswith(".hdf"):
             raise ValueError("The chosen file name needs to end with .hdf")
         if os.path.isdir(os.path.commonpath(path)):
             temp_file_name = path
         else:
-            raise ValueError("The directory in which the file should be created does not exist.")
-        
+            raise ValueError(
+                "The directory in which the file should be created does not exist."
+            )
+
     with h5py.File(temp_file_name, "w") as hdf_file:
-        array = hdf_file.create_dataset(
-            "array",
-            shape=shape,
-            dtype=dtype
-        )
+        array = hdf_file.create_dataset("array", shape=shape, dtype=dtype)
         array[0] = 0
 
     return temp_file_name
+
 
 def mmap_array_from_path(hdf_file: str) -> np.ndarray:
     """reconnect to an exisiting HDF5 file to generate a writable temporary mmapped array.
@@ -158,26 +153,19 @@ def mmap_array_from_path(hdf_file: str) -> np.ndarray:
         A writable temporary mmapped array.
     """
     path = os.path.join(hdf_file)
-    
-    #read parameters required to reinitialize the mmap object
+
+    # read parameters required to reinitialize the mmap object
     with h5py.File(path, "r") as hdf_file:
         array = hdf_file["array"]
         offset = array.id.get_offset()
         shape = array.shape
         dtype = array.dtype
 
-    #reinitialize the mmap object
+    # reinitialize the mmap object
     with open(path, "rb+") as raw_hdf_file:
-        mmap_obj = mmap.mmap(
-            raw_hdf_file.fileno(),
-            0,
-            access=mmap.ACCESS_WRITE
-        )
+        mmap_obj = mmap.mmap(raw_hdf_file.fileno(), 0, access=mmap.ACCESS_WRITE)
         return np.frombuffer(
-            mmap_obj,
-            dtype=dtype,
-            count=np.prod(shape),
-            offset=offset
+            mmap_obj, dtype=dtype, count=np.prod(shape), offset=offset
         ).reshape(shape)
 
 
