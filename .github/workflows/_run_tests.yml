@@ -54,6 +54,6 @@ jobs:
       # TODO make test_isotope_mp.ipynb work
       run: |
         conda activate alphabase
-        INCLUDED_NBS=$(find ./nbs_tests/nbs -name "*.ipynb" | grep -v test_isotope_mp.ipynb)
+        INCLUDED_NBS=$(find ./nbs_tests -name "*.ipynb" | grep -v test_isotope_mp.ipynb)
         python -m pytest --nbmake $(echo $INCLUDED_NBS) 
         conda deactivate
