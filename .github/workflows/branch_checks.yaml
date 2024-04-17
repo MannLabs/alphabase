@@ -14,8 +14,9 @@ jobs:
     - uses: actions/checkout@v3
     - uses: actions/setup-python@v3
     - uses: pre-commit/action@v3.0.1
+  # on branches, we don't test the full matrix (os x [stable, loose])
   run-tests:
-    name: Test stable pip installation on ubuntu-latest
+    name: Test loose pip installation on ubuntu-latest
     strategy:
       matrix:
         os: [ubuntu-latest]
@@ -23,4 +24,4 @@ jobs:
     with:
       python-version: ${{ matrix.python-version }}
       os: ${{ matrix.os }}
-      install-script: "stable_pip_install.sh"
+      install-script: "loose_pip_install.sh"
