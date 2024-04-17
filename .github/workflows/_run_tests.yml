@@ -34,7 +34,9 @@ jobs:
     - name: Install additional dependencies required for testing
       shell: bash -l {0}
       run: |
+        conda activate alphabase
         pip install pytest nbmake==1.5.3
+        conda deactivate
     - name: nbdev tests
       shell: bash -l {0}
       run: |
