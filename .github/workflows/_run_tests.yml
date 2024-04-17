@@ -36,10 +36,22 @@ jobs:
       run: |
         conda activate alphabase
         nbdev_test
-
-        INCLUDED_NBS=$(find ./docs/nbs -name "*.ipynb" | grep -v tutorial_dev_spectral_libraries.ipynb)
-        python -m pytest --nbmake $(echo $INCLUDED_NBS) 
-        
         conda deactivate
 
+    - name: test documentation notebooks
+      shell: bash -l {0}
       # TODO make tutorial_dev_spectral_libraries.ipynb work
+      run: |
+        conda activate alphabase
+        INCLUDED_NBS=$(find ./docs/nbs -name "*.ipynb" | grep -v tutorial_dev_spectral_libraries.ipynb)
+        python -m pytest --nbmake $(echo $INCLUDED_NBS) 
+        conda deactivate
+
+    - name: run additional tests
+      shell: bash -l {0}
+      # TODO make test_isotope_mp.ipynb work
+      run: |
+        conda activate alphabase
+        INCLUDED_NBS=$(find ./nbs_tests/nbs -name "*.ipynb" | grep -v test_isotope_mp.ipynb)
+        python -m pytest --nbmake $(echo $INCLUDED_NBS) 
+        conda deactivate

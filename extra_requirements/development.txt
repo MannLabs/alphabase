@@ -33,3 +33,4 @@ pyahocorasick
 pytest
 
 pre-commit==3.7.0
+nbmake==1.5.3
