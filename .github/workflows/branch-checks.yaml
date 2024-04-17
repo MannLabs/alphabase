@@ -8,8 +8,19 @@ on:
 
 jobs:
   pre-commit:
+    name: Run all pre-commit hooks
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-python@v3
     - uses: pre-commit/action@v3.0.1
+  run-tests:
+    name: Test stable pip installation on ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    uses: ./.github/workflows/_run_tests.yaml
+    with:
+      python-version: ${{ matrix.python-version }}
+      os: ${{ matrix.os }}
+      install-script: "stable_pip_install.sh"
