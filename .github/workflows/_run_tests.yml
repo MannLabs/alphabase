@@ -26,18 +26,21 @@ jobs:
     - name: Conda info
       shell: bash -l {0}
       run: conda info
-    - name: Test pip installation with all stable dependencies
+    - name: Perform pip installation with all stable dependencies
       shell: bash -l {0}
       run: |
         cd misc
         . ./${{ inputs.install-script }}
+    - name: install additional dependencies required for testing
+      shell: bash -l {0}
+      run: |
+        pip install -r extra_requirements/development.txt
     - name: nbdev tests
       shell: bash -l {0}
       run: |
         conda activate alphabase
         nbdev_test
         conda deactivate
-
     - name: test documentation notebooks
       shell: bash -l {0}
       # TODO make tutorial_dev_spectral_libraries.ipynb work
@@ -46,7 +49,6 @@ jobs:
         INCLUDED_NBS=$(find ./docs/nbs -name "*.ipynb" | grep -v tutorial_dev_spectral_libraries.ipynb)
         python -m pytest --nbmake $(echo $INCLUDED_NBS) 
         conda deactivate
-
     - name: run additional tests
       shell: bash -l {0}
       # TODO make test_isotope_mp.ipynb work
