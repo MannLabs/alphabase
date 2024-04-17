@@ -31,17 +31,17 @@ jobs:
       run: |
         cd misc
         . ./${{ inputs.install-script }}
-    - name: install additional dependencies required for testing
+    - name: Install additional dependencies required for testing
       shell: bash -l {0}
       run: |
-        pip install -r extra_requirements/development.txt
+        pip install -r extra_requirements/tests.txt
     - name: nbdev tests
       shell: bash -l {0}
       run: |
         conda activate alphabase
         nbdev_test
         conda deactivate
-    - name: test documentation notebooks
+    - name: Test documentation notebooks
       shell: bash -l {0}
       # TODO make tutorial_dev_spectral_libraries.ipynb work
       run: |
@@ -49,7 +49,7 @@ jobs:
         INCLUDED_NBS=$(find ./docs/nbs -name "*.ipynb" | grep -v tutorial_dev_spectral_libraries.ipynb)
         python -m pytest --nbmake $(echo $INCLUDED_NBS) 
         conda deactivate
-    - name: run additional tests
+    - name: Test additional notebooks
       shell: bash -l {0}
       # TODO make test_isotope_mp.ipynb work
       run: |
