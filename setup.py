@@ -4,14 +4,16 @@
 import setuptools
 import re
 import os
+
 # local
 import alphabase as package2install
 
-#nbdev2
+# nbdev2
 # from configparser import ConfigParser
 # nbdev_config = ConfigParser(delimiters=['='])
 # nbdev_config.read('settings.ini')
 # nbdev_cfg = nbdev_config['DEFAULT']
+
 
 def get_long_description():
     with open("README.md", "r") as readme_file:
@@ -34,7 +36,7 @@ def get_requirements():
             for line in requirements_file:
                 extra_requirements[extra_stable].append(line)
                 # conditional req like: "pywin32==xxx; sys_platform=='win32'"
-                line, *conditions = line.split(';')
+                line, *conditions = line.split(";")
                 requirement, *comparison = re.split("[><=~!]", line)
                 requirement = requirement.strip()
                 requirement = ";".join([requirement] + conditions)
@@ -64,7 +66,8 @@ def create_pip_wheel():
             "console_scripts": package2install.__console_scripts__,
             # 'nbdev': [f'{nbdev_cfg.get("lib_path")}={nbdev_cfg.get("lib_path")}._modidx:d'],
         },
-        install_requires=requirements + [
+        install_requires=requirements
+        + [
             # TODO Remove hardcoded requirement?
             "pywin32; sys_platform=='win32'"
         ],
