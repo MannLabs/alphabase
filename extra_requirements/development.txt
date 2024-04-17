@@ -3,6 +3,7 @@ twine
 bumpversion
 pipdeptree
 ipykernel
+nbdev
 pyteomics
 scikit-learn
 matplotlib
@@ -29,8 +30,5 @@ xxhash
 regex
 pydivsufsort
 pyahocorasick
-
+pytest
 pre-commit==3.7.0
-
-# include test requirements
--r tests.txt

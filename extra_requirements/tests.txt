@@ -1,4 +1,0 @@
-# requirements only required for running tests
-nbdev
-nbmake==1.5.3
-pytest
