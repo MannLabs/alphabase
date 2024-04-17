@@ -1,0 +1,32 @@
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main, development ]
+  workflow_dispatch:
+
+name: Default installation and tests
+
+jobs:
+  stable_installation:
+    name: Test stable pip installation on ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macOS-latest, windows-latest, macos-latest-xlarge]
+    uses: ./.github/workflows/_run_tests.yaml
+    with:
+      python-version: ${{ matrix.python-version }}
+      os: ${{ matrix.os }}
+      install-script: "stable_pip_install.sh"
+
+  loose_installation:
+    name: Test loose pip installation on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macOS-latest, windows-latest, macos-latest-xlarge]
+    uses: ./.github/workflows/_run_tests.yaml
+    with:
+      python-version: ${{ matrix.python-version }}
+      os: ${{ matrix.os }}
+      install-script: "stable_pip_install.sh"

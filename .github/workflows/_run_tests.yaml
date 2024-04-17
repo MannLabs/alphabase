@@ -1,0 +1,39 @@
+# reusable workflow to run all tests
+name: run-tests
+
+on:
+  workflow_call:
+    inputs:
+      os:
+        required: true
+        type: string
+      python-version:
+        required: true
+        type: string
+      install-script:
+        required: true
+        type: string
+jobs:
+  pre-commit:
+    runs-on: ${{ inputs.os }}
+    steps:
+    - uses: actions/checkout@v3
+    - uses: conda-incubator/setup-miniconda@v2
+      with:
+        miniconda-version: "latest"
+        auto-update-conda: true
+        python-version: ${{ inputs.python-version }}
+    - name: Conda info
+      shell: bash -l {0}
+      run: conda info
+    - name: Test pip installation with all stable dependencies
+      shell: bash -l {0}
+      run: |
+        cd misc
+        . ./${{ inputs.install-script }}
+    - name: nbdev tests
+      shell: bash -l {0}
+      run: |
+        conda activate alphabase
+        nbdev_test
+        conda deactivate
