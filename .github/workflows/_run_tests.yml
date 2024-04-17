@@ -36,4 +36,10 @@ jobs:
       run: |
         conda activate alphabase
         nbdev_test
+
+        INCLUDED_NBS=$(find ./docs/nbs -name "*.ipynb" | grep -v tutorial_dev_spectral_libraries.ipynb)
+        python -m pytest --nbmake $(echo $INCLUDED_NBS) 
+        
         conda deactivate
+
+      # TODO make tutorial_dev_spectral_libraries.ipynb work
