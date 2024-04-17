@@ -20,7 +20,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-    uses: ./.github/workflows/_run_tests.yaml
+    uses: ./.github/workflows/_run_tests.yml
     with:
       python-version: ${{ matrix.python-version }}
       os: ${{ matrix.os }}
