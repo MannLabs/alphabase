@@ -31,8 +31,8 @@ class SpecLibFlat(SpecLibBase):
         "flat_frag_start_idx",
         "flat_frag_stop_idx",
     ]
-    """ 
-    :obj:`SpecLibBase.key_numeric_columns <alphabase.spectral_library.base.SpecLibBase.key_numeric_columns>` 
+    """
+    :obj:`SpecLibBase.key_numeric_columns <alphabase.spectral_library.base.SpecLibBase.key_numeric_columns>`
     + `['flat_frag_start_idx','flat_frag_stop_idx']`.
     """
 

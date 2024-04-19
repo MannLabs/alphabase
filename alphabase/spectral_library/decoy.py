@@ -250,7 +250,7 @@ class SpecLibDecoyProvider(object):
 
 decoy_lib_provider: SpecLibDecoyProvider = SpecLibDecoyProvider()
 """
-Factory object of `SpecLibDecoyProvider` to 
+Factory object of `SpecLibDecoyProvider` to
 register and get different types of decoy methods.
 """
 

@@ -1,7 +1,7 @@
 Documentation for AlphaBase
 =====================================
 
-The infrastructure of AlphaX ecosystem for MS proteomics. 
+The infrastructure of AlphaX ecosystem for MS proteomics.
 For more information, see AlphaBase on `GitHub <https://github.com/MannLabs/alphabase/>`_.
 
 .. toctree::
@@ -17,4 +17,3 @@ For more information, see AlphaBase on `GitHub <https://github.com/MannLabs/alph
    modules_psm_reader
    modules_scoring
    modules_statistics
-   

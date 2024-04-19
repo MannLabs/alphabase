@@ -55,8 +55,8 @@ class SpecLibBase(object):
         "labeling_channel",
     ]
     """
-    list of str: Key numeric columns to be saved 
-    into library/precursor_df in the hdf file for fast loading, 
+    list of str: Key numeric columns to be saved
+    into library/precursor_df in the hdf file for fast loading,
     others will be saved into library/mod_seq_df instead.
     """
 
