@@ -1322,7 +1322,7 @@ def calc_fragment_cardinality(
         fragment_mz,
         fragment_cardinality,
     ):
-        elution_group = elution_group_idx[0]
+        elution_group_idx[0]  # noqa TODO check for potential bug
         elution_group_start = 0
 
         for i in range(len(elution_group_idx)):
