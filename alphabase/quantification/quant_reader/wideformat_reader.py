@@ -6,8 +6,7 @@ from . import table_reformatter
 def reformat_and_write_wideformat_table(peptides_tsv, outfile_name, config_dict):
     input_df = pd.read_csv(peptides_tsv, sep="\t", encoding="latin1")
     filter_dict = config_dict.get("filters")
-    protein_cols = config_dict.get("protein_cols")
-    ion_cols = config_dict.get("ion_cols")
+
     input_df = quantreader_utils.filter_input(filter_dict, input_df)
     # input_df = merge_protein_and_ion_cols(input_df, config_dict)
     input_df = table_reformatter.merge_protein_cols_and_config_dict(

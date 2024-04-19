@@ -1,5 +1,5 @@
 def filter_input(filter_dict, input):
-    if filter_dict == None:
+    if filter_dict is None:
         return input
     for filtname, filterconf in filter_dict.items():
         param = filterconf.get("param")
