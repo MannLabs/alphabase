@@ -23,14 +23,3 @@ jobs:
       python-version: ${{ matrix.python-version }}
       os: ${{ matrix.os }}
       install-script: "loose_pip_install.sh"
-
-  run-tests-stable:
-    name: Test stable pip installation on ubuntu-latest
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-    uses: ./.github/workflows/_run_tests.yml
-    with:
-      python-version: ${{ matrix.python-version }}
-      os: ${{ matrix.os }}
-      install-script: "stable_pip_install.sh"
