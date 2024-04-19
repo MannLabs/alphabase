@@ -3,6 +3,7 @@ import numpy as np
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.base import BaseEstimator, RegressorMixin
 
+from sklearn.utils.estimator_checks import check_estimator  # noqa: F401 apparently some test code depends on this being imported here TODO fix
 
 EPSILON = 1e-6
 

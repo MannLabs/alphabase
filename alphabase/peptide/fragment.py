@@ -12,6 +12,7 @@ from alphabase.constants.element import (
 from alphabase.peptide.mass_calc import *  # noqa: F403 apparently some test code depends on things imported here TODO fix
 from alphabase.peptide.precursor import (
     refine_precursor_df,
+    update_precursor_mz,  # noqa: F401 apparently some test code depends on this being imported here TODO fix
     is_precursor_sorted,
 )
 
