@@ -7,7 +7,7 @@ from alphabase.psm_reader.psm_reader import (
     psm_reader_provider,
 )
 from alphabase.constants.aa import AA_ASCII_MASS
-from alphabase.constants.atom import MASS_H, MASS_O, MASS_PROTON
+from alphabase.constants.atom import MASS_H, MASS_O
 from alphabase.constants.modification import MOD_MASS
 
 try:

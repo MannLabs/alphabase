@@ -4,7 +4,6 @@ import shutil
 import glob
 import dask.dataframe as dd
 import os.path
-import sys
 
 from . import config_dict_loader
 from . import quantreader_utils

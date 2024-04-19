@@ -1,6 +1,4 @@
 import tqdm
-import os
-import sys
 import pandas as pd
 import itertools
 import io

@@ -7,8 +7,6 @@ from sklearn.base import BaseEstimator
 from alphabase.scoring.feature_extraction_base import BaseFeatureExtractor
 from alphabase.scoring.fdr import (
     calculate_fdr,
-    calculate_fdr_from_ref,
-    fdr_to_q_values,
     fdr_from_ref,
 )
 

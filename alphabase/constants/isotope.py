@@ -7,7 +7,6 @@ from alphabase.constants.element import (
     EMPTY_DIST,
     CHEM_ISOTOPE_DIST,
     CHEM_MONO_IDX,
-    CHEM_MONO_MASS,
     truncate_isotope,
     parse_formula,
 )

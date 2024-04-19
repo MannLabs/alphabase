@@ -1,25 +1,17 @@
 import numpy as np
 import pandas as pd
-from typing import List, Union, Tuple, Dict, TYPE_CHECKING
-import warnings
+from typing import List, Union, Tuple, Dict
 import numba as nb
-import logging
 
 from alphabase.constants._const import PEAK_MZ_DTYPE, PEAK_INTENSITY_DTYPE
 from alphabase.peptide.mass_calc import *
 from alphabase.constants.modification import calc_modloss_mass
 from alphabase.constants.element import (
-    MASS_H2O,
     MASS_PROTON,
-    MASS_NH3,
-    MASS_H,
-    MASS_C,
-    MASS_O,
 )
 
 from alphabase.peptide.precursor import (
     refine_precursor_df,
-    update_precursor_mz,
     is_precursor_sorted,
 )
 

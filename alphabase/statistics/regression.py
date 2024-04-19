@@ -3,8 +3,6 @@ import numpy as np
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.base import BaseEstimator, RegressorMixin
 
-from sklearn.utils.estimator_checks import check_estimator
-
 
 EPSILON = 1e-6
 
