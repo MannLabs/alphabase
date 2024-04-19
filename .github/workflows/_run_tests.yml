@@ -54,6 +54,8 @@ jobs:
     - name: Test additional notebooks
       shell: bash -l {0}
       # TODO make test_isotope_mp.ipynb work
+      # Note: multiprocessing in ipynb sometimes suspended on some versions of Windows, ignore the
+      # corresponding notebook(s) if this occurs again
       run: |
         conda activate alphabase
         INCLUDED_NBS=$(find ./nbs_tests -name "*.ipynb" | grep -v test_isotope_mp.ipynb)
