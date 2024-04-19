@@ -70,7 +70,7 @@ def keep_modifications(mod_str: str, mod_set: set) -> str:
     if not mod_str:
         return ""
     for mod in mod_str.split(";"):
-        if not mod in mod_set:
+        if mod not in mod_set:
             return pd.NA
     return mod_str
 
@@ -339,11 +339,11 @@ class PSMReaderBase(object):
         self.normalize_rt()
 
     def normalize_rt_by_raw_name(self):
-        if not "rt" in self.psm_df.columns:
+        if "rt" not in self.psm_df.columns:
             return
-        if not "rt_norm" in self.psm_df.columns:
+        if "rt_norm" not in self.psm_df.columns:
             self.norm_rt()
-        if not "raw_name" in self.psm_df.columns:
+        if "raw_name" not in self.psm_df.columns:
             return
         for raw_name, df_group in self.psm_df.groupby("raw_name"):
             self.psm_df.loc[df_group.index, "rt_norm"] = (
@@ -407,7 +407,7 @@ class PSMReaderBase(object):
 
         if (
             "scan_num" in self._psm_df.columns
-            and not "spec_idx" in self._psm_df.columns
+            and "spec_idx" not in self._psm_df.columns
         ):
             self._psm_df["spec_idx"] = self._psm_df.scan_num - 1
 
