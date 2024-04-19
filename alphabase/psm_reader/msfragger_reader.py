@@ -12,7 +12,7 @@ from alphabase.constants.modification import MOD_MASS
 
 try:
     import pyteomics.pepxml as pepxml
-except:
+except ImportError:
     pepxml = None
 
 

@@ -16,7 +16,7 @@ def filter_input(filter_dict, input):
             continue
         try:
             input = input.astype({f"{param}": "float"})
-        except:
+        except Exception:
             pass
 
         if comparator == ">":

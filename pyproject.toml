@@ -1,5 +1,6 @@
 
 [tool.ruff.lint]
-# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
-select = []
-ignore = []
+select = ["E", "F"]
+ignore = [
+    "E501"  # Line too long  (ruff wraps code, but not docstrings)
+]

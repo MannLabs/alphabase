@@ -1,3 +1,6 @@
+import re
+
+
 def extend_sample_allcolumns_for_mDIA_case(allcols_samples, config_dict_for_type):
     if is_mDIA_table(config_dict_for_type):
         new_allcols = []
@@ -45,9 +48,6 @@ def remove_mtraq_modifications_from_ion_ids(ions):
 
 def is_mDIA_table(config_dict_for_type):
     return config_dict_for_type.get("channel_ID") == ["Channel.0", "Channel.4"]
-
-
-import re
 
 
 def parse_channel_from_peptide_column(input_df):

@@ -4,11 +4,12 @@ from typing import List, Union, Tuple, Dict
 import numba as nb
 
 from alphabase.constants._const import PEAK_MZ_DTYPE, PEAK_INTENSITY_DTYPE
-from alphabase.peptide.mass_calc import *
+
 from alphabase.constants.modification import calc_modloss_mass
 from alphabase.constants.element import (
     MASS_PROTON,
 )
+from alphabase.peptide.mass_calc import calc_b_y_and_peptide_masses_for_same_len_seqs
 
 from alphabase.peptide.precursor import (
     refine_precursor_df,
