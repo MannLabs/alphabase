@@ -1,0 +1,63 @@
+# reusable workflow to run all tests
+name: run-tests
+
+on:
+  workflow_call:
+    inputs:
+      os:
+        required: true
+        type: string
+      python-version:
+        required: true
+        type: string
+      install-script:
+        required: true
+        type: string
+jobs:
+  pre-commit:
+    runs-on: ${{ inputs.os }}
+    steps:
+    - uses: actions/checkout@v3
+    - uses: conda-incubator/setup-miniconda@v2
+      with:
+        miniconda-version: "latest"
+        auto-update-conda: true
+        python-version: ${{ inputs.python-version }}
+    - name: Conda info
+      shell: bash -l {0}
+      run: conda info
+    - name: Perform pip installation with all stable dependencies
+      shell: bash -l {0}
+      run: |
+        cd misc
+        . ./${{ inputs.install-script }}
+    - name: Install additional dependencies required for testing
+      shell: bash -l {0}
+      run: |
+        conda activate alphabase
+        pip install pytest nbmake==1.5.3
+        conda deactivate
+    - name: nbdev tests
+      shell: bash -l {0}
+      run: |
+        conda activate alphabase
+        nbdev_test
+        conda deactivate
+    - name: Test documentation notebooks
+      shell: bash -l {0}
+      # TODO make tutorial_dev_spectral_libraries.ipynb work
+      run: |
+        conda activate alphabase
+        INCLUDED_NBS=$(find ./docs/nbs -name "*.ipynb" | grep -v tutorial_dev_spectral_libraries.ipynb)
+        python -m pytest --nbmake $(echo $INCLUDED_NBS) 
+        conda deactivate
+    - name: Test additional notebooks
+      shell: bash -l {0}
+      # TODO make test_isotope_mp.ipynb work
+      # Note: multiprocessing in ipynb sometimes suspended on some versions of Windows, ignore the
+      # corresponding notebook(s) if this occurs again
+      run: |
+        conda activate alphabase
+        INCLUDED_NBS=$(find ./nbs_tests -name "*.ipynb" | grep -v test_isotope_mp.ipynb)
+        python -m pytest --nbmake $(echo $INCLUDED_NBS) 
+        conda deactivate

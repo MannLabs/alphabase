@@ -31,5 +31,4 @@ regex
 pydivsufsort
 pyahocorasick
 pytest
-
 pre-commit==3.7.0
