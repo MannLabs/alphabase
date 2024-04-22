@@ -18,6 +18,6 @@ from alphabase.psm_reader.msfragger_reader import MSFragger_PSM_TSV_Reader
 from alphabase.psm_reader.sage_reader import SageReaderTSV, SageReaderParquet
 
 try:
-    from alphabase.psm_reader.msfragger_reader import MSFraggerPepXML  # noqa: F401 TODO remove import side effects
+    from alphabase.psm_reader.msfragger_reader import MSFraggerPepXML  # noqa: F401 TODO remove import side effects (registering the reader)
 except ImportError:
     pass
