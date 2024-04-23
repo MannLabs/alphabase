@@ -32,7 +32,7 @@ frag_type_representation_dict = {
 }
 """
 Represent fragment ion types from b/y ions.
-Modification neutral losses (i.e. modloss) are not here 
+Modification neutral losses (i.e. modloss) are not here
 as they have variable atoms added to b/y ions.
 """
 
