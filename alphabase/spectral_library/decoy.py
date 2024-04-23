@@ -2,9 +2,7 @@ import copy
 from typing import Any
 import pandas as pd
 import multiprocessing as mp
-from functools import partial
 from alphabase.spectral_library.base import SpecLibBase
-from alphabase.io.hdf import HDF_File
 
 
 def _batchify_series(series, mp_batch_size):

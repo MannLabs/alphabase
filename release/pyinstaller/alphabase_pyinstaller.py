@@ -5,7 +5,7 @@ if __name__ == "__main__":
 
         multiprocessing.freeze_support()
         alphabase.gui.run()
-    except e:
+    except Exception:
         import traceback
         import sys
 

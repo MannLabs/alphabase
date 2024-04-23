@@ -258,7 +258,7 @@ class SpecLibBase(object):
 
         if not np.all(np.array(n_fragments) == n_fragments[0]):
             raise ValueError(
-                f"The libraries can't be appended as the number of fragments in the current libraries are not the same."
+                "The libraries can't be appended as the number of fragments in the current libraries are not the same."
             )
 
         for attr, matching_columns in zip(dfs_to_append, matching_columns):
@@ -309,7 +309,7 @@ class SpecLibBase(object):
         from alphabase.spectral_library.decoy import decoy_lib_provider
 
         # register 'protein_reverse' to the decoy_lib_provider
-        import alphabase.protein.protein_level_decoy
+        import alphabase.protein.protein_level_decoy  # noqa: F401 TODO this import has a side effect (registering the reader)
 
         decoy_lib = decoy_lib_provider.get_decoy_lib(self.decoy, self)
         if decoy_lib is None:

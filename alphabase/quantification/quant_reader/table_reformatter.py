@@ -1,4 +1,3 @@
-import itertools
 import pandas as pd
 import copy
 
@@ -119,7 +118,7 @@ def split_extend_df(input_df, splitcol2sep, value_threshold=10):
     Returns:
         Pandas Dataframe: Pandas dataframe with the condensed items expanded to long format
     """
-    if splitcol2sep == None:
+    if splitcol2sep is None:
         return input_df
 
     for split_col, separator in splitcol2sep.items():
@@ -179,7 +178,7 @@ def add_index_and_metadata_columns(
     )  # df_subset[ion_hierarchy_local].apply(lambda x: '_AND_'.join(x.astype(str)), axis=1)
 
     df_subset = df_subset.set_index(ion_hierarchy_local)
-    if quant_id_dict != None:
+    if quant_id_dict is not None:
         df_subset = df_subset.rename(
             columns={quant_id_dict.get(hierarchy_type): "quant_val"}
         )

@@ -1,3 +1,4 @@
+# ruff: noqa: F401 TODO remove import side effects (i.e. change way readers are registered)
 # to register all readers into .psm_reader.psm_reader_provider
 from alphabase.psm_reader.psm_reader import (
     psm_reader_provider,
@@ -17,6 +18,6 @@ from alphabase.psm_reader.msfragger_reader import MSFragger_PSM_TSV_Reader
 from alphabase.psm_reader.sage_reader import SageReaderTSV, SageReaderParquet
 
 try:
-    from alphabase.psm_reader.msfragger_reader import MSFraggerPepXML
+    from alphabase.psm_reader.msfragger_reader import MSFraggerPepXML  # noqa: F401 TODO remove import side effects (registering the reader)
 except ImportError:
     pass

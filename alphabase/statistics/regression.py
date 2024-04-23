@@ -3,8 +3,7 @@ import numpy as np
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.base import BaseEstimator, RegressorMixin
 
-from sklearn.utils.estimator_checks import check_estimator
-
+from sklearn.utils.estimator_checks import check_estimator  # noqa: F401 apparently some test code depends on this being imported here TODO fix
 
 EPSILON = 1e-6
 
@@ -259,7 +258,7 @@ class LOESSRegression(BaseEstimator, RegressorMixin):
         for i, weights in enumerate(w.T):
             loadings = np.linalg.inv(x_design.T * weights @ x_design) @ x_design.T
             beta = (loadings * weights) @ y
-            y_m = np.sum(x_design @ beta, axis=1)
+            y_m = np.sum(x_design @ beta, axis=1)  # noqa TODO check for potential bug
             self.beta[:, i] = np.ravel((loadings * weights) @ y)
 
         return self

@@ -4,7 +4,6 @@ import pandas as pd
 import re
 import contextlib
 import time
-import warnings
 
 
 class HDF_Object(object):

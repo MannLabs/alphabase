@@ -1,25 +1,18 @@
 import numpy as np
 import pandas as pd
-from typing import List, Union, Tuple, Dict, TYPE_CHECKING
-import warnings
+from typing import List, Union, Tuple, Dict
 import numba as nb
-import logging
 
 from alphabase.constants._const import PEAK_MZ_DTYPE, PEAK_INTENSITY_DTYPE
-from alphabase.peptide.mass_calc import *
+
 from alphabase.constants.modification import calc_modloss_mass
 from alphabase.constants.element import (
-    MASS_H2O,
     MASS_PROTON,
-    MASS_NH3,
-    MASS_H,
-    MASS_C,
-    MASS_O,
 )
-
+from alphabase.peptide.mass_calc import *  # noqa: F403 apparently some test code depends on things imported here TODO fix
 from alphabase.peptide.precursor import (
     refine_precursor_df,
-    update_precursor_mz,
+    update_precursor_mz,  # noqa: F401 apparently some test code depends on this being imported here TODO fix
     is_precursor_sorted,
 )
 
@@ -411,7 +404,7 @@ def calc_fragment_mz_values_for_same_nAA(
     else:
         mod_diff_list = None
         mod_diff_site_list = None
-    (b_mass, y_mass, pepmass) = calc_b_y_and_peptide_masses_for_same_len_seqs(
+    (b_mass, y_mass, pepmass) = calc_b_y_and_peptide_masses_for_same_len_seqs(  # noqa: F405 TODO remove once the import is done explicitly
         df_group.sequence.values.astype("U"),
         mod_list,
         site_list,
@@ -1330,7 +1323,7 @@ def calc_fragment_cardinality(
         fragment_mz,
         fragment_cardinality,
     ):
-        elution_group = elution_group_idx[0]
+        elution_group_idx[0]  # noqa TODO check for potential bug
         elution_group_start = 0
 
         for i in range(len(elution_group_idx)):

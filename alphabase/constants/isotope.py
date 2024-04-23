@@ -7,7 +7,7 @@ from alphabase.constants.element import (
     EMPTY_DIST,
     CHEM_ISOTOPE_DIST,
     CHEM_MONO_IDX,
-    CHEM_MONO_MASS,
+    CHEM_MONO_MASS,  # noqa: F401 apparently some test code depends on this being imported here TODO fix
     truncate_isotope,
     parse_formula,
 )

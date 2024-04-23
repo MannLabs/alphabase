@@ -1,18 +1,16 @@
 import typing
-import os
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
 from alphabase.peptide.mobility import mobility_to_ccs_for_df
-from alphabase.io.psm_reader.dia_search_reader import SpectronautReader
+from alphabase.io.psm_reader.dia_search_reader import SpectronautReader  # noqa: F401 TODO this import has a side effect (registering the reader)
 from alphabase.io.psm_reader.maxquant_reader import MaxQuantReader
 from alphabase.spectral_library.base import SpecLibBase
 from alphabase.psm_reader.psm_reader import psm_reader_yaml
 from alphabase.psm_reader import psm_reader_provider
 
-from alphabase.constants._const import CONST_FILE_FOLDER, PEAK_INTENSITY_DTYPE
-from alphabase.yaml_utils import load_yaml
+from alphabase.constants._const import PEAK_INTENSITY_DTYPE
 
 
 class LibraryReaderBase(MaxQuantReader, SpecLibBase):

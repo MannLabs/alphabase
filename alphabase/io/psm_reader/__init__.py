@@ -1,2 +1,2 @@
 # Legacy, use alphabase.psm_reader instead
-from alphabase.psm_reader import *
+from alphabase.psm_reader import *  # noqa: F403

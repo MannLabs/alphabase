@@ -100,9 +100,9 @@ def get_relevant_columns_config_dict(config_typedict):
 
 def _get_quant_ids_from_config_dict(config_typedict):
     quantID = config_typedict.get("quant_ID")
-    if type(quantID) == type("string"):
+    if isinstance(quantID, str):
         return [config_typedict.get("quant_ID")]
-    if quantID == None:
+    if quantID is None:
         return []
     else:
         return list(config_typedict.get("quant_ID").values())
@@ -110,9 +110,9 @@ def _get_quant_ids_from_config_dict(config_typedict):
 
 def _get_sample_ids_from_config_dict(config_typedict):
     sampleID = config_typedict.get("sample_ID")
-    if type(sampleID) == type("string"):
+    if isinstance(sampleID, str):
         return [config_typedict.get("sample_ID")]
-    if sampleID == None:
+    if sampleID is None:
         return []
     else:
         return config_typedict.get("sample_ID")

@@ -186,7 +186,7 @@ class Schema:
         self.schema = properties
         for column in self.schema:
             if not isinstance(column, Column):
-                raise ValueError(f"Schema must contain only Property objects")
+                raise ValueError("Schema must contain only Property objects")
 
     def __call__(self, df):
         """

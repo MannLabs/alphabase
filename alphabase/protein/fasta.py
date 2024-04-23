@@ -1251,7 +1251,7 @@ class SpecLibFasta(SpecLibBase):
             )
             if "labeling_channel" not in self.key_numeric_columns:
                 self.key_numeric_columns.append("labeling_channel")
-        except:
+        except Exception:
             if "labeling_channel" in self.key_numeric_columns:
                 self.key_numeric_columns.remove("labeling_channel")
 

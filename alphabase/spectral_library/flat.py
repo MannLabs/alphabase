@@ -7,8 +7,6 @@ from alphabase.peptide.fragment import flatten_fragments, remove_unused_fragment
 
 from alphabase.io.hdf import HDF_File
 
-import alphabase.peptide.precursor as precursor
-
 
 class SpecLibFlat(SpecLibBase):
     """
