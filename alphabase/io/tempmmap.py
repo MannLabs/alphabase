@@ -76,7 +76,7 @@ def array(shape: tuple, dtype: np.dtype, tmp_dir_name: str = None) -> np.ndarray
     # redefine the temporary directory if a new location is given otherwise read from global variable
     # this allows you to ensure that the correct temp directory location is used when working with multiple threads
     if tmp_dir_name is not None:
-        if os.path.isdir(tmp_dir_name): # ensure that directory exists
+        if os.path.isdir(tmp_dir_name):  # ensure that directory exists
             TEMP_DIR_NAME = tmp_dir_name
         else:
             raise ValueError(
@@ -99,12 +99,12 @@ def array(shape: tuple, dtype: np.dtype, tmp_dir_name: str = None) -> np.ndarray
 
 
 def create_empty_mmap(
-        shape: tuple, 
-        dtype: np.dtype, 
-        path: str = None, 
-        overwrite: bool = False, 
-        tmp_dir_name: str = None
-    ):
+    shape: tuple, 
+    dtype: np.dtype, 
+    path: str = None, 
+    overwrite: bool = False, 
+    tmp_dir_name: str = None
+):
     """Initialize a new HDF5 file compatible with mmap. Returns the path to the initialized file.
     File can be mapped using the mmap_array_from_path function.
 
@@ -132,7 +132,7 @@ def create_empty_mmap(
     # redefine the temporary directory if a new location is given otherwise read from global variable
     # this allows you to ensure that the correct temp directory location is used when working with multiple threads
     if tmp_dir_name is not None:
-        if os.path.isdir(tmp_dir_name): # ensure that directory exists
+        if os.path.isdir(tmp_dir_name):  # ensure that directory exists
             TEMP_DIR_NAME = tmp_dir_name
         else:
             raise ValueError(
