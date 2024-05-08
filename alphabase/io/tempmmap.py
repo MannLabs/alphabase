@@ -51,6 +51,44 @@ def _check_temp_dir_existence(abs_path: str) -> str:
             f"The directory {abs_path} in which the file should be created does not exist."
         )
 
+def _check_file_location(abs_file_path: str, overwrite = False) -> str:
+    """
+    Check if the path specified for the new temporary file is valid. If not raise a value error.
+
+    Valid file paths need to:
+    1. be contained in directories that exist
+    2. end in .hdf
+    3. not exist if overwrite is set to False
+
+    Parameters
+    ----------
+    abs_path : str
+        The absolute path to the new temporary file.
+
+    Returns
+    ------
+    str 
+        The file path if it is valid.
+    """
+    #check overwrite status and existence of file
+    if not overwrite:
+        if os.path.exists(abs_file_path):
+                raise ValueError(
+                    "The file already exists. Set overwrite to True to overwrite the file or choose a different name."
+                )
+
+    #ensure that the filename conforms to the naming convention     
+    if not os.path.basename.endswith(".hdf"):
+        raise ValueError("The chosen file name needs to end with .hdf")
+    
+    #ensure that the directory in which the file should be created exists
+    if os.path.isdir(os.path.commonpath(abs_file_path)):
+        return(abs_file_path)
+    else:
+        raise ValueError(
+            f"The directory {os.path.commonpath(abs_file_path)} in which the file should be created does not exist."
+        )
+        
 
 def redefine_temp_location(path):
     """
@@ -129,7 +167,7 @@ def array(shape: tuple, dtype: np.dtype, tmp_dir_abs_path: str = None) -> np.nda
 def create_empty_mmap(
     shape: tuple, 
     dtype: np.dtype, 
-    path: str = None, 
+    file_path: str = None, 
     overwrite: bool = False, 
     tmp_dir_abs_path: str = None
 ):
@@ -142,8 +180,8 @@ def create_empty_mmap(
         A tuple with the shape of the array.
     dtype : type
         The np.dtype of the array.
-    path : str, optional
-        The path to the file that should be created.
+    file_path : str, optional
+        The absolute path to the file that should be created. This includes the file name.
         Defaults to None.
         If None a random file name will be generated in the default tempdir location.
     overwrite : bool , optional
@@ -163,25 +201,12 @@ def create_empty_mmap(
         TEMP_DIR_NAME = _check_temp_dir_existence(tmp_dir_abs_path)
 
     # if path does not exist generate a random file name in the TEMP directory
-    if path is None:
+    if file_path is None:
         temp_file_name = os.path.join(
             TEMP_DIR_NAME, f"temp_mmap_{np.random.randint(2**63)}.hdf"
         )
     else:
-        # check that if overwrite is false the file does not already exist
-        if not overwrite:
-            if os.path.exists(path):
-                raise ValueError(
-                    "The file already exists. Set overwrite to True to overwrite the file or choose a different name."
-                )
-        if not os.path.basename.endswith(".hdf"):
-            raise ValueError("The chosen file name needs to end with .hdf")
-        if os.path.isdir(os.path.commonpath(path)):
-            temp_file_name = path
-        else:
-            raise ValueError(
-                "The directory in which the file should be created does not exist."
-            )
+        temp_file_name= _check_file_location(file_path: str, overwrite = False)
 
     with h5py.File(temp_file_name, "w") as hdf_file:
         array = hdf_file.create_dataset("array", shape=shape, dtype=dtype)
