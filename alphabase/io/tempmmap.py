@@ -69,7 +69,7 @@ def redefine_temp_location(path):
 
     global _TEMP_DIR, _TEMP_DIR, TEMP_DIR_NAME
     logging.warning(
-        f"""Folder {TEMP_DIR_NAME} with temp mmap arrays is being deleted.All existing temp mmapp arrays will be unusable!"""
+        f"""Folder {TEMP_DIR_NAME} with temp mmap arrays is being deleted. All existing temp mmapp arrays will be unusable!"""
     )
 
     # cleaup old temporary directory
