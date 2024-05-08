@@ -22,6 +22,35 @@ logging.warning(
     "and might need to be triggered manually!"
 )
 
+def _check_temp_dir_existence(abs_path: str) -> str:
+    """
+    Check if the directory to which the temp arrays should be written exists. If not raise a value error.
+
+    Parameters
+    ----------
+    abs_path : str
+        The absolute path to the new temporary directory.
+
+    Returns
+    ------
+    str 
+        The directory path if it exists.
+    """
+    #ensure that the path exists
+    if os.path.exists(abs_path):
+        # ensure that the path points to a directory
+        if os.path.isdir(abs_path):  
+            TEMP_DIR_NAME = abs_path
+            return(TEMP_DIR_NAME)
+        else:
+            raise ValueError(
+                f"The path {abs_path} does not point to a directory."
+            )
+    else:
+        raise ValueError(
+            f"The directory {abs_path} in which the file should be created does not exist."
+        )
+
 
 def redefine_temp_location(path):
     """
@@ -56,7 +85,7 @@ def redefine_temp_location(path):
     return TEMP_DIR_NAME
 
 
-def array(shape: tuple, dtype: np.dtype, tmp_dir_name: str = None) -> np.ndarray:
+def array(shape: tuple, dtype: np.dtype, tmp_dir_abs_path: str = None) -> np.ndarray:
     """Create a writable temporary mmapped array.
 
     Parameters
@@ -65,23 +94,22 @@ def array(shape: tuple, dtype: np.dtype, tmp_dir_name: str = None) -> np.ndarray
         A tuple with the shape of the array.
     dtype : type
         The np.dtype of the array.
-    tmp_dir_name : str, optional
-        If specified the memory mapped array will be created in this directory. Defaults to None.
+    tmp_dir_abs_path : str, optional
+        If specified the memory mapped array will be created in this directory. 
+        An absolute path is expected.
+        Defaults to None. If not specified the global TEMP_DIR_NAME location will be used.
 
     Returns
     -------
     type
         A writable temporary mmapped array.
     """
+
     # redefine the temporary directory if a new location is given otherwise read from global variable
     # this allows you to ensure that the correct temp directory location is used when working with multiple threads
-    if tmp_dir_name is not None:
-        if os.path.isdir(tmp_dir_name):  # ensure that directory exists
-            TEMP_DIR_NAME = tmp_dir_name
-        else:
-            raise ValueError(
-                "The directory in which the file should be created does not exist."
-            )
+    if tmp_dir_abs_path is not None:
+        TEMP_DIR_NAME = _check_temp_dir_existence(tmp_dir_abs_path)
+       
     temp_file_name = os.path.join(
         TEMP_DIR_NAME, f"temp_mmap_{np.random.randint(2**63)}.hdf"
     )
@@ -103,7 +131,7 @@ def create_empty_mmap(
     dtype: np.dtype, 
     path: str = None, 
     overwrite: bool = False, 
-    tmp_dir_name: str = None
+    tmp_dir_abs_path: str = None
 ):
     """Initialize a new HDF5 file compatible with mmap. Returns the path to the initialized file.
     File can be mapped using the mmap_array_from_path function.
@@ -117,12 +145,12 @@ def create_empty_mmap(
     path : str, optional
         The path to the file that should be created.
         Defaults to None.
-        If None a random file name will be generated.
+        If None a random file name will be generated in the default tempdir location.
     overwrite : bool , optional
         If True the file will be overwritten if it already exists.
         Defaults to False.
-    tmp_dir_name : str, optional
-        If specified the memory mapped array will be created in this directory.
+    tmp_dir_abs_path : str, optional
+        If specified the default tempdir location will be updated to this path. Defaults to None. An absolute path to a directory is expected.
 
     Returns
     -------
@@ -131,13 +159,8 @@ def create_empty_mmap(
     """
     # redefine the temporary directory if a new location is given otherwise read from global variable
     # this allows you to ensure that the correct temp directory location is used when working with multiple threads
-    if tmp_dir_name is not None:
-        if os.path.isdir(tmp_dir_name):  # ensure that directory exists
-            TEMP_DIR_NAME = tmp_dir_name
-        else:
-            raise ValueError(
-                "The directory in which the file should be created does not exist."
-            )
+    if tmp_dir_abs_path is not None:
+        TEMP_DIR_NAME = _check_temp_dir_existence(tmp_dir_abs_path)
 
     # if path does not exist generate a random file name in the TEMP directory
     if path is None:
