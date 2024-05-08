@@ -77,7 +77,7 @@ def redefine_temp_location(path):
     del _TEMP_DIR
 
     # create new tempfile at desired location
-    _TEMP_DIR = tempfile.TemporaryDirectory(prefix=os.path.join(path, "temp_mmap"))
+    _TEMP_DIR = tempfile.TemporaryDirectory(prefix=os.path.join(path, "temp_mmap_"))
     TEMP_DIR_NAME = _TEMP_DIR.name
     logging.warning(
         f"""New temp folder location. Temp mmap arrays are written to {TEMP_DIR_NAME}. Cleanup of this folder is OS dependant, and might need to be triggered manually!"""
