@@ -206,7 +206,7 @@ def create_empty_mmap(
             TEMP_DIR_NAME, f"temp_mmap_{np.random.randint(2**63)}.hdf"
         )
     else:
-        temp_file_name= _check_file_location(file_path: str, overwrite = False)
+        temp_file_name= _check_file_location(file_path, overwrite = False)
 
     with h5py.File(temp_file_name, "w") as hdf_file:
         array = hdf_file.create_dataset("array", shape=shape, dtype=dtype)
