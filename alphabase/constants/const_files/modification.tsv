@@ -126,6 +126,7 @@ Dimethyl@N	28.0313	28.0532	H(4)C(2)	0.0		Post-translational	36	0.0
 Dimethyl@Any N-term	28.0313	28.0532	H(4)C(2)	0.0		Isotopic label	36	0.0
 Dimethyl@K	28.0313	28.0532	H(4)C(2)	0.0		Multiple	36	0.0
 Dimethyl@R	28.0313	28.0532	H(4)C(2)	0.0		Post-translational	36	0.0
+Dimethyl@C	28.0313	28.0532	H(4)C(2)	0.0		Isotopic label	36	0.0
 Trimethyl@A^Protein N-term	42.04695	42.0797	H(6)C(3)	0.0		Post-translational	37	0.0
 Trimethyl@R	42.04695	42.0797	H(6)C(3)	0.0		Chemical derivative	37	0.0
 Trimethyl@K	42.04695	42.0797	H(6)C(3)	59.073499	H(9)C(3)N(1)	Post-translational	37	0.5
