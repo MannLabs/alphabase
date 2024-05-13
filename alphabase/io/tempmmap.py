@@ -22,6 +22,7 @@ logging.warning(
     "and might need to be triggered manually!"
 )
 
+
 def _check_temp_dir_existence(abs_path: str) -> str:
     """
     Check if the directory to which the temp arrays should be written exists. If not raise a value error.
@@ -33,25 +34,24 @@ def _check_temp_dir_existence(abs_path: str) -> str:
 
     Returns
     ------
-    str 
+    str
         The directory path if it exists.
     """
-    #ensure that the path exists
+    # ensure that the path exists
     if os.path.exists(abs_path):
         # ensure that the path points to a directory
-        if os.path.isdir(abs_path):  
+        if os.path.isdir(abs_path):
             TEMP_DIR_NAME = abs_path
-            return(TEMP_DIR_NAME)
+            return TEMP_DIR_NAME
         else:
-            raise ValueError(
-                f"The path {abs_path} does not point to a directory."
-            )
+            raise ValueError(f"The path {abs_path} does not point to a directory.")
     else:
         raise ValueError(
             f"The directory {abs_path} in which the file should be created does not exist."
         )
 
-def _check_file_location(abs_file_path: str, overwrite = False) -> str:
+
+def _check_file_location(abs_file_path: str, overwrite=False) -> str:
     """
     Check if the path specified for the new temporary file is valid. If not raise a value error.
 
@@ -67,28 +67,28 @@ def _check_file_location(abs_file_path: str, overwrite = False) -> str:
 
     Returns
     ------
-    str 
+    str
         The file path if it is valid.
     """
-    #check overwrite status and existence of file
+    # check overwrite status and existence of file
     if not overwrite:
         if os.path.exists(abs_file_path):
-                raise ValueError(
-                    "The file already exists. Set overwrite to True to overwrite the file or choose a different name."
-                )
+            raise ValueError(
+                "The file already exists. Set overwrite to True to overwrite the file or choose a different name."
+            )
 
-    #ensure that the filename conforms to the naming convention     
+    # ensure that the filename conforms to the naming convention
     if not os.path.basename.endswith(".hdf"):
         raise ValueError("The chosen file name needs to end with .hdf")
-    
-    #ensure that the directory in which the file should be created exists
+
+    # ensure that the directory in which the file should be created exists
     if os.path.isdir(os.path.commonpath(abs_file_path)):
-        return(abs_file_path)
+        return abs_file_path
     else:
         raise ValueError(
             f"The directory {os.path.commonpath(abs_file_path)} in which the file should be created does not exist."
         )
-        
+
 
 def redefine_temp_location(path):
     """
@@ -133,7 +133,7 @@ def array(shape: tuple, dtype: np.dtype, tmp_dir_abs_path: str = None) -> np.nda
     dtype : type
         The np.dtype of the array.
     tmp_dir_abs_path : str, optional
-        If specified the memory mapped array will be created in this directory. 
+        If specified the memory mapped array will be created in this directory.
         An absolute path is expected.
         Defaults to None. If not specified the global TEMP_DIR_NAME location will be used.
 
@@ -147,7 +147,7 @@ def array(shape: tuple, dtype: np.dtype, tmp_dir_abs_path: str = None) -> np.nda
     # this allows you to ensure that the correct temp directory location is used when working with multiple threads
     if tmp_dir_abs_path is not None:
         TEMP_DIR_NAME = _check_temp_dir_existence(tmp_dir_abs_path)
-       
+
     temp_file_name = os.path.join(
         TEMP_DIR_NAME, f"temp_mmap_{np.random.randint(2**63)}.hdf"
     )
@@ -165,11 +165,11 @@ def array(shape: tuple, dtype: np.dtype, tmp_dir_abs_path: str = None) -> np.nda
 
 
 def create_empty_mmap(
-    shape: tuple, 
-    dtype: np.dtype, 
-    file_path: str = None, 
-    overwrite: bool = False, 
-    tmp_dir_abs_path: str = None
+    shape: tuple,
+    dtype: np.dtype,
+    file_path: str = None,
+    overwrite: bool = False,
+    tmp_dir_abs_path: str = None,
 ):
     """Initialize a new HDF5 file compatible with mmap. Returns the path to the initialized file.
     File can be mapped using the mmap_array_from_path function.
@@ -206,7 +206,7 @@ def create_empty_mmap(
             TEMP_DIR_NAME, f"temp_mmap_{np.random.randint(2**63)}.hdf"
         )
     else:
-        temp_file_name= _check_file_location(file_path, overwrite = False)
+        temp_file_name = _check_file_location(file_path, overwrite=False)
 
     with h5py.File(temp_file_name, "w") as hdf_file:
         array = hdf_file.create_dataset("array", shape=shape, dtype=dtype)
