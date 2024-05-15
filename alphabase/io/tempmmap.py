@@ -16,11 +16,18 @@ import shutil
 _TEMP_DIR = tempfile.TemporaryDirectory(prefix="temp_mmap_")
 TEMP_DIR_NAME = _TEMP_DIR.name
 
-logging.warning(
-    f"Temp mmap arrays are written to {TEMP_DIR_NAME}. "
-    "Cleanup of this folder is OS dependant, "
-    "and might need to be triggered manually!"
-)
+is_cleanup_warning_logged = False
+
+
+def _log_cleanup_warning_once() -> None:
+    """Logs a warning on temp array cleanup once."""
+    global is_cleanup_warning_logged
+    if not is_cleanup_warning_logged:
+        logging.warning(
+            f"Temp mmap arrays are written to {TEMP_DIR_NAME}. "
+            "Cleanup of this folder is OS dependent and might need to be triggered manually!"
+        )
+        is_cleanup_warning_logged = True
 
 
 def redefine_temp_location(path):
@@ -71,6 +78,8 @@ def array(shape: tuple, dtype: np.dtype) -> np.ndarray:
     type
         A writable temporary mmapped array.
     """
+    _log_cleanup_warning_once()
+
     temp_file_name = os.path.join(
         TEMP_DIR_NAME, f"temp_mmap_{np.random.randint(2**63)}.hdf"
     )
@@ -110,6 +119,7 @@ def create_empty_mmap(shape: tuple, dtype: np.dtype, path: str = None, overwrite
     str
         path to the newly created file.
     """
+    _log_cleanup_warning_once()
 
     # if path does not exist generate a random file name in the TEMP directory
     if path is None:
@@ -152,6 +162,8 @@ def mmap_array_from_path(hdf_file: str) -> np.ndarray:
     type
         A writable temporary mmapped array.
     """
+    _log_cleanup_warning_once()
+
     path = os.path.join(hdf_file)
 
     # read parameters required to reinitialize the mmap object
