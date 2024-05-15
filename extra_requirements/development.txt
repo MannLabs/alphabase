@@ -3,7 +3,7 @@ twine
 bumpversion
 pipdeptree
 ipykernel
-nbdev
+# nbdev
 pyteomics
 scikit-learn
 matplotlib

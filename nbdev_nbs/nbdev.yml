@@ -1,9 +1,0 @@
-project:
-  output-dir: docs
-
-website:
-  title: "alphabase"
-  site-url: "https://MannLabs.github.io/alphabase"
-  description: "Base functionalities for AlphaPept Ecosystems"
-  repo-branch: main
-  repo-url: "https://github.com/MannLabs/alphabase"

@@ -1139,7 +1139,6 @@ def create_fragment_mz_dataframe(
     )
 
 
-# %% ../../nbdev_nbs/peptide/fragment.ipynb 38
 @nb.njit(nogil=True)
 def join_left(left: np.ndarray, right: np.ndarray):
     """joins all values in the left array to the values in the right array.

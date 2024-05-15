@@ -37,3 +37,4 @@ jobs:
       os: ${{ matrix.os }}
       python-version: ${{ matrix.python-version }}
       install-script: "loose_pip_install.sh"
+      test-nbs: "run_tests.sh"
