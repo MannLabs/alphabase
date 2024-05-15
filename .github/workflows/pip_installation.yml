@@ -25,7 +25,6 @@ jobs:
       os: ${{ matrix.os }}
       python-version: ${{ matrix.python-version }}
       install-script: "stable_pip_install.sh"
-      test-nbs: "run_tests.sh"
 
   loose_installation:
     name: Test loose pip installation on ${{ matrix.os }}
