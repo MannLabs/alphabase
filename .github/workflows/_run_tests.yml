@@ -41,5 +41,6 @@ jobs:
       shell: bash -l {0}
       run: |
         conda activate alphabase
-        . ./tests/run_tests.sh
+        cd tests
+        . ./run_tests.sh
         conda deactivate
