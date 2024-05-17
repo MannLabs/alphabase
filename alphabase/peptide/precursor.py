@@ -8,7 +8,7 @@ from tqdm import tqdm
 from xxhash import xxh64_intdigest
 from functools import partial
 
-from alphabase.constants.element import MASS_PROTON, MASS_ISOTOPE
+from alphabase.constants.atom import MASS_PROTON, MASS_ISOTOPE
 from alphabase.constants.aa import AA_Composition
 from alphabase.constants.modification import MOD_Composition
 from alphabase.constants.isotope import IsotopeDistribution

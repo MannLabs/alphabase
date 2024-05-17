@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 from alphabase.peptide.fragment import update_precursor_mz
-from alphabase.constants.element import common_const_dict
+from alphabase.constants.atom import common_const_dict
 
 CCS_IM_COEF = common_const_dict["MOBILITY"]["CCS_IM_COEF"]
 IM_GAS_MASS = common_const_dict["MOBILITY"]["IM_GAS_MASS"]

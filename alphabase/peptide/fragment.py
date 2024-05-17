@@ -6,7 +6,7 @@ import numba as nb
 from alphabase.constants._const import PEAK_MZ_DTYPE, PEAK_INTENSITY_DTYPE
 
 from alphabase.constants.modification import calc_modloss_mass
-from alphabase.constants.element import (
+from alphabase.constants.atom import (
     MASS_PROTON,
 )
 from alphabase.peptide.mass_calc import *  # noqa: F403 apparently some test code depends on things imported here TODO fix
@@ -16,7 +16,7 @@ from alphabase.peptide.precursor import (
     is_precursor_sorted,
 )
 
-from alphabase.constants.element import calc_mass_from_formula
+from alphabase.constants.atom import calc_mass_from_formula
 
 frag_type_representation_dict = {
     "c": "b+N(1)H(3)",

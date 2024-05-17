@@ -2,7 +2,7 @@ import numba
 import numpy as np
 import typing
 
-from alphabase.constants.element import (
+from alphabase.constants.atom import (
     MAX_ISOTOPE_LEN,
     EMPTY_DIST,
     CHEM_ISOTOPE_DIST,
