@@ -9,7 +9,7 @@ on:
   push:
     branches: [ main, development ]
   pull_request:
-    branches: [ main, development ]
+    branches: [ main ]
   workflow_dispatch:
 
 name: Pip installation and tests
@@ -28,7 +28,6 @@ jobs:
 
   loose_installation:
     name: Test loose pip installation on ${{ matrix.os }}
-    # runs-on: ${{ matrix.os }} # `runs-on` conflicts with `uses`, see https://github.com/orgs/community/discussions/62320
     strategy:
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest, macos-latest-xlarge]
