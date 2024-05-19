@@ -310,6 +310,7 @@ class SpecLibBase(object):
 
         # register 'protein_reverse' to the decoy_lib_provider
         from alphabase.protein.protein_level_decoy import register_decoy
+
         register_decoy()
 
         decoy_lib = decoy_lib_provider.get_decoy_lib(self.decoy, self)
