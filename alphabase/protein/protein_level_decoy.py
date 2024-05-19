@@ -71,4 +71,5 @@ class ProteinReverseDecoy(SpecLibDecoy):
         )
 
 
-decoy_lib_provider.register("protein_reverse", ProteinReverseDecoy)
+def register_decoy():
+    decoy_lib_provider.register("protein_reverse", ProteinReverseDecoy)
