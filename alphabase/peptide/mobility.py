@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from alphabase.peptide.fragment import update_precursor_mz
+from alphabase.peptide.precursor import update_precursor_mz
 from alphabase.constants.atom import common_const_dict
 
 CCS_IM_COEF = common_const_dict["MOBILITY"]["CCS_IM_COEF"]

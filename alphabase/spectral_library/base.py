@@ -334,7 +334,7 @@ class SpecLibBase(object):
         """
         Calculate precursor mz for self._precursor_df
         """
-        fragment.update_precursor_mz(self._precursor_df)
+        precursor.update_precursor_mz(self._precursor_df)
 
     def calc_and_clip_precursor_mz(self):
         """
