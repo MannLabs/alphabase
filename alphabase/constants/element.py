@@ -1,4 +1,4 @@
-from alphabase.constants.atom import *
+from alphabase.constants.atom import *  # noqa: F403 TODO remove in the next release
 
 import warnings
 
