@@ -272,4 +272,5 @@ class MaxQuantReader(PSMReaderBase):
             self._psm_df["sequence"] = seqs
 
 
-psm_reader_provider.register_reader("maxquant", MaxQuantReader)
+def register_readers():
+    psm_reader_provider.register_reader("maxquant", MaxQuantReader)

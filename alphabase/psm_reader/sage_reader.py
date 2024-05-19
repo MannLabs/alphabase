@@ -231,5 +231,6 @@ class SageReaderParquet(SageReaderBase):
         return pd.read_parquet(filename)
 
 
-psm_reader_provider.register_reader("sage_tsv", SageReaderTSV)
-psm_reader_provider.register_reader("sage_parquet", SageReaderParquet)
+def register_readers():
+    psm_reader_provider.register_reader("sage_tsv", SageReaderTSV)
+    psm_reader_provider.register_reader("sage_parquet", SageReaderParquet)

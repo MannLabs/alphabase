@@ -14,3 +14,4 @@ regex
 dask
 dask_expr
 pyahocorasick
+pyteomics

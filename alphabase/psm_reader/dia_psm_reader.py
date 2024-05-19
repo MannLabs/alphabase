@@ -131,13 +131,6 @@ class DiannReader(SpectronautReader):
         self._psm_df.rename(columns={"spec_idx": "diann_spec_idx"}, inplace=True)
 
 
-psm_reader_provider.register_reader("spectronaut", SpectronautReader)
-psm_reader_provider.register_reader("speclib_tsv", SpectronautReader)
-psm_reader_provider.register_reader("openswath", SwathReader)
-psm_reader_provider.register_reader("swath", SwathReader)
-psm_reader_provider.register_reader("diann", DiannReader)
-
-
 class SpectronautReportReader(MaxQuantReader):
     """Reader for Spectronaut's report TSV/CSV.
 
@@ -189,4 +182,10 @@ class SpectronautReportReader(MaxQuantReader):
         return df
 
 
-psm_reader_provider.register_reader("spectronaut_report", SpectronautReportReader)
+def register_readers():
+    psm_reader_provider.register_reader("spectronaut", SpectronautReader)
+    psm_reader_provider.register_reader("speclib_tsv", SpectronautReader)
+    psm_reader_provider.register_reader("openswath", SwathReader)
+    psm_reader_provider.register_reader("swath", SwathReader)
+    psm_reader_provider.register_reader("diann", DiannReader)
+    psm_reader_provider.register_reader("spectronaut_report", SpectronautReportReader)

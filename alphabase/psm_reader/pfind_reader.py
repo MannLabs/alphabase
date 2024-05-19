@@ -144,5 +144,6 @@ class pFindReader(PSMReaderBase):
         self._psm_df["mods"] = self._psm_df["mods"].apply(translate_pFind_mod)
 
 
-psm_reader_provider.register_reader("pfind", pFindReader)
-psm_reader_provider.register_reader("pfind3", pFindReader)
+def register_readers():
+    psm_reader_provider.register_reader("pfind", pFindReader)
+    psm_reader_provider.register_reader("pfind3", pFindReader)
