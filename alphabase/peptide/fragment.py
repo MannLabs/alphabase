@@ -6,17 +6,16 @@ import numba as nb
 from alphabase.constants._const import PEAK_MZ_DTYPE, PEAK_INTENSITY_DTYPE
 
 from alphabase.constants.modification import calc_modloss_mass
-from alphabase.constants.element import (
+from alphabase.constants.atom import (
     MASS_PROTON,
 )
 from alphabase.peptide.mass_calc import *  # noqa: F403 apparently some test code depends on things imported here TODO fix
 from alphabase.peptide.precursor import (
     refine_precursor_df,
-    update_precursor_mz,  # noqa: F401 apparently some test code depends on this being imported here TODO fix
-    is_precursor_sorted,
+    is_precursor_refined,
 )
 
-from alphabase.constants.element import calc_mass_from_formula
+from alphabase.constants.atom import calc_mass_from_formula
 
 frag_type_representation_dict = {
     "c": "b+N(1)H(3)",
@@ -1077,7 +1076,7 @@ def create_fragment_mz_dataframe(
             dtype=dtype,
         )
 
-    if is_precursor_sorted(precursor_df) and reference_fragment_df is None:
+    if is_precursor_refined(precursor_df) and reference_fragment_df is None:
         # fast
         return create_fragment_mz_dataframe_by_sort_precursor(
             precursor_df, charged_frag_types, batch_size, dtype=dtype

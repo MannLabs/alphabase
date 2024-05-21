@@ -5,7 +5,7 @@ import typing
 
 from alphabase.yaml_utils import load_yaml
 
-from alphabase.constants.element import (
+from alphabase.constants.atom import (
     calc_mass_from_formula,
     MASS_H2O,
     parse_formula,

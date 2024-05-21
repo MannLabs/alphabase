@@ -11,7 +11,7 @@ from alphabase.constants.modification import (
     calc_modification_mass_sum,
     calc_mod_masses_for_same_len_seqs,
 )
-from alphabase.constants.element import MASS_H2O
+from alphabase.constants.atom import MASS_H2O
 
 
 def calc_diff_modification_mass(

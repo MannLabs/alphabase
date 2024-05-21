@@ -8,10 +8,10 @@ import re
 
 from alphabase.peptide.fragment import (
     create_fragment_mz_dataframe,
-    calc_fragment_count, 
+    calc_fragment_count,
     filter_fragment_number,
     join_left,
-    remove_unused_fragments
+    remove_unused_fragments,
 )
 from alphabase.peptide.precursor import (
     update_precursor_mz,
@@ -20,7 +20,7 @@ from alphabase.peptide.precursor import (
     calc_precursor_isotope_intensity,
     calc_precursor_isotope_info_mp,
     calc_precursor_isotope_info,
-    hash_precursor_df
+    hash_precursor_df,
 )
 from alphabase.io.hdf import HDF_File
 
@@ -368,7 +368,7 @@ class SpecLibBase(object):
     ):
         """
         Calculate and append the isotope intensity columns into self.precursor_df.
-        See `alphabase.peptide.precursor.calc_precursor_isotope_intensity` for details.
+        See `alphabase.peptide.calc_precursor_isotope_intensity` for details.
 
         Parameters
         ----------
@@ -431,7 +431,7 @@ class SpecLibBase(object):
     ):
         """
         Append isotope columns into self.precursor_df.
-        See `alphabase.peptide.precursor.calc_precursor_isotope` for details.
+        See `alphabase.peptide.calc_precursor_isotope` for details.
         """
         if "precursor_mz" not in self._precursor_df.columns:
             self.calc_and_clip_precursor_mz()
@@ -442,9 +442,7 @@ class SpecLibBase(object):
                 process_bar=mp_process_bar,
             )
         else:
-            (self._precursor_df) = calc_precursor_isotope_info(
-                self.precursor_df
-            )
+            (self._precursor_df) = calc_precursor_isotope_info(self.precursor_df)
 
     def calc_fragment_mz_df(self):
         """
@@ -506,7 +504,7 @@ class SpecLibBase(object):
 
     def calc_fragment_count(self):
         """
-        Count the number of non-zero fragments for each precursor.
+        Count the number of non-zero fragments for each
         Creates the column 'n_fragments' in self._precursor_df.
         """
 
@@ -524,10 +522,10 @@ class SpecLibBase(object):
         Parameters
         ----------
         n_fragments_allowed_column_name : str, optional, default 'n_fragments_allowed'
-            The column name in self._precursor_df that contains the number of fragments allowed for each precursor.
+            The column name in self._precursor_df that contains the number of fragments allowed for each
 
         n_allowed : int, optional, default 999
-            The global setting for the number of fragments allowed for each precursor.
+            The global setting for the number of fragments allowed for each
         """
 
         filter_fragment_number(
