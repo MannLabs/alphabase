@@ -1323,7 +1323,7 @@ def calc_fragment_cardinality(
     ):
         if len(elution_group_idx) == 0:
             return
-        elution_group_idx[0] # noqa TODO check for potential bug
+        elution_group_idx[0]  # noqa TODO check for potential bug
         elution_group_start = 0
 
         for i in range(len(elution_group_idx)):
