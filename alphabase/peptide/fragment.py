@@ -9,7 +9,7 @@ from alphabase.constants.modification import calc_modloss_mass
 from alphabase.constants.atom import (
     MASS_PROTON,
 )
-from alphabase.peptide.mass_calc import *  # noqa: F403 apparently some test code depends on things imported here TODO fix
+from alphabase.peptide.mass_calc import calc_b_y_and_peptide_masses_for_same_len_seqs
 from alphabase.peptide.precursor import (
     refine_precursor_df,
     is_precursor_refined,
@@ -403,7 +403,7 @@ def calc_fragment_mz_values_for_same_nAA(
     else:
         mod_diff_list = None
         mod_diff_site_list = None
-    (b_mass, y_mass, pepmass) = calc_b_y_and_peptide_masses_for_same_len_seqs(  # noqa: F405 TODO remove once the import is done explicitly
+    (b_mass, y_mass, pepmass) = calc_b_y_and_peptide_masses_for_same_len_seqs(
         df_group.sequence.values.astype("U"),
         mod_list,
         site_list,
@@ -1321,6 +1321,8 @@ def calc_fragment_cardinality(
         fragment_mz,
         fragment_cardinality,
     ):
+        if len(elution_group_idx) == 0:
+            return
         elution_group_idx[0]  # noqa TODO check for potential bug
         elution_group_start = 0
 

@@ -323,7 +323,9 @@ class SpecLibBase(object):
         from alphabase.spectral_library.decoy import decoy_lib_provider
 
         # register 'protein_reverse' to the decoy_lib_provider
-        import alphabase.protein.protein_level_decoy  # noqa: F401 TODO this import has a side effect (registering the reader)
+        from alphabase.protein.protein_level_decoy import register_decoy
+
+        register_decoy()
 
         decoy_lib = decoy_lib_provider.get_decoy_lib(self.decoy, self)
         if decoy_lib is None:

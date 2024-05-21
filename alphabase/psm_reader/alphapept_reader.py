@@ -108,4 +108,5 @@ class AlphaPeptReader(PSMReaderBase):
         self._psm_df.decoy = self._psm_df.decoy.astype(np.int8)
 
 
-psm_reader_provider.register_reader("alphapept", AlphaPeptReader)
+def register_readers():
+    psm_reader_provider.register_reader("alphapept", AlphaPeptReader)
