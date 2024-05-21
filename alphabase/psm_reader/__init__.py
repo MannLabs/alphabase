@@ -55,4 +55,4 @@ register_dia_readers()
 register_fragger_readers()
 register_mq_readers()
 register_pf_readers()
-register_sage_readers
+register_sage_readers()
