@@ -429,8 +429,8 @@ def add_single_peptide_labeling(
     nterm_label_mod: str,
     cterm_label_mod: str,
 ):
-    add_nterm_label = True if nterm_label_mod else False
-    add_cterm_label = True if cterm_label_mod else False
+    add_nterm_label = bool(nterm_label_mod)
+    add_cterm_label = bool(cterm_label_mod)
     if mod_sites:
         _sites = mod_sites.split(";")
         if "0" in _sites:
@@ -478,10 +478,7 @@ def create_labeling_peptide_df(
     if len(peptide_df) == 0:
         return peptide_df
 
-    if inplace:
-        df = peptide_df
-    else:
-        df = peptide_df.copy()
+    df = peptide_df if inplace else peptide_df.copy()
 
     (label_aas, label_mod_dict, nterm_label_mod, cterm_label_mod) = parse_labels(labels)
 
@@ -507,7 +504,7 @@ def protein_idxes_to_names(protein_idxes: str, protein_names: list):
 
 def append_special_modifications(
     df: pd.DataFrame,
-    var_mods: list = ["Phospho@S", "Phospho@T", "Phospho@Y"],
+    var_mods: list = None,
     min_mod_num: int = 0,
     max_mod_num: int = 1,
     max_peptidoform_num: int = 100,
@@ -553,6 +550,8 @@ def append_special_modifications(
     pd.DataFrame
         The precursor_df with new modification added.
     """
+    if var_mods is None:
+        var_mods = ["Phospho@S", "Phospho@T", "Phospho@Y"]
     if len(var_mods) == 0 or len(df) == 0:
         return df
 
@@ -644,7 +643,7 @@ class SpecLibFasta(SpecLibBase):
 
     def __init__(
         self,
-        charged_frag_types: list = ["b_z1", "b_z2", "y_z1", "y_z2"],
+        charged_frag_types: list = None,
         *,
         protease: str = "trypsin",
         max_missed_cleavages: int = 2,
@@ -654,12 +653,12 @@ class SpecLibFasta(SpecLibBase):
         precursor_charge_max: int = 4,
         precursor_mz_min: float = 400.0,
         precursor_mz_max: float = 2000.0,
-        var_mods: list = ["Acetyl@Protein_N-term", "Oxidation@M"],
+        var_mods: list = None,
         min_var_mod_num: int = 0,
         max_var_mod_num: int = 2,
-        fix_mods: list = ["Carbamidomethyl@C"],
+        fix_mods: list = None,
         labeling_channels: dict = None,
-        special_mods: list = [],
+        special_mods: list = None,
         min_special_mod_num: int = 0,
         max_special_mod_num: int = 1,
         special_mods_cannot_modify_pep_n_term: bool = False,
@@ -758,6 +757,14 @@ class SpecLibFasta(SpecLibBase):
         include_contaminants : bool, optional
             If include contaminants.fasta, by default False
         """
+        if special_mods is None:
+            special_mods = []
+        if fix_mods is None:
+            fix_mods = ["Carbamidomethyl@C"]
+        if var_mods is None:
+            var_mods = ["Acetyl@Protein_N-term", "Oxidation@M"]
+        if charged_frag_types is None:
+            charged_frag_types = ["b_z1", "b_z2", "y_z1", "y_z2"]
         super().__init__(
             charged_frag_types=charged_frag_types,
             precursor_mz_min=precursor_mz_min,

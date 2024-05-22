@@ -15,16 +15,7 @@ from alphabase.spectral_library.base import SpecLibBase
 class LibraryReaderBase(MaxQuantReader, SpecLibBase):
     def __init__(
         self,
-        charged_frag_types: typing.List[str] = [
-            "b_z1",
-            "b_z2",
-            "y_z1",
-            "y_z2",
-            "b_modloss_z1",
-            "b_modloss_z2",
-            "y_modloss_z1",
-            "y_modloss_z2",
-        ],
+        charged_frag_types: typing.List[str] = None,
         column_mapping: dict = None,
         modification_mapping: dict = None,
         fdr=0.01,
@@ -79,6 +70,17 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
             Can be either `pseudo_reverse` or `diann`
 
         """
+        if charged_frag_types is None:
+            charged_frag_types = [
+                "b_z1",
+                "b_z2",
+                "y_z1",
+                "y_z2",
+                "b_modloss_z1",
+                "b_modloss_z2",
+                "y_modloss_z1",
+                "y_modloss_z2",
+            ]
         SpecLibBase.__init__(
             self,
             charged_frag_types=charged_frag_types,
@@ -293,21 +295,23 @@ SWATHLibraryReader = LibraryReaderBase
 class LibraryReaderFromRawData(SpecLibBase):
     def __init__(
         self,
-        charged_frag_types: typing.List[str] = [
-            "b_z1",
-            "b_z2",
-            "y_z1",
-            "y_z2",
-            "b_modloss_z1",
-            "b_modloss_z2",
-            "y_modloss_z1",
-            "y_modloss_z2",
-        ],
+        charged_frag_types: typing.List[str] = None,
         precursor_mz_min: float = 400,
         precursor_mz_max: float = 2000,
         decoy: str = None,
         **kwargs,
     ):
+        if charged_frag_types is None:
+            charged_frag_types = [
+                "b_z1",
+                "b_z2",
+                "y_z1",
+                "y_z2",
+                "b_modloss_z1",
+                "b_modloss_z2",
+                "y_modloss_z1",
+                "y_modloss_z2",
+            ]
         super().__init__(
             charged_frag_types=charged_frag_types,
             precursor_mz_min=precursor_mz_min,

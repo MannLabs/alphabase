@@ -80,7 +80,7 @@ class SpecLibBase:
         # ['b_z1','b_z2','y_z1','y_modloss_z1', ...];
         # 'b_z1': 'b' is the fragment type and
         # 'z1' is the charge state z=1.
-        charged_frag_types: typing.List[str] = ["b_z1", "b_z2", "y_z1", "y_z2"],
+        charged_frag_types: typing.List[str] = None,
         precursor_mz_min=400,
         precursor_mz_max=6000,
         decoy: str = None,
@@ -104,7 +104,11 @@ class SpecLibBase:
             Decoy methods, could be "pseudo_reverse" or "diann".
             Defaults to None.
         """
-        self.charged_frag_types = charged_frag_types
+        self.charged_frag_types = (
+            ["b_z1", "b_z2", "y_z1", "y_z2"]
+            if charged_frag_types is None
+            else charged_frag_types
+        )
         self._precursor_df = pd.DataFrame()
         self._fragment_intensity_df = pd.DataFrame()
         self._fragment_mz_df = pd.DataFrame()
@@ -190,12 +194,7 @@ class SpecLibBase:
     def append(
         self,
         other: "SpecLibBase",
-        dfs_to_append: typing.List[str] = [
-            "_precursor_df",
-            "_fragment_intensity_df",
-            "_fragment_mz_df",
-            "_fragment_intensity_predicted_df",
-        ],
+        dfs_to_append: typing.List[str] = None,
         remove_unused_dfs: bool = True,
     ):
         """
@@ -223,6 +222,13 @@ class SpecLibBase:
         None
 
         """
+        if dfs_to_append is None:
+            dfs_to_append = [
+                "_precursor_df",
+                "_fragment_intensity_df",
+                "_fragment_mz_df",
+                "_fragment_intensity_predicted_df",
+            ]
         if remove_unused_dfs:
             current_frag_dfs = self.available_dense_fragment_dfs()
             for attr in current_frag_dfs:
@@ -265,11 +271,10 @@ class SpecLibBase:
         n_fragments = []
         # get subset of dfs_to_append starting with _fragment
         for attr in dfs_to_append:
-            if attr.startswith("_fragment"):
-                if hasattr(self, attr):
-                    n_current_fragments = len(getattr(self, attr))
-                    if n_current_fragments > 0:
-                        n_fragments += [n_current_fragments]
+            if attr.startswith("_fragment") and hasattr(self, attr):
+                n_current_fragments = len(getattr(self, attr))
+                if n_current_fragments > 0:
+                    n_fragments += [n_current_fragments]
 
         if not np.all(np.array(n_fragments) == n_fragments[0]):
             raise ValueError(

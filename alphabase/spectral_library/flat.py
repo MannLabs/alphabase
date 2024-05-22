@@ -38,16 +38,10 @@ class SpecLibFlat(SpecLibBase):
 
     def __init__(
         self,
-        charged_frag_types: list = ["b_z1", "b_z2", "y_z1", "y_z2"],
+        charged_frag_types: list = None,
         min_fragment_intensity: float = 0.001,
         keep_top_k_fragments: int = 1000,
-        custom_fragment_df_columns: list = [
-            "type",
-            "number",
-            "position",
-            "charge",
-            "loss_type",
-        ],
+        custom_fragment_df_columns: list = None,
         **kwargs,
     ):
         """
@@ -63,6 +57,16 @@ class SpecLibFlat(SpecLibBase):
             See :attr:`custom_fragment_df_columns`,
             defaults to ['type','number','position','charge','loss_type']
         """
+        if custom_fragment_df_columns is None:
+            custom_fragment_df_columns = [
+                "type",
+                "number",
+                "position",
+                "charge",
+                "loss_type",
+            ]
+        if charged_frag_types is None:
+            charged_frag_types = ["b_z1", "b_z2", "y_z1", "y_z2"]
         super().__init__(charged_frag_types=charged_frag_types)
         self.min_fragment_intensity = min_fragment_intensity
         self.keep_top_k_fragments = keep_top_k_fragments
