@@ -1,6 +1,6 @@
 import pandas as pd
-from . import quantreader_utils
-from . import table_reformatter
+
+from . import quantreader_utils, table_reformatter
 
 
 def reformat_and_write_wideformat_table(peptides_tsv, outfile_name, config_dict):

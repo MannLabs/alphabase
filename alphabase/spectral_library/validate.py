@@ -1,7 +1,7 @@
-import pandas as pd
-import numpy as np
+from typing import List, Union
 
-from typing import Union, List
+import numpy as np
+import pandas as pd
 
 
 class Column:

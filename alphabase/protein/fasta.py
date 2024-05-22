@@ -1,25 +1,22 @@
-import regex as re
-import numpy as np
-import pandas as pd
-import numba
-import os
-import itertools
 import copy
-import ahocorasick
-from tqdm import tqdm
-
+import itertools
+import os
 import warnings
-
-from Bio import SeqIO
 from typing import Union
 
-from alphabase.yaml_utils import load_yaml
-from alphabase.io.hdf import HDF_File
-from alphabase.utils import explode_multiple_columns
+import ahocorasick
+import numba
+import numpy as np
+import pandas as pd
+import regex as re
+from Bio import SeqIO
+from tqdm import tqdm
 
 from alphabase.constants._const import CONST_FILE_FOLDER
-
+from alphabase.io.hdf import HDF_File
 from alphabase.spectral_library.base import SpecLibBase
+from alphabase.utils import explode_multiple_columns
+from alphabase.yaml_utils import load_yaml
 
 
 def get_uniprot_gene_name(description: str):
@@ -46,7 +43,7 @@ def read_fasta_file(fasta_filename: str = ""):
         protein information,
         {protein_id:str, full_name:str, gene_name:str, description:str, sequence:str}
     """
-    with open(fasta_filename, "rt") as handle:
+    with open(fasta_filename) as handle:
         iterator = SeqIO.parse(handle, "fasta")
         while iterator:
             try:
@@ -180,7 +177,7 @@ def cleave_sequence_with_cut_pos(
     return seq_list, miss_list, nterm_list, cterm_list
 
 
-class Digest(object):
+class Digest:
     def __init__(
         self,
         protease: str = "trypsin",

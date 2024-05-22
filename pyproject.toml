@@ -1,6 +1,19 @@
-
 [tool.ruff.lint]
-select = ["E", "F"]
+select =  [
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+#    # pyupgrade
+#    "UP",
+#    # flake8-bugbear
+#    "B",
+#    # flake8-simplify
+#    "SIM",
+#    # isort
+#    "I",
+]
 ignore = [
-    "E501"  # Line too long  (ruff wraps code, but not docstrings)
+    "E501",  # Line too long  (ruff wraps code, but not docstrings)
+    "B028"  #  No explicit `stacklevel` keyword argument found (for warnings)
 ]

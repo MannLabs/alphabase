@@ -2,16 +2,17 @@
 """This module allows to create temporary mmapped arrays."""
 
 # builtin
-import os
-import logging
 import atexit
+import logging
+import mmap
+import os
+import shutil
+import tempfile
+
+import h5py
 
 # external
 import numpy as np
-import mmap
-import h5py
-import tempfile
-import shutil
 
 _TEMP_DIR = tempfile.TemporaryDirectory(prefix="temp_mmap_")
 TEMP_DIR_NAME = _TEMP_DIR.name
