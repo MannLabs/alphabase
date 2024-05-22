@@ -199,14 +199,16 @@ class HDF_Group(HDF_Object):
     def __setattr__(self, name, value):
         try:
             super().__setattr__(name, value)
-        except NotImplementedError:
+        except NotImplementedError as e:
             if not self.truncate:
                 if name in self.group_names:
-                    raise KeyError(f"Group name '{name}' cannot be truncated")
+                    raise KeyError(f"Group name '{name}' cannot be truncated") from e
                 elif name in self.dataset_names:
-                    raise KeyError(f"Dataset name '{name}' cannot be truncated")
+                    raise KeyError(f"Dataset name '{name}' cannot be truncated") from e
                 elif name in self.dataframe_names:
-                    raise KeyError(f"Dataframe name '{name}' cannot be truncated")
+                    raise KeyError(
+                        f"Dataframe name '{name}' cannot be truncated"
+                    ) from e
             if isinstance(value, (np.ndarray, pd.core.series.Series)):
                 self.add_dataset(name, value)
             elif isinstance(value, (dict, pd.DataFrame)):
@@ -217,7 +219,7 @@ class HDF_Group(HDF_Object):
                     "Only (str, bool, int, float, np.ndarray, "
                     "pd.core.series.Series, dict pd.DataFrame) types are "
                     "accepted.",
-                )
+                ) from e
 
     def add_dataset(
         self,
@@ -252,12 +254,12 @@ class HDF_Group(HDF_Object):
                     # chunks=array.shape,
                     maxshape=tuple([None for i in array.shape]),
                 )
-            except TypeError:
+            except TypeError as e:
                 raise NotImplementedError(
                     f"Type {array.dtype} is not understood. "
                     "If this is a string format, try to cast it to "
                     "np.dtype('O') as possible solution."
-                )
+                ) from e
             dataset = HDF_Dataset(
                 file_name=self.file_name,
                 name=f"{self.name}/{name}",

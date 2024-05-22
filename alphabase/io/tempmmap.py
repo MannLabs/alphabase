@@ -119,11 +119,10 @@ def create_empty_mmap(shape: tuple, dtype: np.dtype, path: str = None, overwrite
         )
     else:
         # check that if overwrite is false the file does not already exist
-        if not overwrite:
-            if os.path.exists(path):
-                raise ValueError(
-                    "The file already exists. Set overwrite to True to overwrite the file or choose a different name."
-                )
+        if not overwrite and os.path.exists(path):
+            raise ValueError(
+                "The file already exists. Set overwrite to True to overwrite the file or choose a different name."
+            )
         if not os.path.basename.endswith(".hdf"):
             raise ValueError("The chosen file name needs to end with .hdf")
         if os.path.isdir(os.path.commonpath(path)):

@@ -240,9 +240,10 @@ class PSMReaderBase:
         for this_mod, other_mod in self.modification_mapping.items():
             if isinstance(other_mod, (list, tuple)):
                 for _mod in other_mod:
-                    if _mod in self.rev_mod_mapping:
-                        if this_mod.endswith("Protein N-term"):
-                            continue
+                    if _mod in self.rev_mod_mapping and this_mod.endswith(
+                        "Protein N-term"
+                    ):
+                        continue
                     self.rev_mod_mapping[_mod] = this_mod
             else:
                 self.rev_mod_mapping[other_mod] = this_mod
