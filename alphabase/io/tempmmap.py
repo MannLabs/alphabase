@@ -23,7 +23,7 @@ logging.warning(
 )
 
 
-def _check_temp_dir_existence(abs_path: str) -> str:
+def _change_temp_dir_location(abs_path: str) -> str:
     """
     Check if the directory to which the temp arrays should be written exists. If not raise a value error.
 
@@ -148,7 +148,7 @@ def array(shape: tuple, dtype: np.dtype, tmp_dir_abs_path: str = None) -> np.nda
     # redefine the temporary directory if a new location is given otherwise read from global variable
     # this allows you to ensure that the correct temp directory location is used when working with multiple threads
     if tmp_dir_abs_path is not None:
-        TEMP_DIR_NAME = _check_temp_dir_existence(tmp_dir_abs_path)
+        TEMP_DIR_NAME = _change_temp_dir_location(tmp_dir_abs_path)
 
     temp_file_name = os.path.join(
         TEMP_DIR_NAME, f"temp_mmap_{np.random.randint(2**63)}.hdf"
@@ -198,11 +198,11 @@ def create_empty_mmap(
         path to the newly created file.
     """
     global TEMP_DIR_NAME
-    
+
     # redefine the temporary directory if a new location is given otherwise read from global variable
     # this allows you to ensure that the correct temp directory location is used when working with multiple threads
     if tmp_dir_abs_path is not None:
-        TEMP_DIR_NAME = _check_temp_dir_existence(tmp_dir_abs_path)
+        TEMP_DIR_NAME = _change_temp_dir_location(tmp_dir_abs_path)
 
     # if path does not exist generate a random file name in the TEMP directory
     if file_path is None:
