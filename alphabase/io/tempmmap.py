@@ -109,7 +109,6 @@ def redefine_temp_location(path):
 
     # cleaup old temporary directory
     shutil.rmtree(TEMP_DIR_NAME, ignore_errors=True)
-    del _TEMP_DIR
 
     # create new tempfile at desired location
     _TEMP_DIR = tempfile.TemporaryDirectory(prefix=os.path.join(path, "temp_mmap_"))
