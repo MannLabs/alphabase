@@ -25,24 +25,22 @@ logging.warning(
 
 def _change_temp_dir_location(abs_path: str) -> str:
     """
-    Check if the directory to which the temp arrays should be written exists. If not raise a value error.
+    Check if the directory to which the temp arrays should be written exists, if so defines this as the new temp dir location. If not raise a value error.
 
     Parameters
     ----------
     abs_path : str
         The absolute path to the new temporary directory.
 
-    Returns
-    ------
-    str
-        The directory path if it exists.
     """
+
+    global TEMP_DIR_NAME
+
     # ensure that the path exists
     if os.path.exists(abs_path):
         # ensure that the path points to a directory
         if os.path.isdir(abs_path):
             TEMP_DIR_NAME = abs_path
-            return TEMP_DIR_NAME
         else:
             raise ValueError(f"The path {abs_path} does not point to a directory.")
     else:
@@ -148,7 +146,7 @@ def array(shape: tuple, dtype: np.dtype, tmp_dir_abs_path: str = None) -> np.nda
     # redefine the temporary directory if a new location is given otherwise read from global variable
     # this allows you to ensure that the correct temp directory location is used when working with multiple threads
     if tmp_dir_abs_path is not None:
-        TEMP_DIR_NAME = _change_temp_dir_location(tmp_dir_abs_path)
+        _change_temp_dir_location(tmp_dir_abs_path)
 
     temp_file_name = os.path.join(
         TEMP_DIR_NAME, f"temp_mmap_{np.random.randint(2**63)}.hdf"
@@ -202,7 +200,7 @@ def create_empty_mmap(
     # redefine the temporary directory if a new location is given otherwise read from global variable
     # this allows you to ensure that the correct temp directory location is used when working with multiple threads
     if tmp_dir_abs_path is not None:
-        TEMP_DIR_NAME = _change_temp_dir_location(tmp_dir_abs_path)
+        _change_temp_dir_location(tmp_dir_abs_path)
 
     # if path does not exist generate a random file name in the TEMP directory
     if file_path is None:
