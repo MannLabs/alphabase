@@ -22,7 +22,6 @@ logging.warning(
     "and might need to be triggered manually!"
 )
 
-
 def _change_temp_dir_location(abs_path: str) -> str:
     """
     Check if the directory to which the temp arrays should be written exists, if so defines this as the new temp dir location. If not raise a value error.
@@ -47,7 +46,6 @@ def _change_temp_dir_location(abs_path: str) -> str:
         raise ValueError(
             f"The directory {abs_path} in which the file should be created does not exist."
         )
-
 
 def _get_file_location(abs_file_path: str, overwrite=False) -> str:
     """
@@ -103,7 +101,8 @@ def redefine_temp_location(path):
 
     """
 
-    global _TEMP_DIR, _TEMP_DIR, TEMP_DIR_NAME
+    global _TEMP_DIR, TEMP_DIR_NAME
+
     logging.warning(
         f"""Folder {TEMP_DIR_NAME} with temp mmap arrays is being deleted. All existing temp mmapp arrays will be unusable!"""
     )
@@ -115,9 +114,11 @@ def redefine_temp_location(path):
     # create new tempfile at desired location
     _TEMP_DIR = tempfile.TemporaryDirectory(prefix=os.path.join(path, "temp_mmap_"))
     TEMP_DIR_NAME = _TEMP_DIR.name
+
     logging.warning(
         f"""New temp folder location. Temp mmap arrays are written to {TEMP_DIR_NAME}. Cleanup of this folder is OS dependant, and might need to be triggered manually!"""
     )
+
     return TEMP_DIR_NAME
 
 
@@ -298,13 +299,15 @@ def clear() -> str:
     str
         The name of the new temporary folder.
     """
-    global _TEMP_DIR
-    global TEMP_DIR_NAME
+    global _TEMP_DIR, TEMP_DIR_NAME
+
     logging.warning(
         f"Folder {TEMP_DIR_NAME} with temp mmap arrays is being deleted. "
         "All existing temp mmapp arrays will be unusable!"
     )
+
     del _TEMP_DIR
+    
     _TEMP_DIR = tempfile.TemporaryDirectory(prefix="temp_mmap_")
     TEMP_DIR_NAME = _TEMP_DIR.name
     return TEMP_DIR_NAME
