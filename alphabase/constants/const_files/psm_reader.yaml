@@ -30,12 +30,12 @@ maxquant:
     'charge': 'Charge'
     'rt': 'Retention time'
     'ccs': 'CCS'
-    'mobility': 
+    'mobility':
       - 'Mobility'
       - 'IonMobility'
       - 'K0' # Bug in MaxQuant? It should be 1/K0
       - '1/K0'
-    'scan_num': 
+    'scan_num':
       - 'Scan number'
       - 'MS/MS scan number'
       - 'Scan index'
@@ -48,35 +48,35 @@ maxquant:
     'intensity': 'Intensity'
 
   modification_mapping:
-    'Dimethyl@K': 
+    'Dimethyl@K':
       - 'K(Dimethyl)'
     'Dimethyl@R':
       - 'R(Dimethyl)'
     'Dimethyl@Any N-term':
       - '(Dimethyl)'
-    'Acetyl@Protein N-term': 
+    'Acetyl@Protein N-term':
       - '_(Acetyl (Protein N-term))'
       - '_(ac)'
-    'Carbamidomethyl@C': 
+    'Carbamidomethyl@C':
       - 'C(Carbamidomethyl (C))'
       - 'C(Carbamidomethyl)'
-    'Oxidation@M': 
+    'Oxidation@M':
       - 'M(Oxidation)'
       - 'M(Oxidation (M))'
       - 'M(ox)'
-    'Phospho@S': 
+    'Phospho@S':
       - 'S(Phospho (S))'
       - 'S(Phospho (ST))'
       - 'S(Phospho (STY))'
       - 'S(ph)'
       - 'pS'
-    'Phospho@T': 
+    'Phospho@T':
       - 'T(Phospho (T))'
       - 'T(Phospho (ST))'
       - 'T(Phospho (STY))'
       - 'T(ph)'
       - 'pT'
-    'Phospho@Y': 
+    'Phospho@Y':
       - 'Y(Phospho (Y))'
       - 'Y(Phospho (STY))'
       - 'Y(ph)'
@@ -187,7 +187,7 @@ spectronaut:
     'uniprot_ids': ['UniProtIds','UniProtID','UniprotId']
     'genes': ['Genes','Gene','GeneName','GeneNames']
   modification_mapping: 'maxquant'
-  
+
 library_reader_base:
   reader_type: library_reader_base
   rt_unit: irt

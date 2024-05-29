@@ -3,14 +3,15 @@ import numpy as np
 
 from typing import Union, List
 
-class Column():
+
+class Column:
     def __init__(
-            self, 
-            name : str, 
-            type : Union[str, type, np.dtype], 
-            allow_NaN : bool = False, 
-            allow_inf : bool = False
-        ):
+        self,
+        name: str,
+        type: Union[str, type, np.dtype],
+        allow_NaN: bool = False,
+        allow_inf: bool = False,
+    ):
         """
         Base class for validating a single column.
         The column is safely cast to the specified type inplace.
@@ -39,7 +40,7 @@ class Column():
 
         type: Union[type, np.dtype]
             Type of the column
-        
+
         """
 
         self.name = name
@@ -52,10 +53,7 @@ class Column():
         self.allow_NaN = allow_NaN
         self.allow_inf = allow_inf
 
-    def __call__(
-            self, 
-            df : pd.DataFrame
-            ):
+    def __call__(self, df: pd.DataFrame):
         """
         Validates the column.
 
@@ -70,43 +68,47 @@ class Column():
             if np.can_cast(df[self.name].dtype, self.type):
                 df[self.name] = df[self.name].astype(self.type)
             else:
-                raise ValueError(f"Validation failed: Column {self.name} of type {_get_type_name(df[self.name].dtype)} cannot be cast to {_get_type_name(self.type)}")
-            
+                raise ValueError(
+                    f"Validation failed: Column {self.name} of type {_get_type_name(df[self.name].dtype)} cannot be cast to {_get_type_name(self.type)}"
+                )
+
         if not self.allow_NaN:
             if df[self.name].isna().any():
-                raise ValueError(f"Validation failed: Column {self.name} contains NaN values")
-            
+                raise ValueError(
+                    f"Validation failed: Column {self.name} contains NaN values"
+                )
+
         if not self.allow_inf:
             if not np.isfinite(df[self.name]).all():
-                raise ValueError(f"Validation failed: Column {self.name} contains inf values")
+                raise ValueError(
+                    f"Validation failed: Column {self.name} contains inf values"
+                )
+
 
 class Optional(Column):
     """
     Optional column to be validated.
     If the column is not present in the dataframe, the validation is skipped.
     """
+
     def __init__(self, *args, **kwargs):
         """
         Optional column
-        
+
         Parameters
         ----------
-        
+
         name: str
             Name of the column
-                
+
         type: type
             Type of the column
-            
+
         """
 
-        super().__init__( *args, **kwargs)
-        
+        super().__init__(*args, **kwargs)
 
-    def __call__(
-            self, 
-            df : pd.DataFrame
-        ):
+    def __call__(self, df: pd.DataFrame):
         """
         Casts the column to the specified type if it is present in the dataframe
 
@@ -121,11 +123,13 @@ class Optional(Column):
         if self.name in df.columns:
             super().__call__(df)
 
+
 class Required(Column):
     """
     Required column to be validated.
     If the column is not present in the dataframe, the validation fails.
     """
+
     def __init__(self, *args, **kwargs):
         """
         Required column
@@ -142,10 +146,7 @@ class Required(Column):
         """
         super().__init__(*args, **kwargs)
 
-    def __call__(
-            self, 
-            df : pd.DataFrame
-        ):
+    def __call__(self, df: pd.DataFrame):
         """
         Casts the column to the specified type if it is present in the dataframe
 
@@ -157,16 +158,16 @@ class Required(Column):
 
         """
 
-        if self.name in df.columns:       
+        if self.name in df.columns:
             super().__call__(df)
         else:
-            raise ValueError(f"Validation failed: Column {self.name} is not present in the dataframe")
+            raise ValueError(
+                f"Validation failed: Column {self.name} is not present in the dataframe"
+            )
 
-class Schema():
-    def __init__(
-            self, 
-            name : str, 
-            properties: List[Column]):
+
+class Schema:
+    def __init__(self, name: str, properties: List[Column]):
         """
         Schema for validating dataframes
 
@@ -185,7 +186,7 @@ class Schema():
         self.schema = properties
         for column in self.schema:
             if not isinstance(column, Column):
-                raise ValueError(f"Schema must contain only Property objects")
+                raise ValueError("Schema must contain only Property objects")
 
     def __call__(self, df):
         """
@@ -202,8 +203,8 @@ class Schema():
         for column in self.schema:
             column(df)
 
-def _get_type_name(
-        type : Union[str, type, np.dtype]) -> str:
+
+def _get_type_name(type: Union[str, type, np.dtype]) -> str:
     """
     Returns the human readable name of the type
 

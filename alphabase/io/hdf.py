@@ -4,13 +4,12 @@ import pandas as pd
 import re
 import contextlib
 import time
-import warnings
 
 
 class HDF_Object(object):
-    '''
+    """
     A generic class to access HDF components.
-    '''
+    """
 
     @property
     def read_only(self):
@@ -29,18 +28,10 @@ class HDF_Object(object):
         return self._name
 
     def __eq__(self, other):
-        return (
-            self.file_name == other.self.file_name
-        ) and (
-            self.name == other.name
-        )
+        return (self.file_name == other.self.file_name) and (self.name == other.name)
 
     @contextlib.contextmanager
-    def editing_mode(
-        self,
-        read_only: bool = False,
-        truncate: bool = True
-    ):
+    def editing_mode(self, read_only: bool = False, truncate: bool = True):
         original_read_only = self.read_only
         original_truncate = self.truncate
         try:
@@ -82,12 +73,10 @@ class HDF_Object(object):
             raise AttributeError("Cannot set read-only attributes")
         elif not isinstance(name, str):
             raise KeyError(f"Attribute name '{name}' is not a string")
-        elif not bool(re.match(r'^[a-zA-Z_][\w.-]*$', name)):
+        elif not bool(re.match(r"^[a-zA-Z_][\w.-]*$", name)):
             raise KeyError(f"Invalid attribute name: {name}")
         if (not self.truncate) and (name in self.metadata):
-            raise KeyError(
-                f"Attribute '{name}' cannot be truncated"
-            )
+            raise KeyError(f"Attribute '{name}' cannot be truncated")
         if isinstance(value, (str, bool, int, float)):
             with h5py.File(self.file_name, "a") as hdf_file:
                 hdf_object = hdf_file[self.name]
@@ -101,7 +90,6 @@ class HDF_Object(object):
 
 
 class HDF_Group(HDF_Object):
-
     def __init__(
         self,
         *,
@@ -158,21 +146,15 @@ class HDF_Group(HDF_Object):
 
     @property
     def groups(self):
-        return [
-            self.__getattribute__(name) for name in self.group_names
-        ]
+        return [self.__getattribute__(name) for name in self.group_names]
 
     @property
     def datasets(self):
-        return [
-            self.__getattribute__(name) for name in self.dataset_names
-        ]
+        return [self.__getattribute__(name) for name in self.dataset_names]
 
     @property
     def dataframes(self):
-        return [
-            self.__getattribute__(name) for name in self.dataframe_names
-        ]
+        return [self.__getattribute__(name) for name in self.dataframe_names]
 
     @property
     def components(self):
@@ -186,7 +168,10 @@ class HDF_Group(HDF_Object):
                     if not name.endswith("_mmap"):
                         dataset_names.append(name)
                 else:
-                    if name.endswith('_df') or "is_pd_dataframe" in hdf_object[name].attrs:
+                    if (
+                        name.endswith("_df")
+                        or "is_pd_dataframe" in hdf_object[name].attrs
+                    ):
                         datafame_names.append(name)
                     else:
                         group_names.append(name)
@@ -216,17 +201,11 @@ class HDF_Group(HDF_Object):
         except NotImplementedError:
             if not self.truncate:
                 if name in self.group_names:
-                    raise KeyError(
-                        f"Group name '{name}' cannot be truncated"
-                    )
+                    raise KeyError(f"Group name '{name}' cannot be truncated")
                 elif name in self.dataset_names:
-                    raise KeyError(
-                        f"Dataset name '{name}' cannot be truncated"
-                    )
+                    raise KeyError(f"Dataset name '{name}' cannot be truncated")
                 elif name in self.dataframe_names:
-                    raise KeyError(
-                        f"Dataframe name '{name}' cannot be truncated"
-                    )
+                    raise KeyError(f"Dataframe name '{name}' cannot be truncated")
             if isinstance(value, (np.ndarray, pd.core.series.Series)):
                 self.add_dataset(name, value)
             elif isinstance(value, (dict, pd.DataFrame)):
@@ -236,7 +215,7 @@ class HDF_Group(HDF_Object):
                     f"Type '{type(value)}' is invalid for attribute {name}",
                     "Only (str, bool, int, float, np.ndarray, "
                     "pd.core.series.Series, dict pd.DataFrame) types are "
-                    "accepted."
+                    "accepted.",
                 )
 
     def add_dataset(
@@ -298,7 +277,7 @@ class HDF_Group(HDF_Object):
                 del hdf_object[name]
             hdf_object.create_group(name)
         if isinstance(group, pd.DataFrame):
-            if not name.endswith('_df'):
+            if not name.endswith("_df"):
                 raise TypeError(f"DataFrame group name `{name}` must end with `_df`")
             group = dict(group)
             # group["is_pd_dataframe"] = True
@@ -322,7 +301,6 @@ class HDF_Group(HDF_Object):
 
 
 class HDF_Dataset(HDF_Object):
-
     def __init__(
         self,
         *,
@@ -371,9 +349,7 @@ class HDF_Dataset(HDF_Object):
             raise AttributeError("Cannot append read-only dataset")
         with h5py.File(self.file_name, "a") as hdf_file:
             hdf_object = hdf_file[self.name]
-            new_shape = tuple(
-                [i + j for i, j in zip(self.shape, data.shape)]
-            )
+            new_shape = tuple([i + j for i, j in zip(self.shape, data.shape)])
             old_size = len(self)
             hdf_object.resize(new_shape)
             hdf_object[old_size:] = data
@@ -421,22 +397,15 @@ class HDF_Dataset(HDF_Object):
             offset = subgroup.id.get_offset()
             shape = subgroup.shape
             import mmap
+
             with open(self.file_name, "rb") as raw_hdf_file:
-                mmap_obj = mmap.mmap(
-                    raw_hdf_file.fileno(),
-                    0,
-                    access=mmap.ACCESS_READ
-                )
+                mmap_obj = mmap.mmap(raw_hdf_file.fileno(), 0, access=mmap.ACCESS_READ)
                 return np.frombuffer(
-                    mmap_obj,
-                    dtype=subgroup.dtype,
-                    count=np.prod(shape),
-                    offset=offset
+                    mmap_obj, dtype=subgroup.dtype, count=np.prod(shape), offset=offset
                 ).reshape(shape)
 
 
 class HDF_Dataframe(HDF_Group):
-
     @property
     def dtype(self):
         dtypes = []
@@ -490,19 +459,19 @@ class HDF_File(HDF_Group):
         """HDF file object to load/save the hdf file. It also provides convenient
         attribute-like accesses to operate the data in the HDF object.
 
-        Instead of relying directly on the `h5py` interface, we will use an HDF wrapper 
-        file to provide consistent access to only those specific HDF features we want. 
-        Since components of an HDF file come in three shapes `datasets`, `groups` and `attributes`, 
-        we will first define a generic HDF wrapper object to handle these components. 
-        Once this is done, the HDF wrapper file can be treated as such an object with additional 
+        Instead of relying directly on the `h5py` interface, we will use an HDF wrapper
+        file to provide consistent access to only those specific HDF features we want.
+        Since components of an HDF file come in three shapes `datasets`, `groups` and `attributes`,
+        we will first define a generic HDF wrapper object to handle these components.
+        Once this is done, the HDF wrapper file can be treated as such an object with additional
         features to open and close the initial connection.
 
         Args:
             file_name (str): file path.
             read_only (bool, optional): If hdf is read-only. Defaults to True.
-            truncate (bool, optional): If existing groups and datasets can be 
+            truncate (bool, optional): If existing groups and datasets can be
                 truncated (i.e. are overwitten). Defaults to False.
-            delete_existing (bool, optional): If the file already exists, 
+            delete_existing (bool, optional): If the file already exists,
                 delete it completely and create a new one. Defaults to False.
 
         Examples::
@@ -530,7 +499,7 @@ class HDF_File(HDF_Group):
             mode = "w"
         else:
             mode = "a"
-        with h5py.File(file_name, mode):#, swmr=True):
+        with h5py.File(file_name, mode):  # , swmr=True):
             pass
         super().__init__(
             file_name=file_name,

@@ -30,7 +30,7 @@ X: 'C(1000000)'
 Y: 'C(9)H(9)N(1)O(2)S(0)'
 Z: 'C(1000000)'
 # Any other ASCII chars could be the placeholders for future usage.
-# For example: 
+# For example:
 # phospho site-specific search (only lower case 'sty' can be modified)
 # s is S
 s: 'C(3)H(5)N(1)O(2)S(0)'

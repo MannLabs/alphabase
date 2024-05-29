@@ -2,11 +2,13 @@ if __name__ == "__main__":
     try:
         import alphabase.gui
         import multiprocessing
+
         multiprocessing.freeze_support()
         alphabase.gui.run()
-    except e:
+    except Exception:
         import traceback
         import sys
+
         exc_info = sys.exc_info()
         # Display the *original* exception
         traceback.print_exception(*exc_info)
