@@ -15,5 +15,3 @@ For more information, see AlphaBase on `GitHub <https://github.com/MannLabs/alph
    modules_constants
    modules_io
    modules_psm_reader
-   modules_scoring
-   modules_statistics

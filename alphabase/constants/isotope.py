@@ -2,12 +2,11 @@ import numba
 import numpy as np
 import typing
 
-from alphabase.constants.element import (
+from alphabase.constants.atom import (
     MAX_ISOTOPE_LEN,
     EMPTY_DIST,
     CHEM_ISOTOPE_DIST,
     CHEM_MONO_IDX,
-    CHEM_MONO_MASS,  # noqa: F401 apparently some test code depends on this being imported here TODO fix
     truncate_isotope,
     parse_formula,
 )

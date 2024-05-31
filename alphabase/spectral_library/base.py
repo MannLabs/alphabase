@@ -6,8 +6,22 @@ import copy
 import warnings
 import re
 
-import alphabase.peptide.fragment as fragment
-import alphabase.peptide.precursor as precursor
+from alphabase.peptide.fragment import (
+    create_fragment_mz_dataframe,
+    calc_fragment_count,
+    filter_fragment_number,
+    join_left,
+    remove_unused_fragments,
+)
+from alphabase.peptide.precursor import (
+    update_precursor_mz,
+    refine_precursor_df,
+    calc_precursor_isotope_intensity_mp,
+    calc_precursor_isotope_intensity,
+    calc_precursor_isotope_info_mp,
+    calc_precursor_isotope_info,
+    hash_precursor_df,
+)
 from alphabase.io.hdf import HDF_File
 
 
@@ -110,7 +124,7 @@ class SpecLibBase(object):
     @precursor_df.setter
     def precursor_df(self, df: pd.DataFrame):
         self._precursor_df = df
-        precursor.refine_precursor_df(
+        refine_precursor_df(
             self._precursor_df,
             drop_frag_idx=False,
             ensure_data_validity=True,
@@ -293,7 +307,7 @@ class SpecLibBase(object):
         """
         Sort nAA and reset_index for faster calculation (or prediction)
         """
-        precursor.refine_precursor_df(self._precursor_df)
+        refine_precursor_df(self._precursor_df)
 
     def append_decoy_sequence(self):
         """
@@ -309,7 +323,9 @@ class SpecLibBase(object):
         from alphabase.spectral_library.decoy import decoy_lib_provider
 
         # register 'protein_reverse' to the decoy_lib_provider
-        import alphabase.protein.protein_level_decoy  # noqa: F401 TODO this import has a side effect (registering the reader)
+        from alphabase.protein.protein_level_decoy import register_decoy
+
+        register_decoy()
 
         decoy_lib = decoy_lib_provider.get_decoy_lib(self.decoy, self)
         if decoy_lib is None:
@@ -334,7 +350,7 @@ class SpecLibBase(object):
         """
         Calculate precursor mz for self._precursor_df
         """
-        fragment.update_precursor_mz(self._precursor_df)
+        update_precursor_mz(self._precursor_df)
 
     def calc_and_clip_precursor_mz(self):
         """
@@ -354,7 +370,7 @@ class SpecLibBase(object):
     ):
         """
         Calculate and append the isotope intensity columns into self.precursor_df.
-        See `alphabase.peptide.precursor.calc_precursor_isotope_intensity` for details.
+        See `alphabase.peptide.calc_precursor_isotope_intensity` for details.
 
         Parameters
         ----------
@@ -377,7 +393,7 @@ class SpecLibBase(object):
             self.calc_and_clip_precursor_mz()
 
         if mp_process_num > 1 and len(self.precursor_df) > mp_batch_size:
-            (self._precursor_df) = precursor.calc_precursor_isotope_intensity_mp(
+            (self._precursor_df) = calc_precursor_isotope_intensity_mp(
                 self.precursor_df,
                 max_isotope=max_isotope,
                 min_right_most_intensity=min_right_most_intensity,
@@ -386,7 +402,7 @@ class SpecLibBase(object):
                 mp_batch_size=mp_batch_size,
             )
         else:
-            (self._precursor_df) = precursor.calc_precursor_isotope_intensity(
+            (self._precursor_df) = calc_precursor_isotope_intensity(
                 self.precursor_df,
                 max_isotope=max_isotope,
                 normalize=normalize,
@@ -417,20 +433,18 @@ class SpecLibBase(object):
     ):
         """
         Append isotope columns into self.precursor_df.
-        See `alphabase.peptide.precursor.calc_precursor_isotope` for details.
+        See `alphabase.peptide.calc_precursor_isotope` for details.
         """
         if "precursor_mz" not in self._precursor_df.columns:
             self.calc_and_clip_precursor_mz()
         if mp_process_num > 1 and len(self.precursor_df) > mp_batch_size:
-            (self._precursor_df) = precursor.calc_precursor_isotope_info_mp(
+            (self._precursor_df) = calc_precursor_isotope_info_mp(
                 self.precursor_df,
                 processes=mp_process_num,
                 process_bar=mp_process_bar,
             )
         else:
-            (self._precursor_df) = precursor.calc_precursor_isotope_info(
-                self.precursor_df
-            )
+            (self._precursor_df) = calc_precursor_isotope_info(self.precursor_df)
 
     def calc_fragment_mz_df(self):
         """
@@ -438,7 +452,7 @@ class SpecLibBase(object):
         `create_fragment_mz_dataframe` function.
         """
         if self.charged_frag_types is not None or len(self.charged_frag_types):
-            (self._fragment_mz_df) = fragment.create_fragment_mz_dataframe(
+            (self._fragment_mz_df) = create_fragment_mz_dataframe(
                 self.precursor_df,
                 self.charged_frag_types,
             )
@@ -449,7 +463,7 @@ class SpecLibBase(object):
 
     def hash_precursor_df(self):
         """Insert hash codes for peptides and precursors"""
-        precursor.hash_precursor_df(self._precursor_df)
+        hash_precursor_df(self._precursor_df)
 
     def annotate_fragments_from_speclib(self, donor_speclib, verbose=True):
         """
@@ -483,7 +497,7 @@ class SpecLibBase(object):
             df for df in available_fragments_df if len(getattr(self, df)) > 0
         ]
         to_compress = [getattr(self, df) for df in non_zero_dfs]
-        self._precursor_df, compressed_dfs = fragment.remove_unused_fragments(
+        self._precursor_df, compressed_dfs = remove_unused_fragments(
             self._precursor_df, to_compress
         )
 
@@ -492,11 +506,11 @@ class SpecLibBase(object):
 
     def calc_fragment_count(self):
         """
-        Count the number of non-zero fragments for each precursor.
+        Count the number of non-zero fragments for each
         Creates the column 'n_fragments' in self._precursor_df.
         """
 
-        self._precursor_df["n_fragments"] = fragment.calc_fragment_count(
+        self._precursor_df["n_fragments"] = calc_fragment_count(
             self._precursor_df, self._fragment_intensity_df
         )
 
@@ -510,13 +524,13 @@ class SpecLibBase(object):
         Parameters
         ----------
         n_fragments_allowed_column_name : str, optional, default 'n_fragments_allowed'
-            The column name in self._precursor_df that contains the number of fragments allowed for each precursor.
+            The column name in self._precursor_df that contains the number of fragments allowed for each
 
         n_allowed : int, optional, default 999
-            The global setting for the number of fragments allowed for each precursor.
+            The global setting for the number of fragments allowed for each
         """
 
-        fragment.filter_fragment_number(
+        filter_fragment_number(
             self._precursor_df,
             self._fragment_intensity_df,
             n_fragments_allowed_column_name=n_fragments_allowed_column_name,
@@ -702,7 +716,7 @@ def annotate_fragments_from_speclib(
     speclib_hash = speclib.precursor_df[hash_column_name].values
     fragment_speclib_hash = fragment_speclib.precursor_df[hash_column_name].values
 
-    speclib_indices = fragment.join_left(speclib_hash, fragment_speclib_hash)
+    speclib_indices = join_left(speclib_hash, fragment_speclib_hash)
 
     matched_mask = speclib_indices >= 0
 

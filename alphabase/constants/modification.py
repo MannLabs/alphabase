@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from typing import Union, List
 
-from alphabase.constants.element import (
+from alphabase.constants.atom import (
     calc_mass_from_formula,
     parse_formula,
 )

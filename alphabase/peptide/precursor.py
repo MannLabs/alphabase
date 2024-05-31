@@ -8,7 +8,7 @@ from tqdm import tqdm
 from xxhash import xxh64_intdigest
 from functools import partial
 
-from alphabase.constants.element import MASS_PROTON, MASS_ISOTOPE
+from alphabase.constants.atom import MASS_PROTON, MASS_ISOTOPE
 from alphabase.constants.aa import AA_Composition
 from alphabase.constants.modification import MOD_Composition
 from alphabase.constants.isotope import IsotopeDistribution
@@ -62,7 +62,16 @@ def is_precursor_refined(precursor_df: pd.DataFrame):
     )
 
 
-is_precursor_sorted = is_precursor_refined
+def is_precursor_sorted(precursor_df: pd.DataFrame):
+    import warnings
+
+    warnings.warn(
+        "`alphabase.peptide.precursor.is_precursor_sorted()` is deprecated, "
+        "it will be removed in alphabse>=1.3.0. "
+        "Please use `alphabase.peptide.precursor.is_precursor_refined()` instead.",
+        FutureWarning,
+    )
+    return is_precursor_refined(precursor_df)
 
 
 def update_precursor_mz(
@@ -88,7 +97,7 @@ def update_precursor_mz(
     if "nAA" not in precursor_df:
         reset_precursor_df(precursor_df)
         _calc_in_order = True
-    elif is_precursor_sorted(precursor_df):
+    elif is_precursor_refined(precursor_df):
         _calc_in_order = True
     else:
         _calc_in_order = False
@@ -126,7 +135,16 @@ def update_precursor_mz(
     return precursor_df
 
 
-calc_precursor_mz = update_precursor_mz
+def calc_precursor_mz(precursor_df: pd.DataFrame, batch_size: int = 500000):
+    import warnings
+
+    warnings.warn(
+        "`alphabase.peptide.precursor.calc_precursor_mz()` is deprecated, "
+        "it will be removed in alphabse>=2.0.0. "
+        "Please use `alphabase.peptide.precursor.update_precursor_mz()` instead.",
+        FutureWarning,
+    )
+    return update_precursor_mz(precursor_df, batch_size)
 
 
 def get_mod_seq_hash(

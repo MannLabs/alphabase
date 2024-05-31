@@ -13,14 +13,22 @@ import h5py
 import tempfile
 import shutil
 
+# TODO initialize temp_dir not on import but when it is first needed
 _TEMP_DIR = tempfile.TemporaryDirectory(prefix="temp_mmap_")
 TEMP_DIR_NAME = _TEMP_DIR.name
 
-logging.warning(
-    f"Temp mmap arrays are written to {TEMP_DIR_NAME}. "
-    "Cleanup of this folder is OS dependant, "
-    "and might need to be triggered manually!"
-)
+is_cleanup_info_logged = False
+
+
+def _log_cleanup_info_once() -> None:
+    """Logs a info on temp array cleanup once."""
+    global is_cleanup_info_logged
+    if not is_cleanup_info_logged:
+        logging.info(
+            f"Temp mmap arrays are written to {TEMP_DIR_NAME}. "
+            "Cleanup of this folder is OS dependent and might need to be triggered manually!"
+        )
+        is_cleanup_info_logged = True
 
 
 def _change_temp_dir_location(abs_path: str) -> str:
@@ -142,8 +150,9 @@ def array(shape: tuple, dtype: np.dtype, tmp_dir_abs_path: str = None) -> np.nda
     type
         A writable temporary mmapped array.
     """
-
     global TEMP_DIR_NAME
+    
+    _log_cleanup_info_once()
 
     # redefine the temporary directory if a new location is given otherwise read from global variable
     # this allows you to ensure that the correct temp directory location is used when working with multiple threads
@@ -199,6 +208,8 @@ def create_empty_mmap(
     """
     global TEMP_DIR_NAME
 
+    _log_cleanup_info_once()
+    
     # redefine the temporary directory if a new location is given otherwise read from global variable
     # this allows you to ensure that the correct temp directory location is used when working with multiple threads
     if tmp_dir_abs_path is not None:
@@ -232,6 +243,8 @@ def mmap_array_from_path(hdf_file: str) -> np.ndarray:
     type
         A writable temporary mmapped array.
     """
+    _log_cleanup_info_once()
+
     path = os.path.join(hdf_file)
 
     # read parameters required to reinitialize the mmap object

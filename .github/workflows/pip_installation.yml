@@ -28,7 +28,6 @@ jobs:
 
   loose_installation:
     name: Test loose pip installation on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest, macos-latest-xlarge]

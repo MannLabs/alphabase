@@ -10,10 +10,7 @@ from alphabase.constants.aa import AA_ASCII_MASS
 from alphabase.constants.atom import MASS_H, MASS_O
 from alphabase.constants.modification import MOD_MASS
 
-try:
-    import pyteomics.pepxml as pepxml
-except ImportError:
-    pepxml = None
+import pyteomics.pepxml as pepxml
 
 
 def _is_fragger_decoy(proteins):
@@ -96,102 +93,96 @@ class MSFragger_PSM_TSV_Reader(PSMReaderBase):
         raise NotImplementedError("MSFragger_PSM_TSV_Reader for psm.tsv")
 
 
-psm_reader_provider.register_reader("msfragger_psm_tsv", MSFragger_PSM_TSV_Reader)
-psm_reader_provider.register_reader("msfragger", MSFragger_PSM_TSV_Reader)
-
-if pepxml is None:
-
-    class MSFraggerPepXML:
-        def __init__(self):
-            raise NotImplementedError("")
-else:
-
-    class MSFraggerPepXML(PSMReaderBase):
-        def __init__(
-            self,
-            *,
-            column_mapping: dict = None,
-            modification_mapping: dict = None,
-            fdr=0.001,  # refers to E-value in the PepXML
-            keep_decoy=False,
-            rt_unit="second",
-            keep_unknown_aa_mass_diffs=False,
+class MSFraggerPepXML(PSMReaderBase):
+    def __init__(
+        self,
+        *,
+        column_mapping: dict = None,
+        modification_mapping: dict = None,
+        fdr=0.001,  # refers to E-value in the PepXML
+        keep_decoy=False,
+        rt_unit="second",
+        keep_unknown_aa_mass_diffs=False,
+        **kwargs,
+    ):
+        """MSFragger is not fully supported as we can only access the pepxml file."""
+        super().__init__(
+            column_mapping=column_mapping,
+            modification_mapping=modification_mapping,
+            fdr=fdr,
+            keep_decoy=keep_decoy,
+            rt_unit=rt_unit,
             **kwargs,
-        ):
-            """MSFragger is not fully supported as we can only access the pepxml file."""
-            super().__init__(
-                column_mapping=column_mapping,
-                modification_mapping=modification_mapping,
-                fdr=fdr,
-                keep_decoy=keep_decoy,
-                rt_unit=rt_unit,
-                **kwargs,
+        )
+        self.keep_unknown_aa_mass_diffs = keep_unknown_aa_mass_diffs
+
+    def _init_column_mapping(self):
+        self.column_mapping = psm_reader_yaml["msfragger_pepxml"]["column_mapping"]
+
+    def _init_modification_mapping(self):
+        self.modification_mapping = {}
+
+    def _translate_modifications(self):
+        pass
+
+    def _load_file(self, filename):
+        msf_df = pepxml.DataFrame(filename)
+        msf_df.fillna("", inplace=True)
+        if "ion_mobility" in msf_df.columns:
+            msf_df["ion_mobility"] = msf_df.ion_mobility.astype(float)
+        msf_df["raw_name"] = msf_df["spectrum"].str.split(".").apply(lambda x: x[0])
+        msf_df["to_remove"] = 0
+        self.column_mapping["to_remove"] = "to_remove"
+        return msf_df
+
+    def _translate_decoy(self, origin_df=None):
+        self._psm_df["decoy"] = self._psm_df.proteins.apply(_is_fragger_decoy).astype(
+            np.int8
+        )
+
+        self._psm_df.proteins = self._psm_df.proteins.apply(lambda x: ";".join(x))
+        if not self.keep_decoy:
+            self._psm_df["to_remove"] += self._psm_df.decoy > 0
+
+    def _translate_score(self, origin_df=None):
+        # evalue score
+        self._psm_df["score"] = -np.log(self._psm_df["score"] + 1e-100)
+
+    def _load_modifications(self, msf_df):
+        if len(msf_df) == 0:
+            self._psm_df["mods"] = ""
+            self._psm_df["mod_sites"] = ""
+            self._psm_df["aa_mass_diffs"] = ""
+            self._psm_df["aa_mass_diff_sites"] = ""
+            return
+
+        (
+            self._psm_df["mods"],
+            self._psm_df["mod_sites"],
+            self._psm_df["aa_mass_diffs"],
+            self._psm_df["aa_mass_diff_sites"],
+        ) = zip(
+            *msf_df[["peptide", "modifications"]].apply(
+                lambda x: _get_mods_from_masses(*x), axis=1
             )
-            self.keep_unknown_aa_mass_diffs = keep_unknown_aa_mass_diffs
+        )
 
-        def _init_column_mapping(self):
-            self.column_mapping = psm_reader_yaml["msfragger_pepxml"]["column_mapping"]
-
-        def _init_modification_mapping(self):
-            self.modification_mapping = {}
-
-        def _translate_modifications(self):
-            pass
-
-        def _load_file(self, filename):
-            msf_df = pepxml.DataFrame(filename)
-            msf_df.fillna("", inplace=True)
-            if "ion_mobility" in msf_df.columns:
-                msf_df["ion_mobility"] = msf_df.ion_mobility.astype(float)
-            msf_df["raw_name"] = msf_df["spectrum"].str.split(".").apply(lambda x: x[0])
-            msf_df["to_remove"] = 0
-            self.column_mapping["to_remove"] = "to_remove"
-            return msf_df
-
-        def _translate_decoy(self, origin_df=None):
-            self._psm_df["decoy"] = self._psm_df.proteins.apply(
-                _is_fragger_decoy
-            ).astype(np.int8)
-
-            self._psm_df.proteins = self._psm_df.proteins.apply(lambda x: ";".join(x))
-            if not self.keep_decoy:
-                self._psm_df["to_remove"] += self._psm_df.decoy > 0
-
-        def _translate_score(self, origin_df=None):
-            # evalue score
-            self._psm_df["score"] = -np.log(self._psm_df["score"] + 1e-100)
-
-        def _load_modifications(self, msf_df):
-            if len(msf_df) == 0:
-                self._psm_df["mods"] = ""
-                self._psm_df["mod_sites"] = ""
-                self._psm_df["aa_mass_diffs"] = ""
-                self._psm_df["aa_mass_diff_sites"] = ""
-                return
-
-            (
-                self._psm_df["mods"],
-                self._psm_df["mod_sites"],
-                self._psm_df["aa_mass_diffs"],
-                self._psm_df["aa_mass_diff_sites"],
-            ) = zip(
-                *msf_df[["peptide", "modifications"]].apply(
-                    lambda x: _get_mods_from_masses(*x), axis=1
-                )
+        if not self.keep_unknown_aa_mass_diffs:
+            self._psm_df["to_remove"] += self._psm_df.aa_mass_diffs != ""
+            self._psm_df.drop(
+                columns=["aa_mass_diffs", "aa_mass_diff_sites"], inplace=True
             )
 
-            if not self.keep_unknown_aa_mass_diffs:
-                self._psm_df["to_remove"] += self._psm_df.aa_mass_diffs != ""
-                self._psm_df.drop(
-                    columns=["aa_mass_diffs", "aa_mass_diff_sites"], inplace=True
-                )
+    def _post_process(self, origin_df: pd.DataFrame):
+        super()._post_process(origin_df)
+        self._psm_df = (
+            self._psm_df.query("to_remove==0")
+            .drop(columns="to_remove")
+            .reset_index(drop=True)
+        )
 
-        def _post_process(self, origin_df: pd.DataFrame):
-            super()._post_process(origin_df)
-            self._psm_df = (
-                self._psm_df.query("to_remove==0")
-                .drop(columns="to_remove")
-                .reset_index(drop=True)
-            )
 
+def register_readers():
+    psm_reader_provider.register_reader("msfragger_psm_tsv", MSFragger_PSM_TSV_Reader)
+    psm_reader_provider.register_reader("msfragger", MSFragger_PSM_TSV_Reader)
     psm_reader_provider.register_reader("msfragger_pepxml", MSFraggerPepXML)
