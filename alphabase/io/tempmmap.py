@@ -151,7 +151,7 @@ def array(shape: tuple, dtype: np.dtype, tmp_dir_abs_path: str = None) -> np.nda
         A writable temporary mmapped array.
     """
     global TEMP_DIR_NAME
-    
+
     _log_cleanup_info_once()
 
     # redefine the temporary directory if a new location is given otherwise read from global variable
@@ -209,7 +209,7 @@ def create_empty_mmap(
     global TEMP_DIR_NAME
 
     _log_cleanup_info_once()
-    
+
     # redefine the temporary directory if a new location is given otherwise read from global variable
     # this allows you to ensure that the correct temp directory location is used when working with multiple threads
     if tmp_dir_abs_path is not None:
