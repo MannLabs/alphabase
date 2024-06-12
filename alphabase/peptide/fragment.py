@@ -494,12 +494,10 @@ def mask_fragments_for_charge_greater_than_precursor_charge(
     precursor_charge_array: np.ndarray,
     nAA_array: np.ndarray,
     *,
-    candidate_fragment_charges: list = None,
+    candidate_fragment_charges: list = [2, 3, 4],
 ):
     """Mask the fragment dataframe when
     the fragment charge is larger than the precursor charge"""
-    if candidate_fragment_charges is None:
-        candidate_fragment_charges = [2, 3, 4]
     precursor_charge_array = np.repeat(precursor_charge_array, nAA_array - 1)
     for col in fragment_df.columns:
         for charge in candidate_fragment_charges:
@@ -683,8 +681,8 @@ def flatten_fragments(
     fragment_intensity_df: pd.DataFrame,
     min_fragment_intensity: float = -1,
     keep_top_k_fragments: int = 1000,
-    custom_columns: list = None,
-    custom_df: Dict[str, pd.DataFrame] = None,
+    custom_columns: list = ["type", "number", "position", "charge", "loss_type"],
+    custom_df: Dict[str, pd.DataFrame] = {},
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Converts the tabular fragment format consisting of
@@ -752,10 +750,6 @@ def flatten_fragments(
         - charge:    uint8, fragment charge
         - loss_type: int16, fragment loss type, 0=noloss, 17=NH3, 18=H2O, 98=H3PO4 (phos), ...
     """
-    if custom_df is None:
-        custom_df = {}
-    if custom_columns is None:
-        custom_columns = ["type", "number", "position", "charge", "loss_type"]
     if len(precursor_df) == 0:
         return precursor_df, pd.DataFrame()
     # new dataframes for fragments and precursors are created

@@ -504,7 +504,7 @@ def protein_idxes_to_names(protein_idxes: str, protein_names: list):
 
 def append_special_modifications(
     df: pd.DataFrame,
-    var_mods: list = None,
+    var_mods: list = ["Phospho@S", "Phospho@T", "Phospho@Y"],
     min_mod_num: int = 0,
     max_mod_num: int = 1,
     max_peptidoform_num: int = 100,
@@ -550,8 +550,6 @@ def append_special_modifications(
     pd.DataFrame
         The precursor_df with new modification added.
     """
-    if var_mods is None:
-        var_mods = ["Phospho@S", "Phospho@T", "Phospho@Y"]
     if len(var_mods) == 0 or len(df) == 0:
         return df
 
@@ -643,7 +641,7 @@ class SpecLibFasta(SpecLibBase):
 
     def __init__(
         self,
-        charged_frag_types: list = None,
+        charged_frag_types: list = ["b_z1", "b_z2", "y_z1", "y_z2"],
         *,
         protease: str = "trypsin",
         max_missed_cleavages: int = 2,
@@ -653,12 +651,12 @@ class SpecLibFasta(SpecLibBase):
         precursor_charge_max: int = 4,
         precursor_mz_min: float = 400.0,
         precursor_mz_max: float = 2000.0,
-        var_mods: list = None,
+        var_mods: list = ["Acetyl@Protein_N-term", "Oxidation@M"],
         min_var_mod_num: int = 0,
         max_var_mod_num: int = 2,
-        fix_mods: list = None,
+        fix_mods: list = ["Carbamidomethyl@C"],
         labeling_channels: dict = None,
-        special_mods: list = None,
+        special_mods: list = [],
         min_special_mod_num: int = 0,
         max_special_mod_num: int = 1,
         special_mods_cannot_modify_pep_n_term: bool = False,
@@ -757,14 +755,6 @@ class SpecLibFasta(SpecLibBase):
         include_contaminants : bool, optional
             If include contaminants.fasta, by default False
         """
-        if special_mods is None:
-            special_mods = []
-        if fix_mods is None:
-            fix_mods = ["Carbamidomethyl@C"]
-        if var_mods is None:
-            var_mods = ["Acetyl@Protein_N-term", "Oxidation@M"]
-        if charged_frag_types is None:
-            charged_frag_types = ["b_z1", "b_z2", "y_z1", "y_z2"]
         super().__init__(
             charged_frag_types=charged_frag_types,
             precursor_mz_min=precursor_mz_min,

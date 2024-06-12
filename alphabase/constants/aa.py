@@ -77,9 +77,7 @@ def reset_AA_Composition():
 reset_AA_Composition()
 
 
-def reset_AA_atoms(atom_replace_dict: typing.Dict = None):
-    if atom_replace_dict is None:
-        atom_replace_dict = {}
+def reset_AA_atoms(atom_replace_dict: typing.Dict = {}):
     reset_elements()
     replace_atoms(atom_replace_dict)
     reset_AA_mass()

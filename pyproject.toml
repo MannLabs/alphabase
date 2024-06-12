@@ -15,5 +15,6 @@ select =  [
 ]
 ignore = [
     "E501",  # Line too long  (ruff wraps code, but not docstrings)
-    "B028"  #  No explicit `stacklevel` keyword argument found (for warnings)
+    "B028",  #  No explicit `stacklevel` keyword argument found (for warnings)
+    "B006", # Do not use mutable data structures for argument defaults # TODO: fix this!
 ]

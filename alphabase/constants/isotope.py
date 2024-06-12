@@ -155,7 +155,14 @@ def _calc_one_elem_cum_dist(element_cum_dist: np.ndarray, element_cum_mono: np.n
 class IsotopeDistribution:
     def __init__(
         self,
-        max_elem_num_dict: dict = None,
+        max_elem_num_dict: dict = {
+            "C": 2000,
+            "H": 5000,
+            "N": 1000,
+            "O": 1000,
+            "S": 200,
+            "P": 200,
+        },
     ):
         """Faster calculation of isotope abundance distribution by pre-building
         isotope distribution tables for most common elements.
@@ -186,15 +193,6 @@ class IsotopeDistribution:
             {element: mono position array of cumulated isotope distribution},
             and mono position array is a 1-D int np.ndarray.
         """
-        if max_elem_num_dict is None:
-            max_elem_num_dict = {
-                "C": 2000,
-                "H": 5000,
-                "N": 1000,
-                "O": 1000,
-                "S": 200,
-                "P": 200,
-            }
         self.element_to_cum_dist_dict = {}
         self.element_to_cum_mono_idx = {}
         for elem, n in max_elem_num_dict.items():
