@@ -21,10 +21,7 @@ def get_requirements():
     requirement_file_names[""] = "requirements.txt"
     for extra, requirement_file_name in requirement_file_names.items():
         with open(requirement_file_name) as requirements_file:
-            if extra != "":
-                extra_stable = f"{extra}-stable"
-            else:
-                extra_stable = "stable"
+            extra_stable = f"{extra}-stable" if extra != "" else "stable"
             extra_requirements[extra_stable] = []
             extra_requirements[extra] = []
             for line in requirements_file:

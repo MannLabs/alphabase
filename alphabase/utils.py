@@ -9,7 +9,7 @@ import tqdm
 def process_bar(iterator, len_iter):
     with tqdm.tqdm(total=len_iter) as bar:
         i = 0
-        for i, iter in enumerate(iterator):
+        for i, iter in enumerate(iterator):  # noqa: B007
             yield iter
             bar.update()
         bar.update(len_iter - i - 1)

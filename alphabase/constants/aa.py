@@ -69,7 +69,7 @@ reset_AA_df()
 def reset_AA_Composition():
     global AA_Composition
     AA_Composition = {}
-    for aa, formula, mass in AA_DF.values:
+    for aa, formula, _mass in AA_DF.values:
         AA_Composition[aa] = dict(parse_formula(formula))
     return AA_Composition
 
