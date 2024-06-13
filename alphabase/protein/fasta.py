@@ -46,7 +46,7 @@ def read_fasta_file(fasta_filename: str = ""):
         protein information,
         {protein_id:str, full_name:str, gene_name:str, description:str, sequence:str}
     """
-    with open(fasta_filename, "rt") as handle:
+    with open(fasta_filename, "rt", encoding="utf-8", errors="ignore") as handle:
         iterator = SeqIO.parse(handle, "fasta")
         while iterator:
             try:
