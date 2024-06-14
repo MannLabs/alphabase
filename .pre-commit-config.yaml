@@ -13,4 +13,4 @@ repos:
     - id: ruff-format
     - id: ruff
 
-  exclude: .bumpversion.cfg
+exclude: .bumpversion.cfg
