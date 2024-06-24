@@ -73,7 +73,11 @@ def lookup_modification(
         print(np.min(ppm_distance))
         return None
 
-    matched_mod = filtered_mod_df.sort_values(by="unimod_id").iloc[0]
+    print("XXX", filtered_mod_df["mod_name", "unimod_id"])
+    matched_mods = filtered_mod_df.sort_values(by="unimod_id")
+    print("YYY", matched_mods["mod_name", "unimod_id"])
+
+    matched_mod = matched_mods.iloc[0]
 
     return matched_mod["mod_name"]
 

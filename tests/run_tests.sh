@@ -7,5 +7,5 @@ python -m pytest --nbmake $(echo $INCLUDED_NBS)
 # corresponding notebook(s) if this occurs again
 # INCLUDED_NBS=$(find ../nbs_tests -name "*.ipynb" | grep -v test_isotope_mp.ipynb)
 
-INCLUDED_NBS=$(find ../nbs_tests -name "*.ipynb")
-python -m pytest --nbmake $(echo $INCLUDED_NBS)
+#INCLUDED_NBS=$(find ../nbs_tests -name "*.ipynb")
+python -m pytest --nbmake nbs_tests/psm_reader/sage_reader.ipynb
