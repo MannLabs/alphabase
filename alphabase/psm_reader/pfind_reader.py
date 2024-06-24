@@ -1,8 +1,7 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
 
 import alphabase.constants.modification as ap_mod
-
 from alphabase.psm_reader.psm_reader import (
     PSMReaderBase,
     psm_reader_provider,
@@ -48,9 +47,7 @@ def translate_pFind_mod(mod_str):
     ret_mods = []
     for mod in mod_str.split(";"):
         mod = convert_one_pFind_mod(mod)
-        if not mod:
-            return pd.NA
-        elif mod not in ap_mod.MOD_INFO_DICT:
+        if not mod or mod not in ap_mod.MOD_INFO_DICT:
             return pd.NA
         else:
             ret_mods.append(mod)

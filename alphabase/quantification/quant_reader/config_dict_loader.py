@@ -1,10 +1,11 @@
+import itertools
 import os
-import yaml
-import pandas as pd
 import os.path
 import pathlib
-import itertools
 import re
+
+import pandas as pd
+import yaml
 
 INTABLE_CONFIG = os.path.join(
     pathlib.Path(__file__).parent.absolute(),
@@ -57,7 +58,7 @@ def _get_seperator(input_file):
 
 
 def _load_config(config_yaml):
-    with open(config_yaml, "r") as stream:
+    with open(config_yaml) as stream:
         config_all = yaml.safe_load(stream)
     return config_all
 

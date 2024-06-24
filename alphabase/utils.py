@@ -1,7 +1,8 @@
-import tqdm
-import pandas as pd
-import itertools
 import io
+import itertools
+
+import pandas as pd
+import tqdm
 
 
 # from alphatims
@@ -39,7 +40,7 @@ def get_delimiter(tsv_file: str):
         line = tsv_file.readline().strip()
         tsv_file.seek(0)
     else:
-        with open(tsv_file, "r") as f:
+        with open(tsv_file) as f:
             line = f.readline().strip()
     if "\t" in line:
         return "\t"

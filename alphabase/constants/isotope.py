@@ -1,14 +1,15 @@
-import numba
-import numpy as np
 import typing
 
+import numba
+import numpy as np
+
 from alphabase.constants.atom import (
-    MAX_ISOTOPE_LEN,
-    EMPTY_DIST,
     CHEM_ISOTOPE_DIST,
     CHEM_MONO_IDX,
-    truncate_isotope,
+    EMPTY_DIST,
+    MAX_ISOTOPE_LEN,
     parse_formula,
+    truncate_isotope,
 )
 
 

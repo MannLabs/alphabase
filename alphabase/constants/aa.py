@@ -1,18 +1,17 @@
 import os
-import pandas as pd
-import numpy as np
 import typing
 
-from alphabase.yaml_utils import load_yaml
+import numpy as np
+import pandas as pd
 
+from alphabase.constants._const import CONST_FILE_FOLDER
 from alphabase.constants.atom import (
-    calc_mass_from_formula,
     MASS_H2O,
+    calc_mass_from_formula,
     parse_formula,
     reset_elements,
 )
-
-from alphabase.constants._const import CONST_FILE_FOLDER
+from alphabase.yaml_utils import load_yaml
 
 # We use all 128 ASCII code to represent amino acids for flexible extensions in the future.
 # The amino acid masses are stored in 128-lengh array :py:data:`AA_ASCII_MASS`.

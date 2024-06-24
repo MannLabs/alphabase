@@ -1,11 +1,11 @@
 import os
-import numpy as np
-import numba
 import typing
 
-from alphabase.yaml_utils import load_yaml
+import numba
+import numpy as np
 
 from alphabase.constants._const import CONST_FILE_FOLDER, common_const_dict
+from alphabase.yaml_utils import load_yaml
 
 MASS_PROTON: float = common_const_dict["MASS_PROTON"]
 MASS_ISOTOPE: float = common_const_dict["MASS_ISOTOPE"]

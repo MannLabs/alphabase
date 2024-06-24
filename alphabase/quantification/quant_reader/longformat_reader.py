@@ -1,14 +1,17 @@
-import pandas as pd
-import os
-import shutil
 import glob
-import dask.dataframe as dd
+import os
 import os.path
+import shutil
 
-from . import config_dict_loader
-from . import quantreader_utils
-from . import table_reformatter
-from . import plexdia_reformatter
+import dask.dataframe as dd
+import pandas as pd
+
+from . import (
+    config_dict_loader,
+    plexdia_reformatter,
+    quantreader_utils,
+    table_reformatter,
+)
 
 
 def reformat_and_write_longtable_according_to_config(

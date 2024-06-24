@@ -1,12 +1,13 @@
+import contextlib
+import re
+import time
+
 import h5py
 import numpy as np
 import pandas as pd
-import re
-import contextlib
-import time
 
 
-class HDF_Object(object):
+class HDF_Object:
     """
     A generic class to access HDF components.
     """

@@ -1,6 +1,6 @@
-from alphabase.constants.atom import *  # noqa: F403 TODO remove in the next release
-
 import warnings
+
+from alphabase.constants.atom import *  # noqa: F403 TODO remove in the next release
 
 warnings.warn(
     "The module `alphabase.constants.element` is deprecated, "

@@ -1,5 +1,6 @@
-import pandas as pd
 import copy
+
+import pandas as pd
 
 
 def merge_protein_cols_and_config_dict(

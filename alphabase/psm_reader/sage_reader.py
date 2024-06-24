@@ -1,16 +1,16 @@
-import numpy as np
-import pandas as pd
-import typing
 import re
+import typing
 from functools import partial
 
+import numpy as np
+import pandas as pd
+
+from alphabase.constants.modification import MOD_DF
 from alphabase.psm_reader.psm_reader import (
     PSMReaderBase,
     psm_reader_provider,
     psm_reader_yaml,
 )
-
-from alphabase.constants.modification import MOD_DF
 
 
 def sage_spec_idx_from_scannr(scannr: str) -> int:
