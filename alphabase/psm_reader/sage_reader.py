@@ -1,3 +1,5 @@
+import logging
+
 import numpy as np
 import pandas as pd
 import typing
@@ -73,7 +75,14 @@ def lookup_modification(
         print(np.min(ppm_distance))
         return None
 
-    matched_mod = filtered_mod_df.sort_values(by="unimod_id").iloc[0]
+    str1 = f'XXX {filtered_mod_df[["mod_name", "unimod_id"]]}'
+    logging.error(str1)
+    matched_mods = filtered_mod_df.sort_values(by="unimod_id")
+
+    str2 = f'XXX {matched_mods[["mod_name", "unimod_id"]]}'
+    logging.error(str2)
+
+    matched_mod = matched_mods.iloc[0]
 
     return matched_mod["mod_name"]
 
@@ -139,13 +148,22 @@ def capture_modifications(
         return ";".join(site_list), ";".join(mod_list)
 
 
+def _print_df(df, s):
+    df = df[df["mod_name"].str.startswith("Gln->pyro-Glu@Q^Any")]
+    df = df[["mod_name", "mass"]]
+    logging.error(f"ZZZ {s} {df}")
+
+
 def get_annotated_mod_df():
     """Annotates the modification dataframe with the location of the modification."""
     mod_annotated_df = MOD_DF.copy()
     mod_annotated_df["location"] = (
         mod_annotated_df["mod_name"].str.split("@").str[1].str.split("^").str[0]
     )
+    _print_df(mod_annotated_df, "1")
     mod_annotated_df = mod_annotated_df.sort_values(by="mass").reset_index(drop=True)
+
+    _print_df(mod_annotated_df, "2")
     mod_annotated_df["mod_name_stripped"] = mod_annotated_df["mod_name"].str.replace(
         " ", "_"
     )

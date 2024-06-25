@@ -14,7 +14,7 @@ on:
         required: true
         type: string
 jobs:
-  pre-commit:
+  run-unit-tests:
     runs-on: ${{ inputs.os }}
     steps:
     - uses: actions/checkout@v3
@@ -26,7 +26,7 @@ jobs:
     - name: Conda info
       shell: bash -l {0}
       run: conda info
-    - name: Perform pip installation with all stable dependencies
+    - name: Perform pip installation
       shell: bash -l {0}
       run: |
         cd misc
@@ -36,6 +36,12 @@ jobs:
       run: |
         conda activate alphabase
         pip install pytest nbmake==1.5.3
+        conda deactivate
+    - name: Print environment
+      shell: bash -l {0}
+      run: |
+        conda activate alphabase
+        pip freeze
         conda deactivate
     - name: Run tests
       shell: bash -l {0}
