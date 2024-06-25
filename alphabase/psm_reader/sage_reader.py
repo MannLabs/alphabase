@@ -150,6 +150,7 @@ def capture_modifications(
 
 def _print_df(df, s):
     df = df[df["mod_name"].str.startswith("Gln->pyro-Glu@Q^Any")]
+    df = df[["mod_name", "mass"]]
     logging.error(f"ZZZ {s} {df}")
 
 
