@@ -296,7 +296,7 @@ def hash_precursor_df(precursor_df: pd.DataFrame, *, seed: int = 0) -> pd.DataFr
 
 def get_mod_seq_formula(seq: str, mods: str) -> list:
     """
-    'PEPTIDE','Acetyl@Any N-term' --> [('C',n), ('H',m), ...]
+    'PEPTIDE','Acetyl@Any_N-term' --> [('C',n), ('H',m), ...]
     """
     formula = {}
     for aa in seq:

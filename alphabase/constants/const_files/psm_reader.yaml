@@ -19,7 +19,7 @@ alphapept:
     'Phospho@S': 'pS'
     'Phospho@T': 'pT'
     'Phospho@Y': 'pY'
-    'Acetyl@Protein N-term': 'a'
+    'Acetyl@Protein_N-term': 'a'
 
 maxquant:
   reader_type: maxquant
@@ -52,9 +52,9 @@ maxquant:
       - 'K(Dimethyl)'
     'Dimethyl@R':
       - 'R(Dimethyl)'
-    'Dimethyl@Any N-term':
+    'Dimethyl@Any_N-term':
       - '(Dimethyl)'
-    'Acetyl@Protein N-term':
+    'Acetyl@Protein_N-term':
       - '_(Acetyl (Protein N-term))'
       - '_(ac)'
     'Carbamidomethyl@C':
@@ -124,10 +124,10 @@ msfragger_pepxml:
     - 'Phospho@S' #TY are not needed here
     - 'GlyGly@K'
     - 'Cysteinyl@C'
-    - 'Acetyl@Any N-term'
-    - 'Glu->pyro-Glu@E^Any N-term'
-    - 'Gln->pyro-Glu@Q^Any N-term'
-    - 'Dimethyl@K' # Any N-term is not needed here as it will be infered in-the-fly
+    - 'Acetyl@Any_N-term'
+    - 'Glu->pyro-Glu@E^Any_N-term'
+    - 'Gln->pyro-Glu@Q^Any_N-term'
+    - 'Dimethyl@K' # Any_N-term is not needed here as it will be infered in-the-fly
     - 'Methyl@E' #an example of a PTM that can be C-term
   mod_mass_tol: 0.1 # Da
 
