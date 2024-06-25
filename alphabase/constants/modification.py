@@ -90,14 +90,18 @@ def load_mod_df(
 ):
     global MOD_DF
     MOD_DF = pd.read_table(tsv, keep_default_na=False)
-    _df = MOD_DF[MOD_DF.mod_name.str.contains(" ", regex=False)].copy()
-    _df["mod_name"] = MOD_DF.mod_name.str.replace(" ", "_", regex=False)
-    MOD_DF = pd.concat([MOD_DF, _df], ignore_index=True).drop_duplicates("mod_name")
+
+    if any(mask := MOD_DF["mod_name"].str.contains(" ", regex=False)):
+        raise ValueError(
+            f"Modification names must not contain spaces: {MOD_DF[mask]['mod_name'].values}"
+        )
+
+    MOD_DF.drop_duplicates("mod_name", inplace=True)
     MOD_DF.fillna("", inplace=True)
-    MOD_DF["unimod_id"] = MOD_DF.unimod_id.astype(np.int32)
+    MOD_DF["unimod_id"] = MOD_DF["unimod_id"].astype(np.int32)
     MOD_DF.set_index("mod_name", drop=False, inplace=True)
-    MOD_DF["mass"] = MOD_DF.composition.apply(calc_mass_from_formula)
-    MOD_DF["modloss_original"] = MOD_DF.modloss_composition.apply(
+    MOD_DF["mass"] = MOD_DF["composition"].apply(calc_mass_from_formula)
+    MOD_DF["modloss_original"] = MOD_DF["modloss_composition"].apply(
         calc_mass_from_formula
     )
     MOD_DF["modloss"] = MOD_DF["modloss_original"]
