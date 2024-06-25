@@ -10,7 +10,7 @@ GlyGly@K:
   unimod_id: 121
 
 #unimod modifications
-15N-oxobutanoic@C^Any N-term:
+15N-oxobutanoic@C^ Any_N-term:
   avge_mass: -18.0239
   classification: Artefact
   composition: H(-3)15N(-1)
@@ -90,7 +90,7 @@ GlyGly@K:
   modloss_composition: ''
   mono_mass: 167.982375
   unimod_id: 1387
-3sulfo@Any N-term:
+3sulfo@ Any_N-term:
   avge_mass: 184.1693
   classification: Chemical derivative
   composition: H(4)C(7)O(4)S(1)
@@ -362,7 +362,7 @@ AROD@C:
   modloss_composition: ''
   mono_mass: 820.336015
   unimod_id: 938
-AccQTag@Any N-term:
+AccQTag@Any_N-term:
   avge_mass: 170.1674
   classification: Chemical derivative
   composition: H(6)C(10)N(2)O(1)
@@ -394,7 +394,7 @@ Acetyl:13C(2)@Protein N-term:
   modloss_composition: ''
   mono_mass: 44.017274
   unimod_id: 1372
-Acetyl:2H(3)@Any N-term:
+Acetyl:2H(3)@Any_N-term:
   avge_mass: 45.0552
   classification: Isotopic label
   composition: H(-1)2H(3)C(2)O(1)
@@ -450,7 +450,7 @@ Acetyl:2H(3)@Y:
   modloss_composition: ''
   mono_mass: 45.029395
   unimod_id: 56
-Acetyl@Any N-term:
+Acetyl@Any_N-term:
   avge_mass: 42.0367
   classification: Multiple
   composition: H(2)C(2)O(1)
@@ -482,7 +482,7 @@ Acetyl@K:
   modloss_composition: ''
   mono_mass: 42.010565
   unimod_id: 1
-Acetyl@Protein N-term:
+Acetyl@Protein_N-term:
   avge_mass: 42.0367
   classification: Post-translational
   composition: H(2)C(2)O(1)
@@ -538,7 +538,7 @@ Acetylhypusine@K:
   modloss_composition: ''
   mono_mass: 113.084064
   unimod_id: 1043
-Ahx2+Hsl@Any C-term:
+Ahx2+Hsl@Any_C-term:
   avge_mass: 309.4039
   classification: Non-standard residue
   composition: H(27)C(16)N(3)O(3)
@@ -690,7 +690,7 @@ Ala->Xle@A:
   modloss_composition: ''
   mono_mass: 42.04695
   unimod_id: 1047
-Amidated@Any C-term:
+Amidated@Any_C-term:
   avge_mass: -0.9848
   classification: Artefact
   composition: H(1)N(1)O(-1)
@@ -706,7 +706,7 @@ Amidated@Protein C-term:
   modloss_composition: ''
   mono_mass: -0.984016
   unimod_id: 2
-Amidine@Any N-term:
+Amidine@Any_N-term:
   avge_mass: 41.0519
   classification: Chemical derivative
   composition: H(3)C(2)N(1)
@@ -738,7 +738,7 @@ Amino@Y:
   modloss_composition: ''
   mono_mass: 15.010899
   unimod_id: 342
-Ammonia-loss@C^Any N-term:
+Ammonia-loss@C^Any_N-term:
   avge_mass: -17.0305
   classification: Artefact
   composition: H(-3)N(-1)
@@ -770,7 +770,7 @@ Ammonia-loss@T^Protein N-term:
   modloss_composition: ''
   mono_mass: -17.026549
   unimod_id: 385
-Ammonium@Any C-term:
+Ammonium@Any_C-term:
   avge_mass: 17.0305
   classification: Artefact
   composition: H(3)N(1)
@@ -978,7 +978,7 @@ Arg->Xle@R:
   modloss_composition: ''
   mono_mass: -43.017047
   unimod_id: 645
-Arg-loss@R^Any C-term:
+Arg-loss@R^Any_C-term:
   avge_mass: -156.1857
   classification: Other
   composition: H(-12)C(-6)N(-4)O(-1)
@@ -994,7 +994,7 @@ Arg2PG@R:
   modloss_composition: ''
   mono_mass: 266.057909
   unimod_id: 848
-Arg@Any N-term:
+Arg@Any_N-term:
   avge_mass: 156.1857
   classification: Other
   composition: H(12)C(6)N(4)O(1)
@@ -1466,7 +1466,7 @@ BHTOH@K:
   modloss_composition: ''
   mono_mass: 234.16198
   unimod_id: 498
-BITC@Any N-term:
+BITC@Any_N-term:
   avge_mass: 149.2129
   classification: Chemical derivative
   composition: H(7)C(8)N(1)S(1)
@@ -1514,7 +1514,7 @@ Bacillosamine@N:
   modloss_composition: H(16)C(10)N(2)O(4)
   mono_mass: 228.111007
   unimod_id: 910
-Benzoyl@Any N-term:
+Benzoyl@Any_N-term:
   avge_mass: 104.1061
   classification: Isotopic label
   composition: H(4)C(7)O(1)
@@ -1642,7 +1642,7 @@ Biotin:Thermo-21325@K:
   modloss_composition: ''
   mono_mass: 695.310118
   unimod_id: 884
-Biotin:Thermo-21328@Any N-term:
+Biotin:Thermo-21328@Any_N-term:
   avge_mass: 389.5564
   classification: Chemical derivative
   composition: H(23)C(15)N(3)O(3)S(3)
@@ -1658,7 +1658,7 @@ Biotin:Thermo-21328@K:
   modloss_composition: ''
   mono_mass: 389.090154
   unimod_id: 1841
-Biotin:Thermo-21330@Any N-term:
+Biotin:Thermo-21330@Any_N-term:
   avge_mass: 473.5835
   classification: Chemical derivative
   composition: H(35)C(21)N(3)O(7)S(1)
@@ -1754,7 +1754,7 @@ Biotin:Thermo-88317@Y:
   modloss_composition: ''
   mono_mass: 443.291294
   unimod_id: 1037
-Biotin@Any N-term:
+Biotin@Any_N-term:
   avge_mass: 226.2954
   classification: Chemical derivative
   composition: H(14)C(10)N(2)O(2)S(1)
@@ -1786,7 +1786,7 @@ Bodipy@C:
   modloss_composition: ''
   mono_mass: 414.167478
   unimod_id: 878
-Brij35@Any N-term:
+Brij35@Any_N-term:
   avge_mass: 168.319
   classification: Other
   composition: H(24)C(12)
@@ -1794,7 +1794,7 @@ Brij35@Any N-term:
   modloss_composition: ''
   mono_mass: 168.187801
   unimod_id: 1837
-Brij58@Any N-term:
+Brij58@Any_N-term:
   avge_mass: 224.4253
   classification: Other
   composition: H(32)C(16)
@@ -1850,7 +1850,7 @@ Butyryl@K:
   modloss_composition: ''
   mono_mass: 70.041865
   unimod_id: 1289
-C8-QAT@Any N-term:
+C8-QAT@Any_N-term:
   avge_mass: 227.3862
   classification: Chemical derivative
   composition: H(29)C(14)N(1)O(1)
@@ -1866,7 +1866,7 @@ C8-QAT@K:
   modloss_composition: ''
   mono_mass: 227.224915
   unimod_id: 513
-CAF@Any N-term:
+CAF@Any_N-term:
   avge_mass: 136.1265
   classification: Chemical derivative
   composition: H(4)C(3)O(4)S(1)
@@ -1906,7 +1906,7 @@ CIGG@K:
   modloss_composition: ''
   mono_mass: 330.136176
   unimod_id: 1990
-CLIP_TRAQ_2@Any N-term:
+CLIP_TRAQ_2@Any_N-term:
   avge_mass: 141.1756
   classification: Isotopic label
   composition: H(12)C(6)13C(1)N(2)O(1)
@@ -1930,7 +1930,7 @@ CLIP_TRAQ_2@Y:
   modloss_composition: ''
   mono_mass: 141.098318
   unimod_id: 525
-CLIP_TRAQ_3@Any N-term:
+CLIP_TRAQ_3@Any_N-term:
   avge_mass: 271.2976
   classification: Isotopic label
   composition: H(20)C(11)13C(1)N(3)O(4)
@@ -1954,7 +1954,7 @@ CLIP_TRAQ_3@Y:
   modloss_composition: ''
   mono_mass: 271.148736
   unimod_id: 536
-CLIP_TRAQ_4@Any N-term:
+CLIP_TRAQ_4@Any_N-term:
   avge_mass: 244.2292
   classification: Isotopic label
   composition: H(15)C(9)13C(1)N(2)O(5)
@@ -2002,7 +2002,7 @@ Can-FP-biotin@Y:
   modloss_composition: ''
   mono_mass: 447.195679
   unimod_id: 333
-Carbamidomethyl@Any N-term:
+Carbamidomethyl@Any_N-term:
   avge_mass: 57.0513
   classification: Artefact
   composition: H(3)C(2)N(1)O(1)
@@ -2098,7 +2098,7 @@ CarbamidomethylDTT@C:
   modloss_composition: ''
   mono_mass: 209.018035
   unimod_id: 893
-Carbamyl@Any N-term:
+Carbamyl@Any_N-term:
   avge_mass: 43.0247
   classification: Multiple
   composition: H(1)C(1)N(1)O(1)
@@ -2322,7 +2322,7 @@ Carboxymethyl:13C(2)@C:
   modloss_composition: ''
   mono_mass: 60.012189
   unimod_id: 775
-Carboxymethyl@Any N-term:
+Carboxymethyl@Any_N-term:
   avge_mass: 58.0361
   classification: Artefact
   composition: H(2)C(2)O(2)
@@ -2362,7 +2362,7 @@ Carboxymethyl@W:
   modloss_composition: ''
   mono_mass: 58.005479
   unimod_id: 6
-CarboxymethylDMAP@Any N-term:
+CarboxymethylDMAP@Any_N-term:
   avge_mass: 162.1885
   classification: Chemical derivative
   composition: H(10)C(9)N(2)O(1)
@@ -2378,7 +2378,7 @@ CarboxymethylDTT@C:
   modloss_composition: ''
   mono_mass: 210.00205
   unimod_id: 894
-Cation:Ag@Any C-term:
+Cation:Ag@Any_C-term:
   avge_mass: 106.8603
   classification: Artefact
   composition: H(-1)Ag(1)
@@ -2402,7 +2402,7 @@ Cation:Ag@E:
   modloss_composition: ''
   mono_mass: 105.897267
   unimod_id: 955
-Cation:Al[III]@Any C-term:
+Cation:Al[III]@Any_C-term:
   avge_mass: 23.9577
   classification: Artefact
   composition: H(-3)Al(1)
@@ -2426,7 +2426,7 @@ Cation:Al[III]@E:
   modloss_composition: ''
   mono_mass: 23.958063
   unimod_id: 1910
-Cation:Ca[II]@Any C-term:
+Cation:Ca[II]@Any_C-term:
   avge_mass: 38.0621
   classification: Artefact
   composition: H(-2)Ca(1)
@@ -2450,7 +2450,7 @@ Cation:Ca[II]@E:
   modloss_composition: ''
   mono_mass: 37.946941
   unimod_id: 951
-Cation:Cu[I]@Any C-term:
+Cation:Cu[I]@Any_C-term:
   avge_mass: 62.5381
   classification: Artefact
   composition: H(-1)Cu(1)
@@ -2482,7 +2482,7 @@ Cation:Cu[I]@H:
   modloss_composition: ''
   mono_mass: 61.921774
   unimod_id: 531
-Cation:Fe[III]@Any C-term:
+Cation:Fe[III]@Any_C-term:
   avge_mass: 52.8212
   classification: Artefact
   composition: H(-3)Fe(1)
@@ -2506,7 +2506,7 @@ Cation:Fe[III]@E:
   modloss_composition: ''
   mono_mass: 52.911464
   unimod_id: 1870
-Cation:Fe[II]@Any C-term:
+Cation:Fe[II]@Any_C-term:
   avge_mass: 53.8291
   classification: Artefact
   composition: H(-2)Fe(1)
@@ -2530,7 +2530,7 @@ Cation:Fe[II]@E:
   modloss_composition: ''
   mono_mass: 53.919289
   unimod_id: 952
-Cation:K@Any C-term:
+Cation:K@Any_C-term:
   avge_mass: 38.0904
   classification: Artefact
   composition: H(-1)K(1)
@@ -2554,7 +2554,7 @@ Cation:K@E:
   modloss_composition: ''
   mono_mass: 37.955882
   unimod_id: 530
-Cation:Li@Any C-term:
+Cation:Li@Any_C-term:
   avge_mass: 5.9331
   classification: Artefact
   composition: H(-1)Li(1)
@@ -2578,7 +2578,7 @@ Cation:Li@E:
   modloss_composition: ''
   mono_mass: 6.008178
   unimod_id: 950
-Cation:Mg[II]@Any C-term:
+Cation:Mg[II]@Any_C-term:
   avge_mass: 22.2891
   classification: Artefact
   composition: H(-2)Mg(1)
@@ -2602,7 +2602,7 @@ Cation:Mg[II]@E:
   modloss_composition: ''
   mono_mass: 21.969392
   unimod_id: 956
-Cation:Na@Any C-term:
+Cation:Na@Any_C-term:
   avge_mass: 21.9818
   classification: Artefact
   composition: H(-1)Na(1)
@@ -2626,7 +2626,7 @@ Cation:Na@E:
   modloss_composition: ''
   mono_mass: 21.981943
   unimod_id: 30
-Cation:Ni[II]@Any C-term:
+Cation:Ni[II]@Any_C-term:
   avge_mass: 56.6775
   classification: Artefact
   composition: H(-2)Ni(1)
@@ -2650,7 +2650,7 @@ Cation:Ni[II]@E:
   modloss_composition: ''
   mono_mass: 55.919696
   unimod_id: 953
-Cation:Zn[II]@Any C-term:
+Cation:Zn[II]@Any_C-term:
   avge_mass: 63.3931
   classification: Artefact
   composition: H(-2)Zn(1)
@@ -3106,7 +3106,7 @@ Cysteinyl@C:
   modloss_composition: ''
   mono_mass: 119.004099
   unimod_id: 312
-Cytopiloyne+water@Any N-term:
+Cytopiloyne+water@Any_N-term:
   avge_mass: 380.3891
   classification: Chemical derivative
   composition: H(24)C(19)O(8)
@@ -3162,7 +3162,7 @@ Cytopiloyne+water@Y:
   modloss_composition: ''
   mono_mass: 380.147118
   unimod_id: 271
-Cytopiloyne@Any N-term:
+Cytopiloyne@Any_N-term:
   avge_mass: 362.3738
   classification: Chemical derivative
   composition: H(22)C(19)O(7)
@@ -3338,7 +3338,7 @@ DYn-2@C:
   modloss_composition: ''
   mono_mass: 161.09664
   unimod_id: 1872
-Dansyl@Any N-term:
+Dansyl@Any_N-term:
   avge_mass: 233.2862
   classification: Chemical derivative
   composition: H(11)C(12)N(1)O(2)S(1)
@@ -3466,7 +3466,7 @@ Decarboxylation@E:
   modloss_composition: ''
   mono_mass: -30.010565
   unimod_id: 1915
-Dehydrated@C^Any N-term:
+Dehydrated@C^Any_N-term:
   avge_mass: -18.0153
   classification: Artefact
   composition: H(-2)O(-1)
@@ -3562,7 +3562,7 @@ Delta:H(10)C(8)O(1)@K:
   modloss_composition: ''
   mono_mass: 122.073165
   unimod_id: 1928
-Delta:H(2)C(2)@Any N-term:
+Delta:H(2)C(2)@Any_N-term:
   avge_mass: 26.0373
   classification: Other
   composition: H(2)C(2)
@@ -3634,7 +3634,7 @@ Delta:H(3)C(3)O(2)@K:
   modloss_composition: ''
   mono_mass: 71.013304
   unimod_id: 1926
-Delta:H(4)C(2)@Any N-term:
+Delta:H(4)C(2)@Any_N-term:
   avge_mass: 28.0532
   classification: Other
   composition: H(4)C(2)
@@ -3906,7 +3906,7 @@ Dethiomethyl@M:
   modloss_composition: ''
   mono_mass: -48.003371
   unimod_id: 526
-DiART6plex115@Any N-term:
+DiART6plex115@Any_N-term:
   avge_mass: 217.2535
   classification: Isotopic label
   composition: H(20)C(8)13C(3)15N(2)O(2)
@@ -3938,7 +3938,7 @@ DiART6plex115@Y:
   modloss_composition: ''
   mono_mass: 217.156612
   unimod_id: 1393
-DiART6plex116/119@Any N-term:
+DiART6plex116/119@Any_N-term:
   avge_mass: 217.2797
   classification: Isotopic label
   composition: H(18)2H(2)C(9)13C(2)N(1)15N(1)O(2)
@@ -3970,7 +3970,7 @@ DiART6plex116/119@Y:
   modloss_composition: ''
   mono_mass: 217.168776
   unimod_id: 1394
-DiART6plex117@Any N-term:
+DiART6plex117@Any_N-term:
   avge_mass: 217.2805
   classification: Isotopic label
   composition: H(18)2H(2)C(10)13C(1)15N(2)O(2)
@@ -4002,7 +4002,7 @@ DiART6plex117@Y:
   modloss_composition: ''
   mono_mass: 217.162456
   unimod_id: 1395
-DiART6plex118@Any N-term:
+DiART6plex118@Any_N-term:
   avge_mass: 217.279
   classification: Isotopic label
   composition: H(18)2H(2)C(8)13C(3)N(2)O(2)
@@ -4034,7 +4034,7 @@ DiART6plex118@Y:
   modloss_composition: ''
   mono_mass: 217.175096
   unimod_id: 1396
-DiART6plex@Any N-term:
+DiART6plex@Any_N-term:
   avge_mass: 217.2527
   classification: Isotopic label
   composition: H(20)C(7)13C(4)N(1)15N(1)O(2)
@@ -4066,7 +4066,7 @@ DiART6plex@Y:
   modloss_composition: ''
   mono_mass: 217.162932
   unimod_id: 1392
-DiLeu4plex115@Any N-term:
+DiLeu4plex115@Any_N-term:
   avge_mass: 145.1966
   classification: Isotopic label
   composition: H(15)C(7)13C(1)15N(1)18O(1)
@@ -4090,7 +4090,7 @@ DiLeu4plex115@Y:
   modloss_composition: ''
   mono_mass: 145.12
   unimod_id: 1321
-DiLeu4plex117@Any N-term:
+DiLeu4plex117@Any_N-term:
   avge_mass: 145.2092
   classification: Isotopic label
   composition: H(13)2H(2)C(7)13C(1)15N(1)O(1)
@@ -4114,7 +4114,7 @@ DiLeu4plex117@Y:
   modloss_composition: ''
   mono_mass: 145.128307
   unimod_id: 1323
-DiLeu4plex118@Any N-term:
+DiLeu4plex118@Any_N-term:
   avge_mass: 145.2354
   classification: Isotopic label
   composition: H(11)2H(4)C(8)N(1)O(1)
@@ -4138,7 +4138,7 @@ DiLeu4plex118@Y:
   modloss_composition: ''
   mono_mass: 145.140471
   unimod_id: 1324
-DiLeu4plex@Any N-term:
+DiLeu4plex@Any_N-term:
   avge_mass: 145.2229
   classification: Isotopic label
   composition: H(13)2H(2)C(8)N(1)18O(1)
@@ -4178,7 +4178,7 @@ Dibromo@Y:
   modloss_composition: ''
   mono_mass: 155.821022
   unimod_id: 534
-Dicarbamidomethyl@Any N-term:
+Dicarbamidomethyl@Any_N-term:
   avge_mass: 114.1026
   classification: Artefact
   composition: H(6)C(4)N(2)O(2)
@@ -4218,7 +4218,7 @@ Dicarbamidomethyl@R:
   modloss_composition: ''
   mono_mass: 114.042927
   unimod_id: 1290
-Didehydro@K^Any C-term:
+Didehydro@K^Any_C-term:
   avge_mass: -2.0159
   classification: Artefact
   composition: H(-2)
@@ -4258,7 +4258,7 @@ Didehydroretinylidene@K:
   modloss_composition: ''
   mono_mass: 264.187801
   unimod_id: 433
-Diethyl@Any N-term:
+Diethyl@Any_N-term:
   avge_mass: 56.1063
   classification: Chemical derivative
   composition: H(8)C(4)
@@ -4274,7 +4274,7 @@ Diethyl@K:
   modloss_composition: ''
   mono_mass: 56.0626
   unimod_id: 518
-Diethylphosphate@Any N-term:
+Diethylphosphate@Any_N-term:
   avge_mass: 136.0862
   classification: Chemical derivative
   composition: H(9)C(4)O(3)P(1)
@@ -4418,7 +4418,7 @@ Diironsubcluster@C:
   modloss_composition: ''
   mono_mass: 342.786916
   unimod_id: 439
-Diisopropylphosphate@Any N-term:
+Diisopropylphosphate@Any_N-term:
   avge_mass: 164.1394
   classification: Chemical derivative
   composition: H(13)C(6)O(3)P(1)
@@ -4458,7 +4458,7 @@ Diisopropylphosphate@Y:
   modloss_composition: ''
   mono_mass: 164.060231
   unimod_id: 362
-Dimethyl:2H(4)13C(2)@Any N-term:
+Dimethyl:2H(4)13C(2)@Any_N-term:
   avge_mass: 34.0631
   classification: Isotopic label
   composition: 2H(4)13C(2)
@@ -4490,7 +4490,7 @@ Dimethyl:2H(4)13C(2)@R:
   modloss_composition: ''
   mono_mass: 34.063117
   unimod_id: 510
-Dimethyl:2H(4)@Any N-term:
+Dimethyl:2H(4)@Any_N-term:
   avge_mass: 32.0778
   classification: Isotopic label
   composition: 2H(4)C(2)
@@ -4522,7 +4522,7 @@ Dimethyl:2H(4)@R:
   modloss_composition: ''
   mono_mass: 32.056407
   unimod_id: 199
-Dimethyl:2H(6)13C(2)@Any N-term:
+Dimethyl:2H(6)13C(2)@Any_N-term:
   avge_mass: 36.0754
   classification: Isotopic label
   composition: H(-2)2H(6)13C(2)
@@ -4554,7 +4554,7 @@ Dimethyl:2H(6)13C(2)@R:
   modloss_composition: ''
   mono_mass: 36.07567
   unimod_id: 330
-Dimethyl:2H(6)@Any N-term:
+Dimethyl:2H(6)@Any_N-term:
   avge_mass: 34.0901
   classification: Isotopic label
   composition: H(-2)2H(6)C(2)
@@ -4578,7 +4578,7 @@ Dimethyl:2H(6)@R:
   modloss_composition: ''
   mono_mass: 34.068961
   unimod_id: 1291
-Dimethyl@Any N-term:
+Dimethyl@Any_N-term:
   avge_mass: 28.0532
   classification: Isotopic label
   composition: H(4)C(2)
@@ -4946,7 +4946,7 @@ EQIGG@K:
   modloss_composition: ''
   mono_mass: 484.228162
   unimod_id: 846
-ESP:2H(10)@Any N-term:
+ESP:2H(10)@Any_N-term:
   avge_mass: 348.5299
   classification: Isotopic label
   composition: H(16)2H(10)C(16)N(4)O(2)S(1)
@@ -4962,7 +4962,7 @@ ESP:2H(10)@K:
   modloss_composition: ''
   mono_mass: 348.240414
   unimod_id: 91
-ESP@Any N-term:
+ESP@Any_N-term:
   avge_mass: 338.4682
   classification: Isotopic label
   composition: H(26)C(16)N(4)O(2)S(1)
@@ -4994,7 +4994,7 @@ Ethanedithiol@T:
   modloss_composition: ''
   mono_mass: 75.980527
   unimod_id: 200
-Ethanolamine@Any C-term:
+Ethanolamine@Any_C-term:
   avge_mass: 43.0678
   classification: Chemical derivative
   composition: H(5)C(2)N(1)
@@ -5074,7 +5074,7 @@ Ethyl+Deamidated@Q:
   modloss_composition: ''
   mono_mass: 29.015316
   unimod_id: 931
-Ethyl@Any C-term:
+Ethyl@Any_C-term:
   avge_mass: 28.0532
   classification: Chemical derivative
   composition: H(4)C(2)
@@ -5082,7 +5082,7 @@ Ethyl@Any C-term:
   modloss_composition: ''
   mono_mass: 28.0313
   unimod_id: 280
-Ethyl@Any N-term:
+Ethyl@Any_N-term:
   avge_mass: 28.0532
   classification: Multiple
   composition: H(4)C(2)
@@ -5122,7 +5122,7 @@ Ethyl@Protein N-term:
   modloss_composition: ''
   mono_mass: 28.0313
   unimod_id: 280
-Ethylphosphate@Any N-term:
+Ethylphosphate@Any_N-term:
   avge_mass: 108.0331
   classification: Chemical derivative
   composition: H(5)C(2)O(3)P(1)
@@ -5378,7 +5378,7 @@ Fluoro@Y:
   modloss_composition: ''
   mono_mass: 17.990578
   unimod_id: 127
-Formyl@Any N-term:
+Formyl@Any_N-term:
   avge_mass: 28.0101
   classification: Artefact
   composition: C(1)O(1)
@@ -5506,7 +5506,7 @@ GGQ@K:
   modloss_composition: ''
   mono_mass: 242.101505
   unimod_id: 1292
-GIST-Quat:2H(3)@Any N-term:
+GIST-Quat:2H(3)@Any_N-term:
   avge_mass: 130.2027
   classification: Isotopic label
   composition: H(10)2H(3)C(7)N(1)O(1)
@@ -5522,7 +5522,7 @@ GIST-Quat:2H(3)@K:
   modloss_composition: H(6)2H(3)C(3)N(1)
   mono_mass: 130.118544
   unimod_id: 61
-GIST-Quat:2H(6)@Any N-term:
+GIST-Quat:2H(6)@Any_N-term:
   avge_mass: 133.2212
   classification: Isotopic label
   composition: H(7)2H(6)C(7)N(1)O(1)
@@ -5538,7 +5538,7 @@ GIST-Quat:2H(6)@K:
   modloss_composition: H(3)2H(6)C(3)N(1)
   mono_mass: 133.137375
   unimod_id: 62
-GIST-Quat:2H(9)@Any N-term:
+GIST-Quat:2H(9)@Any_N-term:
   avge_mass: 136.2397
   classification: Isotopic label
   composition: H(4)2H(9)C(7)N(1)O(1)
@@ -5554,7 +5554,7 @@ GIST-Quat:2H(9)@K:
   modloss_composition: 2H(9)C(3)N(1)
   mono_mass: 136.156205
   unimod_id: 63
-GIST-Quat@Any N-term:
+GIST-Quat@Any_N-term:
   avge_mass: 127.1842
   classification: Isotopic label
   composition: H(13)C(7)N(1)O(1)
@@ -5586,7 +5586,7 @@ GPIanchor@Protein C-term:
   modloss_composition: ''
   mono_mass: 123.00853
   unimod_id: 394
-Galactosyl@Any N-term:
+Galactosyl@Any_N-term:
   avge_mass: 178.14
   classification: Other glycosylation
   composition: H(10)C(6)O(6)
@@ -5754,7 +5754,7 @@ Gln->Xle@Q:
   modloss_composition: ''
   mono_mass: -14.974514
   unimod_id: 635
-Gln->pyro-Glu@Q^Any N-term:
+Gln->pyro-Glu@Q^Any_N-term:
   avge_mass: -17.0305
   classification: Artefact
   composition: H(-3)N(-1)
@@ -5906,7 +5906,7 @@ Glu->Xle@E:
   modloss_composition: ''
   mono_mass: -15.958529
   unimod_id: 1081
-Glu->pyro-Glu+Methyl:2H(2)13C(1)@E^Any N-term:
+Glu->pyro-Glu+Methyl:2H(2)13C(1)@E^Any_N-term:
   avge_mass: -0.9837
   classification: Artefact
   composition: H(-2)2H(2)13C(1)O(-1)
@@ -5914,7 +5914,7 @@ Glu->pyro-Glu+Methyl:2H(2)13C(1)@E^Any N-term:
   modloss_composition: ''
   mono_mass: -0.979006
   unimod_id: 1827
-Glu->pyro-Glu+Methyl@E^Any N-term:
+Glu->pyro-Glu+Methyl@E^Any_N-term:
   avge_mass: -3.9887
   classification: Artefact
   composition: C(1)O(-1)
@@ -5922,7 +5922,7 @@ Glu->pyro-Glu+Methyl@E^Any N-term:
   modloss_composition: ''
   mono_mass: -3.994915
   unimod_id: 1826
-Glu->pyro-Glu@E^Any N-term:
+Glu->pyro-Glu@E^Any_N-term:
   avge_mass: -18.0153
   classification: Artefact
   composition: H(-2)O(-1)
@@ -6186,7 +6186,7 @@ Gly->Xle@G:
   modloss_composition: ''
   mono_mass: 56.0626
   unimod_id: 1105
-Gly-loss+Amide@G^Any C-term:
+Gly-loss+Amide@G^Any_C-term:
   avge_mass: -58.0361
   classification: Post-translational
   composition: H(-2)C(-2)O(-2)
@@ -6242,7 +6242,7 @@ Glycosyl@P:
   modloss_composition: ''
   mono_mass: 148.037173
   unimod_id: 408
-Guanidinyl@Any N-term:
+Guanidinyl@Any_N-term:
   avge_mass: 42.04
   classification: Chemical derivative
   composition: H(2)C(1)N(2)
@@ -9426,7 +9426,7 @@ Hex(9)Phos(3)@T:
   modloss_composition: H(93)C(54)O(54)P(3)
   mono_mass: 1698.374404
   unimod_id: 1742
-Hex@Any N-term:
+Hex@Any_N-term:
   avge_mass: 162.1406
   classification: Other glycosylation
   composition: H(10)C(6)O(5)
@@ -10178,7 +10178,7 @@ ICDID@C:
   modloss_composition: ''
   mono_mass: 138.06808
   unimod_id: 1018
-ICPL:13C(6)2H(4)@Any N-term:
+ICPL:13C(6)2H(4)@Any_N-term:
   avge_mass: 115.0747
   classification: Isotopic label
   composition: H(-1)2H(4)13C(6)N(1)O(1)
@@ -10202,7 +10202,7 @@ ICPL:13C(6)2H(4)@Protein N-term:
   modloss_composition: ''
   mono_mass: 115.0667
   unimod_id: 866
-ICPL:13C(6)@Any N-term:
+ICPL:13C(6)@Any_N-term:
   avge_mass: 111.05
   classification: Isotopic label
   composition: H(3)13C(6)N(1)O(1)
@@ -10226,7 +10226,7 @@ ICPL:13C(6)@Protein N-term:
   modloss_composition: ''
   mono_mass: 111.041593
   unimod_id: 364
-ICPL:2H(4)@Any N-term:
+ICPL:2H(4)@Any_N-term:
   avge_mass: 109.1188
   classification: Isotopic label
   composition: H(-1)2H(4)C(6)N(1)O(1)
@@ -10250,7 +10250,7 @@ ICPL:2H(4)@Protein N-term:
   modloss_composition: ''
   mono_mass: 109.046571
   unimod_id: 687
-ICPL@Any N-term:
+ICPL@Any_N-term:
   avge_mass: 105.0941
   classification: Isotopic label
   composition: H(3)C(6)N(1)O(1)
@@ -10330,7 +10330,7 @@ IMID@K:
   modloss_composition: ''
   mono_mass: 68.037448
   unimod_id: 94
-ISD_z+2_ion@Any N-term:
+ISD_z+2_ion@Any_N-term:
   avge_mass: -15.0146
   classification: Artefact
   composition: H(-1)N(-1)
@@ -10338,7 +10338,7 @@ ISD_z+2_ion@Any N-term:
   modloss_composition: ''
   mono_mass: -15.010899
   unimod_id: 991
-Iminobiotin@Any N-term:
+Iminobiotin@Any_N-term:
   avge_mass: 225.3106
   classification: Chemical derivative
   composition: H(15)C(10)N(3)O(1)S(1)
@@ -10394,7 +10394,7 @@ IodoU-AMP@Y:
   modloss_composition: ''
   mono_mass: 322.020217
   unimod_id: 292
-Iodoacetanilide:13C(6)@Any N-term:
+Iodoacetanilide:13C(6)@Any_N-term:
   avge_mass: 139.1032
   classification: Artefact
   composition: H(7)C(2)13C(6)N(1)O(1)
@@ -10418,7 +10418,7 @@ Iodoacetanilide:13C(6)@K:
   modloss_composition: ''
   mono_mass: 139.072893
   unimod_id: 1398
-Iodoacetanilide@Any N-term:
+Iodoacetanilide@Any_N-term:
   avge_mass: 133.1473
   classification: Artefact
   composition: H(7)C(8)N(1)O(1)
@@ -10506,7 +10506,7 @@ LG-Hlactam-R@R:
   modloss_composition: ''
   mono_mass: 306.171876
   unimod_id: 506
-LG-anhydrolactam@Any N-term:
+LG-anhydrolactam@Any_N-term:
   avge_mass: 314.4186
   classification: Post-translational
   composition: H(26)C(20)O(3)
@@ -10522,7 +10522,7 @@ LG-anhydrolactam@K:
   modloss_composition: ''
   mono_mass: 314.188195
   unimod_id: 946
-LG-anhyropyrrole@Any N-term:
+LG-anhyropyrrole@Any_N-term:
   avge_mass: 298.4192
   classification: Post-translational
   composition: H(26)C(20)O(2)
@@ -10562,7 +10562,7 @@ LG-lactam-R@R:
   modloss_composition: ''
   mono_mass: 290.176961
   unimod_id: 505
-LG-pyrrole@Any N-term:
+LG-pyrrole@Any_N-term:
   avge_mass: 316.4345
   classification: Post-translational
   composition: H(28)C(20)O(3)
@@ -11074,7 +11074,7 @@ Label:15N(4)@R:
   modloss_composition: ''
   mono_mass: 3.98814
   unimod_id: 897
-Label:18O(1)@Any C-term:
+Label:18O(1)@Any_C-term:
   avge_mass: 1.9998
   classification: Isotopic label
   composition: O(-1)18O(1)
@@ -11106,7 +11106,7 @@ Label:18O(1)@Y:
   modloss_composition: ''
   mono_mass: 2.004246
   unimod_id: 258
-Label:18O(2)@Any C-term:
+Label:18O(2)@Any_C-term:
   avge_mass: 3.9995
   classification: Isotopic label
   composition: O(-2)18O(2)
@@ -11434,7 +11434,7 @@ Lys-loss@K^Protein C-term:
   modloss_composition: ''
   mono_mass: -128.094963
   unimod_id: 313
-Lys@Any N-term:
+Lys@Any_N-term:
   avge_mass: 128.1723
   classification: Other
   composition: H(12)C(6)N(2)O(1)
@@ -11690,7 +11690,7 @@ Met->Hpg@M:
   modloss_composition: ''
   mono_mass: -21.987721
   unimod_id: 899
-Met->Hse@M^Any C-term:
+Met->Hse@M^Any_C-term:
   avge_mass: -30.0922
   classification: Chemical derivative
   composition: H(-2)C(-1)O(1)S(-1)
@@ -11698,7 +11698,7 @@ Met->Hse@M^Any C-term:
   modloss_composition: ''
   mono_mass: -29.992806
   unimod_id: 10
-Met->Hsl@M^Any C-term:
+Met->Hsl@M^Any_C-term:
   avge_mass: -48.1075
   classification: Chemical derivative
   composition: H(-4)C(-1)S(-1)
@@ -11922,7 +11922,7 @@ Methyl-PEO12-Maleimide@C:
   modloss_composition: ''
   mono_mass: 710.383719
   unimod_id: 891
-Methyl:2H(2)@Any N-term:
+Methyl:2H(2)@Any_N-term:
   avge_mass: 16.0389
   classification: Isotopic label
   composition: 2H(2)C(1)
@@ -11946,7 +11946,7 @@ Methyl:2H(3)+Acetyl:2H(3)@K:
   modloss_composition: ''
   mono_mass: 62.063875
   unimod_id: 1368
-Methyl:2H(3)13C(1)@Any N-term:
+Methyl:2H(3)13C(1)@Any_N-term:
   avge_mass: 18.0377
   classification: Isotopic label
   composition: H(-1)2H(3)13C(1)
@@ -12010,7 +12010,7 @@ Methyl:2H(3)@R:
   modloss_composition: ''
   mono_mass: 17.03448
   unimod_id: 298
-Methyl@Any C-term:
+Methyl@Any_C-term:
   avge_mass: 14.0266
   classification: Multiple
   composition: H(2)C(1)
@@ -12018,7 +12018,7 @@ Methyl@Any C-term:
   modloss_composition: ''
   mono_mass: 14.01565
   unimod_id: 34
-Methyl@Any N-term:
+Methyl@Any_N-term:
   avge_mass: 14.0266
   classification: Chemical derivative
   composition: H(2)C(1)
@@ -12186,7 +12186,7 @@ Methylpyrroline@K:
   modloss_composition: ''
   mono_mass: 109.052764
   unimod_id: 435
-Methylthio@Any N-term:
+Methylthio@Any_N-term:
   avge_mass: 46.0916
   classification: Artefact
   composition: H(2)C(1)S(1)
@@ -12314,7 +12314,7 @@ Myristoyl@C:
   modloss_composition: ''
   mono_mass: 210.198366
   unimod_id: 45
-Myristoyl@G^Any N-term:
+Myristoyl@G^Any_N-term:
   avge_mass: 210.3556
   classification: Post-translational
   composition: H(26)C(14)O(1)
@@ -12386,7 +12386,7 @@ NBS@W:
   modloss_composition: ''
   mono_mass: 152.988449
   unimod_id: 172
-NDA@Any N-term:
+NDA@Any_N-term:
   avge_mass: 175.1855
   classification: Chemical derivative
   composition: H(5)C(13)N(1)
@@ -12466,7 +12466,7 @@ NEMsulfurWater@C:
   modloss_composition: ''
   mono_mass: 175.030314
   unimod_id: 1328
-NHS-LC-Biotin@Any N-term:
+NHS-LC-Biotin@Any_N-term:
   avge_mass: 339.453
   classification: Chemical derivative
   composition: H(25)C(16)N(3)O(3)S(1)
@@ -12490,7 +12490,7 @@ NHS-fluorescein@K:
   modloss_composition: ''
   mono_mass: 471.131802
   unimod_id: 1391
-NIC@Any N-term:
+NIC@Any_N-term:
   avge_mass: 105.0941
   classification: Isotopic label
   composition: H(3)C(6)N(1)O(1)
@@ -12538,7 +12538,7 @@ NO_SMX_SMCT@C:
   modloss_composition: ''
   mono_mass: 268.039202
   unimod_id: 745
-NP40@Any N-term:
+NP40@Any_N-term:
   avge_mass: 220.3505
   classification: Other
   composition: H(24)C(15)O(1)
@@ -12930,7 +12930,7 @@ Oxidation@F:
   modloss_composition: ''
   mono_mass: 15.994915
   unimod_id: 35
-Oxidation@G^Any C-term:
+Oxidation@G^Any_C-term:
   avge_mass: 15.9994
   classification: Pre-translational
   composition: O(1)
@@ -13058,7 +13058,7 @@ Oxidation@Y:
   modloss_composition: ''
   mono_mass: 15.994915
   unimod_id: 35
-PEITC@Any N-term:
+PEITC@Any_N-term:
   avge_mass: 163.2395
   classification: Chemical derivative
   composition: H(9)C(9)N(1)S(1)
@@ -13402,7 +13402,7 @@ Phe->Xle@F:
   modloss_composition: ''
   mono_mass: -33.98435
   unimod_id: 568
-Phenylisocyanate:2H(5)@Any N-term:
+Phenylisocyanate:2H(5)@Any_N-term:
   avge_mass: 124.1515
   classification: Chemical derivative
   composition: 2H(5)C(7)N(1)O(1)
@@ -13410,7 +13410,7 @@ Phenylisocyanate:2H(5)@Any N-term:
   modloss_composition: ''
   mono_mass: 124.068498
   unimod_id: 412
-Phenylisocyanate@Any N-term:
+Phenylisocyanate@Any_N-term:
   avge_mass: 119.1207
   classification: Chemical derivative
   composition: H(5)C(7)N(1)O(1)
@@ -13626,7 +13626,7 @@ Phosphoadenosine@Y:
   modloss_composition: ''
   mono_mass: 329.05252
   unimod_id: 405
-Phosphogluconoylation@Any N-term:
+Phosphogluconoylation@Any_N-term:
   avge_mass: 258.1199
   classification: Post-translational
   composition: H(11)C(6)O(9)P(1)
@@ -13722,7 +13722,7 @@ Phytochromobilin@C:
   modloss_composition: ''
   mono_mass: 584.263485
   unimod_id: 389
-Piperidine@Any N-term:
+Piperidine@Any_N-term:
   avge_mass: 68.117
   classification: Chemical derivative
   composition: H(8)C(5)
@@ -13914,7 +13914,7 @@ Pro->pyro-Glu@P:
   modloss_composition: ''
   mono_mass: 13.979265
   unimod_id: 359
-Propargylamine@Any C-term:
+Propargylamine@Any_C-term:
   avge_mass: 37.0632
   classification: Chemical derivative
   composition: H(3)C(3)N(1)O(-1)
@@ -13946,7 +13946,7 @@ Propionamide:2H(3)@C:
   modloss_composition: ''
   mono_mass: 74.055944
   unimod_id: 97
-Propionamide@Any N-term:
+Propionamide@Any_N-term:
   avge_mass: 71.0779
   classification: Chemical derivative
   composition: H(5)C(3)N(1)O(1)
@@ -13970,7 +13970,7 @@ Propionamide@K:
   modloss_composition: ''
   mono_mass: 71.037114
   unimod_id: 24
-Propionyl:13C(3)@Any N-term:
+Propionyl:13C(3)@Any_N-term:
   avge_mass: 59.0412
   classification: Isotopic label
   composition: H(4)13C(3)O(1)
@@ -13986,7 +13986,7 @@ Propionyl:13C(3)@K:
   modloss_composition: ''
   mono_mass: 59.036279
   unimod_id: 59
-Propionyl@Any N-term:
+Propionyl@Any_N-term:
   avge_mass: 56.0633
   classification: Isotopic label
   composition: H(4)C(3)O(1)
@@ -14082,7 +14082,7 @@ Propiophenone@W:
   modloss_composition: ''
   mono_mass: 132.057515
   unimod_id: 1310
-Propyl:2H(6)@Any N-term:
+Propyl:2H(6)@Any_N-term:
   avge_mass: 48.1167
   classification: Isotopic label
   composition: 2H(6)C(3)
@@ -14098,7 +14098,7 @@ Propyl:2H(6)@K:
   modloss_composition: ''
   mono_mass: 48.084611
   unimod_id: 1306
-Propyl@Any C-term:
+Propyl@Any_C-term:
   avge_mass: 42.0797
   classification: Chemical derivative
   composition: H(6)C(3)
@@ -14106,7 +14106,7 @@ Propyl@Any C-term:
   modloss_composition: ''
   mono_mass: 42.04695
   unimod_id: 1305
-Propyl@Any N-term:
+Propyl@Any_N-term:
   avge_mass: 42.0797
   classification: Isotopic label
   composition: H(6)C(3)
@@ -14154,7 +14154,7 @@ PropylNAGthiazoline@C:
   modloss_composition: ''
   mono_mass: 232.064354
   unimod_id: 514
-Puromycin@Any C-term:
+Puromycin@Any_C-term:
   avge_mass: 453.4943
   classification: Co-translational
   composition: H(27)C(22)N(7)O(4)
@@ -14162,7 +14162,7 @@ Puromycin@Any C-term:
   modloss_composition: ''
   mono_mass: 453.212452
   unimod_id: 973
-PyMIC@Any N-term:
+PyMIC@Any_N-term:
   avge_mass: 134.1353
   classification: Chemical derivative
   composition: H(6)C(7)N(2)O(1)
@@ -14186,7 +14186,7 @@ PyridoxalPhosphateH2@K:
   modloss_composition: ''
   mono_mass: 231.02966
   unimod_id: 1383
-Pyridylacetyl@Any N-term:
+PyridylAcetyl@Any_N-term:
   avge_mass: 119.1207
   classification: Chemical derivative
   composition: H(5)C(7)N(1)O(1)
@@ -14210,7 +14210,7 @@ Pyridylethyl@C:
   modloss_composition: ''
   mono_mass: 105.057849
   unimod_id: 31
-Pyro-carbamidomethyl@C^Any N-term:
+Pyro-carbamidomethyl@C^Any_N-term:
   avge_mass: 40.0208
   classification: Artefact
   composition: C(2)O(1)
@@ -14298,7 +14298,7 @@ Quinone@Y:
   modloss_composition: ''
   mono_mass: 29.974179
   unimod_id: 392
-RNPXL@K^Any N-term:
+RNPXL@K^Any_N-term:
   avge_mass: 324.1813
   classification: Other
   composition: H(13)C(9)N(2)O(9)P(1)
@@ -14306,7 +14306,7 @@ RNPXL@K^Any N-term:
   modloss_composition: H(13)C(9)N(2)O(9)P(1)
   mono_mass: 324.035867
   unimod_id: 1825
-RNPXL@R^Any N-term:
+RNPXL@R^Any_N-term:
   avge_mass: 324.1813
   classification: Other
   composition: H(13)C(9)N(2)O(9)P(1)
@@ -14322,7 +14322,7 @@ Retinylidene@K:
   modloss_composition: ''
   mono_mass: 266.203451
   unimod_id: 380
-SMA@Any N-term:
+SMA@Any_N-term:
   avge_mass: 127.1412
   classification: Chemical derivative
   composition: H(9)C(6)N(1)O(2)
@@ -14338,7 +14338,7 @@ SMA@K:
   modloss_composition: ''
   mono_mass: 127.063329
   unimod_id: 29
-SPITC:13C(6)@Any N-term:
+SPITC:13C(6)@Any_N-term:
   avge_mass: 221.2054
   classification: Chemical derivative
   composition: H(5)C(1)13C(6)N(1)O(3)S(2)
@@ -14354,7 +14354,7 @@ SPITC:13C(6)@K:
   modloss_composition: ''
   mono_mass: 220.991213
   unimod_id: 464
-SPITC@Any N-term:
+SPITC@Any_N-term:
   avge_mass: 215.2495
   classification: Chemical derivative
   composition: H(5)C(7)N(1)O(3)S(2)
@@ -14554,7 +14554,7 @@ Ser->Xle@S:
   modloss_composition: ''
   mono_mass: 26.052036
   unimod_id: 656
-Succinyl:13C(4)@Any N-term:
+Succinyl:13C(4)@Any_N-term:
   avge_mass: 104.0434
   classification: Isotopic label
   composition: H(4)13C(4)O(3)
@@ -14570,7 +14570,7 @@ Succinyl:13C(4)@K:
   modloss_composition: ''
   mono_mass: 104.029463
   unimod_id: 66
-Succinyl:2H(4)@Any N-term:
+Succinyl:2H(4)@Any_N-term:
   avge_mass: 104.0974
   classification: Isotopic label
   composition: 2H(4)C(4)O(3)
@@ -14586,7 +14586,7 @@ Succinyl:2H(4)@K:
   modloss_composition: ''
   mono_mass: 104.041151
   unimod_id: 65
-Succinyl@Any N-term:
+Succinyl@Any_N-term:
   avge_mass: 100.0728
   classification: Isotopic label
   composition: H(4)C(4)O(3)
@@ -14610,7 +14610,7 @@ Succinyl@Protein N-term:
   modloss_composition: ''
   mono_mass: 100.016044
   unimod_id: 64
-SulfanilicAcid:13C(6)@Any C-term:
+SulfanilicAcid:13C(6)@Any_C-term:
   avge_mass: 161.1303
   classification: Chemical derivative
   composition: H(5)13C(6)N(1)O(2)S(1)
@@ -14634,7 +14634,7 @@ SulfanilicAcid:13C(6)@E:
   modloss_composition: ''
   mono_mass: 161.024228
   unimod_id: 286
-SulfanilicAcid@Any C-term:
+SulfanilicAcid@Any_C-term:
   avge_mass: 155.1744
   classification: Isotopic label
   composition: H(5)C(6)N(1)O(2)S(1)
@@ -14682,7 +14682,7 @@ Sulfide@W:
   modloss_composition: ''
   mono_mass: 31.972071
   unimod_id: 421
-Sulfo-NHS-LC-LC-Biotin@Any N-term:
+Sulfo-NHS-LC-LC-Biotin@Any_N-term:
   avge_mass: 452.6106
   classification: Chemical derivative
   composition: H(36)C(22)N(4)O(4)S(1)
@@ -14762,7 +14762,7 @@ TAMRA-FP@Y:
   modloss_composition: ''
   mono_mass: 659.312423
   unimod_id: 1038
-TMAB:2H(9)@Any N-term:
+TMAB:2H(9)@Any_N-term:
   avge_mass: 137.2476
   classification: Isotopic label
   composition: H(5)2H(9)C(7)N(1)O(1)
@@ -14778,7 +14778,7 @@ TMAB:2H(9)@K:
   modloss_composition: 2H(9)C(3)N(1)
   mono_mass: 137.16403
   unimod_id: 477
-TMAB@Any N-term:
+TMAB@Any_N-term:
   avge_mass: 128.1922
   classification: Isotopic label
   composition: H(14)C(7)N(1)O(1)
@@ -14794,7 +14794,7 @@ TMAB@K:
   modloss_composition: H(9)C(3)N(1)
   mono_mass: 128.107539
   unimod_id: 476
-TMPP-Ac:13C(9)@Any N-term:
+TMPP-Ac:13C(9)@Any_N-term:
   avge_mass: 581.474
   classification: Chemical derivative
   composition: H(33)C(20)13C(9)O(10)P(1)
@@ -14818,7 +14818,7 @@ TMPP-Ac:13C(9)@Y:
   modloss_composition: ''
   mono_mass: 581.211328
   unimod_id: 1993
-TMPP-Ac@Any N-term:
+TMPP-Ac@Any_N-term:
   avge_mass: 572.5401
   classification: Chemical derivative
   composition: H(33)C(29)O(10)P(1)
@@ -14842,7 +14842,7 @@ TMPP-Ac@Y:
   modloss_composition: ''
   mono_mass: 572.181134
   unimod_id: 827
-TMT2plex@Any N-term:
+TMT2plex@Any_N-term:
   avge_mass: 225.2921
   classification: Isotopic label
   composition: H(20)C(11)13C(1)N(2)O(2)
@@ -14890,7 +14890,7 @@ TMT2plex@T:
   modloss_composition: ''
   mono_mass: 225.155833
   unimod_id: 738
-TMT6plex@Any N-term:
+TMT6plex@Any_N-term:
   avge_mass: 229.2634
   classification: Isotopic label
   composition: H(20)C(8)13C(4)N(1)15N(1)O(2)
@@ -14938,7 +14938,7 @@ TMT6plex@T:
   modloss_composition: ''
   mono_mass: 229.162932
   unimod_id: 737
-TMT@Any N-term:
+TMT@Any_N-term:
   avge_mass: 224.2994
   classification: Chemical derivative
   composition: H(20)C(12)N(2)O(2)
@@ -14986,7 +14986,7 @@ TMT@T:
   modloss_composition: ''
   mono_mass: 224.152478
   unimod_id: 739
-TMTpro@Any N-term:
+TMTpro@Any_N-term:
   avge_mass: 304.3127
   classification: Isotopic label
   composition: H(25)C(8)13C(7)N(1)15N(2)O(3)
@@ -15034,7 +15034,7 @@ TMTpro@T:
   modloss_composition: ''
   mono_mass: 304.207146
   unimod_id: 2016
-TMTpro_zero@Any N-term:
+TMTpro_zero@Any_N-term:
   avge_mass: 295.3773
   classification: Chemical derivative
   composition: H(25)C(15)N(3)O(3)
@@ -15082,7 +15082,7 @@ TMTpro_zero@T:
   modloss_composition: ''
   mono_mass: 295.189592
   unimod_id: 2017
-TNBS@Any N-term:
+TNBS@Any_N-term:
   avge_mass: 211.0886
   classification: Chemical derivative
   composition: H(1)C(6)N(3)O(6)
@@ -15498,7 +15498,7 @@ Tris@N:
   modloss_composition: ''
   mono_mass: 104.071154
   unimod_id: 1831
-Triton@Any C-term:
+Triton@Any_C-term:
   avge_mass: 188.3086
   classification: Other
   composition: H(20)C(14)
@@ -15506,7 +15506,7 @@ Triton@Any C-term:
   modloss_composition: ''
   mono_mass: 188.156501
   unimod_id: 1836
-Triton@Any N-term:
+Triton@Any_N-term:
   avge_mass: 188.3086
   classification: Other
   composition: H(20)C(14)
@@ -15682,7 +15682,7 @@ Trp->Xle@W:
   modloss_composition: ''
   mono_mass: -72.995249
   unimod_id: 677
-Tween20@Any N-term:
+Tween20@Any_N-term:
   avge_mass: 165.2951
   classification: Other
   composition: H(21)C(12)
@@ -15690,7 +15690,7 @@ Tween20@Any N-term:
   modloss_composition: ''
   mono_mass: 165.164326
   unimod_id: 1834
-Tween80@Any C-term:
+Tween80@Any_C-term:
   avge_mass: 263.4381
   classification: Other
   composition: H(31)C(18)O(1)
@@ -15930,7 +15930,7 @@ UgiJoullieProGlyProGly@E:
   modloss_composition: ''
   mono_mass: 308.148455
   unimod_id: 1283
-Unknown:162@Any C-term:
+Unknown:162@Any_C-term:
   avge_mass: 162.2267
   classification: Artefact
   composition: H(18)C(8)O(3)
@@ -15938,7 +15938,7 @@ Unknown:162@Any C-term:
   modloss_composition: ''
   mono_mass: 162.125595
   unimod_id: 1970
-Unknown:162@Any N-term:
+Unknown:162@Any_N-term:
   avge_mass: 162.2267
   classification: Artefact
   composition: H(18)C(8)O(3)
@@ -15962,7 +15962,7 @@ Unknown:162@E:
   modloss_composition: ''
   mono_mass: 162.125595
   unimod_id: 1970
-Unknown:177@Any C-term:
+Unknown:177@Any_C-term:
   avge_mass: 176.4788
   classification: Artefact
   composition: H(-7)O(1)Fe(3)
@@ -15970,7 +15970,7 @@ Unknown:177@Any C-term:
   modloss_composition: ''
   mono_mass: 176.744957
   unimod_id: 1971
-Unknown:177@Any N-term:
+Unknown:177@Any_N-term:
   avge_mass: 176.4788
   classification: Artefact
   composition: H(-7)O(1)Fe(3)
@@ -15994,7 +15994,7 @@ Unknown:177@E:
   modloss_composition: ''
   mono_mass: 176.744957
   unimod_id: 1971
-Unknown:210@Any C-term:
+Unknown:210@Any_C-term:
   avge_mass: 210.3126
   classification: Artefact
   composition: H(22)C(13)O(2)
@@ -16002,7 +16002,7 @@ Unknown:210@Any C-term:
   modloss_composition: ''
   mono_mass: 210.16198
   unimod_id: 1972
-Unknown:210@Any N-term:
+Unknown:210@Any_N-term:
   avge_mass: 210.3126
   classification: Artefact
   composition: H(22)C(13)O(2)
@@ -16026,7 +16026,7 @@ Unknown:210@E:
   modloss_composition: ''
   mono_mass: 210.16198
   unimod_id: 1972
-Unknown:216@Any C-term:
+Unknown:216@Any_C-term:
   avge_mass: 216.231
   classification: Artefact
   composition: H(16)C(10)O(5)
@@ -16034,7 +16034,7 @@ Unknown:216@Any C-term:
   modloss_composition: ''
   mono_mass: 216.099774
   unimod_id: 1973
-Unknown:216@Any N-term:
+Unknown:216@Any_N-term:
   avge_mass: 216.231
   classification: Artefact
   composition: H(16)C(10)O(5)
@@ -16058,7 +16058,7 @@ Unknown:216@E:
   modloss_composition: ''
   mono_mass: 216.099774
   unimod_id: 1973
-Unknown:234@Any C-term:
+Unknown:234@Any_C-term:
   avge_mass: 234.2033
   classification: Artefact
   composition: H(14)C(9)O(7)
@@ -16066,7 +16066,7 @@ Unknown:234@Any C-term:
   modloss_composition: ''
   mono_mass: 234.073953
   unimod_id: 1974
-Unknown:234@Any N-term:
+Unknown:234@Any_N-term:
   avge_mass: 234.2033
   classification: Artefact
   composition: H(14)C(9)O(7)
@@ -16090,7 +16090,7 @@ Unknown:234@E:
   modloss_composition: ''
   mono_mass: 234.073953
   unimod_id: 1974
-Unknown:248@Any C-term:
+Unknown:248@Any_C-term:
   avge_mass: 248.359
   classification: Artefact
   composition: H(28)C(13)O(4)
@@ -16098,7 +16098,7 @@ Unknown:248@Any C-term:
   modloss_composition: ''
   mono_mass: 248.19876
   unimod_id: 1975
-Unknown:248@Any N-term:
+Unknown:248@Any_N-term:
   avge_mass: 248.359
   classification: Artefact
   composition: H(28)C(13)O(4)
@@ -16122,7 +16122,7 @@ Unknown:248@E:
   modloss_composition: ''
   mono_mass: 248.19876
   unimod_id: 1975
-Unknown:250@Any C-term:
+Unknown:250@Any_C-term:
   avge_mass: 250.2075
   classification: Artefact
   composition: H(4)C(10)N(1)O(5)S(1)
@@ -16130,7 +16130,7 @@ Unknown:250@Any C-term:
   modloss_composition: ''
   mono_mass: 249.981018
   unimod_id: 1976
-Unknown:250@Any N-term:
+Unknown:250@Any_N-term:
   avge_mass: 250.2075
   classification: Artefact
   composition: H(4)C(10)N(1)O(5)S(1)
@@ -16154,7 +16154,7 @@ Unknown:250@E:
   modloss_composition: ''
   mono_mass: 249.981018
   unimod_id: 1976
-Unknown:302@Any C-term:
+Unknown:302@Any_C-term:
   avge_mass: 302.2656
   classification: Artefact
   composition: H(8)C(4)N(5)O(7)S(2)
@@ -16162,7 +16162,7 @@ Unknown:302@Any C-term:
   modloss_composition: ''
   mono_mass: 301.986514
   unimod_id: 1977
-Unknown:302@Any N-term:
+Unknown:302@Any_N-term:
   avge_mass: 302.2656
   classification: Artefact
   composition: H(8)C(4)N(5)O(7)S(2)
@@ -16186,7 +16186,7 @@ Unknown:302@E:
   modloss_composition: ''
   mono_mass: 301.986514
   unimod_id: 1977
-Unknown:306@Any C-term:
+Unknown:306@Any_C-term:
   avge_mass: 306.2659
   classification: Artefact
   composition: H(18)C(12)O(9)
@@ -16194,7 +16194,7 @@ Unknown:306@Any C-term:
   modloss_composition: ''
   mono_mass: 306.095082
   unimod_id: 1978
-Unknown:306@Any N-term:
+Unknown:306@Any_N-term:
   avge_mass: 306.2659
   classification: Artefact
   composition: H(18)C(12)O(9)
@@ -16218,7 +16218,7 @@ Unknown:306@E:
   modloss_composition: ''
   mono_mass: 306.095082
   unimod_id: 1978
-Unknown:420@Any C-term:
+Unknown:420@Any_C-term:
   avge_mass: 420.5888
   classification: Artefact
   composition: H(24)C(12)N(2)O(6)S(4)
@@ -16226,7 +16226,7 @@ Unknown:420@Any C-term:
   modloss_composition: H(24)C(12)N(2)O(6)S(4)
   mono_mass: 420.051719
   unimod_id: 1979
-Unknown:420@Any N-term:
+Unknown:420@Any_N-term:
   avge_mass: 420.5888
   classification: Artefact
   composition: H(24)C(12)N(2)O(6)S(4)
@@ -17370,7 +17370,7 @@ Xlink:SMCC[321]@C:
   modloss_composition: ''
   mono_mass: 321.205242
   unimod_id: 908
-ZGB@Any N-term:
+ZGB@Any_N-term:
   avge_mass: 758.7261
   classification: Other
   composition: H(53)C(37)N(6)O(6)F(2)S(1)B(1)
@@ -17394,7 +17394,7 @@ ZQG@K:
   modloss_composition: H(6)C(8)O(2)
   mono_mass: 320.100836
   unimod_id: 2001
-a-type-ion@Any C-term:
+a-type-ion@Any_C-term:
   avge_mass: -46.0254
   classification: Other
   composition: H(-2)C(-1)O(-2)
@@ -20618,7 +20618,7 @@ dHex@T:
   modloss_composition: H(10)C(6)O(4)
   mono_mass: 146.057909
   unimod_id: 295
-dNIC@Any N-term:
+dNIC@Any_N-term:
   avge_mass: 109.1205
   classification: Isotopic label
   composition: H(1)2H(3)C(6)N(1)O(1)
@@ -20698,7 +20698,7 @@ glucosone@R:
   modloss_composition: ''
   mono_mass: 160.037173
   unimod_id: 981
-glycidamide@Any N-term:
+glycidamide@Any_N-term:
   avge_mass: 87.0773
   classification: Chemical derivative
   composition: H(5)C(3)N(1)O(2)
@@ -20730,7 +20730,7 @@ hydroxyisobutyryl@K:
   modloss_composition: ''
   mono_mass: 86.036779
   unimod_id: 1849
-iTRAQ4plex114@Any N-term:
+iTRAQ4plex114@Any_N-term:
   avge_mass: 144.168
   classification: Isotopic label
   composition: H(12)C(5)13C(2)N(2)18O(1)
@@ -20762,7 +20762,7 @@ iTRAQ4plex114@Y:
   modloss_composition: ''
   mono_mass: 144.105918
   unimod_id: 532
-iTRAQ4plex115@Any N-term:
+iTRAQ4plex115@Any_N-term:
   avge_mass: 144.1688
   classification: Isotopic label
   composition: H(12)C(6)13C(1)N(1)15N(1)18O(1)
@@ -20794,7 +20794,7 @@ iTRAQ4plex115@Y:
   modloss_composition: ''
   mono_mass: 144.099599
   unimod_id: 533
-iTRAQ4plex@Any N-term:
+iTRAQ4plex@Any_N-term:
   avge_mass: 144.1544
   classification: Isotopic label
   composition: H(12)C(4)13C(3)N(1)15N(1)O(1)
@@ -20858,7 +20858,7 @@ iTRAQ4plex@Y:
   modloss_composition: ''
   mono_mass: 144.102063
   unimod_id: 214
-iTRAQ8plex:13C(6)15N(2)@Any N-term:
+iTRAQ8plex:13C(6)15N(2)@Any_N-term:
   avge_mass: 304.3081
   classification: Isotopic label
   composition: H(24)C(8)13C(6)N(2)15N(2)O(3)
@@ -20890,7 +20890,7 @@ iTRAQ8plex:13C(6)15N(2)@Y:
   modloss_composition: ''
   mono_mass: 304.19904
   unimod_id: 731
-iTRAQ8plex@Any N-term:
+iTRAQ8plex@Any_N-term:
   avge_mass: 304.3074
   classification: Isotopic label
   composition: H(24)C(7)13C(7)N(3)15N(1)O(3)
@@ -21042,7 +21042,7 @@ lapachenole@C:
   modloss_composition: ''
   mono_mass: 240.11503
   unimod_id: 771
-mTRAQ:13C(3)15N(1)@Any N-term:
+mTRAQ:13C(3)15N(1)@Any_N-term:
   avge_mass: 144.1544
   classification: Isotopic label
   composition: H(12)C(4)13C(3)N(1)15N(1)O(1)
@@ -21090,7 +21090,7 @@ mTRAQ:13C(3)15N(1)@Y:
   modloss_composition: ''
   mono_mass: 144.102063
   unimod_id: 889
-mTRAQ:13C(6)15N(2)@Any N-term:
+mTRAQ:13C(6)15N(2)@Any_N-term:
   avge_mass: 148.1257
   classification: Isotopic label
   composition: H(12)C(1)13C(6)15N(2)O(1)
@@ -21138,7 +21138,7 @@ mTRAQ:13C(6)15N(2)@Y:
   modloss_composition: ''
   mono_mass: 148.109162
   unimod_id: 1302
-mTRAQ@Any N-term:
+mTRAQ@Any_N-term:
   avge_mass: 140.183
   classification: Isotopic label
   composition: H(12)C(7)N(2)O(1)
@@ -21418,7 +21418,7 @@ serotonylation@Q:
   modloss_composition: ''
   mono_mass: 159.068414
   unimod_id: 1992
-shTMT@Any N-term:
+shTMT@Any_N-term:
   avge_mass: 235.2201
   classification: Chemical derivative
   composition: H(20)C(3)13C(9)15N(2)O(2)
