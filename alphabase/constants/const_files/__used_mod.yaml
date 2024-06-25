@@ -18,7 +18,7 @@ GlyGly@K:
   modloss_composition: ''
   mono_mass: -18.023584
   unimod_id: 1419
-15N-oxobutanoic@S^Protein N-term:
+15N-oxobutanoic@S^Protein_N-term:
   avge_mass: -18.0239
   classification: Post-translational
   composition: H(-3)15N(-1)
@@ -26,7 +26,7 @@ GlyGly@K:
   modloss_composition: ''
   mono_mass: -18.023584
   unimod_id: 1419
-15N-oxobutanoic@T^Protein N-term:
+15N-oxobutanoic@T^Protein_N-term:
   avge_mass: -18.0239
   classification: Post-translational
   composition: H(-3)15N(-1)
@@ -234,7 +234,7 @@ AEBS@K:
   modloss_composition: ''
   mono_mass: 183.035399
   unimod_id: 276
-AEBS@Protein N-term:
+AEBS@Protein_N-term:
   avge_mass: 183.2276
   classification: Artefact
   composition: H(9)C(8)N(1)O(2)S(1)
@@ -386,7 +386,7 @@ Acetyl:13C(2)@K:
   modloss_composition: ''
   mono_mass: 44.017274
   unimod_id: 1372
-Acetyl:13C(2)@Protein N-term:
+Acetyl:13C(2)@Protein_N-term:
   avge_mass: 44.022
   classification: Isotopic label
   composition: H(2)13C(2)O(1)
@@ -418,7 +418,7 @@ Acetyl:2H(3)@K:
   modloss_composition: ''
   mono_mass: 45.029395
   unimod_id: 56
-Acetyl:2H(3)@Protein N-term:
+Acetyl:2H(3)@Protein_N-term:
   avge_mass: 45.0552
   classification: Isotopic label
   composition: H(-1)2H(3)C(2)O(1)
@@ -698,7 +698,7 @@ Amidated@Any_C-term:
   modloss_composition: ''
   mono_mass: -0.984016
   unimod_id: 2
-Amidated@Protein C-term:
+Amidated@Protein_C-term:
   avge_mass: -0.9848
   classification: Post-translational
   composition: H(1)N(1)O(-1)
@@ -754,7 +754,7 @@ Ammonia-loss@N:
   modloss_composition: ''
   mono_mass: -17.026549
   unimod_id: 385
-Ammonia-loss@S^Protein N-term:
+Ammonia-loss@S^Protein_N-term:
   avge_mass: -17.0305
   classification: Post-translational
   composition: H(-3)N(-1)
@@ -762,7 +762,7 @@ Ammonia-loss@S^Protein N-term:
   modloss_composition: ''
   mono_mass: -17.026549
   unimod_id: 385
-Ammonia-loss@T^Protein N-term:
+Ammonia-loss@T^Protein_N-term:
   avge_mass: -17.0305
   classification: Post-translational
   composition: H(-3)N(-1)
@@ -1346,7 +1346,7 @@ BDMAPP@K:
   modloss_composition: ''
   mono_mass: 253.010225
   unimod_id: 684
-BDMAPP@Protein N-term:
+BDMAPP@Protein_N-term:
   avge_mass: 254.1231
   classification: Chemical derivative
   composition: H(12)C(11)N(1)O(1)Br(1)
@@ -1562,7 +1562,7 @@ Biotin-PEO-Amine@E:
   modloss_composition: ''
   mono_mass: 356.188212
   unimod_id: 289
-Biotin-PEO-Amine@Protein C-term:
+Biotin-PEO-Amine@Protein_C-term:
   avge_mass: 356.4835
   classification: Chemical derivative
   composition: H(28)C(16)N(4)O(3)S(1)
@@ -1882,7 +1882,7 @@ CAMthiopropanoyl@K:
   modloss_composition: ''
   mono_mass: 145.019749
   unimod_id: 293
-CAMthiopropanoyl@Protein N-term:
+CAMthiopropanoyl@Protein_N-term:
   avge_mass: 145.1796
   classification: Chemical derivative
   composition: H(7)C(5)N(1)O(2)S(1)
@@ -2130,7 +2130,7 @@ Carbamyl@M:
   modloss_composition: ''
   mono_mass: 43.005814
   unimod_id: 5
-Carbamyl@Protein N-term:
+Carbamyl@Protein_N-term:
   avge_mass: 43.0247
   classification: Post-translational
   composition: H(1)C(1)N(1)O(1)
@@ -2242,7 +2242,7 @@ Carbonyl@V:
   modloss_composition: ''
   mono_mass: 13.979265
   unimod_id: 1918
-Carboxy->Thiocarboxy@G^Protein C-term:
+Carboxy->Thiocarboxy@G^Protein_C-term:
   avge_mass: 16.0656
   classification: Post-translational
   composition: O(-1)S(1)
@@ -2274,7 +2274,7 @@ Carboxy@K:
   modloss_composition: ''
   mono_mass: 43.989829
   unimod_id: 299
-Carboxy@M^Protein N-term:
+Carboxy@M^Protein_N-term:
   avge_mass: 44.0095
   classification: Post-translational
   composition: C(1)O(2)
@@ -2698,7 +2698,7 @@ Chlorination@Y:
   modloss_composition: ''
   mono_mass: 33.961028
   unimod_id: 936
-Cholesterol@Protein C-term:
+Cholesterol@Protein_C-term:
   avge_mass: 368.6383
   classification: Post-translational
   composition: H(44)C(27)
@@ -3010,7 +3010,7 @@ Cys->Pro@C:
   modloss_composition: ''
   mono_mass: -5.956421
   unimod_id: 1063
-Cys->PyruvicAcid@C^Protein N-term:
+Cys->PyruvicAcid@C^Protein_N-term:
   avge_mass: -33.0961
   classification: Post-translational
   composition: H(-3)N(-1)O(1)S(-1)
@@ -3402,7 +3402,7 @@ Deamidated:18O(1)@Q:
   modloss_composition: ''
   mono_mass: 2.988261
   unimod_id: 366
-Deamidated@F^Protein N-term:
+Deamidated@F^Protein_N-term:
   avge_mass: 0.9848
   classification: Post-translational
   composition: H(-1)N(-1)O(1)
@@ -3482,7 +3482,7 @@ Dehydrated@D:
   modloss_composition: ''
   mono_mass: -18.010565
   unimod_id: 23
-Dehydrated@N^Protein C-term:
+Dehydrated@N^Protein_C-term:
   avge_mass: -18.0153
   classification: Post-translational
   composition: H(-2)O(-1)
@@ -3490,7 +3490,7 @@ Dehydrated@N^Protein C-term:
   modloss_composition: ''
   mono_mass: -18.010565
   unimod_id: 23
-Dehydrated@Q^Protein C-term:
+Dehydrated@Q^Protein_C-term:
   avge_mass: -18.0153
   classification: Post-translational
   composition: H(-2)O(-1)
@@ -3586,7 +3586,7 @@ Delta:H(2)C(2)@K:
   modloss_composition: ''
   mono_mass: 26.01565
   unimod_id: 254
-Delta:H(2)C(2)@Protein N-term:
+Delta:H(2)C(2)@Protein_N-term:
   avge_mass: 26.0373
   classification: Other
   composition: H(2)C(2)
@@ -3682,7 +3682,7 @@ Delta:H(4)C(3)@K:
   modloss_composition: ''
   mono_mass: 40.0313
   unimod_id: 256
-Delta:H(4)C(3)@Protein N-term:
+Delta:H(4)C(3)@Protein_N-term:
   avge_mass: 40.0639
   classification: Other
   composition: H(4)C(3)
@@ -3770,7 +3770,7 @@ Delta:H(6)C(3)O(1)@K:
   modloss_composition: ''
   mono_mass: 58.041865
   unimod_id: 1312
-Delta:H(6)C(3)O(1)@Protein N-term:
+Delta:H(6)C(3)O(1)@Protein_N-term:
   avge_mass: 58.0791
   classification: Chemical derivative
   composition: H(6)C(3)O(1)
@@ -3802,7 +3802,7 @@ Delta:H(8)C(6)O(1)@K:
   modloss_composition: ''
   mono_mass: 96.057515
   unimod_id: 1313
-Delta:H(8)C(6)O(1)@Protein N-term:
+Delta:H(8)C(6)O(1)@Protein_N-term:
   avge_mass: 96.1271
   classification: Chemical derivative
   composition: H(8)C(6)O(1)
@@ -3922,7 +3922,7 @@ DiART6plex115@K:
   modloss_composition: ''
   mono_mass: 217.156612
   unimod_id: 1393
-DiART6plex115@Protein N-term:
+DiART6plex115@Protein_N-term:
   avge_mass: 217.2535
   classification: Isotopic label
   composition: H(20)C(8)13C(3)15N(2)O(2)
@@ -3954,7 +3954,7 @@ DiART6plex116/119@K:
   modloss_composition: ''
   mono_mass: 217.168776
   unimod_id: 1394
-DiART6plex116/119@Protein N-term:
+DiART6plex116/119@Protein_N-term:
   avge_mass: 217.2797
   classification: Isotopic label
   composition: H(18)2H(2)C(9)13C(2)N(1)15N(1)O(2)
@@ -3986,7 +3986,7 @@ DiART6plex117@K:
   modloss_composition: ''
   mono_mass: 217.162456
   unimod_id: 1395
-DiART6plex117@Protein N-term:
+DiART6plex117@Protein_N-term:
   avge_mass: 217.2805
   classification: Isotopic label
   composition: H(18)2H(2)C(10)13C(1)15N(2)O(2)
@@ -4018,7 +4018,7 @@ DiART6plex118@K:
   modloss_composition: ''
   mono_mass: 217.175096
   unimod_id: 1396
-DiART6plex118@Protein N-term:
+DiART6plex118@Protein_N-term:
   avge_mass: 217.279
   classification: Isotopic label
   composition: H(18)2H(2)C(8)13C(3)N(2)O(2)
@@ -4050,7 +4050,7 @@ DiART6plex@K:
   modloss_composition: ''
   mono_mass: 217.162932
   unimod_id: 1392
-DiART6plex@Protein N-term:
+DiART6plex@Protein_N-term:
   avge_mass: 217.2527
   classification: Isotopic label
   composition: H(20)C(7)13C(4)N(1)15N(1)O(2)
@@ -4474,7 +4474,7 @@ Dimethyl:2H(4)13C(2)@K:
   modloss_composition: ''
   mono_mass: 34.063117
   unimod_id: 510
-Dimethyl:2H(4)13C(2)@Protein N-term:
+Dimethyl:2H(4)13C(2)@Protein_N-term:
   avge_mass: 34.0631
   classification: Isotopic label
   composition: 2H(4)13C(2)
@@ -4506,7 +4506,7 @@ Dimethyl:2H(4)@K:
   modloss_composition: ''
   mono_mass: 32.056407
   unimod_id: 199
-Dimethyl:2H(4)@Protein N-term:
+Dimethyl:2H(4)@Protein_N-term:
   avge_mass: 32.0778
   classification: Isotopic label
   composition: 2H(4)C(2)
@@ -4538,7 +4538,7 @@ Dimethyl:2H(6)13C(2)@K:
   modloss_composition: ''
   mono_mass: 36.07567
   unimod_id: 330
-Dimethyl:2H(6)13C(2)@Protein N-term:
+Dimethyl:2H(6)13C(2)@Protein_N-term:
   avge_mass: 36.0754
   classification: Isotopic label
   composition: H(-2)2H(6)13C(2)
@@ -4602,7 +4602,7 @@ Dimethyl@N:
   modloss_composition: ''
   mono_mass: 28.0313
   unimod_id: 36
-Dimethyl@P^Protein N-term:
+Dimethyl@P^Protein_N-term:
   avge_mass: 28.0532
   classification: Post-translational
   composition: H(4)C(2)
@@ -4610,7 +4610,7 @@ Dimethyl@P^Protein N-term:
   modloss_composition: ''
   mono_mass: 28.0313
   unimod_id: 36
-Dimethyl@Protein N-term:
+Dimethyl@Protein_N-term:
   avge_mass: 28.0532
   classification: Isotopic label
   composition: H(4)C(2)
@@ -5114,7 +5114,7 @@ Ethyl@K:
   modloss_composition: ''
   mono_mass: 28.0313
   unimod_id: 280
-Ethyl@Protein N-term:
+Ethyl@Protein_N-term:
   avge_mass: 28.0532
   classification: Chemical derivative
   composition: H(4)C(2)
@@ -5394,7 +5394,7 @@ Formyl@K:
   modloss_composition: ''
   mono_mass: 27.994915
   unimod_id: 122
-Formyl@Protein N-term:
+Formyl@Protein_N-term:
   avge_mass: 28.0101
   classification: Post-translational
   composition: C(1)O(1)
@@ -5418,7 +5418,7 @@ Formyl@T:
   modloss_composition: ''
   mono_mass: 27.994915
   unimod_id: 122
-FormylMet@Protein N-term:
+FormylMet@Protein_N-term:
   avge_mass: 159.2062
   classification: Pre-translational
   composition: H(9)C(6)N(1)O(2)S(1)
@@ -5474,7 +5474,7 @@ GG@K:
   modloss_composition: ''
   mono_mass: 114.042927
   unimod_id: 121
-GG@Protein N-term:
+GG@Protein_N-term:
   avge_mass: 114.1026
   classification: Post-translational
   composition: H(6)C(4)N(2)O(2)
@@ -5578,7 +5578,7 @@ GNLLFLACYCIGG@K:
   modloss_composition: ''
   mono_mass: 1324.6308
   unimod_id: 1991
-GPIanchor@Protein C-term:
+GPIanchor@Protein_C-term:
   avge_mass: 123.0477
   classification: Post-translational
   composition: H(6)C(2)N(1)O(3)P(1)
@@ -5938,7 +5938,7 @@ Glu@E:
   modloss_composition: ''
   mono_mass: 129.042593
   unimod_id: 450
-Glu@Protein C-term:
+Glu@Protein_C-term:
   avge_mass: 129.114
   classification: Chemical derivative
   composition: H(7)C(5)N(1)O(3)
@@ -5954,7 +5954,7 @@ GluGlu@E:
   modloss_composition: ''
   mono_mass: 258.085186
   unimod_id: 451
-GluGlu@Protein C-term:
+GluGlu@Protein_C-term:
   avge_mass: 258.228
   classification: Post-translational
   composition: H(14)C(10)N(2)O(6)
@@ -5970,7 +5970,7 @@ GluGluGlu@E:
   modloss_composition: ''
   mono_mass: 387.127779
   unimod_id: 452
-GluGluGlu@Protein C-term:
+GluGluGlu@Protein_C-term:
   avge_mass: 387.3419
   classification: Post-translational
   composition: H(21)C(15)N(3)O(9)
@@ -5986,7 +5986,7 @@ GluGluGluGlu@E:
   modloss_composition: ''
   mono_mass: 516.170373
   unimod_id: 453
-GluGluGluGlu@Protein C-term:
+GluGluGluGlu@Protein_C-term:
   avge_mass: 516.4559
   classification: Post-translational
   composition: H(28)C(20)N(4)O(12)
@@ -6002,7 +6002,7 @@ Glucosylgalactosyl@K:
   modloss_composition: H(20)C(12)O(11)
   mono_mass: 340.100562
   unimod_id: 393
-Glucuronyl@Protein N-term:
+Glucuronyl@Protein_N-term:
   avge_mass: 176.1241
   classification: Other glycosylation
   composition: H(8)C(6)O(6)
@@ -10194,7 +10194,7 @@ ICPL:13C(6)2H(4)@K:
   modloss_composition: ''
   mono_mass: 115.0667
   unimod_id: 866
-ICPL:13C(6)2H(4)@Protein N-term:
+ICPL:13C(6)2H(4)@Protein_N-term:
   avge_mass: 115.0747
   classification: Isotopic label
   composition: H(-1)2H(4)13C(6)N(1)O(1)
@@ -10218,7 +10218,7 @@ ICPL:13C(6)@K:
   modloss_composition: ''
   mono_mass: 111.041593
   unimod_id: 364
-ICPL:13C(6)@Protein N-term:
+ICPL:13C(6)@Protein_N-term:
   avge_mass: 111.05
   classification: Isotopic label
   composition: H(3)13C(6)N(1)O(1)
@@ -10242,7 +10242,7 @@ ICPL:2H(4)@K:
   modloss_composition: ''
   mono_mass: 109.046571
   unimod_id: 687
-ICPL:2H(4)@Protein N-term:
+ICPL:2H(4)@Protein_N-term:
   avge_mass: 109.1188
   classification: Isotopic label
   composition: H(-1)2H(4)C(6)N(1)O(1)
@@ -10266,7 +10266,7 @@ ICPL@K:
   modloss_composition: ''
   mono_mass: 105.021464
   unimod_id: 365
-ICPL@Protein N-term:
+ICPL@Protein_N-term:
   avge_mass: 105.0941
   classification: Isotopic label
   composition: H(3)C(6)N(1)O(1)
@@ -10490,7 +10490,7 @@ LG-Hlactam-K@K:
   modloss_composition: ''
   mono_mass: 348.193674
   unimod_id: 504
-LG-Hlactam-K@Protein N-term:
+LG-Hlactam-K@Protein_N-term:
   avge_mass: 348.4333
   classification: Post-translational
   composition: H(28)C(20)O(5)
@@ -10546,7 +10546,7 @@ LG-lactam-K@K:
   modloss_composition: ''
   mono_mass: 332.19876
   unimod_id: 503
-LG-lactam-K@Protein N-term:
+LG-lactam-K@Protein_N-term:
   avge_mass: 332.4339
   classification: Post-translational
   composition: H(28)C(20)O(4)
@@ -11426,7 +11426,7 @@ Lys->Xle@K:
   modloss_composition: ''
   mono_mass: -15.010899
   unimod_id: 600
-Lys-loss@K^Protein C-term:
+Lys-loss@K^Protein_C-term:
   avge_mass: -128.1723
   classification: Post-translational
   composition: H(-12)C(-6)N(-2)O(-1)
@@ -11586,7 +11586,7 @@ MesitylOxide@K:
   modloss_composition: ''
   mono_mass: 98.073165
   unimod_id: 1873
-MesitylOxide@Protein N-term:
+MesitylOxide@Protein_N-term:
   avge_mass: 98.143
   classification: Chemical derivative
   composition: H(10)C(6)O(1)
@@ -11778,7 +11778,7 @@ Met->Xle@M:
   modloss_composition: ''
   mono_mass: -17.956421
   unimod_id: 614
-Met-loss+Acetyl@M^Protein N-term:
+Met-loss+Acetyl@M^Protein_N-term:
   avge_mass: -89.1594
   classification: Co-translational
   composition: H(-7)C(-3)N(-1)S(-1)
@@ -11786,7 +11786,7 @@ Met-loss+Acetyl@M^Protein N-term:
   modloss_composition: ''
   mono_mass: -89.02992
   unimod_id: 766
-Met-loss@M^Protein N-term:
+Met-loss@M^Protein_N-term:
   avge_mass: -131.1961
   classification: Co-translational
   composition: H(-9)C(-5)N(-1)O(-1)S(-1)
@@ -12090,7 +12090,7 @@ Methyl@N:
   modloss_composition: ''
   mono_mass: 14.01565
   unimod_id: 34
-Methyl@Protein N-term:
+Methyl@Protein_N-term:
   avge_mass: 14.0266
   classification: Post-translational
   composition: H(2)C(1)
@@ -12226,7 +12226,7 @@ Methylthio@N:
   modloss_composition: ''
   mono_mass: 45.987721
   unimod_id: 39
-Microcin@Protein C-term:
+Microcin@Protein_C-term:
   avge_mass: 831.6871
   classification: Post-translational
   composition: H(37)C(36)N(3)O(20)
@@ -12234,7 +12234,7 @@ Microcin@Protein C-term:
   modloss_composition: ''
   mono_mass: 831.197041
   unimod_id: 448
-MicrocinC7@Protein C-term:
+MicrocinC7@Protein_C-term:
   avge_mass: 386.3003
   classification: Post-translational
   composition: H(19)C(13)N(6)O(6)P(1)
@@ -12290,7 +12290,7 @@ MurNAc@A:
   modloss_composition: ''
   mono_mass: 275.100502
   unimod_id: 1400
-Myristoleyl@G^Protein N-term:
+Myristoleyl@G^Protein_N-term:
   avge_mass: 208.3398
   classification: Co-translational
   composition: H(24)C(14)O(1)
@@ -12298,7 +12298,7 @@ Myristoleyl@G^Protein N-term:
   modloss_composition: ''
   mono_mass: 208.182715
   unimod_id: 134
-Myristoyl+Delta:H(-4)@G^Protein N-term:
+Myristoyl+Delta:H(-4)@G^Protein_N-term:
   avge_mass: 206.3239
   classification: Co-translational
   composition: H(22)C(14)O(1)
@@ -13170,7 +13170,7 @@ Palmitoyl@K:
   modloss_composition: ''
   mono_mass: 238.229666
   unimod_id: 47
-Palmitoyl@Protein N-term:
+Palmitoyl@Protein_N-term:
   avge_mass: 238.4088
   classification: Post-translational
   composition: H(30)C(16)O(1)
@@ -14002,7 +14002,7 @@ Propionyl@K:
   modloss_composition: ''
   mono_mass: 56.026215
   unimod_id: 58
-Propionyl@Protein N-term:
+Propionyl@Protein_N-term:
   avge_mass: 56.0633
   classification: Multiple
   composition: H(4)C(3)O(1)
@@ -14138,7 +14138,7 @@ Propyl@K:
   modloss_composition: ''
   mono_mass: 42.04695
   unimod_id: 1305
-Propyl@Protein C-term:
+Propyl@Protein_C-term:
   avge_mass: 42.0797
   classification: Chemical derivative
   composition: H(6)C(3)
@@ -14218,7 +14218,7 @@ Pyro-carbamidomethyl@C^Any_N-term:
   modloss_composition: ''
   mono_mass: 39.994915
   unimod_id: 26
-PyruvicAcidIminyl@C^Protein N-term:
+PyruvicAcidIminyl@C^Protein_N-term:
   avge_mass: 70.0468
   classification: Post-translational
   composition: H(2)C(3)O(2)
@@ -14234,7 +14234,7 @@ PyruvicAcidIminyl@K:
   modloss_composition: ''
   mono_mass: 70.005479
   unimod_id: 422
-PyruvicAcidIminyl@V^Protein N-term:
+PyruvicAcidIminyl@V^Protein_N-term:
   avge_mass: 70.0468
   classification: Post-translational
   composition: H(2)C(3)O(2)
@@ -14474,7 +14474,7 @@ Ser->His@S:
   modloss_composition: ''
   mono_mass: 50.026883
   unimod_id: 1198
-Ser->LacticAcid@S^Protein N-term:
+Ser->LacticAcid@S^Protein_N-term:
   avge_mass: -15.0146
   classification: Post-translational
   composition: H(-1)N(-1)
@@ -14602,7 +14602,7 @@ Succinyl@K:
   modloss_composition: ''
   mono_mass: 100.016044
   unimod_id: 64
-Succinyl@Protein N-term:
+Succinyl@Protein_N-term:
   avge_mass: 100.0728
   classification: Post-translational
   composition: H(4)C(4)O(3)
@@ -14866,7 +14866,7 @@ TMT2plex@K:
   modloss_composition: ''
   mono_mass: 225.155833
   unimod_id: 738
-TMT2plex@Protein N-term:
+TMT2plex@Protein_N-term:
   avge_mass: 225.2921
   classification: Isotopic label
   composition: H(20)C(11)13C(1)N(2)O(2)
@@ -14914,7 +14914,7 @@ TMT6plex@K:
   modloss_composition: ''
   mono_mass: 229.162932
   unimod_id: 737
-TMT6plex@Protein N-term:
+TMT6plex@Protein_N-term:
   avge_mass: 229.2634
   classification: Isotopic label
   composition: H(20)C(8)13C(4)N(1)15N(1)O(2)
@@ -14962,7 +14962,7 @@ TMT@K:
   modloss_composition: ''
   mono_mass: 224.152478
   unimod_id: 739
-TMT@Protein N-term:
+TMT@Protein_N-term:
   avge_mass: 224.2994
   classification: Chemical derivative
   composition: H(20)C(12)N(2)O(2)
@@ -15010,7 +15010,7 @@ TMTpro@K:
   modloss_composition: ''
   mono_mass: 304.207146
   unimod_id: 2016
-TMTpro@Protein N-term:
+TMTpro@Protein_N-term:
   avge_mass: 304.3127
   classification: Isotopic label
   composition: H(25)C(8)13C(7)N(1)15N(2)O(3)
@@ -15058,7 +15058,7 @@ TMTpro_zero@K:
   modloss_composition: ''
   mono_mass: 295.189592
   unimod_id: 2017
-TMTpro_zero@Protein N-term:
+TMTpro_zero@Protein_N-term:
   avge_mass: 295.3773
   classification: Chemical derivative
   composition: H(25)C(15)N(3)O(3)
@@ -15138,7 +15138,7 @@ Thiazolidine@K:
   modloss_composition: ''
   mono_mass: 12.0
   unimod_id: 1009
-Thiazolidine@Protein N-term:
+Thiazolidine@Protein_N-term:
   avge_mass: 12.0107
   classification: Chemical derivative
   composition: C(1)
@@ -15426,7 +15426,7 @@ Trimethyl:2H(9)@R:
   modloss_composition: ''
   mono_mass: 51.103441
   unimod_id: 1371
-Trimethyl@A^Protein N-term:
+Trimethyl@A^Protein_N-term:
   avge_mass: 42.0797
   classification: Post-translational
   composition: H(6)C(3)
@@ -15482,7 +15482,7 @@ Trioxidation@Y:
   modloss_composition: ''
   mono_mass: 47.984744
   unimod_id: 345
-Tripalmitate@C^Protein N-term:
+Tripalmitate@C^Protein_N-term:
   avge_mass: 789.3049
   classification: Post-translational
   composition: H(96)C(51)O(5)
@@ -16714,7 +16714,7 @@ Xlink:BS2G[113]@K:
   modloss_composition: ''
   mono_mass: 113.047679
   unimod_id: 1906
-Xlink:BS2G[113]@Protein N-term:
+Xlink:BS2G[113]@Protein_N-term:
   avge_mass: 113.1146
   classification: Chemical derivative
   composition: H(7)C(5)N(1)O(2)
@@ -16730,7 +16730,7 @@ Xlink:BS2G[114]@K:
   modloss_composition: ''
   mono_mass: 114.031694
   unimod_id: 1907
-Xlink:BS2G[114]@Protein N-term:
+Xlink:BS2G[114]@Protein_N-term:
   avge_mass: 114.0993
   classification: Chemical derivative
   composition: H(6)C(5)O(3)
@@ -16746,7 +16746,7 @@ Xlink:BS2G[217]@K:
   modloss_composition: ''
   mono_mass: 217.095023
   unimod_id: 1908
-Xlink:BS2G[217]@Protein N-term:
+Xlink:BS2G[217]@Protein_N-term:
   avge_mass: 217.2191
   classification: Chemical derivative
   composition: H(15)C(9)N(1)O(5)
@@ -16762,7 +16762,7 @@ Xlink:BS2G[96]@K:
   modloss_composition: ''
   mono_mass: 96.021129
   unimod_id: 1905
-Xlink:BS2G[96]@Protein N-term:
+Xlink:BS2G[96]@Protein_N-term:
   avge_mass: 96.0841
   classification: Chemical derivative
   composition: H(4)C(5)O(2)
@@ -16778,7 +16778,7 @@ Xlink:BuUrBu[111]@K:
   modloss_composition: ''
   mono_mass: 111.032028
   unimod_id: 1885
-Xlink:BuUrBu[111]@Protein N-term:
+Xlink:BuUrBu[111]@Protein_N-term:
   avge_mass: 111.0987
   classification: Chemical derivative
   composition: H(5)C(5)N(1)O(2)
@@ -16794,7 +16794,7 @@ Xlink:BuUrBu[196]@K:
   modloss_composition: ''
   mono_mass: 196.084792
   unimod_id: 1899
-Xlink:BuUrBu[196]@Protein N-term:
+Xlink:BuUrBu[196]@Protein_N-term:
   avge_mass: 196.2032
   classification: Chemical derivative
   composition: H(12)C(9)N(2)O(3)
@@ -16810,7 +16810,7 @@ Xlink:BuUrBu[213]@K:
   modloss_composition: ''
   mono_mass: 213.111341
   unimod_id: 1887
-Xlink:BuUrBu[213]@Protein N-term:
+Xlink:BuUrBu[213]@Protein_N-term:
   avge_mass: 213.2337
   classification: Chemical derivative
   composition: H(15)C(9)N(3)O(3)
@@ -16826,7 +16826,7 @@ Xlink:BuUrBu[214]@K:
   modloss_composition: ''
   mono_mass: 214.095357
   unimod_id: 1888
-Xlink:BuUrBu[214]@Protein N-term:
+Xlink:BuUrBu[214]@Protein_N-term:
   avge_mass: 214.2185
   classification: Chemical derivative
   composition: H(14)C(9)N(2)O(4)
@@ -16842,7 +16842,7 @@ Xlink:BuUrBu[317]@K:
   modloss_composition: ''
   mono_mass: 317.158686
   unimod_id: 1889
-Xlink:BuUrBu[317]@Protein N-term:
+Xlink:BuUrBu[317]@Protein_N-term:
   avge_mass: 317.3382
   classification: Chemical derivative
   composition: H(23)C(13)N(3)O(6)
@@ -16858,7 +16858,7 @@ Xlink:BuUrBu[85]@K:
   modloss_composition: ''
   mono_mass: 85.052764
   unimod_id: 1886
-Xlink:BuUrBu[85]@Protein N-term:
+Xlink:BuUrBu[85]@Protein_N-term:
   avge_mass: 85.1045
   classification: Chemical derivative
   composition: H(7)C(4)N(1)O(1)
@@ -16906,7 +16906,7 @@ Xlink:DMP[122]@K:
   modloss_composition: ''
   mono_mass: 122.084398
   unimod_id: 1912
-Xlink:DMP[122]@Protein N-term:
+Xlink:DMP[122]@Protein_N-term:
   avge_mass: 122.1677
   classification: Chemical derivative
   composition: H(10)C(7)N(2)
@@ -16922,7 +16922,7 @@ Xlink:DMP[139]@K:
   modloss_composition: ''
   mono_mass: 139.110947
   unimod_id: 1911
-Xlink:DMP[139]@Protein N-term:
+Xlink:DMP[139]@Protein_N-term:
   avge_mass: 139.1982
   classification: Chemical derivative
   composition: H(13)C(7)N(3)
@@ -16938,7 +16938,7 @@ Xlink:DMP[140]@K:
   modloss_composition: ''
   mono_mass: 140.094963
   unimod_id: 1027
-Xlink:DMP[140]@Protein N-term:
+Xlink:DMP[140]@Protein_N-term:
   avge_mass: 140.183
   classification: Chemical derivative
   composition: H(12)C(7)N(2)O(1)
@@ -16954,7 +16954,7 @@ Xlink:DMP[154]@K:
   modloss_composition: ''
   mono_mass: 154.110613
   unimod_id: 455
-Xlink:DMP[154]@Protein N-term:
+Xlink:DMP[154]@Protein_N-term:
   avge_mass: 154.2096
   classification: Chemical derivative
   composition: H(14)C(8)N(2)O(1)
@@ -16970,7 +16970,7 @@ Xlink:DSSO[104]@K:
   modloss_composition: ''
   mono_mass: 103.9932
   unimod_id: 1883
-Xlink:DSSO[104]@Protein N-term:
+Xlink:DSSO[104]@Protein_N-term:
   avge_mass: 104.1277
   classification: Chemical derivative
   composition: H(4)C(3)O(2)S(1)
@@ -16986,7 +16986,7 @@ Xlink:DSSO[158]@K:
   modloss_composition: ''
   mono_mass: 158.003765
   unimod_id: 1896
-Xlink:DSSO[158]@Protein N-term:
+Xlink:DSSO[158]@Protein_N-term:
   avge_mass: 158.175
   classification: Chemical derivative
   composition: H(6)C(6)O(3)S(1)
@@ -17002,7 +17002,7 @@ Xlink:DSSO[175]@K:
   modloss_composition: ''
   mono_mass: 175.030314
   unimod_id: 1879
-Xlink:DSSO[175]@Protein N-term:
+Xlink:DSSO[175]@Protein_N-term:
   avge_mass: 175.2056
   classification: Chemical derivative
   composition: H(9)C(6)N(1)O(3)S(1)
@@ -17018,7 +17018,7 @@ Xlink:DSSO[176]@K:
   modloss_composition: ''
   mono_mass: 176.01433
   unimod_id: 1878
-Xlink:DSSO[176]@Protein N-term:
+Xlink:DSSO[176]@Protein_N-term:
   avge_mass: 176.1903
   classification: Chemical derivative
   composition: H(8)C(6)O(4)S(1)
@@ -17034,7 +17034,7 @@ Xlink:DSSO[279]@K:
   modloss_composition: ''
   mono_mass: 279.077658
   unimod_id: 1880
-Xlink:DSSO[279]@Protein N-term:
+Xlink:DSSO[279]@Protein_N-term:
   avge_mass: 279.3101
   classification: Chemical derivative
   composition: H(17)C(10)N(1)O(6)S(1)
@@ -17050,7 +17050,7 @@ Xlink:DSSO[54]@K:
   modloss_composition: ''
   mono_mass: 54.010565
   unimod_id: 1881
-Xlink:DSSO[54]@Protein N-term:
+Xlink:DSSO[54]@Protein_N-term:
   avge_mass: 54.0474
   classification: Chemical derivative
   composition: H(2)C(3)O(1)
@@ -17066,7 +17066,7 @@ Xlink:DSSO[86]@K:
   modloss_composition: ''
   mono_mass: 85.982635
   unimod_id: 1882
-Xlink:DSSO[86]@Protein N-term:
+Xlink:DSSO[86]@Protein_N-term:
   avge_mass: 86.1124
   classification: Chemical derivative
   composition: H(2)C(3)O(1)S(1)
@@ -17082,7 +17082,7 @@ Xlink:DSS[138]@K:
   modloss_composition: ''
   mono_mass: 138.06808
   unimod_id: 1898
-Xlink:DSS[138]@Protein N-term:
+Xlink:DSS[138]@Protein_N-term:
   avge_mass: 138.1638
   classification: Chemical derivative
   composition: H(10)C(8)O(2)
@@ -17098,7 +17098,7 @@ Xlink:DSS[155]@K:
   modloss_composition: ''
   mono_mass: 155.094629
   unimod_id: 1789
-Xlink:DSS[155]@Protein N-term:
+Xlink:DSS[155]@Protein_N-term:
   avge_mass: 155.1943
   classification: Chemical derivative
   composition: H(13)C(8)N(1)O(2)
@@ -17114,7 +17114,7 @@ Xlink:DSS[156]@K:
   modloss_composition: ''
   mono_mass: 156.078644
   unimod_id: 1020
-Xlink:DSS[156]@Protein N-term:
+Xlink:DSS[156]@Protein_N-term:
   avge_mass: 156.1791
   classification: Chemical derivative
   composition: H(12)C(8)O(3)
@@ -17130,7 +17130,7 @@ Xlink:DSS[259]@K:
   modloss_composition: ''
   mono_mass: 259.141973
   unimod_id: 1877
-Xlink:DSS[259]@Protein N-term:
+Xlink:DSS[259]@Protein_N-term:
   avge_mass: 259.2988
   classification: Chemical derivative
   composition: H(21)C(12)N(1)O(5)
@@ -17146,7 +17146,7 @@ Xlink:DST[114]@K:
   modloss_composition: ''
   mono_mass: 113.995309
   unimod_id: 1901
-Xlink:DST[114]@Protein N-term:
+Xlink:DST[114]@Protein_N-term:
   avge_mass: 114.0563
   classification: Chemical derivative
   composition: H(2)C(4)O(4)
@@ -17162,7 +17162,7 @@ Xlink:DST[132]@K:
   modloss_composition: ''
   mono_mass: 132.005873
   unimod_id: 1022
-Xlink:DST[132]@Protein N-term:
+Xlink:DST[132]@Protein_N-term:
   avge_mass: 132.0716
   classification: Chemical derivative
   composition: H(4)C(4)O(5)
@@ -17178,7 +17178,7 @@ Xlink:DST[56]@K:
   modloss_composition: ''
   mono_mass: 55.989829
   unimod_id: 1999
-Xlink:DST[56]@Protein N-term:
+Xlink:DST[56]@Protein_N-term:
   avge_mass: 56.0202
   classification: Chemical derivative
   composition: C(2)O(2)
@@ -17194,7 +17194,7 @@ Xlink:DTBP[172]@K:
   modloss_composition: ''
   mono_mass: 172.01289
   unimod_id: 1900
-Xlink:DTBP[172]@Protein N-term:
+Xlink:DTBP[172]@Protein_N-term:
   avge_mass: 172.2711
   classification: Chemical derivative
   composition: H(8)C(6)N(2)S(2)
@@ -17210,7 +17210,7 @@ Xlink:DTBP[87]@K:
   modloss_composition: ''
   mono_mass: 87.01427
   unimod_id: 324
-Xlink:DTBP[87]@Protein N-term:
+Xlink:DTBP[87]@Protein_N-term:
   avge_mass: 87.1435
   classification: Chemical derivative
   composition: H(5)C(3)N(1)S(1)
@@ -17226,7 +17226,7 @@ Xlink:DTSSP[174]@K:
   modloss_composition: ''
   mono_mass: 173.980921
   unimod_id: 1902
-Xlink:DTSSP[174]@Protein N-term:
+Xlink:DTSSP[174]@Protein_N-term:
   avge_mass: 174.2406
   classification: Chemical derivative
   composition: H(6)C(6)O(2)S(2)
@@ -17242,7 +17242,7 @@ Xlink:DTSSP[192]@K:
   modloss_composition: ''
   mono_mass: 191.991486
   unimod_id: 1023
-Xlink:DTSSP[192]@Protein N-term:
+Xlink:DTSSP[192]@Protein_N-term:
   avge_mass: 192.2559
   classification: Chemical derivative
   composition: H(8)C(6)O(3)S(2)
@@ -17258,7 +17258,7 @@ Xlink:DTSSP[88]@K:
   modloss_composition: ''
   mono_mass: 87.998285
   unimod_id: 126
-Xlink:DTSSP[88]@Protein N-term:
+Xlink:DTSSP[88]@Protein_N-term:
   avge_mass: 88.1283
   classification: Chemical derivative
   composition: H(4)C(3)O(1)S(1)
@@ -17274,7 +17274,7 @@ Xlink:EGS[115]@K:
   modloss_composition: ''
   mono_mass: 115.026943
   unimod_id: 1028
-Xlink:EGS[115]@Protein N-term:
+Xlink:EGS[115]@Protein_N-term:
   avge_mass: 115.0874
   classification: Chemical derivative
   composition: H(5)C(4)N(1)O(3)
@@ -17290,7 +17290,7 @@ Xlink:EGS[226]@K:
   modloss_composition: ''
   mono_mass: 226.047738
   unimod_id: 1897
-Xlink:EGS[226]@Protein N-term:
+Xlink:EGS[226]@Protein_N-term:
   avge_mass: 226.1828
   classification: Chemical derivative
   composition: H(10)C(10)O(6)
@@ -17306,7 +17306,7 @@ Xlink:EGS[244]@K:
   modloss_composition: ''
   mono_mass: 244.058303
   unimod_id: 1021
-Xlink:EGS[244]@Protein N-term:
+Xlink:EGS[244]@Protein_N-term:
   avge_mass: 244.1981
   classification: Chemical derivative
   composition: H(12)C(10)O(7)
@@ -17330,7 +17330,7 @@ Xlink:SMCC[219]@K:
   modloss_composition: ''
   mono_mass: 219.089543
   unimod_id: 1903
-Xlink:SMCC[219]@Protein N-term:
+Xlink:SMCC[219]@Protein_N-term:
   avge_mass: 219.2365
   classification: Chemical derivative
   composition: H(13)C(12)N(1)O(3)
@@ -17354,7 +17354,7 @@ Xlink:SMCC[237]@K:
   modloss_composition: ''
   mono_mass: 237.100108
   unimod_id: 1024
-Xlink:SMCC[237]@Protein N-term:
+Xlink:SMCC[237]@Protein_N-term:
   avge_mass: 237.2518
   classification: Chemical derivative
   composition: H(15)C(12)N(1)O(4)
@@ -17466,7 +17466,7 @@ biotinAcrolein298@K:
   modloss_composition: ''
   mono_mass: 298.146347
   unimod_id: 1314
-biotinAcrolein298@Protein N-term:
+biotinAcrolein298@Protein_N-term:
   avge_mass: 298.4044
   classification: Chemical derivative
   composition: H(22)C(13)N(4)O(2)S(1)
@@ -20826,7 +20826,7 @@ iTRAQ4plex@K:
   modloss_composition: ''
   mono_mass: 144.102063
   unimod_id: 214
-iTRAQ4plex@Protein N-term:
+iTRAQ4plex@Protein_N-term:
   avge_mass: 144.1544
   classification: Isotopic label
   composition: H(12)C(4)13C(3)N(1)15N(1)O(1)
@@ -20922,7 +20922,7 @@ iTRAQ8plex@K:
   modloss_composition: ''
   mono_mass: 304.20536
   unimod_id: 730
-iTRAQ8plex@Protein N-term:
+iTRAQ8plex@Protein_N-term:
   avge_mass: 304.3074
   classification: Isotopic label
   composition: H(24)C(7)13C(7)N(3)15N(1)O(3)
@@ -21434,7 +21434,7 @@ shTMT@K:
   modloss_composition: ''
   mono_mass: 235.176741
   unimod_id: 2015
-shTMT@Protein N-term:
+shTMT@Protein_N-term:
   avge_mass: 235.2201
   classification: Chemical derivative
   composition: H(20)C(3)13C(9)15N(2)O(2)
