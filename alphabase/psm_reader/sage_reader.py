@@ -148,13 +148,21 @@ def capture_modifications(
         return ";".join(site_list), ";".join(mod_list)
 
 
+def _print_df(df, s):
+    df = df[df["mod_name"].str.startswith("Gln->pyro-Glu@Q^Any")]
+    logging.error(f"ZZZ {s} {df}")
+
+
 def get_annotated_mod_df():
     """Annotates the modification dataframe with the location of the modification."""
     mod_annotated_df = MOD_DF.copy()
     mod_annotated_df["location"] = (
         mod_annotated_df["mod_name"].str.split("@").str[1].str.split("^").str[0]
     )
+    _print_df(mod_annotated_df, "1")
     mod_annotated_df = mod_annotated_df.sort_values(by="mass").reset_index(drop=True)
+
+    _print_df(mod_annotated_df, "2")
     mod_annotated_df["mod_name_stripped"] = mod_annotated_df["mod_name"].str.replace(
         " ", "_"
     )

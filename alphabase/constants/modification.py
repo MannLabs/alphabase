@@ -114,6 +114,7 @@ def load_mod_df(
     MOD_DF["modloss"] = MOD_DF["modloss_original"]
     keep_modloss_by_importance(modloss_importance_level)
     update_all_by_MOD_DF()
+    _print_df(MOD_DF, 5)
 
 
 load_mod_df()
