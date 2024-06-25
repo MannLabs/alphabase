@@ -1,3 +1,5 @@
+import logging
+
 import numpy as np
 import pandas as pd
 import typing
@@ -74,11 +76,11 @@ def lookup_modification(
         return None
 
     str1 = f'XXX {filtered_mod_df[["mod_name", "unimod_id"]]}'
+    logging.error(str1)
     matched_mods = filtered_mod_df.sort_values(by="unimod_id")
 
     str2 = f'XXX {matched_mods[["mod_name", "unimod_id"]]}'
-
-    raise ValueError(str1 + "\n" + str2)
+    logging.error(str2)
 
     matched_mod = matched_mods.iloc[0]
 

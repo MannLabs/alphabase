@@ -1,3 +1,4 @@
+import logging
 import os
 import numba
 import numpy as np
@@ -83,6 +84,11 @@ def keep_modloss_by_importance(modloss_importance_level: float = 1.0):
     MOD_LOSS_MASS.update(MOD_DF["modloss"].to_dict())
 
 
+def _print_df(df, s):
+    df = df[df["mod_name"].str.startswith("Gln->pyro-Glu@Q^Any")]
+    logging.error(f"YYY {s} {df}")
+
+
 def load_mod_df(
     tsv: str = os.path.join(CONST_FILE_FOLDER, "modification.tsv"),
     *,
@@ -90,9 +96,14 @@ def load_mod_df(
 ):
     global MOD_DF
     MOD_DF = pd.read_table(tsv, keep_default_na=False)
+    _print_df(MOD_DF, 1)
     _df = MOD_DF[MOD_DF.mod_name.str.contains(" ", regex=False)].copy()
+    _print_df(_df, 2)
     _df["mod_name"] = MOD_DF.mod_name.str.replace(" ", "_", regex=False)
+    _print_df(_df, 3)
     MOD_DF = pd.concat([MOD_DF, _df], ignore_index=True).drop_duplicates("mod_name")
+
+    _print_df(MOD_DF, 4)
     MOD_DF.fillna("", inplace=True)
     MOD_DF["unimod_id"] = MOD_DF.unimod_id.astype(np.int32)
     MOD_DF.set_index("mod_name", drop=False, inplace=True)

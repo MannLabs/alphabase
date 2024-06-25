@@ -8,4 +8,5 @@
 # INCLUDED_NBS=$(find ../nbs_tests -name "*.ipynb" | grep -v test_isotope_mp.ipynb)
 
 #INCLUDED_NBS=$(find ../nbs_tests -name "*.ipynb")
-python -m pytest --nbmake ../nbs_tests/psm_reader/sage_reader.ipynb
+#python -m pytest --nbmake ../nbs_tests/psm_reader/sage_reader.ipynb
+pytest --log-cli-level=INFO ../test_sage_reader.py
