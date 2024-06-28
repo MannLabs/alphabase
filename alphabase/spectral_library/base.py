@@ -678,14 +678,14 @@ class SpecLibBase(object):
     @staticmethod
     def _replace_mod_name_whitespaces(mod_seq_df: pd.DataFrame) -> None:
         """Replace whitespaces in-place in `mod_seq_df` in column `mod_name` with underscores."""
-        if mod_seq_df["mod_name"].str.contains(" ", regex=False):
+        if any(mod_seq_df["mods"].str.contains(" ", regex=False)):
             warn(
                 "Support for whitespaces in modifications will be dropped in the next major release. "
                 "Please use underscores instead.",
                 DeprecationWarning,
                 stacklevel=2,
             )
-            mod_seq_df["mod_name"] = mod_seq_df["mod_name"].str.replace(" ", "_")
+            mod_seq_df["mods"] = mod_seq_df["mods"].str.replace(" ", "_")
 
 
 def annotate_fragments_from_speclib(
