@@ -75,7 +75,7 @@ def lookup_modification(
 
     matched_mod = filtered_mod_df.sort_values(by="unimod_id").iloc[0]
 
-    return matched_mod["mod_name"]
+    return matched_mod["mod_name_stripped"]
 
 
 def capture_modifications(
@@ -122,7 +122,7 @@ def capture_modifications(
             mass_observed, previous_aa, mod_annotated_df, ppm_tolerance=ppm_tolerance
         )
         if mod is not None:
-            site_list.append(str(match_start - 1 - match_delta))
+            site_list.append(str(match_start - match_delta))
             mod_list.append(mod)
 
         else:

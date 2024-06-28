@@ -160,7 +160,7 @@ def array(shape: tuple, dtype: np.dtype, tmp_dir_abs_path: str = None) -> np.nda
         _change_temp_dir_location(tmp_dir_abs_path)
 
     temp_file_name = os.path.join(
-        TEMP_DIR_NAME, f"temp_mmap_{np.random.randint(2**63)}.hdf"
+        TEMP_DIR_NAME, f"temp_mmap_{np.random.randint(2**63, dtype=np.int64)}.hdf"
     )
 
     with h5py.File(temp_file_name, "w") as hdf_file:
@@ -218,7 +218,7 @@ def create_empty_mmap(
     # if path does not exist generate a random file name in the TEMP directory
     if file_path is None:
         temp_file_name = os.path.join(
-            TEMP_DIR_NAME, f"temp_mmap_{np.random.randint(2**63)}.hdf"
+            TEMP_DIR_NAME, f"temp_mmap_{np.random.randint(2**63, dtype=np.int64)}.hdf"
         )
     else:
         temp_file_name = _get_file_location(file_path, overwrite=False)
