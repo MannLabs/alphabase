@@ -52,6 +52,10 @@ def update_all_by_MOD_DF():
         MOD_Composition[mod] = dict(parse_formula(chem))
 
 
+def _mod_replace_whitespace(modname):
+    return modname.replace(" ", "_")
+
+
 def add_modifications_for_lower_case_AA():
     """Add modifications for lower-case AAs for advanced usages"""
     global MOD_DF
@@ -68,6 +72,7 @@ def add_modifications_for_lower_case_AA():
             return ""
 
     lower_case_df["mod_name"] = lower_case_df["mod_name"].apply(_mod_lower_case)
+    lower_case_df["mod_name"] = lower_case_df["mod_name"].apply(_mod_replace_whitespace)
     lower_case_df = lower_case_df[lower_case_df["mod_name"] != ""]
     lower_case_df.set_index("mod_name", drop=False, inplace=True)
     lower_case_df["lower_case_AA"] = True
@@ -90,9 +95,9 @@ def load_mod_df(
 ):
     global MOD_DF
     MOD_DF = pd.read_table(tsv, keep_default_na=False)
-    _df = MOD_DF[MOD_DF.mod_name.str.contains(" ", regex=False)].copy()
-    _df["mod_name"] = MOD_DF.mod_name.str.replace(" ", "_", regex=False)
-    MOD_DF = pd.concat([MOD_DF, _df], ignore_index=True).drop_duplicates("mod_name")
+    # _df = MOD_DF[MOD_DF.mod_name.str.contains(" ", regex=False)].copy()
+    MOD_DF["mod_name"] = MOD_DF.mod_name.str.replace(" ", "_", regex=False)
+    # MOD_DF = pd.concat([MOD_DF, _df], ignore_index=True).drop_duplicates("mod_name")
     MOD_DF.fillna("", inplace=True)
     MOD_DF["unimod_id"] = MOD_DF.unimod_id.astype(np.int32)
     MOD_DF.set_index("mod_name", drop=False, inplace=True)
@@ -137,6 +142,8 @@ def calc_modification_mass(
         `0` if sites has no modifications
     """
     masses = np.zeros(nAA)
+    mod_names = [_mod_replace_whitespace(mod) for mod in mod_names]
+
     for site, mod in zip(mod_sites, mod_names):
         if site == 0:
             masses[site] += MOD_MASS[mod]
@@ -175,8 +182,10 @@ def calc_mod_masses_for_same_len_seqs(
         Masses of modifications through all the peptides,
         `0` if sites without modifications.
     """
+
     masses = np.zeros((len(mod_names_list), nAA))
     for i, (mod_names, mod_sites) in enumerate(zip(mod_names_list, mod_sites_list)):
+        mod_names = [_mod_replace_whitespace(mod) for mod in mod_names]
         for mod, site in zip(mod_names, mod_sites):
             if site == 0:
                 masses[i, site] += MOD_MASS[mod]
@@ -203,6 +212,8 @@ def calc_modification_mass_sum(mod_names: List[str]) -> float:
     float
         Total mass
     """
+    # Acetyl@Protein_N-term
+    mod_names = [_mod_replace_whitespace(mod) for mod in mod_names]
     return np.sum([MOD_MASS[mod] for mod in mod_names])
 
 
@@ -278,6 +289,9 @@ def calc_modloss_mass_with_importance(
     """
     if not mod_names:
         return np.zeros(nAA - 1)
+
+    mod_names = [_mod_replace_whitespace(mod) for mod in mod_names]
+
     mod_losses = np.zeros(nAA + 2)
     mod_losses[mod_sites] = [MOD_LOSS_MASS[mod] for mod in mod_names]
     _loss_importance = np.zeros(nAA + 2)
@@ -357,6 +371,9 @@ def calc_modloss_mass(
     """
     if len(mod_names) == 0:
         return np.zeros(nAA - 1)
+
+    mod_names = [_mod_replace_whitespace(mod) for mod in mod_names]
+
     mod_losses = np.zeros(nAA + 2)
     mod_losses[mod_sites] = [MOD_LOSS_MASS[mod] for mod in mod_names]
 
@@ -372,6 +389,8 @@ def _add_a_new_modification(
     """
     Add a new modification into :data:`MOD_DF`.
     """
+    mod_name = _mod_replace_whitespace(mod_name)
+
     MOD_DF.loc[
         mod_name,
         [

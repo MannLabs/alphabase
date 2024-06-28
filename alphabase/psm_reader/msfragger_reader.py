@@ -44,6 +44,7 @@ def _get_mods_from_masses(sequence, msf_aa_mods):
 
         mod_translated = False
         for mod_name in mass_mapped_mods:
+            mod_name = mod_name.replace(" ", "_")
             if abs(mod_mass - MOD_MASS[mod_name]) < mod_mass_tol:
                 if site == 0:
                     _mod = mod_name.split("@")[0] + "@Any N-term"

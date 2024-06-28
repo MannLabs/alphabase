@@ -307,6 +307,7 @@ def get_mod_seq_formula(seq: str, mods: str) -> list:
                 formula[chem] = n
     if len(mods) > 0:
         for mod in mods.split(";"):
+            mod = mod.replace(" ", "_")
             for chem, n in MOD_Composition[mod].items():
                 if chem in formula:
                     formula[chem] += n

@@ -136,6 +136,7 @@ def capture_modifications(
     if error:
         return np.nan, np.nan
     else:
+        mod_list = [mod.replace("_", " ") for mod in mod_list]
         return ";".join(site_list), ";".join(mod_list)
 
 
