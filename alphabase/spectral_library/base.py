@@ -679,12 +679,17 @@ class SpecLibBase(object):
     def _replace_mod_name_whitespaces(mod_seq_df: pd.DataFrame) -> None:
         """Replace whitespaces in-place in `mod_seq_df` in column `mod_name` with underscores."""
         if any(mod_seq_df["mods"].str.contains(" ", regex=False)):
+            msg = (
+                "Support for whitespaces in modifications will be dropped in the next major release of alphabase. "
+                "Please use underscores in your spectral libraries instead."
+            )
             warn(
-                "Support for whitespaces in modifications will be dropped in the next major release. "
-                "Please use underscores instead.",
+                msg,
                 DeprecationWarning,
                 stacklevel=2,
             )
+            logging.warning(msg)
+
             mod_seq_df["mods"] = mod_seq_df["mods"].str.replace(" ", "_")
 
 
