@@ -1,3 +1,5 @@
+from warnings import warn
+
 import pandas as pd
 import numpy as np
 import typing
@@ -650,6 +652,9 @@ class SpecLibBase(object):
             ]
             mod_seq_df = _hdf.library.mod_seq_df.values
             cols = [col for col in mod_seq_df.columns if col not in key_columns]
+
+            self._replace_mod_name_whitespaces(mod_seq_df)
+
             self._precursor_df[cols] = mod_seq_df[cols]
 
         self._fragment_mz_df = _hdf.library.fragment_mz_df.values
@@ -669,6 +674,18 @@ class SpecLibBase(object):
                 if frag in self._fragment_intensity_df.columns
             ]
         ]
+
+    @staticmethod
+    def _replace_mod_name_whitespaces(mod_seq_df: pd.DataFrame) -> None:
+        """Replace whitespaces in-place in `mod_seq_df` in column `mod_name` with underscores."""
+        if mod_seq_df["mod_name"].str.contains(" ", regex=False):
+            warn(
+                "Support for whitespaces in modifications will be dropped in the next major release. "
+                "Please use underscores instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            mod_seq_df["mod_name"] = mod_seq_df["mod_name"].str.replace(" ", "_")
 
 
 def annotate_fragments_from_speclib(
