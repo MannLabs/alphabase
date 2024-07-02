@@ -46,9 +46,9 @@ def _get_mods_from_masses(sequence, msf_aa_mods):
         for mod_name in mass_mapped_mods:
             if abs(mod_mass - MOD_MASS[mod_name]) < mod_mass_tol:
                 if site == 0:
-                    _mod = mod_name.split("@")[0] + "@Any N-term"
+                    _mod = mod_name.split("@")[0] + "@Any_N-term"
                 elif site == 1:
-                    if mod_name.endswith("^Any N-term"):
+                    if mod_name.endswith("^Any_N-term"):
                         _mod = mod_name
                         site_str = "0"
                     else:
@@ -58,7 +58,7 @@ def _get_mods_from_masses(sequence, msf_aa_mods):
                         _mod = mod_name
                     else:
                         _mod = (
-                            mod_name.split("@")[0] + "@Any C-term"
+                            mod_name.split("@")[0] + "@Any_C-term"
                         )  # what if only Protein C-term is listed?
                     site_str = "-1"
                 else:

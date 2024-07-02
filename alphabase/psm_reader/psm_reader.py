@@ -185,7 +185,7 @@ class PSMReaderBase(object):
             ```
             add_modification_mapping({
             'Dimethyl@K': ['K(Dimethyl)'], # list
-            'Dimethyl@Any N-term': '_(Dimethyl)', # str
+            'Dimethyl@Any_N-term': '_(Dimethyl)', # str
             })
             ```
         """
@@ -241,7 +241,7 @@ class PSMReaderBase(object):
             if isinstance(other_mod, (list, tuple)):
                 for _mod in other_mod:
                     if _mod in self.rev_mod_mapping:
-                        if this_mod.endswith("Protein N-term"):
+                        if this_mod.endswith("Protein_N-term"):
                             continue
                     self.rev_mod_mapping[_mod] = this_mod
             else:
@@ -516,7 +516,7 @@ class PSMReaderBase(object):
                 "Phospho@S",
                 "Phospho@T",
                 "Phospho@Y",
-                "Acetyl@Protein N-term",
+                "Acetyl@Protein_N-term",
             ]
         ),
     ):
