@@ -626,7 +626,7 @@ class SpecLibBase(object):
             "fragment_intensity_df": self._fragment_intensity_df,
         }
 
-    def load_hdf(self, hdf_file: str, load_mod_seq: bool = False):
+    def load_hdf(self, hdf_file: str, load_mod_seq: bool = True):
         """Load the hdf library from hdf_file
 
         Parameters
