@@ -17,7 +17,23 @@ class Progress:  # pragma: no cover
     def __init__(self):
         self.pbar = None
 
-    def __call__(self, block_num, block_size, total_size):
+    def __call__(self, block_num: int, block_size: int, total_size: int) -> None:
+        """Report download progress to console.
+
+        Parameters
+        ----------
+
+        block_num : int
+            number of blocks downloaded
+
+        block_size : int
+            size of each block in bytes
+
+        total_size : int
+            total size of the file to be downloaded in bytes
+
+        """
+
         if total_size < 0:
             # disable progress when the downloaded item is a directory
             return
@@ -36,7 +52,18 @@ class FileDownloader(ABC):
     """Abstract class for downloading files from sharing links."""
 
     def __init__(self, url: str, output_dir: str):
-        """Initialize FileDownloader."""
+        """Initialize FileDownloader.
+
+        Parameters
+        ----------
+
+        url : str
+            sharing link to download file from
+
+        output_dir : str
+            directory to save downloaded file to
+
+        """
         self._url = url
         self._output_dir = output_dir
         self._encoded_url = self._encode_url()
