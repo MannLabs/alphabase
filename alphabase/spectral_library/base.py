@@ -635,8 +635,9 @@ class SpecLibBase(object):
             hdf library path to load
 
         load_mod_seq : bool, optional
-            if also load mod_seq_df.
-            Defaults to False.
+            For performance reason, the susbset of non key numeric columns is stored in mod_seq_df.
+            For fast loading, set load_mod_seq to False to skip loading mod_seq_df.
+            Defaults to True.
 
         """
         _hdf = HDF_File(
