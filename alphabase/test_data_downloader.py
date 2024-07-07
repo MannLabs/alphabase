@@ -48,6 +48,7 @@ class Progress:  # pragma: no cover
         else:
             self.pbar.finish()
 
+
 class FileDownloader(ABC):
     """Abstract class for downloading files from sharing links."""
 
