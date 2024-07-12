@@ -1,17 +1,18 @@
-import numpy as np
 from typing import List, Tuple
+
+import numpy as np
 
 from alphabase.constants.aa import (
     calc_AA_masses,
     calc_AA_masses_for_same_len_seqs,
     calc_sequence_masses_for_same_len_seqs,
 )
+from alphabase.constants.atom import MASS_H2O
 from alphabase.constants.modification import (
+    calc_mod_masses_for_same_len_seqs,
     calc_modification_mass,
     calc_modification_mass_sum,
-    calc_mod_masses_for_same_len_seqs,
 )
-from alphabase.constants.atom import MASS_H2O
 
 
 def calc_diff_modification_mass(
@@ -42,9 +43,7 @@ def calc_diff_modification_mass(
     """
     masses = np.zeros(pep_len)
     for site, mass in zip(mass_diff_sites, mass_diffs):
-        if site == 0:
-            masses[site] += mass
-        elif site == -1:
+        if site == 0 or site == -1:
             masses[site] += mass
         else:
             masses[site - 1] += mass
@@ -87,9 +86,7 @@ def calc_mod_diff_masses_for_same_len_seqs(
         zip(aa_mass_diffs_list, mod_sites_list)
     ):
         for mod_diff, site in zip(aa_mass_diffs, mod_sites):
-            if site == 0:
-                masses[i, site] += mod_diff
-            elif site == -1:
+            if site == 0 or site == -1:
                 masses[i, site] += mod_diff
             else:
                 masses[i, site - 1] += mod_diff

@@ -1,16 +1,15 @@
 import os
+from typing import List, Union
+
 import numba
 import numpy as np
 import pandas as pd
-from typing import Union, List
 
+from alphabase.constants._const import CONST_FILE_FOLDER
 from alphabase.constants.atom import (
     calc_mass_from_formula,
     parse_formula,
 )
-
-from alphabase.constants._const import CONST_FILE_FOLDER
-
 
 #: Main entry of modification infomation (DataFrame fotmat).
 MOD_DF: pd.DataFrame = pd.DataFrame()
@@ -138,9 +137,7 @@ def calc_modification_mass(
     """
     masses = np.zeros(nAA)
     for site, mod in zip(mod_sites, mod_names):
-        if site == 0:
-            masses[site] += MOD_MASS[mod]
-        elif site == -1:
+        if site == 0 or site == -1:
             masses[site] += MOD_MASS[mod]
         else:
             masses[site - 1] += MOD_MASS[mod]
@@ -178,9 +175,7 @@ def calc_mod_masses_for_same_len_seqs(
     masses = np.zeros((len(mod_names_list), nAA))
     for i, (mod_names, mod_sites) in enumerate(zip(mod_names_list, mod_sites_list)):
         for mod, site in zip(mod_names, mod_sites):
-            if site == 0:
-                masses[i, site] += MOD_MASS[mod]
-            elif site == -1:
+            if site == 0 or site == -1:
                 masses[i, site] += MOD_MASS[mod]
             else:
                 masses[i, site - 1] += MOD_MASS[mod]

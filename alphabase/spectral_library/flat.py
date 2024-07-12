@@ -1,11 +1,11 @@
-import pandas as pd
-import numpy as np
 import warnings
 
-from alphabase.spectral_library.base import SpecLibBase
-from alphabase.peptide.fragment import flatten_fragments, remove_unused_fragments
+import numpy as np
+import pandas as pd
 
 from alphabase.io.hdf import HDF_File
+from alphabase.peptide.fragment import flatten_fragments, remove_unused_fragments
+from alphabase.spectral_library.base import SpecLibBase
 
 
 class SpecLibFlat(SpecLibBase):

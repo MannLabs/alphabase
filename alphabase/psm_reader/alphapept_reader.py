@@ -1,8 +1,9 @@
-import numba
 import os
-import pandas as pd
-import numpy as np
+
 import h5py
+import numba
+import numpy as np
+import pandas as pd
 
 from alphabase.psm_reader.psm_reader import (
     PSMReaderBase,

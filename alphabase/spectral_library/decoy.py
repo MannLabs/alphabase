@@ -1,7 +1,9 @@
 import copy
-from typing import Any
-import pandas as pd
 import multiprocessing as mp
+from typing import Any
+
+import pandas as pd
+
 from alphabase.spectral_library.base import SpecLibBase
 
 
@@ -11,7 +13,7 @@ def _batchify_series(series, mp_batch_size):
         yield series.iloc[i : i + mp_batch_size]
 
 
-class BaseDecoyGenerator(object):
+class BaseDecoyGenerator:
     """
     Base class for decoy generator.
     A class is used instead of a function to make as it needs to be pickled for multiprocessing.
@@ -208,7 +210,7 @@ class SpecLibDecoy(SpecLibBase):
         )
 
 
-class SpecLibDecoyProvider(object):
+class SpecLibDecoyProvider:
     def __init__(self):
         self.decoy_dict = {}
 
