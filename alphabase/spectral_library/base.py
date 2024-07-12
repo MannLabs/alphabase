@@ -628,7 +628,12 @@ class SpecLibBase(object):
             "fragment_intensity_df": self._fragment_intensity_df,
         }
 
-    def load_hdf(self, hdf_file: str, load_mod_seq: bool = False):
+    def load_hdf(
+        self,
+        hdf_file: str,
+        load_mod_seq: bool = False,
+        support_legacy_mods_format: bool = True,
+    ):
         """Load the hdf library from hdf_file
 
         Parameters
@@ -639,6 +644,11 @@ class SpecLibBase(object):
         load_mod_seq : bool, optional
             if also load mod_seq_df.
             Defaults to False.
+
+        support_legacy_mods_format : bool, optional
+            If True, whitespaces in modifications will be replaced by underscores to match the internal data format.
+            Defaults to True.
+            DeprecationWarning: future versions will have a different default and eventually this flag will be dropped.
 
         """
         _hdf = HDF_File(
@@ -653,7 +663,8 @@ class SpecLibBase(object):
             mod_seq_df = _hdf.library.mod_seq_df.values
             cols = [col for col in mod_seq_df.columns if col not in key_columns]
 
-            self._replace_mod_name_whitespaces(mod_seq_df)
+            if support_legacy_mods_format:
+                self._replace_mod_name_whitespaces(mod_seq_df)
 
             self._precursor_df[cols] = mod_seq_df[cols]
 
