@@ -693,7 +693,7 @@ class SpecLibBase:
                 "Support for whitespaces in modifications will be dropped in the next major release of alphabase. "
                 "Please use underscores in your spectral libraries instead."
             )
-            warn(
+            warnings.warn(
                 msg,
                 DeprecationWarning,
                 stacklevel=2,
