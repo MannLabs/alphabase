@@ -1,13 +1,13 @@
-import os
 import copy
-import pandas as pd
-import numpy as np
+import os
 import warnings
 
-import alphabase.peptide.mobility as mobility
-from alphabase.peptide.precursor import update_precursor_mz, reset_precursor_df
-from alphabase.constants._const import CONST_FILE_FOLDER
+import numpy as np
+import pandas as pd
 
+import alphabase.peptide.mobility as mobility
+from alphabase.constants._const import CONST_FILE_FOLDER
+from alphabase.peptide.precursor import reset_precursor_df, update_precursor_mz
 from alphabase.utils import get_delimiter
 from alphabase.yaml_utils import load_yaml
 
@@ -78,7 +78,7 @@ def keep_modifications(mod_str: str, mod_set: set) -> str:
 psm_reader_yaml = load_yaml(os.path.join(CONST_FILE_FOLDER, "psm_reader.yaml"))
 
 
-class PSMReaderBase(object):
+class PSMReaderBase:
     def __init__(
         self,
         *,

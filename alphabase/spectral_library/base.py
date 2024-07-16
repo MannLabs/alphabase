@@ -1,33 +1,32 @@
-from warnings import warn
-
-import pandas as pd
-import numpy as np
-import typing
-import logging
 import copy
-import warnings
+import logging
 import re
+import typing
+import warnings
 
+import numpy as np
+import pandas as pd
+
+from alphabase.io.hdf import HDF_File
 from alphabase.peptide.fragment import (
-    create_fragment_mz_dataframe,
     calc_fragment_count,
+    create_fragment_mz_dataframe,
     filter_fragment_number,
     join_left,
     remove_unused_fragments,
 )
 from alphabase.peptide.precursor import (
-    update_precursor_mz,
-    refine_precursor_df,
-    calc_precursor_isotope_intensity_mp,
-    calc_precursor_isotope_intensity,
-    calc_precursor_isotope_info_mp,
     calc_precursor_isotope_info,
+    calc_precursor_isotope_info_mp,
+    calc_precursor_isotope_intensity,
+    calc_precursor_isotope_intensity_mp,
     hash_precursor_df,
+    refine_precursor_df,
+    update_precursor_mz,
 )
-from alphabase.io.hdf import HDF_File
 
 
-class SpecLibBase(object):
+class SpecLibBase:
     """
     Base spectral library in alphabase and alphapeptdeep.
 
@@ -322,10 +321,9 @@ class SpecLibBase(object):
         ...
         ```
         """
-        from alphabase.spectral_library.decoy import decoy_lib_provider
-
         # register 'protein_reverse' to the decoy_lib_provider
         from alphabase.protein.protein_level_decoy import register_decoy
+        from alphabase.spectral_library.decoy import decoy_lib_provider
 
         register_decoy()
 

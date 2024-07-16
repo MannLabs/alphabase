@@ -1,21 +1,20 @@
+from typing import Dict, List, Tuple, Union
+
+import numba as nb
 import numpy as np
 import pandas as pd
-from typing import List, Union, Tuple, Dict
-import numba as nb
 
-from alphabase.constants._const import PEAK_MZ_DTYPE, PEAK_INTENSITY_DTYPE
-
-from alphabase.constants.modification import calc_modloss_mass
+from alphabase.constants._const import PEAK_INTENSITY_DTYPE, PEAK_MZ_DTYPE
 from alphabase.constants.atom import (
     MASS_PROTON,
+    calc_mass_from_formula,
 )
+from alphabase.constants.modification import calc_modloss_mass
 from alphabase.peptide.mass_calc import calc_b_y_and_peptide_masses_for_same_len_seqs
 from alphabase.peptide.precursor import (
-    refine_precursor_df,
     is_precursor_refined,
+    refine_precursor_df,
 )
-
-from alphabase.constants.atom import calc_mass_from_formula
 
 frag_type_representation_dict = {
     "c": "b+N(1)H(3)",

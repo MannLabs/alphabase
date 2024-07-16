@@ -1,17 +1,17 @@
-import pandas as pd
-import numpy as np
-import numba
-import typing
 import multiprocessing as mp
-from tqdm import tqdm
-
-from xxhash import xxh64_intdigest
+import typing
 from functools import partial
 
-from alphabase.constants.atom import MASS_PROTON, MASS_ISOTOPE
+import numba
+import numpy as np
+import pandas as pd
+from tqdm import tqdm
+from xxhash import xxh64_intdigest
+
 from alphabase.constants.aa import AA_Composition
-from alphabase.constants.modification import MOD_Composition
+from alphabase.constants.atom import MASS_ISOTOPE, MASS_PROTON
 from alphabase.constants.isotope import IsotopeDistribution
+from alphabase.constants.modification import MOD_Composition
 from alphabase.peptide.mass_calc import calc_peptide_masses_for_same_len_seqs
 
 
@@ -586,7 +586,7 @@ def calc_precursor_isotope_intensity(
 
     isotope_dist = IsotopeDistribution()
 
-    col_names = ["i_{}".format(i) for i in range(max_isotope)]
+    col_names = [f"i_{i}" for i in range(max_isotope)]
 
     precursor_dist = np.zeros((len(precursor_df), max_isotope), dtype=np.float32)
 

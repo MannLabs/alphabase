@@ -1,15 +1,16 @@
 #!python
 
 # builtin
-import setuptools
 import re
+
+import setuptools
 
 # local
 import alphabase as package2install
 
 
 def get_long_description():
-    with open("README.md", "r") as readme_file:
+    with open("README.md") as readme_file:
         long_description = readme_file.read()
     return long_description
 

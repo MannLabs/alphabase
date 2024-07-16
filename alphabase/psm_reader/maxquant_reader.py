@@ -1,15 +1,15 @@
-import pandas as pd
-import numpy as np
-import numba
 import copy
 
+import numba
+import numpy as np
+import pandas as pd
+
+from alphabase.constants.modification import MOD_DF
 from alphabase.psm_reader.psm_reader import (
     PSMReaderBase,
     psm_reader_provider,
     psm_reader_yaml,
 )
-
-from alphabase.constants.modification import MOD_DF
 
 mod_to_unimod_dict = {}
 for mod_name, unimod_id in MOD_DF[["mod_name", "unimod_id"]].values:
