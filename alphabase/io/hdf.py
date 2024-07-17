@@ -498,9 +498,16 @@ class HDF_File(HDF_Group):
             >>> hdf_file.dfs.df1.data_from
             "colleagues"
         """
-        mode = "w" if delete_existing else "a"
-        with h5py.File(file_name, mode):  # , swmr=True):
+        if delete_existing:
+            mode = "w"
+        elif read_only:
+            mode = "r"
+        else:
+            mode = "a"
+
+        with h5py.File(file_name, mode):
             pass
+
         super().__init__(
             file_name=file_name,
             name="/",
