@@ -1,3 +1,6 @@
+import contextlib
+
+
 def filter_input(filter_dict, input):
     if filter_dict is None:
         return input
@@ -14,10 +17,8 @@ def filter_input(filter_dict, input):
         if comparator == "==":
             input = input[input[param] == value]
             continue
-        try:
+        with contextlib.suppress(Exception):
             input = input.astype({f"{param}": "float"})
-        except Exception:
-            pass
 
         if comparator == ">":
             input = input[input[param].astype(type(value)) > value]

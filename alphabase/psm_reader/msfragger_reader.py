@@ -13,10 +13,7 @@ from alphabase.psm_reader.psm_reader import (
 
 
 def _is_fragger_decoy(proteins):
-    for prot in proteins:
-        if not prot.lower().startswith("rev_"):
-            return False
-    return True
+    return all(prot.lower().startswith("rev_") for prot in proteins)
 
 
 mass_mapped_mods = psm_reader_yaml["msfragger_pepxml"]["mass_mapped_mods"]

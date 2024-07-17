@@ -25,18 +25,16 @@ def refine_precursor_df(
     """
     if ensure_data_validity:
         df.fillna("", inplace=True)
-        if "charge" in df.columns:
-            if df.charge.dtype not in [
-                "int",
-                "int8",
-                "int64",
-                "int32",
-                # np.int64, np.int32, np.int8,
-            ]:
-                df["charge"] = df["charge"].astype(np.int8)
-        if "mod_sites" in df.columns:
-            if df.mod_sites.dtype not in ["O", "U"]:
-                df["mod_sites"] = df.mod_sites.astype("U")
+        if "charge" in df.columns and df.charge.dtype not in [
+            "int",
+            "int8",
+            "int64",
+            "int32",
+            # np.int64, np.int32, np.int8,
+        ]:
+            df["charge"] = df["charge"].astype(np.int8)
+        if "mod_sites" in df.columns and df.mod_sites.dtype not in ["O", "U"]:
+            df["mod_sites"] = df.mod_sites.astype("U")
 
     if "nAA" not in df.columns:
         df["nAA"] = df.sequence.str.len().astype(np.int32)
@@ -107,7 +105,7 @@ def update_precursor_mz(
     # precursor_mz_idx = precursor_df.columns.get_loc(
     #     'precursor_mz'
     # )
-    for nAA, big_df_group in _grouped:
+    for _, big_df_group in _grouped:
         for i in range(0, len(big_df_group), batch_size):
             batch_end = i + batch_size
 

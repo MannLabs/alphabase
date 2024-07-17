@@ -120,7 +120,7 @@ def merge_precursor_fragment_df(
     iters = enumerate(df[["frag_start_idx", "frag_stop_idx"]].values)
     if verbose:
         iters = tqdm.tqdm(iters)
-    for i, (start, end) in iters:
+    for _i, (start, end) in iters:
         intens = fragment_inten_df.iloc[start:end, :].to_numpy(
             copy=True
         )  # is loc[start:end-1,:] faster?
