@@ -1,16 +1,16 @@
 mod_name	unimod_mass	unimod_avge_mass	composition	unimod_modloss	modloss_composition	classification	unimod_id	modloss_importance
 Acetyl@T	42.010565	42.0367	H(2)C(2)O(1)	0.0		Post-translational	1	0.0
-Acetyl@Protein N-term	42.010565	42.0367	H(2)C(2)O(1)	0.0		Post-translational	1	0.0
+Acetyl@Protein_N-term	42.010565	42.0367	H(2)C(2)O(1)	0.0		Post-translational	1	0.0
 Acetyl@S	42.010565	42.0367	H(2)C(2)O(1)	0.0		Post-translational	1	0.0
 Acetyl@C	42.010565	42.0367	H(2)C(2)O(1)	0.0		Post-translational	1	0.0
-Acetyl@Any N-term	42.010565	42.0367	H(2)C(2)O(1)	0.0		Multiple	1	0.0
+Acetyl@Any_N-term	42.010565	42.0367	H(2)C(2)O(1)	0.0		Multiple	1	0.0
 Acetyl@K	42.010565	42.0367	H(2)C(2)O(1)	0.0		Multiple	1	0.0
 Acetyl@Y	42.010565	42.0367	H(2)C(2)O(1)	0.0		Chemical derivative	1	0.0
 Acetyl@H	42.010565	42.0367	H(2)C(2)O(1)	0.0		Chemical derivative	1	0.0
 Acetyl@R	42.010565	42.0367	H(2)C(2)O(1)	0.0		Artefact	1	0.0
-Amidated@Any C-term	-0.984016	-0.9848	H(1)N(1)O(-1)	0.0		Artefact	2	0.0
-Amidated@Protein C-term	-0.984016	-0.9848	H(1)N(1)O(-1)	0.0		Post-translational	2	0.0
-Biotin@Any N-term	226.077598	226.2954	H(14)C(10)N(2)O(2)S(1)	0.0		Chemical derivative	3	0.0
+Amidated@Any_C-term	-0.984016	-0.9848	H(1)N(1)O(-1)	0.0		Artefact	2	0.0
+Amidated@Protein_C-term	-0.984016	-0.9848	H(1)N(1)O(-1)	0.0		Post-translational	2	0.0
+Biotin@Any_N-term	226.077598	226.2954	H(14)C(10)N(2)O(2)S(1)	0.0		Chemical derivative	3	0.0
 Biotin@K	226.077598	226.2954	H(14)C(10)N(2)O(2)S(1)	0.0		Post-translational	3	0.0
 Carbamidomethyl@Y	57.021464	57.0513	H(3)C(2)N(1)O(1)	0.0		Artefact	4	0.0
 Carbamidomethyl@T	57.021464	57.0513	H(3)C(2)N(1)O(1)	0.0		Artefact	4	0.0
@@ -18,7 +18,7 @@ Carbamidomethyl@S	57.021464	57.0513	H(3)C(2)N(1)O(1)	0.0		Artefact	4	0.0
 Carbamidomethyl@E	57.021464	57.0513	H(3)C(2)N(1)O(1)	0.0		Artefact	4	0.0
 Carbamidomethyl@D	57.021464	57.0513	H(3)C(2)N(1)O(1)	0.0		Artefact	4	0.0
 Carbamidomethyl@H	57.021464	57.0513	H(3)C(2)N(1)O(1)	0.0		Artefact	4	0.0
-Carbamidomethyl@Any N-term	57.021464	57.0513	H(3)C(2)N(1)O(1)	0.0		Artefact	4	0.0
+Carbamidomethyl@Any_N-term	57.021464	57.0513	H(3)C(2)N(1)O(1)	0.0		Artefact	4	0.0
 Carbamidomethyl@K	57.021464	57.0513	H(3)C(2)N(1)O(1)	0.0		Artefact	4	0.0
 Carbamidomethyl@C	57.021464	57.0513	H(3)C(2)N(1)O(1)	0.0		Chemical derivative	4	0.0
 Carbamidomethyl@U	57.021464	57.0513	H(3)C(2)N(1)O(1)	0.0		Chemical derivative	4	0.0
@@ -29,10 +29,10 @@ Carbamyl@S	43.005814	43.0247	H(1)C(1)N(1)O(1)	0.0		Chemical derivative	5	0.0
 Carbamyl@M	43.005814	43.0247	H(1)C(1)N(1)O(1)	0.0		Artefact	5	0.0
 Carbamyl@C	43.005814	43.0247	H(1)C(1)N(1)O(1)	0.0		Artefact	5	0.0
 Carbamyl@R	43.005814	43.0247	H(1)C(1)N(1)O(1)	0.0		Artefact	5	0.0
-Carbamyl@Any N-term	43.005814	43.0247	H(1)C(1)N(1)O(1)	0.0		Multiple	5	0.0
+Carbamyl@Any_N-term	43.005814	43.0247	H(1)C(1)N(1)O(1)	0.0		Multiple	5	0.0
 Carbamyl@K	43.005814	43.0247	H(1)C(1)N(1)O(1)	0.0		Multiple	5	0.0
-Carbamyl@Protein N-term	43.005814	43.0247	H(1)C(1)N(1)O(1)	0.0		Post-translational	5	0.0
-Carboxymethyl@Any N-term	58.005479	58.0361	H(2)C(2)O(2)	0.0		Artefact	6	0.0
+Carbamyl@Protein_N-term	43.005814	43.0247	H(1)C(1)N(1)O(1)	0.0		Post-translational	5	0.0
+Carboxymethyl@Any_N-term	58.005479	58.0361	H(2)C(2)O(2)	0.0		Artefact	6	0.0
 Carboxymethyl@K	58.005479	58.0361	H(2)C(2)O(2)	0.0		Artefact	6	0.0
 Carboxymethyl@C	58.005479	58.0361	H(2)C(2)O(2)	0.0		Chemical derivative	6	0.0
 Carboxymethyl@W	58.005479	58.0361	H(2)C(2)O(2)	0.0		Chemical derivative	6	0.0
@@ -40,11 +40,11 @@ Carboxymethyl@U	58.005479	58.0361	H(2)C(2)O(2)	0.0		Chemical derivative	6	0.0
 Deamidated@Q	0.984016	0.9848	H(-1)N(-1)O(1)	0.0		Artefact	7	0.0
 Deamidated@R	0.984016	0.9848	H(-1)N(-1)O(1)	43.005814	H(1)C(1)N(1)O(1)	Post-translational	7	0.5
 Deamidated@N	0.984016	0.9848	H(-1)N(-1)O(1)	0.0		Artefact	7	0.0
-Deamidated@F^Protein N-term	0.984016	0.9848	H(-1)N(-1)O(1)	0.0		Post-translational	7	0.0
+Deamidated@F^Protein_N-term	0.984016	0.9848	H(-1)N(-1)O(1)	0.0		Post-translational	7	0.0
 ICAT-G@C	486.251206	486.6253	H(38)C(22)N(4)O(6)S(1)	0.0		Isotopic label	8	0.0
 ICAT-G:2H(8)@C	494.30142	494.6746	H(30)2H(8)C(22)N(4)O(6)S(1)	0.0		Isotopic label	9	0.0
-Met->Hse@M^Any C-term	-29.992806	-30.0922	H(-2)C(-1)O(1)S(-1)	0.0		Chemical derivative	10	0.0
-Met->Hsl@M^Any C-term	-48.003371	-48.1075	H(-4)C(-1)S(-1)	0.0		Chemical derivative	11	0.0
+Met->Hse@M^Any_C-term	-29.992806	-30.0922	H(-2)C(-1)O(1)S(-1)	0.0		Chemical derivative	10	0.0
+Met->Hsl@M^Any_C-term	-48.003371	-48.1075	H(-4)C(-1)S(-1)	0.0		Chemical derivative	11	0.0
 ICAT-D:2H(8)@C	450.275205	450.6221	H(26)2H(8)C(20)N(4)O(5)S(1)	0.0		Isotopic label	12	0.0
 ICAT-D@C	442.224991	442.5728	H(34)C(20)N(4)O(5)S(1)	0.0		Isotopic label	13	0.0
 NIPCAM@C	99.068414	99.1311	H(9)C(5)N(1)O(1)	0.0		Chemical derivative	17	0.0
@@ -68,32 +68,32 @@ Dehydrated@D	-18.010565	-18.0153	H(-2)O(-1)	0.0		Chemical derivative	23	0.0
 Dehydrated@Y	-18.010565	-18.0153	H(-2)O(-1)	0.0		Post-translational	23	0.0
 Dehydrated@T	-18.010565	-18.0153	H(-2)O(-1)	0.0		Post-translational	23	0.0
 Dehydrated@S	-18.010565	-18.0153	H(-2)O(-1)	0.0		Post-translational	23	0.0
-Dehydrated@N^Protein C-term	-18.010565	-18.0153	H(-2)O(-1)	0.0		Post-translational	23	0.0
-Dehydrated@Q^Protein C-term	-18.010565	-18.0153	H(-2)O(-1)	0.0		Post-translational	23	0.0
-Dehydrated@C^Any N-term	-18.010565	-18.0153	H(-2)O(-1)	0.0		Artefact	23	0.0
+Dehydrated@N^Protein_C-term	-18.010565	-18.0153	H(-2)O(-1)	0.0		Post-translational	23	0.0
+Dehydrated@Q^Protein_C-term	-18.010565	-18.0153	H(-2)O(-1)	0.0		Post-translational	23	0.0
+Dehydrated@C^Any_N-term	-18.010565	-18.0153	H(-2)O(-1)	0.0		Artefact	23	0.0
 Propionamide@C	71.037114	71.0779	H(5)C(3)N(1)O(1)	0.0		Artefact	24	0.0
 Propionamide@K	71.037114	71.0779	H(5)C(3)N(1)O(1)	0.0		Chemical derivative	24	0.0
-Propionamide@Any N-term	71.037114	71.0779	H(5)C(3)N(1)O(1)	0.0		Chemical derivative	24	0.0
-Pyridylacetyl@Any N-term	119.037114	119.1207	H(5)C(7)N(1)O(1)	0.0		Chemical derivative	25	0.0
+Propionamide@Any_N-term	71.037114	71.0779	H(5)C(3)N(1)O(1)	0.0		Chemical derivative	24	0.0
+Pyridylacetyl@Any_N-term	119.037114	119.1207	H(5)C(7)N(1)O(1)	0.0		Chemical derivative	25	0.0
 Pyridylacetyl@K	119.037114	119.1207	H(5)C(7)N(1)O(1)	0.0		Chemical derivative	25	0.0
-Pyro-carbamidomethyl@C^Any N-term	39.994915	40.0208	C(2)O(1)	0.0		Artefact	26	0.0
-Glu->pyro-Glu@E^Any N-term	-18.010565	-18.0153	H(-2)O(-1)	0.0		Artefact	27	0.0
-Gln->pyro-Glu@Q^Any N-term	-17.026549	-17.0305	H(-3)N(-1)	0.0		Artefact	28	0.0
-SMA@Any N-term	127.063329	127.1412	H(9)C(6)N(1)O(2)	0.0		Chemical derivative	29	0.0
+Pyro-carbamidomethyl@C^Any_N-term	39.994915	40.0208	C(2)O(1)	0.0		Artefact	26	0.0
+Glu->pyro-Glu@E^Any_N-term	-18.010565	-18.0153	H(-2)O(-1)	0.0		Artefact	27	0.0
+Gln->pyro-Glu@Q^Any_N-term	-17.026549	-17.0305	H(-3)N(-1)	0.0		Artefact	28	0.0
+SMA@Any_N-term	127.063329	127.1412	H(9)C(6)N(1)O(2)	0.0		Chemical derivative	29	0.0
 SMA@K	127.063329	127.1412	H(9)C(6)N(1)O(2)	0.0		Chemical derivative	29	0.0
 Cation:Na@D	21.981943	21.9818	H(-1)Na(1)	0.0		Artefact	30	0.0
-Cation:Na@Any C-term	21.981943	21.9818	H(-1)Na(1)	0.0		Artefact	30	0.0
+Cation:Na@Any_C-term	21.981943	21.9818	H(-1)Na(1)	0.0		Artefact	30	0.0
 Cation:Na@E	21.981943	21.9818	H(-1)Na(1)	0.0		Artefact	30	0.0
 Pyridylethyl@C	105.057849	105.1372	H(7)C(7)N(1)	0.0		Chemical derivative	31	0.0
 Methyl@E	14.01565	14.0266	H(2)C(1)	0.0		Post-translational	34	0.0
 Methyl@D	14.01565	14.0266	H(2)C(1)	0.0		Post-translational	34	0.0
-Methyl@Any C-term	14.01565	14.0266	H(2)C(1)	0.0		Multiple	34	0.0
-Methyl@Protein N-term	14.01565	14.0266	H(2)C(1)	0.0		Post-translational	34	0.0
+Methyl@Any_C-term	14.01565	14.0266	H(2)C(1)	0.0		Multiple	34	0.0
+Methyl@Protein_N-term	14.01565	14.0266	H(2)C(1)	0.0		Post-translational	34	0.0
 Methyl@L	14.01565	14.0266	H(2)C(1)	0.0		Post-translational	34	0.0
 Methyl@I	14.01565	14.0266	H(2)C(1)	0.0		Post-translational	34	0.0
 Methyl@R	14.01565	14.0266	H(2)C(1)	0.0		Post-translational	34	0.0
 Methyl@Q	14.01565	14.0266	H(2)C(1)	0.0		Post-translational	34	0.0
-Methyl@Any N-term	14.01565	14.0266	H(2)C(1)	0.0		Chemical derivative	34	0.0
+Methyl@Any_N-term	14.01565	14.0266	H(2)C(1)	0.0		Chemical derivative	34	0.0
 Methyl@N	14.01565	14.0266	H(2)C(1)	0.0		Post-translational	34	0.0
 Methyl@K	14.01565	14.0266	H(2)C(1)	0.0		Post-translational	34	0.0
 Methyl@H	14.01565	14.0266	H(2)C(1)	0.0		Post-translational	34	0.0
@@ -107,7 +107,7 @@ Oxidation@Q	15.994915	15.9994	O(1)	0.0		Chemical derivative	35	0.0
 Oxidation@L	15.994915	15.9994	O(1)	0.0		Chemical derivative	35	0.0
 Oxidation@I	15.994915	15.9994	O(1)	0.0		Chemical derivative	35	0.0
 Oxidation@U	15.994915	15.9994	O(1)	0.0		Multiple	35	0.0
-Oxidation@G^Any C-term	15.994915	15.9994	O(1)	0.0		Pre-translational	35	0.0
+Oxidation@G^Any_C-term	15.994915	15.9994	O(1)	0.0		Pre-translational	35	0.0
 Oxidation@W	15.994915	15.9994	O(1)	0.0		Artefact	35	0.0
 Oxidation@C	15.994915	15.9994	O(1)	0.0		Post-translational	35	0.0
 Oxidation@H	15.994915	15.9994	O(1)	0.0		Artefact	35	0.0
@@ -120,20 +120,20 @@ Oxidation@P	15.994915	15.9994	O(1)	0.0		Post-translational	35	0.0
 Oxidation@N	15.994915	15.9994	O(1)	0.0		Post-translational	35	0.0
 Oxidation@K	15.994915	15.9994	O(1)	0.0		Post-translational	35	0.0
 Oxidation@D	15.994915	15.9994	O(1)	0.0		Post-translational	35	0.0
-Dimethyl@Protein N-term	28.0313	28.0532	H(4)C(2)	0.0		Isotopic label	36	0.0
-Dimethyl@P^Protein N-term	28.0313	28.0532	H(4)C(2)	0.0		Post-translational	36	0.0
+Dimethyl@Protein_N-term	28.0313	28.0532	H(4)C(2)	0.0		Isotopic label	36	0.0
+Dimethyl@P^Protein_N-term	28.0313	28.0532	H(4)C(2)	0.0		Post-translational	36	0.0
 Dimethyl@N	28.0313	28.0532	H(4)C(2)	0.0		Post-translational	36	0.0
-Dimethyl@Any N-term	28.0313	28.0532	H(4)C(2)	0.0		Isotopic label	36	0.0
+Dimethyl@Any_N-term	28.0313	28.0532	H(4)C(2)	0.0		Isotopic label	36	0.0
 Dimethyl@K	28.0313	28.0532	H(4)C(2)	0.0		Multiple	36	0.0
 Dimethyl@R	28.0313	28.0532	H(4)C(2)	0.0		Post-translational	36	0.0
-Trimethyl@A^Protein N-term	42.04695	42.0797	H(6)C(3)	0.0		Post-translational	37	0.0
+Trimethyl@A^Protein_N-term	42.04695	42.0797	H(6)C(3)	0.0		Post-translational	37	0.0
 Trimethyl@R	42.04695	42.0797	H(6)C(3)	0.0		Chemical derivative	37	0.0
 Trimethyl@K	42.04695	42.0797	H(6)C(3)	59.073499	H(9)C(3)N(1)	Post-translational	37	0.5
 Methylthio@C	45.987721	46.0916	H(2)C(1)S(1)	0.0		Multiple	39	0.0
 Methylthio@N	45.987721	46.0916	H(2)C(1)S(1)	0.0		Post-translational	39	0.0
 Methylthio@D	45.987721	46.0916	H(2)C(1)S(1)	0.0		Post-translational	39	0.0
 Methylthio@K	45.987721	46.0916	H(2)C(1)S(1)	0.0		Artefact	39	0.0
-Methylthio@Any N-term	45.987721	46.0916	H(2)C(1)S(1)	0.0		Artefact	39	0.0
+Methylthio@Any_N-term	45.987721	46.0916	H(2)C(1)S(1)	0.0		Artefact	39	0.0
 Sulfo@S	79.956815	80.0632	O(3)S(1)	79.956815	O(3)S(1)	Post-translational	40	0.5
 Sulfo@T	79.956815	80.0632	O(3)S(1)	79.956815	O(3)S(1)	Post-translational	40	0.5
 Sulfo@Y	79.956815	80.0632	O(3)S(1)	79.956815	O(3)S(1)	Post-translational	40	0.5
@@ -142,7 +142,7 @@ Hex@C	162.052824	162.1406	H(10)C(6)O(5)	0.0		Other glycosylation	41	0.0
 Hex@W	162.052824	162.1406	H(10)C(6)O(5)	0.0		Other glycosylation	41	0.0
 Hex@T	162.052824	162.1406	H(10)C(6)O(5)	162.052824	H(10)C(6)O(5)	O-linked glycosylation	41	0.5
 Hex@S	162.052824	162.1406	H(10)C(6)O(5)	162.052824	H(10)C(6)O(5)	O-linked glycosylation	41	0.5
-Hex@Any N-term	162.052824	162.1406	H(10)C(6)O(5)	54.031694	H(6)O(3)	Other glycosylation	41	0.5
+Hex@Any_N-term	162.052824	162.1406	H(10)C(6)O(5)	54.031694	H(6)O(3)	Other glycosylation	41	0.5
 Hex@N	162.052824	162.1406	H(10)C(6)O(5)	162.052824	H(10)C(6)O(5)	N-linked glycosylation	41	0.5
 Hex@R	162.052824	162.1406	H(10)C(6)O(5)	54.031694	H(6)O(3)	Other glycosylation	41	0.5
 Hex@K	162.052824	162.1406	H(10)C(6)O(5)	54.031694	H(6)O(3)	Other glycosylation	41	0.5
@@ -155,21 +155,21 @@ HexNAc@N	203.079373	203.1925	H(13)C(8)N(1)O(5)	203.079373	H(13)C(8)N(1)O(5)	N-li
 Farnesyl@C	204.187801	204.3511	H(24)C(15)	0.0		Post-translational	44	0.0
 Myristoyl@C	210.198366	210.3556	H(26)C(14)O(1)	0.0		Post-translational	45	0.0
 Myristoyl@K	210.198366	210.3556	H(26)C(14)O(1)	0.0		Post-translational	45	0.0
-Myristoyl@G^Any N-term	210.198366	210.3556	H(26)C(14)O(1)	0.0		Post-translational	45	0.0
+Myristoyl@G^Any_N-term	210.198366	210.3556	H(26)C(14)O(1)	0.0		Post-translational	45	0.0
 PyridoxalPhosphate@K	229.014009	229.1266	H(8)C(8)N(1)O(5)P(1)	0.0		Post-translational	46	0.0
 Palmitoyl@T	238.229666	238.4088	H(30)C(16)O(1)	0.0		Post-translational	47	0.0
 Palmitoyl@S	238.229666	238.4088	H(30)C(16)O(1)	0.0		Post-translational	47	0.0
 Palmitoyl@K	238.229666	238.4088	H(30)C(16)O(1)	0.0		Post-translational	47	0.0
 Palmitoyl@C	238.229666	238.4088	H(30)C(16)O(1)	0.0		Post-translational	47	0.0
-Palmitoyl@Protein N-term	238.229666	238.4088	H(30)C(16)O(1)	0.0		Post-translational	47	0.0
+Palmitoyl@Protein_N-term	238.229666	238.4088	H(30)C(16)O(1)	0.0		Post-translational	47	0.0
 GeranylGeranyl@C	272.250401	272.4681	H(32)C(20)	0.0		Post-translational	48	0.0
 Phosphopantetheine@S	340.085794	340.333	H(21)C(11)N(2)O(6)P(1)S(1)	0.0		Post-translational	49	0.0
 FAD@Y	783.141486	783.5339	H(31)C(27)N(9)O(15)P(2)	0.0		Post-translational	50	0.0
 FAD@H	783.141486	783.5339	H(31)C(27)N(9)O(15)P(2)	0.0		Post-translational	50	0.0
 FAD@C	783.141486	783.5339	H(31)C(27)N(9)O(15)P(2)	0.0		Post-translational	50	0.0
-Tripalmitate@C^Protein N-term	788.725777	789.3049	H(96)C(51)O(5)	0.0		Post-translational	51	0.0
+Tripalmitate@C^Protein_N-term	788.725777	789.3049	H(96)C(51)O(5)	0.0		Post-translational	51	0.0
 Guanidinyl@K	42.021798	42.04	H(2)C(1)N(2)	0.0		Chemical derivative	52	0.0
-Guanidinyl@Any N-term	42.021798	42.04	H(2)C(1)N(2)	0.0		Chemical derivative	52	0.0
+Guanidinyl@Any_N-term	42.021798	42.04	H(2)C(1)N(2)	0.0		Chemical derivative	52	0.0
 HNE@K	156.11503	156.2221	H(16)C(9)O(2)	0.0		Post-translational	53	0.0
 HNE@H	156.11503	156.2221	H(16)C(9)O(2)	0.0		Post-translational	53	0.0
 HNE@C	156.11503	156.2221	H(16)C(9)O(2)	0.0		Post-translational	53	0.0
@@ -177,36 +177,36 @@ HNE@A	156.11503	156.2221	H(16)C(9)O(2)	0.0		Post-translational	53	0.0
 HNE@L	156.11503	156.2221	H(16)C(9)O(2)	0.0		Post-translational	53	0.0
 Glucuronyl@T	176.032088	176.1241	H(8)C(6)O(6)	176.032088	H(8)C(6)O(6)	O-linked glycosylation	54	0.5
 Glucuronyl@S	176.032088	176.1241	H(8)C(6)O(6)	176.032088	H(8)C(6)O(6)	O-linked glycosylation	54	0.5
-Glucuronyl@Protein N-term	176.032088	176.1241	H(8)C(6)O(6)	0.0		Other glycosylation	54	0.0
+Glucuronyl@Protein_N-term	176.032088	176.1241	H(8)C(6)O(6)	0.0		Other glycosylation	54	0.0
 Glutathione@C	305.068156	305.3076	H(15)C(10)N(3)O(6)S(1)	0.0		Post-translational	55	0.0
 Acetyl:2H(3)@T	45.029395	45.0552	H(-1)2H(3)C(2)O(1)	0.0		Isotopic label	56	0.0
 Acetyl:2H(3)@S	45.029395	45.0552	H(-1)2H(3)C(2)O(1)	0.0		Isotopic label	56	0.0
 Acetyl:2H(3)@H	45.029395	45.0552	H(-1)2H(3)C(2)O(1)	0.0		Isotopic label	56	0.0
-Acetyl:2H(3)@Any N-term	45.029395	45.0552	H(-1)2H(3)C(2)O(1)	0.0		Isotopic label	56	0.0
+Acetyl:2H(3)@Any_N-term	45.029395	45.0552	H(-1)2H(3)C(2)O(1)	0.0		Isotopic label	56	0.0
 Acetyl:2H(3)@K	45.029395	45.0552	H(-1)2H(3)C(2)O(1)	0.0		Isotopic label	56	0.0
 Acetyl:2H(3)@Y	45.029395	45.0552	H(-1)2H(3)C(2)O(1)	0.0		Isotopic label	56	0.0
-Acetyl:2H(3)@Protein N-term	45.029395	45.0552	H(-1)2H(3)C(2)O(1)	0.0		Isotopic label	56	0.0
-Propionyl@Any N-term	56.026215	56.0633	H(4)C(3)O(1)	0.0		Isotopic label	58	0.0
+Acetyl:2H(3)@Protein_N-term	45.029395	45.0552	H(-1)2H(3)C(2)O(1)	0.0		Isotopic label	56	0.0
+Propionyl@Any_N-term	56.026215	56.0633	H(4)C(3)O(1)	0.0		Isotopic label	58	0.0
 Propionyl@K	56.026215	56.0633	H(4)C(3)O(1)	0.0		Isotopic label	58	0.0
 Propionyl@S	56.026215	56.0633	H(4)C(3)O(1)	0.0		Chemical derivative	58	0.0
 Propionyl@T	56.026215	56.0633	H(4)C(3)O(1)	0.0		Isotopic label	58	0.0
-Propionyl@Protein N-term	56.026215	56.0633	H(4)C(3)O(1)	0.0		Multiple	58	0.0
-Propionyl:13C(3)@Any N-term	59.036279	59.0412	H(4)13C(3)O(1)	0.0		Isotopic label	59	0.0
+Propionyl@Protein_N-term	56.026215	56.0633	H(4)C(3)O(1)	0.0		Multiple	58	0.0
+Propionyl:13C(3)@Any_N-term	59.036279	59.0412	H(4)13C(3)O(1)	0.0		Isotopic label	59	0.0
 Propionyl:13C(3)@K	59.036279	59.0412	H(4)13C(3)O(1)	0.0		Isotopic label	59	0.0
-GIST-Quat@Any N-term	127.099714	127.1842	H(13)C(7)N(1)O(1)	59.073499	H(9)C(3)N(1)	Isotopic label	60	0.5
+GIST-Quat@Any_N-term	127.099714	127.1842	H(13)C(7)N(1)O(1)	59.073499	H(9)C(3)N(1)	Isotopic label	60	0.5
 GIST-Quat@K	127.099714	127.1842	H(13)C(7)N(1)O(1)	59.073499	H(9)C(3)N(1)	Isotopic label	60	0.5
-GIST-Quat:2H(3)@Any N-term	130.118544	130.2027	H(10)2H(3)C(7)N(1)O(1)	62.09233	H(6)2H(3)C(3)N(1)	Isotopic label	61	0.5
+GIST-Quat:2H(3)@Any_N-term	130.118544	130.2027	H(10)2H(3)C(7)N(1)O(1)	62.09233	H(6)2H(3)C(3)N(1)	Isotopic label	61	0.5
 GIST-Quat:2H(3)@K	130.118544	130.2027	H(10)2H(3)C(7)N(1)O(1)	62.09233	H(6)2H(3)C(3)N(1)	Isotopic label	61	0.5
-GIST-Quat:2H(6)@Any N-term	133.137375	133.2212	H(7)2H(6)C(7)N(1)O(1)	65.11116	H(3)2H(6)C(3)N(1)	Isotopic label	62	0.5
+GIST-Quat:2H(6)@Any_N-term	133.137375	133.2212	H(7)2H(6)C(7)N(1)O(1)	65.11116	H(3)2H(6)C(3)N(1)	Isotopic label	62	0.5
 GIST-Quat:2H(6)@K	133.137375	133.2212	H(7)2H(6)C(7)N(1)O(1)	65.11116	H(3)2H(6)C(3)N(1)	Isotopic label	62	0.5
-GIST-Quat:2H(9)@Any N-term	136.156205	136.2397	H(4)2H(9)C(7)N(1)O(1)	68.12999	2H(9)C(3)N(1)	Isotopic label	63	0.5
+GIST-Quat:2H(9)@Any_N-term	136.156205	136.2397	H(4)2H(9)C(7)N(1)O(1)	68.12999	2H(9)C(3)N(1)	Isotopic label	63	0.5
 GIST-Quat:2H(9)@K	136.156205	136.2397	H(4)2H(9)C(7)N(1)O(1)	68.12999	2H(9)C(3)N(1)	Isotopic label	63	0.5
-Succinyl@Protein N-term	100.016044	100.0728	H(4)C(4)O(3)	0.0		Post-translational	64	0.0
-Succinyl@Any N-term	100.016044	100.0728	H(4)C(4)O(3)	0.0		Isotopic label	64	0.0
+Succinyl@Protein_N-term	100.016044	100.0728	H(4)C(4)O(3)	0.0		Post-translational	64	0.0
+Succinyl@Any_N-term	100.016044	100.0728	H(4)C(4)O(3)	0.0		Isotopic label	64	0.0
 Succinyl@K	100.016044	100.0728	H(4)C(4)O(3)	0.0		Isotopic label	64	0.0
-Succinyl:2H(4)@Any N-term	104.041151	104.0974	2H(4)C(4)O(3)	0.0		Isotopic label	65	0.0
+Succinyl:2H(4)@Any_N-term	104.041151	104.0974	2H(4)C(4)O(3)	0.0		Isotopic label	65	0.0
 Succinyl:2H(4)@K	104.041151	104.0974	2H(4)C(4)O(3)	0.0		Isotopic label	65	0.0
-Succinyl:13C(4)@Any N-term	104.029463	104.0434	H(4)13C(4)O(3)	0.0		Isotopic label	66	0.0
+Succinyl:13C(4)@Any_N-term	104.029463	104.0434	H(4)13C(4)O(3)	0.0		Isotopic label	66	0.0
 Succinyl:13C(4)@K	104.029463	104.0434	H(4)13C(4)O(3)	0.0		Isotopic label	66	0.0
 probiotinhydrazide@P	258.115047	258.3405	H(18)C(10)N(4)O(2)S(1)	0.0		Chemical derivative	357	0.0
 Pro->pyro-Glu@P	13.979265	13.9835	H(-2)O(1)	0.0		Chemical derivative	359	0.0
@@ -215,23 +215,23 @@ His->Asp@H	-22.031969	-22.0519	H(-2)C(-2)N(-2)O(2)	0.0		AA substitution	349	0.0
 Trp->Hydroxykynurenin@W	19.989829	19.9881	C(-1)O(2)	0.0		Chemical derivative	350	0.0
 Delta:H(4)C(3)@K	40.0313	40.0639	H(4)C(3)	0.0		Other	256	0.0
 Delta:H(4)C(3)@H	40.0313	40.0639	H(4)C(3)	0.0		Other	256	0.0
-Delta:H(4)C(3)@Protein N-term	40.0313	40.0639	H(4)C(3)	0.0		Other	256	0.0
+Delta:H(4)C(3)@Protein_N-term	40.0313	40.0639	H(4)C(3)	0.0		Other	256	0.0
 Delta:H(4)C(2)@K	28.0313	28.0532	H(4)C(2)	0.0		Other	255	0.0
 Delta:H(4)C(2)@H	28.0313	28.0532	H(4)C(2)	0.0		Other	255	0.0
-Delta:H(4)C(2)@Any N-term	28.0313	28.0532	H(4)C(2)	0.0		Other	255	0.0
+Delta:H(4)C(2)@Any_N-term	28.0313	28.0532	H(4)C(2)	0.0		Other	255	0.0
 Cys->Dha@C	-33.987721	-34.0809	H(-2)S(-1)	0.0		Chemical derivative	368	0.0
 Arg->GluSA@R	-43.053433	-43.0711	H(-5)C(-1)N(-3)O(1)	0.0		Chemical derivative	344	0.0
 Trioxidation@Y	47.984744	47.9982	O(3)	0.0		Chemical derivative	345	0.0
 Trioxidation@W	47.984744	47.9982	O(3)	0.0		Chemical derivative	345	0.0
 Trioxidation@C	47.984744	47.9982	O(3)	0.0		Chemical derivative	345	0.0
 Trioxidation@F	47.984744	47.9982	O(3)	0.0		Artefact	345	0.0
-Iminobiotin@Any N-term	225.093583	225.3106	H(15)C(10)N(3)O(1)S(1)	0.0		Chemical derivative	89	0.0
+Iminobiotin@Any_N-term	225.093583	225.3106	H(15)C(10)N(3)O(1)S(1)	0.0		Chemical derivative	89	0.0
 Iminobiotin@K	225.093583	225.3106	H(15)C(10)N(3)O(1)S(1)	0.0		Chemical derivative	89	0.0
-ESP@Any N-term	338.177647	338.4682	H(26)C(16)N(4)O(2)S(1)	0.0		Isotopic label	90	0.0
+ESP@Any_N-term	338.177647	338.4682	H(26)C(16)N(4)O(2)S(1)	0.0		Isotopic label	90	0.0
 ESP@K	338.177647	338.4682	H(26)C(16)N(4)O(2)S(1)	0.0		Isotopic label	90	0.0
-ESP:2H(10)@Any N-term	348.240414	348.5299	H(16)2H(10)C(16)N(4)O(2)S(1)	0.0		Isotopic label	91	0.0
+ESP:2H(10)@Any_N-term	348.240414	348.5299	H(16)2H(10)C(16)N(4)O(2)S(1)	0.0		Isotopic label	91	0.0
 ESP:2H(10)@K	348.240414	348.5299	H(16)2H(10)C(16)N(4)O(2)S(1)	0.0		Isotopic label	91	0.0
-NHS-LC-Biotin@Any N-term	339.161662	339.453	H(25)C(16)N(3)O(3)S(1)	0.0		Chemical derivative	92	0.0
+NHS-LC-Biotin@Any_N-term	339.161662	339.453	H(25)C(16)N(3)O(3)S(1)	0.0		Chemical derivative	92	0.0
 NHS-LC-Biotin@K	339.161662	339.453	H(25)C(16)N(3)O(3)S(1)	0.0		Chemical derivative	92	0.0
 EDT-maleimide-PEO-biotin@T	601.206246	601.8021	H(39)C(25)N(5)O(6)S(3)	0.0		Chemical derivative	93	0.0
 EDT-maleimide-PEO-biotin@S	601.206246	601.8021	H(39)C(25)N(5)O(6)S(3)	0.0		Chemical derivative	93	0.0
@@ -243,14 +243,14 @@ Nitro@Y	44.985078	44.9976	H(-1)N(1)O(2)	0.0		Chemical derivative	354	0.0
 Nitro@W	44.985078	44.9976	H(-1)N(1)O(2)	0.0		Chemical derivative	354	0.0
 Nitro@F	44.985078	44.9976	H(-1)N(1)O(2)	0.0		Artefact	354	0.0
 ICAT-C@C	227.126991	227.2603	H(17)C(10)N(3)O(3)	0.0		Isotopic label	105	0.0
-Delta:H(2)C(2)@Protein N-term	26.01565	26.0373	H(2)C(2)	0.0		Other	254	0.0
+Delta:H(2)C(2)@Protein_N-term	26.01565	26.0373	H(2)C(2)	0.0		Other	254	0.0
 Delta:H(2)C(2)@K	26.01565	26.0373	H(2)C(2)	0.0		Other	254	0.0
 Delta:H(2)C(2)@H	26.01565	26.0373	H(2)C(2)	0.0		Other	254	0.0
-Delta:H(2)C(2)@Any N-term	26.01565	26.0373	H(2)C(2)	0.0		Other	254	0.0
+Delta:H(2)C(2)@Any_N-term	26.01565	26.0373	H(2)C(2)	0.0		Other	254	0.0
 Trp->Kynurenin@W	3.994915	3.9887	C(-1)O(1)	0.0		Chemical derivative	351	0.0
 Lys->Allysine@K	-1.031634	-1.0311	H(-3)N(-1)O(1)	0.0		Post-translational	352	0.0
 ICAT-C:13C(9)@C	236.157185	236.1942	H(17)C(1)13C(9)N(3)O(3)	0.0		Isotopic label	106	0.0
-FormylMet@Protein N-term	159.035399	159.2062	H(9)C(6)N(1)O(2)S(1)	0.0		Pre-translational	107	0.0
+FormylMet@Protein_N-term	159.035399	159.2062	H(9)C(6)N(1)O(2)S(1)	0.0		Pre-translational	107	0.0
 Nethylmaleimide@C	125.047679	125.1253	H(7)C(6)N(1)O(2)	0.0		Chemical derivative	108	0.0
 OxLysBiotinRed@K	354.172562	354.4676	H(26)C(16)N(4)O(3)S(1)	0.0		Chemical derivative	112	0.0
 IBTP@C	316.138088	316.3759	H(21)C(22)P(1)	0.0		Chemical derivative	119	0.0
@@ -265,21 +265,21 @@ GG@C	114.042927	114.1026	H(6)C(4)N(2)O(2)	0.0		Other	121	0.0
 GG@T	114.042927	114.1026	H(6)C(4)N(2)O(2)	0.0		Other	121	0.0
 GG@S	114.042927	114.1026	H(6)C(4)N(2)O(2)	0.0		Other	121	0.0
 GG@K	114.042927	114.1026	H(6)C(4)N(2)O(2)	0.0		Other	121	1000000.0
-GG@Protein N-term	114.042927	114.1026	H(6)C(4)N(2)O(2)	0.0		Post-translational	121	0.0
-Formyl@Protein N-term	27.994915	28.0101	C(1)O(1)	0.0		Post-translational	122	0.0
+GG@Protein_N-term	114.042927	114.1026	H(6)C(4)N(2)O(2)	0.0		Post-translational	121	0.0
+Formyl@Protein_N-term	27.994915	28.0101	C(1)O(1)	0.0		Post-translational	122	0.0
 Formyl@T	27.994915	28.0101	C(1)O(1)	0.0		Artefact	122	0.0
 Formyl@K	27.994915	28.0101	C(1)O(1)	0.0		Artefact	122	0.0
-Formyl@Any N-term	27.994915	28.0101	C(1)O(1)	0.0		Artefact	122	0.0
+Formyl@Any_N-term	27.994915	28.0101	C(1)O(1)	0.0		Artefact	122	0.0
 Formyl@S	27.994915	28.0101	C(1)O(1)	0.0		Artefact	122	0.0
 ICAT-H@C	345.097915	345.7754	H(20)C(15)N(1)O(6)Cl(1)	0.0		Isotopic label	123	0.0
 ICAT-H:13C(6)@C	351.118044	351.7313	H(20)C(9)13C(6)N(1)O(6)Cl(1)	0.0		Isotopic label	124	0.0
-Cation:K@Any C-term	37.955882	38.0904	H(-1)K(1)	0.0		Artefact	530	0.0
+Cation:K@Any_C-term	37.955882	38.0904	H(-1)K(1)	0.0		Artefact	530	0.0
 Cation:K@E	37.955882	38.0904	H(-1)K(1)	0.0		Artefact	530	0.0
 Cation:K@D	37.955882	38.0904	H(-1)K(1)	0.0		Artefact	530	0.0
-Xlink:DTSSP[88]@Protein N-term	87.998285	88.1283	H(4)C(3)O(1)S(1)	0.0		Chemical derivative	126	0.0
+Xlink:DTSSP[88]@Protein_N-term	87.998285	88.1283	H(4)C(3)O(1)S(1)	0.0		Chemical derivative	126	0.0
 Xlink:DTSSP[88]@K	87.998285	88.1283	H(4)C(3)O(1)S(1)	0.0		Chemical derivative	126	0.0
 Xlink:EGS[226]@K	226.047738	226.1828	H(10)C(10)O(6)	0.0		Chemical derivative	1897	0.0
-Xlink:EGS[226]@Protein N-term	226.047738	226.1828	H(10)C(10)O(6)	0.0		Chemical derivative	1897	0.0
+Xlink:EGS[226]@Protein_N-term	226.047738	226.1828	H(10)C(10)O(6)	0.0		Chemical derivative	1897	0.0
 Fluoro@Y	17.990578	17.9905	H(-1)F(1)	0.0		Non-standard residue	127	0.0
 Fluoro@W	17.990578	17.9905	H(-1)F(1)	0.0		Non-standard residue	127	0.0
 Fluoro@F	17.990578	17.9905	H(-1)F(1)	0.0		Non-standard residue	127	0.0
@@ -290,16 +290,16 @@ Iodo@Y	125.896648	125.8965	H(-1)I(1)	0.0		Chemical derivative	129	0.0
 Diiodo@Y	251.793296	251.7931	H(-2)I(2)	0.0		Chemical derivative	130	0.0
 Diiodo@H	251.793296	251.7931	H(-2)I(2)	0.0		Chemical derivative	130	0.0
 Triiodo@Y	377.689944	377.6896	H(-3)I(3)	0.0		Chemical derivative	131	0.0
-Myristoleyl@G^Protein N-term	208.182715	208.3398	H(24)C(14)O(1)	0.0		Co-translational	134	0.0
+Myristoleyl@G^Protein_N-term	208.182715	208.3398	H(24)C(14)O(1)	0.0		Co-translational	134	0.0
 Pro->Pyrrolidinone@P	-30.010565	-30.026	H(-2)C(-1)O(-1)	0.0		Chemical derivative	360	0.0
-Myristoyl+Delta:H(-4)@G^Protein N-term	206.167065	206.3239	H(22)C(14)O(1)	0.0		Co-translational	135	0.0
-Benzoyl@Any N-term	104.026215	104.1061	H(4)C(7)O(1)	0.0		Isotopic label	136	0.0
+Myristoyl+Delta:H(-4)@G^Protein_N-term	206.167065	206.3239	H(22)C(14)O(1)	0.0		Co-translational	135	0.0
+Benzoyl@Any_N-term	104.026215	104.1061	H(4)C(7)O(1)	0.0		Isotopic label	136	0.0
 Benzoyl@K	104.026215	104.1061	H(4)C(7)O(1)	0.0		Isotopic label	136	0.0
 Hex(5)HexNAc(2)@N	1216.422863	1217.088	H(76)C(46)N(2)O(35)	1216.422863	H(76)C(46)N(2)O(35)	N-linked glycosylation	137	0.5
-Dansyl@Any N-term	233.051049	233.2862	H(11)C(12)N(1)O(2)S(1)	0.0		Chemical derivative	139	0.0
+Dansyl@Any_N-term	233.051049	233.2862	H(11)C(12)N(1)O(2)S(1)	0.0		Chemical derivative	139	0.0
 Dansyl@K	233.051049	233.2862	H(11)C(12)N(1)O(2)S(1)	0.0		Chemical derivative	139	0.0
-a-type-ion@Any C-term	-46.005479	-46.0254	H(-2)C(-1)O(-2)	0.0		Other	140	0.0
-Amidine@Any N-term	41.026549	41.0519	H(3)C(2)N(1)	0.0		Chemical derivative	141	0.0
+a-type-ion@Any_C-term	-46.005479	-46.0254	H(-2)C(-1)O(-2)	0.0		Other	140	0.0
+Amidine@Any_N-term	41.026549	41.0519	H(3)C(2)N(1)	0.0		Chemical derivative	141	0.0
 Amidine@K	41.026549	41.0519	H(3)C(2)N(1)	0.0		Chemical derivative	141	0.0
 HexNAc(1)dHex(1)@T	349.137281	349.3337	H(23)C(14)N(1)O(9)	349.137281	H(23)C(14)N(1)O(9)	O-linked glycosylation	142	0.5
 HexNAc(1)dHex(1)@S	349.137281	349.3337	H(23)C(14)N(1)O(9)	349.137281	H(23)C(14)N(1)O(9)	O-linked glycosylation	142	0.5
@@ -350,9 +350,9 @@ Delta:S(-1)Se(1)@C	47.944449	46.895	S(-1)Se(1)	0.0		Non-standard residue	162	0.0
 NBS:13C(6)@W	159.008578	159.1144	H(3)13C(6)N(1)O(2)S(1)	0.0		Chemical derivative	171	0.0
 Methyl:2H(3)13C(1)@K	18.037835	18.0377	H(-1)2H(3)13C(1)	0.0		Isotopic label	329	0.0
 Methyl:2H(3)13C(1)@R	18.037835	18.0377	H(-1)2H(3)13C(1)	0.0		Isotopic label	329	0.0
-Methyl:2H(3)13C(1)@Any N-term	18.037835	18.0377	H(-1)2H(3)13C(1)	0.0		Isotopic label	329	0.0
-Dimethyl:2H(6)13C(2)@Protein N-term	36.07567	36.0754	H(-2)2H(6)13C(2)	0.0		Isotopic label	330	0.0
-Dimethyl:2H(6)13C(2)@Any N-term	36.07567	36.0754	H(-2)2H(6)13C(2)	0.0		Isotopic label	330	0.0
+Methyl:2H(3)13C(1)@Any_N-term	18.037835	18.0377	H(-1)2H(3)13C(1)	0.0		Isotopic label	329	0.0
+Dimethyl:2H(6)13C(2)@Protein_N-term	36.07567	36.0754	H(-2)2H(6)13C(2)	0.0		Isotopic label	330	0.0
+Dimethyl:2H(6)13C(2)@Any_N-term	36.07567	36.0754	H(-2)2H(6)13C(2)	0.0		Isotopic label	330	0.0
 Dimethyl:2H(6)13C(2)@R	36.07567	36.0754	H(-2)2H(6)13C(2)	0.0		Isotopic label	330	0.0
 Dimethyl:2H(6)13C(2)@K	36.07567	36.0754	H(-2)2H(6)13C(2)	0.0		Isotopic label	330	0.0
 NBS@W	152.988449	153.1585	H(3)C(6)N(1)O(2)S(1)	0.0		Chemical derivative	172	0.0
@@ -375,11 +375,11 @@ Label:13C(6)@R	6.020129	5.9559	C(-6)13C(6)	0.0		Isotopic label	188	0.0
 HPG@R	132.021129	132.1162	H(4)C(8)O(2)	0.0		Chemical derivative	186	0.0
 2HPG@R	282.052824	282.2476	H(10)C(16)O(5)	0.0		Chemical derivative	187	0.0
 QAT:2H(3)@C	174.168569	174.2784	H(16)2H(3)C(9)N(2)O(1)	0.0		Isotopic label	196	0.0
-Label:18O(2)@Any C-term	4.008491	3.9995	O(-2)18O(2)	0.0		Isotopic label	193	0.0
-AccQTag@Any N-term	170.048013	170.1674	H(6)C(10)N(2)O(1)	0.0		Chemical derivative	194	0.0
+Label:18O(2)@Any_C-term	4.008491	3.9995	O(-2)18O(2)	0.0		Isotopic label	193	0.0
+AccQTag@Any_N-term	170.048013	170.1674	H(6)C(10)N(2)O(1)	0.0		Chemical derivative	194	0.0
 AccQTag@K	170.048013	170.1674	H(6)C(10)N(2)O(1)	0.0		Chemical derivative	194	0.0
-Dimethyl:2H(4)@Protein N-term	32.056407	32.0778	2H(4)C(2)	0.0		Isotopic label	199	0.0
-Dimethyl:2H(4)@Any N-term	32.056407	32.0778	2H(4)C(2)	0.0		Isotopic label	199	0.0
+Dimethyl:2H(4)@Protein_N-term	32.056407	32.0778	2H(4)C(2)	0.0		Isotopic label	199	0.0
+Dimethyl:2H(4)@Any_N-term	32.056407	32.0778	2H(4)C(2)	0.0		Isotopic label	199	0.0
 Dimethyl:2H(4)@K	32.056407	32.0778	2H(4)C(2)	0.0		Isotopic label	199	0.0
 Dimethyl:2H(4)@R	32.056407	32.0778	2H(4)C(2)	0.0		Isotopic label	199	0.0
 EQAT@C	184.157563	184.2786	H(20)C(10)N(2)O(1)	0.0		Chemical derivative	197	0.0
@@ -408,11 +408,11 @@ NEIAA@Y	85.052764	85.1045	H(7)C(4)N(1)O(1)	0.0		Isotopic label	211	0.0
 NEIAA@C	85.052764	85.1045	H(7)C(4)N(1)O(1)	0.0		Isotopic label	211	0.0
 iTRAQ4plex@C	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	214	0.0
 iTRAQ4plex@T	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	214	0.0
-iTRAQ4plex@Protein N-term	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	214	0.0
+iTRAQ4plex@Protein_N-term	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	214	0.0
 iTRAQ4plex@S	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	214	0.0
 iTRAQ4plex@H	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	214	0.0
 iTRAQ4plex@Y	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	214	0.0
-iTRAQ4plex@Any N-term	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	214	0.0
+iTRAQ4plex@Any_N-term	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	214	0.0
 iTRAQ4plex@K	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	214	0.0
 Crotonaldehyde@K	70.041865	70.0898	H(6)C(4)O(1)	0.0		Other	253	0.0
 Crotonaldehyde@H	70.041865	70.0898	H(6)C(4)O(1)	0.0		Other	253	0.0
@@ -426,26 +426,26 @@ Argbiotinhydrazide@R	199.066699	199.27	H(13)C(9)N(1)O(2)S(1)	0.0		Chemical deriv
 Label:18O(1)@Y	2.004246	1.9998	O(-1)18O(1)	0.0		Isotopic label	258	0.0
 Label:18O(1)@T	2.004246	1.9998	O(-1)18O(1)	0.0		Isotopic label	258	0.0
 Label:18O(1)@S	2.004246	1.9998	O(-1)18O(1)	0.0		Isotopic label	258	0.0
-Label:18O(1)@Any C-term	2.004246	1.9998	O(-1)18O(1)	0.0		Isotopic label	258	0.0
+Label:18O(1)@Any_C-term	2.004246	1.9998	O(-1)18O(1)	0.0		Isotopic label	258	0.0
 Label:13C(6)15N(2)@K	8.014199	7.9427	C(-6)13C(6)N(-2)15N(2)	0.0		Isotopic label	259	0.0
 Thiophospho@Y	95.943487	96.0455	H(1)O(2)P(1)S(1)	0.0		Other	260	0.0
 Thiophospho@T	95.943487	96.0455	H(1)O(2)P(1)S(1)	0.0		Other	260	0.0
 Thiophospho@S	95.943487	96.0455	H(1)O(2)P(1)S(1)	0.0		Other	260	0.0
 SPITC@K	214.971084	215.2495	H(5)C(7)N(1)O(3)S(2)	0.0		Chemical derivative	261	0.0
-SPITC@Any N-term	214.971084	215.2495	H(5)C(7)N(1)O(3)S(2)	0.0		Chemical derivative	261	0.0
+SPITC@Any_N-term	214.971084	215.2495	H(5)C(7)N(1)O(3)S(2)	0.0		Chemical derivative	261	0.0
 IGBP@C	296.016039	297.1478	H(13)C(12)N(2)O(2)Br(1)	0.0		Isotopic label	243	0.0
 Cytopiloyne@Y	362.136553	362.3738	H(22)C(19)O(7)	0.0		Chemical derivative	270	0.0
 Cytopiloyne@S	362.136553	362.3738	H(22)C(19)O(7)	0.0		Chemical derivative	270	0.0
 Cytopiloyne@R	362.136553	362.3738	H(22)C(19)O(7)	0.0		Chemical derivative	270	0.0
 Cytopiloyne@P	362.136553	362.3738	H(22)C(19)O(7)	0.0		Chemical derivative	270	0.0
-Cytopiloyne@Any N-term	362.136553	362.3738	H(22)C(19)O(7)	0.0		Chemical derivative	270	0.0
+Cytopiloyne@Any_N-term	362.136553	362.3738	H(22)C(19)O(7)	0.0		Chemical derivative	270	0.0
 Cytopiloyne@K	362.136553	362.3738	H(22)C(19)O(7)	0.0		Chemical derivative	270	0.0
 Cytopiloyne@C	362.136553	362.3738	H(22)C(19)O(7)	0.0		Chemical derivative	270	0.0
 Cytopiloyne+water@Y	380.147118	380.3891	H(24)C(19)O(8)	0.0		Chemical derivative	271	0.0
 Cytopiloyne+water@T	380.147118	380.3891	H(24)C(19)O(8)	0.0		Chemical derivative	271	0.0
 Cytopiloyne+water@S	380.147118	380.3891	H(24)C(19)O(8)	0.0		Chemical derivative	271	0.0
 Cytopiloyne+water@R	380.147118	380.3891	H(24)C(19)O(8)	0.0		Chemical derivative	271	0.0
-Cytopiloyne+water@Any N-term	380.147118	380.3891	H(24)C(19)O(8)	0.0		Chemical derivative	271	0.0
+Cytopiloyne+water@Any_N-term	380.147118	380.3891	H(24)C(19)O(8)	0.0		Chemical derivative	271	0.0
 Cytopiloyne+water@K	380.147118	380.3891	H(24)C(19)O(8)	0.0		Chemical derivative	271	0.0
 Cytopiloyne+water@C	380.147118	380.3891	H(24)C(19)O(8)	0.0		Chemical derivative	271	0.0
 Label:13C(6)15N(4)@R	10.008269	9.9296	C(-6)13C(6)N(-4)15N(4)	0.0		Isotopic label	267	0.0
@@ -458,8 +458,8 @@ Label:13C(5)15N(1)@V	6.013809	5.9567	C(-5)13C(5)N(-1)15N(1)	0.0		Isotopic label	
 Label:13C(5)15N(1)@E	6.013809	5.9567	C(-5)13C(5)N(-1)15N(1)	0.0		Isotopic label	268	0.0
 PET@T	121.035005	121.2028	H(7)C(7)N(1)O(-1)S(1)	0.0		Chemical derivative	264	0.0
 PET@S	121.035005	121.2028	H(7)C(7)N(1)O(-1)S(1)	0.0		Chemical derivative	264	0.0
-CAF@Any N-term	135.983029	136.1265	H(4)C(3)O(4)S(1)	0.0		Chemical derivative	272	0.0
-Xlink:BS2G[96]@Protein N-term	96.021129	96.0841	H(4)C(5)O(2)	0.0		Chemical derivative	1905	0.0
+CAF@Any_N-term	135.983029	136.1265	H(4)C(3)O(4)S(1)	0.0		Chemical derivative	272	0.0
+Xlink:BS2G[96]@Protein_N-term	96.021129	96.0841	H(4)C(5)O(2)	0.0		Chemical derivative	1905	0.0
 Xlink:BS2G[96]@K	96.021129	96.0841	H(4)C(5)O(2)	0.0		Chemical derivative	1905	0.0
 Nitrosyl@C	28.990164	28.9982	H(-1)N(1)O(1)	0.0		Post-translational	275	0.0
 Nitrosyl@Y	28.990164	28.9982	H(-1)N(1)O(1)	0.0		Chemical derivative	275	0.0
@@ -467,7 +467,7 @@ Kdo@T	220.058303	220.1767	H(12)C(8)O(7)	220.058303	H(12)C(8)O(7)	O-linked glycos
 Kdo@S	220.058303	220.1767	H(12)C(8)O(7)	220.058303	H(12)C(8)O(7)	O-linked glycosylation	2022	0.5
 AEBS@Y	183.035399	183.2276	H(9)C(8)N(1)O(2)S(1)	0.0		Artefact	276	0.0
 AEBS@S	183.035399	183.2276	H(9)C(8)N(1)O(2)S(1)	0.0		Artefact	276	0.0
-AEBS@Protein N-term	183.035399	183.2276	H(9)C(8)N(1)O(2)S(1)	0.0		Artefact	276	0.0
+AEBS@Protein_N-term	183.035399	183.2276	H(9)C(8)N(1)O(2)S(1)	0.0		Artefact	276	0.0
 AEBS@K	183.035399	183.2276	H(9)C(8)N(1)O(2)S(1)	0.0		Artefact	276	0.0
 AEBS@H	183.035399	183.2276	H(9)C(8)N(1)O(2)S(1)	0.0		Artefact	276	0.0
 Ethanolyl@K	44.026215	44.0526	H(4)C(2)O(1)	0.0		Chemical derivative	278	0.0
@@ -475,10 +475,10 @@ Ethanolyl@C	44.026215	44.0526	H(4)C(2)O(1)	0.0		Chemical derivative	278	0.0
 Ethanolyl@R	44.026215	44.0526	H(4)C(2)O(1)	0.0		Chemical derivative	278	0.0
 Label:13C(6)15N(2)+Dimethyl@K	36.045499	35.9959	H(4)C(-4)13C(6)N(-2)15N(2)	0.0		Isotopic label	987	0.0
 HMVK@C	86.036779	86.0892	H(6)C(4)O(2)	0.0		Chemical derivative	371	0.0
-Ethyl@Any C-term	28.0313	28.0532	H(4)C(2)	0.0		Chemical derivative	280	0.0
-Ethyl@Protein N-term	28.0313	28.0532	H(4)C(2)	0.0		Chemical derivative	280	0.0
+Ethyl@Any_C-term	28.0313	28.0532	H(4)C(2)	0.0		Chemical derivative	280	0.0
+Ethyl@Protein_N-term	28.0313	28.0532	H(4)C(2)	0.0		Chemical derivative	280	0.0
 Ethyl@E	28.0313	28.0532	H(4)C(2)	0.0		Artefact	280	0.0
-Ethyl@Any N-term	28.0313	28.0532	H(4)C(2)	0.0		Multiple	280	0.0
+Ethyl@Any_N-term	28.0313	28.0532	H(4)C(2)	0.0		Multiple	280	0.0
 Ethyl@K	28.0313	28.0532	H(4)C(2)	0.0		Multiple	280	0.0
 Ethyl@D	28.0313	28.0532	H(4)C(2)	0.0		Chemical derivative	280	0.0
 CoenzymeA@C	765.09956	765.5182	H(34)C(21)N(7)O(16)P(3)S(1)	0.0		Post-translational	281	0.0
@@ -486,15 +486,15 @@ Methyl+Deamidated@Q	14.999666	15.0113	H(1)C(1)N(-1)O(1)	0.0		Post-translational	
 Methyl+Deamidated@N	14.999666	15.0113	H(1)C(1)N(-1)O(1)	0.0		Chemical derivative	528	0.0
 Delta:H(5)C(2)@P	29.039125	29.0611	H(5)C(2)	0.0		Post-translational	529	0.0
 Methyl:2H(2)@K	16.028204	16.0389	2H(2)C(1)	0.0		Isotopic label	284	0.0
-Methyl:2H(2)@Any N-term	16.028204	16.0389	2H(2)C(1)	0.0		Isotopic label	284	0.0
+Methyl:2H(2)@Any_N-term	16.028204	16.0389	2H(2)C(1)	0.0		Isotopic label	284	0.0
 SulfanilicAcid@E	155.004099	155.1744	H(5)C(6)N(1)O(2)S(1)	0.0		Isotopic label	285	0.0
 SulfanilicAcid@D	155.004099	155.1744	H(5)C(6)N(1)O(2)S(1)	0.0		Isotopic label	285	0.0
-SulfanilicAcid@Any C-term	155.004099	155.1744	H(5)C(6)N(1)O(2)S(1)	0.0		Isotopic label	285	0.0
+SulfanilicAcid@Any_C-term	155.004099	155.1744	H(5)C(6)N(1)O(2)S(1)	0.0		Isotopic label	285	0.0
 SulfanilicAcid:13C(6)@E	161.024228	161.1303	H(5)13C(6)N(1)O(2)S(1)	0.0		Chemical derivative	286	0.0
 SulfanilicAcid:13C(6)@D	161.024228	161.1303	H(5)13C(6)N(1)O(2)S(1)	0.0		Chemical derivative	286	0.0
-SulfanilicAcid:13C(6)@Any C-term	161.024228	161.1303	H(5)13C(6)N(1)O(2)S(1)	0.0		Chemical derivative	286	0.0
+SulfanilicAcid:13C(6)@Any_C-term	161.024228	161.1303	H(5)13C(6)N(1)O(2)S(1)	0.0		Chemical derivative	286	0.0
 Biotin-PEO-Amine@D	356.188212	356.4835	H(28)C(16)N(4)O(3)S(1)	0.0		Chemical derivative	289	0.0
-Biotin-PEO-Amine@Protein C-term	356.188212	356.4835	H(28)C(16)N(4)O(3)S(1)	0.0		Chemical derivative	289	0.0
+Biotin-PEO-Amine@Protein_C-term	356.188212	356.4835	H(28)C(16)N(4)O(3)S(1)	0.0		Chemical derivative	289	0.0
 Biotin-PEO-Amine@E	356.188212	356.4835	H(28)C(16)N(4)O(3)S(1)	0.0		Chemical derivative	289	0.0
 Trp->Oxolactone@W	13.979265	13.9835	H(-2)O(1)	0.0		Chemical derivative	288	0.0
 Biotin-HPDP@C	428.191582	428.6124	H(32)C(19)N(4)O(3)S(2)	0.0		Chemical derivative	290	0.0
@@ -502,7 +502,7 @@ Delta:Hg(1)@C	201.970617	200.59	Hg(1)	0.0		Chemical derivative	291	0.0
 IodoU-AMP@Y	322.020217	322.1654	H(11)C(9)N(2)O(9)P(1)	0.0		Chemical derivative	292	0.0
 IodoU-AMP@W	322.020217	322.1654	H(11)C(9)N(2)O(9)P(1)	0.0		Chemical derivative	292	0.0
 IodoU-AMP@F	322.020217	322.1654	H(11)C(9)N(2)O(9)P(1)	0.0		Chemical derivative	292	0.0
-CAMthiopropanoyl@Protein N-term	145.019749	145.1796	H(7)C(5)N(1)O(2)S(1)	0.0		Chemical derivative	293	0.0
+CAMthiopropanoyl@Protein_N-term	145.019749	145.1796	H(7)C(5)N(1)O(2)S(1)	0.0		Chemical derivative	293	0.0
 CAMthiopropanoyl@K	145.019749	145.1796	H(7)C(5)N(1)O(2)S(1)	0.0		Chemical derivative	293	0.0
 IED-Biotin@C	326.141261	326.4145	H(22)C(14)N(4)O(3)S(1)	0.0		Chemical derivative	294	0.0
 dHex@N	146.057909	146.1412	H(10)C(6)O(4)	146.057909	H(10)C(6)O(4)	N-linked glycosylation	295	0.5
@@ -517,7 +517,7 @@ Carboxy@E	43.989829	44.0095	C(1)O(2)	0.0		Post-translational	299	0.0
 Carboxy@D	43.989829	44.0095	C(1)O(2)	0.0		Post-translational	299	0.0
 Carboxy@K	43.989829	44.0095	C(1)O(2)	0.0		Post-translational	299	0.0
 Carboxy@W	43.989829	44.0095	C(1)O(2)	0.0		Chemical derivative	299	0.0
-Carboxy@M^Protein N-term	43.989829	44.0095	C(1)O(2)	0.0		Post-translational	299	0.0
+Carboxy@M^Protein_N-term	43.989829	44.0095	C(1)O(2)	0.0		Post-translational	299	0.0
 Bromobimane@C	190.074228	190.1986	H(10)C(10)N(2)O(2)	0.0		Chemical derivative	301	0.0
 Menadione@K	170.036779	170.1641	H(6)C(11)O(2)	0.0		Chemical derivative	302	0.0
 Menadione@C	170.036779	170.1641	H(6)C(11)O(2)	0.0		Chemical derivative	302	0.0
@@ -539,7 +539,7 @@ Hex(5)HexNAc(4)@S	1622.581608	1623.4731	H(102)C(62)N(4)O(45)	1622.581608	H(102)C
 Hex(5)HexNAc(4)@N	1622.581608	1623.4731	H(102)C(62)N(4)O(45)	1622.581608	H(102)C(62)N(4)O(45)	N-linked glycosylation	311	0.5
 Hex(5)HexNAc(4)@T	1622.581608	1623.4731	H(102)C(62)N(4)O(45)	1622.581608	H(102)C(62)N(4)O(45)	O-linked glycosylation	311	0.5
 Cysteinyl@C	119.004099	119.1423	H(5)C(3)N(1)O(2)S(1)	0.0		Multiple	312	0.0
-Lys-loss@K^Protein C-term	-128.094963	-128.1723	H(-12)C(-6)N(-2)O(-1)	0.0		Post-translational	313	0.0
+Lys-loss@K^Protein_C-term	-128.094963	-128.1723	H(-12)C(-6)N(-2)O(-1)	0.0		Post-translational	313	0.0
 Nmethylmaleimide@K	111.032028	111.0987	H(5)C(5)N(1)O(2)	0.0		Chemical derivative	314	0.0
 Nmethylmaleimide@C	111.032028	111.0987	H(5)C(5)N(1)O(2)	0.0		Chemical derivative	314	0.0
 CyDye-Cy3@C	672.298156	672.8335	H(44)C(37)N(4)O(6)S(1)	0.0		Chemical derivative	494	0.0
@@ -551,7 +551,7 @@ Nethylmaleimide+water@K	143.058243	143.1406	H(9)C(6)N(1)O(3)	0.0		Chemical deriv
 Nethylmaleimide+water@C	143.058243	143.1406	H(9)C(6)N(1)O(3)	0.0		Chemical derivative	320	0.0
 Methyl+Acetyl:2H(3)@K	59.045045	59.0817	H(1)2H(3)C(3)O(1)	0.0		Isotopic label	768	0.0
 Xlink:B10621@C	713.093079	713.5626	H(30)C(31)N(4)O(6)S(1)I(1)	0.0		Chemical derivative	323	0.0
-Xlink:DTBP[87]@Protein N-term	87.01427	87.1435	H(5)C(3)N(1)S(1)	0.0		Chemical derivative	324	0.0
+Xlink:DTBP[87]@Protein_N-term	87.01427	87.1435	H(5)C(3)N(1)S(1)	0.0		Chemical derivative	324	0.0
 Xlink:DTBP[87]@K	87.01427	87.1435	H(5)C(3)N(1)S(1)	0.0		Chemical derivative	324	0.0
 FP-Biotin@K	572.316129	572.7405	H(49)C(27)N(4)O(5)P(1)S(1)	0.0		Chemical derivative	325	0.0
 FP-Biotin@T	572.316129	572.7405	H(49)C(27)N(4)O(5)P(1)S(1)	0.0		Chemical derivative	325	0.0
@@ -573,21 +573,21 @@ Diisopropylphosphate@K	164.060231	164.1394	H(13)C(6)O(3)P(1)	0.0		Chemical deriv
 Diisopropylphosphate@Y	164.060231	164.1394	H(13)C(6)O(3)P(1)	0.0		Chemical derivative	362	0.0
 Diisopropylphosphate@T	164.060231	164.1394	H(13)C(6)O(3)P(1)	0.0		Chemical derivative	362	0.0
 Diisopropylphosphate@S	164.060231	164.1394	H(13)C(6)O(3)P(1)	0.0		Chemical derivative	362	0.0
-Diisopropylphosphate@Any N-term	164.060231	164.1394	H(13)C(6)O(3)P(1)	0.0		Chemical derivative	362	0.0
+Diisopropylphosphate@Any_N-term	164.060231	164.1394	H(13)C(6)O(3)P(1)	0.0		Chemical derivative	362	0.0
 Isopropylphospho@Y	122.013281	122.0596	H(7)C(3)O(3)P(1)	0.0		Chemical derivative	363	0.0
 Isopropylphospho@T	122.013281	122.0596	H(7)C(3)O(3)P(1)	0.0		Chemical derivative	363	0.0
 Isopropylphospho@S	122.013281	122.0596	H(7)C(3)O(3)P(1)	0.0		Chemical derivative	363	0.0
-ICPL:13C(6)@Any N-term	111.041593	111.05	H(3)13C(6)N(1)O(1)	0.0		Isotopic label	364	0.0
-ICPL:13C(6)@Protein N-term	111.041593	111.05	H(3)13C(6)N(1)O(1)	0.0		Isotopic label	364	0.0
+ICPL:13C(6)@Any_N-term	111.041593	111.05	H(3)13C(6)N(1)O(1)	0.0		Isotopic label	364	0.0
+ICPL:13C(6)@Protein_N-term	111.041593	111.05	H(3)13C(6)N(1)O(1)	0.0		Isotopic label	364	0.0
 ICPL:13C(6)@K	111.041593	111.05	H(3)13C(6)N(1)O(1)	0.0		Isotopic label	364	0.0
 CarbamidomethylDTT@C	209.018035	209.2864	H(11)C(6)N(1)O(3)S(2)	0.0		Artefact	893	0.0
-ICPL@Protein N-term	105.021464	105.0941	H(3)C(6)N(1)O(1)	0.0		Isotopic label	365	0.0
+ICPL@Protein_N-term	105.021464	105.0941	H(3)C(6)N(1)O(1)	0.0		Isotopic label	365	0.0
 ICPL@K	105.021464	105.0941	H(3)C(6)N(1)O(1)	0.0		Isotopic label	365	0.0
-ICPL@Any N-term	105.021464	105.0941	H(3)C(6)N(1)O(1)	0.0		Isotopic label	365	0.0
+ICPL@Any_N-term	105.021464	105.0941	H(3)C(6)N(1)O(1)	0.0		Isotopic label	365	0.0
 Deamidated:18O(1)@Q	2.988261	2.9845	H(-1)N(-1)18O(1)	0.0		Isotopic label	366	0.0
 Deamidated:18O(1)@N	2.988261	2.9845	H(-1)N(-1)18O(1)	0.0		Isotopic label	366	0.0
 Arg->Orn@R	-42.021798	-42.04	H(-2)C(-1)N(-2)	0.0		Artefact	372	0.0
-Cation:Cu[I]@Any C-term	61.921774	62.5381	H(-1)Cu(1)	0.0		Artefact	531	0.0
+Cation:Cu[I]@Any_C-term	61.921774	62.5381	H(-1)Cu(1)	0.0		Artefact	531	0.0
 Cation:Cu[I]@E	61.921774	62.5381	H(-1)Cu(1)	0.0		Artefact	531	0.0
 Cation:Cu[I]@D	61.921774	62.5381	H(-1)Cu(1)	0.0		Artefact	531	0.0
 Cation:Cu[I]@H	61.921774	62.5381	H(-1)Cu(1)	0.0		Artefact	531	0.0
@@ -600,10 +600,10 @@ Carboxyethyl@H	72.021129	72.0627	H(4)C(3)O(2)	0.0		Chemical derivative	378	0.0
 Hypusine@K	87.068414	87.1204	H(9)C(4)N(1)O(1)	0.0		Post-translational	379	0.0
 Retinylidene@K	266.203451	266.4204	H(26)C(20)	0.0		Post-translational	380	0.0
 Lys->AminoadipicAcid@K	14.96328	14.9683	H(-3)N(-1)O(2)	0.0		Post-translational	381	0.0
-Cys->PyruvicAcid@C^Protein N-term	-33.003705	-33.0961	H(-3)N(-1)O(1)S(-1)	0.0		Post-translational	382	0.0
-Ammonia-loss@C^Any N-term	-17.026549	-17.0305	H(-3)N(-1)	0.0		Artefact	385	0.0
-Ammonia-loss@S^Protein N-term	-17.026549	-17.0305	H(-3)N(-1)	0.0		Post-translational	385	0.0
-Ammonia-loss@T^Protein N-term	-17.026549	-17.0305	H(-3)N(-1)	0.0		Post-translational	385	0.0
+Cys->PyruvicAcid@C^Protein_N-term	-33.003705	-33.0961	H(-3)N(-1)O(1)S(-1)	0.0		Post-translational	382	0.0
+Ammonia-loss@C^Any_N-term	-17.026549	-17.0305	H(-3)N(-1)	0.0		Artefact	385	0.0
+Ammonia-loss@S^Protein_N-term	-17.026549	-17.0305	H(-3)N(-1)	0.0		Post-translational	385	0.0
+Ammonia-loss@T^Protein_N-term	-17.026549	-17.0305	H(-3)N(-1)	0.0		Post-translational	385	0.0
 Ammonia-loss@N	-17.026549	-17.0305	H(-3)N(-1)	0.0		Chemical derivative	385	0.0
 Phycocyanobilin@C	586.279135	586.678	H(38)C(33)N(4)O(6)	0.0		Post-translational	387	0.0
 Phycoerythrobilin@C	588.294785	588.6939	H(40)C(33)N(4)O(6)	0.0		Post-translational	388	0.0
@@ -614,7 +614,7 @@ Molybdopterin@C	521.884073	520.2668	H(11)C(10)N(5)O(8)P(1)S(2)Mo(1)	0.0		Post-tr
 Quinone@W	29.974179	29.9829	H(-2)O(2)	0.0		Post-translational	392	0.0
 Quinone@Y	29.974179	29.9829	H(-2)O(2)	0.0		Post-translational	392	0.0
 Glucosylgalactosyl@K	340.100562	340.2806	H(20)C(12)O(11)	340.100562	H(20)C(12)O(11)	Other glycosylation	393	0.5
-GPIanchor@Protein C-term	123.00853	123.0477	H(6)C(2)N(1)O(3)P(1)	0.0		Post-translational	394	0.0
+GPIanchor@Protein_C-term	123.00853	123.0477	H(6)C(2)N(1)O(3)P(1)	0.0		Post-translational	394	0.0
 PhosphoribosyldephosphoCoA@S	881.146904	881.6335	H(42)C(26)N(7)O(19)P(3)S(1)	0.0		Post-translational	395	0.0
 GlycerylPE@E	197.04531	197.1262	H(12)C(5)N(1)O(5)P(1)	0.0		Post-translational	396	0.0
 Triiodothyronine@Y	469.716159	469.785	H(1)C(6)O(1)I(3)	0.0		Post-translational	397	0.0
@@ -623,25 +623,25 @@ Tyr->Dha@Y	-94.041865	-94.1112	H(-6)C(-6)O(-1)	0.0		Post-translational	400	0.0
 Didehydro@S	-2.01565	-2.0159	H(-2)	0.0		Post-translational	401	0.0
 Didehydro@Y	-2.01565	-2.0159	H(-2)	0.0		Post-translational	401	0.0
 Didehydro@T	-2.01565	-2.0159	H(-2)	0.0		Chemical derivative	401	0.0
-Didehydro@K^Any C-term	-2.01565	-2.0159	H(-2)	0.0		Artefact	401	0.0
+Didehydro@K^Any_C-term	-2.01565	-2.0159	H(-2)	0.0		Artefact	401	0.0
 Cys->Oxoalanine@C	-17.992806	-18.0815	H(-2)O(1)S(-1)	0.0		Post-translational	402	0.0
-Ser->LacticAcid@S^Protein N-term	-15.010899	-15.0146	H(-1)N(-1)	0.0		Post-translational	403	0.0
+Ser->LacticAcid@S^Protein_N-term	-15.010899	-15.0146	H(-1)N(-1)	0.0		Post-translational	403	0.0
 GluGlu@E	258.085186	258.228	H(14)C(10)N(2)O(6)	0.0		Post-translational	451	0.0
-GluGlu@Protein C-term	258.085186	258.228	H(14)C(10)N(2)O(6)	0.0		Post-translational	451	0.0
+GluGlu@Protein_C-term	258.085186	258.228	H(14)C(10)N(2)O(6)	0.0		Post-translational	451	0.0
 Phosphoadenosine@H	329.05252	329.2059	H(12)C(10)N(5)O(6)P(1)	0.0		Post-translational	405	0.0
 Phosphoadenosine@T	329.05252	329.2059	H(12)C(10)N(5)O(6)P(1)	0.0		Post-translational	405	0.0
 Phosphoadenosine@K	329.05252	329.2059	H(12)C(10)N(5)O(6)P(1)	0.0		Post-translational	405	0.0
 Phosphoadenosine@Y	329.05252	329.2059	H(12)C(10)N(5)O(6)P(1)	0.0		Post-translational	405	0.0
 Phosphoadenosine@S	329.05252	329.2059	H(12)C(10)N(5)O(6)P(1)	0.0		Post-translational	405	0.0
 Glu@E	129.042593	129.114	H(7)C(5)N(1)O(3)	0.0		Post-translational	450	0.0
-Glu@Protein C-term	129.042593	129.114	H(7)C(5)N(1)O(3)	0.0		Chemical derivative	450	0.0
+Glu@Protein_C-term	129.042593	129.114	H(7)C(5)N(1)O(3)	0.0		Chemical derivative	450	0.0
 Hydroxycinnamyl@C	146.036779	146.1427	H(6)C(9)O(2)	0.0		Post-translational	407	0.0
 Glycosyl@P	148.037173	148.114	H(8)C(5)O(5)	0.0		Other glycosylation	408	0.0
 FMNH@H	454.088965	454.3279	H(19)C(17)N(4)O(9)P(1)	0.0		Post-translational	409	0.0
 FMNH@C	454.088965	454.3279	H(19)C(17)N(4)O(9)P(1)	0.0		Post-translational	409	0.0
 Archaeol@C	634.662782	635.1417	H(86)C(43)O(2)	0.0		Post-translational	410	0.0
-Phenylisocyanate@Any N-term	119.037114	119.1207	H(5)C(7)N(1)O(1)	0.0		Chemical derivative	411	0.0
-Phenylisocyanate:2H(5)@Any N-term	124.068498	124.1515	2H(5)C(7)N(1)O(1)	0.0		Chemical derivative	412	0.0
+Phenylisocyanate@Any_N-term	119.037114	119.1207	H(5)C(7)N(1)O(1)	0.0		Chemical derivative	411	0.0
+Phenylisocyanate:2H(5)@Any_N-term	124.068498	124.1515	2H(5)C(7)N(1)O(1)	0.0		Chemical derivative	412	0.0
 Phosphoguanosine@H	345.047435	345.2053	H(12)C(10)N(5)O(7)P(1)	0.0		Post-translational	413	0.0
 Phosphoguanosine@K	345.047435	345.2053	H(12)C(10)N(5)O(7)P(1)	0.0		Post-translational	413	0.0
 Hydroxymethyl@N	30.010565	30.026	H(2)C(1)O(1)	0.0		Post-translational	414	0.0
@@ -650,13 +650,13 @@ Dipyrrolylmethanemethyl@C	418.137616	418.3973	H(22)C(20)N(2)O(8)	0.0		Post-trans
 PhosphoUridine@H	306.025302	306.166	H(11)C(9)N(2)O(8)P(1)	0.0		Post-translational	417	0.0
 PhosphoUridine@Y	306.025302	306.166	H(11)C(9)N(2)O(8)P(1)	0.0		Post-translational	417	0.0
 Glycerophospho@S	154.00311	154.0584	H(7)C(3)O(5)P(1)	0.0		Post-translational	419	0.0
-Carboxy->Thiocarboxy@G^Protein C-term	15.977156	16.0656	O(-1)S(1)	0.0		Post-translational	420	0.0
+Carboxy->Thiocarboxy@G^Protein_C-term	15.977156	16.0656	O(-1)S(1)	0.0		Post-translational	420	0.0
 Sulfide@D	31.972071	32.065	S(1)	0.0		Post-translational	421	0.0
 Sulfide@C	31.972071	32.065	S(1)	0.0		Post-translational	421	0.0
 Sulfide@W	31.972071	32.065	S(1)	0.0		Chemical derivative	421	0.0
 PyruvicAcidIminyl@K	70.005479	70.0468	H(2)C(3)O(2)	0.0		Post-translational	422	0.0
-PyruvicAcidIminyl@V^Protein N-term	70.005479	70.0468	H(2)C(3)O(2)	0.0		Post-translational	422	0.0
-PyruvicAcidIminyl@C^Protein N-term	70.005479	70.0468	H(2)C(3)O(2)	0.0		Post-translational	422	0.0
+PyruvicAcidIminyl@V^Protein_N-term	70.005479	70.0468	H(2)C(3)O(2)	0.0		Post-translational	422	0.0
+PyruvicAcidIminyl@C^Protein_N-term	70.005479	70.0468	H(2)C(3)O(2)	0.0		Post-translational	422	0.0
 Delta:Se(1)@C	79.91652	78.96	Se(1)	0.0		Post-translational	423	0.0
 MolybdopterinGD@D	1572.985775	1572.0146	H(47)C(40)N(20)O(26)P(4)S(4)Mo(1)	0.0		Post-translational	424	0.0
 MolybdopterinGD@C	1572.985775	1572.0146	H(47)C(40)N(20)O(26)P(4)S(4)Mo(1)	0.0		Post-translational	424	0.0
@@ -684,12 +684,12 @@ PhosphoHex@S	242.019154	242.1205	H(11)C(6)O(8)P(1)	242.019154	H(11)C(6)O(8)P(1)	
 Palmitoleyl@C	236.214016	236.3929	H(28)C(16)O(1)	0.0		Post-translational	431	0.0
 Palmitoleyl@S	236.214016	236.3929	H(28)C(16)O(1)	0.0		Post-translational	431	0.0
 Palmitoleyl@T	236.214016	236.3929	H(28)C(16)O(1)	0.0		Pre-translational	431	0.0
-Cholesterol@Protein C-term	368.344302	368.6383	H(44)C(27)	0.0		Post-translational	432	0.0
+Cholesterol@Protein_C-term	368.344302	368.6383	H(44)C(27)	0.0		Post-translational	432	0.0
 Didehydroretinylidene@K	264.187801	264.4046	H(24)C(20)	0.0		Post-translational	433	0.0
 CHDH@D	294.183109	294.3859	H(26)C(17)O(4)	0.0		Post-translational	434	0.0
 Methylpyrroline@K	109.052764	109.1259	H(7)C(6)N(1)O(1)	0.0		Post-translational	435	0.0
 Hydroxyheme@E	614.161645	614.4714	H(30)C(34)N(4)O(4)Fe(1)	0.0		Post-translational	436	0.0
-MicrocinC7@Protein C-term	386.110369	386.3003	H(19)C(13)N(6)O(6)P(1)	0.0		Post-translational	437	0.0
+MicrocinC7@Protein_C-term	386.110369	386.3003	H(19)C(13)N(6)O(6)P(1)	0.0		Post-translational	437	0.0
 Cyano@C	24.995249	25.0095	H(-1)C(1)N(1)	0.0		Post-translational	438	0.0
 Diironsubcluster@C	342.786916	342.876	H(-1)C(5)N(2)O(5)S(2)Fe(2)	0.0		Post-translational	439	0.0
 Amidino@C	42.021798	42.04	H(2)C(1)N(2)	0.0		Post-translational	440	0.0
@@ -701,27 +701,27 @@ Hydroxytrimethyl@K	59.04969	59.0871	H(7)C(3)O(1)	0.0		Post-translational	445	0.0
 Deoxy@T	-15.994915	-15.9994	O(-1)	0.0		Chemical derivative	447	0.0
 Deoxy@D	-15.994915	-15.9994	O(-1)	0.0		Post-translational	447	0.0
 Deoxy@S	-15.994915	-15.9994	O(-1)	0.0		Chemical derivative	447	0.0
-Microcin@Protein C-term	831.197041	831.6871	H(37)C(36)N(3)O(20)	0.0		Post-translational	448	0.0
+Microcin@Protein_C-term	831.197041	831.6871	H(37)C(36)N(3)O(20)	0.0		Post-translational	448	0.0
 Decanoyl@T	154.135765	154.2493	H(18)C(10)O(1)	0.0		Post-translational	449	0.0
 Decanoyl@S	154.135765	154.2493	H(18)C(10)O(1)	0.0		Post-translational	449	0.0
-GluGluGlu@Protein C-term	387.127779	387.3419	H(21)C(15)N(3)O(9)	0.0		Post-translational	452	0.0
+GluGluGlu@Protein_C-term	387.127779	387.3419	H(21)C(15)N(3)O(9)	0.0		Post-translational	452	0.0
 GluGluGlu@E	387.127779	387.3419	H(21)C(15)N(3)O(9)	0.0		Post-translational	452	0.0
-GluGluGluGlu@Protein C-term	516.170373	516.4559	H(28)C(20)N(4)O(12)	0.0		Post-translational	453	0.0
+GluGluGluGlu@Protein_C-term	516.170373	516.4559	H(28)C(20)N(4)O(12)	0.0		Post-translational	453	0.0
 GluGluGluGlu@E	516.170373	516.4559	H(28)C(20)N(4)O(12)	0.0		Post-translational	453	0.0
 HexN@W	161.068808	161.1558	H(11)C(6)N(1)O(4)	0.0		Other glycosylation	454	0.0
 HexN@T	161.068808	161.1558	H(11)C(6)N(1)O(4)	161.068808	H(11)C(6)N(1)O(4)	O-linked glycosylation	454	0.5
 HexN@S	161.068808	161.1558	H(11)C(6)N(1)O(4)	161.068808	H(11)C(6)N(1)O(4)	O-linked glycosylation	454	0.5
 HexN@N	161.068808	161.1558	H(11)C(6)N(1)O(4)	161.068808	H(11)C(6)N(1)O(4)	N-linked glycosylation	454	0.5
 HexN@K	161.068808	161.1558	H(11)C(6)N(1)O(4)	0.0		Synth. pep. protect. gp.	454	0.0
-Xlink:DMP[154]@Protein N-term	154.110613	154.2096	H(14)C(8)N(2)O(1)	0.0		Chemical derivative	455	0.0
+Xlink:DMP[154]@Protein_N-term	154.110613	154.2096	H(14)C(8)N(2)O(1)	0.0		Chemical derivative	455	0.0
 Xlink:DMP[154]@K	154.110613	154.2096	H(14)C(8)N(2)O(1)	0.0		Chemical derivative	455	0.0
-NDA@Any N-term	175.042199	175.1855	H(5)C(13)N(1)	0.0		Chemical derivative	457	0.0
+NDA@Any_N-term	175.042199	175.1855	H(5)C(13)N(1)	0.0		Chemical derivative	457	0.0
 NDA@K	175.042199	175.1855	H(5)C(13)N(1)	0.0		Chemical derivative	457	0.0
-SPITC:13C(6)@Any N-term	220.991213	221.2054	H(5)C(1)13C(6)N(1)O(3)S(2)	0.0		Chemical derivative	464	0.0
+SPITC:13C(6)@Any_N-term	220.991213	221.2054	H(5)C(1)13C(6)N(1)O(3)S(2)	0.0		Chemical derivative	464	0.0
 SPITC:13C(6)@K	220.991213	221.2054	H(5)C(1)13C(6)N(1)O(3)S(2)	0.0		Chemical derivative	464	0.0
-TMAB:2H(9)@Any N-term	137.16403	137.2476	H(5)2H(9)C(7)N(1)O(1)	68.12999	2H(9)C(3)N(1)	Isotopic label	477	0.5
+TMAB:2H(9)@Any_N-term	137.16403	137.2476	H(5)2H(9)C(7)N(1)O(1)	68.12999	2H(9)C(3)N(1)	Isotopic label	477	0.5
 TMAB:2H(9)@K	137.16403	137.2476	H(5)2H(9)C(7)N(1)O(1)	68.12999	2H(9)C(3)N(1)	Isotopic label	477	0.5
-TMAB@Any N-term	128.107539	128.1922	H(14)C(7)N(1)O(1)	59.073499	H(9)C(3)N(1)	Isotopic label	476	0.5
+TMAB@Any_N-term	128.107539	128.1922	H(14)C(7)N(1)O(1)	59.073499	H(9)C(3)N(1)	Isotopic label	476	0.5
 TMAB@K	128.107539	128.1922	H(14)C(7)N(1)O(1)	59.073499	H(9)C(3)N(1)	Isotopic label	476	0.5
 FTC@S	421.073241	421.4259	H(15)C(21)N(3)O(5)S(1)	0.0		Chemical derivative	478	0.0
 FTC@R	421.073241	421.4259	H(15)C(21)N(3)O(5)S(1)	0.0		Chemical derivative	478	0.0
@@ -749,21 +749,21 @@ BHTOH@C	234.16198	234.334	H(22)C(15)O(2)	0.0		Other	498	0.0
 BHTOH@K	234.16198	234.334	H(22)C(15)O(2)	0.0		Other	498	0.0
 IGBP:13C(2)@C	298.022748	299.1331	H(13)C(10)13C(2)N(2)O(2)Br(1)	0.0		Isotopic label	499	0.0
 Nmethylmaleimide+water@C	129.042593	129.114	H(7)C(5)N(1)O(3)	0.0		Chemical derivative	500	0.0
-PyMIC@Any N-term	134.048013	134.1353	H(6)C(7)N(2)O(1)	0.0		Chemical derivative	501	0.0
-LG-lactam-K@Protein N-term	332.19876	332.4339	H(28)C(20)O(4)	0.0		Post-translational	503	0.0
+PyMIC@Any_N-term	134.048013	134.1353	H(6)C(7)N(2)O(1)	0.0		Chemical derivative	501	0.0
+LG-lactam-K@Protein_N-term	332.19876	332.4339	H(28)C(20)O(4)	0.0		Post-translational	503	0.0
 LG-lactam-K@K	332.19876	332.4339	H(28)C(20)O(4)	0.0		Post-translational	503	0.0
 BisANS@K	594.091928	594.6569	H(22)C(32)N(2)O(6)S(2)	0.0		Chemical derivative	519	0.0
-Piperidine@Any N-term	68.0626	68.117	H(8)C(5)	0.0		Chemical derivative	520	0.0
+Piperidine@Any_N-term	68.0626	68.117	H(8)C(5)	0.0		Chemical derivative	520	0.0
 Piperidine@K	68.0626	68.117	H(8)C(5)	0.0		Chemical derivative	520	0.0
-Diethyl@Any N-term	56.0626	56.1063	H(8)C(4)	0.0		Chemical derivative	518	0.0
+Diethyl@Any_N-term	56.0626	56.1063	H(8)C(4)	0.0		Chemical derivative	518	0.0
 Diethyl@K	56.0626	56.1063	H(8)C(4)	0.0		Chemical derivative	518	0.0
-LG-Hlactam-K@Protein N-term	348.193674	348.4333	H(28)C(20)O(5)	0.0		Post-translational	504	0.0
+LG-Hlactam-K@Protein_N-term	348.193674	348.4333	H(28)C(20)O(5)	0.0		Post-translational	504	0.0
 LG-Hlactam-K@K	348.193674	348.4333	H(28)C(20)O(5)	0.0		Post-translational	504	0.0
-Dimethyl:2H(4)13C(2)@Protein N-term	34.063117	34.0631	2H(4)13C(2)	0.0		Isotopic label	510	0.0
+Dimethyl:2H(4)13C(2)@Protein_N-term	34.063117	34.0631	2H(4)13C(2)	0.0		Isotopic label	510	0.0
 Dimethyl:2H(4)13C(2)@R	34.063117	34.0631	2H(4)13C(2)	0.0		Isotopic label	510	0.0
 Dimethyl:2H(4)13C(2)@K	34.063117	34.0631	2H(4)13C(2)	0.0		Isotopic label	510	0.0
-Dimethyl:2H(4)13C(2)@Any N-term	34.063117	34.0631	2H(4)13C(2)	0.0		Isotopic label	510	0.0
-C8-QAT@Any N-term	227.224915	227.3862	H(29)C(14)N(1)O(1)	0.0		Chemical derivative	513	0.0
+Dimethyl:2H(4)13C(2)@Any_N-term	34.063117	34.0631	2H(4)13C(2)	0.0		Isotopic label	510	0.0
+C8-QAT@Any_N-term	227.224915	227.3862	H(29)C(14)N(1)O(1)	0.0		Chemical derivative	513	0.0
 C8-QAT@K	227.224915	227.3862	H(29)C(14)N(1)O(1)	0.0		Chemical derivative	513	0.0
 Hex(2)@R	324.105647	324.2812	H(20)C(12)O(10)	0.0		Other glycosylation	512	0.0
 Hex(2)@K	324.105647	324.2812	H(20)C(12)O(10)	0.0		Other glycosylation	512	0.0
@@ -773,30 +773,30 @@ LG-lactam-R@R	290.176961	290.3939	H(26)C(19)N(-2)O(4)	0.0		Post-translational	50
 Withaferin@C	470.266839	470.5977	H(38)C(28)O(6)	0.0		Chemical derivative	1036	0.0
 Biotin:Thermo-88317@S	443.291294	443.5603	H(42)C(22)N(3)O(4)P(1)	0.0		Chemical derivative	1037	0.0
 Biotin:Thermo-88317@Y	443.291294	443.5603	H(42)C(22)N(3)O(4)P(1)	0.0		Chemical derivative	1037	0.0
-CLIP_TRAQ_2@Any N-term	141.098318	141.1756	H(12)C(6)13C(1)N(2)O(1)	0.0		Isotopic label	525	0.0
+CLIP_TRAQ_2@Any_N-term	141.098318	141.1756	H(12)C(6)13C(1)N(2)O(1)	0.0		Isotopic label	525	0.0
 CLIP_TRAQ_2@K	141.098318	141.1756	H(12)C(6)13C(1)N(2)O(1)	0.0		Isotopic label	525	0.0
 CLIP_TRAQ_2@Y	141.098318	141.1756	H(12)C(6)13C(1)N(2)O(1)	0.0		Isotopic label	525	0.0
 LG-Hlactam-R@R	306.171876	306.3933	H(26)C(19)N(-2)O(5)	0.0		Post-translational	506	0.0
 Maleimide-PEO2-Biotin@C	525.225719	525.6183	H(35)C(23)N(5)O(7)S(1)	0.0		Chemical derivative	522	0.0
-Sulfo-NHS-LC-LC-Biotin@Any N-term	452.245726	452.6106	H(36)C(22)N(4)O(4)S(1)	0.0		Chemical derivative	523	0.0
+Sulfo-NHS-LC-LC-Biotin@Any_N-term	452.245726	452.6106	H(36)C(22)N(4)O(4)S(1)	0.0		Chemical derivative	523	0.0
 Sulfo-NHS-LC-LC-Biotin@K	452.245726	452.6106	H(36)C(22)N(4)O(4)S(1)	0.0		Chemical derivative	523	0.0
 FNEM@C	427.069202	427.3625	H(13)C(24)N(1)O(7)	0.0		Chemical derivative	515	0.0
 PropylNAGthiazoline@C	232.064354	232.2768	H(14)C(9)N(1)O(4)S(1)	0.0		Chemical derivative	514	0.0
 Dethiomethyl@M	-48.003371	-48.1075	H(-4)C(-1)S(-1)	0.0		Artefact	526	0.0
 iTRAQ4plex114@Y	144.105918	144.168	H(12)C(5)13C(2)N(2)18O(1)	0.0		Isotopic label	532	0.0
-iTRAQ4plex114@Any N-term	144.105918	144.168	H(12)C(5)13C(2)N(2)18O(1)	0.0		Isotopic label	532	0.0
+iTRAQ4plex114@Any_N-term	144.105918	144.168	H(12)C(5)13C(2)N(2)18O(1)	0.0		Isotopic label	532	0.0
 iTRAQ4plex114@K	144.105918	144.168	H(12)C(5)13C(2)N(2)18O(1)	0.0		Isotopic label	532	0.0
 iTRAQ4plex114@C	144.105918	144.168	H(12)C(5)13C(2)N(2)18O(1)	0.0		Isotopic label	532	0.0
 iTRAQ4plex115@Y	144.099599	144.1688	H(12)C(6)13C(1)N(1)15N(1)18O(1)	0.0		Isotopic label	533	0.0
-iTRAQ4plex115@Any N-term	144.099599	144.1688	H(12)C(6)13C(1)N(1)15N(1)18O(1)	0.0		Isotopic label	533	0.0
+iTRAQ4plex115@Any_N-term	144.099599	144.1688	H(12)C(6)13C(1)N(1)15N(1)18O(1)	0.0		Isotopic label	533	0.0
 iTRAQ4plex115@K	144.099599	144.1688	H(12)C(6)13C(1)N(1)15N(1)18O(1)	0.0		Isotopic label	533	0.0
 iTRAQ4plex115@C	144.099599	144.1688	H(12)C(6)13C(1)N(1)15N(1)18O(1)	0.0		Isotopic label	533	0.0
 Dibromo@Y	155.821022	157.7921	H(-2)Br(2)	0.0		Chemical derivative	534	0.0
 LRGG@K	383.228103	383.446	H(29)C(16)N(7)O(4)	0.0		Chemical derivative	535	0.0
 CLIP_TRAQ_3@Y	271.148736	271.2976	H(20)C(11)13C(1)N(3)O(4)	0.0		Isotopic label	536	0.0
-CLIP_TRAQ_3@Any N-term	271.148736	271.2976	H(20)C(11)13C(1)N(3)O(4)	0.0		Isotopic label	536	0.0
+CLIP_TRAQ_3@Any_N-term	271.148736	271.2976	H(20)C(11)13C(1)N(3)O(4)	0.0		Isotopic label	536	0.0
 CLIP_TRAQ_3@K	271.148736	271.2976	H(20)C(11)13C(1)N(3)O(4)	0.0		Isotopic label	536	0.0
-CLIP_TRAQ_4@Any N-term	244.101452	244.2292	H(15)C(9)13C(1)N(2)O(5)	0.0		Isotopic label	537	0.0
+CLIP_TRAQ_4@Any_N-term	244.101452	244.2292	H(15)C(9)13C(1)N(2)O(5)	0.0		Isotopic label	537	0.0
 CLIP_TRAQ_4@K	244.101452	244.2292	H(15)C(9)13C(1)N(2)O(5)	0.0		Isotopic label	537	0.0
 CLIP_TRAQ_4@Y	244.101452	244.2292	H(15)C(9)13C(1)N(2)O(5)	0.0		Isotopic label	537	0.0
 Biotin:Cayman-10141@C	626.386577	626.8927	H(54)C(35)N(4)O(4)S(1)	0.0		Other	538	0.0
@@ -840,12 +840,12 @@ Gly->Val@G	42.04695	42.0797	H(6)C(3)N(0)O(0)S(0)	0.0		AA substitution	575	0.0
 Gly->Asp@G	58.005479	58.0361	H(2)C(2)N(0)O(2)S(0)	0.0		AA substitution	576	0.0
 Gly->Cys@G	45.987721	46.0916	H(2)C(1)N(0)O(0)S(1)	0.0		AA substitution	577	0.0
 Gly->Arg@G	99.079647	99.1344	H(9)C(4)N(3)O(0)S(0)	0.0		AA substitution	578	0.0
-dNIC@Any N-term	109.048119	109.1205	H(1)2H(3)C(6)N(1)O(1)	0.0		Isotopic label	698	0.0
+dNIC@Any_N-term	109.048119	109.1205	H(1)2H(3)C(6)N(1)O(1)	0.0		Isotopic label	698	0.0
 dNIC@K	109.048119	109.1205	H(1)2H(3)C(6)N(1)O(1)	0.0		Isotopic label	698	0.0
 His->Pro@H	-40.006148	-40.0241	H(0)C(-1)N(-2)O(0)S(0)	0.0		AA substitution	580	0.0
 His->Tyr@H	26.004417	26.034	H(2)C(3)N(-2)O(1)S(0)	0.0		AA substitution	581	0.0
 His->Gln@H	-9.000334	-9.0101	H(1)C(-1)N(-1)O(1)S(0)	0.0		AA substitution	582	0.0
-NIC@Any N-term	105.021464	105.0941	H(3)C(6)N(1)O(1)	0.0		Isotopic label	697	0.0
+NIC@Any_N-term	105.021464	105.0941	H(3)C(6)N(1)O(1)	0.0		Isotopic label	697	0.0
 NIC@K	105.021464	105.0941	H(3)C(6)N(1)O(1)	0.0		Isotopic label	697	0.0
 His->Arg@H	19.042199	19.0464	H(5)C(0)N(1)O(0)S(0)	0.0		AA substitution	584	0.0
 His->Xle@H	-23.974848	-23.9816	H(4)N(-2)	0.0		AA substitution	585	0.0
@@ -957,23 +957,23 @@ Tyr->Asp@Y	-48.036386	-48.0859	H(-4)C(-5)N(0)O(1)S(0)	0.0		AA substitution	682	0
 Tyr->Cys@Y	-60.054144	-60.0304	H(-4)C(-6)N(0)O(-1)S(1)	0.0		AA substitution	683	0.0
 BDMAPP@W	253.010225	254.1231	H(12)C(11)N(1)O(1)Br(1)	0.0		Artefact	684	0.0
 BDMAPP@Y	253.010225	254.1231	H(12)C(11)N(1)O(1)Br(1)	0.0		Artefact	684	0.0
-BDMAPP@Protein N-term	253.010225	254.1231	H(12)C(11)N(1)O(1)Br(1)	0.0		Chemical derivative	684	0.0
+BDMAPP@Protein_N-term	253.010225	254.1231	H(12)C(11)N(1)O(1)Br(1)	0.0		Chemical derivative	684	0.0
 BDMAPP@K	253.010225	254.1231	H(12)C(11)N(1)O(1)Br(1)	0.0		Chemical derivative	684	0.0
 BDMAPP@H	253.010225	254.1231	H(12)C(11)N(1)O(1)Br(1)	0.0		Artefact	684	0.0
 NA-LNO2@C	325.225309	325.443	H(31)C(18)N(1)O(4)	0.0		Post-translational	685	0.0
 NA-LNO2@H	325.225309	325.443	H(31)C(18)N(1)O(4)	0.0		Post-translational	685	0.0
 NA-OA-NO2@C	327.240959	327.4589	H(33)C(18)N(1)O(4)	0.0		Post-translational	686	0.0
 NA-OA-NO2@H	327.240959	327.4589	H(33)C(18)N(1)O(4)	0.0		Post-translational	686	0.0
-ICPL:2H(4)@Any N-term	109.046571	109.1188	H(-1)2H(4)C(6)N(1)O(1)	0.0		Isotopic label	687	0.0
-ICPL:2H(4)@Protein N-term	109.046571	109.1188	H(-1)2H(4)C(6)N(1)O(1)	0.0		Isotopic label	687	0.0
+ICPL:2H(4)@Any_N-term	109.046571	109.1188	H(-1)2H(4)C(6)N(1)O(1)	0.0		Isotopic label	687	0.0
+ICPL:2H(4)@Protein_N-term	109.046571	109.1188	H(-1)2H(4)C(6)N(1)O(1)	0.0		Isotopic label	687	0.0
 ICPL:2H(4)@K	109.046571	109.1188	H(-1)2H(4)C(6)N(1)O(1)	0.0		Isotopic label	687	0.0
 CarboxymethylDTT@C	210.00205	210.2712	H(10)C(6)O(4)S(2)	0.0		Artefact	894	0.0
-iTRAQ8plex@Protein N-term	304.20536	304.3074	H(24)C(7)13C(7)N(3)15N(1)O(3)	0.0		Isotopic label	730	0.0
+iTRAQ8plex@Protein_N-term	304.20536	304.3074	H(24)C(7)13C(7)N(3)15N(1)O(3)	0.0		Isotopic label	730	0.0
 iTRAQ8plex@T	304.20536	304.3074	H(24)C(7)13C(7)N(3)15N(1)O(3)	0.0		Isotopic label	730	0.0
 iTRAQ8plex@S	304.20536	304.3074	H(24)C(7)13C(7)N(3)15N(1)O(3)	0.0		Isotopic label	730	0.0
 iTRAQ8plex@H	304.20536	304.3074	H(24)C(7)13C(7)N(3)15N(1)O(3)	0.0		Isotopic label	730	0.0
 iTRAQ8plex@Y	304.20536	304.3074	H(24)C(7)13C(7)N(3)15N(1)O(3)	0.0		Isotopic label	730	0.0
-iTRAQ8plex@Any N-term	304.20536	304.3074	H(24)C(7)13C(7)N(3)15N(1)O(3)	0.0		Isotopic label	730	0.0
+iTRAQ8plex@Any_N-term	304.20536	304.3074	H(24)C(7)13C(7)N(3)15N(1)O(3)	0.0		Isotopic label	730	0.0
 iTRAQ8plex@K	304.20536	304.3074	H(24)C(7)13C(7)N(3)15N(1)O(3)	0.0		Isotopic label	730	0.0
 iTRAQ8plex@C	304.20536	304.3074	H(24)C(7)13C(7)N(3)15N(1)O(3)	0.0		Isotopic label	730	0.0
 Label:13C(6)15N(1)@I	7.017164	6.9493	C(-6)13C(6)N(-1)15N(1)	0.0		Isotopic label	695	0.0
@@ -991,14 +991,14 @@ O-Dimethylphosphate@S	107.997631	108.0331	H(5)C(2)O(3)P(1)	0.0		Chemical derivat
 O-Methylphosphate@Y	93.981981	94.0065	H(3)C(1)O(3)P(1)	0.0		Chemical derivative	724	0.0
 O-Methylphosphate@T	93.981981	94.0065	H(3)C(1)O(3)P(1)	0.0		Chemical derivative	724	0.0
 O-Methylphosphate@S	93.981981	94.0065	H(3)C(1)O(3)P(1)	0.0		Chemical derivative	724	0.0
-Diethylphosphate@Any N-term	136.028931	136.0862	H(9)C(4)O(3)P(1)	0.0		Chemical derivative	725	0.0
+Diethylphosphate@Any_N-term	136.028931	136.0862	H(9)C(4)O(3)P(1)	0.0		Chemical derivative	725	0.0
 Diethylphosphate@H	136.028931	136.0862	H(9)C(4)O(3)P(1)	0.0		Chemical derivative	725	0.0
 Diethylphosphate@C	136.028931	136.0862	H(9)C(4)O(3)P(1)	0.0		Chemical derivative	725	0.0
 Diethylphosphate@K	136.028931	136.0862	H(9)C(4)O(3)P(1)	0.0		Chemical derivative	725	0.0
 Diethylphosphate@Y	136.028931	136.0862	H(9)C(4)O(3)P(1)	0.0		Chemical derivative	725	0.0
 Diethylphosphate@T	136.028931	136.0862	H(9)C(4)O(3)P(1)	0.0		Chemical derivative	725	0.0
 Diethylphosphate@S	136.028931	136.0862	H(9)C(4)O(3)P(1)	0.0		Chemical derivative	725	0.0
-Ethylphosphate@Any N-term	107.997631	108.0331	H(5)C(2)O(3)P(1)	0.0		Chemical derivative	726	0.0
+Ethylphosphate@Any_N-term	107.997631	108.0331	H(5)C(2)O(3)P(1)	0.0		Chemical derivative	726	0.0
 Ethylphosphate@K	107.997631	108.0331	H(5)C(2)O(3)P(1)	0.0		Chemical derivative	726	0.0
 Ethylphosphate@Y	107.997631	108.0331	H(5)C(2)O(3)P(1)	0.0		Chemical derivative	726	0.0
 Ethylphosphate@T	107.997631	108.0331	H(5)C(2)O(3)P(1)	0.0		Chemical derivative	726	0.0
@@ -1015,30 +1015,30 @@ O-Isopropylmethylphosphonate@Y	120.034017	120.0868	H(9)C(4)O(2)P(1)	0.0		Chemica
 O-Isopropylmethylphosphonate@T	120.034017	120.0868	H(9)C(4)O(2)P(1)	0.0		Chemical derivative	729	0.0
 O-Isopropylmethylphosphonate@S	120.034017	120.0868	H(9)C(4)O(2)P(1)	0.0		Chemical derivative	729	0.0
 iTRAQ8plex:13C(6)15N(2)@Y	304.19904	304.3081	H(24)C(8)13C(6)N(2)15N(2)O(3)	0.0		Isotopic label	731	0.0
-iTRAQ8plex:13C(6)15N(2)@Any N-term	304.19904	304.3081	H(24)C(8)13C(6)N(2)15N(2)O(3)	0.0		Isotopic label	731	0.0
+iTRAQ8plex:13C(6)15N(2)@Any_N-term	304.19904	304.3081	H(24)C(8)13C(6)N(2)15N(2)O(3)	0.0		Isotopic label	731	0.0
 iTRAQ8plex:13C(6)15N(2)@K	304.19904	304.3081	H(24)C(8)13C(6)N(2)15N(2)O(3)	0.0		Isotopic label	731	0.0
 iTRAQ8plex:13C(6)15N(2)@C	304.19904	304.3081	H(24)C(8)13C(6)N(2)15N(2)O(3)	0.0		Isotopic label	731	0.0
 BEMAD_ST@T	136.001656	136.2357	H(8)C(4)O(1)S(2)	0.0		Chemical derivative	735	0.0
 BEMAD_ST@S	136.001656	136.2357	H(8)C(4)O(1)S(2)	0.0		Chemical derivative	735	0.0
 Ethanolamine@D	43.042199	43.0678	H(5)C(2)N(1)	0.0		Chemical derivative	734	0.0
-Ethanolamine@Any C-term	43.042199	43.0678	H(5)C(2)N(1)	0.0		Chemical derivative	734	0.0
+Ethanolamine@Any_C-term	43.042199	43.0678	H(5)C(2)N(1)	0.0		Chemical derivative	734	0.0
 Ethanolamine@E	43.042199	43.0678	H(5)C(2)N(1)	0.0		Chemical derivative	734	0.0
 Ethanolamine@C	43.042199	43.0678	H(5)C(2)N(1)	0.0		Chemical derivative	734	0.0
 TMT6plex@T	229.162932	229.2634	H(20)C(8)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	737	0.0
 TMT6plex@S	229.162932	229.2634	H(20)C(8)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	737	0.0
 TMT6plex@H	229.162932	229.2634	H(20)C(8)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	737	0.0
-TMT6plex@Protein N-term	229.162932	229.2634	H(20)C(8)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	737	0.0
-TMT6plex@Any N-term	229.162932	229.2634	H(20)C(8)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	737	0.0
+TMT6plex@Protein_N-term	229.162932	229.2634	H(20)C(8)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	737	0.0
+TMT6plex@Any_N-term	229.162932	229.2634	H(20)C(8)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	737	0.0
 TMT6plex@K	229.162932	229.2634	H(20)C(8)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	737	0.0
 BEMAD_C@C	120.0245	120.1701	H(8)C(4)O(2)S(1)	0.0		Chemical derivative	736	0.0
 TMT2plex@H	225.155833	225.2921	H(20)C(11)13C(1)N(2)O(2)	0.0		Isotopic label	738	0.0
 TMT2plex@S	225.155833	225.2921	H(20)C(11)13C(1)N(2)O(2)	0.0		Isotopic label	738	0.0
 TMT2plex@T	225.155833	225.2921	H(20)C(11)13C(1)N(2)O(2)	0.0		Isotopic label	738	0.0
-TMT2plex@Protein N-term	225.155833	225.2921	H(20)C(11)13C(1)N(2)O(2)	0.0		Isotopic label	738	0.0
-TMT2plex@Any N-term	225.155833	225.2921	H(20)C(11)13C(1)N(2)O(2)	0.0		Isotopic label	738	0.0
+TMT2plex@Protein_N-term	225.155833	225.2921	H(20)C(11)13C(1)N(2)O(2)	0.0		Isotopic label	738	0.0
+TMT2plex@Any_N-term	225.155833	225.2921	H(20)C(11)13C(1)N(2)O(2)	0.0		Isotopic label	738	0.0
 TMT2plex@K	225.155833	225.2921	H(20)C(11)13C(1)N(2)O(2)	0.0		Isotopic label	738	0.0
-TMT@Protein N-term	224.152478	224.2994	H(20)C(12)N(2)O(2)	0.0		Chemical derivative	739	0.0
-TMT@Any N-term	224.152478	224.2994	H(20)C(12)N(2)O(2)	0.0		Chemical derivative	739	0.0
+TMT@Protein_N-term	224.152478	224.2994	H(20)C(12)N(2)O(2)	0.0		Chemical derivative	739	0.0
+TMT@Any_N-term	224.152478	224.2994	H(20)C(12)N(2)O(2)	0.0		Chemical derivative	739	0.0
 TMT@K	224.152478	224.2994	H(20)C(12)N(2)O(2)	0.0		Chemical derivative	739	0.0
 TMT@H	224.152478	224.2994	H(20)C(12)N(2)O(2)	0.0		Isotopic label	739	0.0
 TMT@S	224.152478	224.2994	H(20)C(12)N(2)O(2)	0.0		Isotopic label	739	0.0
@@ -1054,9 +1054,9 @@ NO_SMX_SIMD@C	267.031377	267.2612	H(9)C(10)N(3)O(4)S(1)	0.0		Chemical derivative
 Malonyl@C	86.000394	86.0462	H(2)C(3)O(3)	0.0		Chemical derivative	747	0.0
 Malonyl@S	86.000394	86.0462	H(2)C(3)O(3)	0.0		Chemical derivative	747	0.0
 Malonyl@K	86.000394	86.0462	H(2)C(3)O(3)	0.0		Post-translational	747	0.0
-3sulfo@Any N-term	183.983029	184.1693	H(4)C(7)O(4)S(1)	0.0		Chemical derivative	748	0.0
+3sulfo@Any_N-term	183.983029	184.1693	H(4)C(7)O(4)S(1)	0.0		Chemical derivative	748	0.0
 trifluoro@L	53.971735	53.9714	H(-3)F(3)	0.0		Non-standard residue	750	0.0
-TNBS@Any N-term	210.986535	211.0886	H(1)C(6)N(3)O(6)	0.0		Chemical derivative	751	0.0
+TNBS@Any_N-term	210.986535	211.0886	H(1)C(6)N(3)O(6)	0.0		Chemical derivative	751	0.0
 TNBS@K	210.986535	211.0886	H(1)C(6)N(3)O(6)	0.0		Chemical derivative	751	0.0
 Biotin-phenacyl@C	626.263502	626.727	H(38)C(29)N(8)O(6)S(1)	0.0		Chemical derivative	774	0.0
 Biotin-phenacyl@H	626.263502	626.727	H(38)C(29)N(8)O(6)S(1)	0.0		Chemical derivative	774	0.0
@@ -1069,14 +1069,14 @@ maleimide@C	97.016378	97.0721	H(3)C(4)N(1)O(2)	0.0		Chemical derivative	773	0.0
 IDEnT@C	214.990469	216.064	H(7)C(9)N(1)O(1)Cl(2)	0.0		Isotopic label	762	0.0
 BEMAD_ST:2H(6)@T	142.039317	142.2727	H(2)2H(6)C(4)O(1)S(2)	0.0		Isotopic label	763	0.0
 BEMAD_ST:2H(6)@S	142.039317	142.2727	H(2)2H(6)C(4)O(1)S(2)	0.0		Isotopic label	763	0.0
-Met-loss@M^Protein N-term	-131.040485	-131.1961	H(-9)C(-5)N(-1)O(-1)S(-1)	0.0		Co-translational	765	0.0
-Met-loss+Acetyl@M^Protein N-term	-89.02992	-89.1594	H(-7)C(-3)N(-1)S(-1)	0.0		Co-translational	766	0.0
+Met-loss@M^Protein_N-term	-131.040485	-131.1961	H(-9)C(-5)N(-1)O(-1)S(-1)	0.0		Co-translational	765	0.0
+Met-loss+Acetyl@M^Protein_N-term	-89.02992	-89.1594	H(-7)C(-3)N(-1)S(-1)	0.0		Co-translational	766	0.0
 Menadione-HQ@K	172.05243	172.18	H(8)C(11)O(2)	0.0		Chemical derivative	767	0.0
 Menadione-HQ@C	172.05243	172.18	H(8)C(11)O(2)	0.0		Chemical derivative	767	0.0
 Carboxymethyl:13C(2)@C	60.012189	60.0214	H(2)13C(2)O(2)	0.0		Chemical derivative	775	0.0
 NEM:2H(5)@C	130.079062	130.1561	H(2)2H(5)C(6)N(1)O(2)	0.0		Chemical derivative	776	0.0
-Gly-loss+Amide@G^Any C-term	-58.005479	-58.0361	H(-2)C(-2)O(-2)	0.0		Post-translational	822	0.0
-TMPP-Ac@Any N-term	572.181134	572.5401	H(33)C(29)O(10)P(1)	0.0		Chemical derivative	827	0.0
+Gly-loss+Amide@G^Any_C-term	-58.005479	-58.0361	H(-2)C(-2)O(-2)	0.0		Post-translational	822	0.0
+TMPP-Ac@Any_N-term	572.181134	572.5401	H(33)C(29)O(10)P(1)	0.0		Chemical derivative	827	0.0
 TMPP-Ac@K	572.181134	572.5401	H(33)C(29)O(10)P(1)	0.0		Artefact	827	0.0
 TMPP-Ac@Y	572.181134	572.5401	H(33)C(29)O(10)P(1)	0.0		Artefact	827	0.0
 Label:13C(6)+GG@K	120.063056	120.0586	H(6)C(-2)13C(6)N(2)O(2)	0.0		Isotopic label	799	0.0
@@ -1105,7 +1105,7 @@ cGMP@C	343.031785	343.1895	H(10)C(10)N(5)O(7)P(1)	0.0		Post-translational	849	0.
 cGMP+RMP-loss@C	150.041585	150.1182	H(4)C(5)N(5)O(1)	0.0		Post-translational	851	0.0
 cGMP+RMP-loss@S	150.041585	150.1182	H(4)C(5)N(5)O(1)	0.0		Post-translational	851	0.0
 mTRAQ@Y	140.094963	140.183	H(12)C(7)N(2)O(1)	0.0		Isotopic label	888	0.0
-mTRAQ@Any N-term	140.094963	140.183	H(12)C(7)N(2)O(1)	0.0		Isotopic label	888	0.0
+mTRAQ@Any_N-term	140.094963	140.183	H(12)C(7)N(2)O(1)	0.0		Isotopic label	888	0.0
 mTRAQ@K	140.094963	140.183	H(12)C(7)N(2)O(1)	0.0		Isotopic label	888	0.0
 mTRAQ@H	140.094963	140.183	H(12)C(7)N(2)O(1)	0.0		Isotopic label	888	0.0
 mTRAQ@S	140.094963	140.183	H(12)C(7)N(2)O(1)	0.0		Isotopic label	888	0.0
@@ -1115,19 +1115,19 @@ Label:2H(4)+GG@K	118.068034	118.1273	H(2)2H(4)C(4)N(2)O(2)	0.0		Post-translation
 spermine@Q	185.189198	185.3097	H(23)C(10)N(3)	0.0		Chemical derivative	1420	0.0
 Label:13C(1)2H(3)@M	4.022185	4.0111	H(-3)2H(3)C(-1)13C(1)	0.0		Isotopic label	862	0.0
 ZGB@K	758.380841	758.7261	H(53)C(37)N(6)O(6)F(2)S(1)B(1)	0.0		Other	861	0.0
-ZGB@Any N-term	758.380841	758.7261	H(53)C(37)N(6)O(6)F(2)S(1)B(1)	0.0		Other	861	0.0
+ZGB@Any_N-term	758.380841	758.7261	H(53)C(37)N(6)O(6)F(2)S(1)B(1)	0.0		Other	861	0.0
 MG-H1@R	54.010565	54.0474	H(2)C(3)O(1)	0.0		Other	859	0.0
 G-H1@R	39.994915	40.0208	C(2)O(1)	0.0		Other	860	0.0
 Label:13C(6)15N(2)+GG@K	122.057126	122.0454	H(6)C(-2)13C(6)15N(2)O(2)	0.0		Isotopic label	864	0.0
-ICPL:13C(6)2H(4)@Any N-term	115.0667	115.0747	H(-1)2H(4)13C(6)N(1)O(1)	0.0		Isotopic label	866	0.0
+ICPL:13C(6)2H(4)@Any_N-term	115.0667	115.0747	H(-1)2H(4)13C(6)N(1)O(1)	0.0		Isotopic label	866	0.0
 ICPL:13C(6)2H(4)@K	115.0667	115.0747	H(-1)2H(4)13C(6)N(1)O(1)	0.0		Isotopic label	866	0.0
-ICPL:13C(6)2H(4)@Protein N-term	115.0667	115.0747	H(-1)2H(4)13C(6)N(1)O(1)	0.0		Isotopic label	866	0.0
+ICPL:13C(6)2H(4)@Protein_N-term	115.0667	115.0747	H(-1)2H(4)13C(6)N(1)O(1)	0.0		Isotopic label	866	0.0
 DyLight-maleimide@C	940.1999	941.0762	H(48)C(39)N(4)O(15)S(4)	0.0		Chemical derivative	890	0.0
 mTRAQ:13C(3)15N(1)@S	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	889	0.0
 mTRAQ:13C(3)15N(1)@T	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	889	0.0
 mTRAQ:13C(3)15N(1)@H	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	889	0.0
 mTRAQ:13C(3)15N(1)@Y	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	889	0.0
-mTRAQ:13C(3)15N(1)@Any N-term	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	889	0.0
+mTRAQ:13C(3)15N(1)@Any_N-term	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	889	0.0
 mTRAQ:13C(3)15N(1)@K	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	889	0.0
 Methyl-PEO12-Maleimide@C	710.383719	710.8073	H(58)C(32)N(2)O(15)	0.0		Chemical derivative	891	0.0
 MDCC@C	383.148121	383.3978	H(21)C(20)N(3)O(5)	0.0		Chemical derivative	887	0.0
@@ -1149,7 +1149,7 @@ Lys->CamCys@K	31.935685	32.0219	H(-4)C(-1)O(1)S(1)	0.0		Pre-translational	903	0.
 Phe->CamCys@F	12.962234	13.0204	H(-1)C(-4)N(1)O(1)S(1)	0.0		Pre-translational	904	0.0
 Leu->MetOx@L	33.951335	34.0378	H(-2)C(-1)O(1)S(1)	0.0		Pre-translational	905	0.0
 Lys->MetOx@K	18.940436	19.0232	H(-3)C(-1)N(-1)O(1)S(1)	0.0		Pre-translational	906	0.0
-Galactosyl@Any N-term	178.047738	178.14	H(10)C(6)O(6)	0.0		Other glycosylation	907	0.0
+Galactosyl@Any_N-term	178.047738	178.14	H(10)C(6)O(6)	0.0		Other glycosylation	907	0.0
 Galactosyl@K	178.047738	178.14	H(10)C(6)O(6)	0.0		Other glycosylation	907	0.0
 Xlink:SMCC[321]@C	321.205242	321.4146	H(27)C(17)N(3)O(3)	0.0		Chemical derivative	908	0.0
 Bacillosamine@N	228.111007	228.245	H(16)C(10)N(2)O(4)	228.111007	H(16)C(10)N(2)O(4)	N-linked glycosylation	910	0.5
@@ -1184,39 +1184,39 @@ DNPS@W	198.981352	199.164	H(3)C(6)N(2)O(4)S(1)	0.0		Chemical derivative	941	0.0
 SulfoGMBS@C	458.162391	458.5306	H(26)C(22)N(4)O(5)S(1)	0.0		Other	942	0.0
 DimethylamineGMBS@C	267.158292	267.3241	H(21)C(13)N(3)O(3)	0.0		Chemical derivative	943	0.0
 Label:15N(2)2H(9)@K	11.050561	11.0423	H(-9)2H(9)N(-2)15N(2)	0.0		Isotopic label	944	0.0
-LG-anhydrolactam@Any N-term	314.188195	314.4186	H(26)C(20)O(3)	0.0		Post-translational	946	0.0
+LG-anhydrolactam@Any_N-term	314.188195	314.4186	H(26)C(20)O(3)	0.0		Post-translational	946	0.0
 LG-anhydrolactam@K	314.188195	314.4186	H(26)C(20)O(3)	0.0		Post-translational	946	0.0
 LG-pyrrole@C	316.203845	316.4345	H(28)C(20)O(3)	0.0		Post-translational	947	0.0
-LG-pyrrole@Any N-term	316.203845	316.4345	H(28)C(20)O(3)	0.0		Post-translational	947	0.0
+LG-pyrrole@Any_N-term	316.203845	316.4345	H(28)C(20)O(3)	0.0		Post-translational	947	0.0
 LG-pyrrole@K	316.203845	316.4345	H(28)C(20)O(3)	0.0		Post-translational	947	0.0
-LG-anhyropyrrole@Any N-term	298.19328	298.4192	H(26)C(20)O(2)	0.0		Post-translational	948	0.0
+LG-anhyropyrrole@Any_N-term	298.19328	298.4192	H(26)C(20)O(2)	0.0		Post-translational	948	0.0
 LG-anhyropyrrole@K	298.19328	298.4192	H(26)C(20)O(2)	0.0		Post-translational	948	0.0
 3-deoxyglucosone@R	144.042259	144.1253	H(8)C(6)O(4)	0.0		Multiple	949	0.0
 Cation:Li@D	6.008178	5.9331	H(-1)Li(1)	0.0		Artefact	950	0.0
 Cation:Li@E	6.008178	5.9331	H(-1)Li(1)	0.0		Artefact	950	0.0
-Cation:Li@Any C-term	6.008178	5.9331	H(-1)Li(1)	0.0		Artefact	950	0.0
-Cation:Ca[II]@Any C-term	37.946941	38.0621	H(-2)Ca(1)	0.0		Artefact	951	0.0
+Cation:Li@Any_C-term	6.008178	5.9331	H(-1)Li(1)	0.0		Artefact	950	0.0
+Cation:Ca[II]@Any_C-term	37.946941	38.0621	H(-2)Ca(1)	0.0		Artefact	951	0.0
 Cation:Ca[II]@E	37.946941	38.0621	H(-2)Ca(1)	0.0		Artefact	951	0.0
 Cation:Ca[II]@D	37.946941	38.0621	H(-2)Ca(1)	0.0		Artefact	951	0.0
 Cation:Fe[II]@D	53.919289	53.8291	H(-2)Fe(1)	0.0		Artefact	952	0.0
 Cation:Fe[II]@E	53.919289	53.8291	H(-2)Fe(1)	0.0		Artefact	952	0.0
-Cation:Fe[II]@Any C-term	53.919289	53.8291	H(-2)Fe(1)	0.0		Artefact	952	0.0
+Cation:Fe[II]@Any_C-term	53.919289	53.8291	H(-2)Fe(1)	0.0		Artefact	952	0.0
 Cation:Ni[II]@D	55.919696	56.6775	H(-2)Ni(1)	0.0		Artefact	953	0.0
 Cation:Ni[II]@E	55.919696	56.6775	H(-2)Ni(1)	0.0		Artefact	953	0.0
-Cation:Ni[II]@Any C-term	55.919696	56.6775	H(-2)Ni(1)	0.0		Artefact	953	0.0
-Cation:Zn[II]@Any C-term	61.913495	63.3931	H(-2)Zn(1)	0.0		Artefact	954	0.0
+Cation:Ni[II]@Any_C-term	55.919696	56.6775	H(-2)Ni(1)	0.0		Artefact	953	0.0
+Cation:Zn[II]@Any_C-term	61.913495	63.3931	H(-2)Zn(1)	0.0		Artefact	954	0.0
 Cation:Zn[II]@E	61.913495	63.3931	H(-2)Zn(1)	0.0		Artefact	954	0.0
 Cation:Zn[II]@D	61.913495	63.3931	H(-2)Zn(1)	0.0		Artefact	954	0.0
 Cation:Zn[II]@H	61.913495	63.3931	H(-2)Zn(1)	0.0		Artefact	954	0.0
 Cation:Ag@D	105.897267	106.8603	H(-1)Ag(1)	0.0		Artefact	955	0.0
 Cation:Ag@E	105.897267	106.8603	H(-1)Ag(1)	0.0		Artefact	955	0.0
-Cation:Ag@Any C-term	105.897267	106.8603	H(-1)Ag(1)	0.0		Artefact	955	0.0
+Cation:Ag@Any_C-term	105.897267	106.8603	H(-1)Ag(1)	0.0		Artefact	955	0.0
 Cation:Mg[II]@D	21.969392	22.2891	H(-2)Mg(1)	0.0		Artefact	956	0.0
 Cation:Mg[II]@E	21.969392	22.2891	H(-2)Mg(1)	0.0		Artefact	956	0.0
-Cation:Mg[II]@Any C-term	21.969392	22.2891	H(-2)Mg(1)	0.0		Artefact	956	0.0
+Cation:Mg[II]@Any_C-term	21.969392	22.2891	H(-2)Mg(1)	0.0		Artefact	956	0.0
 2-succinyl@C	116.010959	116.0722	H(4)C(4)O(4)	0.0		Chemical derivative	957	0.0
 Propargylamine@D	37.031634	37.0632	H(3)C(3)N(1)O(-1)	0.0		Chemical derivative	958	0.0
-Propargylamine@Any C-term	37.031634	37.0632	H(3)C(3)N(1)O(-1)	0.0		Chemical derivative	958	0.0
+Propargylamine@Any_C-term	37.031634	37.0632	H(3)C(3)N(1)O(-1)	0.0		Chemical derivative	958	0.0
 Propargylamine@E	37.031634	37.0632	H(3)C(3)N(1)O(-1)	0.0		Chemical derivative	958	0.0
 Phosphopropargyl@T	116.997965	117.0431	H(4)C(3)N(1)O(2)P(1)	0.0		Multiple	959	0.0
 Phosphopropargyl@Y	116.997965	117.0431	H(4)C(3)N(1)O(2)P(1)	0.0		Multiple	959	0.0
@@ -1224,11 +1224,11 @@ Phosphopropargyl@S	116.997965	117.0431	H(4)C(3)N(1)O(2)P(1)	0.0		Multiple	959	0.
 SUMO2135@K	2135.920496	2137.2343	H(137)C(90)N(21)O(37)S(1)	0.0		Other	960	0.0
 SUMO3549@K	3549.536568	3551.6672	H(224)C(150)N(38)O(60)S(1)	0.0		Other	961	0.0
 serotonylation@Q	159.068414	159.1846	H(9)C(10)N(1)O(1)	0.0		Post-translational	1992	0.0
-BITC@Any N-term	149.02992	149.2129	H(7)C(8)N(1)S(1)	0.0		Chemical derivative	978	0.0
+BITC@Any_N-term	149.02992	149.2129	H(7)C(8)N(1)S(1)	0.0		Chemical derivative	978	0.0
 BITC@K	149.02992	149.2129	H(7)C(8)N(1)S(1)	0.0		Chemical derivative	978	0.0
 BITC@C	149.02992	149.2129	H(7)C(8)N(1)S(1)	0.0		Chemical derivative	978	0.0
 Carbofuran@S	58.029289	58.0593	H(4)C(2)N(1)O(1)	0.0		Chemical derivative	977	0.0
-PEITC@Any N-term	163.04557	163.2395	H(9)C(9)N(1)S(1)	0.0		Chemical derivative	979	0.0
+PEITC@Any_N-term	163.04557	163.2395	H(9)C(9)N(1)S(1)	0.0		Chemical derivative	979	0.0
 PEITC@K	163.04557	163.2395	H(9)C(9)N(1)S(1)	0.0		Chemical derivative	979	0.0
 PEITC@C	163.04557	163.2395	H(9)C(9)N(1)S(1)	0.0		Chemical derivative	979	0.0
 thioacylPA@K	159.035399	159.2062	H(9)C(6)N(1)O(2)S(1)	0.0		Chemical derivative	967	0.0
@@ -1236,15 +1236,15 @@ maleimide3@K	969.366232	969.8975	H(59)C(37)N(7)O(23)	0.0		Post-translational	971
 maleimide3@C	969.366232	969.8975	H(59)C(37)N(7)O(23)	0.0		Post-translational	971	0.0
 maleimide5@K	1293.471879	1294.1787	H(79)C(49)N(7)O(33)	0.0		Post-translational	972	0.0
 maleimide5@C	1293.471879	1294.1787	H(79)C(49)N(7)O(33)	0.0		Post-translational	972	0.0
-Puromycin@Any C-term	453.212452	453.4943	H(27)C(22)N(7)O(4)	0.0		Co-translational	973	0.0
+Puromycin@Any_C-term	453.212452	453.4943	H(27)C(22)N(7)O(4)	0.0		Co-translational	973	0.0
 glucosone@R	160.037173	160.1247	H(8)C(6)O(5)	0.0		Other	981	0.0
 Label:13C(6)+Dimethyl@K	34.051429	34.0091	H(4)C(-4)13C(6)	0.0		Isotopic label	986	0.0
 cysTMT@C	299.166748	299.4322	H(25)C(14)N(3)O(2)S(1)	0.0		Chemical derivative	984	0.0
 cysTMT6plex@C	304.177202	304.3962	H(25)C(10)13C(4)N(2)15N(1)O(2)S(1)	0.0		Isotopic label	985	0.0
-ISD_z+2_ion@Any N-term	-15.010899	-15.0146	H(-1)N(-1)	0.0		Artefact	991	0.0
+ISD_z+2_ion@Any_N-term	-15.010899	-15.0146	H(-1)N(-1)	0.0		Artefact	991	0.0
 Ammonium@E	17.026549	17.0305	H(3)N(1)	0.0		Artefact	989	0.0
 Ammonium@D	17.026549	17.0305	H(3)N(1)	0.0		Artefact	989	0.0
-Ammonium@Any C-term	17.026549	17.0305	H(3)N(1)	0.0		Artefact	989	0.0
+Ammonium@Any_C-term	17.026549	17.0305	H(3)N(1)	0.0		Artefact	989	0.0
 Biotin:Sigma-B1267@C	449.17329	449.5239	H(27)C(20)N(5)O(5)S(1)	0.0		Chemical derivative	993	0.0
 Label:15N(1)@M	0.997035	0.9934	N(-1)15N(1)	0.0		Isotopic label	994	0.0
 Label:15N(1)@E	0.997035	0.9934	N(-1)15N(1)	0.0		Isotopic label	994	0.0
@@ -1280,34 +1280,34 @@ Thiazolidine@Y	12.0	12.0107	C(1)	0.0		Chemical derivative	1009	0.0
 Thiazolidine@H	12.0	12.0107	C(1)	0.0		Chemical derivative	1009	0.0
 Thiazolidine@R	12.0	12.0107	C(1)	0.0		Chemical derivative	1009	0.0
 Thiazolidine@K	12.0	12.0107	C(1)	0.0		Chemical derivative	1009	0.0
-Thiazolidine@Protein N-term	12.0	12.0107	C(1)	0.0		Chemical derivative	1009	0.0
+Thiazolidine@Protein_N-term	12.0	12.0107	C(1)	0.0		Chemical derivative	1009	0.0
 Thiazolidine@C	12.0	12.0107	C(1)	0.0		Chemical derivative	1009	0.0
 Thiazolidine@F	12.0	12.0107	C(1)	0.0		Chemical derivative	1009	0.0
 DEDGFLYMVYASQETFG@K	1970.824411	1972.088	H(122)C(89)N(18)O(31)S(1)	18.010565	H(2)O(1)	Post-translational	1010	0.5
 Biotin:Invitrogen-M1602@C	523.210069	523.6024	H(33)C(23)N(5)O(7)S(1)	0.0		Chemical derivative	1012	0.0
 Xlink:DSS[156]@K	156.078644	156.1791	H(12)C(8)O(3)	0.0		Chemical derivative	1020	0.0
-Xlink:DSS[156]@Protein N-term	156.078644	156.1791	H(12)C(8)O(3)	0.0		Chemical derivative	1020	0.0
+Xlink:DSS[156]@Protein_N-term	156.078644	156.1791	H(12)C(8)O(3)	0.0		Chemical derivative	1020	0.0
 DMPO@H	111.068414	111.1418	H(9)C(6)N(1)O(1)	0.0		Post-translational	1017	0.0
 DMPO@Y	111.068414	111.1418	H(9)C(6)N(1)O(1)	0.0		Post-translational	1017	0.0
 DMPO@C	111.068414	111.1418	H(9)C(6)N(1)O(1)	0.0		Post-translational	1017	0.0
 glycidamide@K	87.032028	87.0773	H(5)C(3)N(1)O(2)	0.0		Chemical derivative	1014	0.0
-glycidamide@Any N-term	87.032028	87.0773	H(5)C(3)N(1)O(2)	0.0		Chemical derivative	1014	0.0
-Ahx2+Hsl@Any C-term	309.205242	309.4039	H(27)C(16)N(3)O(3)	0.0		Non-standard residue	1015	0.0
+glycidamide@Any_N-term	87.032028	87.0773	H(5)C(3)N(1)O(2)	0.0		Chemical derivative	1014	0.0
+Ahx2+Hsl@Any_C-term	309.205242	309.4039	H(27)C(16)N(3)O(3)	0.0		Non-standard residue	1015	0.0
 ICDID@C	138.06808	138.1638	H(10)C(8)O(2)	0.0		Isotopic label	1018	0.0
 ICDID:2H(6)@C	144.10574	144.2008	H(4)2H(6)C(8)O(2)	0.0		Isotopic label	1019	0.0
-Xlink:EGS[244]@Protein N-term	244.058303	244.1981	H(12)C(10)O(7)	0.0		Chemical derivative	1021	0.0
+Xlink:EGS[244]@Protein_N-term	244.058303	244.1981	H(12)C(10)O(7)	0.0		Chemical derivative	1021	0.0
 Xlink:EGS[244]@K	244.058303	244.1981	H(12)C(10)O(7)	0.0		Chemical derivative	1021	0.0
-Xlink:DST[132]@Protein N-term	132.005873	132.0716	H(4)C(4)O(5)	0.0		Chemical derivative	1022	0.0
+Xlink:DST[132]@Protein_N-term	132.005873	132.0716	H(4)C(4)O(5)	0.0		Chemical derivative	1022	0.0
 Xlink:DST[132]@K	132.005873	132.0716	H(4)C(4)O(5)	0.0		Chemical derivative	1022	0.0
-Xlink:DTSSP[192]@Protein N-term	191.991486	192.2559	H(8)C(6)O(3)S(2)	0.0		Chemical derivative	1023	0.0
+Xlink:DTSSP[192]@Protein_N-term	191.991486	192.2559	H(8)C(6)O(3)S(2)	0.0		Chemical derivative	1023	0.0
 Xlink:DTSSP[192]@K	191.991486	192.2559	H(8)C(6)O(3)S(2)	0.0		Chemical derivative	1023	0.0
 Xlink:SMCC[237]@C	237.100108	237.2518	H(15)C(12)N(1)O(4)	0.0		Chemical derivative	1024	0.0
 Xlink:SMCC[237]@K	237.100108	237.2518	H(15)C(12)N(1)O(4)	0.0		Chemical derivative	1024	0.0
-Xlink:SMCC[237]@Protein N-term	237.100108	237.2518	H(15)C(12)N(1)O(4)	0.0		Chemical derivative	1024	0.0
+Xlink:SMCC[237]@Protein_N-term	237.100108	237.2518	H(15)C(12)N(1)O(4)	0.0		Chemical derivative	1024	0.0
 2-nitrobenzyl@Y	135.032028	135.1201	H(5)C(7)N(1)O(2)	0.0		Chemical derivative	1032	0.0
-Xlink:DMP[140]@Protein N-term	140.094963	140.183	H(12)C(7)N(2)O(1)	0.0		Chemical derivative	1027	0.0
+Xlink:DMP[140]@Protein_N-term	140.094963	140.183	H(12)C(7)N(2)O(1)	0.0		Chemical derivative	1027	0.0
 Xlink:DMP[140]@K	140.094963	140.183	H(12)C(7)N(2)O(1)	0.0		Chemical derivative	1027	0.0
-Xlink:EGS[115]@Protein N-term	115.026943	115.0874	H(5)C(4)N(1)O(3)	0.0		Chemical derivative	1028	0.0
+Xlink:EGS[115]@Protein_N-term	115.026943	115.0874	H(5)C(4)N(1)O(3)	0.0		Chemical derivative	1028	0.0
 Xlink:EGS[115]@K	115.026943	115.0874	H(5)C(4)N(1)O(3)	0.0		Chemical derivative	1028	0.0
 Cys->SecNEM@C	172.992127	172.0203	H(7)C(6)N(1)O(2)S(-1)Se(1)	0.0		Non-standard residue	1033	0.0
 Cys->SecNEM:2H(5)@C	178.023511	177.0511	H(2)2H(5)C(6)N(1)O(2)S(-1)Se(1)	0.0		Chemical derivative	1034	0.0
@@ -1571,17 +1571,17 @@ BMP-piperidinol@C	263.131014	263.3337	H(17)C(18)N(1)O(1)	0.0		Chemical derivativ
 BMP-piperidinol@M	263.131014	263.3337	H(17)C(18)N(1)O(1)	0.0		Chemical derivative	1281	0.0
 UgiJoullieProGlyProGly@D	308.148455	308.333	H(20)C(14)N(4)O(4)	0.0		Chemical derivative	1283	0.0
 UgiJoullieProGlyProGly@E	308.148455	308.333	H(20)C(14)N(4)O(4)	0.0		Chemical derivative	1283	0.0
-Arg-loss@R^Any C-term	-156.101111	-156.1857	H(-12)C(-6)N(-4)O(-1)	0.0		Other	1287	0.0
-Arg@Any N-term	156.101111	156.1857	H(12)C(6)N(4)O(1)	0.0		Other	1288	0.0
+Arg-loss@R^Any_C-term	-156.101111	-156.1857	H(-12)C(-6)N(-4)O(-1)	0.0		Other	1287	0.0
+Arg@Any_N-term	156.101111	156.1857	H(12)C(6)N(4)O(1)	0.0		Other	1288	0.0
 IMEHex(2)NeuAc(1)@K	688.199683	688.6527	H(40)C(25)N(2)O(18)S(1)	0.0		Other glycosylation	1286	0.0
 Butyryl@K	70.041865	70.0898	H(6)C(4)O(1)	0.0		Post-translational	1289	0.0
 Dicarbamidomethyl@K	114.042927	114.1026	H(6)C(4)N(2)O(2)	0.0		Artefact	1290	0.0
 Dicarbamidomethyl@H	114.042927	114.1026	H(6)C(4)N(2)O(2)	0.0		Artefact	1290	0.0
 Dicarbamidomethyl@C	114.042927	114.1026	H(6)C(4)N(2)O(2)	0.0		Artefact	1290	0.0
 Dicarbamidomethyl@R	114.042927	114.1026	H(6)C(4)N(2)O(2)	0.0		Artefact	1290	0.0
-Dicarbamidomethyl@Any N-term	114.042927	114.1026	H(6)C(4)N(2)O(2)	0.0		Artefact	1290	0.0
+Dicarbamidomethyl@Any_N-term	114.042927	114.1026	H(6)C(4)N(2)O(2)	0.0		Artefact	1290	0.0
 Dimethyl:2H(6)@K	34.068961	34.0901	H(-2)2H(6)C(2)	0.0		Isotopic label	1291	0.0
-Dimethyl:2H(6)@Any N-term	34.068961	34.0901	H(-2)2H(6)C(2)	0.0		Isotopic label	1291	0.0
+Dimethyl:2H(6)@Any_N-term	34.068961	34.0901	H(-2)2H(6)C(2)	0.0		Isotopic label	1291	0.0
 Dimethyl:2H(6)@R	34.068961	34.0901	H(-2)2H(6)C(2)	0.0		Isotopic label	1291	0.0
 GGQ@K	242.101505	242.2319	H(14)C(9)N(4)O(4)	0.0		Other	1292	0.0
 QTGG@K	343.149184	343.3357	H(21)C(13)N(5)O(6)	0.0		Other	1293	0.0
@@ -1591,9 +1591,9 @@ Label:13C(3)@A	3.010064	2.978	C(-3)13C(3)	0.0		Isotopic label	1296	0.0
 Label:13C(4)15N(1)@D	5.010454	4.964	C(-4)13C(4)N(-1)15N(1)	0.0		Isotopic label	1298	0.0
 Label:2H(10)@L	10.062767	10.0616	H(-10)2H(10)	0.0		Isotopic label	1299	0.0
 Label:2H(4)13C(1)@R	5.028462	5.0173	H(-4)2H(4)C(-1)13C(1)	0.0		Isotopic label	1300	0.0
-Lys@Any N-term	128.094963	128.1723	H(12)C(6)N(2)O(1)	0.0		Other	1301	0.0
+Lys@Any_N-term	128.094963	128.1723	H(12)C(6)N(2)O(1)	0.0		Other	1301	0.0
 mTRAQ:13C(6)15N(2)@K	148.109162	148.1257	H(12)C(1)13C(6)15N(2)O(1)	0.0		Isotopic label	1302	0.0
-mTRAQ:13C(6)15N(2)@Any N-term	148.109162	148.1257	H(12)C(1)13C(6)15N(2)O(1)	0.0		Isotopic label	1302	0.0
+mTRAQ:13C(6)15N(2)@Any_N-term	148.109162	148.1257	H(12)C(1)13C(6)15N(2)O(1)	0.0		Isotopic label	1302	0.0
 mTRAQ:13C(6)15N(2)@Y	148.109162	148.1257	H(12)C(1)13C(6)15N(2)O(1)	0.0		Isotopic label	1302	0.0
 mTRAQ:13C(6)15N(2)@H	148.109162	148.1257	H(12)C(1)13C(6)15N(2)O(1)	0.0		Isotopic label	1302	0.0
 mTRAQ:13C(6)15N(2)@S	148.109162	148.1257	H(12)C(1)13C(6)15N(2)O(1)	0.0		Isotopic label	1302	0.0
@@ -1606,11 +1606,11 @@ NeuGc@S	307.090331	307.254	H(17)C(11)N(1)O(9)	307.090331	H(17)C(11)N(1)O(9)	O-li
 NeuGc@N	307.090331	307.254	H(17)C(11)N(1)O(9)	307.090331	H(17)C(11)N(1)O(9)	N-linked glycosylation	1304	0.5
 Propyl@D	42.04695	42.0797	H(6)C(3)	0.0		Chemical derivative	1305	0.0
 Propyl@K	42.04695	42.0797	H(6)C(3)	0.0		Isotopic label	1305	0.0
-Propyl@Any N-term	42.04695	42.0797	H(6)C(3)	0.0		Isotopic label	1305	0.0
+Propyl@Any_N-term	42.04695	42.0797	H(6)C(3)	0.0		Isotopic label	1305	0.0
 Propyl@E	42.04695	42.0797	H(6)C(3)	0.0		Chemical derivative	1305	0.0
-Propyl@Any C-term	42.04695	42.0797	H(6)C(3)	0.0		Chemical derivative	1305	0.0
-Propyl@Protein C-term	42.04695	42.0797	H(6)C(3)	0.0		Chemical derivative	1305	0.0
-Propyl:2H(6)@Any N-term	48.084611	48.1167	2H(6)C(3)	0.0		Isotopic label	1306	0.0
+Propyl@Any_C-term	42.04695	42.0797	H(6)C(3)	0.0		Chemical derivative	1305	0.0
+Propyl@Protein_C-term	42.04695	42.0797	H(6)C(3)	0.0		Chemical derivative	1305	0.0
+Propyl:2H(6)@Any_N-term	48.084611	48.1167	2H(6)C(3)	0.0		Isotopic label	1306	0.0
 Propyl:2H(6)@K	48.084611	48.1167	2H(6)C(3)	0.0		Isotopic label	1306	0.0
 Propiophenone@C	132.057515	132.1592	H(8)C(9)O(1)	0.0		Chemical derivative	1310	0.0
 Propiophenone@W	132.057515	132.1592	H(8)C(9)O(1)	0.0		Chemical derivative	1310	0.0
@@ -1623,36 +1623,36 @@ PS_Hapten@H	120.021129	120.1055	H(4)C(7)O(2)	0.0		Chemical derivative	1345	0.0
 PS_Hapten@C	120.021129	120.1055	H(4)C(7)O(2)	0.0		Chemical derivative	1345	0.0
 PS_Hapten@K	120.021129	120.1055	H(4)C(7)O(2)	0.0		Chemical derivative	1345	0.0
 Cy3-maleimide@C	753.262796	753.9046	H(45)C(37)N(4)O(9)S(2)	0.0		Chemical derivative	1348	0.0
-Delta:H(6)C(3)O(1)@Protein N-term	58.041865	58.0791	H(6)C(3)O(1)	0.0		Chemical derivative	1312	0.0
+Delta:H(6)C(3)O(1)@Protein_N-term	58.041865	58.0791	H(6)C(3)O(1)	0.0		Chemical derivative	1312	0.0
 Delta:H(6)C(3)O(1)@K	58.041865	58.0791	H(6)C(3)O(1)	0.0		Chemical derivative	1312	0.0
 Delta:H(6)C(3)O(1)@H	58.041865	58.0791	H(6)C(3)O(1)	0.0		Chemical derivative	1312	0.0
 Delta:H(6)C(3)O(1)@C	58.041865	58.0791	H(6)C(3)O(1)	0.0		Chemical derivative	1312	0.0
-Delta:H(8)C(6)O(1)@Protein N-term	96.057515	96.1271	H(8)C(6)O(1)	0.0		Chemical derivative	1313	0.0
+Delta:H(8)C(6)O(1)@Protein_N-term	96.057515	96.1271	H(8)C(6)O(1)	0.0		Chemical derivative	1313	0.0
 Delta:H(8)C(6)O(1)@K	96.057515	96.1271	H(8)C(6)O(1)	0.0		Chemical derivative	1313	0.0
 biotinAcrolein298@H	298.146347	298.4044	H(22)C(13)N(4)O(2)S(1)	0.0		Chemical derivative	1314	0.0
 biotinAcrolein298@K	298.146347	298.4044	H(22)C(13)N(4)O(2)S(1)	0.0		Chemical derivative	1314	0.0
-biotinAcrolein298@Protein N-term	298.146347	298.4044	H(22)C(13)N(4)O(2)S(1)	0.0		Chemical derivative	1314	0.0
+biotinAcrolein298@Protein_N-term	298.146347	298.4044	H(22)C(13)N(4)O(2)S(1)	0.0		Chemical derivative	1314	0.0
 biotinAcrolein298@C	298.146347	298.4044	H(22)C(13)N(4)O(2)S(1)	0.0		Chemical derivative	1314	0.0
 MM-diphenylpentanone@C	265.146664	265.3496	H(19)C(18)N(1)O(1)	0.0		Chemical derivative	1315	0.0
 EHD-diphenylpentanone@M	266.13068	266.3343	H(18)C(18)O(2)	0.0		Chemical derivative	1317	0.0
 EHD-diphenylpentanone@C	266.13068	266.3343	H(18)C(18)O(2)	0.0		Chemical derivative	1317	0.0
 benzylguanidine@K	132.068748	132.1625	H(8)C(8)N(2)	0.0		Chemical derivative	1349	0.0
-CarboxymethylDMAP@Any N-term	162.079313	162.1885	H(10)C(9)N(2)O(1)	0.0		Chemical derivative	1350	0.0
+CarboxymethylDMAP@Any_N-term	162.079313	162.1885	H(10)C(9)N(2)O(1)	0.0		Chemical derivative	1350	0.0
 Biotin:Thermo-21901+2H2O@C	561.246849	561.6489	H(39)C(23)N(5)O(9)S(1)	0.0		Chemical derivative	1320	0.0
 DiLeu4plex115@K	145.12	145.1966	H(15)C(7)13C(1)15N(1)18O(1)	0.0		Isotopic label	1321	0.0
-DiLeu4plex115@Any N-term	145.12	145.1966	H(15)C(7)13C(1)15N(1)18O(1)	0.0		Isotopic label	1321	0.0
+DiLeu4plex115@Any_N-term	145.12	145.1966	H(15)C(7)13C(1)15N(1)18O(1)	0.0		Isotopic label	1321	0.0
 DiLeu4plex115@Y	145.12	145.1966	H(15)C(7)13C(1)15N(1)18O(1)	0.0		Isotopic label	1321	0.0
-DiLeu4plex@Any N-term	145.132163	145.2229	H(13)2H(2)C(8)N(1)18O(1)	0.0		Isotopic label	1322	0.0
+DiLeu4plex@Any_N-term	145.132163	145.2229	H(13)2H(2)C(8)N(1)18O(1)	0.0		Isotopic label	1322	0.0
 DiLeu4plex@K	145.132163	145.2229	H(13)2H(2)C(8)N(1)18O(1)	0.0		Isotopic label	1322	0.0
 DiLeu4plex@Y	145.132163	145.2229	H(13)2H(2)C(8)N(1)18O(1)	0.0		Isotopic label	1322	0.0
 DiLeu4plex117@K	145.128307	145.2092	H(13)2H(2)C(7)13C(1)15N(1)O(1)	0.0		Isotopic label	1323	0.0
-DiLeu4plex117@Any N-term	145.128307	145.2092	H(13)2H(2)C(7)13C(1)15N(1)O(1)	0.0		Isotopic label	1323	0.0
+DiLeu4plex117@Any_N-term	145.128307	145.2092	H(13)2H(2)C(7)13C(1)15N(1)O(1)	0.0		Isotopic label	1323	0.0
 DiLeu4plex117@Y	145.128307	145.2092	H(13)2H(2)C(7)13C(1)15N(1)O(1)	0.0		Isotopic label	1323	0.0
 DiLeu4plex118@K	145.140471	145.2354	H(11)2H(4)C(8)N(1)O(1)	0.0		Isotopic label	1324	0.0
-DiLeu4plex118@Any N-term	145.140471	145.2354	H(11)2H(4)C(8)N(1)O(1)	0.0		Isotopic label	1324	0.0
+DiLeu4plex118@Any_N-term	145.140471	145.2354	H(11)2H(4)C(8)N(1)O(1)	0.0		Isotopic label	1324	0.0
 DiLeu4plex118@Y	145.140471	145.2354	H(11)2H(4)C(8)N(1)O(1)	0.0		Isotopic label	1324	0.0
 Xlink:BuUrBu[213]@K	213.111341	213.2337	H(15)C(9)N(3)O(3)	0.0		Chemical derivative	1887	0.0
-Xlink:BuUrBu[213]@Protein N-term	213.111341	213.2337	H(15)C(9)N(3)O(3)	0.0		Chemical derivative	1887	0.0
+Xlink:BuUrBu[213]@Protein_N-term	213.111341	213.2337	H(15)C(9)N(3)O(3)	0.0		Chemical derivative	1887	0.0
 bisANS-sulfonates@S	437.201774	437.5543	H(25)C(32)N(2)	0.0		Chemical derivative	1330	0.0
 bisANS-sulfonates@T	437.201774	437.5543	H(25)C(32)N(2)	0.0		Chemical derivative	1330	0.0
 bisANS-sulfonates@K	437.201774	437.5543	H(25)C(32)N(2)	0.0		Chemical derivative	1330	0.0
@@ -1691,7 +1691,7 @@ iodoTMT6plex@E	329.226595	329.3825	H(28)C(12)13C(4)N(3)15N(1)O(3)	0.0		Chemical 
 iodoTMT6plex@D	329.226595	329.3825	H(28)C(12)13C(4)N(3)15N(1)O(3)	0.0		Chemical derivative	1342	0.0
 iodoTMT6plex@C	329.226595	329.3825	H(28)C(12)13C(4)N(3)15N(1)O(3)	0.0		Chemical derivative	1342	0.0
 Label:13C(2)15N(2)@K	4.00078	3.9721	C(-2)13C(2)N(-2)15N(2)	0.0		Isotopic label	1787	0.0
-Phosphogluconoylation@Any N-term	258.014069	258.1199	H(11)C(6)O(9)P(1)	0.0		Post-translational	1344	0.0
+Phosphogluconoylation@Any_N-term	258.014069	258.1199	H(11)C(6)O(9)P(1)	0.0		Post-translational	1344	0.0
 Phosphogluconoylation@K	258.014069	258.1199	H(11)C(6)O(9)P(1)	0.0		Post-translational	1344	0.0
 Methyl:2H(3)+Acetyl:2H(3)@K	62.063875	62.1002	H(-2)2H(6)C(3)O(1)	0.0		Isotopic label	1368	0.0
 dHex(1)Hex(1)@T	308.110732	308.2818	H(20)C(12)O(9)	308.110732	H(20)C(12)O(9)	O-linked glycosylation	1367	0.5
@@ -1703,7 +1703,7 @@ Label:2H(3)+Oxidation@M	19.013745	19.0179	H(-3)2H(3)O(1)	0.0		Isotopic label	137
 Trimethyl:2H(9)@R	51.103441	51.1352	H(-3)2H(9)C(3)	0.0		Isotopic label	1371	0.0
 Trimethyl:2H(9)@K	51.103441	51.1352	H(-3)2H(9)C(3)	0.0		Isotopic label	1371	0.0
 Acetyl:13C(2)@K	44.017274	44.022	H(2)13C(2)O(1)	0.0		Isotopic label	1372	0.0
-Acetyl:13C(2)@Protein N-term	44.017274	44.022	H(2)13C(2)O(1)	0.0		Isotopic label	1372	0.0
+Acetyl:13C(2)@Protein_N-term	44.017274	44.022	H(2)13C(2)O(1)	0.0		Isotopic label	1372	0.0
 dHex(1)Hex(2)@T	470.163556	470.4224	H(30)C(18)O(14)	470.163556	H(30)C(18)O(14)	O-linked glycosylation	1375	0.5
 dHex(1)Hex(2)@S	470.163556	470.4224	H(30)C(18)O(14)	470.163556	H(30)C(18)O(14)	O-linked glycosylation	1375	0.5
 dHex(1)Hex(3)@T	632.216379	632.563	H(40)C(24)O(19)	632.216379	H(40)C(24)O(19)	O-linked glycosylation	1376	0.5
@@ -1725,31 +1725,31 @@ Hydroxamic_acid@D	15.010899	15.0146	H(1)N(1)	0.0		Artefact	1385	0.0
 Oxidation+NEM@C	141.042593	141.1247	H(7)C(6)N(1)O(3)	0.0		Chemical derivative	1390	0.0
 NHS-fluorescein@K	471.131802	471.4581	H(21)C(27)N(1)O(7)	0.0		Chemical derivative	1391	0.0
 DiART6plex@Y	217.162932	217.2527	H(20)C(7)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	1392	0.0
-DiART6plex@Protein N-term	217.162932	217.2527	H(20)C(7)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	1392	0.0
-DiART6plex@Any N-term	217.162932	217.2527	H(20)C(7)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	1392	0.0
+DiART6plex@Protein_N-term	217.162932	217.2527	H(20)C(7)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	1392	0.0
+DiART6plex@Any_N-term	217.162932	217.2527	H(20)C(7)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	1392	0.0
 DiART6plex@K	217.162932	217.2527	H(20)C(7)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	1392	0.0
 DiART6plex115@K	217.156612	217.2535	H(20)C(8)13C(3)15N(2)O(2)	0.0		Isotopic label	1393	0.0
-DiART6plex115@Any N-term	217.156612	217.2535	H(20)C(8)13C(3)15N(2)O(2)	0.0		Isotopic label	1393	0.0
-DiART6plex115@Protein N-term	217.156612	217.2535	H(20)C(8)13C(3)15N(2)O(2)	0.0		Isotopic label	1393	0.0
+DiART6plex115@Any_N-term	217.156612	217.2535	H(20)C(8)13C(3)15N(2)O(2)	0.0		Isotopic label	1393	0.0
+DiART6plex115@Protein_N-term	217.156612	217.2535	H(20)C(8)13C(3)15N(2)O(2)	0.0		Isotopic label	1393	0.0
 DiART6plex115@Y	217.156612	217.2535	H(20)C(8)13C(3)15N(2)O(2)	0.0		Isotopic label	1393	0.0
 DiART6plex116/119@Y	217.168776	217.2797	H(18)2H(2)C(9)13C(2)N(1)15N(1)O(2)	0.0		Isotopic label	1394	0.0
-DiART6plex116/119@Protein N-term	217.168776	217.2797	H(18)2H(2)C(9)13C(2)N(1)15N(1)O(2)	0.0		Isotopic label	1394	0.0
+DiART6plex116/119@Protein_N-term	217.168776	217.2797	H(18)2H(2)C(9)13C(2)N(1)15N(1)O(2)	0.0		Isotopic label	1394	0.0
 DiART6plex116/119@K	217.168776	217.2797	H(18)2H(2)C(9)13C(2)N(1)15N(1)O(2)	0.0		Isotopic label	1394	0.0
-DiART6plex116/119@Any N-term	217.168776	217.2797	H(18)2H(2)C(9)13C(2)N(1)15N(1)O(2)	0.0		Isotopic label	1394	0.0
+DiART6plex116/119@Any_N-term	217.168776	217.2797	H(18)2H(2)C(9)13C(2)N(1)15N(1)O(2)	0.0		Isotopic label	1394	0.0
 DiART6plex117@K	217.162456	217.2805	H(18)2H(2)C(10)13C(1)15N(2)O(2)	0.0		Isotopic label	1395	0.0
-DiART6plex117@Any N-term	217.162456	217.2805	H(18)2H(2)C(10)13C(1)15N(2)O(2)	0.0		Isotopic label	1395	0.0
-DiART6plex117@Protein N-term	217.162456	217.2805	H(18)2H(2)C(10)13C(1)15N(2)O(2)	0.0		Isotopic label	1395	0.0
+DiART6plex117@Any_N-term	217.162456	217.2805	H(18)2H(2)C(10)13C(1)15N(2)O(2)	0.0		Isotopic label	1395	0.0
+DiART6plex117@Protein_N-term	217.162456	217.2805	H(18)2H(2)C(10)13C(1)15N(2)O(2)	0.0		Isotopic label	1395	0.0
 DiART6plex117@Y	217.162456	217.2805	H(18)2H(2)C(10)13C(1)15N(2)O(2)	0.0		Isotopic label	1395	0.0
 DiART6plex118@K	217.175096	217.279	H(18)2H(2)C(8)13C(3)N(2)O(2)	0.0		Isotopic label	1396	0.0
-DiART6plex118@Any N-term	217.175096	217.279	H(18)2H(2)C(8)13C(3)N(2)O(2)	0.0		Isotopic label	1396	0.0
-DiART6plex118@Protein N-term	217.175096	217.279	H(18)2H(2)C(8)13C(3)N(2)O(2)	0.0		Isotopic label	1396	0.0
+DiART6plex118@Any_N-term	217.175096	217.279	H(18)2H(2)C(8)13C(3)N(2)O(2)	0.0		Isotopic label	1396	0.0
+DiART6plex118@Protein_N-term	217.175096	217.279	H(18)2H(2)C(8)13C(3)N(2)O(2)	0.0		Isotopic label	1396	0.0
 DiART6plex118@Y	217.175096	217.279	H(18)2H(2)C(8)13C(3)N(2)O(2)	0.0		Isotopic label	1396	0.0
 Iodoacetanilide@K	133.052764	133.1473	H(7)C(8)N(1)O(1)	0.0		Artefact	1397	0.0
 Iodoacetanilide@C	133.052764	133.1473	H(7)C(8)N(1)O(1)	0.0		Chemical derivative	1397	0.0
-Iodoacetanilide@Any N-term	133.052764	133.1473	H(7)C(8)N(1)O(1)	0.0		Artefact	1397	0.0
+Iodoacetanilide@Any_N-term	133.052764	133.1473	H(7)C(8)N(1)O(1)	0.0		Artefact	1397	0.0
 Iodoacetanilide:13C(6)@K	139.072893	139.1032	H(7)C(2)13C(6)N(1)O(1)	0.0		Artefact	1398	0.0
 Iodoacetanilide:13C(6)@C	139.072893	139.1032	H(7)C(2)13C(6)N(1)O(1)	0.0		Chemical derivative	1398	0.0
-Iodoacetanilide:13C(6)@Any N-term	139.072893	139.1032	H(7)C(2)13C(6)N(1)O(1)	0.0		Artefact	1398	0.0
+Iodoacetanilide:13C(6)@Any_N-term	139.072893	139.1032	H(7)C(2)13C(6)N(1)O(1)	0.0		Artefact	1398	0.0
 Dap-DSP@K	364.076278	364.4377	H(20)C(13)N(2)O(6)S(2)	0.0		Chemical derivative	1399	0.0
 Dap-DSP@E	364.076278	364.4377	H(20)C(13)N(2)O(6)S(2)	0.0		Non-standard residue	1399	0.0
 Dap-DSP@A	364.076278	364.4377	H(20)C(13)N(2)O(6)S(2)	0.0		Non-standard residue	1399	0.0
@@ -1769,11 +1769,11 @@ PhosphoHex(2)@T	404.071978	404.2611	H(21)C(12)O(13)P(1)	404.071978	H(21)C(12)O(1
 PhosphoHex(2)@S	404.071978	404.2611	H(21)C(12)O(13)P(1)	404.071978	H(21)C(12)O(13)P(1)	O-linked glycosylation	1413	0.5
 Trimethyl:13C(3)2H(9)@K	54.113505	54.1132	H(-3)2H(9)13C(3)	0.0		Isotopic label	1414	0.0
 Trimethyl:13C(3)2H(9)@R	54.113505	54.1132	H(-3)2H(9)13C(3)	0.0		Isotopic label	1414	0.0
-15N-oxobutanoic@S^Protein N-term	-18.023584	-18.0239	H(-3)15N(-1)	0.0		Post-translational	1419	0.0
-15N-oxobutanoic@C^Any N-term	-18.023584	-18.0239	H(-3)15N(-1)	0.0		Artefact	1419	0.0
-15N-oxobutanoic@T^Protein N-term	-18.023584	-18.0239	H(-3)15N(-1)	0.0		Post-translational	1419	0.0
+15N-oxobutanoic@S^Protein_N-term	-18.023584	-18.0239	H(-3)15N(-1)	0.0		Post-translational	1419	0.0
+15N-oxobutanoic@C^Any_N-term	-18.023584	-18.0239	H(-3)15N(-1)	0.0		Artefact	1419	0.0
+15N-oxobutanoic@T^Protein_N-term	-18.023584	-18.0239	H(-3)15N(-1)	0.0		Post-translational	1419	0.0
 spermidine@Q	128.131349	128.2153	H(16)C(7)N(2)	0.0		Chemical derivative	1421	0.0
-Biotin:Thermo-21330@Any N-term	473.219571	473.5835	H(35)C(21)N(3)O(7)S(1)	0.0		Chemical derivative	1423	0.0
+Biotin:Thermo-21330@Any_N-term	473.219571	473.5835	H(35)C(21)N(3)O(7)S(1)	0.0		Chemical derivative	1423	0.0
 Biotin:Thermo-21330@K	473.219571	473.5835	H(35)C(21)N(3)O(7)S(1)	0.0		Chemical derivative	1423	0.0
 Hex(1)Pent(2)@T	426.137341	426.3698	H(26)C(16)O(13)	426.137341	H(26)C(16)O(13)	O-linked glycosylation	1428	0.5
 Hex(1)Pent(2)@S	426.137341	426.3698	H(26)C(16)O(13)	426.137341	H(26)C(16)O(13)	O-linked glycosylation	1428	0.5
@@ -1803,7 +1803,7 @@ Hex(1)HexNAc(1)dHex(1)Me(1)@T	525.205755	525.5009	H(35)C(21)N(1)O(14)	525.205755
 Hex(1)HexNAc(1)dHex(1)Me(1)@S	525.205755	525.5009	H(35)C(21)N(1)O(14)	525.205755	H(35)C(21)N(1)O(14)	O-linked glycosylation	1436	0.5
 Hex(1)HexNAc(1)dHex(1)Me(2)@T	539.221405	539.5275	H(37)C(22)N(1)O(14)	539.221405	H(37)C(22)N(1)O(14)	O-linked glycosylation	1437	0.5
 Hex(1)HexNAc(1)dHex(1)Me(2)@S	539.221405	539.5275	H(37)C(22)N(1)O(14)	539.221405	H(37)C(22)N(1)O(14)	O-linked glycosylation	1437	0.5
-Xlink:DSS[155]@Protein N-term	155.094629	155.1943	H(13)C(8)N(1)O(2)	0.0		Chemical derivative	1789	0.0
+Xlink:DSS[155]@Protein_N-term	155.094629	155.1943	H(13)C(8)N(1)O(2)	0.0		Chemical derivative	1789	0.0
 Xlink:DSS[155]@K	155.094629	155.1943	H(13)C(8)N(1)O(2)	0.0		Chemical derivative	1789	0.0
 Hex(2)HexNAc(1)@N	527.18502	527.4737	H(33)C(20)N(1)O(15)	527.18502	H(33)C(20)N(1)O(15)	N-linked glycosylation	1438	0.5
 Hex(2)HexNAc(1)@T	527.18502	527.4737	H(33)C(20)N(1)O(15)	527.18502	H(33)C(20)N(1)O(15)	O-linked glycosylation	1438	0.5
@@ -2407,25 +2407,25 @@ Fluorescein-tyramine@Y	493.116152	493.4637	H(19)C(29)N(1)O(7)	0.0		Chemical deri
 dHex(1)Hex(7)HexNAc(4)@N	2092.745164	2093.8955	H(132)C(80)N(4)O(59)	0.0		N-linked glycosylation	1840	0.0
 betaFNA@C	454.210387	454.5155	H(30)C(25)N(2)O(6)	0.0		Chemical derivative	1839	0.0
 betaFNA@K	454.210387	454.5155	H(30)C(25)N(2)O(6)	0.0		Chemical derivative	1839	0.0
-Brij58@Any N-term	224.250401	224.4253	H(32)C(16)	0.0		Other	1838	0.0
-Brij35@Any N-term	168.187801	168.319	H(24)C(12)	0.0		Other	1837	0.0
-Triton@Any N-term	188.156501	188.3086	H(20)C(14)	0.0		Other	1836	0.0
-Triton@Any C-term	188.156501	188.3086	H(20)C(14)	0.0		Other	1836	0.0
-Tween80@Any C-term	263.237491	263.4381	H(31)C(18)O(1)	0.0		Other	1835	0.0
-Tween20@Any N-term	165.164326	165.2951	H(21)C(12)	0.0		Other	1834	0.0
+Brij58@Any_N-term	224.250401	224.4253	H(32)C(16)	0.0		Other	1838	0.0
+Brij35@Any_N-term	168.187801	168.319	H(24)C(12)	0.0		Other	1837	0.0
+Triton@Any_N-term	188.156501	188.3086	H(20)C(14)	0.0		Other	1836	0.0
+Triton@Any_C-term	188.156501	188.3086	H(20)C(14)	0.0		Other	1836	0.0
+Tween80@Any_C-term	263.237491	263.4381	H(31)C(18)O(1)	0.0		Other	1835	0.0
+Tween20@Any_N-term	165.164326	165.2951	H(21)C(12)	0.0		Other	1834	0.0
 Tris@N	104.071154	104.1277	H(10)C(4)N(1)O(2)	0.0		Artefact	1831	0.0
 Biotin-tyramide@Y	361.146012	361.4585	H(23)C(18)N(3)O(3)S(1)	0.0		Chemical derivative	1830	0.0
 LRGG+dimethyl@K	411.259403	411.4991	H(33)C(18)N(7)O(4)	0.0		Post-translational	1829	0.0
-RNPXL@R^Any N-term	324.035867	324.1813	H(13)C(9)N(2)O(9)P(1)	324.035867	H(13)C(9)N(2)O(9)P(1)	Other	1825	0.5
-RNPXL@K^Any N-term	324.035867	324.1813	H(13)C(9)N(2)O(9)P(1)	324.035867	H(13)C(9)N(2)O(9)P(1)	Other	1825	0.5
+RNPXL@R^Any_N-term	324.035867	324.1813	H(13)C(9)N(2)O(9)P(1)	324.035867	H(13)C(9)N(2)O(9)P(1)	Other	1825	0.5
+RNPXL@K^Any_N-term	324.035867	324.1813	H(13)C(9)N(2)O(9)P(1)	324.035867	H(13)C(9)N(2)O(9)P(1)	Other	1825	0.5
 GEE@Q	86.036779	86.0892	H(6)C(4)O(2)	0.0		Chemical derivative	1824	0.0
-Glu->pyro-Glu+Methyl@E^Any N-term	-3.994915	-3.9887	C(1)O(-1)	0.0		Artefact	1826	0.0
-Glu->pyro-Glu+Methyl:2H(2)13C(1)@E^Any N-term	-0.979006	-0.9837	H(-2)2H(2)13C(1)O(-1)	0.0		Artefact	1827	0.0
+Glu->pyro-Glu+Methyl@E^Any_N-term	-3.994915	-3.9887	C(1)O(-1)	0.0		Artefact	1826	0.0
+Glu->pyro-Glu+Methyl:2H(2)13C(1)@E^Any_N-term	-0.979006	-0.9837	H(-2)2H(2)13C(1)O(-1)	0.0		Artefact	1827	0.0
 LRGG+methyl@K	397.243753	397.4725	H(31)C(17)N(7)O(4)	0.0		Post-translational	1828	0.0
-NP40@Any N-term	220.182715	220.3505	H(24)C(15)O(1)	0.0		Other	1833	0.0
+NP40@Any_N-term	220.182715	220.3505	H(24)C(15)O(1)	0.0		Other	1833	0.0
 IASD@C	452.034807	452.4582	H(16)C(18)N(2)O(8)S(2)	0.0		Chemical derivative	1832	0.0
 Biotin:Thermo-21328@K	389.090154	389.5564	H(23)C(15)N(3)O(3)S(3)	0.0		Chemical derivative	1841	0.0
-Biotin:Thermo-21328@Any N-term	389.090154	389.5564	H(23)C(15)N(3)O(3)S(3)	0.0		Chemical derivative	1841	0.0
+Biotin:Thermo-21328@Any_N-term	389.090154	389.5564	H(23)C(15)N(3)O(3)S(3)	0.0		Chemical derivative	1841	0.0
 PhosphoCytidine@Y	305.041287	305.1812	H(12)C(9)N(3)O(7)P(1)	0.0		Post-translational	1843	0.0
 PhosphoCytidine@T	305.041287	305.1812	H(12)C(9)N(3)O(7)P(1)	0.0		Post-translational	1843	0.0
 PhosphoCytidine@S	305.041287	305.1812	H(12)C(9)N(3)O(7)P(1)	0.0		Post-translational	1843	0.0
@@ -2436,65 +2436,65 @@ hydroxyisobutyryl@K	86.036779	86.0892	H(6)C(4)O(2)	0.0		Post-translational	1849	
 MeMePhosphorothioate@S	107.979873	108.0993	H(5)C(2)O(1)P(1)S(1)	0.0		Chemical derivative	1868	0.0
 Cation:Fe[III]@D	52.911464	52.8212	H(-3)Fe(1)	0.0		Artefact	1870	0.0
 Cation:Fe[III]@E	52.911464	52.8212	H(-3)Fe(1)	0.0		Artefact	1870	0.0
-Cation:Fe[III]@Any C-term	52.911464	52.8212	H(-3)Fe(1)	0.0		Artefact	1870	0.0
+Cation:Fe[III]@Any_C-term	52.911464	52.8212	H(-3)Fe(1)	0.0		Artefact	1870	0.0
 DTT@C	151.996571	152.2351	H(8)C(4)O(2)S(2)	0.0		Artefact	1871	0.0
 DYn-2@C	161.09664	161.2203	H(13)C(11)O(1)	0.0		Other	1872	0.0
 Xlink:DSSO[176]@K	176.01433	176.1903	H(8)C(6)O(4)S(1)	0.0		Chemical derivative	1878	0.0
-Xlink:DSSO[176]@Protein N-term	176.01433	176.1903	H(8)C(6)O(4)S(1)	0.0		Chemical derivative	1878	0.0
+Xlink:DSSO[176]@Protein_N-term	176.01433	176.1903	H(8)C(6)O(4)S(1)	0.0		Chemical derivative	1878	0.0
 MesitylOxide@K	98.073165	98.143	H(10)C(6)O(1)	0.0		Chemical derivative	1873	0.0
 MesitylOxide@H	98.073165	98.143	H(10)C(6)O(1)	0.0		Chemical derivative	1873	0.0
-MesitylOxide@Protein N-term	98.073165	98.143	H(10)C(6)O(1)	0.0		Chemical derivative	1873	0.0
+MesitylOxide@Protein_N-term	98.073165	98.143	H(10)C(6)O(1)	0.0		Chemical derivative	1873	0.0
 Xlink:DSS[259]@K	259.141973	259.2988	H(21)C(12)N(1)O(5)	0.0		Chemical derivative	1877	0.0
-Xlink:DSS[259]@Protein N-term	259.141973	259.2988	H(21)C(12)N(1)O(5)	0.0		Chemical derivative	1877	0.0
+Xlink:DSS[259]@Protein_N-term	259.141973	259.2988	H(21)C(12)N(1)O(5)	0.0		Chemical derivative	1877	0.0
 methylol@Y	30.010565	30.026	H(2)C(1)O(1)	0.0		Chemical derivative	1875	0.0
 methylol@W	30.010565	30.026	H(2)C(1)O(1)	0.0		Chemical derivative	1875	0.0
 methylol@K	30.010565	30.026	H(2)C(1)O(1)	0.0		Chemical derivative	1875	0.0
 Xlink:DSSO[175]@K	175.030314	175.2056	H(9)C(6)N(1)O(3)S(1)	0.0		Chemical derivative	1879	0.0
-Xlink:DSSO[175]@Protein N-term	175.030314	175.2056	H(9)C(6)N(1)O(3)S(1)	0.0		Chemical derivative	1879	0.0
+Xlink:DSSO[175]@Protein_N-term	175.030314	175.2056	H(9)C(6)N(1)O(3)S(1)	0.0		Chemical derivative	1879	0.0
 Xlink:DSSO[279]@K	279.077658	279.3101	H(17)C(10)N(1)O(6)S(1)	0.0		Chemical derivative	1880	0.0
-Xlink:DSSO[279]@Protein N-term	279.077658	279.3101	H(17)C(10)N(1)O(6)S(1)	0.0		Chemical derivative	1880	0.0
-Xlink:DSSO[54]@Protein N-term	54.010565	54.0474	H(2)C(3)O(1)	0.0		Chemical derivative	1881	0.0
+Xlink:DSSO[279]@Protein_N-term	279.077658	279.3101	H(17)C(10)N(1)O(6)S(1)	0.0		Chemical derivative	1880	0.0
+Xlink:DSSO[54]@Protein_N-term	54.010565	54.0474	H(2)C(3)O(1)	0.0		Chemical derivative	1881	0.0
 Xlink:DSSO[54]@K	54.010565	54.0474	H(2)C(3)O(1)	0.0		Chemical derivative	1881	0.0
 Xlink:DSSO[86]@K	85.982635	86.1124	H(2)C(3)O(1)S(1)	0.0		Chemical derivative	1882	0.0
-Xlink:DSSO[86]@Protein N-term	85.982635	86.1124	H(2)C(3)O(1)S(1)	0.0		Chemical derivative	1882	0.0
+Xlink:DSSO[86]@Protein_N-term	85.982635	86.1124	H(2)C(3)O(1)S(1)	0.0		Chemical derivative	1882	0.0
 Xlink:DSSO[104]@K	103.9932	104.1277	H(4)C(3)O(2)S(1)	0.0		Chemical derivative	1883	0.0
-Xlink:DSSO[104]@Protein N-term	103.9932	104.1277	H(4)C(3)O(2)S(1)	0.0		Chemical derivative	1883	0.0
+Xlink:DSSO[104]@Protein_N-term	103.9932	104.1277	H(4)C(3)O(2)S(1)	0.0		Chemical derivative	1883	0.0
 Xlink:BuUrBu[111]@K	111.032028	111.0987	H(5)C(5)N(1)O(2)	0.0		Chemical derivative	1885	0.0
-Xlink:BuUrBu[111]@Protein N-term	111.032028	111.0987	H(5)C(5)N(1)O(2)	0.0		Chemical derivative	1885	0.0
+Xlink:BuUrBu[111]@Protein_N-term	111.032028	111.0987	H(5)C(5)N(1)O(2)	0.0		Chemical derivative	1885	0.0
 Xlink:BuUrBu[85]@K	85.052764	85.1045	H(7)C(4)N(1)O(1)	0.0		Chemical derivative	1886	0.0
-Xlink:BuUrBu[85]@Protein N-term	85.052764	85.1045	H(7)C(4)N(1)O(1)	0.0		Chemical derivative	1886	0.0
-Xlink:BuUrBu[214]@Protein N-term	214.095357	214.2185	H(14)C(9)N(2)O(4)	0.0		Chemical derivative	1888	0.0
+Xlink:BuUrBu[85]@Protein_N-term	85.052764	85.1045	H(7)C(4)N(1)O(1)	0.0		Chemical derivative	1886	0.0
+Xlink:BuUrBu[214]@Protein_N-term	214.095357	214.2185	H(14)C(9)N(2)O(4)	0.0		Chemical derivative	1888	0.0
 Xlink:BuUrBu[214]@K	214.095357	214.2185	H(14)C(9)N(2)O(4)	0.0		Chemical derivative	1888	0.0
-Xlink:BuUrBu[317]@Protein N-term	317.158686	317.3382	H(23)C(13)N(3)O(6)	0.0		Chemical derivative	1889	0.0
+Xlink:BuUrBu[317]@Protein_N-term	317.158686	317.3382	H(23)C(13)N(3)O(6)	0.0		Chemical derivative	1889	0.0
 Xlink:BuUrBu[317]@K	317.158686	317.3382	H(23)C(13)N(3)O(6)	0.0		Chemical derivative	1889	0.0
 Xlink:DSSO[158]@K	158.003765	158.175	H(6)C(6)O(3)S(1)	0.0		Chemical derivative	1896	0.0
-Xlink:DSSO[158]@Protein N-term	158.003765	158.175	H(6)C(6)O(3)S(1)	0.0		Chemical derivative	1896	0.0
+Xlink:DSSO[158]@Protein_N-term	158.003765	158.175	H(6)C(6)O(3)S(1)	0.0		Chemical derivative	1896	0.0
 Xlink:DSS[138]@K	138.06808	138.1638	H(10)C(8)O(2)	0.0		Chemical derivative	1898	0.0
-Xlink:DSS[138]@Protein N-term	138.06808	138.1638	H(10)C(8)O(2)	0.0		Chemical derivative	1898	0.0
-Xlink:BuUrBu[196]@Protein N-term	196.084792	196.2032	H(12)C(9)N(2)O(3)	0.0		Chemical derivative	1899	0.0
+Xlink:DSS[138]@Protein_N-term	138.06808	138.1638	H(10)C(8)O(2)	0.0		Chemical derivative	1898	0.0
+Xlink:BuUrBu[196]@Protein_N-term	196.084792	196.2032	H(12)C(9)N(2)O(3)	0.0		Chemical derivative	1899	0.0
 Xlink:BuUrBu[196]@K	196.084792	196.2032	H(12)C(9)N(2)O(3)	0.0		Chemical derivative	1899	0.0
 Xlink:DTBP[172]@K	172.01289	172.2711	H(8)C(6)N(2)S(2)	0.0		Chemical derivative	1900	0.0
-Xlink:DTBP[172]@Protein N-term	172.01289	172.2711	H(8)C(6)N(2)S(2)	0.0		Chemical derivative	1900	0.0
+Xlink:DTBP[172]@Protein_N-term	172.01289	172.2711	H(8)C(6)N(2)S(2)	0.0		Chemical derivative	1900	0.0
 Xlink:DST[114]@K	113.995309	114.0563	H(2)C(4)O(4)	0.0		Chemical derivative	1901	0.0
-Xlink:DST[114]@Protein N-term	113.995309	114.0563	H(2)C(4)O(4)	0.0		Chemical derivative	1901	0.0
+Xlink:DST[114]@Protein_N-term	113.995309	114.0563	H(2)C(4)O(4)	0.0		Chemical derivative	1901	0.0
 Xlink:DTSSP[174]@K	173.980921	174.2406	H(6)C(6)O(2)S(2)	0.0		Chemical derivative	1902	0.0
-Xlink:DTSSP[174]@Protein N-term	173.980921	174.2406	H(6)C(6)O(2)S(2)	0.0		Chemical derivative	1902	0.0
+Xlink:DTSSP[174]@Protein_N-term	173.980921	174.2406	H(6)C(6)O(2)S(2)	0.0		Chemical derivative	1902	0.0
 Xlink:SMCC[219]@C	219.089543	219.2365	H(13)C(12)N(1)O(3)	0.0		Chemical derivative	1903	0.0
 Xlink:SMCC[219]@K	219.089543	219.2365	H(13)C(12)N(1)O(3)	0.0		Chemical derivative	1903	0.0
-Xlink:SMCC[219]@Protein N-term	219.089543	219.2365	H(13)C(12)N(1)O(3)	0.0		Chemical derivative	1903	0.0
+Xlink:SMCC[219]@Protein_N-term	219.089543	219.2365	H(13)C(12)N(1)O(3)	0.0		Chemical derivative	1903	0.0
 Cation:Al[III]@D	23.958063	23.9577	H(-3)Al(1)	0.0		Artefact	1910	0.0
 Cation:Al[III]@E	23.958063	23.9577	H(-3)Al(1)	0.0		Artefact	1910	0.0
-Cation:Al[III]@Any C-term	23.958063	23.9577	H(-3)Al(1)	0.0		Artefact	1910	0.0
-Xlink:BS2G[113]@Protein N-term	113.047679	113.1146	H(7)C(5)N(1)O(2)	0.0		Chemical derivative	1906	0.0
+Cation:Al[III]@Any_C-term	23.958063	23.9577	H(-3)Al(1)	0.0		Artefact	1910	0.0
+Xlink:BS2G[113]@Protein_N-term	113.047679	113.1146	H(7)C(5)N(1)O(2)	0.0		Chemical derivative	1906	0.0
 Xlink:BS2G[113]@K	113.047679	113.1146	H(7)C(5)N(1)O(2)	0.0		Chemical derivative	1906	0.0
-Xlink:BS2G[114]@Protein N-term	114.031694	114.0993	H(6)C(5)O(3)	0.0		Chemical derivative	1907	0.0
+Xlink:BS2G[114]@Protein_N-term	114.031694	114.0993	H(6)C(5)O(3)	0.0		Chemical derivative	1907	0.0
 Xlink:BS2G[114]@K	114.031694	114.0993	H(6)C(5)O(3)	0.0		Chemical derivative	1907	0.0
-Xlink:BS2G[217]@Protein N-term	217.095023	217.2191	H(15)C(9)N(1)O(5)	0.0		Chemical derivative	1908	0.0
+Xlink:BS2G[217]@Protein_N-term	217.095023	217.2191	H(15)C(9)N(1)O(5)	0.0		Chemical derivative	1908	0.0
 Xlink:BS2G[217]@K	217.095023	217.2191	H(15)C(9)N(1)O(5)	0.0		Chemical derivative	1908	0.0
 Xlink:DMP[139]@K	139.110947	139.1982	H(13)C(7)N(3)	0.0		Chemical derivative	1911	0.0
-Xlink:DMP[139]@Protein N-term	139.110947	139.1982	H(13)C(7)N(3)	0.0		Chemical derivative	1911	0.0
+Xlink:DMP[139]@Protein_N-term	139.110947	139.1982	H(13)C(7)N(3)	0.0		Chemical derivative	1911	0.0
 Xlink:DMP[122]@K	122.084398	122.1677	H(10)C(7)N(2)	0.0		Chemical derivative	1912	0.0
-Xlink:DMP[122]@Protein N-term	122.084398	122.1677	H(10)C(7)N(2)	0.0		Chemical derivative	1912	0.0
+Xlink:DMP[122]@Protein_N-term	122.084398	122.1677	H(10)C(7)N(2)	0.0		Chemical derivative	1912	0.0
 glyoxalAGE@R	21.98435	22.0055	H(-2)C(2)	0.0		Post-translational	1913	0.0
 Met->AspSA@M	-32.008456	-32.1081	H(-4)C(-1)O(1)S(-1)	0.0		Chemical derivative	1914	0.0
 Decarboxylation@D	-30.010565	-30.026	H(-2)C(-1)O(-1)	0.0		Chemical derivative	1915	0.0
@@ -2589,44 +2589,44 @@ Hex(5)HexNAc(4)NeuAc(1)Ac(1)@N	1955.687589	1956.7643	H(121)C(75)N(5)O(54)	1955.6
 Hex(3)HexNAc(3)NeuAc(3)@S	1968.682838	1969.7631	H(120)C(75)N(6)O(54)	1968.682838	H(120)C(75)N(6)O(54)	O-linked glycosylation	1968	0.5
 Hex(3)HexNAc(3)NeuAc(3)@T	1968.682838	1969.7631	H(120)C(75)N(6)O(54)	1968.682838	H(120)C(75)N(6)O(54)	O-linked glycosylation	1968	0.5
 Hex(5)HexNAc(4)NeuAc(1)Ac(2)@N	1997.698154	1998.801	H(123)C(77)N(5)O(55)	1997.698154	H(123)C(77)N(5)O(55)	N-linked glycosylation	1969	0.5
-Unknown:162@Any C-term	162.125595	162.2267	H(18)C(8)O(3)	0.0		Artefact	1970	0.0
+Unknown:162@Any_C-term	162.125595	162.2267	H(18)C(8)O(3)	0.0		Artefact	1970	0.0
 Unknown:162@E	162.125595	162.2267	H(18)C(8)O(3)	0.0		Artefact	1970	0.0
 Unknown:162@D	162.125595	162.2267	H(18)C(8)O(3)	0.0		Artefact	1970	0.0
-Unknown:162@Any N-term	162.125595	162.2267	H(18)C(8)O(3)	0.0		Artefact	1970	0.0
+Unknown:162@Any_N-term	162.125595	162.2267	H(18)C(8)O(3)	0.0		Artefact	1970	0.0
 Unknown:177@D	176.744957	176.4788	H(-7)O(1)Fe(3)	0.0		Artefact	1971	0.0
 Unknown:177@E	176.744957	176.4788	H(-7)O(1)Fe(3)	0.0		Artefact	1971	0.0
-Unknown:177@Any C-term	176.744957	176.4788	H(-7)O(1)Fe(3)	0.0		Artefact	1971	0.0
-Unknown:177@Any N-term	176.744957	176.4788	H(-7)O(1)Fe(3)	0.0		Artefact	1971	0.0
+Unknown:177@Any_C-term	176.744957	176.4788	H(-7)O(1)Fe(3)	0.0		Artefact	1971	0.0
+Unknown:177@Any_N-term	176.744957	176.4788	H(-7)O(1)Fe(3)	0.0		Artefact	1971	0.0
 Unknown:210@D	210.16198	210.3126	H(22)C(13)O(2)	0.0		Artefact	1972	0.0
 Unknown:210@E	210.16198	210.3126	H(22)C(13)O(2)	0.0		Artefact	1972	0.0
-Unknown:210@Any C-term	210.16198	210.3126	H(22)C(13)O(2)	0.0		Artefact	1972	0.0
-Unknown:210@Any N-term	210.16198	210.3126	H(22)C(13)O(2)	0.0		Artefact	1972	0.0
+Unknown:210@Any_C-term	210.16198	210.3126	H(22)C(13)O(2)	0.0		Artefact	1972	0.0
+Unknown:210@Any_N-term	210.16198	210.3126	H(22)C(13)O(2)	0.0		Artefact	1972	0.0
 Unknown:216@D	216.099774	216.231	H(16)C(10)O(5)	0.0		Artefact	1973	0.0
 Unknown:216@E	216.099774	216.231	H(16)C(10)O(5)	0.0		Artefact	1973	0.0
-Unknown:216@Any C-term	216.099774	216.231	H(16)C(10)O(5)	0.0		Artefact	1973	0.0
-Unknown:216@Any N-term	216.099774	216.231	H(16)C(10)O(5)	0.0		Artefact	1973	0.0
+Unknown:216@Any_C-term	216.099774	216.231	H(16)C(10)O(5)	0.0		Artefact	1973	0.0
+Unknown:216@Any_N-term	216.099774	216.231	H(16)C(10)O(5)	0.0		Artefact	1973	0.0
 Unknown:234@D	234.073953	234.2033	H(14)C(9)O(7)	0.0		Artefact	1974	0.0
 Unknown:234@E	234.073953	234.2033	H(14)C(9)O(7)	0.0		Artefact	1974	0.0
-Unknown:234@Any C-term	234.073953	234.2033	H(14)C(9)O(7)	0.0		Artefact	1974	0.0
-Unknown:234@Any N-term	234.073953	234.2033	H(14)C(9)O(7)	0.0		Artefact	1974	0.0
+Unknown:234@Any_C-term	234.073953	234.2033	H(14)C(9)O(7)	0.0		Artefact	1974	0.0
+Unknown:234@Any_N-term	234.073953	234.2033	H(14)C(9)O(7)	0.0		Artefact	1974	0.0
 Unknown:248@D	248.19876	248.359	H(28)C(13)O(4)	0.0		Artefact	1975	0.0
 Unknown:248@E	248.19876	248.359	H(28)C(13)O(4)	0.0		Artefact	1975	0.0
-Unknown:248@Any C-term	248.19876	248.359	H(28)C(13)O(4)	0.0		Artefact	1975	0.0
-Unknown:248@Any N-term	248.19876	248.359	H(28)C(13)O(4)	0.0		Artefact	1975	0.0
+Unknown:248@Any_C-term	248.19876	248.359	H(28)C(13)O(4)	0.0		Artefact	1975	0.0
+Unknown:248@Any_N-term	248.19876	248.359	H(28)C(13)O(4)	0.0		Artefact	1975	0.0
 Unknown:250@D	249.981018	250.2075	H(4)C(10)N(1)O(5)S(1)	0.0		Artefact	1976	0.0
 Unknown:250@E	249.981018	250.2075	H(4)C(10)N(1)O(5)S(1)	0.0		Artefact	1976	0.0
-Unknown:250@Any C-term	249.981018	250.2075	H(4)C(10)N(1)O(5)S(1)	0.0		Artefact	1976	0.0
-Unknown:250@Any N-term	249.981018	250.2075	H(4)C(10)N(1)O(5)S(1)	0.0		Artefact	1976	0.0
+Unknown:250@Any_C-term	249.981018	250.2075	H(4)C(10)N(1)O(5)S(1)	0.0		Artefact	1976	0.0
+Unknown:250@Any_N-term	249.981018	250.2075	H(4)C(10)N(1)O(5)S(1)	0.0		Artefact	1976	0.0
 Unknown:302@D	301.986514	302.2656	H(8)C(4)N(5)O(7)S(2)	0.0		Artefact	1977	0.0
 Unknown:302@E	301.986514	302.2656	H(8)C(4)N(5)O(7)S(2)	0.0		Artefact	1977	0.0
-Unknown:302@Any C-term	301.986514	302.2656	H(8)C(4)N(5)O(7)S(2)	0.0		Artefact	1977	0.0
-Unknown:302@Any N-term	301.986514	302.2656	H(8)C(4)N(5)O(7)S(2)	0.0		Artefact	1977	0.0
+Unknown:302@Any_C-term	301.986514	302.2656	H(8)C(4)N(5)O(7)S(2)	0.0		Artefact	1977	0.0
+Unknown:302@Any_N-term	301.986514	302.2656	H(8)C(4)N(5)O(7)S(2)	0.0		Artefact	1977	0.0
 Unknown:306@D	306.095082	306.2659	H(18)C(12)O(9)	0.0		Artefact	1978	0.0
 Unknown:306@E	306.095082	306.2659	H(18)C(12)O(9)	0.0		Artefact	1978	0.0
-Unknown:306@Any C-term	306.095082	306.2659	H(18)C(12)O(9)	0.0		Artefact	1978	0.0
-Unknown:306@Any N-term	306.095082	306.2659	H(18)C(12)O(9)	0.0		Artefact	1978	0.0
-Unknown:420@Any N-term	420.051719	420.5888	H(24)C(12)N(2)O(6)S(4)	420.051719	H(24)C(12)N(2)O(6)S(4)	Artefact	1979	0.5
-Unknown:420@Any C-term	420.051719	420.5888	H(24)C(12)N(2)O(6)S(4)	420.051719	H(24)C(12)N(2)O(6)S(4)	Artefact	1979	0.5
+Unknown:306@Any_C-term	306.095082	306.2659	H(18)C(12)O(9)	0.0		Artefact	1978	0.0
+Unknown:306@Any_N-term	306.095082	306.2659	H(18)C(12)O(9)	0.0		Artefact	1978	0.0
+Unknown:420@Any_N-term	420.051719	420.5888	H(24)C(12)N(2)O(6)S(4)	420.051719	H(24)C(12)N(2)O(6)S(4)	Artefact	1979	0.5
+Unknown:420@Any_C-term	420.051719	420.5888	H(24)C(12)N(2)O(6)S(4)	420.051719	H(24)C(12)N(2)O(6)S(4)	Artefact	1979	0.5
 Diethylphosphothione@Y	152.006087	152.1518	H(9)C(4)O(2)P(1)S(1)	0.0		Chemical derivative	1986	0.0
 Diethylphosphothione@T	152.006087	152.1518	H(9)C(4)O(2)P(1)S(1)	0.0		Chemical derivative	1986	0.0
 Diethylphosphothione@S	152.006087	152.1518	H(9)C(4)O(2)P(1)S(1)	0.0		Chemical derivative	1986	0.0
@@ -2649,9 +2649,9 @@ monomethylphosphothione@T	109.959137	110.0721	H(3)C(1)O(2)P(1)S(1)	0.0		Chemical
 monomethylphosphothione@Y	109.959137	110.0721	H(3)C(1)O(2)P(1)S(1)	0.0		Chemical derivative	1989	0.0
 TMPP-Ac:13C(9)@Y	581.211328	581.474	H(33)C(20)13C(9)O(10)P(1)	0.0		Artefact	1993	0.0
 TMPP-Ac:13C(9)@K	581.211328	581.474	H(33)C(20)13C(9)O(10)P(1)	0.0		Artefact	1993	0.0
-TMPP-Ac:13C(9)@Any N-term	581.211328	581.474	H(33)C(20)13C(9)O(10)P(1)	0.0		Chemical derivative	1993	0.0
+TMPP-Ac:13C(9)@Any_N-term	581.211328	581.474	H(33)C(20)13C(9)O(10)P(1)	0.0		Chemical derivative	1993	0.0
 ZQG@K	320.100836	320.2973	H(16)C(15)N(2)O(6)	134.036779	H(6)C(8)O(2)	Chemical derivative	2001	0.5
-Xlink:DST[56]@Protein N-term	55.989829	56.0202	C(2)O(2)	0.0		Chemical derivative	1999	0.0
+Xlink:DST[56]@Protein_N-term	55.989829	56.0202	C(2)O(2)	0.0		Chemical derivative	1999	0.0
 Xlink:DST[56]@K	55.989829	56.0202	C(2)O(2)	0.0		Chemical derivative	1999	0.0
 Haloxon@Y	203.950987	204.9763	H(7)C(4)O(3)P(1)Cl(2)	0.0		Chemical derivative	2006	0.0
 Haloxon@T	203.950987	204.9763	H(7)C(4)O(3)P(1)Cl(2)	0.0		Chemical derivative	2006	0.0
@@ -2666,19 +2666,19 @@ Methamidophos-O@K	92.997965	93.0217	H(4)C(1)N(1)O(2)P(1)	0.0		Chemical derivativ
 Methamidophos-O@H	92.997965	93.0217	H(4)C(1)N(1)O(2)P(1)	0.0		Chemical derivative	2008	0.0
 Methamidophos-O@C	92.997965	93.0217	H(4)C(1)N(1)O(2)P(1)	0.0		Chemical derivative	2008	0.0
 Nitrene@Y	12.995249	12.9988	H(-1)N(1)	0.0		Artefact	2014	0.0
-shTMT@Any N-term	235.176741	235.2201	H(20)C(3)13C(9)15N(2)O(2)	0.0		Chemical derivative	2015	0.0
-shTMT@Protein N-term	235.176741	235.2201	H(20)C(3)13C(9)15N(2)O(2)	0.0		Chemical derivative	2015	0.0
+shTMT@Any_N-term	235.176741	235.2201	H(20)C(3)13C(9)15N(2)O(2)	0.0		Chemical derivative	2015	0.0
+shTMT@Protein_N-term	235.176741	235.2201	H(20)C(3)13C(9)15N(2)O(2)	0.0		Chemical derivative	2015	0.0
 shTMT@K	235.176741	235.2201	H(20)C(3)13C(9)15N(2)O(2)	0.0		Chemical derivative	2015	0.0
 TMTpro@S	304.207146	304.3127	H(25)C(8)13C(7)N(1)15N(2)O(3)	0.0		Isotopic label	2016	0.0
 TMTpro@H	304.207146	304.3127	H(25)C(8)13C(7)N(1)15N(2)O(3)	0.0		Isotopic label	2016	0.0
-TMTpro@Protein N-term	304.207146	304.3127	H(25)C(8)13C(7)N(1)15N(2)O(3)	0.0		Isotopic label	2016	0.0
-TMTpro@Any N-term	304.207146	304.3127	H(25)C(8)13C(7)N(1)15N(2)O(3)	0.0		Isotopic label	2016	0.0
+TMTpro@Protein_N-term	304.207146	304.3127	H(25)C(8)13C(7)N(1)15N(2)O(3)	0.0		Isotopic label	2016	0.0
+TMTpro@Any_N-term	304.207146	304.3127	H(25)C(8)13C(7)N(1)15N(2)O(3)	0.0		Isotopic label	2016	0.0
 TMTpro@K	304.207146	304.3127	H(25)C(8)13C(7)N(1)15N(2)O(3)	0.0		Isotopic label	2016	0.0
 TMTpro@T	304.207146	304.3127	H(25)C(8)13C(7)N(1)15N(2)O(3)	0.0		Isotopic label	2016	0.0
 TMTpro_zero@S	295.189592	295.3773	H(25)C(15)N(3)O(3)	0.0		Chemical derivative	2017	0.0
 TMTpro_zero@H	295.189592	295.3773	H(25)C(15)N(3)O(3)	0.0		Chemical derivative	2017	0.0
-TMTpro_zero@Protein N-term	295.189592	295.3773	H(25)C(15)N(3)O(3)	0.0		Chemical derivative	2017	0.0
-TMTpro_zero@Any N-term	295.189592	295.3773	H(25)C(15)N(3)O(3)	0.0		Chemical derivative	2017	0.0
+TMTpro_zero@Protein_N-term	295.189592	295.3773	H(25)C(15)N(3)O(3)	0.0		Chemical derivative	2017	0.0
+TMTpro_zero@Any_N-term	295.189592	295.3773	H(25)C(15)N(3)O(3)	0.0		Chemical derivative	2017	0.0
 TMTpro_zero@K	295.189592	295.3773	H(25)C(15)N(3)O(3)	0.0		Chemical derivative	2017	0.0
 TMTpro_zero@T	295.189592	295.3773	H(25)C(15)N(3)O(3)	0.0		Chemical derivative	2017	0.0
 Andro-H2O@C	332.19876	332.4339	H(28)C(20)O(4)	0.0		Chemical derivative	2025	0.0

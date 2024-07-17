@@ -22,21 +22,21 @@ def convert_one_pFind_mod(mod):
     if len(site) == 1:
         return name + "@" + site
     elif site == "AnyN-term":
-        return name + "@" + "Any N-term"
+        return name + "@" + "Any_N-term"
     elif site == "ProteinN-term":
-        return name + "@" + "Protein N-term"
+        return name + "@" + "Protein_N-term"
     elif site.startswith("AnyN-term"):
-        return name + "@" + site[-1] + "^Any N-term"
+        return name + "@" + site[-1] + "^Any_N-term"
     elif site.startswith("ProteinN-term"):
-        return name + "@" + site[-1] + "^Protein N-term"
+        return name + "@" + site[-1] + "^Protein_N-term"
     elif site == "AnyC-term":
-        return name + "@" + "Any C-term"
+        return name + "@" + "Any_C-term"
     elif site == "ProteinC-term":
-        return name + "@" + "Protein C-term"
+        return name + "@" + "Protein_C-term"
     elif site.startswith("AnyC-term"):
-        return name + "@" + site[-1] + "^Any C-term"
+        return name + "@" + site[-1] + "^Any_C-term"
     elif site.startswith("ProteinC-term"):
-        return name + "@" + site[-1] + "^Protein C-term"
+        return name + "@" + site[-1] + "^Protein_C-term"
     else:
         return None
 

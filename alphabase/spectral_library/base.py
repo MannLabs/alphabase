@@ -627,7 +627,12 @@ class SpecLibBase:
             "fragment_intensity_df": self._fragment_intensity_df,
         }
 
-    def load_hdf(self, hdf_file: str, load_mod_seq: bool = True):
+    def load_hdf(
+        self,
+        hdf_file: str,
+        load_mod_seq: bool = True,
+        support_legacy_mods_format: bool = True,
+    ):
         """Load the hdf library from hdf_file
 
         Parameters
@@ -639,6 +644,11 @@ class SpecLibBase:
             For performance reason, the susbset of non key numeric columns is stored in mod_seq_df.
             For fast loading, set load_mod_seq to False to skip loading mod_seq_df.
             Defaults to True.
+
+        support_legacy_mods_format : bool, optional
+            If True, whitespaces in modifications will be replaced by underscores to match the internal data format.
+            Defaults to True.
+            DeprecationWarning: future versions will have a different default and eventually this flag will be dropped.
 
         """
         _hdf = HDF_File(
@@ -652,6 +662,10 @@ class SpecLibBase:
             ]
             mod_seq_df = _hdf.library.mod_seq_df.values
             cols = [col for col in mod_seq_df.columns if col not in key_columns]
+
+            if support_legacy_mods_format:
+                self._replace_mod_name_whitespaces(mod_seq_df)
+
             self._precursor_df[cols] = mod_seq_df[cols]
 
         self._fragment_mz_df = _hdf.library.fragment_mz_df.values
@@ -671,6 +685,23 @@ class SpecLibBase:
                 if frag in self._fragment_intensity_df.columns
             ]
         ]
+
+    @staticmethod
+    def _replace_mod_name_whitespaces(mod_seq_df: pd.DataFrame) -> None:
+        """Replace whitespaces in-place in `mod_seq_df` in column `mod_name` with underscores."""
+        if any(mod_seq_df["mods"].str.contains(" ", regex=False)):
+            msg = (
+                "Support for whitespaces in modifications will be dropped in the next major release of alphabase. "
+                "Please use underscores in your spectral libraries instead."
+            )
+            warnings.warn(
+                msg,
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            logging.warning(msg)
+
+            mod_seq_df["mods"] = mod_seq_df["mods"].str.replace(" ", "_")
 
 
 def annotate_fragments_from_speclib(
