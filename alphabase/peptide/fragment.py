@@ -1047,25 +1047,24 @@ def create_fragment_mz_dataframe(
     pd.DataFrame
         `fragment_mz_df` with given `charged_frag_types`
     """
-    if reference_fragment_df is None:
-        if "frag_start_idx" in precursor_df.columns:
-            # raise ValueError(
-            #     "`precursor_df` contains 'frag_start_idx' column, "\
-            #     "please provide `reference_fragment_df` argument"
-            # )
-            fragment_mz_df = init_fragment_by_precursor_dataframe(
-                precursor_df,
-                charged_frag_types,
-                dtype=dtype,
-            )
-            return create_fragment_mz_dataframe(
-                precursor_df=precursor_df,
-                charged_frag_types=charged_frag_types,
-                reference_fragment_df=fragment_mz_df,
-                inplace_in_reference=True,
-                batch_size=batch_size,
-                dtype=dtype,
-            )
+    if reference_fragment_df is None and "frag_start_idx" in precursor_df.columns:
+        # raise ValueError(
+        #     "`precursor_df` contains 'frag_start_idx' column, "\
+        #     "please provide `reference_fragment_df` argument"
+        # )
+        fragment_mz_df = init_fragment_by_precursor_dataframe(
+            precursor_df,
+            charged_frag_types,
+            dtype=dtype,
+        )
+        return create_fragment_mz_dataframe(
+            precursor_df=precursor_df,
+            charged_frag_types=charged_frag_types,
+            reference_fragment_df=fragment_mz_df,
+            inplace_in_reference=True,
+            batch_size=batch_size,
+            dtype=dtype,
+        )
     if "nAA" not in precursor_df.columns:
         # fast
         return create_fragment_mz_dataframe_by_sort_precursor(
@@ -1255,12 +1254,10 @@ def filter_fragment_number(
     if not set(["frag_start_idx", "frag_stop_idx"]).issubset(precursor_df.columns):
         raise KeyError("frag_start_idx and frag_stop_idx not in dataframe")
 
-    for i, (start_idx, stop_idx, n_allowed_lib) in enumerate(
-        zip(
-            precursor_df["frag_start_idx"].values,
-            precursor_df["frag_stop_idx"].values,
-            precursor_df[n_fragments_allowed_column_name].values,
-        )
+    for start_idx, stop_idx, n_allowed_lib in zip(
+        precursor_df["frag_start_idx"].values,
+        precursor_df["frag_stop_idx"].values,
+        precursor_df[n_fragments_allowed_column_name].values,
     ):
         _allowed = min(n_allowed_lib, n_allowed)
 

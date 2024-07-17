@@ -265,30 +265,31 @@ class SpecLibBase:
         n_fragments = []
         # get subset of dfs_to_append starting with _fragment
         for attr in dfs_to_append:
-            if attr.startswith("_fragment"):
-                if hasattr(self, attr):
-                    n_current_fragments = len(getattr(self, attr))
-                    if n_current_fragments > 0:
-                        n_fragments += [n_current_fragments]
+            if attr.startswith("_fragment") and hasattr(self, attr):
+                n_current_fragments = len(getattr(self, attr))
+                if n_current_fragments > 0:
+                    n_fragments += [n_current_fragments]
 
         if not np.all(np.array(n_fragments) == n_fragments[0]):
             raise ValueError(
                 "The libraries can't be appended as the number of fragments in the current libraries are not the same."
             )
 
-        for attr, matching_columns in zip(dfs_to_append, matching_columns):
+        for attr, column in zip(dfs_to_append, matching_columns):
             if hasattr(self, attr) and hasattr(other, attr):
                 current_df = getattr(self, attr)
 
                 # copy dataframes to avoid changing the original ones
-                other_df = getattr(other, attr)[matching_columns].copy()
+                other_df = getattr(other, attr)[column].copy()
 
                 if attr.startswith("_precursor"):
                     frag_idx_increment = 0
                     for fragment_df in ["_fragment_intensity_df", "_fragment_mz_df"]:
-                        if hasattr(self, fragment_df):
-                            if len(getattr(self, fragment_df)) > 0:
-                                frag_idx_increment = len(getattr(self, fragment_df))
+                        if (
+                            hasattr(self, fragment_df)
+                            and len(getattr(self, fragment_df)) > 0
+                        ):
+                            frag_idx_increment = len(getattr(self, fragment_df))
 
                     if "frag_start_idx" in other_df.columns:
                         other_df["frag_start_idx"] += frag_idx_increment

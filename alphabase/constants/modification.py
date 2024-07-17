@@ -276,10 +276,7 @@ def calc_modloss_mass_with_importance(
     mod_losses = np.zeros(nAA + 2)
     mod_losses[mod_sites] = [MOD_LOSS_MASS[mod] for mod in mod_names]
     _loss_importance = np.zeros(nAA + 2)
-    _loss_importance[mod_sites] = [
-        MOD_LOSS_IMPORTANCE[mod] if mod in MOD_LOSS_IMPORTANCE else 0
-        for mod in mod_names
-    ]
+    _loss_importance[mod_sites] = [MOD_LOSS_IMPORTANCE.get(mod, 0) for mod in mod_names]
 
     # Will not consider the modloss if the corresponding modloss_importance is 0
     mod_losses[_loss_importance == 0] = 0
