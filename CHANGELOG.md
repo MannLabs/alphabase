@@ -1,5 +1,7 @@
 # Changelog
 
+Note: This changelog is deprecated and will no longer be updated. Please refer to the Release changelogs on github.
+
 Follow the changelog format from https://keepachangelog.com/en/1.0.0/.
 
 ## 1.1.0 - 2023.xx.xx
