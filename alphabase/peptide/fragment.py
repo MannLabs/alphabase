@@ -1,21 +1,20 @@
+from typing import Dict, List, Tuple, Union
+
+import numba as nb
 import numpy as np
 import pandas as pd
-from typing import List, Union, Tuple, Dict
-import numba as nb
 
-from alphabase.constants._const import PEAK_MZ_DTYPE, PEAK_INTENSITY_DTYPE
-
-from alphabase.constants.modification import calc_modloss_mass
+from alphabase.constants._const import PEAK_INTENSITY_DTYPE, PEAK_MZ_DTYPE
 from alphabase.constants.atom import (
     MASS_PROTON,
+    calc_mass_from_formula,
 )
+from alphabase.constants.modification import calc_modloss_mass
 from alphabase.peptide.mass_calc import calc_b_y_and_peptide_masses_for_same_len_seqs
 from alphabase.peptide.precursor import (
-    refine_precursor_df,
     is_precursor_refined,
+    refine_precursor_df,
 )
-
-from alphabase.constants.atom import calc_mass_from_formula
 
 frag_type_representation_dict = {
     "c": "b+N(1)H(3)",
@@ -1048,25 +1047,24 @@ def create_fragment_mz_dataframe(
     pd.DataFrame
         `fragment_mz_df` with given `charged_frag_types`
     """
-    if reference_fragment_df is None:
-        if "frag_start_idx" in precursor_df.columns:
-            # raise ValueError(
-            #     "`precursor_df` contains 'frag_start_idx' column, "\
-            #     "please provide `reference_fragment_df` argument"
-            # )
-            fragment_mz_df = init_fragment_by_precursor_dataframe(
-                precursor_df,
-                charged_frag_types,
-                dtype=dtype,
-            )
-            return create_fragment_mz_dataframe(
-                precursor_df=precursor_df,
-                charged_frag_types=charged_frag_types,
-                reference_fragment_df=fragment_mz_df,
-                inplace_in_reference=True,
-                batch_size=batch_size,
-                dtype=dtype,
-            )
+    if reference_fragment_df is None and "frag_start_idx" in precursor_df.columns:
+        # raise ValueError(
+        #     "`precursor_df` contains 'frag_start_idx' column, "\
+        #     "please provide `reference_fragment_df` argument"
+        # )
+        fragment_mz_df = init_fragment_by_precursor_dataframe(
+            precursor_df,
+            charged_frag_types,
+            dtype=dtype,
+        )
+        return create_fragment_mz_dataframe(
+            precursor_df=precursor_df,
+            charged_frag_types=charged_frag_types,
+            reference_fragment_df=fragment_mz_df,
+            inplace_in_reference=True,
+            batch_size=batch_size,
+            dtype=dtype,
+        )
     if "nAA" not in precursor_df.columns:
         # fast
         return create_fragment_mz_dataframe_by_sort_precursor(
@@ -1256,12 +1254,10 @@ def filter_fragment_number(
     if not set(["frag_start_idx", "frag_stop_idx"]).issubset(precursor_df.columns):
         raise KeyError("frag_start_idx and frag_stop_idx not in dataframe")
 
-    for i, (start_idx, stop_idx, n_allowed_lib) in enumerate(
-        zip(
-            precursor_df["frag_start_idx"].values,
-            precursor_df["frag_stop_idx"].values,
-            precursor_df[n_fragments_allowed_column_name].values,
-        )
+    for start_idx, stop_idx, n_allowed_lib in zip(
+        precursor_df["frag_start_idx"].values,
+        precursor_df["frag_stop_idx"].values,
+        precursor_df[n_fragments_allowed_column_name].values,
     ):
         _allowed = min(n_allowed_lib, n_allowed)
 

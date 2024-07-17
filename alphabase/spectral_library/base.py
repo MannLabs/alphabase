@@ -1,31 +1,32 @@
-import pandas as pd
-import numpy as np
-import typing
-import logging
 import copy
-import warnings
+import logging
 import re
+import typing
+import warnings
 
+import numpy as np
+import pandas as pd
+
+from alphabase.io.hdf import HDF_File
 from alphabase.peptide.fragment import (
-    create_fragment_mz_dataframe,
     calc_fragment_count,
+    create_fragment_mz_dataframe,
     filter_fragment_number,
     join_left,
     remove_unused_fragments,
 )
 from alphabase.peptide.precursor import (
-    update_precursor_mz,
-    refine_precursor_df,
-    calc_precursor_isotope_intensity_mp,
-    calc_precursor_isotope_intensity,
-    calc_precursor_isotope_info_mp,
     calc_precursor_isotope_info,
+    calc_precursor_isotope_info_mp,
+    calc_precursor_isotope_intensity,
+    calc_precursor_isotope_intensity_mp,
     hash_precursor_df,
+    refine_precursor_df,
+    update_precursor_mz,
 )
-from alphabase.io.hdf import HDF_File
 
 
-class SpecLibBase(object):
+class SpecLibBase:
     """
     Base spectral library in alphabase and alphapeptdeep.
 
@@ -264,30 +265,31 @@ class SpecLibBase(object):
         n_fragments = []
         # get subset of dfs_to_append starting with _fragment
         for attr in dfs_to_append:
-            if attr.startswith("_fragment"):
-                if hasattr(self, attr):
-                    n_current_fragments = len(getattr(self, attr))
-                    if n_current_fragments > 0:
-                        n_fragments += [n_current_fragments]
+            if attr.startswith("_fragment") and hasattr(self, attr):
+                n_current_fragments = len(getattr(self, attr))
+                if n_current_fragments > 0:
+                    n_fragments += [n_current_fragments]
 
         if not np.all(np.array(n_fragments) == n_fragments[0]):
             raise ValueError(
                 "The libraries can't be appended as the number of fragments in the current libraries are not the same."
             )
 
-        for attr, matching_columns in zip(dfs_to_append, matching_columns):
+        for attr, column in zip(dfs_to_append, matching_columns):
             if hasattr(self, attr) and hasattr(other, attr):
                 current_df = getattr(self, attr)
 
                 # copy dataframes to avoid changing the original ones
-                other_df = getattr(other, attr)[matching_columns].copy()
+                other_df = getattr(other, attr)[column].copy()
 
                 if attr.startswith("_precursor"):
                     frag_idx_increment = 0
                     for fragment_df in ["_fragment_intensity_df", "_fragment_mz_df"]:
-                        if hasattr(self, fragment_df):
-                            if len(getattr(self, fragment_df)) > 0:
-                                frag_idx_increment = len(getattr(self, fragment_df))
+                        if (
+                            hasattr(self, fragment_df)
+                            and len(getattr(self, fragment_df)) > 0
+                        ):
+                            frag_idx_increment = len(getattr(self, fragment_df))
 
                     if "frag_start_idx" in other_df.columns:
                         other_df["frag_start_idx"] += frag_idx_increment
@@ -320,10 +322,9 @@ class SpecLibBase(object):
         ...
         ```
         """
-        from alphabase.spectral_library.decoy import decoy_lib_provider
-
         # register 'protein_reverse' to the decoy_lib_provider
         from alphabase.protein.protein_level_decoy import register_decoy
+        from alphabase.spectral_library.decoy import decoy_lib_provider
 
         register_decoy()
 
@@ -626,7 +627,12 @@ class SpecLibBase(object):
             "fragment_intensity_df": self._fragment_intensity_df,
         }
 
-    def load_hdf(self, hdf_file: str, load_mod_seq: bool = False):
+    def load_hdf(
+        self,
+        hdf_file: str,
+        load_mod_seq: bool = True,
+        support_legacy_mods_format: bool = True,
+    ):
         """Load the hdf library from hdf_file
 
         Parameters
@@ -635,8 +641,14 @@ class SpecLibBase(object):
             hdf library path to load
 
         load_mod_seq : bool, optional
-            if also load mod_seq_df.
-            Defaults to False.
+            For performance reason, the susbset of non key numeric columns is stored in mod_seq_df.
+            For fast loading, set load_mod_seq to False to skip loading mod_seq_df.
+            Defaults to True.
+
+        support_legacy_mods_format : bool, optional
+            If True, whitespaces in modifications will be replaced by underscores to match the internal data format.
+            Defaults to True.
+            DeprecationWarning: future versions will have a different default and eventually this flag will be dropped.
 
         """
         _hdf = HDF_File(
@@ -650,6 +662,10 @@ class SpecLibBase(object):
             ]
             mod_seq_df = _hdf.library.mod_seq_df.values
             cols = [col for col in mod_seq_df.columns if col not in key_columns]
+
+            if support_legacy_mods_format:
+                self._replace_mod_name_whitespaces(mod_seq_df)
+
             self._precursor_df[cols] = mod_seq_df[cols]
 
         self._fragment_mz_df = _hdf.library.fragment_mz_df.values
@@ -669,6 +685,23 @@ class SpecLibBase(object):
                 if frag in self._fragment_intensity_df.columns
             ]
         ]
+
+    @staticmethod
+    def _replace_mod_name_whitespaces(mod_seq_df: pd.DataFrame) -> None:
+        """Replace whitespaces in-place in `mod_seq_df` in column `mod_name` with underscores."""
+        if any(mod_seq_df["mods"].str.contains(" ", regex=False)):
+            msg = (
+                "Support for whitespaces in modifications will be dropped in the next major release of alphabase. "
+                "Please use underscores in your spectral libraries instead."
+            )
+            warnings.warn(
+                msg,
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            logging.warning(msg)
+
+            mod_seq_df["mods"] = mod_seq_df["mods"].str.replace(" ", "_")
 
 
 def annotate_fragments_from_speclib(

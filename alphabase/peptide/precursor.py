@@ -1,17 +1,17 @@
-import pandas as pd
-import numpy as np
-import numba
-import typing
 import multiprocessing as mp
-from tqdm import tqdm
-
-from xxhash import xxh64_intdigest
+import typing
 from functools import partial
 
-from alphabase.constants.atom import MASS_PROTON, MASS_ISOTOPE
+import numba
+import numpy as np
+import pandas as pd
+from tqdm import tqdm
+from xxhash import xxh64_intdigest
+
 from alphabase.constants.aa import AA_Composition
-from alphabase.constants.modification import MOD_Composition
+from alphabase.constants.atom import MASS_ISOTOPE, MASS_PROTON
 from alphabase.constants.isotope import IsotopeDistribution
+from alphabase.constants.modification import MOD_Composition
 from alphabase.peptide.mass_calc import calc_peptide_masses_for_same_len_seqs
 
 
@@ -25,18 +25,16 @@ def refine_precursor_df(
     """
     if ensure_data_validity:
         df.fillna("", inplace=True)
-        if "charge" in df.columns:
-            if df.charge.dtype not in [
-                "int",
-                "int8",
-                "int64",
-                "int32",
-                # np.int64, np.int32, np.int8,
-            ]:
-                df["charge"] = df["charge"].astype(np.int8)
-        if "mod_sites" in df.columns:
-            if df.mod_sites.dtype not in ["O", "U"]:
-                df["mod_sites"] = df.mod_sites.astype("U")
+        if "charge" in df.columns and df.charge.dtype not in [
+            "int",
+            "int8",
+            "int64",
+            "int32",
+            # np.int64, np.int32, np.int8,
+        ]:
+            df["charge"] = df["charge"].astype(np.int8)
+        if "mod_sites" in df.columns and df.mod_sites.dtype not in ["O", "U"]:
+            df["mod_sites"] = df.mod_sites.astype("U")
 
     if "nAA" not in df.columns:
         df["nAA"] = df.sequence.str.len().astype(np.int32)
@@ -107,7 +105,7 @@ def update_precursor_mz(
     # precursor_mz_idx = precursor_df.columns.get_loc(
     #     'precursor_mz'
     # )
-    for nAA, big_df_group in _grouped:
+    for _, big_df_group in _grouped:
         for i in range(0, len(big_df_group), batch_size):
             batch_end = i + batch_size
 
@@ -296,7 +294,7 @@ def hash_precursor_df(precursor_df: pd.DataFrame, *, seed: int = 0) -> pd.DataFr
 
 def get_mod_seq_formula(seq: str, mods: str) -> list:
     """
-    'PEPTIDE','Acetyl@Any N-term' --> [('C',n), ('H',m), ...]
+    'PEPTIDE','Acetyl@Any_N-term' --> [('C',n), ('H',m), ...]
     """
     formula = {}
     for aa in seq:
@@ -586,7 +584,7 @@ def calc_precursor_isotope_intensity(
 
     isotope_dist = IsotopeDistribution()
 
-    col_names = ["i_{}".format(i) for i in range(max_isotope)]
+    col_names = [f"i_{i}" for i in range(max_isotope)]
 
     precursor_dist = np.zeros((len(precursor_df), max_isotope), dtype=np.float32)
 

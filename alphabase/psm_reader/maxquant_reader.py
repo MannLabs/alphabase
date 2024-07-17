@@ -1,15 +1,15 @@
-import pandas as pd
-import numpy as np
-import numba
 import copy
 
+import numba
+import numpy as np
+import pandas as pd
+
+from alphabase.constants.modification import MOD_DF
 from alphabase.psm_reader.psm_reader import (
     PSMReaderBase,
     psm_reader_provider,
     psm_reader_yaml,
 )
-
-from alphabase.constants.modification import MOD_DF
 
 mod_to_unimod_dict = {}
 for mod_name, unimod_id in MOD_DF[["mod_name", "unimod_id"]].values:
@@ -75,10 +75,7 @@ def parse_mod_seq(
         0 for N-term; -1 for C-term; 1 to N for normal modifications.
     """
     PeptideModSeq = modseq
-    if modseq[0] == "_":
-        underscore_for_ncterm = True
-    else:
-        underscore_for_ncterm = False
+    underscore_for_ncterm = modseq[0] == "_"
     mod_list = []
     site_list = []
     site = PeptideModSeq.find(mod_sep[0])
@@ -136,7 +133,7 @@ class MaxQuantReader(PSMReaderBase):
         fdr=0.01,
         keep_decoy=False,
         fixed_C57=True,
-        mod_seq_columns=["Modified sequence"],
+        mod_seq_columns=None,
         **kwargs,
     ):
         """Reader for MaxQuant msms.txt and evidence.txt
@@ -168,6 +165,8 @@ class MaxQuantReader(PSMReaderBase):
             The columns to find modified sequences,
             by default ['Modified sequence']
         """
+        if mod_seq_columns is None:
+            mod_seq_columns = ["Modified sequence"]
         super().__init__(
             column_mapping=column_mapping,
             modification_mapping=modification_mapping,

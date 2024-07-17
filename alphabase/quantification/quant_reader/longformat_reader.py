@@ -1,14 +1,17 @@
-import pandas as pd
-import os
-import shutil
 import glob
-import dask.dataframe as dd
+import os
 import os.path
+import shutil
 
-from . import config_dict_loader
-from . import quantreader_utils
-from . import table_reformatter
-from . import plexdia_reformatter
+import dask.dataframe as dd
+import pandas as pd
+
+from . import (
+    config_dict_loader,
+    plexdia_reformatter,
+    quantreader_utils,
+    table_reformatter,
+)
 
 
 def reformat_and_write_longtable_according_to_config(
@@ -150,7 +153,7 @@ def adapt_subtable(input_df_subset, config_dict, use_alphaquant_format):
     input_df_subset = quantreader_utils.filter_input(
         config_dict.get("filters", {}), input_df_subset
     )
-    if "ion_hierarchy" in config_dict.keys():
+    if "ion_hierarchy" in config_dict:
         return table_reformatter.merge_protein_cols_and_config_dict(
             input_df_subset, config_dict, use_alphaquant_format
         )
@@ -237,9 +240,9 @@ def process_with_dask(
 
 def get_hierarchy_names_from_config_dict(config_dict_for_type):
     hierarchy_names = []
-    if "ion_hierarchy" in config_dict_for_type.keys():
+    if "ion_hierarchy" in config_dict_for_type:
         ion_hierarchy = config_dict_for_type.get("ion_hierarchy")
-        for hierarchy_type in ion_hierarchy.keys():
+        for hierarchy_type in ion_hierarchy:
             hierarchy_names += ion_hierarchy.get(hierarchy_type).get("order")
         return list(set(hierarchy_names))
     else:

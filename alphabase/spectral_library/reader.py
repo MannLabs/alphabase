@@ -1,15 +1,15 @@
 import typing
+
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from alphabase.peptide.mobility import mobility_to_ccs_for_df
-from alphabase.psm_reader.maxquant_reader import MaxQuantReader
-from alphabase.spectral_library.base import SpecLibBase
-from alphabase.psm_reader.psm_reader import psm_reader_yaml
-from alphabase.psm_reader import psm_reader_provider
-
 from alphabase.constants._const import PEAK_INTENSITY_DTYPE
+from alphabase.peptide.mobility import mobility_to_ccs_for_df
+from alphabase.psm_reader import psm_reader_provider
+from alphabase.psm_reader.maxquant_reader import MaxQuantReader
+from alphabase.psm_reader.psm_reader import psm_reader_yaml
+from alphabase.spectral_library.base import SpecLibBase
 
 
 class LibraryReaderBase(MaxQuantReader, SpecLibBase):
@@ -293,21 +293,23 @@ SWATHLibraryReader = LibraryReaderBase
 class LibraryReaderFromRawData(SpecLibBase):
     def __init__(
         self,
-        charged_frag_types: typing.List[str] = [
-            "b_z1",
-            "b_z2",
-            "y_z1",
-            "y_z2",
-            "b_modloss_z1",
-            "b_modloss_z2",
-            "y_modloss_z1",
-            "y_modloss_z2",
-        ],
+        charged_frag_types: typing.List[str] = None,
         precursor_mz_min: float = 400,
         precursor_mz_max: float = 2000,
         decoy: str = None,
         **kwargs,
     ):
+        if charged_frag_types is None:
+            charged_frag_types = [
+                "b_z1",
+                "b_z2",
+                "y_z1",
+                "y_z2",
+                "b_modloss_z1",
+                "b_modloss_z2",
+                "y_modloss_z1",
+                "y_modloss_z2",
+            ]
         super().__init__(
             charged_frag_types=charged_frag_types,
             precursor_mz_min=precursor_mz_min,

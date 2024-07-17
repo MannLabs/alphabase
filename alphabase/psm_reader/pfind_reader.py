@@ -1,8 +1,7 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
 
 import alphabase.constants.modification as ap_mod
-
 from alphabase.psm_reader.psm_reader import (
     PSMReaderBase,
     psm_reader_provider,
@@ -23,21 +22,21 @@ def convert_one_pFind_mod(mod):
     if len(site) == 1:
         return name + "@" + site
     elif site == "AnyN-term":
-        return name + "@" + "Any N-term"
+        return name + "@" + "Any_N-term"
     elif site == "ProteinN-term":
-        return name + "@" + "Protein N-term"
+        return name + "@" + "Protein_N-term"
     elif site.startswith("AnyN-term"):
-        return name + "@" + site[-1] + "^Any N-term"
+        return name + "@" + site[-1] + "^Any_N-term"
     elif site.startswith("ProteinN-term"):
-        return name + "@" + site[-1] + "^Protein N-term"
+        return name + "@" + site[-1] + "^Protein_N-term"
     elif site == "AnyC-term":
-        return name + "@" + "Any C-term"
+        return name + "@" + "Any_C-term"
     elif site == "ProteinC-term":
-        return name + "@" + "Protein C-term"
+        return name + "@" + "Protein_C-term"
     elif site.startswith("AnyC-term"):
-        return name + "@" + site[-1] + "^Any C-term"
+        return name + "@" + site[-1] + "^Any_C-term"
     elif site.startswith("ProteinC-term"):
-        return name + "@" + site[-1] + "^Protein C-term"
+        return name + "@" + site[-1] + "^Protein_C-term"
     else:
         return None
 
@@ -48,9 +47,7 @@ def translate_pFind_mod(mod_str):
     ret_mods = []
     for mod in mod_str.split(";"):
         mod = convert_one_pFind_mod(mod)
-        if not mod:
-            return pd.NA
-        elif mod not in ap_mod.MOD_INFO_DICT:
+        if not mod or mod not in ap_mod.MOD_INFO_DICT:
             return pd.NA
         else:
             ret_mods.append(mod)

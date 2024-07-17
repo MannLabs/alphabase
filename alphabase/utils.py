@@ -1,14 +1,15 @@
-import tqdm
-import pandas as pd
-import itertools
 import io
+import itertools
+
+import pandas as pd
+import tqdm
 
 
 # from alphatims
 def process_bar(iterator, len_iter):
     with tqdm.tqdm(total=len_iter) as bar:
         i = 0
-        for i, iter in enumerate(iterator):
+        for i, iter in enumerate(iterator):  # noqa: B007
             yield iter
             bar.update()
         bar.update(len_iter - i - 1)
@@ -39,7 +40,7 @@ def get_delimiter(tsv_file: str):
         line = tsv_file.readline().strip()
         tsv_file.seek(0)
     else:
-        with open(tsv_file, "r") as f:
+        with open(tsv_file) as f:
             line = f.readline().strip()
     if "\t" in line:
         return "\t"

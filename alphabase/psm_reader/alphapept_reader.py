@@ -1,8 +1,9 @@
-import numba
 import os
-import pandas as pd
-import numpy as np
+
 import h5py
+import numba
+import numpy as np
+import pandas as pd
 
 from alphabase.psm_reader.psm_reader import (
     PSMReaderBase,
@@ -17,10 +18,7 @@ def parse_ap(precursor):
     Parser to parse peptide strings
     """
     items = precursor.split("_")
-    if len(items) == 3:
-        decoy = 1
-    else:
-        decoy = 0
+    decoy = 1 if len(items) == 3 else 0
     modseq = items[0]
     charge = items[-1]
 
@@ -80,7 +78,7 @@ class AlphaPeptReader(PSMReaderBase):
     def _load_file(self, filename):
         with h5py.File(filename, "r") as _hdf:
             dataset = _hdf[self.hdf_dataset]
-            df = pd.DataFrame({col: dataset[col] for col in dataset.keys()})
+            df = pd.DataFrame({col: dataset[col] for col in dataset})
             df["raw_name"] = os.path.basename(filename)[: -len(".ms_data.hdf")]
             df["precursor"] = df["precursor"].str.decode("utf-8")
             # df['naked_sequence'] = df['naked_sequence'].str.decode('utf-8')
