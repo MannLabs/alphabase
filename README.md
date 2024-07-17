@@ -97,6 +97,11 @@ be compatible with:
 pip install "alphabase[stable]"
 ```
 
+If you want to use strucutural information of aminoacids, you can install the dependencies by including the `smiles` extra:
+``` bash
+pip install "alphabase[smiles]"
+```
+
 NOTE: You might need to run `pip install -U pip` before installing
 AlphaBase like this. Also note the double quotes `"`.
 

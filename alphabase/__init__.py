@@ -40,4 +40,5 @@ __urls__ = {
 }
 __extra_requirements__ = {
     "development": "extra_requirements/development.txt",
+    "smiles": "extra_requirements/smiles.txt",
 }
