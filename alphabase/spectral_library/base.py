@@ -59,6 +59,7 @@ class SpecLibBase:
         "isotope_right_most_mz",
         "isotope_right_most_intensity",
         "isotope_right_most_offset",
+        "mono_isotope_idx",
         "miss_cleavage",
         "mobility_pred",
         "mobility",
@@ -68,7 +69,7 @@ class SpecLibBase:
         "rt_norm_pred",
         "rt",
         "labeling_channel",
-    ]
+    ] + [f"i_{i}" for i in range(10)]
     """
     list of str: Key numeric columns to be saved
     into library/precursor_df in the hdf file for fast loading,
@@ -581,51 +582,71 @@ class SpecLibBase:
         """
         return self._get_hdf_to_load(hdf_file).__getattribute__(df_name).values
 
-    def save_hdf(self, hdf_file: str):
+    def save_hdf(self, hdf_file: str, save_mod_seq_in_other_df: bool = False):
         """Save library dataframes into hdf_file.
-        For `self.precursor_df`, this method will save it into two hdf groups in hdf_file:
-        `library/precursor_df` and `library/mod_seq_df`.
-
-        `library/precursor_df` contains all essential numberic columns those
-        can be loaded faster from hdf file into memory:
-
-        'precursor_mz', 'charge', 'mod_seq_hash', 'mod_seq_charge_hash',
-        'frag_start_idx', 'frag_stop_idx', 'decoy', 'rt_pred', 'ccs_pred',
-        'mobility_pred', 'miss_cleave', 'nAA',
-        ['isotope_mz_m1', 'isotope_intensity_m1'], ...
-
-        `library/mod_seq_df` contains all string columns and the other
-        not essential columns:
-        'sequence','mods','mod_sites', ['proteins', 'genes']...
-        as well as 'mod_seq_hash', 'mod_seq_charge_hash' columns to map
-        back to `precursor_df`
 
         Parameters
         ----------
         hdf_file : str
-            the hdf file path to save
+            The hdf file path to save
+
+        save_mod_seq_in_other_df : bool
+            If True: save `self.precursor_df` into two hdf groups in hdf_file,
+                `library/precursor_df` and `library/mod_seq_df`.
+
+                `library/precursor_df` contains all essential numberic columns those
+                can be loaded faster from hdf file into memory:
+
+                    'precursor_mz', 'charge', 'mod_seq_hash', 'mod_seq_charge_hash',
+                    'frag_start_idx', 'frag_stop_idx', 'decoy', 'rt_pred', 'ccs_pred',
+                    'mobility_pred', 'miss_cleave', 'nAA',
+                    ['isotope_mz_m1', 'isotope_intensity_m1'], ...
+
+                `library/mod_seq_df` contains all string columns and the other
+                not essential columns:
+
+                    - 'sequence'
+                    - 'mods'
+                    - 'mod_sites'
+                    - 'proteins', 'genes', ...: optional columns
+                    - 'mod_seq_hash': one-to-one map back to `precursor_df`
+                    - 'mod_seq_charge_hash': one-to-one map back to `precursor_df`
+            If False:
+                All columns of `self.precursor_df` will be saved into `library/precursor_df`.
+
+            Defaults to False.
 
         """
         _hdf = HDF_File(hdf_file, read_only=False, truncate=True, delete_existing=True)
         if "mod_seq_charge_hash" not in self._precursor_df.columns:
             self.hash_precursor_df()
 
-        key_columns = self.key_numeric_columns + ["mod_seq_hash", "mod_seq_charge_hash"]
+        if save_mod_seq_in_other_df:
+            key_columns = self.key_numeric_columns + [
+                "mod_seq_hash",
+                "mod_seq_charge_hash",
+            ]
 
-        _hdf.library = {
-            "mod_seq_df": self._precursor_df[
-                [
-                    col
-                    for col in self._precursor_df.columns
-                    if col not in self.key_numeric_columns
-                ]
-            ],
-            "precursor_df": self._precursor_df[
-                [col for col in self._precursor_df.columns if col in key_columns]
-            ],
-            "fragment_mz_df": self._fragment_mz_df,
-            "fragment_intensity_df": self._fragment_intensity_df,
-        }
+            _hdf.library = {
+                "mod_seq_df": self._precursor_df[
+                    [
+                        col
+                        for col in self._precursor_df.columns
+                        if col not in self.key_numeric_columns
+                    ]
+                ],
+                "precursor_df": self._precursor_df[
+                    [col for col in self._precursor_df.columns if col in key_columns]
+                ],
+                "fragment_mz_df": self._fragment_mz_df,
+                "fragment_intensity_df": self._fragment_intensity_df,
+            }
+        else:
+            _hdf.library = {
+                "precursor_df": self._precursor_df,
+                "fragment_mz_df": self._fragment_mz_df,
+                "fragment_intensity_df": self._fragment_intensity_df,
+            }
 
     def load_hdf(
         self,
@@ -641,8 +662,9 @@ class SpecLibBase:
             hdf library path to load
 
         load_mod_seq : bool, optional
-            For performance reason, the susbset of non key numeric columns is stored in mod_seq_df.
-            For fast loading, set load_mod_seq to False to skip loading mod_seq_df.
+            By default, `mod_seq_df` is not used in the :meth:`save_hdf`, so this param is not used.
+            However, for performance reason, users can save the susbset of non key numeric columns
+            in mod_seq_df. For fast loading, set load_mod_seq to False to skip loading mod_seq_df.
             Defaults to True.
 
         support_legacy_mods_format : bool, optional
@@ -651,11 +673,9 @@ class SpecLibBase:
             DeprecationWarning: future versions will have a different default and eventually this flag will be dropped.
 
         """
-        _hdf = HDF_File(
-            hdf_file,
-        )
+        _hdf = HDF_File(hdf_file)
         self._precursor_df: pd.DataFrame = _hdf.library.precursor_df.values
-        if load_mod_seq:
+        if load_mod_seq and hasattr(_hdf.library, "mod_seq_df"):
             key_columns = self.key_numeric_columns + [
                 "mod_seq_hash",
                 "mod_seq_charge_hash",
