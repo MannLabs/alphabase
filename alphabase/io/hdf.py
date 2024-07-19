@@ -471,11 +471,11 @@ class HDF_File(HDF_Group):
 
         Args:
             file_name (str): file path.
-            read_only (bool, optional): If hdf is read-only. Defaults to True.
+            read_only (bool, optional): If hdf is read-only. Mutually exclusive with `delete_existing`. Defaults to True.
             truncate (bool, optional): If existing groups and datasets can be
                 truncated (i.e. are overwitten). Defaults to False.
             delete_existing (bool, optional): If the file already exists,
-                delete it completely and create a new one. Defaults to False.
+                delete it completely and create a new one. Mutually exclusive with `read_only`. Defaults to False.
 
         Examples::
             >>> # create a hdf file to write
@@ -486,7 +486,7 @@ class HDF_File(HDF_Group):
             >>> hdf_file.dfs.df1 = pd.DataFrame({'a':[1,2,3]})
             >>> # write another DataFrame dataset into the dfs
             >>> hdf_file.dfs.df2 = pd.DataFrame({'a':[3,2,1]})
-            >>> # set an property value to the dataframe
+            >>> # set a property value to the dataframe
             >>> hdf_file.dfs.df1.data_from = "colleagues"
             >>> # get a dataframe dataset from a dfs
             >>> df1 = hdf_file.dfs.df1.values
@@ -498,6 +498,11 @@ class HDF_File(HDF_Group):
             >>> hdf_file.dfs.df1.data_from
             "colleagues"
         """
+        if delete_existing and read_only:
+            raise ValueError(
+                "Parameters 'delete_existing' and 'read_only' are mutually exclusive."
+            )
+
         if delete_existing:
             mode = "w"
         elif read_only:
