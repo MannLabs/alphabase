@@ -4,7 +4,6 @@ import re
 import typing
 from functools import partial
 
-# apply it with multiple cores
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
@@ -25,6 +24,7 @@ class SageModificationTranslation:
         mp_process_num=10,
     ):
         """Translate Sage style modifications to alphabase style modifications.
+        A modified sequence like VM[+15.9949]QENSSSFSDLSER will be translated to mods: Oxidation@M, mod_sites: 2.
         By default, the translation is done by matching the observed mass and location to the UniMod database.
         If a custom translation dataframe is provided, the translation will be done based on the custom translation dataframe first.
 
@@ -50,7 +50,10 @@ class SageModificationTranslation:
             valid = True
             valid &= "modification" in self.custom_translation_df.columns
             valid &= "matched_mod_name" in self.custom_translation_df.columns
-            assert valid, "Custom translation df must have columns 'modification' and 'matched_mod_name'."
+            if not valid:
+                raise ValueError(
+                    "Custom translation df must have columns 'modification' and 'matched_mod_name'."
+                )
 
     def __call__(self, psm_df: pd.DataFrame) -> pd.DataFrame:
         """Translate modifications in the PSMs to alphabase style modifications.
@@ -62,7 +65,6 @@ class SageModificationTranslation:
 
         Parameters
         ----------
-
         psm_df : pd.DataFrame
             The PSM dataframe with column 'modified_sequence'.
 
@@ -70,19 +72,45 @@ class SageModificationTranslation:
         -------
         pd.DataFrame
             The PSM dataframe with columns 'mod_sites' and 'mods'.
-
         """
 
         # 1. Discover all modifications in the PSMs
-        discovered_modifications_df = discover_modifications(psm_df)
+        discovered_modifications_df = _discover_modifications(psm_df)
         translation_df = pd.DataFrame()
 
         # 2. Annotate modifications from custom translation df, if provided
+        discovered_modifications_df, translation_df = (
+            self._annotate_from_custom_translation(
+                discovered_modifications_df, translation_df
+            )
+        )
+
+        # 3. Annotate all remaining modifications from UniMod
+        translation_df = self._annotate_from_unimod(
+            discovered_modifications_df, translation_df
+        )
+
+        # 4. Apply translation to PSMs
+        translated_psm_df = _apply_translate_modifications_mp(psm_df, translation_df)
+
+        # 5. Drop PSMs with missing modifications
+        is_null = translated_psm_df["mod_sites"].isnull()
+        translated_psm_df = translated_psm_df[~is_null]
+        if np.sum(is_null) > 0:
+            logging.warning(
+                f"Dropped {np.sum(is_null)} PSMs with missing modifications."
+            )
+
+        return translated_psm_df
+
+    def _annotate_from_custom_translation(
+        self, discovered_modifications_df: pd.DataFrame, translation_df: pd.DataFrame
+    ) -> typing.Tuple[pd.DataFrame, pd.DataFrame]:
         if self.custom_translation_df is not None:
             discovered_modifications_df = discovered_modifications_df.merge(
                 self.custom_translation_df, on="modification", how="left"
             )
-            for i, row in discovered_modifications_df[  # noqa
+            for _, row in discovered_modifications_df[
                 discovered_modifications_df["matched_mod_name"].isnull()
             ].iterrows():
                 logging.warning(
@@ -101,22 +129,24 @@ class SageModificationTranslation:
                 discovered_modifications_df["matched_mod_name"].isnull()
             ]
 
-        # 3. Annotate all remaining modifications from UniMod
-        annotated_df = get_annotated_mod_df()
+        return discovered_modifications_df, translation_df
+
+    def _annotate_from_unimod(
+        self, discovered_modifications_df: pd.DataFrame, translation_df: pd.DataFrame
+    ) -> pd.DataFrame:
+        annotated_df = _get_annotated_mod_df()
         discovered_modifications_df["matched_mod_name"] = (
             discovered_modifications_df.apply(
-                lambda x: lookup_modification(
+                lambda x: _lookup_modification(
                     x["mass"],
                     x["previous_aa"],
-                    x["is_nterm"],
-                    x["is_cterm"],
                     annotated_df,
                     ppm_tolerance=self.ppm_tolerance,
                 ),
                 axis=1,
             )
         )
-        for i, row in discovered_modifications_df[  # noqa
+        for _, row in discovered_modifications_df[
             discovered_modifications_df["matched_mod_name"].isnull()
         ].iterrows():
             logging.warning(
@@ -131,21 +161,10 @@ class SageModificationTranslation:
             ]
         )
 
-        # 4. Apply translation to PSMs
-        _psm_df = apply_translate_modifications_mp(psm_df, translation_df)
-
-        # 5. Drop PSMs with missing modifications
-        is_null = _psm_df["mod_sites"].isnull()
-        _psm_df = _psm_df[~is_null]
-        if np.sum(is_null) > 0:
-            logging.warning(
-                f"Dropped {np.sum(is_null)} PSMs with missing modifications."
-            )
-
-        return _psm_df
+        return translation_df
 
 
-def discover_modifications(psm_df: pd.DataFrame) -> pd.DataFrame:
+def _discover_modifications(psm_df: pd.DataFrame) -> pd.DataFrame:
     """Discover all modifications in the PSMs.
 
     Parameters
@@ -161,7 +180,7 @@ def discover_modifications(psm_df: pd.DataFrame) -> pd.DataFrame:
     """
 
     modifications = (
-        psm_df["modified_sequence"].apply(match_modified_sequence).explode().unique()
+        psm_df["modified_sequence"].apply(_match_modified_sequence).explode().unique()
     )
     modifications = modifications[~pd.isnull(modifications)]
     return pd.DataFrame(
@@ -170,15 +189,14 @@ def discover_modifications(psm_df: pd.DataFrame) -> pd.DataFrame:
     )
 
 
-def match_modified_sequence(
+def _match_modified_sequence(
     sequence: str,
 ) -> typing.List[typing.Tuple[str, str, bool, bool, float]]:
     """Get all matches with the amino acid location.
-    Not able to resolve C-term modifications.
 
     P[-100.0]EPTIDE -> [('[-100.0]', 'P', False, False, -100.0)]
-    [-100.0]PEPTIDE -> [('[-100.0]', '', True, False, -100.0)]
-    PEPTIDE[-100.0] -> [('[-100.0]', 'E', False, True, -100.0)]
+    [-100.0]-PEPTIDE -> [('[-100.0]', '', True, False, -100.0)]
+    PEPTIDE-[-100.0] -> [('[-100.0]', 'E', False, True, -100.0)]
 
     Parameters
     ----------
@@ -195,6 +213,8 @@ def match_modified_sequence(
     """
 
     matches = []
+    # Matches the square bracket modification pattern from modified sequences
+    # [-100.0]-PEPTIDE -> [('[-100.0]', '', True, False, -100.0)]
     for m in re.finditer(r"\[(\+|-)(\d+\.\d+)\]", sequence):
         previous_char = sequence[m.start() - 1] if m.start() > 0 else ""
         next_char = sequence[m.end()] if m.end() < len(sequence) else ""
@@ -211,11 +231,9 @@ def match_modified_sequence(
     return matches
 
 
-def lookup_modification(
+def _lookup_modification(
     mass_observed: float,
     previous_aa: str,
-    is_nterm: bool,
-    is_cterm: bool,
     mod_annotated_df: pd.DataFrame,
     ppm_tolerance: int = 10,
 ) -> str:
@@ -230,12 +248,6 @@ def lookup_modification(
 
     previous_aa : str
         The previous amino acid.
-
-    is_nterm : bool
-        Whether the modification is N-terminal.
-
-    is_cterm : bool
-        Whether the modification is C-terminal.
 
     mod_annotated_df : pd.DataFrame
         The annotated modification dataframe.
@@ -269,15 +281,20 @@ def lookup_modification(
         )
         return None
 
+    if len(filtered_mod_df) > 1:
+        logging.warning(
+            f"Multiple modifications found for mass {mass_observed} at position {previous_aa}, will use the one with the lowest localizer rank. Please use the custom translation df to resolve this."
+        )
+
     matched_mod = filtered_mod_df.sort_values(by=["unimod_id", "localizer_rank"]).iloc[
         0
     ]
     return matched_mod.name
 
 
-def translate_modifications(
+def _translate_modifications(
     sequence: str, mod_translation_df: pd.DataFrame
-) -> typing.Tuple[str, str]:
+) -> typing.Tuple[typing.Optional[str], typing.Optional[str]]:
     """Translate modifications in the sequence to alphabase style modifications.
 
     Parameters
@@ -348,9 +365,9 @@ def translate_modifications(
             if len(matched_mod) == 0:
                 return None, None
 
-            mod_tag_len = m.end() - m.start()
             matched_mod_name = matched_mod.iloc[0]["matched_mod_name"]
             mod_site = str(m.start() - accumulated_non_sequence_chars)
+            mod_tag_len = m.end() - m.start()
 
         accumulated_non_sequence_chars += mod_tag_len
         mod_sites.append(mod_site)
@@ -359,7 +376,7 @@ def translate_modifications(
     return ";".join(mod_sites), ";".join(mod_names)
 
 
-def apply_translate_modifications(
+def _apply_translate_modifications(
     df: pd.DataFrame, mod_translation_df: pd.DataFrame
 ) -> pd.DataFrame:
     """Apply the translation of modifications to the PSMs.
@@ -383,7 +400,7 @@ def apply_translate_modifications(
 
     df["mod_sites"], df["mods"] = zip(
         *df["modified_sequence"].apply(
-            lambda x: translate_modifications(x, mod_translation_df)
+            lambda x: _translate_modifications(x, mod_translation_df)
         )
     )
     return df
@@ -411,7 +428,7 @@ def _batchify_df(df: pd.DataFrame, mp_batch_size: int) -> typing.Generator:
         yield df.iloc[i : i + mp_batch_size, :]
 
 
-def apply_translate_modifications_mp(
+def _apply_translate_modifications_mp(
     df: pd.DataFrame,
     mod_translation_df: pd.DataFrame,
     mp_batch_size: int = 50000,
@@ -440,7 +457,7 @@ def apply_translate_modifications_mp(
     with mp.get_context("spawn").Pool(mp_process_num) as p:
         processing = p.imap(
             partial(
-                apply_translate_modifications, mod_translation_df=mod_translation_df
+                _apply_translate_modifications, mod_translation_df=mod_translation_df
             ),
             _batchify_df(df, mp_batch_size),
         )
@@ -454,7 +471,7 @@ def apply_translate_modifications_mp(
     return pd.concat(df_list, ignore_index=True)
 
 
-def get_annotated_mod_df() -> pd.DataFrame:
+def _get_annotated_mod_df() -> pd.DataFrame:
     """Annotates the modification dataframe for annotation of sage output.
     Due to the modified sequence based notation,
     C-Terminal and sidechain modifications on the last AA could be confused.
@@ -484,17 +501,17 @@ def get_annotated_mod_df() -> pd.DataFrame:
     ]
 
 
-def sage_spec_idx_from_scannr(scannr: str) -> int:
-    """Extract the spectrum index from the scannr field in Sage output.
+def _sage_spec_idx_from_scan_nr(scan_nr: str) -> int:
+    """Extract the spectrum index from the scan_nr field in Sage output.
 
     Parameters
     ----------
 
-    scannr : str
-        The scannr field in Sage output.
+    scan_nr : str
+        The scan_nr field in Sage output.
 
     """
-    return int(scannr.split("=")[-1])
+    return int(scan_nr.split("=")[-1])
 
 
 class SageReaderBase(PSMReaderBase):
@@ -532,7 +549,9 @@ class SageReaderBase(PSMReaderBase):
         raise NotImplementedError
 
     def _transform_table(self, origin_df):
-        self.psm_df["spec_idx"] = self.psm_df["scannr"].apply(sage_spec_idx_from_scannr)
+        self.psm_df["spec_idx"] = self.psm_df["scannr"].apply(
+            _sage_spec_idx_from_scan_nr
+        )
         self.psm_df.drop(columns=["scannr"], inplace=True)
 
     def _translate_decoy(self, origin_df):
