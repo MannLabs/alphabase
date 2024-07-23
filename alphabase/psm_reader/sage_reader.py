@@ -106,6 +106,26 @@ class SageModificationTranslation:
     def _annotate_from_custom_translation(
         self, discovered_modifications_df: pd.DataFrame, translation_df: pd.DataFrame
     ) -> typing.Tuple[pd.DataFrame, pd.DataFrame]:
+        """Annotate modifications from custom translation df, if provided.
+        Discovered modifications are first matched using the custom translation dataframe.
+        If no match is found, the modifications are returned for matching using UniMod.
+
+        Parameters
+        ----------
+
+        discovered_modifications_df : pd.DataFrame
+            The discovered modifications dataframe.
+
+        translation_df : pd.DataFrame
+            The translation dataframe.
+
+        Returns
+        -------
+
+        typing.Tuple[pd.DataFrame, pd.DataFrame]
+            The updated discovered modifications dataframe and translation dataframe.
+
+        """
         if self.custom_translation_df is not None:
             discovered_modifications_df = discovered_modifications_df.merge(
                 self.custom_translation_df, on="modification", how="left"
@@ -134,6 +154,23 @@ class SageModificationTranslation:
     def _annotate_from_unimod(
         self, discovered_modifications_df: pd.DataFrame, translation_df: pd.DataFrame
     ) -> pd.DataFrame:
+        """Annotate all remaining modifications from UniMod.
+        UniMod modification are used from the global MOD_DF.
+
+        Parameters
+        ----------
+        discovered_modifications_df : pd.DataFrame
+            The discovered modifications dataframe.
+
+        translation_df : pd.DataFrame
+            The translation dataframe.
+
+        Returns
+        -------
+        pd.DataFrame
+            The updated translation dataframe.
+        """
+
         annotated_df = _get_annotated_mod_df()
         discovered_modifications_df["matched_mod_name"] = (
             discovered_modifications_df.apply(
