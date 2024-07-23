@@ -185,7 +185,7 @@ class PSMReaderBase:
             ```
             add_modification_mapping({
             'Dimethyl@K': ['K(Dimethyl)'], # list
-            'Dimethyl@Any N-term': '_(Dimethyl)', # str
+            'Dimethyl@Any_N-term': '_(Dimethyl)', # str
             })
             ```
         """
@@ -240,9 +240,11 @@ class PSMReaderBase:
         for this_mod, other_mod in self.modification_mapping.items():
             if isinstance(other_mod, (list, tuple)):
                 for _mod in other_mod:
-                    if _mod in self.rev_mod_mapping:
-                        if this_mod.endswith("Protein N-term"):
-                            continue
+                    if _mod in self.rev_mod_mapping and this_mod.endswith(
+                        "Protein_N-term"
+                    ):
+                        continue
+
                     self.rev_mod_mapping[_mod] = this_mod
             else:
                 self.rev_mod_mapping[other_mod] = this_mod
@@ -344,7 +346,7 @@ class PSMReaderBase:
             self.norm_rt()
         if "raw_name" not in self.psm_df.columns:
             return
-        for raw_name, df_group in self.psm_df.groupby("raw_name"):
+        for _, df_group in self.psm_df.groupby("raw_name"):
             self.psm_df.loc[df_group.index, "rt_norm"] = (
                 df_group.rt_norm / df_group.rt_norm.max()
             )
@@ -510,19 +512,21 @@ class PSMReaderBase:
 
     def filter_psm_by_modifications(
         self,
-        include_mod_set=set(
-            [
-                "Oxidation@M",
-                "Phospho@S",
-                "Phospho@T",
-                "Phospho@Y",
-                "Acetyl@Protein N-term",
-            ]
-        ),
+        include_mod_set=None,
     ):
         """
         Only keeps peptides with modifications in `include_mod_list`.
         """
+        if include_mod_set is None:
+            include_mod_set = set(
+                [
+                    "Oxidation@M",
+                    "Phospho@S",
+                    "Phospho@T",
+                    "Phospho@Y",
+                    "Acetyl@Protein_N-term",
+                ]
+            )
         self._psm_df.mods = self._psm_df.mods.apply(
             keep_modifications, mod_set=include_mod_set
         )

@@ -43,7 +43,7 @@ def read_fasta_file(fasta_filename: str = ""):
         protein information,
         {protein_id:str, full_name:str, gene_name:str, description:str, sequence:str}
     """
-    with open(fasta_filename, "rt", encoding="utf-8") as handle:
+    with open(fasta_filename, encoding="utf-8") as handle:
         iterator = SeqIO.parse(handle, "fasta")
         while iterator:
             try:
@@ -429,8 +429,8 @@ def add_single_peptide_labeling(
     nterm_label_mod: str,
     cterm_label_mod: str,
 ):
-    add_nterm_label = True if nterm_label_mod else False
-    add_cterm_label = True if cterm_label_mod else False
+    add_nterm_label = bool(nterm_label_mod)
+    add_cterm_label = bool(cterm_label_mod)
     if mod_sites:
         _sites = mod_sites.split(";")
         if "0" in _sites:
@@ -465,9 +465,9 @@ def parse_labels(labels: list):
         if len(aa) == 1:
             label_aas += aa
             label_mod_dict[aa] = label
-        elif aa == "Any N-term" or aa == "Any_N-term":
+        elif aa == "Any_N-term":
             nterm_label_mod = label
-        elif aa == "Any C-term" or aa == "Any_C-term":
+        elif aa == "Any_C-term":
             cterm_label_mod = label
     return label_aas, label_mod_dict, nterm_label_mod, cterm_label_mod
 
@@ -478,10 +478,7 @@ def create_labeling_peptide_df(
     if len(peptide_df) == 0:
         return peptide_df
 
-    if inplace:
-        df = peptide_df
-    else:
-        df = peptide_df.copy()
+    df = peptide_df if inplace else peptide_df.copy()
 
     (label_aas, label_mod_dict, nterm_label_mod, cterm_label_mod) = parse_labels(labels)
 
@@ -812,13 +809,13 @@ class SpecLibFasta(SpecLibBase):
                     term_dict[site] = term_mod
 
             site, term = parse_term_mod(term_mod)
-            if term == "Any N-term" or term == "Any_N-term":
+            if term == "Any_N-term":
                 _set_dict(pep_nterm, site, term_mod, allow_conflicts)
-            elif term == "Protein N-term" or term == "Protein_N-term":
+            elif term == "Protein_N-term":
                 _set_dict(prot_nterm, site, term_mod, allow_conflicts)
-            elif term == "Any C-term" or term == "Any_C-term":
+            elif term == "Any_C-term":
                 _set_dict(pep_cterm, site, term_mod, allow_conflicts)
-            elif term == "Protein C-term" or term == "Protein_C-term":
+            elif term == "Protein_C-term":
                 _set_dict(prot_cterm, site, term_mod, allow_conflicts)
 
         # for mod in self.fix_mods:

@@ -78,11 +78,10 @@ def _get_file_location(abs_file_path: str, overwrite=False) -> str:
         The file path if it is valid.
     """
     # check overwrite status and existence of file
-    if not overwrite:
-        if os.path.exists(abs_file_path):
-            raise ValueError(
-                "The file already exists. Set overwrite to True to overwrite the file or choose a different name."
-            )
+    if not overwrite and os.path.exists(abs_file_path):
+        raise ValueError(
+            "The file already exists. Set overwrite to True to overwrite the file or choose a different name."
+        )
 
     # ensure that the filename conforms to the naming convention
     if not os.path.basename.endswith(".hdf"):

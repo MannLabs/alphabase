@@ -1,5 +1,7 @@
 # Changelog
 
+Note: This changelog is deprecated and will no longer be updated. Please refer to the Release changelogs on github.
+
 Follow the changelog format from https://keepachangelog.com/en/1.0.0/.
 
 ## 1.1.0 - 2023.xx.xx
@@ -10,7 +12,7 @@ Follow the changelog format from https://keepachangelog.com/en/1.0.0/.
 
 ### Changed
 
-- `mod@Any N-term` and `mod@Any_N-term` are both supported, `Any_N-term` is prefered as there are no spaces and hence better for command line tools. The same for `mod@Protein N-term`, `mod@Any C-term`, and `mod@Protein C-term`.
+- `mod@Any_N-term` are both supported, `Any_N-term` is prefered as there are no spaces and hence better for command line tools. The same for `mod@Protein_N-term`, `mod@Any_C-term`, and `mod@Protein_C-term`.
 - Enable customizing dtypes of peak mz and intensty values.
 - `SWATHLibraryReader` to `LibraryBaseReader` in `alphabase.spectral_library.reader`.
 - New `LibraryReaderBase._get_fragment_intensity` implementation which is called at the end of the parsing process in `PSMReaderBase._post_process`. This allows it to operate only on the translated column names. By default, all non-fragment columns will be grouped and part of the final output.

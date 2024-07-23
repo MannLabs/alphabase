@@ -72,17 +72,15 @@ class Column:
                     f"Validation failed: Column {self.name} of type {_get_type_name(df[self.name].dtype)} cannot be cast to {_get_type_name(self.type)}"
                 )
 
-        if not self.allow_NaN:
-            if df[self.name].isna().any():
-                raise ValueError(
-                    f"Validation failed: Column {self.name} contains NaN values"
-                )
+        if not self.allow_NaN and df[self.name].isna().any():
+            raise ValueError(
+                f"Validation failed: Column {self.name} contains NaN values"
+            )
 
-        if not self.allow_inf:
-            if not np.isfinite(df[self.name]).all():
-                raise ValueError(
-                    f"Validation failed: Column {self.name} contains inf values"
-                )
+        if not self.allow_inf and not np.isfinite(df[self.name]).all():
+            raise ValueError(
+                f"Validation failed: Column {self.name} contains inf values"
+            )
 
 
 class Optional(Column):

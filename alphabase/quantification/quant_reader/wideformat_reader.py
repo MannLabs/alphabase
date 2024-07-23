@@ -12,7 +12,7 @@ def reformat_and_write_wideformat_table(peptides_tsv, outfile_name, config_dict)
     input_df = table_reformatter.merge_protein_cols_and_config_dict(
         input_df, config_dict
     )
-    if "quant_pre_or_suffix" in config_dict.keys():
+    if "quant_pre_or_suffix" in config_dict:
         quant_pre_or_suffix = config_dict.get("quant_pre_or_suffix")
         headers = ["protein", "quant_id"] + list(
             filter(
