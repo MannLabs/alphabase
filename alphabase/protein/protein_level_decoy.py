@@ -71,6 +71,8 @@ class ProteinReverseDecoy(SpecLibDecoy):
         )
 
 
-# remove "protein_reverse" decoy due to conflicting with DecoyGenerator
+# remove "protein_reverse" decoy due to conflicting with DecoyGenerator,
+# as DecoyGenerator only works for peptide-level, but ProteinReverseDecoy
+# is protein-level.
 # def register_decoy():
 #     decoy_lib_provider.register("protein_reverse", ProteinReverseDecoy)
