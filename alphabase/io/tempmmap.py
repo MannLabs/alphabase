@@ -163,10 +163,16 @@ def array(shape: tuple, dtype: np.dtype, tmp_dir_abs_path: str = None) -> np.nda
         TEMP_DIR_NAME, f"temp_mmap_{np.random.randint(2**63, dtype=np.int64)}.hdf"
     )
 
-    with h5py.File(temp_file_name, "w") as hdf_file:
-        array = hdf_file.create_dataset("array", shape=shape, dtype=dtype)
-        array[0] = 0
-        offset = array.id.get_offset()
+    if isinstance(dtype, np.dtypes.ObjectDType):
+        with h5py.File(temp_file_name, "w") as hdf_file:
+            array = hdf_file.create_dataset("array", shape=shape, dtype=dtype)
+            array[0] = np.string_("")
+            offset = array.id.get_offset()
+    else:
+        with h5py.File(temp_file_name, "w") as hdf_file:
+            array = hdf_file.create_dataset("array", shape=shape, dtype=dtype)
+            array[0] = 0
+            offset = array.id.get_offset()
 
     with open(temp_file_name, "rb+") as raw_hdf_file:
         mmap_obj = mmap.mmap(raw_hdf_file.fileno(), 0, access=mmap.ACCESS_WRITE)
@@ -223,10 +229,15 @@ def create_empty_mmap(
     else:
         temp_file_name = _get_file_location(file_path, overwrite=False)
 
-    with h5py.File(temp_file_name, "w") as hdf_file:
-        array = hdf_file.create_dataset("array", shape=shape, dtype=dtype)
-        array[0] = 0
-
+    if isinstance(dtype, np.dtypes.ObjectDType):
+        with h5py.File(temp_file_name, "w") as hdf_file:
+            array = hdf_file.create_dataset("array", shape=shape, dtype=dtype)
+            array[0] = np.string_("")
+    else:
+        with h5py.File(temp_file_name, "w") as hdf_file:
+            array = hdf_file.create_dataset("array", shape=shape, dtype=dtype)
+            array[0] = 0
+            
     return temp_file_name
 
 
