@@ -471,9 +471,9 @@ class HDF_File(HDF_Group):
 
         Args:
             file_name (str): file path.
-            read_only (bool, optional): If hdf is read-only. Mutually exclusive with `delete_existing`. Defaults to True.
+            read_only (bool, optional): If hdf is read-only. Mutually exclusive with `delete_existing` and `truncate`. Defaults to True.
             truncate (bool, optional): If existing groups and datasets can be
-                truncated (i.e. are overwitten). Defaults to False.
+                truncated (i.e. are overwitten). Mutually exclusive with `read_only`. Defaults to False.
             delete_existing (bool, optional): If the file already exists,
                 delete it completely and create a new one. Mutually exclusive with `read_only`. Defaults to False.
 
@@ -498,15 +498,15 @@ class HDF_File(HDF_Group):
             >>> hdf_file.dfs.df1.data_from
             "colleagues"
         """
-        if delete_existing and read_only:
+        if read_only and (delete_existing or truncate):
             raise ValueError(
-                "Parameters 'delete_existing' and 'read_only' are mutually exclusive."
+                "Parameters 'delete_existing'/'truncate' are mutually exclusive with 'read_only'."
             )
 
-        if delete_existing:
-            mode = "w"
-        elif read_only:
+        if read_only:
             mode = "r"
+        elif delete_existing:
+            mode = "w"
         else:
             mode = "a"
 
