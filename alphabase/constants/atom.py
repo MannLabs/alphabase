@@ -6,6 +6,7 @@ from collections import defaultdict
 import numba
 import numpy as np
 from rdkit import Chem
+from rdkit.Chem import rdMolDescriptors
 
 from alphabase.constants._const import CONST_FILE_FOLDER, common_const_dict
 from alphabase.yaml_utils import load_yaml
@@ -213,7 +214,7 @@ class ChemicalCompositonFormula:
     def from_rdkit_mol(cls, mol: Chem.Mol):
         if not mol:
             raise ValueError("Invalid RDKit molecule")
-        formula = Chem.rdMolDescriptors.CalcMolFormula(
+        formula = rdMolDescriptors.CalcMolFormula(
             mol, separateIsotopes=True, abbreviateHIsotopes=False
         )
         formula = formula.replace("[1H]", "H")
