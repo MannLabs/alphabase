@@ -10,4 +10,4 @@ python -m pytest --nbmake $(echo $INCLUDED_NBS)
 INCLUDED_NBS=$(find ../nbs_tests -name "*.ipynb")
 python -m pytest --nbmake $(echo $INCLUDED_NBS)
 
-python -m pytest test_smiles.py
+python -m pytest

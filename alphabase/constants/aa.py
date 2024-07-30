@@ -11,12 +11,14 @@ from alphabase.constants.atom import (
     parse_formula,
     reset_elements,
 )
-from alphabase.yaml_utils import load_yaml
 
 # We use all 128 ASCII code to represent amino acids for flexible extensions in the future.
 # The amino acid masses are stored in 128-lengh array :py:data:`AA_ASCII_MASS`.
 # If an ASCII code is not in `AA_Formula`, the mass will be set as a large value to disable MS search.
-AA_Formula: dict = load_yaml(os.path.join(CONST_FILE_FOLDER, "amino_acid.yaml"))
+AA_Formula: pd.DataFrame = pd.read_csv(
+    os.path.join(CONST_FILE_FOLDER, "amino_acid.tsv"), sep="\t", index_col=0
+)
+
 #: AA mass array with ASCII code, mass of 'A' is AA_ASCII_MASS[ord('A')]
 AA_ASCII_MASS: np.ndarray = np.ones(128) * 1e8
 
@@ -28,20 +30,23 @@ AA_Composition: dict = {}
 
 
 def replace_atoms(atom_replace_dict: typing.Dict):
-    for aa, formula in list(AA_Formula.items()):
+    for aa, row in AA_Formula.iterrows():
+        formula = row["formula"]
         atom_comp = dict(parse_formula(formula))
         for atom_from, atom_to in atom_replace_dict.items():
             if atom_from in atom_comp:
                 atom_comp[atom_to] = atom_comp[atom_from]
                 del atom_comp[atom_from]
-        AA_Formula[aa] = "".join([f"{atom}({n})" for atom, n in atom_comp.items()])
+        AA_Formula.loc[aa, "formula"] = "".join(
+            [f"{atom}({n})" for atom, n in atom_comp.items()]
+        )
 
 
 def reset_AA_mass() -> np.ndarray:
     """AA mass in np.array with shape (128,)"""
     global AA_ASCII_MASS
-    for aa, chem in AA_Formula.items():
-        AA_ASCII_MASS[ord(aa)] = calc_mass_from_formula(chem)
+    for aa, row in AA_Formula.iterrows():
+        AA_ASCII_MASS[ord(aa)] = calc_mass_from_formula(row["formula"])
     return AA_ASCII_MASS
 
 
@@ -53,13 +58,11 @@ def reset_AA_df():
     AA_DF = pd.DataFrame()
     AA_DF["aa"] = [chr(aa) for aa in range(len(AA_ASCII_MASS))]
     AA_DF["formula"] = [""] * len(AA_ASCII_MASS)
-    aa_idxes = []
-    formulas = []
-    for aa, formula in AA_Formula.items():
-        aa_idxes.append(ord(aa))
-        formulas.append(formula)
-    AA_DF.loc[aa_idxes, "formula"] = formulas
+    AA_DF["smiles"] = [""] * len(AA_ASCII_MASS)
     AA_DF["mass"] = AA_ASCII_MASS
+    for aa, row in AA_Formula.iterrows():
+        AA_DF.loc[ord(aa), "formula"] = row["formula"]
+        AA_DF.loc[ord(aa), "smiles"] = row["smiles"]
     return AA_DF
 
 
@@ -69,8 +72,8 @@ reset_AA_df()
 def reset_AA_Composition():
     global AA_Composition
     AA_Composition = {}
-    for aa, formula, _mass in AA_DF.values:
-        AA_Composition[aa] = dict(parse_formula(formula))
+    for aa, row in AA_Formula.iterrows():
+        AA_Composition[aa] = dict(parse_formula(row["formula"]))
     return AA_Composition
 
 
@@ -85,12 +88,14 @@ def reset_AA_atoms(atom_replace_dict: typing.Dict = {}):
     reset_AA_Composition()
 
 
-def update_an_AA(aa: str, formula: str):
+def update_an_AA(aa: str, formula: str, smiles: str = ""):
     aa_idx = ord(aa)
+    AA_Formula.loc[aa, "formula"] = formula
+    AA_Formula.loc[aa, "smiles"] = smiles
     AA_DF.loc[aa_idx, "formula"] = formula
+    AA_DF.loc[aa_idx, "smiles"] = smiles
     AA_ASCII_MASS[aa_idx] = calc_mass_from_formula(formula)
     AA_DF.loc[aa_idx, "mass"] = AA_ASCII_MASS[aa_idx]
-    AA_Formula[aa] = formula
     AA_Composition[aa] = dict(parse_formula(formula))
 
 

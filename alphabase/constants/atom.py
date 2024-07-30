@@ -1,8 +1,11 @@
 import os
+import re
 import typing
+from collections import defaultdict
 
 import numba
 import numpy as np
+from rdkit import Chem
 
 from alphabase.constants._const import CONST_FILE_FOLDER, common_const_dict
 from alphabase.yaml_utils import load_yaml
@@ -200,3 +203,77 @@ def calc_mass_from_formula(formula: str):
         mass of the formula
     """
     return np.sum([CHEM_MONO_MASS[elem] * n for elem, n in parse_formula(formula)])
+
+
+class ChemicalCompositonFormula:
+    def __init__(self, formula):
+        self.elements = self._parse_formula(formula)
+
+    @classmethod
+    def from_rdkit_mol(cls, mol: Chem.Mol):
+        if not mol:
+            raise ValueError("Invalid RDKit molecule")
+        formula = Chem.rdMolDescriptors.CalcMolFormula(
+            mol, separateIsotopes=True, abbreviateHIsotopes=False
+        )
+        formula = formula.replace("[1H]", "H")
+        return cls._from_rdkit_formula(formula)
+
+    @classmethod
+    def _from_rdkit_formula(cls, formula):
+        instance = cls.__new__(cls)
+        instance.elements = instance._parse_rdkit_formula(formula)
+        return instance
+
+    def _parse_formula(self, formula):
+        pattern = r"(\d+)?([A-Z][a-z]*)(?:\(([-]?\d+)\))?"
+        matches = re.findall(pattern, formula)
+        element_counts = defaultdict(int)
+
+        for isotope, element, count in matches:
+            if isotope:
+                element = f"{isotope}{element}"
+            count = int(count) if count else 1
+            element_counts[element] += count
+
+        return element_counts
+
+    def _parse_rdkit_formula(self, formula):
+        pattern = r"(\[(\d+)([A-Z][a-z]*)\]|([A-Z][a-z]*))(\d*)"
+        matches = re.findall(pattern, formula)
+        element_counts = defaultdict(int)
+
+        for match in matches:
+            if match[1]:  # Isotope
+                element = f"{match[1]}{match[2]}"
+                count = int(match[4]) if match[4] else 1
+            else:  # Regular element
+                element = match[3]
+                count = int(match[4]) if match[4] else 1
+            element_counts[element] += count
+
+        return element_counts
+
+    def __str__(self):
+        return "".join(
+            f"{element}({count})"
+            for element, count in sorted(self.elements.items())
+            if count != 0
+        )
+
+    def __repr__(self):
+        return f"ChemicalCompositonFormula('{self.__str__()}')"
+
+    def __add__(self, other):
+        result = ChemicalCompositonFormula("")
+        result.elements = defaultdict(int)
+        for element in set(self.elements.keys()) | set(other.elements.keys()):
+            result.elements[element] = self.elements[element] + other.elements[element]
+        return result
+
+    def __sub__(self, other):
+        result = ChemicalCompositonFormula("")
+        result.elements = defaultdict(int)
+        for element in set(self.elements.keys()) | set(other.elements.keys()):
+            result.elements[element] = self.elements[element] - other.elements[element]
+        return result

@@ -1,10 +1,14 @@
+from collections import defaultdict
+
 import pytest
 from rdkit import Chem
+
+from alphabase.constants.atom import ChemicalCompositonFormula
 from alphabase.smiles.smiles import (
-    modify_amino_acid,
     aa_smiles,
-    n_term_modifications,
     c_term_modifications,
+    modify_amino_acid,
+    n_term_modifications,
     ptm_dict,
 )
 
@@ -28,7 +32,7 @@ def test_modify_amino_acid_no_modification(alanine_smiles):
 
 
 def test_modify_amino_acid_n_term_modification(alanine_smiles):
-    result = modify_amino_acid(alanine_smiles, n_term_mod="Acetyl")
+    result = modify_amino_acid(alanine_smiles, n_term_mod="Acetyl@Any_N-term")
     expected = "CC(=O)N[C@@H](C)C(=O)O"
     assert Chem.MolToSmiles(Chem.MolFromSmiles(result)) == Chem.MolToSmiles(
         Chem.MolFromSmiles(expected)
@@ -36,7 +40,7 @@ def test_modify_amino_acid_n_term_modification(alanine_smiles):
 
 
 def test_modify_amino_acid_c_term_modification(alanine_smiles):
-    result = modify_amino_acid(alanine_smiles, c_term_mod="Methyl")
+    result = modify_amino_acid(alanine_smiles, c_term_mod="Methyl@Any_C-term")
     expected = "N[C@@H](C)C(=O)OC"
     assert Chem.MolToSmiles(Chem.MolFromSmiles(result)) == Chem.MolToSmiles(
         Chem.MolFromSmiles(expected)
@@ -44,7 +48,9 @@ def test_modify_amino_acid_c_term_modification(alanine_smiles):
 
 
 def test_modify_amino_acid_both_modifications(alanine_smiles):
-    result = modify_amino_acid(alanine_smiles, n_term_mod="Acetyl", c_term_mod="Methyl")
+    result = modify_amino_acid(
+        alanine_smiles, n_term_mod="Acetyl@Any_N-term", c_term_mod="Methyl@Any_C-term"
+    )
     expected = "CC(=O)N[C@@H](C)C(=O)OC"
     assert Chem.MolToSmiles(Chem.MolFromSmiles(result)) == Chem.MolToSmiles(
         Chem.MolFromSmiles(expected)
@@ -62,7 +68,7 @@ def test_modify_amino_acid_with_ptm(lysine_smiles):
 
 def test_modify_amino_acid_with_ptm_and_n_term_mod(lysine_smiles):
     lysine_with_ptm = ptm_dict["Acetyl@K"]
-    result = modify_amino_acid(lysine_with_ptm, n_term_mod="mTRAQ")
+    result = modify_amino_acid(lysine_with_ptm, n_term_mod="mTRAQ@Any_N-term")
     expected = "CC(=O)NCCCC[C@H](NC(=O)CN1CCN(C)CC1)C(=O)O"
     assert Chem.MolToSmiles(Chem.MolFromSmiles(result)) == Chem.MolToSmiles(
         Chem.MolFromSmiles(expected)
@@ -97,7 +103,7 @@ def test_invalid_amino_acid_smiles():
 
 
 def test_dimethyl_n_term_modification(alanine_smiles):
-    result = modify_amino_acid(alanine_smiles, n_term_mod="Dimethyl")
+    result = modify_amino_acid(alanine_smiles, n_term_mod="Dimethyl@Any_N-term")
     expected = "CN(C)[C@@H](C)C(=O)O"
     assert Chem.MolToSmiles(Chem.MolFromSmiles(result)) == Chem.MolToSmiles(
         Chem.MolFromSmiles(expected)
@@ -114,3 +120,78 @@ def test_all_amino_acids(aa, smiles):
 def test_all_ptms(ptm, smiles):
     result = modify_amino_acid(smiles)
     assert Chem.MolFromSmiles(result) is not None
+
+
+@pytest.fixture
+def water_formula():
+    return ChemicalCompositonFormula("H(2)O(1)")
+
+
+@pytest.fixture
+def methane_formula():
+    return ChemicalCompositonFormula("C(1)H(4)")
+
+
+@pytest.fixture
+def ethanol_rdkit_mol():
+    return Chem.MolFromSmiles("CCO")
+
+
+def test_init():
+    formula = ChemicalCompositonFormula("C(6)H(12)O(6)")
+    expected = defaultdict(int, {"C": 6, "H": 12, "O": 6})
+    assert formula.elements == expected
+
+
+def test_init_with_isotopes():
+    formula = ChemicalCompositonFormula("13C(1)C(5)H(12)O(6)")
+    expected = defaultdict(int, {"13C": 1, "C": 5, "H": 12, "O": 6})
+    assert formula.elements == expected
+
+
+def test_from_rdkit_mol(ethanol_rdkit_mol):
+    formula = ChemicalCompositonFormula.from_rdkit_mol(ethanol_rdkit_mol)
+    expected = defaultdict(int, {"C": 2, "H": 6, "O": 1})
+    assert formula.elements == expected
+
+
+def test_str_representation(water_formula):
+    assert str(water_formula) == "H(2)O(1)"
+
+
+def test_repr_representation(water_formula):
+    assert repr(water_formula) == "ChemicalCompositonFormula('H(2)O(1)')"
+
+
+def test_addition(water_formula, methane_formula):
+    result = water_formula + methane_formula
+    expected = ChemicalCompositonFormula("C(1)H(6)O(1)")
+    assert result.elements == expected.elements
+
+
+def test_subtraction(water_formula, methane_formula):
+    result = methane_formula - water_formula
+    expected = ChemicalCompositonFormula("C(1)H(2)O(-1)")
+    assert result.elements == expected.elements
+
+
+def test_parse_formula_with_parentheses():
+    formula = ChemicalCompositonFormula("C(6)H(12)O(6)")
+    expected = defaultdict(int, {"C": 6, "H": 12, "O": 6})
+    assert formula.elements == expected
+
+
+def test_parse_rdkit_formula():
+    formula = ChemicalCompositonFormula._from_rdkit_formula("[13C]CH3OH")
+    expected = defaultdict(int, {"13C": 1, "C": 1, "H": 4, "O": 1})
+    assert formula.elements == expected
+
+
+def test_zero_count_elements():
+    formula = ChemicalCompositonFormula("C(1)H(0)O(2)")
+    assert str(formula) == "C(1)O(2)"
+
+
+def test_error_handling_invalid_rdkit_mol():
+    with pytest.raises(ValueError):
+        ChemicalCompositonFormula.from_rdkit_mol(None)

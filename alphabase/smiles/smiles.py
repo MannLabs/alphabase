@@ -1,22 +1,39 @@
 from typing import Optional
-import os
+
+import pandas as pd
 from rdkit import Chem
 from rdkit.Chem.rdmolops import ReplaceSubstructs, SanitizeMol
 
-from alphabase.constants._const import CONST_FILE_FOLDER
-from alphabase.yaml_utils import load_yaml
-
-SMILES_ALL: dict = load_yaml(os.path.join(CONST_FILE_FOLDER, "smiles.yaml"))
+from alphabase.constants.aa import AA_Formula
+from alphabase.constants.modification import MOD_DF
 
 N_TERM_PLACEHOLDER = "[Xe]"
 C_TERM_PLACEHOLDER = "[Rn]"
 
-aa_smiles = SMILES_ALL["aa_smiles"]
-n_term_modifications = SMILES_ALL["n_term_modifications"]
-c_term_modifications = SMILES_ALL["c_term_modifications"]
-ptm_dict = SMILES_ALL["ptm_dict"]
+MOD_DF_SMILES = MOD_DF[MOD_DF["smiles"] != ""]
 
-aa_mols = {aa: Chem.MolFromSmiles(smile) for aa, smile in aa_smiles.items()}
+aa_smiles = {
+    aa: AA_Formula.loc[aa]["smiles"]
+    for aa in AA_Formula.index
+    if not pd.isna(AA_Formula.loc[aa]["smiles"])
+}
+aa_mols = {aa: Chem.MolFromSmiles(aa_smiles[aa]) for aa in aa_smiles}
+
+n_term_modifications = {
+    name: smiles
+    for name, smiles in zip(MOD_DF_SMILES["mod_name"], MOD_DF_SMILES["smiles"])
+    if "@Protein_N-term" in name or "@Any_N-term" in name
+}
+c_term_modifications = {
+    name: smiles
+    for name, smiles in zip(MOD_DF_SMILES["mod_name"], MOD_DF_SMILES["smiles"])
+    if "@Protein_C-term" in name or "@Any_C-term" in name
+}
+ptm_dict = {
+    name: smiles
+    for name, smiles in zip(MOD_DF_SMILES["mod_name"], MOD_DF_SMILES["smiles"])
+    if name not in n_term_modifications and name not in c_term_modifications
+}
 
 
 def validate_correct_args(

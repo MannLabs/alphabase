@@ -362,12 +362,42 @@ def calc_modloss_mass(
         return _calc_modloss(mod_losses[::-1])[-3:0:-1]
 
 
-def _add_a_new_modification(
-    mod_name: str, composition: str, modloss_composition: str = ""
+def _check_mass_sanity(
+    mod_name: str,
+    composition: str,
+    smiles: str,
 ):
     """
-    Add a new modification into :data:`MOD_DF`.
+    Check if the mass of the modification is consistent with the formula.
     """
+    if not smiles or mod_name not in MOD_MASS:
+        return
+    composition_mass = calc_mass_from_formula(composition)
+    if not np.allclose(composition_mass, MOD_MASS[mod_name], atol=1e-5):
+        raise ValueError(
+            f"Modification mass of {mod_name} is inconsistent with the composition formula: {composition}, df version {MOD_DF.loc[mod_name,['composition']]}"
+            f" calculated_mass={composition_mass}, mod_mass={MOD_MASS[mod_name]}"
+        )
+
+
+def _add_a_new_modification(
+    mod_name: str,
+    composition: str,
+    modloss_composition: str = "",
+    smiles: str = "",
+):
+    """
+    Add a new modification into :data:`MOD_DF` or update SMILES if modification already exists.
+    """
+    _check_mass_sanity(mod_name, composition, smiles)
+
+    if mod_name in MOD_DF.index:
+        # If the modification already exists, only update the SMILES
+        MOD_DF.loc[mod_name, "smiles"] = smiles
+        return
+    composition_mass = calc_mass_from_formula(composition)
+    modloss_mass = calc_mass_from_formula(modloss_composition)
+
     MOD_DF.loc[
         mod_name,
         [
@@ -376,11 +406,12 @@ def _add_a_new_modification(
             "modloss_composition",
             "classification",
             "unimod_id",
+            "smiles",
         ],
-    ] = [mod_name, composition, modloss_composition, "User-added", 0]
+    ] = [mod_name, composition, modloss_composition, "User-added", 0, smiles]
     MOD_DF.loc[mod_name, ["mass", "modloss"]] = (
-        calc_mass_from_formula(composition),
-        calc_mass_from_formula(modloss_composition),
+        composition_mass,
+        modloss_mass,
     )
     if MOD_DF.loc[mod_name, "modloss"] > 0:
         MOD_DF.loc[mod_name, "modloss_importance"] = 1e10
