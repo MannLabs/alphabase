@@ -1,10 +1,11 @@
+import itertools
 import os
-import yaml
-import pandas as pd
 import os.path
 import pathlib
-import itertools
 import re
+
+import pandas as pd
+import yaml
 
 INTABLE_CONFIG = os.path.join(
     pathlib.Path(__file__).parent.absolute(),
@@ -23,7 +24,7 @@ def get_input_type_and_config_dict(input_file, input_type_to_use=None):
 
     uploaded_data_columns = set(pd.read_csv(input_file, sep=sep, nrows=1).columns)
 
-    for input_type in type2relevant_columns.keys():
+    for input_type in type2relevant_columns:
         if (input_type_to_use is not None) and (input_type != input_type_to_use):
             continue
         relevant_columns = type2relevant_columns.get(input_type)
@@ -57,14 +58,14 @@ def _get_seperator(input_file):
 
 
 def _load_config(config_yaml):
-    with open(config_yaml, "r") as stream:
+    with open(config_yaml) as stream:
         config_all = yaml.safe_load(stream)
     return config_all
 
 
 def _get_type2relevant_cols(config_all):
     type2relcols = {}
-    for type in config_all.keys():
+    for type in config_all:
         config_typedict = config_all.get(type)
         relevant_cols = get_relevant_columns_config_dict(config_typedict)
         type2relcols[type] = relevant_cols
@@ -77,7 +78,7 @@ def get_relevant_columns_config_dict(config_typedict):
     for filtconf in config_typedict.get("filters", {}).values():
         filtcols.append(filtconf.get("param"))
 
-    if "ion_hierarchy" in config_typedict.keys():
+    if "ion_hierarchy" in config_typedict:
         for headr in config_typedict.get("ion_hierarchy").values():
             ioncols = list(itertools.chain.from_iterable(headr.get("mapping").values()))
             dict_ioncols.extend(ioncols)

@@ -1,9 +1,8 @@
-import pandas as pd
 import numpy as np
-
-from alphabase.psm_reader.psm_reader import psm_reader_provider, psm_reader_yaml
+import pandas as pd
 
 from alphabase.psm_reader.maxquant_reader import MaxQuantReader
+from alphabase.psm_reader.psm_reader import psm_reader_provider, psm_reader_yaml
 
 
 class SpectronautReader(MaxQuantReader):

@@ -1,16 +1,15 @@
 import os
+from typing import List, Union
+
 import numba
 import numpy as np
 import pandas as pd
-from typing import Union, List
 
+from alphabase.constants._const import CONST_FILE_FOLDER
 from alphabase.constants.atom import (
     calc_mass_from_formula,
     parse_formula,
 )
-
-from alphabase.constants._const import CONST_FILE_FOLDER
-
 
 #: Main entry of modification infomation (DataFrame fotmat).
 MOD_DF: pd.DataFrame = pd.DataFrame()
@@ -90,14 +89,18 @@ def load_mod_df(
 ):
     global MOD_DF
     MOD_DF = pd.read_table(tsv, keep_default_na=False)
-    _df = MOD_DF[MOD_DF.mod_name.str.contains(" ", regex=False)].copy()
-    _df["mod_name"] = MOD_DF.mod_name.str.replace(" ", "_", regex=False)
-    MOD_DF = pd.concat([MOD_DF, _df], ignore_index=True).drop_duplicates("mod_name")
+
+    if any(mask := MOD_DF["mod_name"].str.contains(" ", regex=False)):
+        raise ValueError(
+            f"Modification names must not contain spaces: {MOD_DF[mask]['mod_name'].values}"
+        )
+
+    MOD_DF.drop_duplicates("mod_name", inplace=True)
     MOD_DF.fillna("", inplace=True)
-    MOD_DF["unimod_id"] = MOD_DF.unimod_id.astype(np.int32)
+    MOD_DF["unimod_id"] = MOD_DF["unimod_id"].astype(np.int32)
     MOD_DF.set_index("mod_name", drop=False, inplace=True)
-    MOD_DF["mass"] = MOD_DF.composition.apply(calc_mass_from_formula)
-    MOD_DF["modloss_original"] = MOD_DF.modloss_composition.apply(
+    MOD_DF["mass"] = MOD_DF["composition"].apply(calc_mass_from_formula)
+    MOD_DF["modloss_original"] = MOD_DF["modloss_composition"].apply(
         calc_mass_from_formula
     )
     MOD_DF["modloss"] = MOD_DF["modloss_original"]
@@ -138,9 +141,7 @@ def calc_modification_mass(
     """
     masses = np.zeros(nAA)
     for site, mod in zip(mod_sites, mod_names):
-        if site == 0:
-            masses[site] += MOD_MASS[mod]
-        elif site == -1:
+        if site == 0 or site == -1:
             masses[site] += MOD_MASS[mod]
         else:
             masses[site - 1] += MOD_MASS[mod]
@@ -178,9 +179,7 @@ def calc_mod_masses_for_same_len_seqs(
     masses = np.zeros((len(mod_names_list), nAA))
     for i, (mod_names, mod_sites) in enumerate(zip(mod_names_list, mod_sites_list)):
         for mod, site in zip(mod_names, mod_sites):
-            if site == 0:
-                masses[i, site] += MOD_MASS[mod]
-            elif site == -1:
+            if site == 0 or site == -1:
                 masses[i, site] += MOD_MASS[mod]
             else:
                 masses[i, site - 1] += MOD_MASS[mod]
@@ -281,10 +280,7 @@ def calc_modloss_mass_with_importance(
     mod_losses = np.zeros(nAA + 2)
     mod_losses[mod_sites] = [MOD_LOSS_MASS[mod] for mod in mod_names]
     _loss_importance = np.zeros(nAA + 2)
-    _loss_importance[mod_sites] = [
-        MOD_LOSS_IMPORTANCE[mod] if mod in MOD_LOSS_IMPORTANCE else 0
-        for mod in mod_names
-    ]
+    _loss_importance[mod_sites] = [MOD_LOSS_IMPORTANCE.get(mod, 0) for mod in mod_names]
 
     # Will not consider the modloss if the corresponding modloss_importance is 0
     mod_losses[_loss_importance == 0] = 0

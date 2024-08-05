@@ -1,7 +1,9 @@
 import copy
-from typing import Any
-import pandas as pd
 import multiprocessing as mp
+from typing import Any
+
+import pandas as pd
+
 from alphabase.spectral_library.base import SpecLibBase
 
 
@@ -11,7 +13,7 @@ def _batchify_series(series, mp_batch_size):
         yield series.iloc[i : i + mp_batch_size]
 
 
-class BaseDecoyGenerator(object):
+class BaseDecoyGenerator:
     """
     Base class for decoy generator.
     A class is used instead of a function to make as it needs to be pickled for multiprocessing.
@@ -32,8 +34,8 @@ class BaseDecoyGenerator(object):
 class DIANNDecoyGenerator(BaseDecoyGenerator):
     def __init__(
         self,
-        raw_AAs: str = "GAVLIFMPWSCTYHKRQENDBJOUXZ",
-        mutated_AAs: str = "LLLVVLLLLTSSSSLLNDQEVVVVVV",
+        raw_AAs: str = "GAVLIFMPWSCTYHKRQENDBJOUXZsty",
+        mutated_AAs: str = "LLLVVLLLLTSSSSLLNDQEVVVVVVtss",
     ):
         """
         DiaNN-like decoy peptide generator
@@ -43,11 +45,11 @@ class DIANNDecoyGenerator(BaseDecoyGenerator):
 
         raw_AAs : str, optional
             AAs those DiaNN decoy from.
-            Defaults to 'GAVLIFMPWSCTYHKRQENDBJOUXZ'.
+            Defaults to 'GAVLIFMPWSCTYHKRQENDBJOUXZsty'.
 
         mutated_AAs : str, optional
             AAs those DiaNN decoy to.
-            Defaults to 'LLLVVLLLLTSSSSLLNDQEVVVVVV'.
+            Defaults to 'LLLVVLLLLTSSSSLLNDQEVVVVVVtss'.
 
         """
         self.raw_AAs = raw_AAs
@@ -208,7 +210,7 @@ class SpecLibDecoy(SpecLibBase):
         )
 
 
-class SpecLibDecoyProvider(object):
+class SpecLibDecoyProvider:
     def __init__(self):
         self.decoy_dict = {}
 

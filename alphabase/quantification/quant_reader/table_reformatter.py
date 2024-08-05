@@ -1,5 +1,6 @@
-import pandas as pd
 import copy
+
+import pandas as pd
 
 
 def merge_protein_cols_and_config_dict(
@@ -24,7 +25,7 @@ def merge_protein_cols_and_config_dict(
 
     input_df = input_df.drop(columns=[x for x in protein_cols if x != "protein"])
     index_names = []
-    for hierarchy_type in ion_hierarchy.keys():
+    for hierarchy_type in ion_hierarchy:
         df_subset = input_df.copy()
         ion_hierarchy_local = ion_hierarchy.get(hierarchy_type).get("order")
         ion_headers_merged, ion_headers_grouped = get_ionname_columns(
@@ -34,13 +35,13 @@ def merge_protein_cols_and_config_dict(
             df_subset, hierarchy_type, config_dict, ion_headers_merged
         )
         headers = list(set(ion_headers_merged + quant_columns + ["protein"]))
-        if "sample_ID" in config_dict.keys():
+        if "sample_ID" in config_dict:
             headers += [config_dict.get("sample_ID")]
         df_subset = df_subset[headers].drop_duplicates()
 
         if splitcol2sep is not None:
             if (
-                quant_columns[0] in splitcol2sep.keys()
+                quant_columns[0] in splitcol2sep
             ):  # in the case that quantitative values are stored grouped in one column (e.g. msiso1,msiso2,msiso3, etc.), reformat accordingly
                 df_subset = split_extend_df(df_subset, splitcol2sep)
             ion_headers_grouped = adapt_headers_on_extended_df(
@@ -96,7 +97,7 @@ def get_quantitative_columns(input_df, hierarchy_type, config_dict, ion_headers_
         quantcolumn_candidates = [
             x for x in input_df.columns if x not in naming_columns
         ]
-        if "quant_pre_or_suffix" in config_dict.keys():
+        if "quant_pre_or_suffix" in config_dict:
             return [
                 x
                 for x in quantcolumn_candidates
@@ -146,7 +147,7 @@ def adapt_headers_on_extended_df(ion_headers_grouped, splitcol2sep):
     for vals in ion_headers_grouped_copy:
         if splitcol2sep is not None:
             for idx in range(len(vals)):
-                if vals[idx] in splitcol2sep.keys():
+                if vals[idx] in splitcol2sep:
                     vals[idx] = vals[idx] + "_idxs"
     return ion_headers_grouped_copy
 

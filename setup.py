@@ -1,15 +1,16 @@
 #!python
 
 # builtin
-import setuptools
 import re
+
+import setuptools
 
 # local
 import alphabase as package2install
 
 
 def get_long_description():
-    with open("README.md", "r") as readme_file:
+    with open("README.md") as readme_file:
         long_description = readme_file.read()
     return long_description
 
@@ -20,10 +21,7 @@ def get_requirements():
     requirement_file_names[""] = "requirements.txt"
     for extra, requirement_file_name in requirement_file_names.items():
         with open(requirement_file_name) as requirements_file:
-            if extra != "":
-                extra_stable = f"{extra}-stable"
-            else:
-                extra_stable = "stable"
+            extra_stable = f"{extra}-stable" if extra != "" else "stable"
             extra_requirements[extra_stable] = []
             extra_requirements[extra] = []
             for line in requirements_file:

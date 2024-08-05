@@ -1,7 +1,7 @@
 import pandas as pd
 
 from alphabase.protein.fasta import SpecLibFasta
-from alphabase.spectral_library.decoy import decoy_lib_provider, SpecLibDecoy
+from alphabase.spectral_library.decoy import SpecLibDecoy
 
 
 class ProteinReverseDecoy(SpecLibDecoy):
@@ -71,5 +71,8 @@ class ProteinReverseDecoy(SpecLibDecoy):
         )
 
 
-def register_decoy():
-    decoy_lib_provider.register("protein_reverse", ProteinReverseDecoy)
+# remove "protein_reverse" decoy due to conflicting with DecoyGenerator,
+# as DecoyGenerator only works for peptide-level, but ProteinReverseDecoy
+# is protein-level.
+# def register_decoy():
+#     decoy_lib_provider.register("protein_reverse", ProteinReverseDecoy)

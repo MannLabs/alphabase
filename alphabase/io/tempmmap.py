@@ -2,16 +2,17 @@
 """This module allows to create temporary mmapped arrays."""
 
 # builtin
-import os
-import logging
 import atexit
+import logging
+import mmap
+import os
+import shutil
+import tempfile
+
+import h5py
 
 # external
 import numpy as np
-import mmap
-import h5py
-import tempfile
-import shutil
 
 # TODO initialize temp_dir not on import but when it is first needed
 _TEMP_DIR = tempfile.TemporaryDirectory(prefix="temp_mmap_")
@@ -77,11 +78,10 @@ def _get_file_location(abs_file_path: str, overwrite=False) -> str:
         The file path if it is valid.
     """
     # check overwrite status and existence of file
-    if not overwrite:
-        if os.path.exists(abs_file_path):
-            raise ValueError(
-                "The file already exists. Set overwrite to True to overwrite the file or choose a different name."
-            )
+    if not overwrite and os.path.exists(abs_file_path):
+        raise ValueError(
+            "The file already exists. Set overwrite to True to overwrite the file or choose a different name."
+        )
 
     # ensure that the filename conforms to the naming convention
     if not os.path.basename.endswith(".hdf"):
@@ -160,7 +160,7 @@ def array(shape: tuple, dtype: np.dtype, tmp_dir_abs_path: str = None) -> np.nda
         _change_temp_dir_location(tmp_dir_abs_path)
 
     temp_file_name = os.path.join(
-        TEMP_DIR_NAME, f"temp_mmap_{np.random.randint(2**63)}.hdf"
+        TEMP_DIR_NAME, f"temp_mmap_{np.random.randint(2**63, dtype=np.int64)}.hdf"
     )
 
     with h5py.File(temp_file_name, "w") as hdf_file:
@@ -218,7 +218,7 @@ def create_empty_mmap(
     # if path does not exist generate a random file name in the TEMP directory
     if file_path is None:
         temp_file_name = os.path.join(
-            TEMP_DIR_NAME, f"temp_mmap_{np.random.randint(2**63)}.hdf"
+            TEMP_DIR_NAME, f"temp_mmap_{np.random.randint(2**63, dtype=np.int64)}.hdf"
         )
     else:
         temp_file_name = _get_file_location(file_path, overwrite=False)
