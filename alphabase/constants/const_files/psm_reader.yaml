@@ -174,7 +174,6 @@ spectronaut:
     - 'FullUniModPeptideName'
     - 'ModifiedPeptideSequence'
     - 'LabeledSequence'
-    - 'FullUniModPeptideName'
   column_mapping:
     'raw_name': 'ReferenceRun'
     'sequence': ['StrippedPeptide','PeptideSequence']
@@ -199,11 +198,10 @@ library_reader_base:
     - 'ModifiedSequence'
     - 'FullUniModPeptideName'
     - 'LabeledSequence'
-    - 'FullUniModPeptideName'
   column_mapping:
     'raw_name': 'ReferenceRun'
     'sequence': ['PeptideSequence', 'StrippedPeptide']
-    'modified_sequence': ['ModifiedPeptideSequence','ModifiedPeptide']
+    'modified_sequence': ['ModifiedPeptideSequence','ModifiedPeptide','FullUniModPeptideName','ModifiedSequence']
     'charge': 'PrecursorCharge'
     'rt': ['RT','iRT','Tr_recalibrated','RetentionTime','NormalizedRetentionTime']
     'ccs': 'CCS'
