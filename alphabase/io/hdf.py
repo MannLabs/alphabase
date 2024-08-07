@@ -471,11 +471,11 @@ class HDF_File(HDF_Group):
 
         Args:
             file_name (str): file path.
-            read_only (bool, optional): If hdf is read-only. Defaults to True.
+            read_only (bool, optional): If hdf is read-only. Mutually exclusive with `delete_existing` and `truncate`. Defaults to True.
             truncate (bool, optional): If existing groups and datasets can be
-                truncated (i.e. are overwitten). Defaults to False.
+                truncated (i.e. are overwitten). Mutually exclusive with `read_only`. Defaults to False.
             delete_existing (bool, optional): If the file already exists,
-                delete it completely and create a new one. Defaults to False.
+                delete it completely and create a new one. Mutually exclusive with `read_only`. Defaults to False.
 
         Examples::
             >>> # create a hdf file to write
@@ -486,7 +486,7 @@ class HDF_File(HDF_Group):
             >>> hdf_file.dfs.df1 = pd.DataFrame({'a':[1,2,3]})
             >>> # write another DataFrame dataset into the dfs
             >>> hdf_file.dfs.df2 = pd.DataFrame({'a':[3,2,1]})
-            >>> # set an property value to the dataframe
+            >>> # set a property value to the dataframe
             >>> hdf_file.dfs.df1.data_from = "colleagues"
             >>> # get a dataframe dataset from a dfs
             >>> df1 = hdf_file.dfs.df1.values
@@ -498,9 +498,21 @@ class HDF_File(HDF_Group):
             >>> hdf_file.dfs.df1.data_from
             "colleagues"
         """
-        mode = "w" if delete_existing else "a"
-        with h5py.File(file_name, mode):  # , swmr=True):
+        if read_only and (delete_existing or truncate):
+            raise ValueError(
+                "Parameters 'delete_existing'/'truncate' are mutually exclusive with 'read_only'."
+            )
+
+        if read_only:
+            mode = "r"
+        elif delete_existing:
+            mode = "w"
+        else:
+            mode = "a"
+
+        with h5py.File(file_name, mode):
             pass
+
         super().__init__(
             file_name=file_name,
             name="/",
