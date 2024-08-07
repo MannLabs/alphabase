@@ -745,7 +745,7 @@ class SpecLibFasta(SpecLibBase):
         decoy : str, optional
             Decoy type (see :meth:`alphabase.spectral_library.base.append_decoy_sequence()`)
 
-            - `protein_reverse`: Reverse on target protein sequences
+            # - `protein_reverse`: Reverse on target protein sequences
             - `pseudo_reverse`: Pseudo-reverse on target peptide sequences
             - `diann`: DiaNN-like decoy
             - None: no decoy

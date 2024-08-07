@@ -34,8 +34,8 @@ class BaseDecoyGenerator:
 class DIANNDecoyGenerator(BaseDecoyGenerator):
     def __init__(
         self,
-        raw_AAs: str = "GAVLIFMPWSCTYHKRQENDBJOUXZ",
-        mutated_AAs: str = "LLLVVLLLLTSSSSLLNDQEVVVVVV",
+        raw_AAs: str = "GAVLIFMPWSCTYHKRQENDBJOUXZsty",
+        mutated_AAs: str = "LLLVVLLLLTSSSSLLNDQEVVVVVVtss",
     ):
         """
         DiaNN-like decoy peptide generator
@@ -45,11 +45,11 @@ class DIANNDecoyGenerator(BaseDecoyGenerator):
 
         raw_AAs : str, optional
             AAs those DiaNN decoy from.
-            Defaults to 'GAVLIFMPWSCTYHKRQENDBJOUXZ'.
+            Defaults to 'GAVLIFMPWSCTYHKRQENDBJOUXZsty'.
 
         mutated_AAs : str, optional
             AAs those DiaNN decoy to.
-            Defaults to 'LLLVVLLLLTSSSSLLNDQEVVVVVV'.
+            Defaults to 'LLLVVLLLLTSSSSLLNDQEVVVVVVtss'.
 
         """
         self.raw_AAs = raw_AAs
