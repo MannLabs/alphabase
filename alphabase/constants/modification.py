@@ -369,6 +369,22 @@ def _check_mass_sanity(
 ):
     """
     Check if the mass of the modification is consistent with the formula.
+
+    Parameters
+    ----------
+    mod_name : str
+        Modification name (e.g. Mod@S)
+
+    composition : str
+        Composition formula (e.g. "H(4)O(2)"), used to calculate the mass of the modification
+
+    smiles : str
+        SMILES string of the modification, used to calculate and compare the mass of the modification
+
+    Raises
+    ------
+    ValueError
+        If the mass of the modification is inconsistent with the formula
     """
     if not smiles or mod_name not in MOD_MASS:
         return
@@ -388,6 +404,20 @@ def _add_a_new_modification(
 ):
     """
     Add a new modification into :data:`MOD_DF` or update SMILES if modification already exists.
+
+    Parameters
+    ----------
+    mod_name : str
+        Modification name (e.g. Mod@S)
+
+    composition : str
+        Composition formula (e.g. "H(4)O(2)")
+
+    modloss_composition : str
+        Composition formula of the modification loss (e.g. "H(2)O(1)")
+
+    smiles : str
+        SMILES string of the modification
     """
     _check_mass_sanity(mod_name, composition, smiles)
 
@@ -395,8 +425,6 @@ def _add_a_new_modification(
         # If the modification already exists, only update the SMILES
         MOD_DF.loc[mod_name, "smiles"] = smiles
         return
-    composition_mass = calc_mass_from_formula(composition)
-    modloss_mass = calc_mass_from_formula(modloss_composition)
 
     MOD_DF.loc[
         mod_name,
@@ -409,6 +437,8 @@ def _add_a_new_modification(
             "smiles",
         ],
     ] = [mod_name, composition, modloss_composition, "User-added", 0, smiles]
+    composition_mass = calc_mass_from_formula(composition)
+    modloss_mass = calc_mass_from_formula(modloss_composition)
     MOD_DF.loc[mod_name, ["mass", "modloss"]] = (
         composition_mass,
         modloss_mass,

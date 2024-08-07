@@ -4,13 +4,14 @@ import pytest
 from rdkit import Chem
 
 from alphabase.constants.atom import ChemicalCompositonFormula
-from alphabase.smiles.smiles import (
-    aa_smiles,
-    c_term_modifications,
-    modify_amino_acid,
-    n_term_modifications,
-    ptm_dict,
-)
+from alphabase.smiles.smiles import AminoAcidModifier
+
+aa_modifier = AminoAcidModifier()
+modify_amino_acid = aa_modifier.modify_amino_acid
+aa_smiles = aa_modifier.aa_smiles
+n_term_modifications = aa_modifier.n_term_modifications
+c_term_modifications = aa_modifier.c_term_modifications
+ptm_dict = aa_modifier.ptm_dict
 
 
 @pytest.fixture
@@ -132,11 +133,6 @@ def methane_formula():
     return ChemicalCompositonFormula("C(1)H(4)")
 
 
-@pytest.fixture
-def ethanol_rdkit_mol():
-    return Chem.MolFromSmiles("CCO")
-
-
 def test_init():
     formula = ChemicalCompositonFormula("C(6)H(12)O(6)")
     expected = defaultdict(int, {"C": 6, "H": 12, "O": 6})
@@ -149,8 +145,8 @@ def test_init_with_isotopes():
     assert formula.elements == expected
 
 
-def test_from_rdkit_mol(ethanol_rdkit_mol):
-    formula = ChemicalCompositonFormula.from_rdkit_mol(ethanol_rdkit_mol)
+def test_from_smiles():
+    formula = ChemicalCompositonFormula.from_smiles("CCO")
     expected = defaultdict(int, {"C": 2, "H": 6, "O": 1})
     assert formula.elements == expected
 
@@ -194,4 +190,4 @@ def test_zero_count_elements():
 
 def test_error_handling_invalid_rdkit_mol():
     with pytest.raises(ValueError):
-        ChemicalCompositonFormula.from_rdkit_mol(None)
+        ChemicalCompositonFormula.from_smiles("InvalidSMILES")

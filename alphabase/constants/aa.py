@@ -56,9 +56,10 @@ reset_AA_mass()
 def reset_AA_df():
     global AA_DF
     AA_DF = pd.DataFrame()
-    AA_DF["aa"] = [chr(aa) for aa in range(len(AA_ASCII_MASS))]
-    AA_DF["formula"] = [""] * len(AA_ASCII_MASS)
-    AA_DF["smiles"] = [""] * len(AA_ASCII_MASS)
+    num_rows = len(AA_ASCII_MASS)
+    AA_DF["aa"] = [chr(aa) for aa in range(num_rows)]
+    AA_DF["formula"] = [""] * num_rows
+    AA_DF["smiles"] = [""] * num_rows
     AA_DF["mass"] = AA_ASCII_MASS
     for aa, row in AA_Formula.iterrows():
         AA_DF.loc[ord(aa), "formula"] = row["formula"]
