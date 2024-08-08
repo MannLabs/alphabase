@@ -4,7 +4,7 @@ import pandas as pd
 from rdkit import Chem
 from rdkit.Chem.rdmolops import ReplaceSubstructs, SanitizeMol
 
-from alphabase.constants.aa import AA_Formula
+from alphabase.constants.aa import aa_formula
 from alphabase.constants.modification import MOD_DF
 
 
@@ -35,9 +35,9 @@ class AminoAcidModifier:
         """
         if self._aa_smiles is None:
             self._aa_smiles = {
-                aa: AA_Formula.loc[aa]["smiles"]
-                for aa in AA_Formula.index
-                if not pd.isna(AA_Formula.loc[aa]["smiles"])
+                aa: aa_formula.loc[aa]["smiles"]
+                for aa in aa_formula.index
+                if not pd.isna(aa_formula.loc[aa]["smiles"])
             }
         return self._aa_smiles
 
@@ -246,21 +246,15 @@ class AminoAcidModifier:
             mol = ReplaceSubstructs(mol, n_term_placeholder_mol, n_mod_mol)[0]
 
             if "Dimethyl" in n_term_mod:
-                mol = ReplaceSubstructs(mol, n_term_placeholder_mol, n_mod_mol)[0]
-            else:
-                mol = ReplaceSubstructs(
-                    mol,
-                    n_term_placeholder_mol,
-                    Chem.MolFromSmiles("[H]", sanitize=False),
-                )[0]
-        else:
-            mol = ReplaceSubstructs(
-                mol,
-                n_term_placeholder_mol,
-                Chem.MolFromSmiles("[H]", sanitize=False),
-                replaceAll=True,
-            )[0]
-        return mol
+                return ReplaceSubstructs(mol, n_term_placeholder_mol, n_mod_mol)[0]
+
+        # replacing all leftover N-terminal placeholders with hydrogen atoms
+        return ReplaceSubstructs(
+            mol,
+            n_term_placeholder_mol,
+            Chem.MolFromSmiles("[H]", sanitize=False),
+            replaceAll=True,
+        )[0]
 
     def _apply_c_terminal_modification(
         self, mol: Chem.Mol, c_term_placeholder_mol: Chem.Mol, c_term_mod: Optional[str]
@@ -285,9 +279,7 @@ class AminoAcidModifier:
         if c_term_mod:
             c_mod_smiles = self.c_term_modifications[c_term_mod]
             c_mod_mol = Chem.MolFromSmiles(c_mod_smiles)
-            mol = ReplaceSubstructs(mol, c_term_placeholder_mol, c_mod_mol)[0]
-        else:
-            mol = ReplaceSubstructs(
-                mol, c_term_placeholder_mol, Chem.MolFromSmiles("O", sanitize=False)
-            )[0]
-        return mol
+            return ReplaceSubstructs(mol, c_term_placeholder_mol, c_mod_mol)[0]
+        return ReplaceSubstructs(
+            mol, c_term_placeholder_mol, Chem.MolFromSmiles("O", sanitize=False)
+        )[0]

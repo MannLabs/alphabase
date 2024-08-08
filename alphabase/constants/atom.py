@@ -299,6 +299,7 @@ class ChemicalCompositonFormula:
             count = int(count) if count else 1
             element_counts[element] += count
 
+        self._validate_atoms(element_counts)
         return element_counts
 
     def _parse_rdkit_formula(self, formula: str) -> dict:
@@ -331,7 +332,26 @@ class ChemicalCompositonFormula:
                 element = match[3]
             element_counts[element] += count
 
+        self._validate_atoms(element_counts)
         return element_counts
+
+    def _validate_atoms(self, element_counts):
+        """
+        Validate the elements in the formula.
+
+        Parameters
+        ----------
+        element_counts : dict
+            The elements and their counts in the formula.
+
+        Raises
+        ------
+        ValueError
+            If the formula contains an unknown element.
+        """
+        for element in element_counts:
+            if element not in CHEM_MONO_MASS:
+                raise ValueError(f"Unknown element: {element}")
 
     def __str__(self):
         """

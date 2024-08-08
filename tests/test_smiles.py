@@ -191,3 +191,8 @@ def test_zero_count_elements():
 def test_error_handling_invalid_rdkit_mol():
     with pytest.raises(ValueError):
         ChemicalCompositonFormula.from_smiles("InvalidSMILES")
+
+
+def test_error_unknown_atom():
+    with pytest.raises(ValueError):
+        ChemicalCompositonFormula("C(6)H(12)Atom(6)")
