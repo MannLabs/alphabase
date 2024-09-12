@@ -246,7 +246,31 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
 
         csv_sep = self._get_table_delimiter(filename)
 
-        df = pd.read_csv(filename, sep=csv_sep, keep_default_na=False)
+        df = pd.read_csv(
+            filename,
+            sep=csv_sep,
+            keep_default_na=False,
+            na_values=[
+                "#N/A",
+                "#N/A N/A",
+                "#NA",
+                "-1.#IND",
+                "-1.#QNAN",
+                "-NaN",
+                "-nan",
+                "1.#IND",
+                "1.#QNAN",
+                "<NA>",
+                "N/A",
+                "NA",
+                "NULL",
+                "NaN",
+                "None",
+                "n/a",
+                "nan",
+                "null",
+            ],
+        )
         self._find_mod_seq_column(df)
 
         return df

@@ -102,6 +102,7 @@ pfind:
     'decoy': ['Target/Decoy', 'Targe/Decoy']
   modification_mapping:
     '': ''
+
 msfragger_pepxml:
   reader_type: msfragger_pepxml
   rt_unit: second
@@ -151,6 +152,7 @@ diann:
     'score': 'CScore'
     'fdr': 'Q.Value'
   modification_mapping: 'maxquant'
+
 spectronaut_report:
   reader_type: spectronaut_report
   rt_unit: minute
@@ -158,6 +160,7 @@ spectronaut_report:
   column_mapping:
     'raw_name': 'R.FileName'
     'rt': ['EG.ApexRT','EG.MeanApexRT']
+    'mobility': ['FG.ApexIonMobility']
     'proteins': ['PG.ProteinNames','PG.ProteinGroups']
     'genes': 'PG.Genes'
     'uniprot_ids': 'PG.UniProtIds'
