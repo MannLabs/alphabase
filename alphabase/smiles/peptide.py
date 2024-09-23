@@ -33,8 +33,8 @@ class PeptideSmilesEncoder:
 
         Returns
         -------
-        Chem.Mol
-            RDKit molecule object of the peptide.
+        str
+            The SMILES string of the peptide molecule.
         """
         if mods and mod_site:
             mods = {int(m): mod for m, mod in zip(mod_site.split(";"), mods.split(";"))}
@@ -81,7 +81,6 @@ class PeptideSmilesEncoder:
             c_term_mod = mods[-1]
         # Process each amino acid in the sequence
         for idx, aa in enumerate(sequence):
-            # Get the amino acid SMILES
             if idx + 1 in mods:
                 aa_smiles = self.amino_acid_modifier.ptm_dict.get(mods[idx + 1], None)
             else:
@@ -107,8 +106,6 @@ class PeptideSmilesEncoder:
         )
         for idx in range(1, len(amino_acid_mols)):
             peptide_mol = self._connect_amino_acids(peptide_mol, amino_acid_mols[idx])
-            # if idx == 1:
-
             peptide_mol = self.amino_acid_modifier._apply_n_terminal_modification(
                 peptide_mol,
                 n_term_placeholder_mol=n_term_placeholder_mol,
@@ -120,7 +117,6 @@ class PeptideSmilesEncoder:
             c_term_mod=c_term_mod,
         )
         Chem.SanitizeMol(peptide_mol)
-        print(Chem.MolToSmiles(peptide_mol))
         return peptide_mol
 
     def _connect_amino_acids(self, mol1: Chem.Mol, mol2: Chem.Mol) -> Chem.Mol:
