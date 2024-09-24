@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Optional
 
 from rdkit import Chem
 
@@ -13,7 +13,7 @@ class PeptideSmilesEncoder:
     def __init__(self):
         self.amino_acid_modifier = AminoAcidModifier()
 
-    def encode_peptide(
+    def peptide_to_smiles(
         self,
         sequence: str,
         mods: Optional[str] = "",
@@ -36,17 +36,39 @@ class PeptideSmilesEncoder:
         str
             The SMILES string of the peptide molecule.
         """
-        if mods and mod_site:
-            mods = {int(m): mod for m, mod in zip(mod_site.split(";"), mods.split(";"))}
-        else:
-            mods = {}
-        peptide_mol = self._build_peptide(sequence, mods)
+        peptide_mol = self._build_peptide(sequence, mods, mod_site)
         return Chem.MolToSmiles(peptide_mol)
+
+    def peptide_to_mol(
+        self,
+        sequence: str,
+        mods: Optional[str] = "",
+        mod_site: Optional[str] = "",
+    ) -> Chem.Mol:
+        """
+        Encode a peptide sequence into an RDKit molecule object.
+
+        Parameters
+        ----------
+        sequence : str
+            Peptide sequence, e.g., "AFVKMCK".
+        mods : Optional[str]
+            Modifications in the format "GG@K;Oxidation@M;Carbamidomethyl@C".
+        mod_site : Optional[str]
+            Corresponding modification sites in the format "4;5;6".
+
+        Returns
+        -------
+        Chem.Mol
+            The peptide molecule.
+        """
+        return self._build_peptide(sequence, mods, mod_site)
 
     def _build_peptide(
         self,
         sequence: str,
-        mods: Dict[int, str],
+        mods: Optional[str] = "",
+        mod_site: Optional[str] = "",
     ) -> Chem.Mol:
         """
         Build the peptide molecule from the sequence and modifications.
@@ -55,14 +77,21 @@ class PeptideSmilesEncoder:
         ----------
         sequence : str
             Peptide sequence.
-        mods : Dict[int, str]
-            Modifications dictionary with the site as key and the modification as value.
+        mods : Optional[str]
+            Modifications in the format "GG@K;Oxidation@M;Carbamidomethyl@C".
+        mod_site : Optional[str]
+            Corresponding modification sites in the format "4;5;6".
 
         Returns
         -------
         Chem.Mol
             The peptide molecule.
         """
+        if mods and mod_site:
+            mods = {int(m): mod for m, mod in zip(mod_site.split(";"), mods.split(";"))}
+        else:
+            mods = {}
+
         # List to hold the amino acid molecules
         amino_acid_mols = []
 
