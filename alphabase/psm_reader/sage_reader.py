@@ -548,7 +548,7 @@ def _sage_spec_idx_from_scan_nr(scan_nr: str) -> int:
         The scan_nr field in Sage output.
 
     """
-    return int(scan_nr.split("=")[-1])
+    return int(scan_nr.split("=")[-1]) - 1
 
 
 class SageReaderBase(PSMReaderBase):
