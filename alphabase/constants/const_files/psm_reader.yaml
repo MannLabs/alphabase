@@ -61,7 +61,7 @@ maxquant:
     'Acetyl@K':
       - 'K(Acetyl (K))'
       - 'K(ac)'
-    'Hydroxyisobutyryl@K':
+    'hydroxyisobutyryl@K':
       - 'K(2-)'
     'Carbamidomethyl@C':
       - 'C(Carbamidomethyl (C))'
