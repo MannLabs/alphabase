@@ -2440,7 +2440,7 @@ PhosphoCytidine@S	305.041287	305.1812	H(12)C(9)N(3)O(7)P(1)	0.0		Post-translatio
 AzidoF@F	41.001397	41.0122	H(-1)N(3)	0.0		Chemical derivative	1845		0.0
 Dimethylaminoethyl@C	71.073499	71.121	H(9)C(4)N(1)	0.0		Chemical derivative	1846		0.0
 Gluratylation@K	114.031694	114.0993	H(6)C(5)O(3)	0.0		Post-translational	1848		0.0
-hydroxyisobutyryl@K	86.036779	86.0892	H(6)C(4)O(2)	0.0		Post-translational	1849		0.0
+hydroxyisobutyryl@K	86.036779	86.0892	H(6)C(4)O(2)	0.0		Post-translational	1849	CC(C)(O)C(=O)NCCCCC(N([Xe])[Xe])C([Rn])=O	0.0
 MeMePhosphorothioate@S	107.979873	108.0993	H(5)C(2)O(1)P(1)S(1)	0.0		Chemical derivative	1868		0.0
 Cation:Fe[III]@D	52.911464	52.8212	H(-3)Fe(1)	0.0		Artefact	1870		0.0
 Cation:Fe[III]@E	52.911464	52.8212	H(-3)Fe(1)	0.0		Artefact	1870		0.0
