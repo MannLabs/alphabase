@@ -81,12 +81,6 @@ class SpecLibFlat(SpecLibBase):
         """Protein dataframe"""
         return self._protein_df
 
-    def available_dense_fragment_dfs(self):
-        """Return the available dense fragment dataframes.
-        This method is inherited from :class:`SpecLibBase` and will return an empty list for a flat library.
-        """
-        return []
-
     def remove_unused_fragments(self):
         """Remove unused fragments from fragment_df.
         This method is inherited from :class:`SpecLibBase` and has not been implemented for a flat library.
