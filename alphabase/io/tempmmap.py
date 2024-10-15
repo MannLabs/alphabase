@@ -84,7 +84,7 @@ def _get_file_location(abs_file_path: str, overwrite=False) -> str:
         )
 
     # ensure that the filename conforms to the naming convention
-    if not os.path.basename.endswith(".hdf"):
+    if not os.path.basename(abs_file_path).endswith(".hdf"):
         raise ValueError("The chosen file name needs to end with .hdf")
 
     # ensure that the directory in which the file should be created exists
