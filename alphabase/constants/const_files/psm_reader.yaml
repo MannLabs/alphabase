@@ -209,7 +209,7 @@ library_reader_base:
   column_mapping:
     'raw_name': 'ReferenceRun'
     'sequence': ['PeptideSequence', 'StrippedPeptide']
-    'modified_sequence': ['ModifiedPeptideSequence','ModifiedPeptide']
+    'modified_sequence': ['ModifiedPeptideSequence','ModifiedPeptide','ModifiedSequence','FullUniModPeptideName','LabeledSequence','FullUniModPeptideName']
     'charge': 'PrecursorCharge'
     'rt': ['RT','iRT','Tr_recalibrated','RetentionTime','NormalizedRetentionTime']
     'ccs': 'CCS'
