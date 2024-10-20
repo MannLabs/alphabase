@@ -100,8 +100,7 @@ class DiannReader(SpectronautReader):
         **kwargs,
     ):
         """
-        Also similar to `MaxQuantReader`,
-        but different in column_mapping and modificatin_mapping
+        Base class for DIA-NN readers
         """
         super().__init__(
             column_mapping=column_mapping,
@@ -119,15 +118,22 @@ class DiannReader(SpectronautReader):
     def _init_column_mapping(self):
         self.column_mapping = psm_reader_yaml["diann"]["column_mapping"]
 
-    def _load_file(self, filename):
-        self.csv_sep = self._get_table_delimiter(filename)
-        df = pd.read_csv(filename, sep=self.csv_sep, keep_default_na=False)
-
-        return df
-
     def _post_process(self, origin_df: pd.DataFrame):
         super()._post_process(origin_df)
         self._psm_df.rename(columns={"spec_idx": "diann_spec_idx"}, inplace=True)
+
+
+class DiannTSVReader(DiannReader):
+    def _load_file(self, filename):
+        self.csv_sep = self._get_table_delimiter(filename)
+        df = pd.read_csv(filename, sep=self.csv_sep, keep_default_na=False)
+        return df
+
+
+class DiannParquetReader(DiannReader):
+    def _load_file(self, filename):
+        df = pd.read_parquet(filename)
+        return df
 
 
 class SpectronautReportReader(MaxQuantReader):
@@ -186,5 +192,7 @@ def register_readers():
     psm_reader_provider.register_reader("speclib_tsv", SpectronautReader)
     psm_reader_provider.register_reader("openswath", SwathReader)
     psm_reader_provider.register_reader("swath", SwathReader)
-    psm_reader_provider.register_reader("diann", DiannReader)
+    psm_reader_provider.register_reader("diann", DiannTSVReader)
+    psm_reader_provider.register_reader("diann_tsv", DiannTSVReader)
+    psm_reader_provider.register_reader("diann_parquet", DiannParquetReader)
     psm_reader_provider.register_reader("spectronaut_report", SpectronautReportReader)
