@@ -288,36 +288,27 @@ class SpecLibBase:
 
                 if attr.startswith("_precursor"):
                     # increment dense fragment indices
-                    frag_idx_increment = 0
-                    for fragment_dense_df in [
-                        "_fragment_intensity_df",
-                        "_fragment_mz_df",
-                    ]:
+                    fragment_df_mapping = {
+                        "_fragment_intensity_df": "",
+                        "_fragment_mz_df": "",
+                        "_fragment_df": "flat_",
+                    }
+
+                    # Update indices for each fragment dataframe type
+                    for fragment_df, prefix in fragment_df_mapping.items():
                         if (
-                            hasattr(self, fragment_dense_df)
-                            and len(getattr(self, fragment_dense_df)) > 0
+                            hasattr(self, fragment_df)
+                            and len(getattr(self, fragment_df)) > 0
                         ):
-                            frag_idx_increment = len(getattr(self, fragment_dense_df))
+                            frag_idx_increment = len(getattr(self, fragment_df))
 
-                    if "frag_start_idx" in other_df.columns:
-                        other_df["frag_start_idx"] += frag_idx_increment
+                            start_col = f"{prefix}frag_start_idx"
+                            stop_col = f"{prefix}frag_stop_idx"
 
-                    if "frag_stop_idx" in other_df.columns:
-                        other_df["frag_stop_idx"] += frag_idx_increment
-
-                    # increment flat fragment indices
-                    for fragment_flat_df in ["_fragment_df"]:
-                        if (
-                            hasattr(self, fragment_flat_df)
-                            and len(getattr(self, fragment_flat_df)) > 0
-                        ):
-                            frag_idx_increment = len(getattr(self, fragment_flat_df))
-
-                    if "flat_frag_start_idx" in other_df.columns:
-                        other_df["flat_frag_start_idx"] += frag_idx_increment
-
-                    if "flat_frag_stop_idx" in other_df.columns:
-                        other_df["flat_frag_stop_idx"] += frag_idx_increment
+                            if start_col in other_df.columns:
+                                other_df[start_col] += frag_idx_increment
+                            if stop_col in other_df.columns:
+                                other_df[stop_col] += frag_idx_increment
 
                 setattr(
                     self,
