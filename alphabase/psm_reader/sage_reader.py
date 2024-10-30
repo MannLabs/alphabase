@@ -538,15 +538,16 @@ def _get_annotated_mod_df() -> pd.DataFrame:
     ]
 
 
-def _sage_spec_idx_from_scan_nr(scan_nr: str) -> int:
+def _sage_spec_idx_from_scan_nr(scan_indicator_str: str) -> int:
     """Extract the spectrum index from the scan_nr field in Sage output.
     Sage uses 1-based indexing for spectra, so we need to subtract 1 to convert to 0-based indexing.
 
     Parameters
     ----------
 
-    scan_nr : str
-        The scan_nr field in Sage output.
+    scan_indicator_str : str
+        The scan_indicator_str field in Sage output.
+        e.g. `'controllerType=0 controllerNumber=1 scan=7846'`
 
     Returns
     -------
@@ -561,7 +562,7 @@ def _sage_spec_idx_from_scan_nr(scan_nr: str) -> int:
     7845
 
     """
-    return int(re.search(r"scan=(\d+)", scan_nr).group(1)) - 1
+    return int(re.search(r"scan=(\d+)", scan_indicator_str).group(1)) - 1
 
 
 class SageReaderBase(PSMReaderBase):
