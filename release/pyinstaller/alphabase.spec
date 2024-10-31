@@ -21,7 +21,7 @@ block_cipher = None
 location = os.getcwd()
 project = "alphabase"
 remove_tests = True
-bundle_name = "AlphaBase"
+bundle_name = "alphabase"
 #####################
 
 
