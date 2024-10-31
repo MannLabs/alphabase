@@ -24,7 +24,8 @@ LicenseFile=..\..\LICENSE.txt
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
-OutputDir=dist
+; release workflow expects artifact at root of repository
+OutputDir=../../
 OutputBaseFilename=alphabase_gui_installer_windows
 SetupIconFile=..\logos\alpha_logo.ico
 Compression=lzma
