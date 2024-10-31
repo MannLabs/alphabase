@@ -287,28 +287,44 @@ class SpecLibBase:
                 other_df = getattr(other, attr)[column].copy()
 
                 if attr.startswith("_precursor"):
-                    # increment dense fragment indices
+                    # we iterate over the types of fragment dataframes
                     fragment_df_mapping = {
-                        "_fragment_intensity_df": "",
-                        "_fragment_mz_df": "",
-                        "_fragment_df": "flat_",
+                        # dense fragment dataframes
+                        "": ["_fragment_intensity_df", "_fragment_mz_df"],
+                        # flat fragment dataframes
+                        "flat_": ["_fragment_df"],
                     }
 
                     # Update indices for each fragment dataframe type
-                    for fragment_df, prefix in fragment_df_mapping.items():
-                        if (
-                            hasattr(self, fragment_df)
-                            and len(getattr(self, fragment_df)) > 0
-                        ):
-                            frag_idx_increment = len(getattr(self, fragment_df))
+                    for prefix, fragment_df_list in fragment_df_mapping.items():
+                        # obtain frag_idx_increment and check if it is the same for all fragment dataframes
+                        # an increment of 0 is allowed, but if not 0, it must be the same for all dense fragment dataframes
+                        frag_idx_increment = 0
+                        for fragment_df in fragment_df_list:
+                            if (
+                                hasattr(self, fragment_df)
+                                and len(getattr(self, fragment_df)) > 0
+                            ):
+                                if (
+                                    frag_idx_increment != 0
+                                    and len(getattr(self, fragment_df)) != 0
+                                    and frag_idx_increment
+                                    != len(getattr(self, fragment_df))
+                                ):
+                                    raise ValueError(
+                                        f"The number of fragments in the {fragment_df} dataframe must be the same as in all other dense fragment dataframes"
+                                    )
+                                else:
+                                    frag_idx_increment = len(getattr(self, fragment_df))
 
-                            start_col = f"{prefix}frag_start_idx"
-                            stop_col = f"{prefix}frag_stop_idx"
+                        # update the indices
+                        start_col = f"{prefix}frag_start_idx"
+                        stop_col = f"{prefix}frag_stop_idx"
 
-                            if start_col in other_df.columns:
-                                other_df[start_col] += frag_idx_increment
-                            if stop_col in other_df.columns:
-                                other_df[stop_col] += frag_idx_increment
+                        if start_col in other_df.columns:
+                            other_df[start_col] += frag_idx_increment
+                        if stop_col in other_df.columns:
+                            other_df[stop_col] += frag_idx_increment
 
                 setattr(
                     self,
