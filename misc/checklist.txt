@@ -47,7 +47,7 @@ ReadTheDocs up-to-date?
 
 Releases for all Windows, MacOS and Linux?
 
-  cd misc/one_click_macos
+  cd misc/macos
   source create_installer_macos.sh
 
   cd misc/one_click_linux

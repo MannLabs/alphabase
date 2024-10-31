@@ -11,7 +11,7 @@
         <line choice="AlphaBase"/>
     </choices-outline>
     <choice id="AlphaBase" title="AlphaBase">
-        <pkg-ref id="AlphaBase.pkg"/>
+        <pkg-ref id="alphabase.pkg"/>
     </choice>
-    <pkg-ref id="AlphaBase.pkg" auth="Root">AlphaBase.pkg</pkg-ref>
+    <pkg-ref id="alphabase.pkg" auth="Root">alphabase.pkg</pkg-ref>
 </installer-script>

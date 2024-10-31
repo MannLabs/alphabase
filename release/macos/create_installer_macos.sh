@@ -1,5 +1,5 @@
 #!bash
-
+# TODO remove with old release workflow
 # Initial cleanup
 rm -rf dist
 rm -rf build
@@ -19,7 +19,7 @@ conda activate alphabaseinstaller
 python setup.py sdist bdist_wheel
 
 # Setting up the local package
-cd release/one_click_macos_gui
+cd release/macos
 pip install "../../dist/alphabase-1.4.0-py3-none-any.whl[stable]"
 
 # Creating the stand-alone pyinstaller folder
