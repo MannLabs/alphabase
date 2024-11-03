@@ -38,6 +38,7 @@ maxquant:
     'scan_num':
       - 'Scan number'
       - 'MS/MS scan number'
+      - 'MS/MS Scan Number'
       - 'Scan index'
     'raw_name': 'Raw file'
     'precursor_mz': 'm/z'
@@ -57,6 +58,8 @@ maxquant:
     'Acetyl@Protein_N-term':
       - '_(Acetyl (Protein_N-term))'
       - '_(ac)'
+    'Acetyl@K':
+      - 'K(ac)'
     'Carbamidomethyl@C':
       - 'C(Carbamidomethyl (C))'
       - 'C(Carbamidomethyl)'
@@ -84,6 +87,7 @@ maxquant:
     'Deamidated@N': ['N(Deamidation (NQ))','N(de)']
     'Deamidated@Q': ['Q(Deamidation (NQ))','Q(de)']
     'GlyGly@K': ['K(GlyGly (K))', 'K(gl)']
+    'hydroxyisobutyryl@K': 'K(2-)'
 
 pfind:
   reader_type: pfind
