@@ -96,6 +96,8 @@ maxquant:
       - 'K(cr)'
     'Lactylation@K':
       - 'K(la)'
+    'Succinyl@K':
+      - 'K(su)'
     'Deamidated@N': ['N(Deamidation (NQ))','N(de)']
     'Deamidated@Q': ['Q(Deamidation (NQ))','Q(de)']
     'GlyGly@K': ['K(GlyGly (K))', 'K(gl)']
