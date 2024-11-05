@@ -92,6 +92,10 @@ maxquant:
     'Phospho@H':
       - 'H(Phospho (STYDH))'
       - 'pH'
+    'Crotonyl@K':
+      - 'K(cr)'
+    'Lactylation@K':
+      - 'K(la)'
     'Deamidated@N': ['N(Deamidation (NQ))','N(de)']
     'Deamidated@Q': ['Q(Deamidation (NQ))','Q(de)']
     'GlyGly@K': ['K(GlyGly (K))', 'K(gl)']
