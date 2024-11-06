@@ -165,7 +165,7 @@ def array(shape: tuple, dtype: np.dtype, tmp_dir_abs_path: str = None) -> np.nda
 
     with h5py.File(temp_file_name, "w") as hdf_file:
         array = hdf_file.create_dataset("array", shape=shape, dtype=dtype)
-        array[0] = 0
+        array[0] = np.string_("") if isinstance(dtype, np.dtypes.StrDType) else 0
         offset = array.id.get_offset()
 
     with open(temp_file_name, "rb+") as raw_hdf_file:
@@ -225,7 +225,7 @@ def create_empty_mmap(
 
     with h5py.File(temp_file_name, "w") as hdf_file:
         array = hdf_file.create_dataset("array", shape=shape, dtype=dtype)
-        array[0] = 0
+        array[0] = np.string_("") if isinstance(dtype, np.dtypes.StrDType) else 0
 
     return temp_file_name
 
