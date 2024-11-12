@@ -104,9 +104,6 @@ class pFindReader(PSMReaderBase):
     def _init_column_mapping(self):
         self.column_mapping = psm_reader_yaml["pfind"]["column_mapping"]
 
-    def _init_modification_mapping(self):
-        self.modification_mapping = {}
-
     def _translate_modifications(self):
         pass
 

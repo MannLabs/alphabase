@@ -1,4 +1,5 @@
 import copy
+from typing import Optional
 
 import numba
 import numpy as np
@@ -191,7 +192,7 @@ class MaxQuantReader(PSMReaderBase):
             psm_reader_yaml["maxquant"]["modification_mapping"]
         )
 
-    def set_modification_mapping(self, modification_mapping: dict):
+    def set_modification_mapping(self, modification_mapping: Optional[dict] = None):
         super().set_modification_mapping(modification_mapping)
         self._add_all_unimod()
         self._extend_mod_brackets()

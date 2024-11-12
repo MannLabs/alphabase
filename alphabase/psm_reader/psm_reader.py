@@ -1,6 +1,7 @@
 import copy
 import os
 import warnings
+from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -153,7 +154,10 @@ class PSMReaderBase:
             Defaults to False.
         """
 
-        self.set_modification_mapping(None)
+        self.modification_mapping = None
+        self.rev_mod_mapping = None
+
+        self.set_modification_mapping()
         self.add_modification_mapping(modification_mapping)
 
         if column_mapping is not None:
@@ -210,7 +214,7 @@ class PSMReaderBase:
 
         self.set_modification_mapping(self.modification_mapping)
 
-    def set_modification_mapping(self, modification_mapping: dict):
+    def set_modification_mapping(self, modification_mapping: Optional[dict] = None):
         if modification_mapping is None:
             self._init_modification_mapping()
         elif isinstance(modification_mapping, str):
@@ -224,6 +228,7 @@ class PSMReaderBase:
                 )
         else:
             self.modification_mapping = copy.deepcopy(modification_mapping)
+
         self._mods_as_lists()
         self._reverse_mod_mapping()
 

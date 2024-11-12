@@ -593,9 +593,6 @@ class SageReaderBase(PSMReaderBase):
     def _init_column_mapping(self):
         self.column_mapping = psm_reader_yaml["sage"]["column_mapping"]
 
-    def _init_modification_mapping(self):
-        self.modification_mapping = {}
-
     def _load_file(self, filename):
         raise NotImplementedError
 
