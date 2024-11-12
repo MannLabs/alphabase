@@ -84,7 +84,7 @@ def _get_file_location(abs_file_path: str, overwrite=False) -> str:
         )
 
     # ensure that the filename conforms to the naming convention
-    if not os.path.basename.endswith(".hdf"):
+    if not os.path.basename(abs_file_path).endswith(".hdf"):
         raise ValueError("The chosen file name needs to end with .hdf")
 
     # ensure that the directory in which the file should be created exists
@@ -165,7 +165,7 @@ def array(shape: tuple, dtype: np.dtype, tmp_dir_abs_path: str = None) -> np.nda
 
     with h5py.File(temp_file_name, "w") as hdf_file:
         array = hdf_file.create_dataset("array", shape=shape, dtype=dtype)
-        array[0] = 0
+        array[0] = np.string_("") if isinstance(dtype, np.dtypes.StrDType) else 0
         offset = array.id.get_offset()
 
     with open(temp_file_name, "rb+") as raw_hdf_file:
@@ -225,7 +225,7 @@ def create_empty_mmap(
 
     with h5py.File(temp_file_name, "w") as hdf_file:
         array = hdf_file.create_dataset("array", shape=shape, dtype=dtype)
-        array[0] = 0
+        array[0] = np.string_("") if isinstance(dtype, np.dtypes.StrDType) else 0
 
     return temp_file_name
 

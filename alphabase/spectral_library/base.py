@@ -193,6 +193,7 @@ class SpecLibBase:
         other: "SpecLibBase",
         dfs_to_append: typing.List[str] = [
             "_precursor_df",
+            "_fragment_df",
             "_fragment_intensity_df",
             "_fragment_mz_df",
             "_fragment_intensity_predicted_df",
@@ -224,6 +225,7 @@ class SpecLibBase:
         None
 
         """
+
         if remove_unused_dfs:
             current_frag_dfs = self.available_dense_fragment_dfs()
             for attr in current_frag_dfs:
@@ -263,15 +265,16 @@ class SpecLibBase:
             else:
                 matching_columns.append([])
 
-        n_fragments = []
+        n_dense_fragments = []
+
         # get subset of dfs_to_append starting with _fragment
         for attr in dfs_to_append:
-            if attr.startswith("_fragment") and hasattr(self, attr):
+            if attr in self.available_dense_fragment_dfs() and hasattr(self, attr):
                 n_current_fragments = len(getattr(self, attr))
                 if n_current_fragments > 0:
-                    n_fragments += [n_current_fragments]
+                    n_dense_fragments += [n_current_fragments]
 
-        if not np.all(np.array(n_fragments) == n_fragments[0]):
+        if len(set(n_dense_fragments)) > 1:
             raise ValueError(
                 "The libraries can't be appended as the number of fragments in the current libraries are not the same."
             )
@@ -284,19 +287,44 @@ class SpecLibBase:
                 other_df = getattr(other, attr)[column].copy()
 
                 if attr.startswith("_precursor"):
-                    frag_idx_increment = 0
-                    for fragment_df in ["_fragment_intensity_df", "_fragment_mz_df"]:
-                        if (
-                            hasattr(self, fragment_df)
-                            and len(getattr(self, fragment_df)) > 0
-                        ):
-                            frag_idx_increment = len(getattr(self, fragment_df))
+                    # we iterate over the types of fragment dataframes
+                    fragment_df_mapping = {
+                        # dense fragment dataframes
+                        "": ["_fragment_intensity_df", "_fragment_mz_df"],
+                        # flat fragment dataframes
+                        "flat_": ["_fragment_df"],
+                    }
 
-                    if "frag_start_idx" in other_df.columns:
-                        other_df["frag_start_idx"] += frag_idx_increment
+                    # Update indices for each fragment dataframe type
+                    for prefix, fragment_df_list in fragment_df_mapping.items():
+                        # obtain frag_idx_increment and check if it is the same for all fragment dataframes
+                        # an increment of 0 is allowed, but if not 0, it must be the same for all dense fragment dataframes
+                        frag_idx_increment = 0
+                        for fragment_df in fragment_df_list:
+                            if (
+                                hasattr(self, fragment_df)
+                                and len(getattr(self, fragment_df)) > 0
+                            ):
+                                if (
+                                    frag_idx_increment != 0
+                                    and len(getattr(self, fragment_df)) != 0
+                                    and frag_idx_increment
+                                    != len(getattr(self, fragment_df))
+                                ):
+                                    raise ValueError(
+                                        f"The number of fragments in the {fragment_df} dataframe must be the same as in all other dense fragment dataframes"
+                                    )
+                                else:
+                                    frag_idx_increment = len(getattr(self, fragment_df))
 
-                    if "frag_stop_idx" in other_df.columns:
-                        other_df["frag_stop_idx"] += frag_idx_increment
+                        # update the indices
+                        start_col = f"{prefix}frag_start_idx"
+                        stop_col = f"{prefix}frag_stop_idx"
+
+                        if start_col in other_df.columns:
+                            other_df[start_col] += frag_idx_increment
+                        if stop_col in other_df.columns:
+                            other_df[stop_col] += frag_idx_increment
 
                 setattr(
                     self,
