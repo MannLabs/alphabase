@@ -28,9 +28,7 @@ test_data_path = Path(f"{current_file_directory}/reference_data")
 # TODO add tests for AlphaPept
 
 
-def _assert_reference_df_equal(
-    psm_df: pd.DataFrame, test_case_name: str, check_exact: bool = True
-) -> None:
+def _assert_reference_df_equal(psm_df: pd.DataFrame, test_case_name: str) -> None:
     """Compare the output of a PSM reader against reference data.
 
     If reference is not present, save the output as reference data and raise.
@@ -39,7 +37,7 @@ def _assert_reference_df_equal(
     if out_file_path.exists():
         expected_df = pd.read_parquet(out_file_path)
 
-        pd.testing.assert_frame_equal(psm_df, expected_df, check_exact=check_exact)
+        pd.testing.assert_frame_equal(psm_df, expected_df)
     else:
         psm_df.to_parquet(out_file_path)
         raise ValueError("No reference data found.")
@@ -174,7 +172,7 @@ def test_diann_speclib_reader() -> None:
     reader = LibraryReaderBase()
     reader.import_file(input_data)
 
-    _assert_reference_df_equal(reader.psm_df, "diann_speclib", check_exact=False)
+    _assert_reference_df_equal(reader.psm_df, "diann_speclib")
 
 
 def test_msfragger_speclib_reader() -> None:
@@ -217,4 +215,4 @@ _EVLHLLR_	2	21.775629	0.837	EVLHLLR	440.274169715862	A0AVF1	TTC26	b	705.4294	0.0
     reader = LibraryReaderBase()
     reader.import_file(input_data)
 
-    _assert_reference_df_equal(reader.psm_df, "msfragger_speclib", check_exact=False)
+    _assert_reference_df_equal(reader.psm_df, "msfragger_speclib")
