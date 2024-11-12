@@ -235,8 +235,10 @@ class MaxQuantReader(PSMReaderBase):
             self.modification_mapping[key] = list(mod_set)
 
     def _translate_decoy(self, origin_df=None):
-        if "decoy" in self._psm_df.columns:
-            self._psm_df.decoy = (self._psm_df.decoy == "-").astype(np.int8)
+        if PsmDfCols.DECOY in self._psm_df.columns:
+            self._psm_df[PsmDfCols.DECOY] = (
+                self._psm_df[PsmDfCols.DECOY] == "-"
+            ).astype(np.int8)
 
     def _init_column_mapping(self):
         self.column_mapping = psm_reader_yaml["maxquant"]["column_mapping"]

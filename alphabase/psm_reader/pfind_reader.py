@@ -121,7 +121,9 @@ class pFindReader(PSMReaderBase):
         return pfind_df
 
     def _translate_decoy(self, origin_df=None):
-        self._psm_df.decoy = (self._psm_df.decoy == "decoy").astype(np.int8)
+        self._psm_df[PsmDfCols.DECOY] = (
+            self._psm_df[PsmDfCols.DECOY] == "decoy"
+        ).astype(np.int8)
 
     def _translate_score(self, origin_df=None):
         self._psm_df.score = -np.log(self._psm_df.score.astype(float) + 1e-100)

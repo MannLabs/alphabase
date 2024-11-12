@@ -418,14 +418,14 @@ def _translate_modifications(
 
 
 def _apply_translate_modifications(
-    df: pd.DataFrame, mod_translation_df: pd.DataFrame
+    psm_df: pd.DataFrame, mod_translation_df: pd.DataFrame
 ) -> pd.DataFrame:
     """Apply the translation of modifications to the PSMs.
 
     Parameters
     ----------
 
-    df : pd.DataFrame
+    psm_df : pd.DataFrame
         The PSM dataframe with column 'modified_sequence'.
 
     mod_translation_df : pd.DataFrame
@@ -439,12 +439,12 @@ def _apply_translate_modifications(
 
     """
 
-    df["mod_sites"], df["mods"] = zip(
-        *df["modified_sequence"].apply(
+    psm_df[PsmDfCols.MOD_SITES], psm_df[PsmDfCols.MODS] = zip(
+        *psm_df[PsmDfCols.MODIFIED_SEQUENCE].apply(
             lambda x: _translate_modifications(x, mod_translation_df)
         )
     )
-    return df
+    return psm_df
 
 
 def _batchify_df(df: pd.DataFrame, mp_batch_size: int) -> typing.Generator:
@@ -470,7 +470,7 @@ def _batchify_df(df: pd.DataFrame, mp_batch_size: int) -> typing.Generator:
 
 
 def _apply_translate_modifications_mp(
-    df: pd.DataFrame,
+    psm_df: pd.DataFrame,
     mod_translation_df: pd.DataFrame,
     mp_batch_size: int = 50000,
     mp_process_num: int = 10,
@@ -481,7 +481,7 @@ def _apply_translate_modifications_mp(
     Parameters
     ----------
 
-    df : pd.DataFrame
+    psm_df : pd.DataFrame
         The PSM dataframe.
 
     mod_translation_df : pd.DataFrame
@@ -500,11 +500,11 @@ def _apply_translate_modifications_mp(
             partial(
                 _apply_translate_modifications, mod_translation_df=mod_translation_df
             ),
-            _batchify_df(df, mp_batch_size),
+            _batchify_df(psm_df, mp_batch_size),
         )
         if progress_bar:
             df_list = list(
-                tqdm(processing, total=int(np.ceil(len(df) / mp_batch_size)))
+                tqdm(processing, total=int(np.ceil(len(psm_df) / mp_batch_size)))
             )
         else:
             df_list = list(processing)
@@ -634,7 +634,7 @@ class SageReaderBase(PSMReaderBase):
         self._psm_df = sage_translation(self._psm_df)
 
         # drop modified_sequence
-        self._psm_df.drop(columns=["modified_sequence"], inplace=True)
+        self._psm_df.drop(columns=[PsmDfCols.MODIFIED_SEQUENCE], inplace=True)
 
 
 class SageReaderTSV(SageReaderBase):

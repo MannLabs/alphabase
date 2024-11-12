@@ -136,7 +136,7 @@ class MSFraggerPepXML(PSMReaderBase):
 
         self._psm_df.proteins = self._psm_df.proteins.apply(lambda x: ";".join(x))
         if not self._keep_decoy:
-            self._psm_df[PsmDfCols.TO_REMOVE] += self._psm_df.decoy > 0
+            self._psm_df[PsmDfCols.TO_REMOVE] += self._psm_df[PsmDfCols.DECOY] > 0
 
     def _translate_score(self, origin_df=None):
         # evalue score

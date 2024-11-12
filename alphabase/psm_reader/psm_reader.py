@@ -485,7 +485,7 @@ class PSMReaderBase:
         origin_df : pd.DataFrame
             the loaded original df
         """
-        self._psm_df[PsmDfCols.NAA] = self._psm_df.sequence.str.len()
+        self._psm_df[PsmDfCols.NAA] = self._psm_df[PsmDfCols.SEQUENCE].str.len()
 
         self.normalize_rt_by_raw_name()
 
@@ -495,7 +495,7 @@ class PSMReaderBase:
         if PsmDfCols.FDR in self._psm_df.columns:
             keep_rows &= self._psm_df.fdr <= self._keep_fdr
         if PsmDfCols.DECOY in self._psm_df.columns and not self._keep_decoy:
-            keep_rows &= self._psm_df.decoy == 0
+            keep_rows &= self._psm_df[PsmDfCols.DECOY] == 0
 
         self._psm_df = self._psm_df[keep_rows]
 

@@ -104,7 +104,7 @@ class AlphaPeptReader(PSMReaderBase):
             _charges,
             self._psm_df[PsmDfCols.DECOY],
         ) = zip(*df["precursor"].apply(parse_ap))
-        self._psm_df.decoy = self._psm_df.decoy.astype(np.int8)
+        self._psm_df[PsmDfCols.DECOY] = self._psm_df[PsmDfCols.DECOY].astype(np.int8)
 
 
 def register_readers():
