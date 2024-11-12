@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 
 import alphabase.constants.modification as ap_mod
+from alphabase.psm_reader.keys import PsmDfCols
 from alphabase.psm_reader.psm_reader import (
     PSMReaderBase,
     psm_reader_provider,
@@ -127,15 +128,17 @@ class pFindReader(PSMReaderBase):
 
     def _load_modifications(self, pfind_df):
         if len(pfind_df) == 0:
-            self._psm_df["mods"] = ""
-            self._psm_df["mod_sites"] = ""
+            self._psm_df[PsmDfCols.MODS] = ""
+            self._psm_df[PsmDfCols.MOD_SITES] = ""
             return
 
-        (self._psm_df["mods"], self._psm_df["mod_sites"]) = zip(
+        (self._psm_df[PsmDfCols.MODS], self._psm_df[PsmDfCols.MOD_SITES]) = zip(
             *pfind_df["Modification"].apply(get_pFind_mods)
         )
 
-        self._psm_df["mods"] = self._psm_df["mods"].apply(translate_pFind_mod)
+        self._psm_df[PsmDfCols.MODS] = self._psm_df[PsmDfCols.MODS].apply(
+            translate_pFind_mod
+        )
 
 
 def register_readers():

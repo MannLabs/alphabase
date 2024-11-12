@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 
 from alphabase.constants.modification import MOD_DF
+from alphabase.psm_reader.keys import PsmDfCols
 from alphabase.psm_reader.psm_reader import (
     PSMReaderBase,
     psm_reader_provider,
@@ -261,15 +262,15 @@ class MaxQuantReader(PSMReaderBase):
         else:
             mod_sep = "()"
 
-        (seqs, self._psm_df["mods"], self._psm_df["mod_sites"]) = zip(
+        (seqs, self._psm_df[PsmDfCols.MODS], self._psm_df[PsmDfCols.MOD_SITES]) = zip(
             *origin_df[self.mod_seq_column].apply(
                 parse_mod_seq,
                 mod_sep=mod_sep,
                 fixed_C57=self.fixed_C57,
             )
         )
-        if "sequence" not in self._psm_df.columns:
-            self._psm_df["sequence"] = seqs
+        if PsmDfCols.SEQUENCE not in self._psm_df.columns:
+            self._psm_df[PsmDfCols.SEQUENCE] = seqs
 
 
 def register_readers():

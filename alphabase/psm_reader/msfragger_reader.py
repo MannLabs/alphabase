@@ -5,6 +5,7 @@ import pyteomics.pepxml as pepxml
 from alphabase.constants.aa import AA_ASCII_MASS
 from alphabase.constants.atom import MASS_H, MASS_O
 from alphabase.constants.modification import MOD_MASS
+from alphabase.psm_reader.keys import PsmDfCols
 from alphabase.psm_reader.psm_reader import (
     PSMReaderBase,
     psm_reader_provider,
@@ -129,31 +130,31 @@ class MSFraggerPepXML(PSMReaderBase):
         return msf_df
 
     def _translate_decoy(self, origin_df=None):
-        self._psm_df["decoy"] = self._psm_df.proteins.apply(_is_fragger_decoy).astype(
-            np.int8
-        )
+        self._psm_df[PsmDfCols.DECOY] = self._psm_df.proteins.apply(
+            _is_fragger_decoy
+        ).astype(np.int8)
 
         self._psm_df.proteins = self._psm_df.proteins.apply(lambda x: ";".join(x))
         if not self._keep_decoy:
-            self._psm_df["to_remove"] += self._psm_df.decoy > 0
+            self._psm_df[PsmDfCols.TO_REMOVE] += self._psm_df.decoy > 0
 
     def _translate_score(self, origin_df=None):
         # evalue score
-        self._psm_df["score"] = -np.log(self._psm_df["score"] + 1e-100)
+        self._psm_df[PsmDfCols.SCORE] = -np.log(self._psm_df[PsmDfCols.SCORE] + 1e-100)
 
     def _load_modifications(self, msf_df):
         if len(msf_df) == 0:
-            self._psm_df["mods"] = ""
-            self._psm_df["mod_sites"] = ""
-            self._psm_df["aa_mass_diffs"] = ""
-            self._psm_df["aa_mass_diff_sites"] = ""
+            self._psm_df[PsmDfCols.MODS] = ""
+            self._psm_df[PsmDfCols.MOD_SITES] = ""
+            self._psm_df[PsmDfCols.AA_MASS_DIFFS] = ""
+            self._psm_df[PsmDfCols.AA_MASS_DIFF_SITES] = ""
             return
 
         (
-            self._psm_df["mods"],
-            self._psm_df["mod_sites"],
-            self._psm_df["aa_mass_diffs"],
-            self._psm_df["aa_mass_diff_sites"],
+            self._psm_df[PsmDfCols.MODS],
+            self._psm_df[PsmDfCols.MOD_SITES],
+            self._psm_df[PsmDfCols.AA_MASS_DIFFS],
+            self._psm_df[PsmDfCols.AA_MASS_DIFF_SITES],
         ) = zip(
             *msf_df[["peptide", "modifications"]].apply(
                 lambda x: _get_mods_from_masses(*x), axis=1
@@ -161,9 +162,10 @@ class MSFraggerPepXML(PSMReaderBase):
         )
 
         if not self.keep_unknown_aa_mass_diffs:
-            self._psm_df["to_remove"] += self._psm_df.aa_mass_diffs != ""
+            self._psm_df[PsmDfCols.TO_REMOVE] += self._psm_df.aa_mass_diffs != ""
             self._psm_df.drop(
-                columns=["aa_mass_diffs", "aa_mass_diff_sites"], inplace=True
+                columns=[PsmDfCols.AA_MASS_DIFFS, PsmDfCols.AA_MASS_DIFF_SITES],
+                inplace=True,
             )
 
     def _post_process(self, origin_df: pd.DataFrame):

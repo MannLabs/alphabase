@@ -9,6 +9,7 @@ import pandas as pd
 import alphabase.peptide.mobility as mobility
 from alphabase.constants._const import CONST_FILE_FOLDER
 from alphabase.peptide.precursor import reset_precursor_df, update_precursor_mz
+from alphabase.psm_reader.keys import PsmDfCols
 from alphabase.utils import get_delimiter
 from alphabase.yaml_utils import load_yaml
 
@@ -317,13 +318,13 @@ class PSMReaderBase:
         return get_delimiter(_filename)
 
     def _normalize_rt(self):
-        if "rt" in self._psm_df.columns:
+        if PsmDfCols.RT in self._psm_df.columns:
             if self._engine_rt_unit == "second":
                 # self.psm_df['rt_sec'] = self.psm_df.rt
-                self._psm_df["rt"] = self._psm_df.rt / 60
-                if "rt_start" in self._psm_df.columns:
-                    self._psm_df["rt_start"] = self._psm_df.rt_start / 60
-                    self._psm_df["rt_stop"] = self._psm_df.rt_stop / 60
+                self._psm_df[PsmDfCols.RT] = self._psm_df.rt / 60
+                if PsmDfCols.RT_START in self._psm_df.columns:
+                    self._psm_df[PsmDfCols.RT_START] = self._psm_df.rt_start / 60
+                    self._psm_df[PsmDfCols.RT_STOP] = self._psm_df.rt_stop / 60
             # elif self._engine_rt_unit == 'minute':
             # self.psm_df['rt_sec'] = self.psm_df.rt*60
             min_rt = self._psm_df.rt.min()
@@ -337,19 +338,19 @@ class PSMReaderBase:
             elif not self._min_max_rt_norm:
                 min_rt = 0
 
-            self._psm_df["rt_norm"] = (
+            self._psm_df[PsmDfCols.RT_NORM] = (
                 (self._psm_df.rt - min_rt) / (max_rt - min_rt)
             ).clip(0, 1)
 
     def normalize_rt_by_raw_name(self):
         if "rt" not in self.psm_df.columns:
             return
-        if "rt_norm" not in self._psm_df.columns:
+        if PsmDfCols.RT_NORM not in self._psm_df.columns:
             self._normalize_rt()
         if "raw_name" not in self._psm_df.columns:
             return
         for _, df_group in self._psm_df.groupby("raw_name"):
-            self._psm_df.loc[df_group.index, "rt_norm"] = (
+            self._psm_df.loc[df_group.index, PsmDfCols.RT_NORM] = (
                 df_group.rt_norm / df_group.rt_norm.max()
             )
 
@@ -410,9 +411,9 @@ class PSMReaderBase:
 
         if (
             "scan_num" in self._psm_df.columns
-            and "spec_idx" not in self._psm_df.columns
+            and PsmDfCols.SPEC_IDX not in self._psm_df.columns
         ):
-            self._psm_df["spec_idx"] = self._psm_df.scan_num - 1
+            self._psm_df[PsmDfCols.SPEC_IDX] = self._psm_df.scan_num - 1
 
     def _transform_table(self, origin_df: pd.DataFrame):
         """
@@ -484,16 +485,16 @@ class PSMReaderBase:
         origin_df : pd.DataFrame
             the loaded original df
         """
-        self._psm_df["nAA"] = self._psm_df.sequence.str.len()
+        self._psm_df[PsmDfCols.NAA] = self._psm_df.sequence.str.len()
 
         self.normalize_rt_by_raw_name()
 
-        self._psm_df = self._psm_df[~self._psm_df["mods"].isna()]
+        self._psm_df = self._psm_df[~self._psm_df[PsmDfCols.MODS].isna()]
 
         keep_rows = np.ones(len(self._psm_df), dtype=bool)
-        if "fdr" in self._psm_df.columns:
+        if PsmDfCols.FDR in self._psm_df.columns:
             keep_rows &= self._psm_df.fdr <= self._keep_fdr
-        if "decoy" in self._psm_df.columns and not self._keep_decoy:
+        if PsmDfCols.DECOY in self._psm_df.columns and not self._keep_decoy:
             keep_rows &= self._psm_df.decoy == 0
 
         self._psm_df = self._psm_df[keep_rows]
@@ -503,13 +504,19 @@ class PSMReaderBase:
         if "precursor_mz" not in self._psm_df:
             self._psm_df = update_precursor_mz(self._psm_df)
 
-        if "ccs" in self._psm_df.columns and "mobility" not in self._psm_df.columns:
-            self._psm_df["mobility"] = mobility.ccs_to_mobility_for_df(
-                self._psm_df, "ccs"
+        if (
+            PsmDfCols.CCS in self._psm_df.columns
+            and PsmDfCols.MOBILITY not in self._psm_df.columns
+        ):
+            self._psm_df[PsmDfCols.MOBILITY] = mobility.ccs_to_mobility_for_df(
+                self._psm_df, PsmDfCols.CCS
             )
-        elif "mobility" in self._psm_df.columns and "ccs" not in self._psm_df.columns:
-            self._psm_df["ccs"] = mobility.mobility_to_ccs_for_df(
-                self._psm_df, "mobility"
+        elif (
+            PsmDfCols.MOBILITY in self._psm_df.columns
+            and PsmDfCols.CCS not in self._psm_df.columns
+        ):
+            self._psm_df[PsmDfCols.CCS] = mobility.mobility_to_ccs_for_df(
+                self._psm_df, PsmDfCols.MOBILITY
             )
 
     def filter_psm_by_modifications(

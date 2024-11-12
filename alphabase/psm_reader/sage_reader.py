@@ -9,6 +9,7 @@ import pandas as pd
 from tqdm import tqdm
 
 from alphabase.constants.modification import MOD_DF
+from alphabase.psm_reader.keys import PsmDfCols
 from alphabase.psm_reader.psm_reader import (
     PSMReaderBase,
     psm_reader_provider,
@@ -94,7 +95,7 @@ class SageModificationTranslation:
         translated_psm_df = _apply_translate_modifications_mp(psm_df, translation_df)
 
         # 5. Drop PSMs with missing modifications
-        is_null = translated_psm_df["mod_sites"].isnull()
+        is_null = translated_psm_df[PsmDfCols.MOD_SITES].isnull()
         translated_psm_df = translated_psm_df[~is_null]
         if np.sum(is_null) > 0:
             logging.warning(
@@ -217,7 +218,10 @@ def _discover_modifications(psm_df: pd.DataFrame) -> pd.DataFrame:
     """
 
     modifications = (
-        psm_df["modified_sequence"].apply(_match_modified_sequence).explode().unique()
+        psm_df[PsmDfCols.MODIFIED_SEQUENCE]
+        .apply(_match_modified_sequence)
+        .explode()
+        .unique()
     )
     modifications = modifications[~pd.isnull(modifications)]
     return pd.DataFrame(
@@ -597,21 +601,27 @@ class SageReaderBase(PSMReaderBase):
         raise NotImplementedError
 
     def _transform_table(self, origin_df):
-        self._psm_df["spec_idx"] = self._psm_df["scannr"].apply(
+        self._psm_df[PsmDfCols.SPEC_IDX] = self._psm_df[PsmDfCols.SCANNR].apply(
             _sage_spec_idx_from_scan_nr
         )
-        self._psm_df.drop(columns=["scannr"], inplace=True)
+        self._psm_df.drop(columns=[PsmDfCols.SCANNR], inplace=True)
 
     def _translate_decoy(self, origin_df):
         if not self._keep_decoy:
-            self._psm_df = self._psm_df[~self._psm_df["decoy"]]
+            self._psm_df = self._psm_df[~self._psm_df[PsmDfCols.DECOY]]
 
-        self._psm_df = self._psm_df[self._psm_df["fdr"] <= self._keep_fdr]
-        self._psm_df = self._psm_df[self._psm_df["peptide_fdr"] <= self._keep_fdr]
-        self._psm_df = self._psm_df[self._psm_df["protein_fdr"] <= self._keep_fdr]
+        self._psm_df = self._psm_df[self._psm_df[PsmDfCols.FDR] <= self._keep_fdr]
+        self._psm_df = self._psm_df[
+            self._psm_df[PsmDfCols.PEPTIDE_FDR] <= self._keep_fdr
+        ]
+        self._psm_df = self._psm_df[
+            self._psm_df[PsmDfCols.PROTEIN_FDR] <= self._keep_fdr
+        ]
 
         # drop peptide_fdr, protein_fdr
-        self._psm_df.drop(columns=["peptide_fdr", "protein_fdr"], inplace=True)
+        self._psm_df.drop(
+            columns=[PsmDfCols.PEPTIDE_FDR, PsmDfCols.PROTEIN_FDR], inplace=True
+        )
 
     def _load_modifications(self, origin_df):
         pass
