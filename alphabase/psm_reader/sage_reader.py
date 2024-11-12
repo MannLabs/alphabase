@@ -600,18 +600,18 @@ class SageReaderBase(PSMReaderBase):
         raise NotImplementedError
 
     def _transform_table(self, origin_df):
-        self.psm_df["spec_idx"] = self.psm_df["scannr"].apply(
+        self._psm_df["spec_idx"] = self._psm_df["scannr"].apply(
             _sage_spec_idx_from_scan_nr
         )
-        self.psm_df.drop(columns=["scannr"], inplace=True)
+        self._psm_df.drop(columns=["scannr"], inplace=True)
 
     def _translate_decoy(self, origin_df):
         if not self._keep_decoy:
-            self._psm_df = self.psm_df[~self.psm_df["decoy"]]
+            self._psm_df = self._psm_df[~self._psm_df["decoy"]]
 
-        self._psm_df = self.psm_df[self.psm_df["fdr"] <= self._keep_fdr]
-        self._psm_df = self.psm_df[self.psm_df["peptide_fdr"] <= self._keep_fdr]
-        self._psm_df = self.psm_df[self.psm_df["protein_fdr"] <= self._keep_fdr]
+        self._psm_df = self._psm_df[self._psm_df["fdr"] <= self._keep_fdr]
+        self._psm_df = self._psm_df[self._psm_df["peptide_fdr"] <= self._keep_fdr]
+        self._psm_df = self._psm_df[self._psm_df["protein_fdr"] <= self._keep_fdr]
 
         # drop peptide_fdr, protein_fdr
         self._psm_df.drop(columns=["peptide_fdr", "protein_fdr"], inplace=True)

@@ -312,17 +312,17 @@ class PSMReaderBase:
         return get_delimiter(_filename)
 
     def _normalize_rt(self):
-        if "rt" in self.psm_df.columns:
+        if "rt" in self._psm_df.columns:
             if self._engine_rt_unit == "second":
                 # self.psm_df['rt_sec'] = self.psm_df.rt
-                self.psm_df["rt"] = self.psm_df.rt / 60
-                if "rt_start" in self.psm_df.columns:
-                    self.psm_df["rt_start"] = self.psm_df.rt_start / 60
-                    self.psm_df["rt_stop"] = self.psm_df.rt_stop / 60
+                self._psm_df["rt"] = self._psm_df.rt / 60
+                if "rt_start" in self._psm_df.columns:
+                    self._psm_df["rt_start"] = self._psm_df.rt_start / 60
+                    self._psm_df["rt_stop"] = self._psm_df.rt_stop / 60
             # elif self._engine_rt_unit == 'minute':
             # self.psm_df['rt_sec'] = self.psm_df.rt*60
-            min_rt = self.psm_df.rt.min()
-            max_rt = self.psm_df.rt.max()
+            min_rt = self._psm_df.rt.min()
+            max_rt = self._psm_df.rt.max()
             if min_rt < 0:  # iRT
                 if min_rt < self._min_irt_value:
                     min_rt = self._min_irt_value
@@ -332,19 +332,19 @@ class PSMReaderBase:
             elif not self._min_max_rt_norm:
                 min_rt = 0
 
-            self.psm_df["rt_norm"] = (
-                (self.psm_df.rt - min_rt) / (max_rt - min_rt)
+            self._psm_df["rt_norm"] = (
+                (self._psm_df.rt - min_rt) / (max_rt - min_rt)
             ).clip(0, 1)
 
     def normalize_rt_by_raw_name(self):
         if "rt" not in self.psm_df.columns:
             return
-        if "rt_norm" not in self.psm_df.columns:
+        if "rt_norm" not in self._psm_df.columns:
             self._normalize_rt()
-        if "raw_name" not in self.psm_df.columns:
+        if "raw_name" not in self._psm_df.columns:
             return
-        for _, df_group in self.psm_df.groupby("raw_name"):
-            self.psm_df.loc[df_group.index, "rt_norm"] = (
+        for _, df_group in self._psm_df.groupby("raw_name"):
+            self._psm_df.loc[df_group.index, "rt_norm"] = (
                 df_group.rt_norm / df_group.rt_norm.max()
             )
 
