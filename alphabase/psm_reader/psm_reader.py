@@ -162,8 +162,8 @@ class PSMReaderBase:
             self._init_column_mapping()
 
         self._psm_df = pd.DataFrame()
-        self.keep_fdr = fdr
-        self.keep_decoy = keep_decoy
+        self._keep_fdr = fdr
+        self._keep_decoy = keep_decoy
         self._min_max_rt_norm = False
         self._engine_rt_unit = rt_unit
         self._min_irt_value = -100
@@ -487,8 +487,8 @@ class PSMReaderBase:
 
         keep_rows = np.ones(len(self._psm_df), dtype=bool)
         if "fdr" in self._psm_df.columns:
-            keep_rows &= self._psm_df.fdr <= self.keep_fdr
-        if "decoy" in self._psm_df.columns and not self.keep_decoy:
+            keep_rows &= self._psm_df.fdr <= self._keep_fdr
+        if "decoy" in self._psm_df.columns and not self._keep_decoy:
             keep_rows &= self._psm_df.decoy == 0
 
         self._psm_df = self._psm_df[keep_rows]
