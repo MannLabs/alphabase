@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+from alphabase.psm_reader.keys import PsmDfCols
 from alphabase.psm_reader.maxquant_reader import MaxQuantReader
 from alphabase.psm_reader.psm_reader import psm_reader_provider, psm_reader_yaml
 
@@ -127,7 +128,9 @@ class DiannReader(SpectronautReader):
 
     def _post_process(self, origin_df: pd.DataFrame):
         super()._post_process(origin_df)
-        self._psm_df.rename(columns={"spec_idx": "diann_spec_idx"}, inplace=True)
+        self._psm_df.rename(
+            columns={PsmDfCols.SPEC_IDX: "diann_spec_idx"}, inplace=True
+        )
 
 
 class SpectronautReportReader(MaxQuantReader):

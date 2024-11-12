@@ -125,8 +125,8 @@ class MSFraggerPepXML(PSMReaderBase):
         if "ion_mobility" in msf_df.columns:
             msf_df["ion_mobility"] = msf_df.ion_mobility.astype(float)
         msf_df["raw_name"] = msf_df["spectrum"].str.split(".").apply(lambda x: x[0])
-        msf_df["to_remove"] = 0
-        self.column_mapping["to_remove"] = "to_remove"
+        msf_df["to_remove"] = 0  # TODO revisit
+        self.column_mapping[PsmDfCols.TO_REMOVE] = "to_remove"
         return msf_df
 
     def _translate_decoy(self, origin_df=None):
@@ -162,7 +162,9 @@ class MSFraggerPepXML(PSMReaderBase):
         )
 
         if not self.keep_unknown_aa_mass_diffs:
-            self._psm_df[PsmDfCols.TO_REMOVE] += self._psm_df.aa_mass_diffs != ""
+            self._psm_df[PsmDfCols.TO_REMOVE] += (
+                self._psm_df[PsmDfCols.AA_MASS_DIFFS] != ""
+            )
             self._psm_df.drop(
                 columns=[PsmDfCols.AA_MASS_DIFFS, PsmDfCols.AA_MASS_DIFF_SITES],
                 inplace=True,
@@ -171,8 +173,8 @@ class MSFraggerPepXML(PSMReaderBase):
     def _post_process(self, origin_df: pd.DataFrame):
         super()._post_process(origin_df)
         self._psm_df = (
-            self._psm_df.query("to_remove==0")
-            .drop(columns="to_remove")
+            self._psm_df.query(f"{PsmDfCols.TO_REMOVE}==0")
+            .drop(columns=PsmDfCols.TO_REMOVE)
             .reset_index(drop=True)
         )
 

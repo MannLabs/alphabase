@@ -150,7 +150,7 @@ class PSMReaderBase:
             If keep decoy PSMs in self.psm_df.
         _min_max_rt_norm : bool
             if True, the 'rt_norm' values in self._psm_df
-            will be normalized by rt_norm = (self.psm_df.rt-rt_min)/(rt_max-rt_min).
+            will be normalized by rt_norm = (self.psm_df[PsmDfCols.RT]-rt_min)/(rt_max-rt_min).
             It is useful to normalize iRT values as they contain negative values.
             Defaults to False.
         """
@@ -321,14 +321,18 @@ class PSMReaderBase:
         if PsmDfCols.RT in self._psm_df.columns:
             if self._engine_rt_unit == "second":
                 # self.psm_df['rt_sec'] = self.psm_df.rt
-                self._psm_df[PsmDfCols.RT] = self._psm_df.rt / 60
+                self._psm_df[PsmDfCols.RT] = self._psm_df[PsmDfCols.RT] / 60
                 if PsmDfCols.RT_START in self._psm_df.columns:
-                    self._psm_df[PsmDfCols.RT_START] = self._psm_df.rt_start / 60
-                    self._psm_df[PsmDfCols.RT_STOP] = self._psm_df.rt_stop / 60
+                    self._psm_df[PsmDfCols.RT_START] = (
+                        self._psm_df[PsmDfCols.RT_START] / 60
+                    )
+                    self._psm_df[PsmDfCols.RT_STOP] = (
+                        self._psm_df[PsmDfCols.RT_STOP] / 60
+                    )
             # elif self._engine_rt_unit == 'minute':
             # self.psm_df['rt_sec'] = self.psm_df.rt*60
-            min_rt = self._psm_df.rt.min()
-            max_rt = self._psm_df.rt.max()
+            min_rt = self._psm_df[PsmDfCols.RT].min()
+            max_rt = self._psm_df[PsmDfCols.RT].max()
             if min_rt < 0:  # iRT
                 if min_rt < self._min_irt_value:
                     min_rt = self._min_irt_value
@@ -339,7 +343,7 @@ class PSMReaderBase:
                 min_rt = 0
 
             self._psm_df[PsmDfCols.RT_NORM] = (
-                (self._psm_df.rt - min_rt) / (max_rt - min_rt)
+                (self._psm_df[PsmDfCols.RT] - min_rt) / (max_rt - min_rt)
             ).clip(0, 1)
 
     def normalize_rt_by_raw_name(self):
@@ -351,7 +355,7 @@ class PSMReaderBase:
             return
         for _, df_group in self._psm_df.groupby("raw_name"):
             self._psm_df.loc[df_group.index, PsmDfCols.RT_NORM] = (
-                df_group.rt_norm / df_group.rt_norm.max()
+                df_group[PsmDfCols.RT_NORM] / df_group[PsmDfCols.RT_NORM].max()
             )
 
     def _load_file(self, filename: str) -> pd.DataFrame:
@@ -457,8 +461,8 @@ class PSMReaderBase:
             not in `self.modification_mapping`
         """
 
-        self._psm_df.mods, unknown_mods = zip(
-            *self._psm_df.mods.apply(
+        self._psm_df[PsmDfCols.MODS], unknown_mods = zip(
+            *self._psm_df[PsmDfCols.MODS].apply(
                 translate_other_modification, mod_dict=self.rev_mod_mapping
             )
         )
@@ -493,7 +497,7 @@ class PSMReaderBase:
 
         keep_rows = np.ones(len(self._psm_df), dtype=bool)
         if PsmDfCols.FDR in self._psm_df.columns:
-            keep_rows &= self._psm_df.fdr <= self._keep_fdr
+            keep_rows &= self._psm_df[PsmDfCols.FDR] <= self._keep_fdr
         if PsmDfCols.DECOY in self._psm_df.columns and not self._keep_decoy:
             keep_rows &= self._psm_df[PsmDfCols.DECOY] == 0
 
@@ -536,11 +540,11 @@ class PSMReaderBase:
                     "Acetyl@Protein_N-term",
                 ]
             )
-        self._psm_df.mods = self._psm_df.mods.apply(
+        self._psm_df[PsmDfCols.MODS] = self._psm_df[PsmDfCols.MODS].apply(
             _keep_modifications, mod_set=include_mod_set
         )
 
-        self._psm_df.dropna(subset=["mods"], inplace=True)
+        self._psm_df.dropna(subset=[PsmDfCols.MODS], inplace=True)
         self._psm_df.reset_index(drop=True, inplace=True)
 
 

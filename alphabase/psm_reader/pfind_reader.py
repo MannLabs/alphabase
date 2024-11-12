@@ -126,7 +126,9 @@ class pFindReader(PSMReaderBase):
         ).astype(np.int8)
 
     def _translate_score(self, origin_df=None):
-        self._psm_df.score = -np.log(self._psm_df.score.astype(float) + 1e-100)
+        self._psm_df[PsmDfCols.SCORE] = -np.log(
+            self._psm_df[PsmDfCols.SCORE].astype(float) + 1e-100
+        )
 
     def _load_modifications(self, pfind_df):
         if len(pfind_df) == 0:
