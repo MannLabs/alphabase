@@ -24,7 +24,7 @@ current_file_directory = os.path.dirname(os.path.abspath(__file__))
 test_data_path = Path(f"{current_file_directory}/reference_data")
 
 
-def assert_reference_df_equal(psm_df: pd.DataFrame, test_case_name: str) -> None:
+def _assert_reference_df_equal(psm_df: pd.DataFrame, test_case_name: str) -> None:
     """Compare the output of a PSM reader against reference data.
 
     If reference is not present, save the output as reference data and raise.
@@ -39,7 +39,7 @@ def assert_reference_df_equal(psm_df: pd.DataFrame, test_case_name: str) -> None
         raise ValueError("No reference data found.")
 
 
-def test_maxquant() -> None:
+def test_maxquant_reader() -> None:
     """Test the MaxQuant reader."""
 
     input_data = io.StringIO("""Raw file	Scan number	Scan index	Sequence	Length	Missed cleavages	Modifications	Modified sequence	Oxidation (M) Probabilities	Oxidation (M) Score diffs	Acetyl (Protein_N-term)	Oxidation (M)	Proteins	Charge	Fragmentation	Mass analyzer	Type	Scan event number	Isotope index	m/z	Mass	Mass error [ppm]	Mass error [Da]	Simple mass error [ppm]	Retention time	PEP	Score	Delta score	Score diff	Localization prob	Combinatorics	PIF	Fraction of total spectrum	Base peak fraction	Precursor full scan number	Precursor Intensity	Precursor apex fraction	Precursor apex offset	Precursor apex offset time	Matches	Intensities	Mass deviations [Da]	Mass deviations [ppm]	Masses	Number of matches	Intensity coverage	Peak coverage	Neutral loss level	ETD identification type	Reverse	All scores	All sequences	All modified sequences	Reporter PIF	Reporter fraction	id	Protein group IDs	Peptide ID	Mod. peptide ID	Evidence ID	Oxidation (M) site IDs
@@ -50,10 +50,10 @@ def test_maxquant() -> None:
     reader = MaxQuantReader()
     reader.import_file(input_data)
 
-    assert_reference_df_equal(reader.psm_df, "maxquant")
+    _assert_reference_df_equal(reader.psm_df, "maxquant")
 
 
-def test_pfind() -> None:
+def test_pfind_reader() -> None:
     """Test the pFind reader."""
     input_data = StringIO("""File_Name	Scan_No	Exp.MH+	Charge	Q-value	Sequence	Calc.MH+	Mass_Shift(Exp.-Calc.)	Raw_Score	Final_Score	Modification	Specificity	Proteins	Positions	Label	Target/Decoy	Miss.Clv.Sites	Avg.Frag.Mass.Shift	Others
     Ecoli-1to1to1-un-C13-N15-10mM-20150823.30507.30507.2.0.dta	30507	2074.030369	2	0	AMIEAGAAAVHFEDQLASVK	2074.027271	0.003098	35.299588	5.15726e-013	2,Oxidation[M];	3	gi|16131841|ref|NP_418439.1|/	173,K,K/	1|0|	target	0	0.948977	131070	0	0	0	262143	0	0	0	32
@@ -63,10 +63,10 @@ def test_pfind() -> None:
     reader = pFindReader()
     reader.import_file(input_data)
 
-    assert_reference_df_equal(reader.psm_df, "pfind")
+    _assert_reference_df_equal(reader.psm_df, "pfind")
 
 
-def test_diann() -> None:
+def test_diann_reader() -> None:
     """Test the Diann reader."""
     input_data = StringIO("""File.Name	Run	Protein.Group	Protein.Ids	Protein.Names	Genes	PG.Quantity	PG.Normalised	PG.MaxLFQ	Genes.Quantity	Genes.Normalised	Genes.MaxLFQ	Genes.MaxLFQ.Unique	Modified.Sequence	Stripped.Sequence	Precursor.Id	Precursor.Charge	Q.Value	Global.Q.Value	Protein.Q.Value	PG.Q.Value	Global.PG.Q.Value	GG.Q.Value	Translated.Q.Value	Proteotypic	Precursor.Quantity	Precursor.Normalised	Precursor.Translated	Quantity.Quality	RT	RT.Start	RT.Stop	iRT	Predicted.RT	Predicted.iRT	Lib.Q.Value	Ms1.Profile.Corr	Ms1.Area	Evidence	Spectrum.Similarity	Mass.Evidence	CScore	Decoy.Evidence	Decoy.CScore	Fragment.Quant.Raw	Fragment.Quant.Corrected	Fragment.Correlations	MS2.Scan	IM	iIM	Predicted.IM	Predicted.iIM
     F:\XXX\20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-A2_1_22636.d	20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-A2_1_22636	Q9UH36	Q9UH36		SRRD	3296.49	3428.89	3428.89	3296.49	3428.89	3428.89	3428.89	(UniMod:1)AAAAAAALESWQAAAPR	AAAAAAALESWQAAAPR	(UniMod:1)AAAAAAALESWQAAAPR2	2	3.99074e-05	1.96448e-05	0.000159821	0.000159821	0.000146135	0.000161212	0	1	3296.49	3428.89	3296.49	0.852479	19.9208	19.8731	19.9685	123.9	19.8266	128.292	0	0.960106	5308.05	1.96902	0.683134	0.362287	0.999997	1.23691	3.43242e-05	1212.01;2178.03;1390.01;1020.01;714.008;778.008;	1212.01;1351.73;887.591;432.92;216.728;732.751;	0.956668;0.757581;0.670497;0.592489;0.47072;0.855203;	30053	1.19708	1.19328	1.19453	1.19469
@@ -76,10 +76,10 @@ def test_diann() -> None:
     reader = DiannReader()
     reader.import_file(input_data)
 
-    assert_reference_df_equal(reader.psm_df, "diann")
+    _assert_reference_df_equal(reader.psm_df, "diann")
 
 
-def test_spectronaut() -> None:
+def test_spectronaut_reader() -> None:
     """Test the Spectronaut reader."""
     input_data = StringIO("""ReferenceRun	PrecursorCharge	Workflow	IntModifiedPeptide	CV	AllowForNormalization	ModifiedPeptide	StrippedPeptide	iRT	IonMobility	iRTSourceSpecific	BGSInferenceId	IsProteotypic	IntLabeledPeptide	LabeledPeptide	PrecursorMz	ReferenceRunQvalue	ReferenceRunMS1Response	FragmentLossType	FragmentNumber	FragmentType	FragmentCharge	FragmentMz	RelativeIntensity	ExcludeFromAssay	Database	ProteinGroups	UniProtIds	Protein Name	ProteinDescription	Organisms	OrganismId	Genes	Protein Existence	Sequence Version	FASTAName
     202106018_TIMS03_EVO03_PaSk_SA_HeLa_EGF_Phospho_100ug_test_S4-A1_1_25843	2		_ALVAT[+80]PGK_		True	_ALVAT[Phospho (STY)]PGK_	ALVATPGK	-5.032703	0.758	-5.032703	P19338	False	_ALVAT[+80]PGK_	_ALVAT[Phospho (STY)]PGK_	418.717511324722	0	10352	noloss	3	y	1	301.187031733932	53.1991	False	sp	P19338	P19338	NUCL_HUMAN	Nucleolin	Homo sapiens		NCL	1	3	MCT_human_UP000005640_9606
@@ -94,10 +94,10 @@ def test_spectronaut() -> None:
     reader = SpectronautReader()
     reader.import_file(input_data)
 
-    assert_reference_df_equal(reader.psm_df, "spectronaut")
+    _assert_reference_df_equal(reader.psm_df, "spectronaut")
 
 
-def test_spectronaut_report() -> None:
+def test_spectronaut_report_reader() -> None:
     """Test the Spectronaut report reader."""
     input_data = StringIO("""R.FileName,R.Replicate,EG.PrecursorId,EG.ApexRT,FG.CalibratedMassAccuracy (PPM),FG.CalibratedMz
     20211203_EXPL2_SoSt_SA_DIA_HeLa_1000mz_noCB_01,1,_VIETPENDFK_.2,40.826847076416,-0.6350307649846,596.298998773218
@@ -109,10 +109,10 @@ def test_spectronaut_report() -> None:
     reader = SpectronautReportReader()
     reader.import_file(input_data)
 
-    assert_reference_df_equal(reader.psm_df, "spectronaut_report")
+    _assert_reference_df_equal(reader.psm_df, "spectronaut_report")
 
 
-def test_openswath() -> None:
+def test_openswath_reader() -> None:
     """Test the OpenSwath reader."""
 
     input_data = StringIO("""PrecursorMz	ProductMz	Tr_recalibrated	transition_name	CE	LibraryIntensity	transition_group_id	decoy	PeptideSequence	ProteinName	Annotation	FullUniModPeptideName	PrecursorCharge	GroupLabel	UniprotID	FragmentType	FragmentCharge	FragmentSeriesNumber
@@ -132,10 +132,10 @@ def test_openswath() -> None:
     reader = SwathReader()
     reader.import_file(input_data)
 
-    assert_reference_df_equal(reader.psm_df, "openswath")
+    _assert_reference_df_equal(reader.psm_df, "openswath")
 
 
-def test_diann_speclib() -> None:
+def test_diann_speclib_reader() -> None:
     """Test the Diann speclib reader."""
     # this is the head of  "https://datashare.biochem.mpg.de/s/DF12ObSdZnBnqUV" ("diann_speclib.tsv")
     input_data = StringIO("""FileName	PrecursorMz	ProductMz	Tr_recalibrated	IonMobility	transition_name	LibraryIntensity	transition_group_id	decoy	PeptideSequence	Proteotypic	QValue	PGQValue	Ms1ProfileCorr	ProteinGroup	ProteinName	Genes	FullUniModPeptideName	ModifiedPeptide	PrecursorCharge	PeptideGroupLabel	UniprotID	NTerm	CTerm	FragmentType	FragmentCharge	FragmentSeriesNumber	FragmentLossType	ExcludeFromAssay
@@ -168,10 +168,10 @@ def test_diann_speclib() -> None:
     reader = LibraryReaderBase()
     reader.import_file(input_data)
 
-    assert_reference_df_equal(reader.psm_df, "diann_speclib")
+    _assert_reference_df_equal(reader.psm_df, "diann_speclib")
 
 
-def test_msfragger_speclib() -> None:
+def test_msfragger_speclib_reader() -> None:
     """Test the MSFragger speclib reader."""
 
     # this is the head of https://datashare.biochem.mpg.de/s/Cka1utORt3r5A4a ("msfragger_speclib.tsv")
@@ -211,4 +211,4 @@ _EVLHLLR_	2	21.775629	0.837	EVLHLLR	440.274169715862	A0AVF1	TTC26	b	705.4294	0.0
     reader = LibraryReaderBase()
     reader.import_file(input_data)
 
-    assert_reference_df_equal(reader.psm_df, "msfragger_speclib")
+    _assert_reference_df_equal(reader.psm_df, "msfragger_speclib")
