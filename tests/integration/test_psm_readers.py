@@ -1,6 +1,8 @@
 """Integration tests for the PSM Readers.
 
 Tests the output of defined inputs against reference data, which are expected in the `reference_data` folder.
+
+Most of the test data is taken from psm_readers.ipynb
 """
 
 import io
@@ -22,6 +24,8 @@ from alphabase.spectral_library.reader import LibraryReaderBase
 
 current_file_directory = os.path.dirname(os.path.abspath(__file__))
 test_data_path = Path(f"{current_file_directory}/reference_data")
+
+# TODO add tests for AlphaPept
 
 
 def _assert_reference_df_equal(psm_df: pd.DataFrame, test_case_name: str) -> None:
