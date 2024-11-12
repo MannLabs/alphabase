@@ -12,6 +12,7 @@ from alphabase.psm_reader.psm_reader import (
     psm_reader_yaml,
 )
 
+# make sure all warnings are shown
 warnings.filterwarnings("always")
 
 mod_to_unimod_dict = {}
@@ -254,13 +255,13 @@ class MaxQuantReader(PSMReaderBase):
         if "scan_num" in mapped_columns:
             scan_num_col = mapped_columns["scan_num"]
             no_ms2_mask = df[scan_num_col] == ""
-            if np.sum(no_ms2_mask) > 0:
+            if (num_no_ms2_mask := np.sum(no_ms2_mask)) > 0:
                 warnings.warn(
-                    f"Maxquant psm file contains {np.sum(no_ms2_mask)} MBR PSMs without MS2 scan. This is not yet supported and rows containing MBR PSMs will be removed."
+                    f"Maxquant psm file contains {num_no_ms2_mask} MBR PSMs without MS2 scan. This is not yet supported and rows containing MBR PSMs will be removed."
                 )
                 df = df[~no_ms2_mask]
                 df.reset_index(drop=True, inplace=True)
-                df[scan_num_col] = df[scan_num_col].astype(int)
+        df[scan_num_col] = df[scan_num_col].astype(int)
 
         # if 'K0' in df.columns:
         #     df['Mobility'] = df['K0'] # Bug in MaxQuant? It should be 1/K0
