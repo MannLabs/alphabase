@@ -49,7 +49,7 @@ def translate_other_modification(mod_str: str, mod_dict: dict) -> str:
         return ";".join(ret_mods), []
 
 
-def keep_modifications(mod_str: str, mod_set: set) -> str:
+def _keep_modifications(mod_str: str, mod_set: set) -> str:
     """
     Check if modifications of `mod_str` are in `mod_set`.
 
@@ -311,7 +311,7 @@ class PSMReaderBase:
     def _get_table_delimiter(self, _filename):
         return get_delimiter(_filename)
 
-    def normalize_rt(self):
+    def _normalize_rt(self):
         if "rt" in self.psm_df.columns:
             if self._engine_rt_unit == "second":
                 # self.psm_df['rt_sec'] = self.psm_df.rt
@@ -336,14 +336,11 @@ class PSMReaderBase:
                 (self.psm_df.rt - min_rt) / (max_rt - min_rt)
             ).clip(0, 1)
 
-    def norm_rt(self):
-        self.normalize_rt()
-
     def normalize_rt_by_raw_name(self):
         if "rt" not in self.psm_df.columns:
             return
         if "rt_norm" not in self.psm_df.columns:
-            self.norm_rt()
+            self._normalize_rt()
         if "raw_name" not in self.psm_df.columns:
             return
         for _, df_group in self.psm_df.groupby("raw_name"):
@@ -528,7 +525,7 @@ class PSMReaderBase:
                 ]
             )
         self._psm_df.mods = self._psm_df.mods.apply(
-            keep_modifications, mod_set=include_mod_set
+            _keep_modifications, mod_set=include_mod_set
         )
 
         self._psm_df.dropna(subset=["mods"], inplace=True)
