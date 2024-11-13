@@ -14,6 +14,9 @@ class ConstantsClass(type):
 
 
 class PsmDfCols(metaclass=ConstantsClass):
+    """Constants for accessing the columns of a PSM dataframe."""
+
+    # TODO: these are used only in th psm_reader package and the spectral_library.reader module so far
     MOD_SITES = "mod_sites"
     MODIFIED_SEQUENCE = "modified_sequence"
     SEQUENCE = "sequence"
@@ -44,10 +47,26 @@ class PsmDfCols(metaclass=ConstantsClass):
     PRECURSOR_MZ = "precursor_mz"
     DIANN_SPEC_INDEX = "diann_spec_idx"
 
-    FRAG_START_IDX = "frag_start_idx"
-    FRAG_STOP_IDX = "frag_stop_idx"
-
     # part of the output, but not directly referenced
     _UNIPROT_IDS = "uniprot_ids"
     _GENES = "genes"
     _QUERY_ID = "query_id"
+
+    # part of psm_reader_yaml, but not directly referenced
+    _INTENSITY = "intensity"
+
+
+class LibPsmDfCols(metaclass=ConstantsClass):
+    """Constants for accessing the columns of a Library PSM dataframe."""
+
+    # only used for reader_type=library_reader_base
+    FRAG_START_IDX = "frag_start_idx"
+    FRAG_STOP_IDX = "frag_stop_idx"
+
+    # only used for reader_type=library_reader_base, not referenced in reader classes
+    FRAGMENT_INTENSITY = "fragment_intensity"
+    FRAGMENT_MZ = "fragment_mz"
+    FRAGMENT_TYPE = "fragment_type"
+    FRAGMENT_CHARGE = "fragment_charge"
+    FRAGMENT_SERIES = "fragment_series"
+    FRAGMENT_LOSS_TYPE = "fragment_loss_type"
