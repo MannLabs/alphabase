@@ -7,6 +7,7 @@ from tqdm import tqdm
 from alphabase.constants._const import PEAK_INTENSITY_DTYPE
 from alphabase.peptide.mobility import mobility_to_ccs_for_df
 from alphabase.psm_reader import psm_reader_provider
+from alphabase.psm_reader.keys import PsmDfCols
 from alphabase.psm_reader.maxquant_reader import MaxQuantReader
 from alphabase.psm_reader.psm_reader import psm_reader_yaml
 from alphabase.spectral_library.base import SpecLibBase
@@ -175,7 +176,7 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
         for keys, df_group in tqdm(lib_df.groupby(non_fragment_columns)):
             precursor_columns = dict(zip(non_fragment_columns, keys))
 
-            nAA = len(precursor_columns["sequence"])
+            nAA = len(precursor_columns[PsmDfCols.SEQUENCE])
 
             intens = np.zeros(
                 (nAA - 1, len(self.charged_frag_types)),
@@ -286,7 +287,7 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
 
         # identify unknown modifications
         len_before = len(self._psm_df)
-        self._psm_df = self._psm_df[~self._psm_df["mods"].isna()]
+        self._psm_df = self._psm_df[~self._psm_df[PsmDfCols.MODS].isna()]
         len_after = len(self._psm_df)
 
         if len_before != len_after:
@@ -294,17 +295,19 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
                 f"{len_before-len_after} Entries with unknown modifications are removed"
             )
 
-        if "nAA" not in self._psm_df.columns:
-            self._psm_df["nAA"] = self._psm_df.sequence.str.len()
+        if PsmDfCols.NAA not in self._psm_df.columns:
+            self._psm_df[PsmDfCols.NAA] = self._psm_df[PsmDfCols.SEQUENCE].str.len()
 
         self._psm_df = self._get_fragment_intensity(self._psm_df)
 
         self.normalize_rt_by_raw_name()
 
-        if "mobility" in self._psm_df.columns:
-            self._psm_df["ccs"] = mobility_to_ccs_for_df(self._psm_df, "mobility")
+        if PsmDfCols.MOBILITY in self._psm_df.columns:
+            self._psm_df[PsmDfCols.CCS] = mobility_to_ccs_for_df(
+                self._psm_df, PsmDfCols.MOBILITY
+            )
 
-        self._psm_df.drop("modified_sequence", axis=1, inplace=True)
+        self._psm_df.drop(PsmDfCols.MODIFIED_SEQUENCE, axis=1, inplace=True)
         self._precursor_df = self._psm_df
 
         self.calc_fragment_mz_df()

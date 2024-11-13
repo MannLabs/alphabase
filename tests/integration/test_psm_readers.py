@@ -20,6 +20,7 @@ from alphabase.psm_reader import (
     SwathReader,
     pFindReader,
 )
+from alphabase.psm_reader.keys import PsmDfCols
 from alphabase.spectral_library.reader import LibraryReaderBase
 
 current_file_directory = os.path.dirname(os.path.abspath(__file__))
@@ -34,6 +35,11 @@ def _assert_reference_df_equal(psm_df: pd.DataFrame, test_case_name: str) -> Non
     If reference is not present, save the output as reference data and raise.
     """
     out_file_path = test_data_path / f"reference_{test_case_name}.parquet"
+    # psm_df.to_csv(test_data_path / f"reference_{test_case_name}.csv")
+
+    # check that all columns are available in PsmDfCols
+    assert set(psm_df.columns) - set(PsmDfCols.get_values()) == set()
+
     if out_file_path.exists():
         expected_df = pd.read_parquet(out_file_path)
 

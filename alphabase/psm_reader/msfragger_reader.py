@@ -124,17 +124,21 @@ class MSFraggerPepXML(PSMReaderBase):
         msf_df.fillna("", inplace=True)
         if "ion_mobility" in msf_df.columns:
             msf_df["ion_mobility"] = msf_df.ion_mobility.astype(float)
-        msf_df["raw_name"] = msf_df["spectrum"].str.split(".").apply(lambda x: x[0])
+        msf_df[PsmDfCols.RAW_NAME] = (
+            msf_df["spectrum"].str.split(".").apply(lambda x: x[0])
+        )
         msf_df["to_remove"] = 0  # TODO revisit
         self.column_mapping[PsmDfCols.TO_REMOVE] = "to_remove"
         return msf_df
 
     def _translate_decoy(self, origin_df=None):
-        self._psm_df[PsmDfCols.DECOY] = self._psm_df.proteins.apply(
-            _is_fragger_decoy
-        ).astype(np.int8)
+        self._psm_df[PsmDfCols.DECOY] = (
+            self._psm_df[PsmDfCols.PROTEINS].apply(_is_fragger_decoy).astype(np.int8)
+        )
 
-        self._psm_df.proteins = self._psm_df.proteins.apply(lambda x: ";".join(x))
+        self._psm_df[PsmDfCols.PROTEINS] = self._psm_df[PsmDfCols.PROTEINS].apply(
+            lambda x: ";".join(x)
+        )
         if not self._keep_decoy:
             self._psm_df[PsmDfCols.TO_REMOVE] += self._psm_df[PsmDfCols.DECOY] > 0
 
