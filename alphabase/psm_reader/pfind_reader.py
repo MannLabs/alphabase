@@ -114,7 +114,7 @@ class pFindReader(PSMReaderBase):
         )
         pfind_df.fillna("", inplace=True)
         pfind_df = pfind_df[pfind_df.Sequence != ""]
-        pfind_df["raw_name"] = (
+        pfind_df[PsmDfCols.RAW_NAME] = (
             pfind_df["File_Name"].str.split(".").apply(lambda x: x[0])
         )
         pfind_df["Proteins"] = pfind_df["Proteins"].apply(parse_pfind_protein)

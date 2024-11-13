@@ -347,13 +347,13 @@ class PSMReaderBase:
             ).clip(0, 1)
 
     def normalize_rt_by_raw_name(self):
-        if "rt" not in self.psm_df.columns:
+        if PsmDfCols.RT not in self._psm_df.columns:
             return
         if PsmDfCols.RT_NORM not in self._psm_df.columns:
             self._normalize_rt()
-        if "raw_name" not in self._psm_df.columns:
+        if PsmDfCols.RAW_NAME not in self._psm_df.columns:
             return
-        for _, df_group in self._psm_df.groupby("raw_name"):
+        for _, df_group in self._psm_df.groupby(PsmDfCols.RAW_NAME):
             self._psm_df.loc[df_group.index, PsmDfCols.RT_NORM] = (
                 df_group[PsmDfCols.RT_NORM] / df_group[PsmDfCols.RT_NORM].max()
             )
@@ -414,10 +414,10 @@ class PSMReaderBase:
             self._psm_df[col] = origin_df[map_col]
 
         if (
-            "scan_num" in self._psm_df.columns
+            PsmDfCols.SCAN_NUM in self._psm_df.columns
             and PsmDfCols.SPEC_IDX not in self._psm_df.columns
         ):
-            self._psm_df[PsmDfCols.SPEC_IDX] = self._psm_df.scan_num - 1
+            self._psm_df[PsmDfCols.SPEC_IDX] = self._psm_df[PsmDfCols.SCAN_NUM] - 1
 
     def _transform_table(self, origin_df: pd.DataFrame):
         """
@@ -505,7 +505,7 @@ class PSMReaderBase:
 
         reset_precursor_df(self._psm_df)
 
-        if "precursor_mz" not in self._psm_df:
+        if PsmDfCols.PRECURSOR_MZ not in self._psm_df:
             self._psm_df = update_precursor_mz(self._psm_df)
 
         if (

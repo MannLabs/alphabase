@@ -80,13 +80,13 @@ class AlphaPeptReader(PSMReaderBase):
         with h5py.File(filename, "r") as _hdf:
             dataset = _hdf[self.hdf_dataset]
             df = pd.DataFrame({col: dataset[col] for col in dataset})
-            df["raw_name"] = os.path.basename(filename)[: -len(".ms_data.hdf")]
+            df[PsmDfCols.RAW_NAME] = os.path.basename(filename)[: -len(".ms_data.hdf")]
             df["precursor"] = df["precursor"].str.decode("utf-8")
             # df['naked_sequence'] = df['naked_sequence'].str.decode('utf-8')
             if "scan_no" in df.columns:
                 df["scan_no"] = df["scan_no"].astype("int")
                 df["raw_idx"] = df["scan_no"] - 1  # if thermo, use scan-1 as spec_idx
-            df["charge"] = df["charge"].astype(int)
+            df[PsmDfCols.CHARGE] = df[PsmDfCols.CHARGE].astype(int)
         return df
 
     def _load_modifications(self, df: pd.DataFrame):
