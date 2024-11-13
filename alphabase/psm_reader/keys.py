@@ -59,11 +59,10 @@ class PsmDfCols(metaclass=ConstantsClass):
 class LibPsmDfCols(metaclass=ConstantsClass):
     """Constants for accessing the columns of a Library PSM dataframe."""
 
-    # only used for reader_type=library_reader_base
     FRAG_START_IDX = "frag_start_idx"
     FRAG_STOP_IDX = "frag_stop_idx"
 
-    # only used for reader_type=library_reader_base, not referenced in reader classes
+    # not referenced in reader classes
     FRAGMENT_INTENSITY = "fragment_intensity"
     FRAGMENT_MZ = "fragment_mz"
     FRAGMENT_TYPE = "fragment_type"
