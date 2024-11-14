@@ -236,8 +236,8 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
         indices[1:] = np.array(nAA_list) - 1
         indices = np.cumsum(indices)
 
-        df["frag_start_idx"] = indices[:-1]
-        df["frag_stop_idx"] = indices[1:]
+        df[LibPsmDfCols.FRAG_START_IDX] = indices[:-1]
+        df[LibPsmDfCols.FRAG_STOP_IDX] = indices[1:]
 
         return df
 
