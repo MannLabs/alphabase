@@ -26,15 +26,15 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
             "y_modloss_z1",
             "y_modloss_z2",
         ],
-        column_mapping: dict = None,
-        modification_mapping: dict = None,
+        column_mapping: typing.Optional[dict] = None,
+        modification_mapping: typing.Optional[dict] = None,
         fdr=0.01,
         fixed_C57=False,
         mod_seq_columns=psm_reader_yaml["library_reader_base"]["mod_seq_columns"],
         rt_unit="irt",
         precursor_mz_min: float = 400,
         precursor_mz_max: float = 2000,
-        decoy: str = None,
+        decoy: typing.Optional[str] = None,
         **kwargs,
     ):
         """Base class for reading spectral libraries from long format csv files.
@@ -96,11 +96,11 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
             rt_unit=rt_unit,
         )
 
-    def _init_column_mapping(self):
+    def _init_column_mapping(self) -> None:
         """Initialize the column mapping from the `psm_reader.yaml` file."""
         self.column_mapping = psm_reader_yaml["library_reader_base"]["column_mapping"]
 
-    def _find_key_columns(self, lib_df: pd.DataFrame):
+    def _find_key_columns(self, lib_df: pd.DataFrame) -> None:
         """Find and create the key columns for the spectral library.
 
         Parameters
@@ -164,7 +164,7 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
         ]
 
         # by default, all non-fragment columns are used to group the library
-        non_fragment_columns = sorted(list(set(lib_df.columns) - set(fragment_columns)))
+        non_fragment_columns = sorted(set(lib_df.columns) - set(fragment_columns))
 
         for keys, df_group in tqdm(lib_df.groupby(non_fragment_columns)):
             precursor_columns = dict(zip(non_fragment_columns, keys))
@@ -270,7 +270,7 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
     def _post_process(
         self,
         lib_df: pd.DataFrame,
-    ):
+    ) -> None:
         """Process the spectral library and create the `fragment_intensity`, `fragment_mz`dataframe.
         Reimplementation of `PSMReaderBase._post_process`.
         """
@@ -280,9 +280,7 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
         len_after = len(self._psm_df)
 
         if len_before != len_after:
-            print(
-                f"{len_before-len_after} Entries with unknown modifications are removed"
-            )
+            pass
 
         if PsmDfCols.NAA not in self._psm_df.columns:
             self._psm_df[PsmDfCols.NAA] = self._psm_df[PsmDfCols.SEQUENCE].str.len()
@@ -309,10 +307,10 @@ SWATHLibraryReader = LibraryReaderBase
 class LibraryReaderFromRawData(SpecLibBase):
     def __init__(
         self,
-        charged_frag_types: typing.List[str] = None,
+        charged_frag_types: typing.Optional[typing.List[str]] = None,
         precursor_mz_min: float = 400,
         precursor_mz_max: float = 2000,
-        decoy: str = None,
+        decoy: typing.Optional[str] = None,
         **kwargs,
     ):
         if charged_frag_types is None:
@@ -333,7 +331,7 @@ class LibraryReaderFromRawData(SpecLibBase):
             decoy=decoy,
         )
 
-    def import_psms(self, psm_files: list, psm_type: str):
+    def import_psms(self, psm_files: list, psm_type: str) -> None:
         psm_reader = psm_reader_provider.get_reader(psm_type)
         if isinstance(psm_files, str):
             self._precursor_df = psm_reader.import_file(psm_files)
@@ -345,10 +343,10 @@ class LibraryReaderFromRawData(SpecLibBase):
             self._precursor_df = pd.concat(psm_df_list, ignore_index=True)
             self._psm_df = self._precursor_df
 
-    def extract_fragments(self, raw_files: list):
+    def extract_fragments(self, raw_files: list) -> None:
         """Include two steps:
             1. self.calc_fragment_mz_df() to generate self.fragment_mz_df
-            2. Extract self.fragment_intensity_df from RAW files using AlphaRAW
+            2. Extract self.fragment_intensity_df from RAW files using AlphaRAW.
 
         Parameters
         ----------

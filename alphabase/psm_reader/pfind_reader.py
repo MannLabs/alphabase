@@ -1,3 +1,5 @@
+from typing import Optional
+
 import numpy as np
 import pandas as pd
 
@@ -86,8 +88,8 @@ class pFindReader(PSMReaderBase):
     def __init__(
         self,
         *,
-        column_mapping: dict = None,
-        modification_mapping: dict = None,
+        column_mapping: Optional[dict] = None,
+        modification_mapping: Optional[dict] = None,
         fdr=0.01,
         keep_decoy=False,
         **kwargs,
@@ -100,10 +102,10 @@ class pFindReader(PSMReaderBase):
             **kwargs,
         )
 
-    def _init_column_mapping(self):
+    def _init_column_mapping(self) -> None:
         self.column_mapping = psm_reader_yaml["pfind"]["column_mapping"]
 
-    def _translate_modifications(self):
+    def _translate_modifications(self) -> None:
         pass
 
     def _load_file(self, filename):
@@ -118,17 +120,17 @@ class pFindReader(PSMReaderBase):
         pfind_df["Proteins"] = pfind_df["Proteins"].apply(parse_pfind_protein)
         return pfind_df
 
-    def _translate_decoy(self, origin_df=None):
+    def _translate_decoy(self, origin_df=None) -> None:
         self._psm_df[PsmDfCols.DECOY] = (
             self._psm_df[PsmDfCols.DECOY] == "decoy"
         ).astype(np.int8)
 
-    def _translate_score(self, origin_df=None):
+    def _translate_score(self, origin_df=None) -> None:
         self._psm_df[PsmDfCols.SCORE] = -np.log(
             self._psm_df[PsmDfCols.SCORE].astype(float) + 1e-100
         )
 
-    def _load_modifications(self, pfind_df):
+    def _load_modifications(self, pfind_df) -> None:
         if len(pfind_df) == 0:
             self._psm_df[PsmDfCols.MODS] = ""
             self._psm_df[PsmDfCols.MOD_SITES] = ""
@@ -143,6 +145,6 @@ class pFindReader(PSMReaderBase):
         )
 
 
-def register_readers():
+def register_readers() -> None:
     psm_reader_provider.register_reader("pfind", pFindReader)
     psm_reader_provider.register_reader("pfind3", pFindReader)
