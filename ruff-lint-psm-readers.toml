@@ -4,15 +4,16 @@ select = [
     "ALL"
 ]
 
-# TODO this is not great but it is a workaround for now:
+# TODO excluding explicity is not great but it is a workaround for now
 exclude = [
-    "**/psm_reader/*.py",
-    "**/spectral_library/reader.py",
+    "**/psm_reader/*.py", # TODO remove
+    "**/spectral_library/reader.py", # TODO remove
     "**/*.ipynb",
     "**/tests/*",
     "setup.py",
     "docs/**",
     "test_*",
+    "alphabase/__init__.py",
     "alphabase/*utils.py",
     "alphabase/gui.py",
     "alphabase/cli.py",
