@@ -6,8 +6,8 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 
-import alphabase.peptide.mobility as mobility
 from alphabase.constants._const import CONST_FILE_FOLDER
+from alphabase.peptide import mobility
 from alphabase.peptide.precursor import reset_precursor_df, update_precursor_mz
 from alphabase.psm_reader.keys import PsmDfCols
 from alphabase.utils import get_delimiter
@@ -15,8 +15,7 @@ from alphabase.yaml_utils import load_yaml
 
 
 def translate_other_modification(mod_str: str, mod_dict: dict) -> str:
-    """
-    Translate modifications of `mod_str` to the AlphaBase
+    """Translate modifications of `mod_str` to the AlphaBase
     format mapped by mod_dict.
 
     Parameters
@@ -28,13 +27,14 @@ def translate_other_modification(mod_str: str, mod_dict: dict) -> str:
             translate mod dict from others to AlphaBase,
             e.g. for pFind, key=['Phospho[S]','Oxidation[M]'],
             value=['Phospho@S','Oxidation@M']
+
     Returns
     -------
     str
         new mods in AlphaBase format seperated by ';'. if any
         modification is not in `mod_dict`, return pd.NA.
-    """
 
+    """
     if mod_str == "":
         return "", []
     ret_mods = []
@@ -47,13 +47,11 @@ def translate_other_modification(mod_str: str, mod_dict: dict) -> str:
 
     if len(unknown_mods) > 0:
         return pd.NA, unknown_mods
-    else:
-        return ";".join(ret_mods), []
+    return ";".join(ret_mods), []
 
 
 def _keep_modifications(mod_str: str, mod_set: set) -> str:
-    """
-    Check if modifications of `mod_str` are in `mod_set`.
+    """Check if modifications of `mod_str` are in `mod_set`.
 
     Parameters
     ----------
@@ -62,11 +60,13 @@ def _keep_modifications(mod_str: str, mod_set: set) -> str:
         e.g. Oxidation@M;Phospho@S.
     mod_set : set
         mod set to check
+
     Returns
     -------
     str
         original `mod_str` if all modifications are in mod_set
         else pd.NA.
+
     """
     if not mod_str:
         return ""
@@ -153,8 +153,8 @@ class PSMReaderBase:
             will be normalized by rt_norm = (self.psm_df[PsmDfCols.RT]-rt_min)/(rt_max-rt_min).
             It is useful to normalize iRT values as they contain negative values.
             Defaults to False.
-        """
 
+        """
         self.modification_mapping = None
         self.rev_mod_mapping = None
 
@@ -179,8 +179,7 @@ class PSMReaderBase:
         return self._psm_df
 
     def add_modification_mapping(self, modification_mapping: dict):
-        """
-        Append additional modification mappings for the search engine.
+        """Append additional modification mappings for the search engine.
 
         Parameters
         ----------
@@ -193,6 +192,7 @@ class PSMReaderBase:
             'Dimethyl@Any_N-term': '_(Dimethyl)', # str
             })
             ```
+
         """
         if (
             modification_mapping is None
@@ -207,11 +207,10 @@ class PSMReaderBase:
                     self.modification_mapping[key].append(val)
                 else:
                     self.modification_mapping[key].extend(val)
+            elif isinstance(val, str):
+                self.modification_mapping[key] = [val]
             else:
-                if isinstance(val, str):
-                    self.modification_mapping[key] = [val]
-                else:
-                    self.modification_mapping[key] = val
+                self.modification_mapping[key] = val
 
         self.set_modification_mapping(self.modification_mapping)
 
@@ -264,8 +263,7 @@ class PSMReaderBase:
         """Wrapper for import_file()"""
         if isinstance(_file, list):
             return self.import_files(_file)
-        else:
-            return self.import_file(_file)
+        return self.import_file(_file)
 
     def import_files(self, file_list: list):
         df_list = []
@@ -275,8 +273,7 @@ class PSMReaderBase:
         return self._psm_df
 
     def import_file(self, _file: str) -> pd.DataFrame:
-        """
-        This is the main entry function of PSM readers,
+        """This is the main entry function of PSM readers,
         it imports the file with following steps:
         ```
         origin_df = self._load_file(_file)
@@ -292,6 +289,7 @@ class PSMReaderBase:
         ----------
         _file: str
             file path or file stream (io).
+
         """
         origin_df = self._load_file(_file)
         if len(origin_df) == 0:
@@ -334,10 +332,8 @@ class PSMReaderBase:
             min_rt = self._psm_df[PsmDfCols.RT].min()
             max_rt = self._psm_df[PsmDfCols.RT].max()
             if min_rt < 0:  # iRT
-                if min_rt < self._min_irt_value:
-                    min_rt = self._min_irt_value
-                if max_rt > self._max_irt_value:
-                    max_rt = self._max_irt_value
+                min_rt = max(min_rt, self._min_irt_value)
+                max_rt = min(max_rt, self._max_irt_value)
 
             elif not self._min_max_rt_norm:
                 min_rt = 0
@@ -359,8 +355,7 @@ class PSMReaderBase:
             )
 
     def _load_file(self, filename: str) -> pd.DataFrame:
-        """
-        Load original dataframe from PSM filename.
+        """Load original dataframe from PSM filename.
         Different search engines may store PSMs in different ways:
         tsv, csv, HDF, XML, ...
 
@@ -374,9 +369,11 @@ class PSMReaderBase:
         NotImplementedError
             Subclasses must re-implement this method
 
-        Returns:
+        Returns
+        -------
         pd.DataFrame
             loaded dataframe
+
         """
         raise NotImplementedError(f'"{self.__class__}" must implement "_load_file()"')
 
@@ -394,8 +391,7 @@ class PSMReaderBase:
         return mapped_columns
 
     def _translate_columns(self, origin_df: pd.DataFrame):
-        """
-        Translate the dataframe from other search engines
+        """Translate the dataframe from other search engines
         to AlphaBase format
 
         Parameters
@@ -407,6 +403,7 @@ class PSMReaderBase:
         -------
         None
             Add information inplace into self._psm_df
+
         """
         mapped_columns = self._find_mapped_columns(origin_df)
         self._psm_df = pd.DataFrame()
@@ -420,8 +417,7 @@ class PSMReaderBase:
             self._psm_df[PsmDfCols.SPEC_IDX] = self._psm_df[PsmDfCols.SCAN_NUM] - 1
 
     def _transform_table(self, origin_df: pd.DataFrame):
-        """
-        Transform the dataframe format if needed.
+        """Transform the dataframe format if needed.
         Usually only needed in combination with spectral libraries.
 
         Parameters
@@ -433,8 +429,8 @@ class PSMReaderBase:
         -------
         None
             Add information inplace into self._psm_df
+
         """
-        pass
 
     def _load_modifications(self, origin_df: pd.DataFrame):
         """Read modification information from 'origin_df'.
@@ -445,22 +441,22 @@ class PSMReaderBase:
         ----------
         origin_df : pd.DataFrame
             dataframe of original search engine.
+
         """
         raise NotImplementedError(
             f'"{self.__class__}" must implement "_load_modifications()"'
         )
 
     def _translate_modifications(self):
-        """
-        Translate modifications to AlphaBase format.
+        """Translate modifications to AlphaBase format.
 
         Raises
         ------
         KeyError
             if `mod` in `mod_names` is
             not in `self.modification_mapping`
-        """
 
+        """
         self._psm_df[PsmDfCols.MODS], unknown_mods = zip(
             *self._psm_df[PsmDfCols.MODS].apply(
                 translate_other_modification, mod_dict=self.rev_mod_mapping
@@ -479,8 +475,7 @@ class PSMReaderBase:
             )
 
     def _post_process(self, origin_df: pd.DataFrame):
-        """
-        Set 'nAA' columns, remove unknown modifications
+        """Set 'nAA' columns, remove unknown modifications
         and perform other post processings,
         e.g. get 'rt_norm', remove decoys, filter FDR...
 
@@ -488,6 +483,7 @@ class PSMReaderBase:
         ----------
         origin_df : pd.DataFrame
             the loaded original df
+
         """
         self._psm_df[PsmDfCols.NAA] = self._psm_df[PsmDfCols.SEQUENCE].str.len()
 
@@ -527,9 +523,7 @@ class PSMReaderBase:
         self,
         include_mod_set=None,
     ):
-        """
-        Only keeps peptides with modifications in `include_mod_list`.
-        """
+        """Only keeps peptides with modifications in `include_mod_list`."""
         if include_mod_set is None:
             include_mod_set = set(
                 [

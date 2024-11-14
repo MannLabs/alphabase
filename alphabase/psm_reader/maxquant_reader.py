@@ -79,6 +79,7 @@ def parse_mod_seq(
 
         str: modification sites, separated by ';'.
         0 for N-term; -1 for C-term; 1 to N for normal modifications.
+
     """
     PeptideModSeq = modseq
     underscore_for_ncterm = modseq[0] == "_"
@@ -170,6 +171,7 @@ class MaxQuantReader(PSMReaderBase):
         mod_seq_columns : list, optional
             The columns to find modified sequences,
             by default ['Modified sequence']
+
         """
         if mod_seq_columns is None:
             mod_seq_columns = ["Modified sequence"]
@@ -211,8 +213,7 @@ class MaxQuantReader(PSMReaderBase):
                 self.modification_mapping[mod_name] = [unimod]
 
     def _extend_mod_brackets(self):
-        """update modification_mapping to include different bracket types."""
-
+        """Update modification_mapping to include different bracket types."""
         for key, mod_list in list(self.modification_mapping.items()):
             mod_set = set(mod_list)
             # extend bracket types of modifications

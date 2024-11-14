@@ -41,7 +41,6 @@ class SageModificationTranslation:
             The number of processes to use for translation.
 
         """
-
         self.custom_translation_df = custom_translation_df
         self.ppm_tolerance = ppm_tolerance
         self.mp_process_num = mp_process_num
@@ -73,8 +72,8 @@ class SageModificationTranslation:
         -------
         pd.DataFrame
             The PSM dataframe with columns 'mod_sites' and 'mods'.
-        """
 
+        """
         # 1. Discover all modifications in the PSMs
         discovered_modifications_df = _discover_modifications(psm_df)
         translation_df = pd.DataFrame()
@@ -113,7 +112,6 @@ class SageModificationTranslation:
 
         Parameters
         ----------
-
         discovered_modifications_df : pd.DataFrame
             The discovered modifications dataframe.
 
@@ -122,7 +120,6 @@ class SageModificationTranslation:
 
         Returns
         -------
-
         typing.Tuple[pd.DataFrame, pd.DataFrame]
             The updated discovered modifications dataframe and translation dataframe.
 
@@ -170,8 +167,8 @@ class SageModificationTranslation:
         -------
         pd.DataFrame
             The updated translation dataframe.
-        """
 
+        """
         annotated_df = _get_annotated_mod_df()
         discovered_modifications_df["matched_mod_name"] = (
             discovered_modifications_df.apply(
@@ -216,7 +213,6 @@ def _discover_modifications(psm_df: pd.DataFrame) -> pd.DataFrame:
         A dataframe with columns 'modification', 'previous_aa', 'is_nterm', 'is_cterm', 'mass'.
 
     """
-
     modifications = (
         psm_df[PsmDfCols.MODIFIED_SEQUENCE]
         .apply(_match_modified_sequence)
@@ -241,7 +237,6 @@ def _match_modified_sequence(
 
     Parameters
     ----------
-
     sequence : str
         The sequence string.
 
@@ -252,7 +247,6 @@ def _match_modified_sequence(
         Each match has the structure (match, previous_aa, is_nterm, is_cterm, mass)
 
     """
-
     matches = []
     # Matches the square bracket modification pattern from modified sequences
     # [-100.0]-PEPTIDE -> [('[-100.0]', '', True, False, -100.0)]
@@ -278,12 +272,10 @@ def _lookup_modification(
     mod_annotated_df: pd.DataFrame,
     ppm_tolerance: int = 10,
 ) -> str:
-    """
-    Look up a single modification based on the observed mass and the previous amino acid.
+    """Look up a single modification based on the observed mass and the previous amino acid.
 
     Parameters
     ----------
-
     mass_observed : float
         The observed mass of the modification.
 
@@ -298,12 +290,10 @@ def _lookup_modification(
 
     Returns
     -------
-
     str
         The name of the matched modification in alphabase format.
 
     """
-
     mass_distance = mod_annotated_df["mass"].values - mass_observed
     ppm_distance = mass_distance / mass_observed * 1e6
     ppm_distance = np.abs(ppm_distance)
@@ -352,7 +342,6 @@ def _translate_modifications(
         A tuple with the translated modification sites and names.
 
     """
-
     accumulated_non_sequence_chars = 0
 
     mod_sites = []
@@ -424,7 +413,6 @@ def _apply_translate_modifications(
 
     Parameters
     ----------
-
     psm_df : pd.DataFrame
         The PSM dataframe with column 'modified_sequence'.
 
@@ -433,12 +421,10 @@ def _apply_translate_modifications(
 
     Returns
     -------
-
     pd.DataFrame
         The PSM dataframe with columns 'mod_sites' and 'mods'.
 
     """
-
     psm_df[PsmDfCols.MOD_SITES], psm_df[PsmDfCols.MODS] = zip(
         *psm_df[PsmDfCols.MODIFIED_SEQUENCE].apply(
             lambda x: _translate_modifications(x, mod_translation_df)
@@ -460,11 +446,10 @@ def _batchify_df(df: pd.DataFrame, mp_batch_size: int) -> typing.Generator:
 
     Returns
     -------
-
     typing.Generator
         A generator for the batchified dataframe.
-    """
 
+    """
     for i in range(0, len(df), mp_batch_size):
         yield df.iloc[i : i + mp_batch_size, :]
 
@@ -480,7 +465,6 @@ def _apply_translate_modifications_mp(
 
     Parameters
     ----------
-
     psm_df : pd.DataFrame
         The PSM dataframe.
 
@@ -492,8 +476,8 @@ def _apply_translate_modifications_mp(
 
     mp_process_num : int
         The number of parallel processes
-    """
 
+    """
     df_list = []
     with mp.get_context("spawn").Pool(mp_process_num) as p:
         processing = p.imap(
@@ -519,7 +503,6 @@ def _get_annotated_mod_df() -> pd.DataFrame:
 
     Returns
     -------
-
     pd.DataFrame
         The annotated modification dataframe with columns 'mass', 'previous_aa', 'is_nterm', 'is_cterm', 'unimod_id', 'localizer_rank'.
 
@@ -548,20 +531,17 @@ def _sage_spec_idx_from_scan_nr(scan_indicator_str: str) -> int:
 
     Parameters
     ----------
-
     scan_indicator_str : str
         The scan_indicator_str field in Sage output.
         e.g. `'controllerType=0 controllerNumber=1 scan=7846'`
 
     Returns
     -------
-
     int
         The 0-based spectrum index.
 
     Examples
     --------
-
     >>> _sage_spec_idx_from_scan_nr('controllerType=0 controllerNumber=1 scan=7846')
     7845
 
