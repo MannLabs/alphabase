@@ -31,6 +31,9 @@ exclude = [
 ]
 
 ignore = [
+    #
+    "PD002", #pandas-use-of-inplace-argument # TODO revisit
+
     # same as pyproject.toml
     "E501",  # Line too long  (ruff wraps code, but not docstrings)
     "B028",  #  No explicit `stacklevel` keyword argument found (for warnings)
