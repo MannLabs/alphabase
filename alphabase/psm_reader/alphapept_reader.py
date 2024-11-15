@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 from typing import Optional
 
 import h5py
@@ -18,7 +18,7 @@ from alphabase.psm_reader.psm_reader import (
 def parse_ap(precursor):
     """Parser to parse peptide strings."""
     items = precursor.split("_")
-    decoy = 1 if len(items) == 3 else 0
+    decoy = 1 if len(items) == 3 else 0  # noqa: PLR2004 magic value
     modseq = items[0]
     charge = items[-1]
 
@@ -77,7 +77,7 @@ class AlphaPeptReader(PSMReaderBase):
         with h5py.File(filename, "r") as _hdf:
             dataset = _hdf[self.hdf_dataset]
             df = pd.DataFrame({col: dataset[col] for col in dataset})
-            df[PsmDfCols.RAW_NAME] = os.path.basename(filename)[: -len(".ms_data.hdf")]
+            df[PsmDfCols.RAW_NAME] = Path(filename).name[: -len(".ms_data.hdf")]
             df["precursor"] = df["precursor"].str.decode("utf-8")
             # df['naked_sequence'] = df['naked_sequence'].str.decode('utf-8')
             if "scan_no" in df.columns:

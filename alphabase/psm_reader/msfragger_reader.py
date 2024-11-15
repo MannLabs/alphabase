@@ -23,7 +23,7 @@ mass_mapped_mods = psm_reader_yaml["msfragger_pepxml"]["mass_mapped_mods"]
 mod_mass_tol = psm_reader_yaml["msfragger_pepxml"]["mod_mass_tol"]
 
 
-def _get_mods_from_masses(sequence, msf_aa_mods):
+def _get_mods_from_masses(sequence, msf_aa_mods):  # noqa: PLR0912, C901 many branches, too complex TODO: refactor
     mods = []
     mod_sites = []
     aa_mass_diffs = []
@@ -78,7 +78,7 @@ def _get_mods_from_masses(sequence, msf_aa_mods):
     )
 
 
-class MSFragger_PSM_TSV_Reader(PSMReaderBase):
+class MSFragger_PSM_TSV_Reader(PSMReaderBase):  # noqa: N801 name should use CapWords convention TODO: refactor
     def __init__(
         self,
         *,
@@ -129,7 +129,7 @@ class MSFraggerPepXML(PSMReaderBase):
         msf_df[PsmDfCols.RAW_NAME] = (
             msf_df["spectrum"].str.split(".").apply(lambda x: x[0])
         )
-        msf_df["to_remove"] = 0  # TODO revisit
+        msf_df["to_remove"] = 0  # TODO: revisit
         self.column_mapping[PsmDfCols.TO_REMOVE] = "to_remove"
         return msf_df
 

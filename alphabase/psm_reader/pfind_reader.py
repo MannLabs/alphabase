@@ -12,7 +12,7 @@ from alphabase.psm_reader.psm_reader import (
 )
 
 
-def _convert_one_pfind_mod(mod: str) -> Optional[str]:
+def _convert_one_pfind_mod(mod: str) -> Optional[str]:  # noqa:  C901 too complex (11 > 10) TODO: refactor
     if mod[-1] == ")":
         mod = mod[: (mod.find("(") - 1)]
         idx = mod.rfind("[")
