@@ -137,6 +137,8 @@ def parse_mod_seq(
 class MaxQuantReader(PSMReaderBase):
     """Reader for MaxQuant data."""
 
+    _reader_name = "maxquant"
+
     def __init__(  # noqa: PLR0913 many arguments in function definition
         self,
         *,
@@ -258,9 +260,6 @@ class MaxQuantReader(PSMReaderBase):
             self._psm_df[PsmDfCols.DECOY] = (
                 self._psm_df[PsmDfCols.DECOY] == "-"
             ).astype(np.int8)
-
-    def _init_column_mapping(self) -> None:
-        self.column_mapping = psm_reader_yaml["maxquant"]["column_mapping"]
 
     def _load_file(self, filename: str) -> pd.DataFrame:
         csv_sep = self._get_table_delimiter(filename)

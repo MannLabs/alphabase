@@ -23,6 +23,8 @@ class SpectronautReader(MaxQuantReader):
 
     """
 
+    _reader_type = "spectronaut"
+
     def __init__(  # noqa: PLR0913 many arguments in function definition
         self,
         *,
@@ -52,9 +54,6 @@ class SpectronautReader(MaxQuantReader):
 
         self.mod_seq_column = "ModifiedPeptide"
         self._min_max_rt_norm = True
-
-    def _init_column_mapping(self) -> None:
-        self.column_mapping = psm_reader_yaml["spectronaut"]["column_mapping"]
 
     def _load_file(self, filename: str) -> pd.DataFrame:
         self.csv_sep = self._get_table_delimiter(filename)
@@ -103,6 +102,8 @@ class SwathReader(SpectronautReader):
 class DiannReader(SpectronautReader):
     """Reader for DIANN data."""
 
+    _reader_type = "diann"
+
     def __init__(  # noqa: PLR0913 many arguments in function definition
         self,
         *,
@@ -128,9 +129,6 @@ class DiannReader(SpectronautReader):
         self.mod_seq_column = "Modified.Sequence"
         self._min_max_rt_norm = False
 
-    def _init_column_mapping(self) -> None:
-        self.column_mapping = psm_reader_yaml["diann"]["column_mapping"]
-
     def _load_file(self, filename: str) -> pd.DataFrame:
         self.csv_sep = self._get_table_delimiter(filename)
         return pd.read_csv(filename, sep=self.csv_sep, keep_default_na=False)
@@ -154,6 +152,8 @@ class SpectronautReportReader(MaxQuantReader):
         Delimiter for TSV/CSV, by default ','
 
     """
+
+    _reader_type = "spectronaut_report"
 
     def __init__(  # noqa: PLR0913 many arguments in function definition
         self,
@@ -180,9 +180,6 @@ class SpectronautReportReader(MaxQuantReader):
         self.precursor_column = "EG.PrecursorId"
 
         self._min_max_rt_norm = False
-
-    def _init_column_mapping(self) -> None:
-        self.column_mapping = psm_reader_yaml["spectronaut_report"]["column_mapping"]
 
     def _load_file(self, filename: str) -> pd.DataFrame:
         self.mod_seq_column = "ModifiedSequence"

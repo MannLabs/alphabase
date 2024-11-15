@@ -2,6 +2,7 @@
 
 import copy
 import warnings
+from abc import ABC
 from pathlib import Path
 from typing import Dict, List, NoReturn, Optional, Set, Type, Union
 
@@ -81,8 +82,11 @@ def _keep_modifications(mod_str: str, mod_set: set) -> str:
 psm_reader_yaml = load_yaml(Path(CONST_FILE_FOLDER) / "psm_reader.yaml")
 
 
-class PSMReaderBase:
+class PSMReaderBase(ABC):
     """The Base class for all PSMReaders."""
+
+    # the type of the reader, this references a key in psm_reader.yaml
+    _reader_type: str
 
     def __init__(
         self,
@@ -108,12 +112,12 @@ class PSMReaderBase:
             in other engine's result.
             If it is None, this dict will be init by
             `self._init_column_mapping`. The dict values could be
-            either str or list, for exaplme:
+            either str or list, for example:
             ```
             columns_mapping = {
-            'sequence': 'NakedSequence', #str
-            'charge': 'Charge', #str
-            'proteins':['Proteins','UniprotIDs'], # list, this reader will automatically detect all of them.
+                'sequence': 'NakedSequence',
+                'charge': 'Charge',
+                'proteins':['Proteins','UniprotIDs'] # list, this reader will automatically detect all of them.
             }
             ```
             Defaults to None.
@@ -279,9 +283,7 @@ class PSMReaderBase:
                 self.rev_mod_mapping[other_mod] = this_mod
 
     def _init_column_mapping(self) -> NoReturn:
-        raise NotImplementedError(
-            f'"{self.__class__}" must implement "_init_column_mapping()"'
-        )
+        self.column_mapping = psm_reader_yaml[self._reader_type]["column_mapping"]
 
     def load(self, _file: Union[List[str], str]) -> pd.DataFrame:
         """Wrapper for import_file()."""
@@ -329,10 +331,10 @@ class PSMReaderBase:
             self._post_process()
         return self._psm_df
 
-    def _translate_decoy(self) -> None:
+    def _translate_decoy(self) -> None:  # noqa: B027 empty method in an abstract base class
         pass
 
-    def _translate_score(self) -> None:
+    def _translate_score(self) -> None:  # noqa: B027 empty method in an abstract base class
         # some scores are evalue/pvalue, it should be translated
         # to -log(evalue), as score is the larger the better
         pass
@@ -443,7 +445,7 @@ class PSMReaderBase:
         ):
             self._psm_df[PsmDfCols.SPEC_IDX] = self._psm_df[PsmDfCols.SCAN_NUM] - 1
 
-    def _transform_table(self) -> None:
+    def _transform_table(self) -> None:  # noqa: B027 empty method in an abstract base class
         """Transform the dataframe format if needed.
 
         Usually only needed in combination with spectral libraries.

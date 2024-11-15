@@ -18,6 +18,8 @@ from alphabase.spectral_library.base import SpecLibBase
 class LibraryReaderBase(MaxQuantReader, SpecLibBase):
     """Base class for reading spectral libraries."""
 
+    _reader_type = "library_reader_base"
+
     def __init__(  # noqa: PLR0913 many arguments in function definition
         self,
         charged_frag_types: List[str] = [
@@ -114,10 +116,6 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
                 f"({key}={value}) will be forbidden in alphabase>1.5.0.",
                 FutureWarning,
             )
-
-    def _init_column_mapping(self) -> None:
-        """Initialize the column mapping from the `psm_reader.yaml` file."""
-        self.column_mapping = psm_reader_yaml["library_reader_base"]["column_mapping"]
 
     def _find_key_columns(self, lib_df: pd.DataFrame) -> None:
         """Find and create the key columns for the spectral library.
