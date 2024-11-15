@@ -2,6 +2,7 @@ from typing import Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
+from pandas._libs.missing import NAType
 
 import alphabase.constants.modification as ap_mod
 from alphabase.psm_reader.keys import PsmDfCols
@@ -47,7 +48,7 @@ def _convert_one_pfind_mod(mod: str) -> Optional[str]:  # noqa:  C901 too comple
     return return_value
 
 
-def translate_pFind_mod(mod_str: str) -> Union[str, pd.NA]:  # noqa: N802 name `get_pFind_mods` should be lowercase TODO: used by peptdeep
+def translate_pFind_mod(mod_str: str) -> Union[str, NAType]:  # noqa: N802 name `get_pFind_mods` should be lowercase TODO: used by peptdeep
     if not mod_str:
         return ""
     ret_mods = []
