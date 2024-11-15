@@ -1,6 +1,5 @@
 """Module for reading spectral libraries."""
 
-import warnings
 from typing import List, Optional
 
 import numpy as np
@@ -108,14 +107,8 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
             fixed_C57=fixed_C57,
             mod_seq_columns=mod_seq_columns,
             rt_unit=rt_unit,
+            **kwargs,
         )
-
-        for key, value in kwargs.items():  # TODO: remove and remove kwargs
-            warnings.warn(
-                f"Passed unknown arguments to {self.__class__.__name__} "
-                f"({key}={value}) will be forbidden in alphabase>1.5.0.",
-                FutureWarning,
-            )
 
     def _find_key_columns(self, lib_df: pd.DataFrame) -> None:
         """Find and create the key columns for the spectral library.
