@@ -576,6 +576,7 @@ class SageReaderBase(PSMReaderBase):
         mp_process_num: int = 10,
         **kwargs,
     ):
+        """Initialize SageReaderBase."""
         self.custom_translation_df = custom_translation_df
         self.mp_process_num = mp_process_num
 
@@ -635,6 +636,7 @@ class SageReaderTSV(SageReaderBase):
     """Reader for Sage output files in TSV format."""
 
     def __init__(self, *args, **kwargs):
+        """Initialize SageReaderTSV."""
         super().__init__(*args, **kwargs)
 
     def _load_file(self, filename: str) -> pd.DataFrame:
@@ -645,6 +647,7 @@ class SageReaderParquet(SageReaderBase):
     """Reader for Sage output files in parquet format."""
 
     def __init__(self, *args, **kwargs):
+        """Initialize SageReaderParquet."""
         super().__init__(*args, **kwargs)
 
     def _load_file(self, filename: str) -> pd.DataFrame:
@@ -652,5 +655,6 @@ class SageReaderParquet(SageReaderBase):
 
 
 def register_readers() -> None:
+    """Register Sage readers."""
     psm_reader_provider.register_reader("sage_tsv", SageReaderTSV)
     psm_reader_provider.register_reader("sage_parquet", SageReaderParquet)

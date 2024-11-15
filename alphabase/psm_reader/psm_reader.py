@@ -196,6 +196,7 @@ class PSMReaderBase:
 
     @property
     def psm_df(self) -> pd.DataFrame:
+        """Get the PSM DataFrame."""
         return self._psm_df
 
     def add_modification_mapping(self, modification_mapping: dict) -> None:
@@ -237,6 +238,7 @@ class PSMReaderBase:
     def set_modification_mapping(
         self, modification_mapping: Optional[dict] = None
     ) -> None:
+        """Set the modification mapping."""
         if modification_mapping is None:
             self._init_modification_mapping()
         elif isinstance(modification_mapping, str):
@@ -288,6 +290,7 @@ class PSMReaderBase:
         return self.import_file(_file)
 
     def import_files(self, file_list: List[str]) -> pd.DataFrame:
+        """Import multiple files."""
         df_list = [self.import_file(file) for file in file_list]
         self._psm_df = pd.concat(df_list, ignore_index=True)
         return self._psm_df
@@ -365,10 +368,12 @@ class PSMReaderBase:
             ).clip(0, 1)
 
     def normalize_rt_by_raw_name(self) -> None:
+        """Normalize RT by raw name."""
         if PsmDfCols.RT not in self._psm_df.columns:
             return
         if PsmDfCols.RT_NORM not in self._psm_df.columns:
             self._normalize_rt()
+
         if PsmDfCols.RAW_NAME not in self._psm_df.columns:
             return
         for _, df_group in self._psm_df.groupby(PsmDfCols.RAW_NAME):
@@ -563,11 +568,13 @@ class PSMReaderProvider:
     """A factory class to register and get readers for different PSM types."""
 
     def __init__(self):
+        """Initialize PSMReaderProvider."""
         self.reader_dict = {}
 
     def register_reader(
         self, reader_type: str, reader_class: Type[PSMReaderBase]
     ) -> None:
+        """Register a reader by reader_type."""
         self.reader_dict[reader_type.lower()] = reader_class
 
     def get_reader(
@@ -580,6 +587,7 @@ class PSMReaderProvider:
         keep_decoy: bool = False,
         **kwargs,
     ) -> PSMReaderBase:
+        """Get a reader by reader_type."""
         return self.reader_dict[reader_type.lower()](
             column_mapping=column_mapping,
             modification_mapping=modification_mapping,
@@ -592,6 +600,7 @@ class PSMReaderProvider:
         self,
         yaml_dict: dict,
     ) -> PSMReaderBase:
+        """Get a reader by a yaml dict."""
         return self.get_reader(**copy.deepcopy(yaml_dict))
 
 

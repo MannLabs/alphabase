@@ -35,6 +35,7 @@ class SpectronautReader(MaxQuantReader):
         rt_unit: str = "minute",
         **kwargs,
     ):
+        """Initialize SpectronautReader."""
         if mod_seq_columns is None:
             mod_seq_columns = psm_reader_yaml["spectronaut"]["mod_seq_columns"]
 
@@ -165,6 +166,7 @@ class SpectronautReportReader(MaxQuantReader):
         rt_unit: str = "minute",
         **kwargs,
     ):
+        """Initialize SpectronautReportReader."""
         super().__init__(
             column_mapping=column_mapping,
             modification_mapping=modification_mapping,
@@ -194,6 +196,7 @@ class SpectronautReportReader(MaxQuantReader):
 
 
 def register_readers() -> None:
+    """Register readers for Spectronaut's output library and reports, Swath data and DIANN data."""
     psm_reader_provider.register_reader("spectronaut", SpectronautReader)
     psm_reader_provider.register_reader("speclib_tsv", SpectronautReader)
     psm_reader_provider.register_reader("openswath", SwathReader)

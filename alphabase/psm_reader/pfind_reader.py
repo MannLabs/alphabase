@@ -51,6 +51,7 @@ def _convert_one_pfind_mod(mod: str) -> Optional[str]:  # noqa:  C901 too comple
 
 
 def translate_pFind_mod(mod_str: str) -> Union[str, NAType]:  # noqa: N802 name `get_pFind_mods` should be lowercase TODO: used by peptdeep
+    """Translate pFind modification string."""
     if not mod_str:
         return ""
     ret_mods = []
@@ -63,6 +64,7 @@ def translate_pFind_mod(mod_str: str) -> Union[str, NAType]:  # noqa: N802 name 
 
 
 def get_pFind_mods(pfind_mod_str: str) -> Tuple[str, str]:  # noqa: N802 name `get_pFind_mods` should be lowercase TODO: used by peptdeep
+    """Parse pFind modification string."""
     pfind_mod_str = pfind_mod_str.strip(";")
     if not pfind_mod_str:
         return "", ""
@@ -81,6 +83,7 @@ def get_pFind_mods(pfind_mod_str: str) -> Tuple[str, str]:  # noqa: N802 name `g
 
 
 def parse_pfind_protein(protein: str, *, keep_reverse: bool = True) -> str:
+    """Parse pFind protein string."""
     proteins = protein.strip("/").split("/")
     return ";".join(
         [
@@ -156,5 +159,6 @@ class pFindReader(PSMReaderBase):  # noqa: N801 name `pFindReader` should use Ca
 
 
 def register_readers() -> None:
+    """Register pFind readers."""
     psm_reader_provider.register_reader("pfind", pFindReader)
     psm_reader_provider.register_reader("pfind3", pFindReader)

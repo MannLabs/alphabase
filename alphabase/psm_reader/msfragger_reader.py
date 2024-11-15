@@ -189,6 +189,7 @@ class MSFraggerPepXML(PSMReaderBase):
 
 
 def register_readers() -> None:
+    """Register MSFragger readers."""
     psm_reader_provider.register_reader("msfragger_psm_tsv", MSFragger_PSM_TSV_Reader)
     psm_reader_provider.register_reader("msfragger", MSFragger_PSM_TSV_Reader)
     psm_reader_provider.register_reader("msfragger_pepxml", MSFraggerPepXML)

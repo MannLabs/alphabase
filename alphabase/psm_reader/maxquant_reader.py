@@ -34,6 +34,7 @@ for mod_name, unimod_id_ in MOD_DF[["mod_name", "unimod_id"]].to_numpy():
 def replace_parentheses_with_brackets(
     modseq: str,
 ) -> str:
+    """Replace parentheses with brackets in the modified sequence."""
     mod_depth = 0
     for i, aa in enumerate(modseq):
         if aa == "(":
@@ -212,6 +213,7 @@ class MaxQuantReader(PSMReaderBase):
     def set_modification_mapping(
         self, modification_mapping: Optional[dict] = None
     ) -> None:
+        """Set modification mapping."""
         super().set_modification_mapping(modification_mapping)
         self._add_all_unimod()
         self._extend_mod_brackets()
@@ -307,4 +309,5 @@ class MaxQuantReader(PSMReaderBase):
 
 
 def register_readers() -> None:
+    """Register MaxQuant reader."""
     psm_reader_provider.register_reader("maxquant", MaxQuantReader)
