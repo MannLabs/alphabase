@@ -52,6 +52,8 @@ def parse_ap(precursor: str) -> Tuple[str, str, str, str, int]:
 class AlphaPeptReader(PSMReaderBase):
     """Reader for AlphaPept's *.ms_data.hdf files."""
 
+    _reader_type = "alphapept"
+
     def __init__(
         self,
         *,
@@ -70,9 +72,6 @@ class AlphaPeptReader(PSMReaderBase):
             **kwargs,
         )
         self.hdf_dataset = "identifications"
-
-    def _init_column_mapping(self) -> None:
-        self.column_mapping = psm_reader_yaml["alphapept"]["column_mapping"]
 
     def _init_modification_mapping(self) -> None:
         self.modification_mapping = psm_reader_yaml["alphapept"]["modification_mapping"]

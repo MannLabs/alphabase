@@ -15,7 +15,6 @@ from alphabase.psm_reader.keys import PsmDfCols
 from alphabase.psm_reader.psm_reader import (
     PSMReaderBase,
     psm_reader_provider,
-    psm_reader_yaml,
 )
 
 
@@ -564,6 +563,8 @@ def _sage_spec_idx_from_scan_nr(scan_indicator_str: str) -> int:
 class SageReaderBase(PSMReaderBase):
     """Base class for SageReader."""
 
+    _reader_type = "sage"
+
     def __init__(  # noqa: PLR0913 many arguments in function definition
         self,
         *,
@@ -588,9 +589,6 @@ class SageReaderBase(PSMReaderBase):
             rt_unit=rt_unit,
             **kwargs,
         )
-
-    def _init_column_mapping(self) -> None:
-        self.column_mapping = psm_reader_yaml["sage"]["column_mapping"]
 
     def _load_file(self, filename: str) -> NoReturn:
         raise NotImplementedError
