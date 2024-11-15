@@ -318,17 +318,19 @@ class PSMReaderBase(ABC):
 
         """
         origin_df = self._load_file(_file)
-        if len(origin_df) == 0:
-            self._psm_df = pd.DataFrame()
-        else:
+        self._psm_df = pd.DataFrame()
+
+        if len(origin_df):
             # TODO: think about dropping the 'inplace' pattern here
-            self._translate_columns(origin_df)
-            self._transform_table()
-            self._translate_decoy()
-            self._translate_score()
-            self._load_modifications(origin_df)
-            self._translate_modifications()
-            self._post_process()
+            self._translate_columns(origin_df)  # only here
+            self._transform_table()  # only sage
+            self._translate_decoy()  # only sage, mq, msfragger, pfind
+            self._translate_score()  # only msfragger, pfind
+            self._load_modifications(
+                origin_df
+            )  # only sage, mq, msfragger, pfind, alphapept
+            self._translate_modifications()  # here, sage, msfragger, pfind
+            self._post_process()  # here, libraryreader, diann, msfragger
         return self._psm_df
 
     def _translate_decoy(self) -> None:  # noqa: B027 empty method in an abstract base class
@@ -430,7 +432,7 @@ class PSMReaderBase(ABC):
 
         """
         mapped_columns = self._find_mapped_columns(origin_df)
-        self._psm_df = pd.DataFrame()
+
         for col, map_col in mapped_columns.items():
             self._psm_df[col] = origin_df[map_col]
 
