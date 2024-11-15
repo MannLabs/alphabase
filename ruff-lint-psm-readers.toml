@@ -33,9 +33,7 @@ ignore = [
     "PD002", #pandas-use-of-inplace-argument # TODO revisit
 
     # these still need to be resolved:
-    "D", "ANN", "ARG002",
-    "N803", # argument name should be lowercase
-    "FBT002", "FBT001", # Boolean default positional argument in function definition
+    "D",
 
     # reader-specific
     "FA100", # Add `from __future__ import annotations` to simplify `typing.Optional`

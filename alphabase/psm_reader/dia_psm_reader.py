@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 import numpy as np
 import pandas as pd
@@ -26,13 +26,16 @@ class SpectronautReader(MaxQuantReader):
         *,
         column_mapping: Optional[dict] = None,
         modification_mapping: Optional[dict] = None,
-        fdr=0.01,
-        keep_decoy=False,
-        fixed_C57=False,
-        mod_seq_columns=psm_reader_yaml["spectronaut"]["mod_seq_columns"],
-        rt_unit="minute",
+        fdr: float = 0.01,
+        keep_decoy: bool = False,
+        fixed_C57: bool = False,  # noqa: N803 TODO: make this  *,fixed_c57  (breaking)
+        mod_seq_columns: Optional[List[str]] = None,
+        rt_unit: str = "minute",
         **kwargs,
     ):
+        if mod_seq_columns is None:
+            mod_seq_columns = psm_reader_yaml["spectronaut"]["mod_seq_columns"]
+
         super().__init__(
             column_mapping=column_mapping,
             modification_mapping=modification_mapping,
@@ -50,7 +53,7 @@ class SpectronautReader(MaxQuantReader):
     def _init_column_mapping(self) -> None:
         self.column_mapping = psm_reader_yaml["spectronaut"]["column_mapping"]
 
-    def _load_file(self, filename):
+    def _load_file(self, filename: str) -> pd.DataFrame:
         self.csv_sep = self._get_table_delimiter(filename)
         df = pd.read_csv(filename, sep=self.csv_sep, keep_default_na=False)
         self._find_mod_seq_column(df)
@@ -71,13 +74,16 @@ class SwathReader(SpectronautReader):
         *,
         column_mapping: Optional[dict] = None,
         modification_mapping: Optional[dict] = None,
-        fdr=0.01,
-        keep_decoy=False,
-        fixed_C57=False,
-        mod_seq_columns=psm_reader_yaml["spectronaut"]["mod_seq_columns"],
+        fdr: float = 0.01,
+        keep_decoy: bool = False,
+        fixed_C57: bool = False,  # noqa: N803 TODO: make this  *,fixed_c57  (breaking)
+        mod_seq_columns: Optional[List[str]] = None,
         **kwargs,
     ):
         """SWATH or OpenSWATH library, similar to `SpectronautReader`."""
+        if mod_seq_columns is None:
+            mod_seq_columns = psm_reader_yaml["spectronaut"]["mod_seq_columns"]
+
         super().__init__(
             column_mapping=column_mapping,
             modification_mapping=modification_mapping,
@@ -95,10 +101,10 @@ class DiannReader(SpectronautReader):
         *,
         column_mapping: Optional[dict] = None,
         modification_mapping: Optional[dict] = None,
-        fdr=0.01,
-        keep_decoy=False,
-        fixed_C57=False,
-        rt_unit="minute",
+        fdr: float = 0.01,
+        keep_decoy: bool = False,
+        fixed_C57: bool = False,  # noqa: N803 TODO: make this  *,fixed_c57  (breaking)
+        rt_unit: str = "minute",
         **kwargs,
     ):
         """Also similar to `MaxQuantReader`,
@@ -120,12 +126,12 @@ class DiannReader(SpectronautReader):
     def _init_column_mapping(self) -> None:
         self.column_mapping = psm_reader_yaml["diann"]["column_mapping"]
 
-    def _load_file(self, filename):
+    def _load_file(self, filename: str) -> pd.DataFrame:
         self.csv_sep = self._get_table_delimiter(filename)
         return pd.read_csv(filename, sep=self.csv_sep, keep_default_na=False)
 
-    def _post_process(self, origin_df: pd.DataFrame) -> None:
-        super()._post_process(origin_df)
+    def _post_process(self) -> None:
+        super()._post_process()
         self._psm_df.rename(
             columns={PsmDfCols.SPEC_IDX: PsmDfCols.DIANN_SPEC_INDEX}, inplace=True
         )
@@ -149,10 +155,10 @@ class SpectronautReportReader(MaxQuantReader):
         *,
         column_mapping: Optional[dict] = None,
         modification_mapping: Optional[dict] = None,
-        fdr=0.01,
-        keep_decoy=False,
-        fixed_C57=False,
-        rt_unit="minute",
+        fdr: float = 0.01,
+        keep_decoy: bool = False,
+        fixed_C57: bool = False,  # noqa: N803 TODO: make this  *,fixed_c57  (breaking)
+        rt_unit: str = "minute",
         **kwargs,
     ):
         super().__init__(
@@ -172,7 +178,7 @@ class SpectronautReportReader(MaxQuantReader):
     def _init_column_mapping(self) -> None:
         self.column_mapping = psm_reader_yaml["spectronaut_report"]["column_mapping"]
 
-    def _load_file(self, filename):
+    def _load_file(self, filename: str) -> pd.DataFrame:
         self.mod_seq_column = "ModifiedSequence"
         self.csv_sep = self._get_table_delimiter(filename)
         df = pd.read_csv(filename, sep=self.csv_sep, keep_default_na=False)
