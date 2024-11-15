@@ -6,7 +6,6 @@ from tqdm import tqdm
 
 from alphabase.constants._const import PEAK_INTENSITY_DTYPE
 from alphabase.peptide.mobility import mobility_to_ccs_for_df
-from alphabase.psm_reader import psm_reader_provider
 from alphabase.psm_reader.keys import LibPsmDfCols, PsmDfCols
 from alphabase.psm_reader.maxquant_reader import MaxQuantReader
 from alphabase.psm_reader.psm_reader import psm_reader_yaml
@@ -302,57 +301,3 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
 
 # legacy
 SWATHLibraryReader = LibraryReaderBase
-
-
-class LibraryReaderFromRawData(SpecLibBase):
-    def __init__(
-        self,
-        charged_frag_types: typing.Optional[typing.List[str]] = None,
-        precursor_mz_min: float = 400,
-        precursor_mz_max: float = 2000,
-        decoy: typing.Optional[str] = None,
-        **kwargs,
-    ):
-        if charged_frag_types is None:
-            charged_frag_types = [
-                "b_z1",
-                "b_z2",
-                "y_z1",
-                "y_z2",
-                "b_modloss_z1",
-                "b_modloss_z2",
-                "y_modloss_z1",
-                "y_modloss_z2",
-            ]
-        super().__init__(
-            charged_frag_types=charged_frag_types,
-            precursor_mz_min=precursor_mz_min,
-            precursor_mz_max=precursor_mz_max,
-            decoy=decoy,
-        )
-
-    def import_psms(self, psm_files: list, psm_type: str) -> None:
-        psm_reader = psm_reader_provider.get_reader(psm_type)
-        if isinstance(psm_files, str):
-            self._precursor_df = psm_reader.import_file(psm_files)
-            self._psm_df = self._precursor_df
-        else:
-            psm_df_list = []
-            for psm_file in psm_files:
-                psm_df_list.append(psm_reader.import_file(psm_file))
-            self._precursor_df = pd.concat(psm_df_list, ignore_index=True)
-            self._psm_df = self._precursor_df
-
-    def extract_fragments(self, raw_files: list) -> None:
-        """Include two steps:
-            1. self.calc_fragment_mz_df() to generate self.fragment_mz_df
-            2. Extract self.fragment_intensity_df from RAW files using AlphaRAW.
-
-        Parameters
-        ----------
-        raw_files : list
-            RAW file paths
-
-        """
-        self.calc_fragment_mz_df()
-        # TODO Use AlphaRAW to extract fragment intensities
