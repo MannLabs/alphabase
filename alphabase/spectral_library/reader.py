@@ -124,7 +124,7 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
         if PsmDfCols.MOD_SITES not in lib_df.columns:
             lib_df[PsmDfCols.MOD_SITES] = ""
 
-    def _get_fragment_intensity(self, lib_df: pd.DataFrame):
+    def _get_fragment_intensity(self, lib_df: pd.DataFrame):  # noqa: PLR0912, C901 too many branches, too complex TODO: refactor
         """Create the self._fragment_intensity dataframe from a given spectral library.
         In the process, the input dataframe is converted from long format to a precursor dataframe and returned.
 
@@ -151,7 +151,7 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
         precursor_df_list = []
 
         frag_intens_list = []
-        nAA_list = []
+        n_aa_list = []
 
         fragment_columns = [
             LibPsmDfCols.FRAGMENT_MZ,
@@ -168,10 +168,10 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
         for keys, df_group in tqdm(lib_df.groupby(non_fragment_columns)):
             precursor_columns = dict(zip(non_fragment_columns, keys))
 
-            nAA = len(precursor_columns[PsmDfCols.SEQUENCE])
+            n_aa = len(precursor_columns[PsmDfCols.SEQUENCE])
 
             intensities = np.zeros(
-                (nAA - 1, len(self.charged_frag_types)),
+                (n_aa - 1, len(self.charged_frag_types)),
                 dtype=PEAK_INTENSITY_DTYPE,
             )
             for frag_type_, frag_num_, loss_type, frag_charge, intensity in df_group[
@@ -182,11 +182,11 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
                     LibPsmDfCols.FRAGMENT_CHARGE,
                     LibPsmDfCols.FRAGMENT_INTENSITY,
                 ]
-            ].values:
+            ].to_numpy():
                 if frag_type_ in "abc":
                     frag_num = frag_num_ - 1
                 elif frag_type_ in "xyz":
-                    frag_num = nAA - frag_num_ - 1
+                    frag_num = n_aa - frag_num_ - 1
                 else:
                     continue
 
@@ -214,7 +214,7 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
 
             precursor_df_list.append(precursor_columns)
             frag_intens_list.append(normalized_intensities)
-            nAA_list.append(nAA)
+            n_aa_list.append(n_aa)
 
         df = pd.DataFrame(precursor_df_list)
 
@@ -222,8 +222,8 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
             np.concatenate(frag_intens_list), columns=self.charged_frag_types
         )
 
-        indices = np.zeros(len(nAA_list) + 1, dtype=np.int64)
-        indices[1:] = np.array(nAA_list) - 1
+        indices = np.zeros(len(n_aa_list) + 1, dtype=np.int64)
+        indices[1:] = np.array(n_aa_list) - 1
         indices = np.cumsum(indices)
 
         df[LibPsmDfCols.FRAG_START_IDX] = indices[:-1]

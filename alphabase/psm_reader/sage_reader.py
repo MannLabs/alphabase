@@ -292,7 +292,7 @@ def _lookup_modification(
         The name of the matched modification in alphabase format.
 
     """
-    mass_distance = mod_annotated_df["mass"].values - mass_observed
+    mass_distance = mod_annotated_df["mass"].to_numpy() - mass_observed
     ppm_distance = mass_distance / mass_observed * 1e6
     ppm_distance = np.abs(ppm_distance)
 

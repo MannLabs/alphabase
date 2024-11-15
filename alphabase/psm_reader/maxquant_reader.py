@@ -18,7 +18,7 @@ from alphabase.psm_reader.psm_reader import (
 warnings.filterwarnings("always")
 
 mod_to_unimod_dict = {}
-for mod_name, unimod_id in MOD_DF[["mod_name", "unimod_id"]].values:
+for mod_name, unimod_id in MOD_DF[["mod_name", "unimod_id"]].to_numpy():
     unimod_id = int(unimod_id)
     if unimod_id in (-1, "-1"):
         continue
