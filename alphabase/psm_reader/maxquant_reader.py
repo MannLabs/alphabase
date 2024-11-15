@@ -1,4 +1,5 @@
 import copy
+import warnings
 from typing import Optional
 
 import numba
@@ -12,6 +13,9 @@ from alphabase.psm_reader.psm_reader import (
     psm_reader_provider,
     psm_reader_yaml,
 )
+
+# make sure all warnings are shown
+warnings.filterwarnings("always")
 
 mod_to_unimod_dict = {}
 for mod_name, unimod_id in MOD_DF[["mod_name", "unimod_id"]].values:
@@ -249,6 +253,20 @@ class MaxQuantReader(PSMReaderBase):
         self._find_mod_seq_column(df)
         df = df[~pd.isna(df["Retention time"])]
         df.fillna("", inplace=True)
+
+        # remove MBR PSMs as they are currently not supported and will crash import
+        mapped_columns = self._find_mapped_columns(df)
+        if "scan_num" in mapped_columns:
+            scan_num_col = mapped_columns["scan_num"]
+            no_ms2_mask = df[scan_num_col] == ""
+            if (num_no_ms2_mask := np.sum(no_ms2_mask)) > 0:
+                warnings.warn(
+                    f"Maxquant psm file contains {num_no_ms2_mask} MBR PSMs without MS2 scan. This is not yet supported and rows containing MBR PSMs will be removed."
+                )
+                df = df[~no_ms2_mask]
+                df.reset_index(drop=True, inplace=True)
+        df[scan_num_col] = df[scan_num_col].astype(int)
+
         # if 'K0' in df.columns:
         #     df['Mobility'] = df['K0'] # Bug in MaxQuant? It should be 1/K0
         # min_rt = df['Retention time'].min()
