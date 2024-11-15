@@ -1,4 +1,4 @@
-import typing
+from typing import List, Optional
 
 import numpy as np
 import pandas as pd
@@ -15,7 +15,7 @@ from alphabase.spectral_library.base import SpecLibBase
 class LibraryReaderBase(MaxQuantReader, SpecLibBase):
     def __init__(
         self,
-        charged_frag_types: typing.List[str] = [
+        charged_frag_types: List[str] = [
             "b_z1",
             "b_z2",
             "y_z1",
@@ -25,15 +25,15 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
             "y_modloss_z1",
             "y_modloss_z2",
         ],
-        column_mapping: typing.Optional[dict] = None,
-        modification_mapping: typing.Optional[dict] = None,
+        column_mapping: Optional[dict] = None,
+        modification_mapping: Optional[dict] = None,
         fdr=0.01,
         fixed_C57=False,
         mod_seq_columns=psm_reader_yaml["library_reader_base"]["mod_seq_columns"],
         rt_unit="irt",
         precursor_mz_min: float = 400,
         precursor_mz_max: float = 2000,
-        decoy: typing.Optional[str] = None,
+        decoy: Optional[str] = None,
         **kwargs,
     ):
         """Base class for reading spectral libraries from long format csv files.

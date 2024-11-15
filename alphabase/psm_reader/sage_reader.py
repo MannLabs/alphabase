@@ -1,8 +1,8 @@
 import logging
 import multiprocessing as mp
 import re
-import typing
 from functools import partial
+from typing import Generator, List, NoReturn, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -105,7 +105,7 @@ class SageModificationTranslation:
 
     def _annotate_from_custom_translation(
         self, discovered_modifications_df: pd.DataFrame, translation_df: pd.DataFrame
-    ) -> typing.Tuple[pd.DataFrame, pd.DataFrame]:
+    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """Annotate modifications from custom translation df, if provided.
         Discovered modifications are first matched using the custom translation dataframe.
         If no match is found, the modifications are returned for matching using UniMod.
@@ -226,7 +226,7 @@ def _discover_modifications(psm_df: pd.DataFrame) -> pd.DataFrame:
 
 def _match_modified_sequence(
     sequence: str,
-) -> typing.List[typing.Tuple[str, str, bool, bool, float]]:
+) -> List[Tuple[str, str, bool, bool, float]]:
     """Get all matches with the amino acid location.
 
     P[-100.0]EPTIDE -> [('[-100.0]', 'P', False, False, -100.0)]
@@ -323,7 +323,7 @@ def _lookup_modification(
 
 def _translate_modifications(
     sequence: str, mod_translation_df: pd.DataFrame
-) -> typing.Tuple[typing.Optional[str], typing.Optional[str]]:
+) -> Tuple[Optional[str], Optional[str]]:
     """Translate modifications in the sequence to alphabase style modifications.
 
     Parameters
@@ -431,7 +431,7 @@ def _apply_translate_modifications(
     return psm_df
 
 
-def _batchify_df(df: pd.DataFrame, mp_batch_size: int) -> typing.Generator:
+def _batchify_df(df: pd.DataFrame, mp_batch_size: int) -> Generator:
     """Internal funciton for applying translation modifications in parallel.
 
     Parameters
@@ -551,8 +551,8 @@ class SageReaderBase(PSMReaderBase):
     def __init__(
         self,
         *,
-        column_mapping: typing.Optional[dict] = None,
-        modification_mapping: typing.Optional[dict] = None,
+        column_mapping: Optional[dict] = None,
+        modification_mapping: Optional[dict] = None,
         fdr=0.01,
         keep_decoy=False,
         rt_unit="second",
@@ -575,7 +575,7 @@ class SageReaderBase(PSMReaderBase):
     def _init_column_mapping(self) -> None:
         self.column_mapping = psm_reader_yaml["sage"]["column_mapping"]
 
-    def _load_file(self, filename) -> typing.NoReturn:
+    def _load_file(self, filename) -> NoReturn:
         raise NotImplementedError
 
     def _transform_table(self, origin_df) -> None:
