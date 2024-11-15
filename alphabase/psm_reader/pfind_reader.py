@@ -92,6 +92,8 @@ def parse_pfind_protein(protein: str, *, keep_reverse: bool = True) -> str:
 
 
 class pFindReader(PSMReaderBase):  # noqa: N801 name `pFindReader` should use CapWords convention TODO: used by peptdeep, alpharaw
+    """Reader for pFind's *.txt files."""
+
     def __init__(
         self,
         *,
@@ -101,6 +103,7 @@ class pFindReader(PSMReaderBase):  # noqa: N801 name `pFindReader` should use Ca
         keep_decoy: bool = False,
         **kwargs,
     ):
+        """Reading PSMs from pFind's *.txt."""
         super().__init__(
             column_mapping=column_mapping,
             modification_mapping=modification_mapping,

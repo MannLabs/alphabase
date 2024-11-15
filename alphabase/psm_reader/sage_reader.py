@@ -20,6 +20,8 @@ from alphabase.psm_reader.psm_reader import (
 
 
 class SageModificationTranslation:
+    """Translate Sage style modifications to alphabase style modifications."""
+
     def __init__(
         self,
         custom_translation_df: pd.DataFrame = None,
@@ -560,6 +562,8 @@ def _sage_spec_idx_from_scan_nr(scan_indicator_str: str) -> int:
 
 
 class SageReaderBase(PSMReaderBase):
+    """Base class for SageReader."""
+
     def __init__(  # noqa: PLR0913 many arguments in function definition
         self,
         *,
@@ -628,6 +632,8 @@ class SageReaderBase(PSMReaderBase):
 
 
 class SageReaderTSV(SageReaderBase):
+    """Reader for Sage output files in TSV format."""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -636,6 +642,8 @@ class SageReaderTSV(SageReaderBase):
 
 
 class SageReaderParquet(SageReaderBase):
+    """Reader for Sage output files in parquet format."""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

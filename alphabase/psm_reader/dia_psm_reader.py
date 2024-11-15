@@ -71,6 +71,8 @@ class SpectronautReader(MaxQuantReader):
 
 
 class SwathReader(SpectronautReader):
+    """Reader for SWATH or OpenSWATH library TSV/CSV."""
+
     def __init__(  # noqa: PLR0913 many arguments in function definition
         self,
         *,
@@ -98,6 +100,8 @@ class SwathReader(SpectronautReader):
 
 
 class DiannReader(SpectronautReader):
+    """Reader for DIANN data."""
+
     def __init__(  # noqa: PLR0913 many arguments in function definition
         self,
         *,

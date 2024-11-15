@@ -82,6 +82,8 @@ psm_reader_yaml = load_yaml(Path(CONST_FILE_FOLDER) / "psm_reader.yaml")
 
 
 class PSMReaderBase:
+    """The Base class for all PSMReaders."""
+
     def __init__(
         self,
         *,
@@ -558,6 +560,8 @@ class PSMReaderBase:
 
 
 class PSMReaderProvider:
+    """A factory class to register and get readers for different PSM types."""
+
     def __init__(self):
         self.reader_dict = {}
 

@@ -50,6 +50,8 @@ def parse_ap(precursor: str) -> Tuple[str, str, str, str, int]:
 
 
 class AlphaPeptReader(PSMReaderBase):
+    """Reader for AlphaPept's *.ms_data.hdf files."""
+
     def __init__(
         self,
         *,

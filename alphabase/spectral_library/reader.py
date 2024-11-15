@@ -16,6 +16,8 @@ from alphabase.spectral_library.base import SpecLibBase
 
 
 class LibraryReaderBase(MaxQuantReader, SpecLibBase):
+    """Base class for reading spectral libraries."""
+
     def __init__(  # noqa: PLR0913 many arguments in function definition
         self,
         charged_frag_types: List[str] = [
