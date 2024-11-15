@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -47,7 +47,7 @@ def _convert_one_pfind_mod(mod: str) -> Optional[str]:  # noqa:  C901 too comple
     return return_value
 
 
-def translate_pFind_mod(mod_str):  # noqa: N802 name `get_pFind_mods` should be lowercase TODO: used by peptdeep
+def translate_pFind_mod(mod_str: str) -> Union[str, pd.NA]:  # noqa: N802 name `get_pFind_mods` should be lowercase TODO: used by peptdeep
     if not mod_str:
         return ""
     ret_mods = []
@@ -59,7 +59,7 @@ def translate_pFind_mod(mod_str):  # noqa: N802 name `get_pFind_mods` should be 
     return ";".join(ret_mods)
 
 
-def get_pFind_mods(pfind_mod_str):  # noqa: N802 name `get_pFind_mods` should be lowercase TODO: used by peptdeep
+def get_pFind_mods(pfind_mod_str: str) -> Tuple[str, str]:  # noqa: N802 name `get_pFind_mods` should be lowercase TODO: used by peptdeep
     pfind_mod_str = pfind_mod_str.strip(";")
     if not pfind_mod_str:
         return "", ""
@@ -77,7 +77,7 @@ def get_pFind_mods(pfind_mod_str):  # noqa: N802 name `get_pFind_mods` should be
     return ";".join(items[1]), ";".join(items[0])
 
 
-def parse_pfind_protein(protein, keep_reverse=True):
+def parse_pfind_protein(protein: str, keep_reverse: bool = True) -> str:
     proteins = protein.strip("/").split("/")
     return ";".join(
         [
@@ -94,8 +94,8 @@ class pFindReader(PSMReaderBase):  # noqa: N801 name `pFindReader` should use Ca
         *,
         column_mapping: Optional[dict] = None,
         modification_mapping: Optional[dict] = None,
-        fdr=0.01,
-        keep_decoy=False,
+        fdr: float = 0.01,
+        keep_decoy: bool = False,
         **kwargs,
     ):
         super().__init__(
@@ -112,7 +112,7 @@ class pFindReader(PSMReaderBase):  # noqa: N801 name `pFindReader` should use Ca
     def _translate_modifications(self) -> None:
         pass
 
-    def _load_file(self, filename):
+    def _load_file(self, filename: str) -> pd.DataFrame:
         pfind_df = pd.read_csv(
             filename, index_col=False, sep="\t", keep_default_na=False
         )
@@ -134,7 +134,7 @@ class pFindReader(PSMReaderBase):  # noqa: N801 name `pFindReader` should use Ca
             self._psm_df[PsmDfCols.SCORE].astype(float) + 1e-100
         )
 
-    def _load_modifications(self, pfind_df) -> None:
+    def _load_modifications(self, pfind_df: pd.DataFrame) -> None:
         if len(pfind_df) == 0:
             self._psm_df[PsmDfCols.MODS] = ""
             self._psm_df[PsmDfCols.MOD_SITES] = ""

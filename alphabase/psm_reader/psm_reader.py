@@ -1,7 +1,7 @@
 import copy
 import warnings
 from pathlib import Path
-from typing import NoReturn, Optional
+from typing import Dict, List, NoReturn, Optional, Set, Type, Union
 
 import numpy as np
 import pandas as pd
@@ -10,7 +10,7 @@ from alphabase.constants._const import CONST_FILE_FOLDER
 from alphabase.peptide import mobility
 from alphabase.peptide.precursor import reset_precursor_df, update_precursor_mz
 from alphabase.psm_reader.keys import PsmDfCols
-from alphabase.utils import get_delimiter
+from alphabase.utils import _get_delimiter
 from alphabase.yaml_utils import load_yaml
 
 
@@ -86,8 +86,8 @@ class PSMReaderBase:
         *,
         column_mapping: Optional[dict] = None,
         modification_mapping: Optional[dict] = None,
-        fdr=0.01,
-        keep_decoy=False,
+        fdr: float = 0.01,
+        keep_decoy: bool = False,
         rt_unit: str = "minute",
         **kwargs,
     ):
@@ -268,13 +268,13 @@ class PSMReaderBase:
             f'"{self.__class__}" must implement "_init_column_mapping()"'
         )
 
-    def load(self, _file) -> pd.DataFrame:
+    def load(self, _file: Union[List[str], str]) -> pd.DataFrame:
         """Wrapper for import_file()."""
         if isinstance(_file, list):
             return self.import_files(_file)
         return self.import_file(_file)
 
-    def import_files(self, file_list: list):
+    def import_files(self, file_list: List[str]) -> pd.DataFrame:
         df_list = [self.import_file(file) for file in file_list]
         self._psm_df = pd.concat(df_list, ignore_index=True)
         return self._psm_df
@@ -320,8 +320,8 @@ class PSMReaderBase:
         # to -log(evalue), as score is the larger the better
         pass
 
-    def _get_table_delimiter(self, _filename):
-        return get_delimiter(_filename)
+    def _get_table_delimiter(self, filename: str) -> str:
+        return _get_delimiter(filename)
 
     def _normalize_rt(self) -> None:
         if PsmDfCols.RT in self._psm_df.columns:
@@ -385,7 +385,7 @@ class PSMReaderBase:
         """
         raise NotImplementedError(f'"{self.__class__}" must implement "_load_file()"')
 
-    def _find_mapped_columns(self, origin_df: pd.DataFrame):
+    def _find_mapped_columns(self, origin_df: pd.DataFrame) -> Dict[str, str]:
         mapped_columns = {}
         for col, map_col in self.column_mapping.items():
             if isinstance(map_col, str):
@@ -524,7 +524,7 @@ class PSMReaderBase:
 
     def filter_psm_by_modifications(
         self,
-        include_mod_set=None,
+        include_mod_set: Optional[Set] = None,
     ) -> None:
         """Only keeps peptides with modifications in `include_mod_list`."""
         if include_mod_set is None:
@@ -547,7 +547,9 @@ class PSMReaderProvider:
     def __init__(self):
         self.reader_dict = {}
 
-    def register_reader(self, reader_type, reader_class) -> None:
+    def register_reader(
+        self, reader_type: str, reader_class: Type[PSMReaderBase]
+    ) -> None:
         self.reader_dict[reader_type.lower()] = reader_class
 
     def get_reader(
@@ -556,8 +558,8 @@ class PSMReaderProvider:
         *,
         column_mapping: Optional[dict] = None,
         modification_mapping: Optional[dict] = None,
-        fdr=0.01,
-        keep_decoy=False,
+        fdr: float = 0.01,
+        keep_decoy: bool = False,
         **kwargs,
     ) -> PSMReaderBase:
         return self.reader_dict[reader_type.lower()](

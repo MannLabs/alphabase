@@ -22,7 +22,7 @@ class SageModificationTranslation:
         self,
         custom_translation_df: pd.DataFrame = None,
         ppm_tolerance: int = 10,
-        mp_process_num=10,
+        mp_process_num: int = 10,
     ):
         """Translate Sage style modifications to alphabase style modifications.
         A modified sequence like VM[+15.9949]QENSSSFSDLSER will be translated to mods: Oxidation@M, mod_sites: 2.
@@ -553,11 +553,11 @@ class SageReaderBase(PSMReaderBase):
         *,
         column_mapping: Optional[dict] = None,
         modification_mapping: Optional[dict] = None,
-        fdr=0.01,
-        keep_decoy=False,
-        rt_unit="second",
-        custom_translation_df=None,
-        mp_process_num=10,
+        fdr: float = 0.01,
+        keep_decoy: bool = False,
+        rt_unit: str = "second",
+        custom_translation_df: pd.DataFrame = None,
+        mp_process_num: int = 10,
         **kwargs,
     ):
         self.custom_translation_df = custom_translation_df
@@ -575,7 +575,7 @@ class SageReaderBase(PSMReaderBase):
     def _init_column_mapping(self) -> None:
         self.column_mapping = psm_reader_yaml["sage"]["column_mapping"]
 
-    def _load_file(self, filename) -> NoReturn:
+    def _load_file(self, filename: str) -> NoReturn:
         raise NotImplementedError
 
     def _transform_table(self) -> None:
@@ -601,7 +601,7 @@ class SageReaderBase(PSMReaderBase):
             columns=[PsmDfCols.PEPTIDE_FDR, PsmDfCols.PROTEIN_FDR], inplace=True
         )
 
-    def _load_modifications(self, origin_df) -> None:
+    def _load_modifications(self, origin_df: pd.DataFrame) -> None:
         pass
 
     def _translate_modifications(self) -> None:
@@ -619,7 +619,7 @@ class SageReaderTSV(SageReaderBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def _load_file(self, filename):
+    def _load_file(self, filename: str) -> pd.DataFrame:
         return pd.read_csv(filename, sep="\t")
 
 
@@ -627,7 +627,7 @@ class SageReaderParquet(SageReaderBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def _load_file(self, filename):
+    def _load_file(self, filename: str) -> pd.DataFrame:
         return pd.read_parquet(filename)
 
 

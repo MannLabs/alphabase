@@ -243,7 +243,7 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
 
         return df
 
-    def _load_file(self, filename: str):
+    def _load_file(self, filename: str) -> pd.DataFrame:
         """Load the spectral library from a csv file.
         Reimplementation of `PSMReaderBase._translate_columns`.
         """

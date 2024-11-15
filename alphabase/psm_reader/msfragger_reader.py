@@ -1,6 +1,7 @@
-from typing import Optional
+from typing import List, Optional, Tuple
 
 import numpy as np
+import pandas as pd
 from pyteomics import pepxml
 
 from alphabase.constants.aa import AA_ASCII_MASS
@@ -14,7 +15,7 @@ from alphabase.psm_reader.psm_reader import (
 )
 
 
-def _is_fragger_decoy(proteins):
+def _is_fragger_decoy(proteins: List[str]) -> bool:
     return all(prot.lower().startswith("rev_") for prot in proteins)
 
 
@@ -22,7 +23,9 @@ mass_mapped_mods = psm_reader_yaml["msfragger_pepxml"]["mass_mapped_mods"]
 mod_mass_tol = psm_reader_yaml["msfragger_pepxml"]["mod_mass_tol"]
 
 
-def _get_mods_from_masses(sequence, msf_aa_mods):  # noqa: PLR0912, C901 many branches, too complex TODO: refactor
+def _get_mods_from_masses(  # noqa: PLR0912, C901 too many branches, too complex TODO: refactor
+    sequence: str, msf_aa_mods: List[str]
+) -> Tuple[str, str, str, str]:
     mods = []
     mod_sites = []
     aa_mass_diffs = []
@@ -80,12 +83,6 @@ def _get_mods_from_masses(sequence, msf_aa_mods):  # noqa: PLR0912, C901 many br
 class MSFragger_PSM_TSV_Reader(PSMReaderBase):  # noqa: N801 name should use CapWords convention TODO: refactor
     def __init__(
         self,
-        *,
-        column_mapping: Optional[dict] = None,
-        modification_mapping: Optional[dict] = None,
-        fdr=0.01,
-        keep_decoy=False,
-        rt_unit="second",
         **kwargs,
     ):
         raise NotImplementedError("MSFragger_PSM_TSV_Reader for psm.tsv")
@@ -97,10 +94,10 @@ class MSFraggerPepXML(PSMReaderBase):
         *,
         column_mapping: Optional[dict] = None,
         modification_mapping: Optional[dict] = None,
-        fdr=0.001,  # refers to E-value in the PepXML
-        keep_decoy=False,
-        rt_unit="second",
-        keep_unknown_aa_mass_diffs=False,
+        fdr: float = 0.001,  # refers to E-value in the PepXML
+        keep_decoy: bool = False,
+        rt_unit: str = "second",
+        keep_unknown_aa_mass_diffs: bool = False,
         **kwargs,
     ):
         """MSFragger is not fully supported as we can only access the pepxml file."""
@@ -120,7 +117,7 @@ class MSFraggerPepXML(PSMReaderBase):
     def _translate_modifications(self) -> None:
         pass
 
-    def _load_file(self, filename):
+    def _load_file(self, filename: str) -> pd.DataFrame:
         msf_df = pepxml.DataFrame(filename)
         msf_df.fillna("", inplace=True)
         if "ion_mobility" in msf_df.columns:
@@ -147,7 +144,7 @@ class MSFraggerPepXML(PSMReaderBase):
         # evalue score
         self._psm_df[PsmDfCols.SCORE] = -np.log(self._psm_df[PsmDfCols.SCORE] + 1e-100)
 
-    def _load_modifications(self, msf_df) -> None:
+    def _load_modifications(self, msf_df: pd.DataFrame) -> None:
         if len(msf_df) == 0:
             self._psm_df[PsmDfCols.MODS] = ""
             self._psm_df[PsmDfCols.MOD_SITES] = ""
