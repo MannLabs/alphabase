@@ -1,6 +1,6 @@
 import copy
-import os
 import warnings
+from pathlib import Path
 from typing import NoReturn, Optional
 
 import numpy as np
@@ -77,7 +77,7 @@ def _keep_modifications(mod_str: str, mod_set: set) -> str:
 
 
 #: See `psm_reader.yaml <https://github.com/MannLabs/alphabase/blob/main/alphabase/constants/const_files/psm_reader.yaml>`_
-psm_reader_yaml = load_yaml(os.path.join(CONST_FILE_FOLDER, "psm_reader.yaml"))
+psm_reader_yaml = load_yaml(Path(CONST_FILE_FOLDER) / "psm_reader.yaml")
 
 
 class PSMReaderBase:
@@ -268,9 +268,7 @@ class PSMReaderBase:
         return self.import_file(_file)
 
     def import_files(self, file_list: list):
-        df_list = []
-        for _file in file_list:
-            df_list.append(self.import_file(_file))
+        df_list = [self.import_file(file) for file in file_list]
         self._psm_df = pd.concat(df_list, ignore_index=True)
         return self._psm_df
 
