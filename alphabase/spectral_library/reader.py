@@ -13,7 +13,7 @@ from alphabase.spectral_library.base import SpecLibBase
 
 
 class LibraryReaderBase(MaxQuantReader, SpecLibBase):
-    def __init__(
+    def __init__(  # noqa: PLR0913 many arguments in function definition
         self,
         charged_frag_types: List[str] = [
             "b_z1",

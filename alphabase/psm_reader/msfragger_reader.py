@@ -93,7 +93,7 @@ class MSFragger_PSM_TSV_Reader(PSMReaderBase):
 
 
 class MSFraggerPepXML(PSMReaderBase):
-    def __init__(
+    def __init__(  # noqa: PLR0913 many arguments in function definition
         self,
         *,
         column_mapping: Optional[dict] = None,

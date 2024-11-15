@@ -548,7 +548,7 @@ def _sage_spec_idx_from_scan_nr(scan_indicator_str: str) -> int:
 
 
 class SageReaderBase(PSMReaderBase):
-    def __init__(
+    def __init__(  # noqa: PLR0913 many arguments in function definition
         self,
         *,
         column_mapping: Optional[dict] = None,

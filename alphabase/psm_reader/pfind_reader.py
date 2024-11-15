@@ -43,7 +43,7 @@ def convert_one_pFind_mod(mod):
     return None
 
 
-def translate_pFind_mod(mod_str):
+def translate_pFind_mod(mod_str):  # noqa: N802 name `get_pFind_mods` should be lowercase TODO: used by peptdeep
     if not mod_str:
         return ""
     ret_mods = []
@@ -55,7 +55,7 @@ def translate_pFind_mod(mod_str):
     return ";".join(ret_mods)
 
 
-def get_pFind_mods(pfind_mod_str):
+def get_pFind_mods(pfind_mod_str):  # noqa: N802 name `get_pFind_mods` should be lowercase TODO: used by peptdeep
     pfind_mod_str = pfind_mod_str.strip(";")
     if not pfind_mod_str:
         return "", ""
@@ -84,7 +84,7 @@ def parse_pfind_protein(protein, keep_reverse=True):
     )
 
 
-class pFindReader(PSMReaderBase):
+class pFindReader(PSMReaderBase):  # noqa: N801 name `pFindReader` should use CapWords convention TODO: used by peptdeep, alpharaw
     def __init__(
         self,
         *,
