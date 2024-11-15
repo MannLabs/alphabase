@@ -170,11 +170,11 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
 
             nAA = len(precursor_columns[PsmDfCols.SEQUENCE])
 
-            intens = np.zeros(
+            intensities = np.zeros(
                 (nAA - 1, len(self.charged_frag_types)),
                 dtype=PEAK_INTENSITY_DTYPE,
             )
-            for frag_type_, frag_num_, loss_type, frag_charge, inten in df_group[
+            for frag_type_, frag_num_, loss_type, frag_charge, intensity in df_group[
                 [
                     LibPsmDfCols.FRAGMENT_TYPE,
                     LibPsmDfCols.FRAGMENT_SERIES,
@@ -206,14 +206,14 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
                 if frag_type not in frag_col_dict:
                     continue
                 frag_col_idx = frag_col_dict[frag_type]
-                intens[frag_num, frag_col_idx] = inten
-            max_inten = np.max(intens)
-            if max_inten <= 0:
+                intensities[frag_num, frag_col_idx] = intensity
+            max_intensity = np.max(intensities)
+            if max_intensity <= 0:
                 continue
-            intens /= max_inten
+            normalized_intensities = intensities / max_intensity
 
             precursor_df_list.append(precursor_columns)
-            frag_intens_list.append(intens)
+            frag_intens_list.append(normalized_intensities)
             nAA_list.append(nAA)
 
         df = pd.DataFrame(precursor_df_list)
