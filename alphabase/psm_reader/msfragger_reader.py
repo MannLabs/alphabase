@@ -1,3 +1,5 @@
+"""MSFragger reader."""
+
 from typing import List, Optional, Tuple
 
 import numpy as np
@@ -81,14 +83,19 @@ def _get_mods_from_masses(  # noqa: PLR0912, C901 too many branches, too complex
 
 
 class MSFragger_PSM_TSV_Reader(PSMReaderBase):  # noqa: N801 name should use CapWords convention TODO: refactor
+    """Reader for MSFragger's psm.tsv file."""
+
     def __init__(
         self,
         **kwargs,
     ):
+        """Constructor."""
         raise NotImplementedError("MSFragger_PSM_TSV_Reader for psm.tsv")
 
 
 class MSFraggerPepXML(PSMReaderBase):
+    """Reader for MSFragger's pep.xml file."""
+
     def __init__(  # noqa: PLR0913 many arguments in function definition
         self,
         *,
@@ -182,6 +189,7 @@ class MSFraggerPepXML(PSMReaderBase):
 
 
 def register_readers() -> None:
+    """Register MSFragger readers."""
     psm_reader_provider.register_reader("msfragger_psm_tsv", MSFragger_PSM_TSV_Reader)
     psm_reader_provider.register_reader("msfragger", MSFragger_PSM_TSV_Reader)
     psm_reader_provider.register_reader("msfragger_pepxml", MSFraggerPepXML)

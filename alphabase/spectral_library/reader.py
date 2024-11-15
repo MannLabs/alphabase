@@ -1,3 +1,5 @@
+"""Module for reading spectral libraries."""
+
 import warnings
 from typing import List, Optional
 
@@ -14,6 +16,8 @@ from alphabase.spectral_library.base import SpecLibBase
 
 
 class LibraryReaderBase(MaxQuantReader, SpecLibBase):
+    """Base class for reading spectral libraries."""
+
     def __init__(  # noqa: PLR0913 many arguments in function definition
         self,
         charged_frag_types: List[str] = [
@@ -57,6 +61,8 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
             default is 0.01
 
         fixed_C57: bool
+            If true, the search engine will not show `Carbamidomethyl` in the modified sequences.
+            By default False
 
         mod_seq_columns: list of str
             List of column names in the csv file containing the modified sequence.
@@ -76,8 +82,10 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
             Decoy type for the spectral library.
             Can be either `pseudo_reverse` or `diann`
 
-        """
+        **kwargs: dict
+            deprecated
 
+        """
         if mod_seq_columns is None:
             mod_seq_columns = psm_reader_yaml["library_reader_base"]["mod_seq_columns"]
 
@@ -138,6 +146,7 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
 
     def _get_fragment_intensity(self, lib_df: pd.DataFrame) -> pd.DataFrame:  # noqa: PLR0912, C901 too many branches, too complex TODO: refactor
         """Create the self._fragment_intensity dataframe from a given spectral library.
+
         In the process, the input dataframe is converted from long format to a precursor dataframe and returned.
 
         Parameters
@@ -244,9 +253,7 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
         return df
 
     def _load_file(self, filename: str) -> pd.DataFrame:
-        """Load the spectral library from a csv file.
-        Reimplementation of `PSMReaderBase._translate_columns`.
-        """
+        """Load the spectral library from a csv file."""
         csv_sep = self._get_table_delimiter(filename)
 
         df = pd.read_csv(
@@ -281,9 +288,7 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
     def _post_process(
         self,
     ) -> None:
-        """Process the spectral library and create the `fragment_intensity`, `fragment_mz`dataframe.
-        Reimplementation of `PSMReaderBase._post_process`.
-        """
+        """Process the spectral library and create the `fragment_intensity`, `fragment_mz` dataframe."""
         # identify unknown modifications
         len_before = len(self._psm_df)
         self._psm_df = self._psm_df[~self._psm_df[PsmDfCols.MODS].isna()]

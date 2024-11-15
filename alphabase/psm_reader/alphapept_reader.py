@@ -1,3 +1,5 @@
+"""Reader for AlphaPept's *.ms_data.hdf files."""
+
 from pathlib import Path
 from typing import Optional, Tuple
 
@@ -48,6 +50,8 @@ def parse_ap(precursor: str) -> Tuple[str, str, str, str, int]:
 
 
 class AlphaPeptReader(PSMReaderBase):
+    """Reader for AlphaPept's *.ms_data.hdf files."""
+
     def __init__(
         self,
         *,
@@ -105,4 +109,5 @@ class AlphaPeptReader(PSMReaderBase):
 
 
 def register_readers() -> None:
+    """Register readers for AlphaPept's *.ms_data.hdf files."""
     psm_reader_provider.register_reader("alphapept", AlphaPeptReader)
