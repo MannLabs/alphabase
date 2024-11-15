@@ -30,8 +30,8 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
         modification_mapping: Optional[dict] = None,
         fdr: float = 0.01,
         fixed_C57: bool = False,
-        mod_seq_columns=psm_reader_yaml["library_reader_base"]["mod_seq_columns"],
-        rt_unit="irt",
+        mod_seq_columns: Optional[List[str]] = None,
+        rt_unit: str = "irt",
         precursor_mz_min: float = 400,
         precursor_mz_max: float = 2000,
         decoy: Optional[str] = None,
@@ -77,6 +77,10 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
             Can be either `pseudo_reverse` or `diann`
 
         """
+
+        if mod_seq_columns is None:
+            mod_seq_columns = psm_reader_yaml["library_reader_base"]["mod_seq_columns"]
+
         SpecLibBase.__init__(
             self,
             charged_frag_types=charged_frag_types,
@@ -132,7 +136,7 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
         if PsmDfCols.MOD_SITES not in lib_df.columns:
             lib_df[PsmDfCols.MOD_SITES] = ""
 
-    def _get_fragment_intensity(self, lib_df: pd.DataFrame):  # noqa: PLR0912, C901 too many branches, too complex TODO: refactor
+    def _get_fragment_intensity(self, lib_df: pd.DataFrame) -> pd.DataFrame:  # noqa: PLR0912, C901 too many branches, too complex TODO: refactor
         """Create the self._fragment_intensity dataframe from a given spectral library.
         In the process, the input dataframe is converted from long format to a precursor dataframe and returned.
 
