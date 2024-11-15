@@ -15,9 +15,7 @@ from alphabase.psm_reader.psm_reader import (
 
 @numba.njit
 def parse_ap(precursor):
-    """
-    Parser to parse peptide strings
-    """
+    """Parser to parse peptide strings"""
     items = precursor.split("_")
     decoy = 1 if len(items) == 3 else 0
     modseq = items[0]
@@ -58,9 +56,7 @@ class AlphaPeptReader(PSMReaderBase):
         keep_decoy=False,
         **kwargs,
     ):
-        """
-        Reading PSMs from alphapept's *.ms_data.hdf
-        """
+        """Reading PSMs from alphapept's *.ms_data.hdf"""
         super().__init__(
             column_mapping=column_mapping,
             modification_mapping=modification_mapping,

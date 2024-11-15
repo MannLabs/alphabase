@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-import pyteomics.pepxml as pepxml
+from pyteomics import pepxml
 
 from alphabase.constants.aa import AA_ASCII_MASS
 from alphabase.constants.atom import MASS_H, MASS_O

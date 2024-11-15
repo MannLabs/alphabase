@@ -22,24 +22,23 @@ def convert_one_pFind_mod(mod):
         site = mod[(idx + 1) : -1]
     if len(site) == 1:
         return name + "@" + site
-    elif site == "AnyN-term":
+    if site == "AnyN-term":
         return name + "@" + "Any_N-term"
-    elif site == "ProteinN-term":
+    if site == "ProteinN-term":
         return name + "@" + "Protein_N-term"
-    elif site.startswith("AnyN-term"):
+    if site.startswith("AnyN-term"):
         return name + "@" + site[-1] + "^Any_N-term"
-    elif site.startswith("ProteinN-term"):
+    if site.startswith("ProteinN-term"):
         return name + "@" + site[-1] + "^Protein_N-term"
-    elif site == "AnyC-term":
+    if site == "AnyC-term":
         return name + "@" + "Any_C-term"
-    elif site == "ProteinC-term":
+    if site == "ProteinC-term":
         return name + "@" + "Protein_C-term"
-    elif site.startswith("AnyC-term"):
+    if site.startswith("AnyC-term"):
         return name + "@" + site[-1] + "^Any_C-term"
-    elif site.startswith("ProteinC-term"):
+    if site.startswith("ProteinC-term"):
         return name + "@" + site[-1] + "^Protein_C-term"
-    else:
-        return None
+    return None
 
 
 def translate_pFind_mod(mod_str):
@@ -50,8 +49,7 @@ def translate_pFind_mod(mod_str):
         mod = convert_one_pFind_mod(mod)
         if not mod or mod not in ap_mod.MOD_INFO_DICT:
             return pd.NA
-        else:
-            ret_mods.append(mod)
+        ret_mods.append(mod)
     return ";".join(ret_mods)
 
 

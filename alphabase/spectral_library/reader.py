@@ -37,13 +37,10 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
         decoy: str = None,
         **kwargs,
     ):
-        """
-
-        Base class for reading spectral libraries from long format csv files.
+        """Base class for reading spectral libraries from long format csv files.
 
         Parameters
         ----------
-
         charged_frag_types: list of str
             List of fragment types to be used in the spectral library.
             The default is ['b_z1','b_z2','y_z1', 'y_z2', 'b_modloss_z1','b_modloss_z2','y_modloss_z1', 'y_modloss_z2']
@@ -100,18 +97,14 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
         )
 
     def _init_column_mapping(self):
-        """
-        Initialize the column mapping from the `psm_reader.yaml` file.
-        """
+        """Initialize the column mapping from the `psm_reader.yaml` file."""
         self.column_mapping = psm_reader_yaml["library_reader_base"]["column_mapping"]
 
     def _find_key_columns(self, lib_df: pd.DataFrame):
-        """
-        Find and create the key columns for the spectral library.
+        """Find and create the key columns for the spectral library.
 
         Parameters
         ----------
-
         lib_df: pd.DataFrame
             Dataframe containing the spectral library.
 
@@ -133,9 +126,7 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
             lib_df[PsmDfCols.MOD_SITES] = ""
 
     def _get_fragment_intensity(self, lib_df: pd.DataFrame):
-        """
-
-        Create the self._fragment_intensity dataframe from a given spectral library.
+        """Create the self._fragment_intensity dataframe from a given spectral library.
         In the process, the input dataframe is converted from long format to a precursor dataframe and returned.
 
         Parameters
@@ -242,11 +233,9 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
         return df
 
     def _load_file(self, filename: str):
-        """
-        Load the spectral library from a csv file.
+        """Load the spectral library from a csv file.
         Reimplementation of `PSMReaderBase._translate_columns`.
         """
-
         csv_sep = self._get_table_delimiter(filename)
 
         df = pd.read_csv(
@@ -282,11 +271,9 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
         self,
         lib_df: pd.DataFrame,
     ):
-        """
-        Process the spectral library and create the `fragment_intensity`, `fragment_mz`dataframe.
+        """Process the spectral library and create the `fragment_intensity`, `fragment_mz`dataframe.
         Reimplementation of `PSMReaderBase._post_process`.
         """
-
         # identify unknown modifications
         len_before = len(self._psm_df)
         self._psm_df = self._psm_df[~self._psm_df[PsmDfCols.MODS].isna()]
@@ -367,6 +354,7 @@ class LibraryReaderFromRawData(SpecLibBase):
         ----------
         raw_files : list
             RAW file paths
+
         """
         self.calc_fragment_mz_df()
         # TODO Use AlphaRAW to extract fragment intensities

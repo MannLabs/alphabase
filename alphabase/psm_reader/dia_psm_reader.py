@@ -16,6 +16,7 @@ class SpectronautReader(MaxQuantReader):
     ----------
     csv_sep : str, optional
         Delimiter for TSV/CSV, by default '\t'
+
     """
 
     def __init__(
@@ -74,9 +75,7 @@ class SwathReader(SpectronautReader):
         mod_seq_columns=psm_reader_yaml["spectronaut"]["mod_seq_columns"],
         **kwargs,
     ):
-        """
-        SWATH or OpenSWATH library, similar to `SpectronautReader`
-        """
+        """SWATH or OpenSWATH library, similar to `SpectronautReader`"""
         super().__init__(
             column_mapping=column_mapping,
             modification_mapping=modification_mapping,
@@ -100,8 +99,7 @@ class DiannReader(SpectronautReader):
         rt_unit="minute",
         **kwargs,
     ):
-        """
-        Also similar to `MaxQuantReader`,
+        """Also similar to `MaxQuantReader`,
         but different in column_mapping and modificatin_mapping
         """
         super().__init__(
@@ -143,6 +141,7 @@ class SpectronautReportReader(MaxQuantReader):
     ----------
     csv_sep : str, optional
         Delimiter for TSV/CSV, by default ','
+
     """
 
     def __init__(
