@@ -94,7 +94,7 @@ class SageModificationTranslation:
         translated_psm_df = _apply_translate_modifications_mp(psm_df, translation_df)
 
         # 5. Drop PSMs with missing modifications
-        is_null = translated_psm_df[PsmDfCols.MOD_SITES].isnull()
+        is_null = translated_psm_df[PsmDfCols.MOD_SITES].isna()
         translated_psm_df = translated_psm_df[~is_null]
         if np.sum(is_null) > 0:
             logging.warning(
@@ -129,7 +129,7 @@ class SageModificationTranslation:
                 self.custom_translation_df, on="modification", how="left"
             )
             for _, row in discovered_modifications_df[
-                discovered_modifications_df["matched_mod_name"].isnull()
+                discovered_modifications_df["matched_mod_name"].isna()
             ].iterrows():
                 logging.warning(
                     f"No modification found for mass {row['modification']} at position {row['previous_aa']} found in custom_translation_df, will be matched using UniMod"
@@ -139,12 +139,12 @@ class SageModificationTranslation:
                 [
                     translation_df,
                     discovered_modifications_df[
-                        discovered_modifications_df["matched_mod_name"].notnull()
+                        discovered_modifications_df["matched_mod_name"].notna()
                     ],
                 ]
             )
             discovered_modifications_df = discovered_modifications_df[
-                discovered_modifications_df["matched_mod_name"].isnull()
+                discovered_modifications_df["matched_mod_name"].isna()
             ]
 
         return discovered_modifications_df, translation_df
@@ -182,7 +182,7 @@ class SageModificationTranslation:
             )
         )
         for _, row in discovered_modifications_df[
-            discovered_modifications_df["matched_mod_name"].isnull()
+            discovered_modifications_df["matched_mod_name"].isna()
         ].iterrows():
             logging.warning(
                 f"UniMod lookup failed for mass {row['modification']} at position {row['previous_aa']}, will be removed."
@@ -191,7 +191,7 @@ class SageModificationTranslation:
             [
                 translation_df,
                 discovered_modifications_df[
-                    discovered_modifications_df["matched_mod_name"].notnull()
+                    discovered_modifications_df["matched_mod_name"].notna()
                 ],
             ]
         )
@@ -217,7 +217,7 @@ def _discover_modifications(psm_df: pd.DataFrame) -> pd.DataFrame:
         .explode()
         .unique()
     )
-    modifications = modifications[~pd.isnull(modifications)]
+    modifications = modifications[~pd.isna(modifications)]
     return pd.DataFrame(
         list(modifications),
         columns=["modification", "previous_aa", "is_nterm", "is_cterm", "mass"],
