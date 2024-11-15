@@ -77,7 +77,7 @@ def get_pFind_mods(pfind_mod_str: str) -> Tuple[str, str]:  # noqa: N802 name `g
     return ";".join(items[1]), ";".join(items[0])
 
 
-def parse_pfind_protein(protein: str, keep_reverse: bool = True) -> str:
+def parse_pfind_protein(protein: str, *, keep_reverse: bool = True) -> str:
     proteins = protein.strip("/").split("/")
     return ";".join(
         [

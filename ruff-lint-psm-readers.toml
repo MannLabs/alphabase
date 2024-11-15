@@ -34,8 +34,6 @@ ignore = [
 
     # these still need to be resolved:
     "D",
-    "N803", # argument name should be lowercase
-    "FBT002", "FBT001", # Boolean default positional argument in function definition
 
     # reader-specific
     "FA100", # Add `from __future__ import annotations` to simplify `typing.Optional`

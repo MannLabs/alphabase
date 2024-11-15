@@ -457,6 +457,7 @@ def _apply_translate_modifications_mp(
     mod_translation_df: pd.DataFrame,
     mp_batch_size: int = 50000,
     mp_process_num: int = 10,
+    *,
     progress_bar: bool = True,
 ) -> pd.DataFrame:
     """Apply translate modifications with multiprocessing.

@@ -53,7 +53,7 @@ def replace_parentheses_with_brackets(
 def parse_mod_seq(
     modseq: str,
     mod_sep: str = "()",
-    fixed_C57: bool = True,
+    fixed_C57: bool = True,  # noqa: FBT001, FBT002, N803 TODO: make this  *,fixed_c57  (breaking)
 ) -> tuple:
     """Extract modifications and sites from the modified sequence (modseq).
 
@@ -139,7 +139,7 @@ class MaxQuantReader(PSMReaderBase):
         modification_mapping: Optional[dict] = None,
         fdr: float = 0.01,
         keep_decoy: bool = False,
-        fixed_C57: bool = True,
+        fixed_C57: bool = True,  # noqa: N803 TODO: make this  *,fixed_c57  (breaking)
         mod_seq_columns: Optional[List[str]] = None,
         **kwargs,
     ):

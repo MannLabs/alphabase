@@ -28,7 +28,7 @@ class SpectronautReader(MaxQuantReader):
         modification_mapping: Optional[dict] = None,
         fdr: float = 0.01,
         keep_decoy: bool = False,
-        fixed_C57: bool = False,
+        fixed_C57: bool = False,  # noqa: N803 TODO: make this  *,fixed_c57  (breaking)
         mod_seq_columns: Optional[List[str]] = None,
         rt_unit: str = "minute",
         **kwargs,
@@ -76,7 +76,7 @@ class SwathReader(SpectronautReader):
         modification_mapping: Optional[dict] = None,
         fdr: float = 0.01,
         keep_decoy: bool = False,
-        fixed_C57: bool = False,
+        fixed_C57: bool = False,  # noqa: N803 TODO: make this  *,fixed_c57  (breaking)
         mod_seq_columns: Optional[List[str]] = None,
         **kwargs,
     ):
@@ -103,7 +103,7 @@ class DiannReader(SpectronautReader):
         modification_mapping: Optional[dict] = None,
         fdr: float = 0.01,
         keep_decoy: bool = False,
-        fixed_C57: bool = False,
+        fixed_C57: bool = False,  # noqa: N803 TODO: make this  *,fixed_c57  (breaking)
         rt_unit: str = "minute",
         **kwargs,
     ):
@@ -157,7 +157,7 @@ class SpectronautReportReader(MaxQuantReader):
         modification_mapping: Optional[dict] = None,
         fdr: float = 0.01,
         keep_decoy: bool = False,
-        fixed_C57: bool = False,
+        fixed_C57: bool = False,  # noqa: N803 TODO: make this  *,fixed_c57  (breaking)
         rt_unit: str = "minute",
         **kwargs,
     ):
