@@ -174,7 +174,7 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
                 (nAA - 1, len(self.charged_frag_types)),
                 dtype=PEAK_INTENSITY_DTYPE,
             )
-            for frag_type, frag_num, loss_type, frag_charge, inten in df_group[
+            for frag_type_, frag_num_, loss_type, frag_charge, inten in df_group[
                 [
                     LibPsmDfCols.FRAGMENT_TYPE,
                     LibPsmDfCols.FRAGMENT_SERIES,
@@ -183,23 +183,23 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
                     LibPsmDfCols.FRAGMENT_INTENSITY,
                 ]
             ].values:
-                if frag_type in "abc":
-                    frag_num -= 1
-                elif frag_type in "xyz":
-                    frag_num = nAA - frag_num - 1
+                if frag_type_ in "abc":
+                    frag_num = frag_num_ - 1
+                elif frag_type_ in "xyz":
+                    frag_num = nAA - frag_num_ - 1
                 else:
                     continue
 
                 if loss_type == "":
-                    frag_type = f"{frag_type}_z{frag_charge}"
+                    frag_type = f"{frag_type_}_z{frag_charge}"
                 elif loss_type == "H3PO4":
-                    frag_type = f"{frag_type}_modloss_z{frag_charge}"
+                    frag_type = f"{frag_type_}_modloss_z{frag_charge}"
                 elif loss_type == "H2O":
-                    frag_type = f"{frag_type}_H2O_z{frag_charge}"
+                    frag_type = f"{frag_type_}_H2O_z{frag_charge}"
                 elif loss_type == "NH3":
-                    frag_type = f"{frag_type}_NH3_z{frag_charge}"
+                    frag_type = f"{frag_type_}_NH3_z{frag_charge}"
                 elif loss_type == "unknown":  # DiaNN+fragger
-                    frag_type = f"{frag_type}_z{frag_charge}"
+                    frag_type = f"{frag_type_}_z{frag_charge}"
                 else:
                     continue
 
