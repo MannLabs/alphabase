@@ -1,3 +1,4 @@
+import warnings
 from typing import List, Optional
 
 import numpy as np
@@ -94,6 +95,13 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
             mod_seq_columns=mod_seq_columns,
             rt_unit=rt_unit,
         )
+
+        for key, value in kwargs.items():  # TODO: remove and remove kwargs
+            warnings.warn(
+                f"Passed unknown arguments to {self.__class__.__name__} "
+                f"({key}={value}) will be forbidden in alphabase>1.5.0.",
+                FutureWarning,
+            )
 
     def _init_column_mapping(self) -> None:
         """Initialize the column mapping from the `psm_reader.yaml` file."""

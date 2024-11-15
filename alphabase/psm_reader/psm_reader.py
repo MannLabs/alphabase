@@ -174,6 +174,13 @@ class PSMReaderBase:
         self._min_irt_value = -100
         self._max_irt_value = 200
 
+        for key, value in kwargs.items():  # TODO: remove and remove kwargs
+            warnings.warn(
+                f"Passed unknown arguments to {self.__class__.__name__} "
+                f"({key}={value}) will be forbidden in alphabase>1.5.0.",
+                FutureWarning,
+            )
+
     @property
     def psm_df(self) -> pd.DataFrame:
         return self._psm_df
