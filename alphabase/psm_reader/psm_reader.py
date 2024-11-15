@@ -1,3 +1,5 @@
+"""The base class for all PSM readers and the provider for all readers."""
+
 import copy
 import warnings
 from pathlib import Path

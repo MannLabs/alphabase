@@ -1,3 +1,5 @@
+"""Constants for accessing the columns of a PSM dataframe."""
+
 from typing import Any, List, NoReturn
 
 

@@ -33,7 +33,10 @@ ignore = [
     "PD002", #pandas-use-of-inplace-argument # TODO revisit
 
 #    # these still need to be resolved:
-    "D101", "D100", "D103", "D107", "D102",
+    "D101",
+    "D103",
+    "D107",
+    "D102",
 
     # reader-specific
     "FA100", # Add `from __future__ import annotations` to simplify `typing.Optional`

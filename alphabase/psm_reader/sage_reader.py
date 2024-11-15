@@ -1,3 +1,5 @@
+"""SageReader for reading Sage output files."""
+
 import logging
 import multiprocessing as mp
 import re

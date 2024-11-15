@@ -1,3 +1,5 @@
+"""Reader for AlphaPept's *.ms_data.hdf files."""
+
 from pathlib import Path
 from typing import Optional, Tuple
 

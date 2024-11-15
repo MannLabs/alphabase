@@ -1,3 +1,5 @@
+"""pFind reader."""
+
 from typing import Optional, Tuple, Union
 
 import numpy as np

@@ -1,3 +1,5 @@
+"""Readers for Spectronaut's output library and reports, Swath data and DIANN data."""
+
 from typing import List, Optional
 
 import numpy as np

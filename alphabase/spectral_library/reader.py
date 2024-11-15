@@ -1,3 +1,5 @@
+"""Module for reading spectral libraries."""
+
 import warnings
 from typing import List, Optional
 
