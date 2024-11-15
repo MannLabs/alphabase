@@ -2,7 +2,7 @@
 
 import copy
 import warnings
-from abc import ABC
+from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Dict, List, NoReturn, Optional, Set, Type, Union
 
@@ -383,6 +383,7 @@ class PSMReaderBase(ABC):
                 df_group[PsmDfCols.RT_NORM] / df_group[PsmDfCols.RT_NORM].max()
             )
 
+    @abstractmethod
     def _load_file(self, filename: str) -> pd.DataFrame:
         """Load original dataframe from PSM filename.
 
@@ -394,18 +395,12 @@ class PSMReaderBase(ABC):
         filename : str
             psm filename
 
-        Raises
-        ------
-        NotImplementedError
-            Subclasses must re-implement this method
-
         Returns
         -------
         pd.DataFrame
             loaded dataframe
 
         """
-        raise NotImplementedError(f'"{self.__class__}" must implement "_load_file()"')
 
     def _find_mapped_columns(self, origin_df: pd.DataFrame) -> Dict[str, str]:
         mapped_columns = {}
@@ -462,6 +457,7 @@ class PSMReaderBase(ABC):
 
         """
 
+    @abstractmethod
     def _load_modifications(self, origin_df: pd.DataFrame) -> NoReturn:
         """Read modification information from 'origin_df'.
 
@@ -474,9 +470,6 @@ class PSMReaderBase(ABC):
             dataframe of original search engine.
 
         """
-        raise NotImplementedError(
-            f'"{self.__class__}" must implement "_load_modifications()"'
-        )
 
     def _translate_modifications(self) -> None:
         """Translate modifications to AlphaBase format.
