@@ -1,7 +1,7 @@
 import copy
 import os
 import warnings
-from typing import Optional
+from typing import NoReturn, Optional
 
 import numpy as np
 import pandas as pd
@@ -84,8 +84,8 @@ class PSMReaderBase:
     def __init__(
         self,
         *,
-        column_mapping: dict = None,
-        modification_mapping: dict = None,
+        column_mapping: Optional[dict] = None,
+        modification_mapping: Optional[dict] = None,
         fdr=0.01,
         keep_decoy=False,
         rt_unit: str = "minute",
@@ -178,7 +178,7 @@ class PSMReaderBase:
     def psm_df(self) -> pd.DataFrame:
         return self._psm_df
 
-    def add_modification_mapping(self, modification_mapping: dict):
+    def add_modification_mapping(self, modification_mapping: dict) -> None:
         """Append additional modification mappings for the search engine.
 
         Parameters
@@ -214,7 +214,9 @@ class PSMReaderBase:
 
         self.set_modification_mapping(self.modification_mapping)
 
-    def set_modification_mapping(self, modification_mapping: Optional[dict] = None):
+    def set_modification_mapping(
+        self, modification_mapping: Optional[dict] = None
+    ) -> None:
         if modification_mapping is None:
             self._init_modification_mapping()
         elif isinstance(modification_mapping, str):
@@ -232,15 +234,15 @@ class PSMReaderBase:
         self._mods_as_lists()
         self._reverse_mod_mapping()
 
-    def _init_modification_mapping(self):
+    def _init_modification_mapping(self) -> None:
         self.modification_mapping = {}
 
-    def _mods_as_lists(self):
+    def _mods_as_lists(self) -> None:
         for mod, val in list(self.modification_mapping.items()):
             if isinstance(val, str):
                 self.modification_mapping[mod] = [val]
 
-    def _reverse_mod_mapping(self):
+    def _reverse_mod_mapping(self) -> None:
         self.rev_mod_mapping = {}
         for this_mod, other_mod in self.modification_mapping.items():
             if isinstance(other_mod, (list, tuple)):
@@ -254,13 +256,13 @@ class PSMReaderBase:
             else:
                 self.rev_mod_mapping[other_mod] = this_mod
 
-    def _init_column_mapping(self):
+    def _init_column_mapping(self) -> NoReturn:
         raise NotImplementedError(
             f'"{self.__class__}" must implement "_init_column_mapping()"'
         )
 
     def load(self, _file) -> pd.DataFrame:
-        """Wrapper for import_file()"""
+        """Wrapper for import_file()."""
         if isinstance(_file, list):
             return self.import_files(_file)
         return self.import_file(_file)
@@ -283,7 +285,7 @@ class PSMReaderBase:
         self._load_modifications(origin_df)
         self._translate_modifications()
         self._post_process(origin_df)
-        ```
+        ```.
 
         Parameters
         ----------
@@ -304,10 +306,10 @@ class PSMReaderBase:
             self._post_process(origin_df)
         return self._psm_df
 
-    def _translate_decoy(self, origin_df: pd.DataFrame = None):
+    def _translate_decoy(self, origin_df: pd.DataFrame = None) -> None:
         pass
 
-    def _translate_score(self, origin_df: pd.DataFrame = None):
+    def _translate_score(self, origin_df: pd.DataFrame = None) -> None:
         # some scores are evalue/pvalue, it should be translated
         # to -log(evalue), as score is the larger the better
         pass
@@ -315,7 +317,7 @@ class PSMReaderBase:
     def _get_table_delimiter(self, _filename):
         return get_delimiter(_filename)
 
-    def _normalize_rt(self):
+    def _normalize_rt(self) -> None:
         if PsmDfCols.RT in self._psm_df.columns:
             if self._engine_rt_unit == "second":
                 # self.psm_df['rt_sec'] = self.psm_df.rt
@@ -342,7 +344,7 @@ class PSMReaderBase:
                 (self._psm_df[PsmDfCols.RT] - min_rt) / (max_rt - min_rt)
             ).clip(0, 1)
 
-    def normalize_rt_by_raw_name(self):
+    def normalize_rt_by_raw_name(self) -> None:
         if PsmDfCols.RT not in self._psm_df.columns:
             return
         if PsmDfCols.RT_NORM not in self._psm_df.columns:
@@ -390,9 +392,9 @@ class PSMReaderBase:
                         break
         return mapped_columns
 
-    def _translate_columns(self, origin_df: pd.DataFrame):
+    def _translate_columns(self, origin_df: pd.DataFrame) -> None:
         """Translate the dataframe from other search engines
-        to AlphaBase format
+        to AlphaBase format.
 
         Parameters
         ----------
@@ -416,7 +418,7 @@ class PSMReaderBase:
         ):
             self._psm_df[PsmDfCols.SPEC_IDX] = self._psm_df[PsmDfCols.SCAN_NUM] - 1
 
-    def _transform_table(self, origin_df: pd.DataFrame):
+    def _transform_table(self, origin_df: pd.DataFrame) -> None:
         """Transform the dataframe format if needed.
         Usually only needed in combination with spectral libraries.
 
@@ -432,7 +434,7 @@ class PSMReaderBase:
 
         """
 
-    def _load_modifications(self, origin_df: pd.DataFrame):
+    def _load_modifications(self, origin_df: pd.DataFrame) -> NoReturn:
         """Read modification information from 'origin_df'.
         Some of search engines use modified_sequence, some of them
         use additional columns to store modifications and the sites.
@@ -447,7 +449,7 @@ class PSMReaderBase:
             f'"{self.__class__}" must implement "_load_modifications()"'
         )
 
-    def _translate_modifications(self):
+    def _translate_modifications(self) -> None:
         """Translate modifications to AlphaBase format.
 
         Raises
@@ -474,7 +476,7 @@ class PSMReaderBase:
                 f"Unknown modifications: {unknwon_mod_set}. Precursors with unknown modifications will be removed."
             )
 
-    def _post_process(self, origin_df: pd.DataFrame):
+    def _post_process(self, origin_df: pd.DataFrame) -> None:
         """Set 'nAA' columns, remove unknown modifications
         and perform other post processings,
         e.g. get 'rt_norm', remove decoys, filter FDR...
@@ -522,18 +524,16 @@ class PSMReaderBase:
     def filter_psm_by_modifications(
         self,
         include_mod_set=None,
-    ):
+    ) -> None:
         """Only keeps peptides with modifications in `include_mod_list`."""
         if include_mod_set is None:
-            include_mod_set = set(
-                [
-                    "Oxidation@M",
-                    "Phospho@S",
-                    "Phospho@T",
-                    "Phospho@Y",
-                    "Acetyl@Protein_N-term",
-                ]
-            )
+            include_mod_set = {
+                "Oxidation@M",
+                "Phospho@S",
+                "Phospho@T",
+                "Phospho@Y",
+                "Acetyl@Protein_N-term",
+            }
         self._psm_df[PsmDfCols.MODS] = self._psm_df[PsmDfCols.MODS].apply(
             _keep_modifications, mod_set=include_mod_set
         )
@@ -546,15 +546,15 @@ class PSMReaderProvider:
     def __init__(self):
         self.reader_dict = {}
 
-    def register_reader(self, reader_type, reader_class):
+    def register_reader(self, reader_type, reader_class) -> None:
         self.reader_dict[reader_type.lower()] = reader_class
 
     def get_reader(
         self,
         reader_type: str,
         *,
-        column_mapping: dict = None,
-        modification_mapping: dict = None,
+        column_mapping: Optional[dict] = None,
+        modification_mapping: Optional[dict] = None,
         fdr=0.01,
         keep_decoy=False,
         **kwargs,
