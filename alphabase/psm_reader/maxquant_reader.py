@@ -137,7 +137,7 @@ def parse_mod_seq(
 class MaxQuantReader(PSMReaderBase):
     """Reader for MaxQuant data."""
 
-    _reader_name = "maxquant"
+    _reader_type = "maxquant"
 
     def __init__(  # noqa: PLR0913 many arguments in function definition
         self,
