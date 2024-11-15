@@ -6,11 +6,10 @@ DOCS_NBS=$(find ../docs/nbs -name "*.ipynb" | grep -v tutorial_dev_spectral_libr
 # corresponding notebook(s) if this occurs again
 # INCLUDED_NBS=$(find ../nbs_tests -name "*.ipynb" | grep -v test_isotope_mp.ipynb)
 
+python -m pytest
+
 TEST_NBS=$(find ../nbs_tests -name "*.ipynb")
-
 TUTORIAL_NBS=$(find ../docs/tutorials -name "*.ipynb")
-
 ALL_NBS=$(echo $DOCS_NBS$'\n'$TEST_NBS$'\n'$TUTORIAL_NBS)
 
 python -m pytest --nbmake $(echo $ALL_NBS)
-python -m pytest

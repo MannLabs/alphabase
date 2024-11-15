@@ -170,7 +170,7 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
         ]
 
         # by default, all non-fragment columns are used to group the library
-        non_fragment_columns = list(set(lib_df.columns) - set(fragment_columns))
+        non_fragment_columns = sorted(list(set(lib_df.columns) - set(fragment_columns)))
 
         for keys, df_group in tqdm(lib_df.groupby(non_fragment_columns)):
             precursor_columns = dict(zip(non_fragment_columns, keys))

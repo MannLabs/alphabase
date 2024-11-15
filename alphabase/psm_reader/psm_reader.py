@@ -49,7 +49,7 @@ def translate_other_modification(mod_str: str, mod_dict: dict) -> str:
         return ";".join(ret_mods), []
 
 
-def keep_modifications(mod_str: str, mod_set: set) -> str:
+def _keep_modifications(mod_str: str, mod_set: set) -> str:
     """
     Check if modifications of `mod_str` are in `mod_set`.
 
@@ -162,8 +162,8 @@ class PSMReaderBase:
             self._init_column_mapping()
 
         self._psm_df = pd.DataFrame()
-        self.keep_fdr = fdr
-        self.keep_decoy = keep_decoy
+        self._keep_fdr = fdr
+        self._keep_decoy = keep_decoy
         self._min_max_rt_norm = False
         self._engine_rt_unit = rt_unit
         self._min_irt_value = -100
@@ -311,7 +311,7 @@ class PSMReaderBase:
     def _get_table_delimiter(self, _filename):
         return get_delimiter(_filename)
 
-    def normalize_rt(self):
+    def _normalize_rt(self):
         if "rt" in self.psm_df.columns:
             if self._engine_rt_unit == "second":
                 # self.psm_df['rt_sec'] = self.psm_df.rt
@@ -336,14 +336,11 @@ class PSMReaderBase:
                 (self.psm_df.rt - min_rt) / (max_rt - min_rt)
             ).clip(0, 1)
 
-    def norm_rt(self):
-        self.normalize_rt()
-
     def normalize_rt_by_raw_name(self):
         if "rt" not in self.psm_df.columns:
             return
         if "rt_norm" not in self.psm_df.columns:
-            self.norm_rt()
+            self._normalize_rt()
         if "raw_name" not in self.psm_df.columns:
             return
         for _, df_group in self.psm_df.groupby("raw_name"):
@@ -490,8 +487,8 @@ class PSMReaderBase:
 
         keep_rows = np.ones(len(self._psm_df), dtype=bool)
         if "fdr" in self._psm_df.columns:
-            keep_rows &= self._psm_df.fdr <= self.keep_fdr
-        if "decoy" in self._psm_df.columns and not self.keep_decoy:
+            keep_rows &= self._psm_df.fdr <= self._keep_fdr
+        if "decoy" in self._psm_df.columns and not self._keep_decoy:
             keep_rows &= self._psm_df.decoy == 0
 
         self._psm_df = self._psm_df[keep_rows]
@@ -528,7 +525,7 @@ class PSMReaderBase:
                 ]
             )
         self._psm_df.mods = self._psm_df.mods.apply(
-            keep_modifications, mod_set=include_mod_set
+            _keep_modifications, mod_set=include_mod_set
         )
 
         self._psm_df.dropna(subset=["mods"], inplace=True)
