@@ -295,16 +295,17 @@ class PSMReaderBase:
         if len(origin_df) == 0:
             self._psm_df = pd.DataFrame()
         else:
+            # TODO: think about dropping the 'inplace' pattern here
             self._translate_columns(origin_df)
-            self._transform_table(origin_df)
-            self._translate_decoy(origin_df)
+            self._transform_table()
+            self._translate_decoy()
             self._translate_score(origin_df)
             self._load_modifications(origin_df)
             self._translate_modifications()
-            self._post_process(origin_df)
+            self._post_process()
         return self._psm_df
 
-    def _translate_decoy(self, origin_df: pd.DataFrame = None) -> None:
+    def _translate_decoy(self) -> None:
         pass
 
     def _translate_score(self, origin_df: pd.DataFrame = None) -> None:
@@ -416,7 +417,7 @@ class PSMReaderBase:
         ):
             self._psm_df[PsmDfCols.SPEC_IDX] = self._psm_df[PsmDfCols.SCAN_NUM] - 1
 
-    def _transform_table(self, origin_df: pd.DataFrame) -> None:
+    def _transform_table(self) -> None:
         """Transform the dataframe format if needed.
         Usually only needed in combination with spectral libraries.
 
@@ -474,15 +475,10 @@ class PSMReaderBase:
                 f"Unknown modifications: {unknwon_mod_set}. Precursors with unknown modifications will be removed."
             )
 
-    def _post_process(self, origin_df: pd.DataFrame) -> None:
+    def _post_process(self) -> None:
         """Set 'nAA' columns, remove unknown modifications
         and perform other post processings,
         e.g. get 'rt_norm', remove decoys, filter FDR...
-
-        Parameters
-        ----------
-        origin_df : pd.DataFrame
-            the loaded original df
 
         """
         self._psm_df[PsmDfCols.NAA] = self._psm_df[PsmDfCols.SEQUENCE].str.len()

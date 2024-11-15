@@ -578,13 +578,13 @@ class SageReaderBase(PSMReaderBase):
     def _load_file(self, filename) -> NoReturn:
         raise NotImplementedError
 
-    def _transform_table(self, origin_df) -> None:
+    def _transform_table(self) -> None:
         self._psm_df[PsmDfCols.SPEC_IDX] = self._psm_df[PsmDfCols.SCANNR].apply(
             _sage_spec_idx_from_scan_nr
         )
         self._psm_df.drop(columns=[PsmDfCols.SCANNR], inplace=True)
 
-    def _translate_decoy(self, origin_df) -> None:
+    def _translate_decoy(self) -> None:
         if not self._keep_decoy:
             self._psm_df = self._psm_df[~self._psm_df[PsmDfCols.DECOY]]
 

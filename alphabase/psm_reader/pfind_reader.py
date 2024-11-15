@@ -124,12 +124,12 @@ class pFindReader(PSMReaderBase):  # noqa: N801 name `pFindReader` should use Ca
         pfind_df["Proteins"] = pfind_df["Proteins"].apply(parse_pfind_protein)
         return pfind_df
 
-    def _translate_decoy(self, origin_df=None) -> None:
+    def _translate_decoy(self) -> None:
         self._psm_df[PsmDfCols.DECOY] = (
             self._psm_df[PsmDfCols.DECOY] == "decoy"
         ).astype(np.int8)
 
-    def _translate_score(self, origin_df=None) -> None:
+    def _translate_score(self) -> None:
         self._psm_df[PsmDfCols.SCORE] = -np.log(
             self._psm_df[PsmDfCols.SCORE].astype(float) + 1e-100
         )

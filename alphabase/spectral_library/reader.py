@@ -268,7 +268,6 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
 
     def _post_process(
         self,
-        lib_df: pd.DataFrame,
     ) -> None:
         """Process the spectral library and create the `fragment_intensity`, `fragment_mz`dataframe.
         Reimplementation of `PSMReaderBase._post_process`.

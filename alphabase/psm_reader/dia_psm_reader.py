@@ -124,8 +124,8 @@ class DiannReader(SpectronautReader):
         self.csv_sep = self._get_table_delimiter(filename)
         return pd.read_csv(filename, sep=self.csv_sep, keep_default_na=False)
 
-    def _post_process(self, origin_df: pd.DataFrame) -> None:
-        super()._post_process(origin_df)
+    def _post_process(self) -> None:
+        super()._post_process()
         self._psm_df.rename(
             columns={PsmDfCols.SPEC_IDX: PsmDfCols.DIANN_SPEC_INDEX}, inplace=True
         )

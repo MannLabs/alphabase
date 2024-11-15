@@ -1,7 +1,6 @@
 from typing import Optional
 
 import numpy as np
-import pandas as pd
 from pyteomics import pepxml
 
 from alphabase.constants.aa import AA_ASCII_MASS
@@ -133,7 +132,7 @@ class MSFraggerPepXML(PSMReaderBase):
         self.column_mapping[PsmDfCols.TO_REMOVE] = "to_remove"
         return msf_df
 
-    def _translate_decoy(self, origin_df=None) -> None:
+    def _translate_decoy(self) -> None:
         self._psm_df[PsmDfCols.DECOY] = (
             self._psm_df[PsmDfCols.PROTEINS].apply(_is_fragger_decoy).astype(np.int8)
         )
@@ -144,7 +143,7 @@ class MSFraggerPepXML(PSMReaderBase):
         if not self._keep_decoy:
             self._psm_df[PsmDfCols.TO_REMOVE] += self._psm_df[PsmDfCols.DECOY] > 0
 
-    def _translate_score(self, origin_df=None) -> None:
+    def _translate_score(self) -> None:
         # evalue score
         self._psm_df[PsmDfCols.SCORE] = -np.log(self._psm_df[PsmDfCols.SCORE] + 1e-100)
 
@@ -176,8 +175,8 @@ class MSFraggerPepXML(PSMReaderBase):
                 inplace=True,
             )
 
-    def _post_process(self, origin_df: pd.DataFrame) -> None:
-        super()._post_process(origin_df)
+    def _post_process(self) -> None:
+        super()._post_process()
         self._psm_df = (
             self._psm_df.query(f"{PsmDfCols.TO_REMOVE}==0")
             .drop(columns=PsmDfCols.TO_REMOVE)
