@@ -7,6 +7,7 @@ from tqdm import tqdm
 from alphabase.constants._const import PEAK_INTENSITY_DTYPE
 from alphabase.peptide.mobility import mobility_to_ccs_for_df
 from alphabase.psm_reader import psm_reader_provider
+from alphabase.psm_reader.keys import LibPsmDfCols, PsmDfCols
 from alphabase.psm_reader.maxquant_reader import MaxQuantReader
 from alphabase.psm_reader.psm_reader import psm_reader_yaml
 from alphabase.spectral_library.base import SpecLibBase
@@ -115,19 +116,21 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
             Dataframe containing the spectral library.
 
         """
-        if "fragment_loss_type" not in lib_df.columns:
-            lib_df["fragment_loss_type"] = ""
+        if LibPsmDfCols.FRAGMENT_LOSS_TYPE not in lib_df.columns:
+            lib_df[LibPsmDfCols.FRAGMENT_LOSS_TYPE] = ""
 
-        lib_df.fillna({"fragment_loss_type": ""}, inplace=True)
+        lib_df.fillna({LibPsmDfCols.FRAGMENT_LOSS_TYPE: ""}, inplace=True)
         lib_df.replace(
-            {"fragment_loss_type": "noloss"}, {"fragment_loss_type": ""}, inplace=True
+            {LibPsmDfCols.FRAGMENT_LOSS_TYPE: "noloss"},
+            {LibPsmDfCols.FRAGMENT_LOSS_TYPE: ""},
+            inplace=True,
         )
 
-        if "mods" not in lib_df.columns:
-            lib_df["mods"] = ""
+        if PsmDfCols.MODS not in lib_df.columns:
+            lib_df[PsmDfCols.MODS] = ""
 
-        if "mod_sites" not in lib_df.columns:
-            lib_df["mod_sites"] = ""
+        if PsmDfCols.MOD_SITES not in lib_df.columns:
+            lib_df[PsmDfCols.MOD_SITES] = ""
 
     def _get_fragment_intensity(self, lib_df: pd.DataFrame):
         """
@@ -161,12 +164,12 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
         nAA_list = []
 
         fragment_columns = [
-            "fragment_mz",
-            "fragment_type",
-            "fragment_charge",
-            "fragment_series",
-            "fragment_loss_type",
-            "fragment_intensity",
+            LibPsmDfCols.FRAGMENT_MZ,
+            LibPsmDfCols.FRAGMENT_TYPE,
+            LibPsmDfCols.FRAGMENT_CHARGE,
+            LibPsmDfCols.FRAGMENT_SERIES,
+            LibPsmDfCols.FRAGMENT_LOSS_TYPE,
+            LibPsmDfCols.FRAGMENT_INTENSITY,
         ]
 
         # by default, all non-fragment columns are used to group the library
@@ -175,7 +178,7 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
         for keys, df_group in tqdm(lib_df.groupby(non_fragment_columns)):
             precursor_columns = dict(zip(non_fragment_columns, keys))
 
-            nAA = len(precursor_columns["sequence"])
+            nAA = len(precursor_columns[PsmDfCols.SEQUENCE])
 
             intens = np.zeros(
                 (nAA - 1, len(self.charged_frag_types)),
@@ -183,11 +186,11 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
             )
             for frag_type, frag_num, loss_type, frag_charge, inten in df_group[
                 [
-                    "fragment_type",
-                    "fragment_series",
-                    "fragment_loss_type",
-                    "fragment_charge",
-                    "fragment_intensity",
+                    LibPsmDfCols.FRAGMENT_TYPE,
+                    LibPsmDfCols.FRAGMENT_SERIES,
+                    LibPsmDfCols.FRAGMENT_LOSS_TYPE,
+                    LibPsmDfCols.FRAGMENT_CHARGE,
+                    LibPsmDfCols.FRAGMENT_INTENSITY,
                 ]
             ].values:
                 if frag_type in "abc":
@@ -233,8 +236,8 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
         indices[1:] = np.array(nAA_list) - 1
         indices = np.cumsum(indices)
 
-        df["frag_start_idx"] = indices[:-1]
-        df["frag_stop_idx"] = indices[1:]
+        df[LibPsmDfCols.FRAG_START_IDX] = indices[:-1]
+        df[LibPsmDfCols.FRAG_STOP_IDX] = indices[1:]
 
         return df
 
@@ -286,7 +289,7 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
 
         # identify unknown modifications
         len_before = len(self._psm_df)
-        self._psm_df = self._psm_df[~self._psm_df["mods"].isna()]
+        self._psm_df = self._psm_df[~self._psm_df[PsmDfCols.MODS].isna()]
         len_after = len(self._psm_df)
 
         if len_before != len_after:
@@ -294,17 +297,19 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
                 f"{len_before-len_after} Entries with unknown modifications are removed"
             )
 
-        if "nAA" not in self._psm_df.columns:
-            self._psm_df["nAA"] = self._psm_df.sequence.str.len()
+        if PsmDfCols.NAA not in self._psm_df.columns:
+            self._psm_df[PsmDfCols.NAA] = self._psm_df[PsmDfCols.SEQUENCE].str.len()
 
         self._psm_df = self._get_fragment_intensity(self._psm_df)
 
         self.normalize_rt_by_raw_name()
 
-        if "mobility" in self._psm_df.columns:
-            self._psm_df["ccs"] = mobility_to_ccs_for_df(self._psm_df, "mobility")
+        if PsmDfCols.MOBILITY in self._psm_df.columns:
+            self._psm_df[PsmDfCols.CCS] = mobility_to_ccs_for_df(
+                self._psm_df, PsmDfCols.MOBILITY
+            )
 
-        self._psm_df.drop("modified_sequence", axis=1, inplace=True)
+        self._psm_df.drop(PsmDfCols.MODIFIED_SEQUENCE, axis=1, inplace=True)
         self._precursor_df = self._psm_df
 
         self.calc_fragment_mz_df()

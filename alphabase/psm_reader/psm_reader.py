@@ -1,6 +1,7 @@
 import copy
 import os
 import warnings
+from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -8,6 +9,7 @@ import pandas as pd
 import alphabase.peptide.mobility as mobility
 from alphabase.constants._const import CONST_FILE_FOLDER
 from alphabase.peptide.precursor import reset_precursor_df, update_precursor_mz
+from alphabase.psm_reader.keys import PsmDfCols
 from alphabase.utils import get_delimiter
 from alphabase.yaml_utils import load_yaml
 
@@ -148,12 +150,15 @@ class PSMReaderBase:
             If keep decoy PSMs in self.psm_df.
         _min_max_rt_norm : bool
             if True, the 'rt_norm' values in self._psm_df
-            will be normalized by rt_norm = (self.psm_df.rt-rt_min)/(rt_max-rt_min).
+            will be normalized by rt_norm = (self.psm_df[PsmDfCols.RT]-rt_min)/(rt_max-rt_min).
             It is useful to normalize iRT values as they contain negative values.
             Defaults to False.
         """
 
-        self.set_modification_mapping(None)
+        self.modification_mapping = None
+        self.rev_mod_mapping = None
+
+        self.set_modification_mapping()
         self.add_modification_mapping(modification_mapping)
 
         if column_mapping is not None:
@@ -210,7 +215,7 @@ class PSMReaderBase:
 
         self.set_modification_mapping(self.modification_mapping)
 
-    def set_modification_mapping(self, modification_mapping: dict):
+    def set_modification_mapping(self, modification_mapping: Optional[dict] = None):
         if modification_mapping is None:
             self._init_modification_mapping()
         elif isinstance(modification_mapping, str):
@@ -224,6 +229,7 @@ class PSMReaderBase:
                 )
         else:
             self.modification_mapping = copy.deepcopy(modification_mapping)
+
         self._mods_as_lists()
         self._reverse_mod_mapping()
 
@@ -312,17 +318,21 @@ class PSMReaderBase:
         return get_delimiter(_filename)
 
     def _normalize_rt(self):
-        if "rt" in self.psm_df.columns:
+        if PsmDfCols.RT in self._psm_df.columns:
             if self._engine_rt_unit == "second":
                 # self.psm_df['rt_sec'] = self.psm_df.rt
-                self.psm_df["rt"] = self.psm_df.rt / 60
-                if "rt_start" in self.psm_df.columns:
-                    self.psm_df["rt_start"] = self.psm_df.rt_start / 60
-                    self.psm_df["rt_stop"] = self.psm_df.rt_stop / 60
+                self._psm_df[PsmDfCols.RT] = self._psm_df[PsmDfCols.RT] / 60
+                if PsmDfCols.RT_START in self._psm_df.columns:
+                    self._psm_df[PsmDfCols.RT_START] = (
+                        self._psm_df[PsmDfCols.RT_START] / 60
+                    )
+                    self._psm_df[PsmDfCols.RT_STOP] = (
+                        self._psm_df[PsmDfCols.RT_STOP] / 60
+                    )
             # elif self._engine_rt_unit == 'minute':
             # self.psm_df['rt_sec'] = self.psm_df.rt*60
-            min_rt = self.psm_df.rt.min()
-            max_rt = self.psm_df.rt.max()
+            min_rt = self._psm_df[PsmDfCols.RT].min()
+            max_rt = self._psm_df[PsmDfCols.RT].max()
             if min_rt < 0:  # iRT
                 if min_rt < self._min_irt_value:
                     min_rt = self._min_irt_value
@@ -332,20 +342,20 @@ class PSMReaderBase:
             elif not self._min_max_rt_norm:
                 min_rt = 0
 
-            self.psm_df["rt_norm"] = (
-                (self.psm_df.rt - min_rt) / (max_rt - min_rt)
+            self._psm_df[PsmDfCols.RT_NORM] = (
+                (self._psm_df[PsmDfCols.RT] - min_rt) / (max_rt - min_rt)
             ).clip(0, 1)
 
     def normalize_rt_by_raw_name(self):
-        if "rt" not in self.psm_df.columns:
+        if PsmDfCols.RT not in self._psm_df.columns:
             return
-        if "rt_norm" not in self.psm_df.columns:
+        if PsmDfCols.RT_NORM not in self._psm_df.columns:
             self._normalize_rt()
-        if "raw_name" not in self.psm_df.columns:
+        if PsmDfCols.RAW_NAME not in self._psm_df.columns:
             return
-        for _, df_group in self.psm_df.groupby("raw_name"):
-            self.psm_df.loc[df_group.index, "rt_norm"] = (
-                df_group.rt_norm / df_group.rt_norm.max()
+        for _, df_group in self._psm_df.groupby(PsmDfCols.RAW_NAME):
+            self._psm_df.loc[df_group.index, PsmDfCols.RT_NORM] = (
+                df_group[PsmDfCols.RT_NORM] / df_group[PsmDfCols.RT_NORM].max()
             )
 
     def _load_file(self, filename: str) -> pd.DataFrame:
@@ -404,10 +414,10 @@ class PSMReaderBase:
             self._psm_df[col] = origin_df[map_col]
 
         if (
-            "scan_num" in self._psm_df.columns
-            and "spec_idx" not in self._psm_df.columns
+            PsmDfCols.SCAN_NUM in self._psm_df.columns
+            and PsmDfCols.SPEC_IDX not in self._psm_df.columns
         ):
-            self._psm_df["spec_idx"] = self._psm_df.scan_num - 1
+            self._psm_df[PsmDfCols.SPEC_IDX] = self._psm_df[PsmDfCols.SCAN_NUM] - 1
 
     def _transform_table(self, origin_df: pd.DataFrame):
         """
@@ -451,8 +461,8 @@ class PSMReaderBase:
             not in `self.modification_mapping`
         """
 
-        self._psm_df.mods, unknown_mods = zip(
-            *self._psm_df.mods.apply(
+        self._psm_df[PsmDfCols.MODS], unknown_mods = zip(
+            *self._psm_df[PsmDfCols.MODS].apply(
                 translate_other_modification, mod_dict=self.rev_mod_mapping
             )
         )
@@ -479,32 +489,38 @@ class PSMReaderBase:
         origin_df : pd.DataFrame
             the loaded original df
         """
-        self._psm_df["nAA"] = self._psm_df.sequence.str.len()
+        self._psm_df[PsmDfCols.NAA] = self._psm_df[PsmDfCols.SEQUENCE].str.len()
 
         self.normalize_rt_by_raw_name()
 
-        self._psm_df = self._psm_df[~self._psm_df["mods"].isna()]
+        self._psm_df = self._psm_df[~self._psm_df[PsmDfCols.MODS].isna()]
 
         keep_rows = np.ones(len(self._psm_df), dtype=bool)
-        if "fdr" in self._psm_df.columns:
-            keep_rows &= self._psm_df.fdr <= self._keep_fdr
-        if "decoy" in self._psm_df.columns and not self._keep_decoy:
-            keep_rows &= self._psm_df.decoy == 0
+        if PsmDfCols.FDR in self._psm_df.columns:
+            keep_rows &= self._psm_df[PsmDfCols.FDR] <= self._keep_fdr
+        if PsmDfCols.DECOY in self._psm_df.columns and not self._keep_decoy:
+            keep_rows &= self._psm_df[PsmDfCols.DECOY] == 0
 
         self._psm_df = self._psm_df[keep_rows]
 
         reset_precursor_df(self._psm_df)
 
-        if "precursor_mz" not in self._psm_df:
+        if PsmDfCols.PRECURSOR_MZ not in self._psm_df:
             self._psm_df = update_precursor_mz(self._psm_df)
 
-        if "ccs" in self._psm_df.columns and "mobility" not in self._psm_df.columns:
-            self._psm_df["mobility"] = mobility.ccs_to_mobility_for_df(
-                self._psm_df, "ccs"
+        if (
+            PsmDfCols.CCS in self._psm_df.columns
+            and PsmDfCols.MOBILITY not in self._psm_df.columns
+        ):
+            self._psm_df[PsmDfCols.MOBILITY] = mobility.ccs_to_mobility_for_df(
+                self._psm_df, PsmDfCols.CCS
             )
-        elif "mobility" in self._psm_df.columns and "ccs" not in self._psm_df.columns:
-            self._psm_df["ccs"] = mobility.mobility_to_ccs_for_df(
-                self._psm_df, "mobility"
+        elif (
+            PsmDfCols.MOBILITY in self._psm_df.columns
+            and PsmDfCols.CCS not in self._psm_df.columns
+        ):
+            self._psm_df[PsmDfCols.CCS] = mobility.mobility_to_ccs_for_df(
+                self._psm_df, PsmDfCols.MOBILITY
             )
 
     def filter_psm_by_modifications(
@@ -524,11 +540,11 @@ class PSMReaderBase:
                     "Acetyl@Protein_N-term",
                 ]
             )
-        self._psm_df.mods = self._psm_df.mods.apply(
+        self._psm_df[PsmDfCols.MODS] = self._psm_df[PsmDfCols.MODS].apply(
             _keep_modifications, mod_set=include_mod_set
         )
 
-        self._psm_df.dropna(subset=["mods"], inplace=True)
+        self._psm_df.dropna(subset=[PsmDfCols.MODS], inplace=True)
         self._psm_df.reset_index(drop=True, inplace=True)
 
 
