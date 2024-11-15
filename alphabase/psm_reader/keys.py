@@ -5,6 +5,7 @@ class ConstantsClass(type):
     """A metaclass for classes that should only contain string constants."""
 
     def __setattr__(cls, name: Any, value: Any) -> NoReturn:  # noqa: ANN401
+        """Raise an error when trying to set an attribute."""
         raise TypeError("Constants class cannot be modified")
 
     def get_values(cls) -> List[str]:

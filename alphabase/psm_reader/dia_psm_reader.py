@@ -107,9 +107,7 @@ class DiannReader(SpectronautReader):
         rt_unit: str = "minute",
         **kwargs,
     ):
-        """Also similar to `MaxQuantReader`,
-        but different in column_mapping and modification_mapping.
-        """
+        """Similar to `SpectronautReader` but different in column_mapping and modification_mapping."""
         super().__init__(
             column_mapping=column_mapping,
             modification_mapping=modification_mapping,

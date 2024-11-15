@@ -66,9 +66,9 @@ def parse_mod_seq(
         separator to indicate the modification section.
         Defaults to '()'
 
-    fixed_C : bool
+    fixed_C57 : bool
         If Carbamidomethyl@C is a fixed modification
-        and not displayed in the sequence. Defaults to True for MaxQuant.
+        and not displayed in the sequence. Defaults to True.
 
     Returns
     -------
@@ -171,6 +171,9 @@ class MaxQuantReader(PSMReaderBase):
         mod_seq_columns : list, optional
             The columns to find modified sequences,
             by default ['Modified sequence']
+
+        **kwargs : dict
+            deprecated
 
         """
         if mod_seq_columns is None:
