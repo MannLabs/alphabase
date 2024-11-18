@@ -178,10 +178,11 @@ class PSMReaderBase(ABC):
         self.set_modification_mapping()
         self.add_modification_mapping(modification_mapping)
 
-        if column_mapping is not None:
-            self.column_mapping = column_mapping
-        else:
-            self._init_column_mapping()
+        self.column_mapping = (
+            column_mapping
+            if column_mapping is not None
+            else self._read_column_mapping()
+        )
 
         self._psm_df = pd.DataFrame()
         self._keep_fdr = fdr
@@ -282,8 +283,9 @@ class PSMReaderBase(ABC):
             else:
                 self.rev_mod_mapping[other_mod] = this_mod
 
-    def _init_column_mapping(self) -> NoReturn:
-        self.column_mapping = psm_reader_yaml[self._reader_type]["column_mapping"]
+    def _read_column_mapping(self) -> Dict[str, str]:
+        """Read column mapping from psm_reader yaml file."""
+        return psm_reader_yaml[self._reader_type]["column_mapping"]
 
     def load(self, _file: Union[List[str], str]) -> pd.DataFrame:
         """Wrapper for import_file()."""
