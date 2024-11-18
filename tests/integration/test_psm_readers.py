@@ -19,7 +19,9 @@ from alphabase.psm_reader import (
     SpectronautReportReader,
     SwathReader,
     pFindReader,
+    psm_reader_yaml,
 )
+from alphabase.psm_reader.keys import LibPsmDfCols, PsmDfCols
 from alphabase.spectral_library.reader import LibraryReaderBase
 
 current_file_directory = os.path.dirname(os.path.abspath(__file__))
@@ -34,6 +36,16 @@ def _assert_reference_df_equal(psm_df: pd.DataFrame, test_case_name: str) -> Non
     If reference is not present, save the output as reference data and raise.
     """
     out_file_path = test_data_path / f"reference_{test_case_name}.parquet"
+    # psm_df.to_csv(test_data_path / f"reference_{test_case_name}.csv")
+
+    # check that all columns are available in PsmDfCols
+    assert (
+        set(psm_df.columns)
+        - set(PsmDfCols.get_values())
+        - set(LibPsmDfCols.get_values())
+        == set()
+    )
+
     if out_file_path.exists():
         expected_df = pd.read_parquet(out_file_path)
 
@@ -41,6 +53,16 @@ def _assert_reference_df_equal(psm_df: pd.DataFrame, test_case_name: str) -> Non
     else:
         psm_df.to_parquet(out_file_path)
         raise ValueError("No reference data found.")
+
+
+def test_psm_reader_yaml() -> None:
+    """Test that all column mappings in the psm_reader.yaml are covered by string constant keys."""
+    for reader_config in psm_reader_yaml.values():
+        ks = [k for k in reader_config["column_mapping"]]
+        assert (
+            set(ks) - set(PsmDfCols.get_values()) - set(LibPsmDfCols.get_values())
+            == set()
+        )
 
 
 def test_maxquant_reader() -> None:

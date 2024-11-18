@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 
 import alphabase.constants.modification as ap_mod
+from alphabase.psm_reader.keys import PsmDfCols
 from alphabase.psm_reader.psm_reader import (
     PSMReaderBase,
     psm_reader_provider,
@@ -104,9 +105,6 @@ class pFindReader(PSMReaderBase):
     def _init_column_mapping(self):
         self.column_mapping = psm_reader_yaml["pfind"]["column_mapping"]
 
-    def _init_modification_mapping(self):
-        self.modification_mapping = {}
-
     def _translate_modifications(self):
         pass
 
@@ -116,29 +114,35 @@ class pFindReader(PSMReaderBase):
         )
         pfind_df.fillna("", inplace=True)
         pfind_df = pfind_df[pfind_df.Sequence != ""]
-        pfind_df["raw_name"] = (
+        pfind_df[PsmDfCols.RAW_NAME] = (
             pfind_df["File_Name"].str.split(".").apply(lambda x: x[0])
         )
         pfind_df["Proteins"] = pfind_df["Proteins"].apply(parse_pfind_protein)
         return pfind_df
 
     def _translate_decoy(self, origin_df=None):
-        self._psm_df.decoy = (self._psm_df.decoy == "decoy").astype(np.int8)
+        self._psm_df[PsmDfCols.DECOY] = (
+            self._psm_df[PsmDfCols.DECOY] == "decoy"
+        ).astype(np.int8)
 
     def _translate_score(self, origin_df=None):
-        self._psm_df.score = -np.log(self._psm_df.score.astype(float) + 1e-100)
+        self._psm_df[PsmDfCols.SCORE] = -np.log(
+            self._psm_df[PsmDfCols.SCORE].astype(float) + 1e-100
+        )
 
     def _load_modifications(self, pfind_df):
         if len(pfind_df) == 0:
-            self._psm_df["mods"] = ""
-            self._psm_df["mod_sites"] = ""
+            self._psm_df[PsmDfCols.MODS] = ""
+            self._psm_df[PsmDfCols.MOD_SITES] = ""
             return
 
-        (self._psm_df["mods"], self._psm_df["mod_sites"]) = zip(
+        (self._psm_df[PsmDfCols.MODS], self._psm_df[PsmDfCols.MOD_SITES]) = zip(
             *pfind_df["Modification"].apply(get_pFind_mods)
         )
 
-        self._psm_df["mods"] = self._psm_df["mods"].apply(translate_pFind_mod)
+        self._psm_df[PsmDfCols.MODS] = self._psm_df[PsmDfCols.MODS].apply(
+            translate_pFind_mod
+        )
 
 
 def register_readers():
