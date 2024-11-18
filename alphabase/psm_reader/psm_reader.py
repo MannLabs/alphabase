@@ -258,13 +258,14 @@ class PSMReaderBase(ABC):
         else:
             self.modification_mapping = copy.deepcopy(modification_mapping)
 
-        self._mods_as_lists()
+        self._str_mods_to_lists()
         self.rev_mod_mapping = self._get_reversed_mod_mapping()
 
     def _init_modification_mapping(self) -> None:
         self.modification_mapping = {}
 
-    def _mods_as_lists(self) -> None:
+    def _str_mods_to_lists(self) -> None:
+        """Convert all single strings to lists containing one item in self.modification_mapping."""
         for mod, val in list(self.modification_mapping.items()):
             if isinstance(val, str):
                 self.modification_mapping[mod] = [val]
