@@ -239,7 +239,18 @@ class PSMReaderBase(ABC):
     def set_modification_mapping(
         self, modification_mapping: Optional[dict] = None
     ) -> None:
-        """Set the modification mapping."""
+        """Set the modification mapping for the search engine.
+
+        Also creates a reverse mapping from the modification format used by the search engine to the AlphaBase format.
+
+        Parameters
+        ----------
+        modification_mapping:
+            If dictionary: the current modification_mapping will be overwritten by this.
+            If str: the parameter will be interpreted as a reader type, and the modification_mapping is read from the
+                "modification_mapping" section of the psm_reader_yaml
+
+        """
         if modification_mapping is None:
             self._init_modification_mapping()
         elif isinstance(modification_mapping, str):
