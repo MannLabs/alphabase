@@ -3,6 +3,7 @@
 import copy
 import warnings
 from abc import ABC, abstractmethod
+from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, NoReturn, Optional, Set, Type, Union
 
@@ -220,25 +221,20 @@ class PSMReaderBase(ABC):
             ```
 
         """
-        if (
-            modification_mapping is None
-            or len(modification_mapping) == 0
-            or not isinstance(modification_mapping, dict)
-        ):
+        if not isinstance(modification_mapping, dict):
             return
 
+        new_modification_mapping = defaultdict(list)
         for key, val in list(modification_mapping.items()):
-            if key in self.modification_mapping:
-                if isinstance(val, str):
-                    self.modification_mapping[key].append(val)
-                else:
-                    self.modification_mapping[key].extend(val)
-            elif isinstance(val, str):
-                self.modification_mapping[key] = [val]
+            if isinstance(val, str):
+                new_modification_mapping[key].append(val)
             else:
-                self.modification_mapping[key] = val
+                new_modification_mapping[key].extend(val)
 
-        self.set_modification_mapping(self.modification_mapping)
+        if new_modification_mapping:
+            self.set_modification_mapping(
+                self.modification_mapping | new_modification_mapping
+            )
 
     def set_modification_mapping(
         self, modification_mapping: Optional[dict] = None
