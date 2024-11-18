@@ -3,6 +3,7 @@
 import copy
 import warnings
 from abc import ABC, abstractmethod
+from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, NoReturn, Optional, Set, Type, Union
 
@@ -178,10 +179,11 @@ class PSMReaderBase(ABC):
         self.set_modification_mapping()
         self.add_modification_mapping(modification_mapping)
 
-        if column_mapping is not None:
-            self.column_mapping = column_mapping
-        else:
-            self._init_column_mapping()
+        self.column_mapping = (
+            column_mapping
+            if column_mapping is not None
+            else self._read_column_mapping()
+        )
 
         self._psm_df = pd.DataFrame()
         self._keep_fdr = fdr
@@ -219,30 +221,36 @@ class PSMReaderBase(ABC):
             ```
 
         """
-        if (
-            modification_mapping is None
-            or len(modification_mapping) == 0
-            or not isinstance(modification_mapping, dict)
-        ):
+        if not isinstance(modification_mapping, dict):
             return
 
+        new_modification_mapping = defaultdict(list)
         for key, val in list(modification_mapping.items()):
-            if key in self.modification_mapping:
-                if isinstance(val, str):
-                    self.modification_mapping[key].append(val)
-                else:
-                    self.modification_mapping[key].extend(val)
-            elif isinstance(val, str):
-                self.modification_mapping[key] = [val]
+            if isinstance(val, str):
+                new_modification_mapping[key].append(val)
             else:
-                self.modification_mapping[key] = val
+                new_modification_mapping[key].extend(val)
 
-        self.set_modification_mapping(self.modification_mapping)
+        if new_modification_mapping:
+            self.set_modification_mapping(
+                self.modification_mapping | new_modification_mapping
+            )
 
     def set_modification_mapping(
         self, modification_mapping: Optional[dict] = None
     ) -> None:
-        """Set the modification mapping."""
+        """Set the modification mapping for the search engine.
+
+        Also creates a reverse mapping from the modification format used by the search engine to the AlphaBase format.
+
+        Parameters
+        ----------
+        modification_mapping:
+            If dictionary: the current modification_mapping will be overwritten by this.
+            If str: the parameter will be interpreted as a reader type, and the modification_mapping is read from the
+                "modification_mapping" section of the psm_reader_yaml
+
+        """
         if modification_mapping is None:
             self._init_modification_mapping()
         elif isinstance(modification_mapping, str):
@@ -257,33 +265,39 @@ class PSMReaderBase(ABC):
         else:
             self.modification_mapping = copy.deepcopy(modification_mapping)
 
-        self._mods_as_lists()
-        self._reverse_mod_mapping()
+        self._str_mods_to_lists()
+        self.rev_mod_mapping = self._get_reversed_mod_mapping()
 
     def _init_modification_mapping(self) -> None:
         self.modification_mapping = {}
 
-    def _mods_as_lists(self) -> None:
+    def _str_mods_to_lists(self) -> None:
+        """Convert all single strings to lists containing one item in self.modification_mapping."""
         for mod, val in list(self.modification_mapping.items()):
             if isinstance(val, str):
                 self.modification_mapping[mod] = [val]
 
-    def _reverse_mod_mapping(self) -> None:
-        self.rev_mod_mapping = {}
-        for this_mod, other_mod in self.modification_mapping.items():
-            if isinstance(other_mod, (list, tuple)):
-                for _mod in other_mod:
-                    if _mod in self.rev_mod_mapping and this_mod.endswith(
-                        "Protein_N-term"
+    def _get_reversed_mod_mapping(self) -> Dict[str, str]:
+        """Create a reverse mapping from the modification format used by the search engine to the AlphaBase format."""
+        rev_mod_mapping = {}
+        for mod_alphabase_format, mod_other_format in self.modification_mapping.items():
+            if isinstance(mod_other_format, (list, tuple)):
+                for mod_other_format_ in mod_other_format:
+                    if (
+                        mod_other_format_ in rev_mod_mapping
+                        and mod_alphabase_format.endswith("Protein_N-term")
                     ):
                         continue
 
-                    self.rev_mod_mapping[_mod] = this_mod
+                    rev_mod_mapping[mod_other_format_] = mod_alphabase_format
             else:
-                self.rev_mod_mapping[other_mod] = this_mod
+                rev_mod_mapping[mod_other_format] = mod_alphabase_format
 
-    def _init_column_mapping(self) -> NoReturn:
-        self.column_mapping = psm_reader_yaml[self._reader_type]["column_mapping"]
+        return rev_mod_mapping
+
+    def _read_column_mapping(self) -> Dict[str, str]:
+        """Read column mapping from psm_reader yaml file."""
+        return psm_reader_yaml[self._reader_type]["column_mapping"]
 
     def load(self, _file: Union[List[str], str]) -> pd.DataFrame:
         """Wrapper for import_file()."""
