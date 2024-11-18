@@ -259,7 +259,7 @@ class PSMReaderBase(ABC):
             self.modification_mapping = copy.deepcopy(modification_mapping)
 
         self._mods_as_lists()
-        self._reverse_mod_mapping()
+        self.rev_mod_mapping = self._get_reversed_mod_mapping()
 
     def _init_modification_mapping(self) -> None:
         self.modification_mapping = {}
@@ -269,19 +269,23 @@ class PSMReaderBase(ABC):
             if isinstance(val, str):
                 self.modification_mapping[mod] = [val]
 
-    def _reverse_mod_mapping(self) -> None:
-        self.rev_mod_mapping = {}
-        for this_mod, other_mod in self.modification_mapping.items():
-            if isinstance(other_mod, (list, tuple)):
-                for _mod in other_mod:
-                    if _mod in self.rev_mod_mapping and this_mod.endswith(
-                        "Protein_N-term"
+    def _get_reversed_mod_mapping(self) -> Dict[str, str]:
+        """Create a reverse mapping from the modification format used by the search engine to the AlphaBase format."""
+        rev_mod_mapping = {}
+        for mod_alphabase_format, mod_other_format in self.modification_mapping.items():
+            if isinstance(mod_other_format, (list, tuple)):
+                for mod_other_format_ in mod_other_format:
+                    if (
+                        mod_other_format_ in rev_mod_mapping
+                        and mod_alphabase_format.endswith("Protein_N-term")
                     ):
                         continue
 
-                    self.rev_mod_mapping[_mod] = this_mod
+                    rev_mod_mapping[mod_other_format_] = mod_alphabase_format
             else:
-                self.rev_mod_mapping[other_mod] = this_mod
+                rev_mod_mapping[mod_other_format] = mod_alphabase_format
+
+        return rev_mod_mapping
 
     def _read_column_mapping(self) -> Dict[str, str]:
         """Read column mapping from psm_reader yaml file."""
