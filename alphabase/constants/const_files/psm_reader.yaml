@@ -56,7 +56,7 @@ maxquant:
     'Dimethyl@Any_N-term':
       - '(Dimethyl)'
     'Acetyl@Protein_N-term':
-      - '_(Acetyl (Protein_N-term))'
+      - '_(Acetyl (Protein N-term))'
       - '_(ac)'
     'Acetyl@K':
       - 'K(ac)'
