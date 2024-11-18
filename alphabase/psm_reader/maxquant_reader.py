@@ -137,6 +137,8 @@ def parse_mod_seq(
 class MaxQuantReader(PSMReaderBase):
     """Reader for MaxQuant data."""
 
+    _reader_type = "maxquant"
+
     def __init__(  # noqa: PLR0913 many arguments in function definition
         self,
         *,
@@ -146,6 +148,7 @@ class MaxQuantReader(PSMReaderBase):
         keep_decoy: bool = False,
         fixed_C57: bool = True,  # noqa: N803 TODO: make this  *,fixed_c57  (breaking)
         mod_seq_columns: Optional[List[str]] = None,
+        rt_unit: str = "minute",
         **kwargs,
     ):
         """Reader for MaxQuant msms.txt and evidence.txt.
@@ -177,6 +180,10 @@ class MaxQuantReader(PSMReaderBase):
             The columns to find modified sequences,
             by default ['Modified sequence']
 
+        rt_unit : str, optional
+            The unit of RT in the search engine result.
+            Defaults to 'minute'.
+
         **kwargs : dict
             deprecated
 
@@ -191,6 +198,7 @@ class MaxQuantReader(PSMReaderBase):
             modification_mapping=modification_mapping,
             fdr=fdr,
             keep_decoy=keep_decoy,
+            rt_unit=rt_unit,
             **kwargs,
         )
 
@@ -258,9 +266,6 @@ class MaxQuantReader(PSMReaderBase):
             self._psm_df[PsmDfCols.DECOY] = (
                 self._psm_df[PsmDfCols.DECOY] == "-"
             ).astype(np.int8)
-
-    def _init_column_mapping(self) -> None:
-        self.column_mapping = psm_reader_yaml["maxquant"]["column_mapping"]
 
     def _load_file(self, filename: str) -> pd.DataFrame:
         csv_sep = self._get_table_delimiter(filename)

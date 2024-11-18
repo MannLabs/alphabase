@@ -96,6 +96,8 @@ class MSFragger_PSM_TSV_Reader(PSMReaderBase):  # noqa: N801 name should use Cap
 class MSFraggerPepXML(PSMReaderBase):
     """Reader for MSFragger's pep.xml file."""
 
+    _reader_type = "msfragger_pepxml"
+
     def __init__(  # noqa: PLR0913 many arguments in function definition
         self,
         *,
@@ -117,9 +119,6 @@ class MSFraggerPepXML(PSMReaderBase):
             **kwargs,
         )
         self.keep_unknown_aa_mass_diffs = keep_unknown_aa_mass_diffs
-
-    def _init_column_mapping(self) -> None:
-        self.column_mapping = psm_reader_yaml["msfragger_pepxml"]["column_mapping"]
 
     def _translate_modifications(self) -> None:
         pass
