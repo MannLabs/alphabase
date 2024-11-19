@@ -196,12 +196,6 @@ class MaxQuantReader(PSMReaderBase):
         self._mod_seq_columns = mod_seq_columns
         self.mod_seq_column = "Modified sequence"
 
-    def _find_mod_seq_column(self, df: pd.DataFrame) -> None:
-        for mod_seq_col in self._mod_seq_columns:
-            if mod_seq_col in df.columns:
-                self.mod_seq_column = mod_seq_col
-                break
-
     def _init_modification_mapping(self) -> None:
         self.modification_mapping = copy.deepcopy(
             # otherwise maxquant reader will modify the dict inplace

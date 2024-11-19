@@ -329,6 +329,13 @@ class PSMReaderBase(ABC):
             if isinstance(val, str):
                 self.modification_mapping[mod] = [val]
 
+    def _find_mod_seq_column(self, df: pd.DataFrame) -> None:  # called in _load_file
+        for mod_seq_col in self._mod_seq_columns:
+            if mod_seq_col in df.columns:
+                self.mod_seq_column = mod_seq_col
+                break
+            # TODO: warn if there's more
+
     def _get_reversed_mod_mapping(self) -> Dict[str, str]:
         """Create a reverse mapping from the modification format used by the search engine to the AlphaBase format."""
         rev_mod_mapping = {}
