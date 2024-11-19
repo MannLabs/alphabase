@@ -5,6 +5,7 @@ import numba
 import numpy as np
 import pandas as pd
 
+from alphabase.psm_reader.keys import PsmDfCols
 from alphabase.psm_reader.psm_reader import (
     PSMReaderBase,
     psm_reader_provider,
@@ -79,31 +80,31 @@ class AlphaPeptReader(PSMReaderBase):
         with h5py.File(filename, "r") as _hdf:
             dataset = _hdf[self.hdf_dataset]
             df = pd.DataFrame({col: dataset[col] for col in dataset})
-            df["raw_name"] = os.path.basename(filename)[: -len(".ms_data.hdf")]
+            df[PsmDfCols.RAW_NAME] = os.path.basename(filename)[: -len(".ms_data.hdf")]
             df["precursor"] = df["precursor"].str.decode("utf-8")
             # df['naked_sequence'] = df['naked_sequence'].str.decode('utf-8')
             if "scan_no" in df.columns:
                 df["scan_no"] = df["scan_no"].astype("int")
                 df["raw_idx"] = df["scan_no"] - 1  # if thermo, use scan-1 as spec_idx
-            df["charge"] = df["charge"].astype(int)
+            df[PsmDfCols.CHARGE] = df[PsmDfCols.CHARGE].astype(int)
         return df
 
     def _load_modifications(self, df: pd.DataFrame):
         if len(df) == 0:
-            self._psm_df["sequence"] = ""
-            self._psm_df["mods"] = ""
-            self._psm_df["mod_sites"] = ""
-            self._psm_df["decoy"] = 0
+            self._psm_df[PsmDfCols.SEQUENCE] = ""
+            self._psm_df[PsmDfCols.MODS] = ""
+            self._psm_df[PsmDfCols.MOD_SITES] = ""
+            self._psm_df[PsmDfCols.DECOY] = 0
             return
 
         (
-            self._psm_df["sequence"],
-            self._psm_df["mods"],
-            self._psm_df["mod_sites"],
+            self._psm_df[PsmDfCols.SEQUENCE],
+            self._psm_df[PsmDfCols.MODS],
+            self._psm_df[PsmDfCols.MOD_SITES],
             _charges,
-            self._psm_df["decoy"],
+            self._psm_df[PsmDfCols.DECOY],
         ) = zip(*df["precursor"].apply(parse_ap))
-        self._psm_df.decoy = self._psm_df.decoy.astype(np.int8)
+        self._psm_df[PsmDfCols.DECOY] = self._psm_df[PsmDfCols.DECOY].astype(np.int8)
 
 
 def register_readers():

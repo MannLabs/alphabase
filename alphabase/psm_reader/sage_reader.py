@@ -9,6 +9,7 @@ import pandas as pd
 from tqdm import tqdm
 
 from alphabase.constants.modification import MOD_DF
+from alphabase.psm_reader.keys import PsmDfCols
 from alphabase.psm_reader.psm_reader import (
     PSMReaderBase,
     psm_reader_provider,
@@ -94,7 +95,7 @@ class SageModificationTranslation:
         translated_psm_df = _apply_translate_modifications_mp(psm_df, translation_df)
 
         # 5. Drop PSMs with missing modifications
-        is_null = translated_psm_df["mod_sites"].isnull()
+        is_null = translated_psm_df[PsmDfCols.MOD_SITES].isnull()
         translated_psm_df = translated_psm_df[~is_null]
         if np.sum(is_null) > 0:
             logging.warning(
@@ -217,7 +218,10 @@ def _discover_modifications(psm_df: pd.DataFrame) -> pd.DataFrame:
     """
 
     modifications = (
-        psm_df["modified_sequence"].apply(_match_modified_sequence).explode().unique()
+        psm_df[PsmDfCols.MODIFIED_SEQUENCE]
+        .apply(_match_modified_sequence)
+        .explode()
+        .unique()
     )
     modifications = modifications[~pd.isnull(modifications)]
     return pd.DataFrame(
@@ -414,14 +418,14 @@ def _translate_modifications(
 
 
 def _apply_translate_modifications(
-    df: pd.DataFrame, mod_translation_df: pd.DataFrame
+    psm_df: pd.DataFrame, mod_translation_df: pd.DataFrame
 ) -> pd.DataFrame:
     """Apply the translation of modifications to the PSMs.
 
     Parameters
     ----------
 
-    df : pd.DataFrame
+    psm_df : pd.DataFrame
         The PSM dataframe with column 'modified_sequence'.
 
     mod_translation_df : pd.DataFrame
@@ -435,12 +439,12 @@ def _apply_translate_modifications(
 
     """
 
-    df["mod_sites"], df["mods"] = zip(
-        *df["modified_sequence"].apply(
+    psm_df[PsmDfCols.MOD_SITES], psm_df[PsmDfCols.MODS] = zip(
+        *psm_df[PsmDfCols.MODIFIED_SEQUENCE].apply(
             lambda x: _translate_modifications(x, mod_translation_df)
         )
     )
-    return df
+    return psm_df
 
 
 def _batchify_df(df: pd.DataFrame, mp_batch_size: int) -> typing.Generator:
@@ -466,7 +470,7 @@ def _batchify_df(df: pd.DataFrame, mp_batch_size: int) -> typing.Generator:
 
 
 def _apply_translate_modifications_mp(
-    df: pd.DataFrame,
+    psm_df: pd.DataFrame,
     mod_translation_df: pd.DataFrame,
     mp_batch_size: int = 50000,
     mp_process_num: int = 10,
@@ -477,7 +481,7 @@ def _apply_translate_modifications_mp(
     Parameters
     ----------
 
-    df : pd.DataFrame
+    psm_df : pd.DataFrame
         The PSM dataframe.
 
     mod_translation_df : pd.DataFrame
@@ -496,11 +500,11 @@ def _apply_translate_modifications_mp(
             partial(
                 _apply_translate_modifications, mod_translation_df=mod_translation_df
             ),
-            _batchify_df(df, mp_batch_size),
+            _batchify_df(psm_df, mp_batch_size),
         )
         if progress_bar:
             df_list = list(
-                tqdm(processing, total=int(np.ceil(len(df) / mp_batch_size)))
+                tqdm(processing, total=int(np.ceil(len(psm_df) / mp_batch_size)))
             )
         else:
             df_list = list(processing)
@@ -593,28 +597,31 @@ class SageReaderBase(PSMReaderBase):
     def _init_column_mapping(self):
         self.column_mapping = psm_reader_yaml["sage"]["column_mapping"]
 
-    def _init_modification_mapping(self):
-        self.modification_mapping = {}
-
     def _load_file(self, filename):
         raise NotImplementedError
 
     def _transform_table(self, origin_df):
-        self.psm_df["spec_idx"] = self.psm_df["scannr"].apply(
+        self._psm_df[PsmDfCols.SPEC_IDX] = self._psm_df[PsmDfCols.SCANNR].apply(
             _sage_spec_idx_from_scan_nr
         )
-        self.psm_df.drop(columns=["scannr"], inplace=True)
+        self._psm_df.drop(columns=[PsmDfCols.SCANNR], inplace=True)
 
     def _translate_decoy(self, origin_df):
-        if not self.keep_decoy:
-            self._psm_df = self.psm_df[~self.psm_df["decoy"]]
+        if not self._keep_decoy:
+            self._psm_df = self._psm_df[~self._psm_df[PsmDfCols.DECOY]]
 
-        self._psm_df = self.psm_df[self.psm_df["fdr"] <= self.keep_fdr]
-        self._psm_df = self.psm_df[self.psm_df["peptide_fdr"] <= self.keep_fdr]
-        self._psm_df = self.psm_df[self.psm_df["protein_fdr"] <= self.keep_fdr]
+        self._psm_df = self._psm_df[self._psm_df[PsmDfCols.FDR] <= self._keep_fdr]
+        self._psm_df = self._psm_df[
+            self._psm_df[PsmDfCols.PEPTIDE_FDR] <= self._keep_fdr
+        ]
+        self._psm_df = self._psm_df[
+            self._psm_df[PsmDfCols.PROTEIN_FDR] <= self._keep_fdr
+        ]
 
         # drop peptide_fdr, protein_fdr
-        self._psm_df.drop(columns=["peptide_fdr", "protein_fdr"], inplace=True)
+        self._psm_df.drop(
+            columns=[PsmDfCols.PEPTIDE_FDR, PsmDfCols.PROTEIN_FDR], inplace=True
+        )
 
     def _load_modifications(self, origin_df):
         pass
@@ -627,7 +634,7 @@ class SageReaderBase(PSMReaderBase):
         self._psm_df = sage_translation(self._psm_df)
 
         # drop modified_sequence
-        self._psm_df.drop(columns=["modified_sequence"], inplace=True)
+        self._psm_df.drop(columns=[PsmDfCols.MODIFIED_SEQUENCE], inplace=True)
 
 
 class SageReaderTSV(SageReaderBase):

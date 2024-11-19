@@ -1,11 +1,13 @@
 import copy
 import warnings
+from typing import Optional
 
 import numba
 import numpy as np
 import pandas as pd
 
 from alphabase.constants.modification import MOD_DF
+from alphabase.psm_reader.keys import PsmDfCols
 from alphabase.psm_reader.psm_reader import (
     PSMReaderBase,
     psm_reader_provider,
@@ -195,7 +197,7 @@ class MaxQuantReader(PSMReaderBase):
             psm_reader_yaml["maxquant"]["modification_mapping"]
         )
 
-    def set_modification_mapping(self, modification_mapping: dict):
+    def set_modification_mapping(self, modification_mapping: Optional[dict] = None):
         super().set_modification_mapping(modification_mapping)
         self._add_all_unimod()
         self._extend_mod_brackets()
@@ -237,8 +239,10 @@ class MaxQuantReader(PSMReaderBase):
             self.modification_mapping[key] = list(mod_set)
 
     def _translate_decoy(self, origin_df=None):
-        if "decoy" in self._psm_df.columns:
-            self._psm_df.decoy = (self._psm_df.decoy == "-").astype(np.int8)
+        if PsmDfCols.DECOY in self._psm_df.columns:
+            self._psm_df[PsmDfCols.DECOY] = (
+                self._psm_df[PsmDfCols.DECOY] == "-"
+            ).astype(np.int8)
 
     def _init_column_mapping(self):
         self.column_mapping = psm_reader_yaml["maxquant"]["column_mapping"]
@@ -252,16 +256,16 @@ class MaxQuantReader(PSMReaderBase):
 
         # remove MBR PSMs as they are currently not supported and will crash import
         mapped_columns = self._find_mapped_columns(df)
-        if "scan_num" in mapped_columns:
-            scan_num_col = mapped_columns["scan_num"]
+        if PsmDfCols.SCAN_NUM in mapped_columns:
+            scan_num_col = mapped_columns[PsmDfCols.SCAN_NUM]
             no_ms2_mask = df[scan_num_col] == ""
             if (num_no_ms2_mask := np.sum(no_ms2_mask)) > 0:
                 warnings.warn(
-                    f"Maxquant psm file contains {num_no_ms2_mask} MBR PSMs without MS2 scan. This is not yet supported and rows containing MBR PSMs will be removed."
+                    f"MaxQuant PSM file contains {num_no_ms2_mask} MBR PSMs without MS2 scan. This is not yet supported and rows containing MBR PSMs will be removed."
                 )
                 df = df[~no_ms2_mask]
                 df.reset_index(drop=True, inplace=True)
-        df[scan_num_col] = df[scan_num_col].astype(int)
+            df[scan_num_col] = df[scan_num_col].astype(int)
 
         # if 'K0' in df.columns:
         #     df['Mobility'] = df['K0'] # Bug in MaxQuant? It should be 1/K0
@@ -278,15 +282,15 @@ class MaxQuantReader(PSMReaderBase):
         else:
             mod_sep = "()"
 
-        (seqs, self._psm_df["mods"], self._psm_df["mod_sites"]) = zip(
+        (seqs, self._psm_df[PsmDfCols.MODS], self._psm_df[PsmDfCols.MOD_SITES]) = zip(
             *origin_df[self.mod_seq_column].apply(
                 parse_mod_seq,
                 mod_sep=mod_sep,
                 fixed_C57=self.fixed_C57,
             )
         )
-        if "sequence" not in self._psm_df.columns:
-            self._psm_df["sequence"] = seqs
+        if PsmDfCols.SEQUENCE not in self._psm_df.columns:
+            self._psm_df[PsmDfCols.SEQUENCE] = seqs
 
 
 def register_readers():

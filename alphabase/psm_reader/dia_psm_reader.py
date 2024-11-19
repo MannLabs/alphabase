@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+from alphabase.psm_reader.keys import PsmDfCols
 from alphabase.psm_reader.maxquant_reader import MaxQuantReader
 from alphabase.psm_reader.psm_reader import psm_reader_provider, psm_reader_yaml
 
@@ -127,7 +128,9 @@ class DiannReader(SpectronautReader):
 
     def _post_process(self, origin_df: pd.DataFrame):
         super()._post_process(origin_df)
-        self._psm_df.rename(columns={"spec_idx": "diann_spec_idx"}, inplace=True)
+        self._psm_df.rename(
+            columns={PsmDfCols.SPEC_IDX: PsmDfCols.DIANN_SPEC_INDEX}, inplace=True
+        )
 
 
 class SpectronautReportReader(MaxQuantReader):
@@ -174,10 +177,10 @@ class SpectronautReportReader(MaxQuantReader):
         self.mod_seq_column = "ModifiedSequence"
         self.csv_sep = self._get_table_delimiter(filename)
         df = pd.read_csv(filename, sep=self.csv_sep, keep_default_na=False)
-        df[[self.mod_seq_column, "charge"]] = df[self.precursor_column].str.split(
-            ".", expand=True, n=2
-        )
-        df["charge"] = df.charge.astype(np.int8)
+        df[[self.mod_seq_column, PsmDfCols.CHARGE]] = df[
+            self.precursor_column
+        ].str.split(".", expand=True, n=2)
+        df[PsmDfCols.CHARGE] = df[PsmDfCols.CHARGE].astype(np.int8)
         return df
 
 
