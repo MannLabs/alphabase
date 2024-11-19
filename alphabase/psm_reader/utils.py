@@ -1,3 +1,7 @@
+"""Utility functions for PSM readers."""
+
+from typing import List, Set
+
 import pandas as pd
 
 from alphabase.constants.modification import MOD_DF
@@ -74,12 +78,16 @@ def keep_modifications(mod_str: str, mod_set: set) -> str:
     return mod_str
 
 
-def get_mod_set(mod_list):
+def get_mod_set(mod_list: List[str]) -> Set[str]:
+    """Get an extended set of modifications from a list of modifications.
+
+    Extend bracket types of modifications and strip off underscore, e.g.
+      'K(Acetyl)' -> 'K(Acetyl)', 'K[Acetyl]'
+      '_[Phospho]' -> '[Phospho]', '_[Phospho]', '_(Phospho)'
+    """
+
     mod_set = set(mod_list)
-    # extend bracket types of modifications
-    # K(Acetyl) -> K[Acetyl]
-    # (Phospho) -> _(Phospho)
-    # _[Phospho] -> _(Phospho)
+
     for mod in mod_list:
         if mod[1] == "(":
             mod_set.add(f"{mod[0]}[{mod[2:-1]}]")
