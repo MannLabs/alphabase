@@ -177,23 +177,17 @@ class MaxQuantReader(PSMReaderBase):
             deprecated
 
         """
-        if mod_seq_columns is None:
-            mod_seq_columns = [
-                "Modified sequence"
-            ]  # TODO: why not take from psm_reader.yaml?
-
         super().__init__(
             column_mapping=column_mapping,
             modification_mapping=modification_mapping,
             fdr=fdr,
             keep_decoy=keep_decoy,
             rt_unit=rt_unit,
+            mod_seq_columns=mod_seq_columns,
             **kwargs,
         )
 
         self.fixed_C57 = fixed_C57
-        self._mod_seq_columns = mod_seq_columns
-        self.mod_seq_column = "Modified sequence"
 
     def _translate_decoy(self) -> None:
         if PsmDfCols.DECOY in self._psm_df.columns:
@@ -205,7 +199,6 @@ class MaxQuantReader(PSMReaderBase):
         csv_sep = self._get_table_delimiter(filename)
         df = pd.read_csv(filename, sep=csv_sep, keep_default_na=False)
 
-        self._find_mod_seq_column(df)
         df = df[~pd.isna(df["Retention time"])]
         df.fillna("", inplace=True)
 

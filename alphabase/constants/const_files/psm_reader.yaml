@@ -25,6 +25,8 @@ maxquant:
   reader_type: maxquant
   rt_unit: minute
   fixed_C57: True
+  mod_seq_columns:
+    - 'Modified sequence'
   column_mapping:
     'sequence': 'Sequence'
     'charge': 'Charge'
@@ -168,6 +170,8 @@ diann:
     'scan_num': 'MS2.Scan'
     'score': 'CScore'
     'fdr': 'Q.Value'
+  mod_seq_columns:
+    - "Modified.Sequence"
   modification_mapping: 'maxquant'
 
 spectronaut_report:
@@ -182,19 +186,14 @@ spectronaut_report:
     'genes': 'PG.Genes'
     'uniprot_ids': 'PG.UniProtIds'
     'charge': 'charge'
+  mod_seq_columns:
+    - 'ModifiedSequence'
   modification_mapping: 'maxquant'
 
 spectronaut:
   reader_type: spectronaut
   rt_unit: irt
   fixed_C57: False
-  mod_seq_columns:
-    - 'ModifiedPeptide'
-    - 'ModifiedSequence'
-    - 'FullUniModPeptideName'
-    - 'ModifiedPeptideSequence'
-    - 'LabeledSequence'
-    - 'FullUniModPeptideName'
   column_mapping:
     'raw_name': 'ReferenceRun'
     'sequence': ['StrippedPeptide','PeptideSequence']
@@ -206,19 +205,19 @@ spectronaut:
     'proteins': ['Protein Name','ProteinId','ProteinID','ProteinName','ProteinGroup','ProteinGroups']
     'uniprot_ids': ['UniProtIds','UniProtID','UniprotId']
     'genes': ['Genes','Gene','GeneName','GeneNames']
+  mod_seq_columns:
+    - 'ModifiedPeptide'
+    - 'ModifiedSequence'
+    - 'FullUniModPeptideName'
+    - 'ModifiedPeptideSequence'
+    - 'LabeledSequence'
+    - 'FullUniModPeptideName'
   modification_mapping: 'maxquant'
 
 library_reader_base:
   reader_type: library_reader_base
   rt_unit: irt
   fixed_C57: False
-  mod_seq_columns:
-    - 'ModifiedPeptideSequence'
-    - 'ModifiedPeptide'
-    - 'ModifiedSequence'
-    - 'FullUniModPeptideName'
-    - 'LabeledSequence'
-    - 'FullUniModPeptideName'
   column_mapping:
     'raw_name': 'ReferenceRun'
     'sequence': ['PeptideSequence', 'StrippedPeptide']
@@ -237,6 +236,13 @@ library_reader_base:
     'fragment_charge' : ['FragmentCharge', 'FragmentIonCharge', 'ProductCharge', 'ProductIonCharge']
     'fragment_series': ['FragmentSeriesNumber','FragmentNumber']
     'fragment_loss_type': ['FragmentLossType', 'FragmentIonLossType', 'ProductLossType', 'ProductIonLossType']
+  mod_seq_columns:
+    - 'ModifiedPeptideSequence'
+    - 'ModifiedPeptide'
+    - 'ModifiedSequence'
+    - 'FullUniModPeptideName'
+    - 'LabeledSequence'
+    - 'FullUniModPeptideName'
   modification_mapping: 'maxquant'
 
 sage:

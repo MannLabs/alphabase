@@ -7,7 +7,7 @@ import pandas as pd
 
 from alphabase.psm_reader.keys import PsmDfCols
 from alphabase.psm_reader.maxquant_reader import MaxQuantReader
-from alphabase.psm_reader.psm_reader import psm_reader_provider, psm_reader_yaml
+from alphabase.psm_reader.psm_reader import psm_reader_provider
 
 
 class SpectronautReader(MaxQuantReader):
@@ -33,9 +33,6 @@ class SpectronautReader(MaxQuantReader):
         **kwargs,
     ):
         """Initialize SpectronautReader."""
-        if mod_seq_columns is None:
-            mod_seq_columns = psm_reader_yaml["spectronaut"]["mod_seq_columns"]
-
         super().__init__(
             column_mapping=column_mapping,
             modification_mapping=modification_mapping,
@@ -47,14 +44,13 @@ class SpectronautReader(MaxQuantReader):
             **kwargs,
         )
 
-        self.mod_seq_column = "ModifiedPeptide"
         self._min_max_rt_norm = True
 
     def _load_file(self, filename: str) -> pd.DataFrame:
         csv_sep = self._get_table_delimiter(filename)
         df = pd.read_csv(filename, sep=csv_sep, keep_default_na=False)
 
-        self._find_mod_seq_column(df)
+        self.mod_seq_column = self._get_mod_seq_column(df)
         if "ReferenceRun" in df.columns:
             df.drop_duplicates(
                 ["ReferenceRun", self.mod_seq_column, "PrecursorCharge"], inplace=True
@@ -84,9 +80,6 @@ class SwathReader(SpectronautReader):
         **kwargs,
     ):
         """SWATH or OpenSWATH library, similar to `SpectronautReader`."""
-        if mod_seq_columns is None:
-            mod_seq_columns = psm_reader_yaml["spectronaut"]["mod_seq_columns"]
-
         super().__init__(
             column_mapping=column_mapping,
             modification_mapping=modification_mapping,
@@ -126,7 +119,6 @@ class DiannReader(SpectronautReader):
             **kwargs,
         )
 
-        self.mod_seq_column = "Modified.Sequence"
         self._min_max_rt_norm = False
 
     def _load_file(self, filename: str) -> pd.DataFrame:
@@ -172,15 +164,14 @@ class SpectronautReportReader(MaxQuantReader):
             **kwargs,
         )
 
-        self.precursor_column = "EG.PrecursorId"
-        self.mod_seq_column = "ModifiedSequence"
-
+        self.precursor_column = "EG.PrecursorId"  # TODO: move to yaml
         self._min_max_rt_norm = False
 
     def _load_file(self, filename: str) -> pd.DataFrame:
         csv_sep = self._get_table_delimiter(filename)
         df = pd.read_csv(filename, sep=csv_sep, keep_default_na=False)
 
+        self.mod_seq_column = self._get_mod_seq_column(df)
         df[[self.mod_seq_column, PsmDfCols.CHARGE]] = df[
             self.precursor_column
         ].str.split(".", expand=True, n=2)
