@@ -12,13 +12,36 @@ class ModificationMapper:
 
     def __init__(
         self,
-        modification_mapping: Optional[Dict[str, str]],
+        custom_modification_mapping: Optional[Dict[str, str]],
         reader_yaml: Dict,
         modification_type: Optional[str],
         *,
         add_unimod_to_mod_mapping: bool,
     ):
-        """Initialize the ModificationMapper."""
+        """Initialize the ModificationMapper.
+
+        Parameters
+        ----------
+        custom_modification_mapping:
+            A custom mapping or a string referencing one of the mappings in the reader_yaml
+            The key of dict is a modification name in AlphaBase format;
+            the value could be a str or a list, see below
+            ```
+            add_modification_mapping({
+                'Dimethyl@K': ['K(Dimethyl)'], # list
+                'Dimethyl@Any_N-term': '_(Dimethyl)', # str
+            })
+
+        reader_yaml:
+            the yaml (read from file) containing the modification mappings
+
+        modification_type:
+            the type of modification mapping ("maxquant" or "alphapept")
+
+        add_unimod_to_mod_mapping:
+            whether unimod modifications should be added to the mapping
+
+        """
         self.modification_mapping = None
         self.rev_mod_mapping = None
 
@@ -27,16 +50,16 @@ class ModificationMapper:
         self._modification_type = modification_type
 
         self.set_modification_mapping()
-        self.add_modification_mapping(modification_mapping)
+        self.add_modification_mapping(custom_modification_mapping)
 
-    def add_modification_mapping(self, modification_mapping: dict) -> None:
+    def add_modification_mapping(self, custom_modification_mapping: dict) -> None:
         """Append additional modification mappings for the search engine.
 
         Also creates a reverse mapping from the modification format used by the search engine to the AlphaBase format.
 
         Parameters
         ----------
-        modification_mapping : dict
+        custom_modification_mapping : dict
             The key of dict is a modification name in AlphaBase format;
             the value could be a str or a list, see below
             ```
@@ -47,11 +70,11 @@ class ModificationMapper:
             ```
 
         """
-        if not isinstance(modification_mapping, dict):
+        if not isinstance(custom_modification_mapping, dict):
             return
 
         new_modification_mapping = defaultdict(list)
-        for key, val in list(modification_mapping.items()):
+        for key, val in list(custom_modification_mapping.items()):
             if isinstance(val, str):
                 new_modification_mapping[key].append(val)
             else:
@@ -79,11 +102,13 @@ class ModificationMapper:
         """
         if modification_mapping is None:
             self._init_modification_mapping()
-        elif isinstance(modification_mapping, str):
+        elif isinstance(
+            modification_mapping, str
+        ):  # TODO: remove this overloading of the parameter by introducing yaml key "modification_mapping_type"
             if modification_mapping in self._psm_reader_yaml:
-                self.modification_mapping = copy.deepcopy(
-                    self._psm_reader_yaml[modification_mapping]["modification_mapping"]
-                )
+                self.modification_mapping = self._psm_reader_yaml[modification_mapping][
+                    "modification_mapping"
+                ]
             else:
                 raise ValueError(
                     f"Unknown modification mapping: {modification_mapping}"
@@ -100,6 +125,7 @@ class ModificationMapper:
         self.rev_mod_mapping = self._get_reversed_mod_mapping()
 
     def _init_modification_mapping(self) -> None:
+        """Initialize the modification mapping from the psm_reader_yaml or as an empty dictionary."""
         if self._modification_type is not None:
             self.modification_mapping = self._psm_reader_yaml[self._modification_type][
                 "modification_mapping"
@@ -108,6 +134,7 @@ class ModificationMapper:
             self.modification_mapping = {}
 
     def _add_all_unimod(self) -> None:
+        """Add all unimod modifications to the modification mapping."""
         for mod_name, unimod in MOD_TO_UNIMOD_DICT.items():
             if mod_name in self.modification_mapping:
                 self.modification_mapping[mod_name].append(unimod)

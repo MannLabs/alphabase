@@ -244,7 +244,6 @@ def test_spectronaut_reader() -> None:
 
 def test_spectronaut_reader_with_mod() -> None:
     """Test the Spectronaut reader with manual intervention on the modifications."""
-    return
     input_data = StringIO(TEST_DATA_SPECTRONAUT)
 
     reader = SpectronautReader()
