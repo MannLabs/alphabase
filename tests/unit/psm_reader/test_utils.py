@@ -2,7 +2,38 @@
 
 import pandas as pd
 
-from alphabase.psm_reader.utils import get_mod_set, keep_modifications
+from alphabase.psm_reader.utils import (
+    get_mod_set,
+    keep_modifications,
+    translate_other_modification,
+)
+
+
+def test_translate_other_modification_with_empty_mod_str():
+    assert translate_other_modification("", {"ModA": "ModA@X"}) == ("", [])
+
+
+def test_translate_other_modification_with_all_mods_in_dict():
+    assert translate_other_modification(
+        "ModA;ModB", {"ModA": "ModA@X", "ModB": "ModB@Y"}
+    ) == ("ModA@X;ModB@Y", [])
+
+
+def test_translate_other_modification_with_some_mods_not_in_dict():
+    assert translate_other_modification("ModA;UnknownMod", {"ModA": "ModA@X"}) == (
+        pd.NA,
+        ["UnknownMod"],
+    )
+
+
+def test_translate_other_modification_with_no_mods_in_dict():
+    assert translate_other_modification(
+        "UnknownMod1;UnknownMod2", {"ModA": "ModA@X"}
+    ) == (pd.NA, ["UnknownMod1", "UnknownMod2"])
+
+
+def test_translate_other_modification_with_empty_mod_dict():
+    assert translate_other_modification("ModA;ModB", {}) == (pd.NA, ["ModA", "ModB"])
 
 
 def test_keep_modifications_with_empty_mod_str():

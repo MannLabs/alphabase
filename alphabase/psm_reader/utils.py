@@ -1,6 +1,6 @@
 """Utility functions for PSM readers."""
 
-from typing import List, Set, Union
+from typing import Dict, List, Set, Tuple, Union
 
 import pandas as pd
 from pandas._libs.missing import NAType
@@ -18,7 +18,9 @@ for mod_name, unimod_id_ in MOD_DF[["mod_name", "unimod_id"]].to_numpy():
         MOD_TO_UNIMOD_DICT[mod_name] = f"_(UniMod:{unimod_id})"
 
 
-def translate_other_modification(mod_str: str, mod_dict: dict) -> str:
+def translate_other_modification(
+    mod_str: str, mod_dict: Dict
+) -> Tuple[Union[str, NAType], List[str]]:
     """Translate modifications of `mod_str` to the AlphaBase format mapped by mod_dict.
 
     Parameters
@@ -40,8 +42,10 @@ def translate_other_modification(mod_str: str, mod_dict: dict) -> str:
     """
     if mod_str == "":
         return "", []
+
     ret_mods = []
     unknown_mods = []
+
     for mod in mod_str.split(";"):
         if mod in mod_dict:
             ret_mods.append(mod_dict[mod])
@@ -50,6 +54,7 @@ def translate_other_modification(mod_str: str, mod_dict: dict) -> str:
 
     if len(unknown_mods) > 0:
         return pd.NA, unknown_mods
+
     return ";".join(ret_mods), []
 
 
