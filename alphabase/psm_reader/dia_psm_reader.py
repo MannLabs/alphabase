@@ -18,6 +18,7 @@ class SpectronautReader(MaxQuantReader):
     """
 
     _reader_type = "spectronaut"
+    _add_unimod_to_mod_mapping = True
 
     def __init__(  # noqa: PLR0913 many arguments in function definition
         self,
@@ -68,6 +69,9 @@ class SpectronautReader(MaxQuantReader):
 class SwathReader(SpectronautReader):
     """Reader for SWATH or OpenSWATH library TSV/CSV."""
 
+    _reader_type = "spectronaut"  # no typo
+    _add_unimod_to_mod_mapping = True
+
     def __init__(  # noqa: PLR0913 many arguments in function definition
         self,
         *,
@@ -98,6 +102,7 @@ class DiannReader(SpectronautReader):
     """Reader for DIANN data."""
 
     _reader_type = "diann"
+    _add_unimod_to_mod_mapping = True
 
     def __init__(  # noqa: PLR0913 many arguments in function definition
         self,
@@ -143,6 +148,7 @@ class SpectronautReportReader(MaxQuantReader):
     """
 
     _reader_type = "spectronaut_report"
+    _add_unimod_to_mod_mapping = True
 
     def __init__(  # noqa: PLR0913 many arguments in function definition
         self,

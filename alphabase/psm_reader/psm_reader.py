@@ -11,11 +11,22 @@ import numpy as np
 import pandas as pd
 
 from alphabase.constants._const import CONST_FILE_FOLDER
+from alphabase.constants.modification import MOD_DF
 from alphabase.peptide import mobility
 from alphabase.peptide.precursor import reset_precursor_df, update_precursor_mz
 from alphabase.psm_reader.keys import PsmDfCols
 from alphabase.utils import _get_delimiter
 from alphabase.yaml_utils import load_yaml
+
+mod_to_unimod_dict = {}
+for mod_name, unimod_id_ in MOD_DF[["mod_name", "unimod_id"]].to_numpy():
+    unimod_id = int(unimod_id_)
+    if unimod_id in (-1, "-1"):
+        continue
+    if mod_name[-2] == "@":
+        mod_to_unimod_dict[mod_name] = f"{mod_name[-1]}(UniMod:{unimod_id})"
+    else:
+        mod_to_unimod_dict[mod_name] = f"_(UniMod:{unimod_id})"
 
 
 def translate_other_modification(mod_str: str, mod_dict: dict) -> str:
@@ -88,6 +99,8 @@ class PSMReaderBase(ABC):
 
     # the type of the reader, this references a key in psm_reader.yaml
     _reader_type: str
+
+    _add_unimod_to_mod_mapping: bool = False
 
     def __init__(
         self,
@@ -266,10 +279,49 @@ class PSMReaderBase(ABC):
             self.modification_mapping = copy.deepcopy(modification_mapping)
 
         self._str_mods_to_lists()
+
+        if self._add_unimod_to_mod_mapping:
+            self._add_all_unimod()
+            self._extend_mod_brackets()
+
         self.rev_mod_mapping = self._get_reversed_mod_mapping()
 
     def _init_modification_mapping(self) -> None:
         self.modification_mapping = {}
+
+    def _add_all_unimod(self) -> None:
+        for mod_name, unimod in mod_to_unimod_dict.items():
+            if mod_name in self.modification_mapping:
+                self.modification_mapping[mod_name].append(unimod)
+            else:
+                self.modification_mapping[mod_name] = [unimod]
+
+    def _extend_mod_brackets(self) -> None:
+        """Update modification_mapping to include different bracket types."""
+        for key, mod_list in list(self.modification_mapping.items()):
+            mod_set = set(mod_list)
+            # extend bracket types of modifications
+            # K(Acetyl) -> K[Acetyl]
+            # (Phospho) -> _(Phospho)
+            # _[Phospho] -> _(Phospho)
+            for mod in mod_list:
+                if mod[1] == "(":
+                    mod_set.add(f"{mod[0]}[{mod[2:-1]}]")
+                elif mod[1] == "[":
+                    mod_set.add(f"{mod[0]}({mod[2:-1]})")
+
+                if mod.startswith("_"):
+                    mod_set.add(f"{mod[1:]}")
+                elif mod.startswith("("):
+                    mod_set.add(f"_{mod}")
+                    mod_set.add(f"[{mod[1:-1]}]")
+                    mod_set.add(f"_[{mod[1:-1]}]")
+                elif mod.startswith("["):
+                    mod_set.add(f"_{mod}")
+                    mod_set.add(f"({mod[1:-1]})")
+                    mod_set.add(f"_({mod[1:-1]})")
+
+            self.modification_mapping[key] = list(mod_set)
 
     def _str_mods_to_lists(self) -> None:
         """Convert all single strings to lists containing one item in self.modification_mapping."""
