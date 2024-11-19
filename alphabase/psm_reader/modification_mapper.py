@@ -42,13 +42,12 @@ class ModificationMapper:
             whether unimod modifications should be added to the mapping
 
         """
-        self.modification_mapping = None
-        self.rev_mod_mapping = None
-
         self._psm_reader_yaml = reader_yaml
         self._add_unimod_to_mod_mapping = add_unimod_to_mod_mapping
         self._modification_type = modification_type
 
+        self.modification_mapping = None
+        self.rev_mod_mapping = None
         self.set_modification_mapping()
         self.add_modification_mapping(custom_modification_mapping)
 
