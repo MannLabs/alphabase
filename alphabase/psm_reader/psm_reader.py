@@ -16,9 +16,9 @@ from alphabase.peptide.precursor import reset_precursor_df, update_precursor_mz
 from alphabase.psm_reader.keys import PsmDfCols
 from alphabase.psm_reader.utils import (
     MOD_TO_UNIMOD_DICT,
-    get_mod_set,
+    get_extended_modifications,
     keep_modifications,
-    translate_other_modification,
+    translate_modifications,
 )
 from alphabase.utils import _get_delimiter
 from alphabase.yaml_utils import load_yaml
@@ -233,9 +233,7 @@ class PSMReaderBase(ABC):
     def _extend_mod_brackets(self) -> None:
         """Update modification_mapping to include different bracket types."""
         for key, mod_list in list(self.modification_mapping.items()):
-            mod_set = get_mod_set(mod_list)
-
-            self.modification_mapping[key] = list(mod_set)
+            self.modification_mapping[key] = get_extended_modifications(mod_list)
 
     def _str_mods_to_lists(self) -> None:
         """Convert all single strings to lists containing one item in self.modification_mapping."""
@@ -461,7 +459,7 @@ class PSMReaderBase(ABC):
         """
         self._psm_df[PsmDfCols.MODS], unknown_mods = zip(
             *self._psm_df[PsmDfCols.MODS].apply(
-                translate_other_modification, mod_dict=self.rev_mod_mapping
+                translate_modifications, mod_dict=self.rev_mod_mapping
             )
         )
 

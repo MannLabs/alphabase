@@ -1,6 +1,6 @@
 """Utility functions for PSM readers."""
 
-from typing import Dict, List, Set, Tuple, Union
+from typing import Dict, List, Tuple, Union
 
 import pandas as pd
 from pandas._libs.missing import NAType
@@ -18,7 +18,7 @@ for mod_name, unimod_id_ in MOD_DF[["mod_name", "unimod_id"]].to_numpy():
         MOD_TO_UNIMOD_DICT[mod_name] = f"_(UniMod:{unimod_id})"
 
 
-def translate_other_modification(
+def translate_modifications(
     mod_str: str, mod_dict: Dict
 ) -> Tuple[Union[str, NAType], List[str]]:
     """Translate modifications of `mod_str` to the AlphaBase format mapped by mod_dict.
@@ -84,7 +84,7 @@ def keep_modifications(mod_str: str, mod_set: set) -> Union[str, NAType]:
     return mod_str
 
 
-def get_mod_set(mod_list: List[str]) -> Set[str]:
+def get_extended_modifications(mod_list: List[str]) -> List[str]:
     """Get an extended set of modifications from a list of modifications.
 
     Extend bracket types of modifications and strip off underscore, e.g.
@@ -110,4 +110,4 @@ def get_mod_set(mod_list: List[str]) -> Set[str]:
             mod_set.add(f"_{mod}")
             mod_set.add(f"({mod[1:-1]})")
             mod_set.add(f"_({mod[1:-1]})")
-    return mod_set
+    return sorted(list(mod_set))

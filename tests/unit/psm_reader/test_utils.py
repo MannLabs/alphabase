@@ -3,37 +3,38 @@
 import pandas as pd
 
 from alphabase.psm_reader.utils import (
-    get_mod_set,
+    get_extended_modifications,
     keep_modifications,
-    translate_other_modification,
+    translate_modifications,
 )
 
 
 def test_translate_other_modification_with_empty_mod_str():
-    assert translate_other_modification("", {"ModA": "ModA@X"}) == ("", [])
+    assert translate_modifications("", {"ModA": "ModA@X"}) == ("", [])
 
 
 def test_translate_other_modification_with_all_mods_in_dict():
-    assert translate_other_modification(
+    assert translate_modifications(
         "ModA;ModB", {"ModA": "ModA@X", "ModB": "ModB@Y"}
     ) == ("ModA@X;ModB@Y", [])
 
 
 def test_translate_other_modification_with_some_mods_not_in_dict():
-    assert translate_other_modification("ModA;UnknownMod", {"ModA": "ModA@X"}) == (
+    assert translate_modifications("ModA;UnknownMod", {"ModA": "ModA@X"}) == (
         pd.NA,
         ["UnknownMod"],
     )
 
 
 def test_translate_other_modification_with_no_mods_in_dict():
-    assert translate_other_modification(
-        "UnknownMod1;UnknownMod2", {"ModA": "ModA@X"}
-    ) == (pd.NA, ["UnknownMod1", "UnknownMod2"])
+    assert translate_modifications("UnknownMod1;UnknownMod2", {"ModA": "ModA@X"}) == (
+        pd.NA,
+        ["UnknownMod1", "UnknownMod2"],
+    )
 
 
 def test_translate_other_modification_with_empty_mod_dict():
-    assert translate_other_modification("ModA;ModB", {}) == (pd.NA, ["ModA", "ModB"])
+    assert translate_modifications("ModA;ModB", {}) == (pd.NA, ["ModA", "ModB"])
 
 
 def test_keep_modifications_with_empty_mod_str():
@@ -65,46 +66,50 @@ def test_keep_modifications_with_empty_mod_set():
     assert keep_modifications("Oxidation@M;Phospho@S", set()) is pd.NA
 
 
-def test_get_mod_set_with_empty_list():
-    assert get_mod_set([]) == set()
+def test_get_extended_modifications_with_empty_list():
+    assert get_extended_modifications([]) == []
 
 
-def test_get_mod_set_with_single_modification():
-    assert get_mod_set(["K(Acetyl)"]) == {"K(Acetyl)", "K[Acetyl]"}
+def test_get_extended_modifications_with_single_modification():
+    assert get_extended_modifications(["K(Acetyl)"]) == ["K(Acetyl)", "K[Acetyl]"]
 
 
-def test_get_mod_set_with_multiple_modifications():
-    assert get_mod_set(["K(Acetyl)", "(Phospho)"]) == {
+def test_get_extended_modifications_with_multiple_modifications():
+    assert get_extended_modifications(["K(Acetyl)", "(Phospho)"]) == [
+        "(Phospho)",
         "K(Acetyl)",
         "K[Acetyl]",
-        "(Phospho)",
-        "_(Phospho)",
         "[Phospho]",
-        "_[Phospho]",
-    }
-
-
-def test_get_mod_set_with_modifications_starting_with_underscore():
-    assert get_mod_set(["_Phospho"]) == {"_Phospho", "Phospho"}
-
-
-def test_get_mod_set_with_modifications_starting_with_bracket():
-    assert get_mod_set(["(Phospho)"]) == {
-        "(Phospho)",
         "_(Phospho)",
-        "[Phospho]",
         "_[Phospho]",
-    }
+    ]
 
 
-def test_get_mod_set_with_modifications_starting_with_square_bracket():
-    assert get_mod_set(["[Phospho]"]) == {
-        "_[Phospho]",
+def test_get_extended_modifications_with_modifications_starting_with_underscore():
+    assert get_extended_modifications(["_Phospho"]) == ["Phospho", "_Phospho"]
+
+
+def test_get_extended_modifications_with_modifications_starting_with_bracket():
+    assert get_extended_modifications(["(Phospho)"]) == [
         "(Phospho)",
-        "_(Phospho)",
         "[Phospho]",
-    }
+        "_(Phospho)",
+        "_[Phospho]",
+    ]
 
 
-def test_get_mod_set_with_modifications_starting_with_underscore_square_bracket():
-    assert get_mod_set(["_[Phospho]"]) == {"[Phospho]", "_[Phospho]", "_(Phospho)"}
+def test_get_extended_modifications_with_modifications_starting_with_square_bracket():
+    assert get_extended_modifications(["[Phospho]"]) == [
+        "(Phospho)",
+        "[Phospho]",
+        "_(Phospho)",
+        "_[Phospho]",
+    ]
+
+
+def test_get_extended_modifications_with_modifications_starting_with_underscore_square_bracket():
+    assert get_extended_modifications(["_[Phospho]"]) == [
+        "[Phospho]",
+        "_(Phospho)",
+        "_[Phospho]",
+    ]
