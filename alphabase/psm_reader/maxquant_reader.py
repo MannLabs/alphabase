@@ -1,6 +1,5 @@
 """Reader for MaxQuant data."""
 
-import copy
 import warnings
 from typing import List, Optional
 
@@ -12,7 +11,6 @@ from alphabase.psm_reader.keys import PsmDfCols
 from alphabase.psm_reader.psm_reader import (
     PSMReaderBase,
     psm_reader_provider,
-    psm_reader_yaml,
 )
 
 # make sure all warnings are shown
@@ -128,6 +126,7 @@ class MaxQuantReader(PSMReaderBase):
 
     _reader_type = "maxquant"
     _add_unimod_to_mod_mapping = True
+    _modification_type = "maxquant"
 
     def __init__(  # noqa: PLR0913 many arguments in function definition
         self,
@@ -195,12 +194,6 @@ class MaxQuantReader(PSMReaderBase):
         self.fixed_C57 = fixed_C57
         self._mod_seq_columns = mod_seq_columns
         self.mod_seq_column = "Modified sequence"
-
-    def _init_modification_mapping(self) -> None:
-        self.modification_mapping = copy.deepcopy(
-            # otherwise maxquant reader will modify the dict inplace
-            psm_reader_yaml["maxquant"]["modification_mapping"]
-        )
 
     def _translate_decoy(self) -> None:
         if PsmDfCols.DECOY in self._psm_df.columns:
