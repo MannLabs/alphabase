@@ -1,6 +1,37 @@
 """Tests for the utility functions in the psm_reader module."""
 
-from alphabase.psm_reader.utils import get_mod_set
+import pandas as pd
+
+from alphabase.psm_reader.utils import get_mod_set, keep_modifications
+
+
+def test_keep_modifications_with_empty_mod_str():
+    assert keep_modifications("", {"Oxidation@M", "Phospho@S"}) == ""
+
+
+def test_keep_modifications_with_all_mods_in_set():
+    assert (
+        keep_modifications("Oxidation@M;Phospho@S", {"Oxidation@M", "Phospho@S"})
+        == "Oxidation@M;Phospho@S"
+    )
+
+
+def test_keep_modifications_with_some_mods_not_in_set():
+    assert (
+        keep_modifications("Oxidation@M;UnknownMod", {"Oxidation@M", "Phospho@S"})
+        is pd.NA
+    )
+
+
+def test_keep_modifications_with_no_mods_in_set():
+    assert (
+        keep_modifications("UnknownMod1;UnknownMod2", {"Oxidation@M", "Phospho@S"})
+        is pd.NA
+    )
+
+
+def test_keep_modifications_with_empty_mod_set():
+    assert keep_modifications("Oxidation@M;Phospho@S", set()) is pd.NA
 
 
 def test_get_mod_set_with_empty_list():

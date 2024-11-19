@@ -1,8 +1,9 @@
 """Utility functions for PSM readers."""
 
-from typing import List, Set
+from typing import List, Set, Union
 
 import pandas as pd
+from pandas._libs.missing import NAType
 
 from alphabase.constants.modification import MOD_DF
 
@@ -52,8 +53,8 @@ def translate_other_modification(mod_str: str, mod_dict: dict) -> str:
     return ";".join(ret_mods), []
 
 
-def keep_modifications(mod_str: str, mod_set: set) -> str:
-    """Check if modifications of `mod_str` are in `mod_set`.
+def keep_modifications(mod_str: str, mod_set: set) -> Union[str, NAType]:
+    """Return modifications if they are in mod_set, pd.NA otherwise.
 
     Parameters
     ----------
