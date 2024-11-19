@@ -463,7 +463,7 @@ def _apply_translate_modifications_mp(
     psm_df: pd.DataFrame,
     mod_translation_df: pd.DataFrame,
     mp_batch_size: int = 50000,
-    mp_process_num: int = 10,
+    mp_process_num: int = 1,
     *,
     progress_bar: bool = True,
 ) -> pd.DataFrame:
