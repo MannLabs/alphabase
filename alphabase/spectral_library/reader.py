@@ -18,6 +18,7 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
     """Base class for reading spectral libraries."""
 
     _reader_type = "library_reader_base"
+    _add_unimod_to_mod_mapping = True
 
     def __init__(  # noqa: PLR0913 many arguments in function definition
         self,
