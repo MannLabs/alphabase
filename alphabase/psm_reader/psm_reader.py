@@ -11,84 +11,17 @@ import numpy as np
 import pandas as pd
 
 from alphabase.constants._const import CONST_FILE_FOLDER
-from alphabase.constants.modification import MOD_DF
 from alphabase.peptide import mobility
 from alphabase.peptide.precursor import reset_precursor_df, update_precursor_mz
 from alphabase.psm_reader.keys import PsmDfCols
+from alphabase.psm_reader.utils import (
+    MOD_TO_UNIMOD_DICT,
+    get_mod_set,
+    keep_modifications,
+    translate_other_modification,
+)
 from alphabase.utils import _get_delimiter
 from alphabase.yaml_utils import load_yaml
-
-mod_to_unimod_dict = {}
-for mod_name, unimod_id_ in MOD_DF[["mod_name", "unimod_id"]].to_numpy():
-    unimod_id = int(unimod_id_)
-    if unimod_id in (-1, "-1"):
-        continue
-    if mod_name[-2] == "@":
-        mod_to_unimod_dict[mod_name] = f"{mod_name[-1]}(UniMod:{unimod_id})"
-    else:
-        mod_to_unimod_dict[mod_name] = f"_(UniMod:{unimod_id})"
-
-
-def translate_other_modification(mod_str: str, mod_dict: dict) -> str:
-    """Translate modifications of `mod_str` to the AlphaBase format mapped by mod_dict.
-
-    Parameters
-    ----------
-    mod_str : str
-        mod list in str format, seperated by ';',
-        e.g. ModA;ModB
-    mod_dict : dict
-        translate mod dict from others to AlphaBase,
-        e.g. for pFind, key=['Phospho[S]','Oxidation[M]'],
-        value=['Phospho@S','Oxidation@M']
-
-    Returns
-    -------
-    str
-        new mods in AlphaBase format seperated by ';'. if any
-        modification is not in `mod_dict`, return pd.NA.
-
-    """
-    if mod_str == "":
-        return "", []
-    ret_mods = []
-    unknown_mods = []
-    for mod in mod_str.split(";"):
-        if mod in mod_dict:
-            ret_mods.append(mod_dict[mod])
-        else:
-            unknown_mods.append(mod)
-
-    if len(unknown_mods) > 0:
-        return pd.NA, unknown_mods
-    return ";".join(ret_mods), []
-
-
-def _keep_modifications(mod_str: str, mod_set: set) -> str:
-    """Check if modifications of `mod_str` are in `mod_set`.
-
-    Parameters
-    ----------
-    mod_str : str
-        mod list in str format, seperated by ';',
-        e.g. Oxidation@M;Phospho@S.
-    mod_set : set
-        mod set to check
-
-    Returns
-    -------
-    str
-        original `mod_str` if all modifications are in mod_set
-        else pd.NA.
-
-    """
-    if not mod_str:
-        return ""
-    for mod in mod_str.split(";"):
-        if mod not in mod_set:
-            return pd.NA
-    return mod_str
-
 
 #: See `psm_reader.yaml <https://github.com/MannLabs/alphabase/blob/main/alphabase/constants/const_files/psm_reader.yaml>`_
 psm_reader_yaml = load_yaml(Path(CONST_FILE_FOLDER) / "psm_reader.yaml")
@@ -205,6 +138,7 @@ class PSMReaderBase(ABC):
         self._engine_rt_unit = rt_unit
         self._min_irt_value = -100
         self._max_irt_value = 200
+        self._mod_seq_columns = []
 
         for key, value in kwargs.items():  # TODO: remove and remove kwargs
             warnings.warn(
@@ -290,7 +224,7 @@ class PSMReaderBase(ABC):
         self.modification_mapping = {}
 
     def _add_all_unimod(self) -> None:
-        for mod_name, unimod in mod_to_unimod_dict.items():
+        for mod_name, unimod in MOD_TO_UNIMOD_DICT.items():
             if mod_name in self.modification_mapping:
                 self.modification_mapping[mod_name].append(unimod)
             else:
@@ -299,27 +233,7 @@ class PSMReaderBase(ABC):
     def _extend_mod_brackets(self) -> None:
         """Update modification_mapping to include different bracket types."""
         for key, mod_list in list(self.modification_mapping.items()):
-            mod_set = set(mod_list)
-            # extend bracket types of modifications
-            # K(Acetyl) -> K[Acetyl]
-            # (Phospho) -> _(Phospho)
-            # _[Phospho] -> _(Phospho)
-            for mod in mod_list:
-                if mod[1] == "(":
-                    mod_set.add(f"{mod[0]}[{mod[2:-1]}]")
-                elif mod[1] == "[":
-                    mod_set.add(f"{mod[0]}({mod[2:-1]})")
-
-                if mod.startswith("_"):
-                    mod_set.add(f"{mod[1:]}")
-                elif mod.startswith("("):
-                    mod_set.add(f"_{mod}")
-                    mod_set.add(f"[{mod[1:-1]}]")
-                    mod_set.add(f"_[{mod[1:-1]}]")
-                elif mod.startswith("["):
-                    mod_set.add(f"_{mod}")
-                    mod_set.add(f"({mod[1:-1]})")
-                    mod_set.add(f"_({mod[1:-1]})")
+            mod_set = get_mod_set(mod_list)
 
             self.modification_mapping[key] = list(mod_set)
 
@@ -516,20 +430,9 @@ class PSMReaderBase(ABC):
             self._psm_df[PsmDfCols.SPEC_IDX] = self._psm_df[PsmDfCols.SCAN_NUM] - 1
 
     def _transform_table(self) -> None:  # noqa: B027 empty method in an abstract base class
-        """Transform the dataframe format if needed.
+        """Transform the dataframe format if needed, ddd information inplace into self._psm_df.
 
         Usually only needed in combination with spectral libraries.
-
-        Parameters
-        ----------
-        origin_df : pd.DataFrame
-            df of other search engines
-
-        Returns
-        -------
-        None
-            Add information inplace into self._psm_df
-
         """
 
     @abstractmethod
@@ -627,7 +530,7 @@ class PSMReaderBase(ABC):
                 "Acetyl@Protein_N-term",
             }
         self._psm_df[PsmDfCols.MODS] = self._psm_df[PsmDfCols.MODS].apply(
-            _keep_modifications, mod_set=include_mod_set
+            keep_modifications, mod_set=include_mod_set
         )
 
         self._psm_df.dropna(subset=[PsmDfCols.MODS], inplace=True)
