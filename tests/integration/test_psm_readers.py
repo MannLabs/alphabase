@@ -53,11 +53,14 @@ def _assert_reference_df_equal(psm_df: pd.DataFrame, test_case_name: str) -> Non
 
         try:
             pd.testing.assert_frame_equal(psm_df, expected_df)
+            raise AssertionError("Reference data is outdated.")
         except AssertionError as e:
-            # for whatever reason, this column is int32 on windows runners
-            logging.warning(f"Converting 'scan_num' to int64 for comparison: {e}")
+            # for whatever reason, columns are int32 on windows runners
+            logging.warning(f"Converting int32 to int64 for comparison: {e}")
 
-            psm_df["scan_num"] = psm_df["scan_num"].astype(np.int64)
+            for column in psm_df.columns:
+                if psm_df[column].dtype == np.int32:
+                    psm_df[column] = psm_df[column].astype(np.int64)
 
             pd.testing.assert_frame_equal(psm_df, expected_df)
 
