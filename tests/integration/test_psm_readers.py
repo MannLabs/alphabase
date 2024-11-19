@@ -6,10 +6,12 @@ Most of the test data is taken from psm_readers.ipynb
 """
 
 import io
+import logging
 import os
 from io import StringIO
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 from alphabase.psm_reader import (
@@ -49,7 +51,16 @@ def _assert_reference_df_equal(psm_df: pd.DataFrame, test_case_name: str) -> Non
     if out_file_path.exists():
         expected_df = pd.read_parquet(out_file_path)
 
-        pd.testing.assert_frame_equal(psm_df, expected_df)
+        try:
+            pd.testing.assert_frame_equal(psm_df, expected_df)
+        except AssertionError as e:
+            # for whatever reason, this column is int32 on windows runners
+            logging.warning(f"Converting 'scan_num' to int64 for comparison: {e}")
+
+            psm_df["scan_num"] = psm_df["scan_num"].astype(np.int64)
+
+            pd.testing.assert_frame_equal(psm_df, expected_df)
+
     else:
         psm_df.to_parquet(out_file_path)
         raise ValueError("No reference data found.")
