@@ -120,12 +120,10 @@ class PSMReaderBase(ABC):
 
         """
         self._modification_mapper = ModificationMapper(
+            modification_mapping,
             psm_reader_yaml,
             self._modification_type,
             add_unimod_to_mod_mapping=self._add_unimod_to_mod_mapping,
-        )
-        self.modification_mapping, self.rev_mod_mapping = (
-            self._modification_mapper.init_modification_mapping(modification_mapping)
         )
 
         self.column_mapping = (
@@ -155,14 +153,17 @@ class PSMReaderBase(ABC):
         """Get the PSM DataFrame."""
         return self._psm_df
 
+    @property
+    def modification_mapping(self) -> Dict:
+        """Get the modification mapping dictionary."""
+        return self._modification_mapper.modification_mapping
+
     def add_modification_mapping(self, modification_mapping: Dict) -> None:
         """Append additional modification mappings for the search engine.
 
         See ModificationMapping.add_modification_mapping for more details.
         """
-        self.modification_mapping, self.rev_mod_mapping = (
-            self._modification_mapper.add_modification_mapping(modification_mapping)
-        )
+        self._modification_mapper.add_modification_mapping(modification_mapping)
 
     def set_modification_mapping(
         self, modification_mapping: Optional[Dict] = None
@@ -171,9 +172,7 @@ class PSMReaderBase(ABC):
 
         See ModificationMapping.set_modification_mapping for more details.
         """
-        self.modification_mapping, self.rev_mod_mapping = (
-            self._modification_mapper.set_modification_mapping(modification_mapping)
-        )
+        self._modification_mapper.set_modification_mapping(modification_mapping)
 
     def _find_mod_seq_column(self, df: pd.DataFrame) -> None:  # called in _load_file
         for mod_seq_col in self._mod_seq_columns:
@@ -375,7 +374,8 @@ class PSMReaderBase(ABC):
         """
         self._psm_df[PsmDfCols.MODS], unknown_mods = zip(
             *self._psm_df[PsmDfCols.MODS].apply(
-                translate_modifications, mod_dict=self.rev_mod_mapping
+                translate_modifications,
+                mod_dict=self._modification_mapper.rev_mod_mapping,
             )
         )
 

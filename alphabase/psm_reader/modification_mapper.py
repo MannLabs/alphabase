@@ -2,7 +2,7 @@
 
 import copy
 from collections import defaultdict
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional
 
 from alphabase.psm_reader.utils import MOD_TO_UNIMOD_DICT, get_extended_modifications
 
@@ -12,6 +12,7 @@ class ModificationMapper:
 
     def __init__(
         self,
+        modification_mapping: Optional[Dict[str, str]],
         reader_yaml: Dict,
         modification_type: Optional[str],
         *,
@@ -25,16 +26,10 @@ class ModificationMapper:
         self._add_unimod_to_mod_mapping = add_unimod_to_mod_mapping
         self._modification_type = modification_type
 
-    def init_modification_mapping(
-        self, modification_mapping: Optional[Dict[str, str]]
-    ) -> Tuple:
-        """Initialize the modification mapping (& reverse) for the search engine."""
         self.set_modification_mapping()
         self.add_modification_mapping(modification_mapping)
 
-        return self.modification_mapping, self.rev_mod_mapping
-
-    def add_modification_mapping(self, modification_mapping: dict) -> Tuple[Dict, Dict]:
+    def add_modification_mapping(self, modification_mapping: dict) -> None:
         """Append additional modification mappings for the search engine.
 
         Also creates a reverse mapping from the modification format used by the search engine to the AlphaBase format.
@@ -53,7 +48,7 @@ class ModificationMapper:
 
         """
         if not isinstance(modification_mapping, dict):
-            return self.modification_mapping, self.rev_mod_mapping
+            return
 
         new_modification_mapping = defaultdict(list)
         for key, val in list(modification_mapping.items()):
@@ -67,11 +62,9 @@ class ModificationMapper:
                 self.modification_mapping | new_modification_mapping
             )
 
-        return self.modification_mapping, self.rev_mod_mapping
-
     def set_modification_mapping(
         self, modification_mapping: Optional[Dict] = None
-    ) -> Tuple[Dict, Dict]:
+    ) -> None:
         """Set the modification mapping for the search engine.
 
         Also creates a reverse mapping from the modification format used by the search engine to the AlphaBase format.
@@ -105,8 +98,6 @@ class ModificationMapper:
             self._extend_mod_brackets()
 
         self.rev_mod_mapping = self._get_reversed_mod_mapping()
-
-        return self.modification_mapping, self.rev_mod_mapping
 
     def _init_modification_mapping(self) -> None:
         if self._modification_type is not None:
