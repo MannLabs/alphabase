@@ -88,7 +88,7 @@ class SwathReader(SpectronautReader):
         )
 
 
-class DiannReader(MaxQuantReader):
+class DiannReader(SpectronautReader):
     """Reader for DIANN data."""
 
     _reader_type = "diann"
