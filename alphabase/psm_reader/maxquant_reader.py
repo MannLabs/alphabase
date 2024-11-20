@@ -127,6 +127,7 @@ class MaxQuantReader(PSMReaderBase):
     _reader_type = "maxquant"
     _add_unimod_to_mod_mapping = True
     _modification_type = "maxquant"
+    _fixed_c57 = True
 
     def __init__(  # noqa: PLR0913 many arguments in function definition
         self,
@@ -135,48 +136,12 @@ class MaxQuantReader(PSMReaderBase):
         modification_mapping: Optional[dict] = None,
         fdr: float = 0.01,
         keep_decoy: bool = False,
-        fixed_C57: bool = True,  # noqa: N803 TODO: make this  *,fixed_c57  (breaking)
+        fixed_C57: Optional[bool] = None,  # noqa: N803 TODO: make this  *,fixed_c57  (breaking)
         mod_seq_columns: Optional[List[str]] = None,
         rt_unit: str = "minute",
         **kwargs,
     ):
-        """Reader for MaxQuant msms.txt and evidence.txt.
-
-        Parameters
-        ----------
-        column_mapping : dict, optional
-            By default None. If None, use
-            `psm_reader_yaml['maxquant']['column_mapping']`
-            (alphabase.psm_reader.psm_reader_yaml).
-
-        modification_mapping : dict, optional
-            By default None. If None, use
-            `psm_reader_yaml['maxquant']['modification_mapping']`
-            (alphabase.psm_reader.psm_reader_yaml).
-
-        fdr : float, optional
-            Load PSMs with FDR < this fdr, by default 0.01
-
-        keep_decoy : bool, optional
-            If keep decoy PSMs, by default False
-
-        fixed_C57 : bool, optional
-            If true, the search engine will not show `Carbamidomethyl`
-            in the modified sequences.
-            by default True
-
-        mod_seq_columns : list, optional
-            The columns to find modified sequences,
-            by default ['Modified sequence']
-
-        rt_unit : str, optional
-            The unit of RT in the search engine result.
-            Defaults to 'minute'.
-
-        **kwargs : dict
-            deprecated
-
-        """
+        """Reader for MaxQuant msms.txt and evidence.txt."""
         super().__init__(
             column_mapping=column_mapping,
             modification_mapping=modification_mapping,
@@ -187,7 +152,7 @@ class MaxQuantReader(PSMReaderBase):
             **kwargs,
         )
 
-        self.fixed_C57 = fixed_C57
+        self.fixed_C57 = fixed_C57 if fixed_C57 is not None else self._fixed_c57
 
     def _translate_decoy(self) -> None:
         if PsmDfCols.DECOY in self._psm_df.columns:

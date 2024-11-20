@@ -1,7 +1,5 @@
 """Readers for Spectronaut's output library and reports, Swath data and DIANN data."""
 
-from typing import List, Optional
-
 import numpy as np
 import pandas as pd
 
@@ -19,32 +17,8 @@ class SpectronautReader(MaxQuantReader):
 
     _reader_type = "spectronaut"
     _add_unimod_to_mod_mapping = True
-
-    def __init__(  # noqa: PLR0913 many arguments in function definition
-        self,
-        *,
-        column_mapping: Optional[dict] = None,
-        modification_mapping: Optional[dict] = None,
-        fdr: float = 0.01,
-        keep_decoy: bool = False,
-        fixed_C57: bool = False,  # noqa: N803 TODO: make this  *,fixed_c57  (breaking)
-        mod_seq_columns: Optional[List[str]] = None,
-        rt_unit: str = "minute",
-        **kwargs,
-    ):
-        """Initialize SpectronautReader."""
-        super().__init__(
-            column_mapping=column_mapping,
-            modification_mapping=modification_mapping,
-            fdr=fdr,
-            keep_decoy=keep_decoy,
-            mod_seq_columns=mod_seq_columns,
-            fixed_C57=fixed_C57,
-            rt_unit=rt_unit,
-            **kwargs,
-        )
-
-        self._min_max_rt_norm = True
+    _min_max_rt_norm = True
+    _fixed_c57 = False
 
     def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
         """Spectronaut-specific preprocessing of output data."""
@@ -65,58 +39,13 @@ class SwathReader(SpectronautReader):
     _reader_type = "spectronaut"  # no typo
     _add_unimod_to_mod_mapping = True
 
-    def __init__(  # noqa: PLR0913 many arguments in function definition
-        self,
-        *,
-        column_mapping: Optional[dict] = None,
-        modification_mapping: Optional[dict] = None,
-        fdr: float = 0.01,
-        keep_decoy: bool = False,
-        fixed_C57: bool = False,  # noqa: N803 TODO: make this  *,fixed_c57  (breaking)
-        mod_seq_columns: Optional[List[str]] = None,
-        **kwargs,
-    ):
-        """SWATH or OpenSWATH library, similar to `SpectronautReader`."""
-        super().__init__(
-            column_mapping=column_mapping,
-            modification_mapping=modification_mapping,
-            fdr=fdr,
-            keep_decoy=keep_decoy,
-            fixed_C57=fixed_C57,
-            mod_seq_columns=mod_seq_columns,
-            **kwargs,
-        )
-
 
 class DiannReader(MaxQuantReader):
     """Reader for DIANN data."""
 
     _reader_type = "diann"
     _add_unimod_to_mod_mapping = True
-
-    def __init__(  # noqa: PLR0913 many arguments in function definition
-        self,
-        *,
-        column_mapping: Optional[dict] = None,
-        modification_mapping: Optional[dict] = None,
-        fdr: float = 0.01,
-        keep_decoy: bool = False,
-        fixed_C57: bool = False,  # noqa: N803 TODO: make this  *,fixed_c57  (breaking)
-        rt_unit: str = "minute",
-        **kwargs,
-    ):
-        """Similar to `SpectronautReader` but different in column_mapping and modification_mapping."""
-        super().__init__(
-            column_mapping=column_mapping,
-            modification_mapping=modification_mapping,
-            fdr=fdr,
-            keep_decoy=keep_decoy,
-            fixed_C57=fixed_C57,
-            rt_unit=rt_unit,
-            **kwargs,
-        )
-
-        self._min_max_rt_norm = False
+    _min_max_rt_norm = False
 
     def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
         """DIANN-specific preprocessing of output data.
@@ -142,36 +71,12 @@ class SpectronautReportReader(MaxQuantReader):
 
     _reader_type = "spectronaut_report"
     _add_unimod_to_mod_mapping = True
-
-    def __init__(  # noqa: PLR0913 many arguments in function definition
-        self,
-        *,
-        column_mapping: Optional[dict] = None,
-        modification_mapping: Optional[dict] = None,
-        fdr: float = 0.01,
-        keep_decoy: bool = False,
-        fixed_C57: bool = False,  # noqa: N803 TODO: make this  *,fixed_c57  (breaking)
-        rt_unit: str = "minute",
-        **kwargs,
-    ):
-        """Initialize SpectronautReportReader."""
-        super().__init__(
-            column_mapping=column_mapping,
-            modification_mapping=modification_mapping,
-            fdr=fdr,
-            keep_decoy=keep_decoy,
-            fixed_C57=fixed_C57,
-            rt_unit=rt_unit,
-            **kwargs,
-        )
-
-        self.precursor_column = "EG.PrecursorId"  # TODO: move to yaml
-        self._min_max_rt_norm = False
+    _min_max_rt_norm = False
 
     def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
         """Spectronaut report-specific preprocessing of output data."""
         df[[self.mod_seq_column, PsmDfCols.CHARGE]] = df[
-            self.precursor_column
+            "EG.PrecursorId"  # TODO: move to yaml
         ].str.split(".", expand=True, n=2)
         df[PsmDfCols.CHARGE] = df[PsmDfCols.CHARGE].astype(np.int8)
         return df

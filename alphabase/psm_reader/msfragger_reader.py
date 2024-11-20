@@ -106,6 +106,7 @@ class MSFraggerPepXML(PSMReaderBase):
         fdr: float = 0.001,  # refers to E-value in the PepXML
         keep_decoy: bool = False,
         rt_unit: str = "second",
+        # MSFragger reader-specific:
         keep_unknown_aa_mass_diffs: bool = False,
         **kwargs,
     ):
