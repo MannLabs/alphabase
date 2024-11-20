@@ -3,6 +3,7 @@
 import pandas as pd
 
 from alphabase.psm_reader.utils import (
+    get_column_mapping_for_df,
     get_extended_modifications,
     keep_modifications,
     translate_modifications,
@@ -109,3 +110,39 @@ def test_get_extended_modifications_with_modifications_starting_with_square_brac
 
 def test_get_extended_modifications_with_modifications_starting_with_letter_square_bracket():
     assert get_extended_modifications(["K[Dimethyl]"]) == ["K(Dimethyl)", "K[Dimethyl]"]
+
+
+def test_column_mapping_with_all_columns_present():
+    df = pd.DataFrame(columns=["col1", "col2"])
+    column_mapping = {"alpha_col1": "col1", "alpha_col2": "col2"}
+    assert get_column_mapping_for_df(column_mapping, df) == {
+        "alpha_col1": "col1",
+        "alpha_col2": "col2",
+    }
+
+
+def test_column_mapping_with_some_columns_missing():
+    df = pd.DataFrame(columns=["col1"])
+    column_mapping = {"alpha_col1": "col1", "alpha_col2": "col2"}
+    assert get_column_mapping_for_df(column_mapping, df) == {"alpha_col1": "col1"}
+
+
+def test_column_mapping_with_list_of_columns():
+    df = pd.DataFrame(columns=["col1", "col3"])
+    column_mapping = {"alpha_col1": ["col1", "col2"], "alpha_col2": ["col3", "col4"]}
+    assert get_column_mapping_for_df(column_mapping, df) == {
+        "alpha_col1": "col1",
+        "alpha_col2": "col3",
+    }
+
+
+def test_column_mapping_with_no_matching_columns():
+    df = pd.DataFrame(columns=["col3", "col4"])
+    column_mapping = {"alpha_col1": "col1", "alpha_col2": "col2"}
+    assert get_column_mapping_for_df(column_mapping, df) == {}
+
+
+def test_column_mapping_with_empty_dataframe():
+    df = pd.DataFrame()
+    column_mapping = {"alpha_col1": "col1", "alpha_col2": "col2"}
+    assert get_column_mapping_for_df(column_mapping, df) == {}

@@ -12,6 +12,7 @@ from alphabase.psm_reader.psm_reader import (
     PSMReaderBase,
     psm_reader_provider,
 )
+from alphabase.psm_reader.utils import get_column_mapping_for_df
 
 # make sure all warnings are shown
 warnings.filterwarnings("always")
@@ -180,7 +181,7 @@ class MaxQuantReader(PSMReaderBase):
         df.fillna("", inplace=True)
 
         # remove MBR PSMs as they are currently not supported and will crash import
-        mapped_columns = self._find_mapped_columns(df)
+        mapped_columns = get_column_mapping_for_df(self.column_mapping, df)
         if PsmDfCols.SCAN_NUM in mapped_columns:
             scan_num_col = mapped_columns[PsmDfCols.SCAN_NUM]
             no_ms2_mask = df[scan_num_col] == ""

@@ -635,9 +635,6 @@ class SageReaderBase(PSMReaderBase, ABC):
             columns=[PsmDfCols.PEPTIDE_FDR, PsmDfCols.PROTEIN_FDR], inplace=True
         )
 
-    def _load_modifications(self, origin_df: pd.DataFrame) -> None:
-        pass
-
     def _translate_modifications(self) -> None:
         sage_translation = SageModificationTranslation(
             custom_translation_df=self.custom_translation_df,

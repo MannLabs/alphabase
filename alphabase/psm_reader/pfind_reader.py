@@ -123,14 +123,14 @@ class pFindReader(PSMReaderBase):  # noqa: N801 name `pFindReader` should use Ca
             self._psm_df[PsmDfCols.SCORE].astype(float) + 1e-100
         )
 
-    def _load_modifications(self, pfind_df: pd.DataFrame) -> None:
-        if len(pfind_df) == 0:
+    def _load_modifications(self, origin_df: pd.DataFrame) -> None:
+        if len(origin_df) == 0:
             self._psm_df[PsmDfCols.MODS] = ""
             self._psm_df[PsmDfCols.MOD_SITES] = ""
             return
 
         (self._psm_df[PsmDfCols.MODS], self._psm_df[PsmDfCols.MOD_SITES]) = zip(
-            *pfind_df["Modification"].apply(get_pFind_mods)
+            *origin_df["Modification"].apply(get_pFind_mods)
         )
 
         self._psm_df[PsmDfCols.MODS] = self._psm_df[PsmDfCols.MODS].apply(
