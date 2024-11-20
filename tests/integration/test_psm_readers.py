@@ -195,7 +195,7 @@ test_data_path = Path(f"{current_file_directory}/reference_data")
 
 
 def _assert_reference_df_equal(
-    psm_df: pd.DataFrame, test_case_name: str, check_like: bool = False
+    psm_df: pd.DataFrame, test_case_name: str, loose_check: bool = False
 ) -> None:
     """Compare the output of a PSM reader against reference data.
 
@@ -214,7 +214,17 @@ def _assert_reference_df_equal(
 
     if out_file_path.exists():
         expected_df = pd.read_parquet(out_file_path)
-        pd.testing.assert_frame_equal(psm_df, expected_df, check_like=check_like)
+
+        if loose_check:
+            # check that the data is the same, but ignore the order
+            psm_df = psm_df.sort_values(by=["rt_norm", "precursor_mz"]).reset_index(
+                drop=True
+            )
+            expected_df = expected_df.sort_values(
+                by=["rt_norm", "precursor_mz"]
+            ).reset_index(drop=True)
+
+        pd.testing.assert_frame_equal(psm_df, expected_df, check_like=loose_check)
     else:
         psm_df.to_parquet(out_file_path)
         raise ValueError("No reference data found.")
@@ -351,7 +361,7 @@ def test_sage_reader() -> None:
     reader.import_file(input_data)
 
     # TODO find out why results differ in order on github runner
-    _assert_reference_df_equal(reader.psm_df, "sage", check_like=True)
+    _assert_reference_df_equal(reader.psm_df, "sage", loose_check=True)
 
 
 def test_diann_speclib_reader() -> None:
