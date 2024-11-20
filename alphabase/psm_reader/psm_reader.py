@@ -177,7 +177,7 @@ class PSMReaderBase(ABC):
     def add_modification_mapping(self, modification_mapping: Dict) -> None:
         """Append additional modification mappings for the search engine.
 
-        See ModificationMapping.add_modification_mapping for more details.
+        See ModificationMapper.add_modification_mapping for more details.
         """
         self._modification_mapper.add_modification_mapping(modification_mapping)
 
@@ -186,12 +186,12 @@ class PSMReaderBase(ABC):
     ) -> None:
         """Set the modification mapping for the search engine.
 
-        See ModificationMapping.set_modification_mapping for more details.
+        See ModificationMapper.set_modification_mapping for more details.
         """
         self._modification_mapper.set_modification_mapping(modification_mapping)
 
     def load(self, _file: Union[List[str], str]) -> pd.DataFrame:
-        """Wrapper for import_file()."""
+        """Import a single file or multiple files."""
         if isinstance(_file, list):
             return self.import_files(_file)
         return self.import_file(_file)
@@ -242,31 +242,20 @@ class PSMReaderBase(ABC):
         sep = _get_delimiter(filename)
         return pd.read_csv(filename, sep=sep, keep_default_na=False)
 
-    def _get_mod_seq_column(self, df: pd.DataFrame) -> Optional[str]:
+    def _get_mod_seq_column(self, origin_df: pd.DataFrame) -> Optional[str]:
         """Get the first column from `_mod_seq_columns` that is a column of `df`."""
         for mod_seq_col in self._mod_seq_columns:
-            if mod_seq_col in df.columns:
+            if mod_seq_col in origin_df.columns:
                 return mod_seq_col
         return None
         # TODO: warn if there's more
 
     def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Preprocess the dataframe right after reading from file."""
         return df
 
     def _translate_columns(self, origin_df: pd.DataFrame) -> None:
-        """Translate the dataframe from other search engines to AlphaBase format.
-
-        Parameters
-        ----------
-        origin_df : pd.DataFrame
-            df of other search engines
-
-        Returns
-        -------
-        None
-            Add information inplace into self._psm_df
-
-        """
+        """Translate the dataframe from other search engines to AlphaBase format."""
         column_mapping_for_df = get_column_mapping_for_df(
             self.column_mapping, origin_df
         )
@@ -299,24 +288,10 @@ class PSMReaderBase(ABC):
 
         Some search engines use modified_sequence, some of them
         use additional columns to store modifications and the sites.
-
-        Parameters
-        ----------
-        origin_df : pd.DataFrame
-            dataframe of original search engine.
-
         """
 
     def _translate_modifications(self) -> None:
-        """Translate modifications to AlphaBase format.
-
-        Raises
-        ------
-        KeyError
-            if `mod` in `mod_names` is
-            not in `self.modification_mapping`
-
-        """
+        """Translate modifications to AlphaBase format."""
         self._psm_df[PsmDfCols.MODS], unknown_mods = zip(
             *self._psm_df[PsmDfCols.MODS].apply(
                 translate_modifications,
@@ -325,14 +300,14 @@ class PSMReaderBase(ABC):
         )
 
         # accumulate unknown mods
-        unknwon_mod_set = set()
+        unknown_mod_set = set()
         for mod_list in unknown_mods:
             if len(mod_list) > 0:
-                unknwon_mod_set.update(mod_list)
+                unknown_mod_set.update(mod_list)
 
-        if len(unknwon_mod_set) > 0:
+        if len(unknown_mod_set) > 0:
             warnings.warn(
-                f"Unknown modifications: {unknwon_mod_set}. Precursors with unknown modifications will be removed."
+                f"Unknown modifications: {unknown_mod_set}. Precursors with unknown modifications will be removed."
             )
 
     def _post_process(self) -> None:
@@ -390,31 +365,28 @@ class PSMReaderBase(ABC):
             )
 
     def _normalize_rt(self) -> None:
-        if PsmDfCols.RT in self._psm_df.columns:
-            if self._engine_rt_unit == "second":
-                # self.psm_df['rt_sec'] = self.psm_df.rt
-                self._psm_df[PsmDfCols.RT] = self._psm_df[PsmDfCols.RT] / 60
-                if PsmDfCols.RT_START in self._psm_df.columns:
-                    self._psm_df[PsmDfCols.RT_START] = (
-                        self._psm_df[PsmDfCols.RT_START] / 60
-                    )
-                    self._psm_df[PsmDfCols.RT_STOP] = (
-                        self._psm_df[PsmDfCols.RT_STOP] / 60
-                    )
-            # elif self._engine_rt_unit == 'minute':
-            # self.psm_df['rt_sec'] = self.psm_df.rt*60
-            min_rt = self._psm_df[PsmDfCols.RT].min()
-            max_rt = self._psm_df[PsmDfCols.RT].max()
-            if min_rt < 0:  # iRT
-                min_rt = max(min_rt, self._min_irt_value)
-                max_rt = min(max_rt, self._max_irt_value)
+        """Normalize RT values to [0, 1]."""
+        if PsmDfCols.RT not in self._psm_df.columns:
+            return
 
-            elif not self._min_max_rt_norm:
-                min_rt = 0
+        if self._engine_rt_unit == "second":
+            self._psm_df[PsmDfCols.RT] = self._psm_df[PsmDfCols.RT] / 60
+            if PsmDfCols.RT_START in self._psm_df.columns:
+                self._psm_df[PsmDfCols.RT_START] = self._psm_df[PsmDfCols.RT_START] / 60
+                self._psm_df[PsmDfCols.RT_STOP] = self._psm_df[PsmDfCols.RT_STOP] / 60
 
-            self._psm_df[PsmDfCols.RT_NORM] = (
-                (self._psm_df[PsmDfCols.RT] - min_rt) / (max_rt - min_rt)
-            ).clip(0, 1)
+        min_rt = self._psm_df[PsmDfCols.RT].min()
+        max_rt = self._psm_df[PsmDfCols.RT].max()
+        if min_rt < 0:  # iRT
+            min_rt = max(min_rt, self._min_irt_value)
+            max_rt = min(max_rt, self._max_irt_value)
+
+        elif not self._min_max_rt_norm:
+            min_rt = 0
+
+        self._psm_df[PsmDfCols.RT_NORM] = (
+            (self._psm_df[PsmDfCols.RT] - min_rt) / (max_rt - min_rt)
+        ).clip(0, 1)
 
     def filter_psm_by_modifications(
         self,
