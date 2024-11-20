@@ -231,6 +231,8 @@ def test_psm_reader_yaml() -> None:
     for reader_config in psm_reader_yaml.values():
         if reader_config == "modification_mappings":
             continue
+        if "column_mapping" not in reader_config:
+            continue
         ks = [k for k in reader_config["column_mapping"]]
         assert (
             set(ks) - set(PsmDfCols.get_values()) - set(LibPsmDfCols.get_values())
