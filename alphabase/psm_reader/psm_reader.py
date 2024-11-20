@@ -4,7 +4,7 @@ import copy
 import warnings
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Type, Union
+from typing import Dict, List, NoReturn, Optional, Set, Type, Union
 
 import numpy as np
 import pandas as pd
@@ -261,6 +261,9 @@ class PSMReaderBase(ABC):
         # to -log(evalue), as score is the larger the better
         pass
 
+    def _get_table_delimiter(self, filename: str) -> str:
+        return _get_delimiter(filename)
+
     def _normalize_rt(self) -> None:
         if PsmDfCols.RT in self._psm_df.columns:
             if self._engine_rt_unit == "second":
@@ -302,11 +305,12 @@ class PSMReaderBase(ABC):
                 df_group[PsmDfCols.RT_NORM] / df_group[PsmDfCols.RT_NORM].max()
             )
 
+    @abstractmethod
     def _load_file(self, filename: str) -> pd.DataFrame:
-        """Load PSM file into a dataframe.
+        """Load original dataframe from PSM filename.
 
-        Different search engines may store PSMs in different ways: tsv, csv, HDF, XML, ...
-        This default implementation works for tsv and csv files and thus covers many readers.
+        Different search engines may store PSMs in different ways:
+        tsv, csv, HDF, XML, ...
 
         Parameters
         ----------
@@ -316,11 +320,9 @@ class PSMReaderBase(ABC):
         Returns
         -------
         pd.DataFrame
-            psm file as dataframe
+            loaded dataframe
 
         """
-        sep = _get_delimiter(filename)
-        return pd.read_csv(filename, sep=sep, keep_default_na=False)
 
     def _find_mapped_columns(self, df: pd.DataFrame) -> Dict[str, str]:
         """Determine the mapping of AlphaBase columns to the columns in the given DataFrame.
@@ -374,7 +376,7 @@ class PSMReaderBase(ABC):
         """
 
     @abstractmethod
-    def _load_modifications(self, origin_df: pd.DataFrame) -> None:
+    def _load_modifications(self, origin_df: pd.DataFrame) -> NoReturn:
         """Read modification information from 'origin_df'.
 
         Some search engines use modified_sequence, some of them

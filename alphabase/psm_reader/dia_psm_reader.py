@@ -46,6 +46,11 @@ class SpectronautReader(MaxQuantReader):
 
         self._min_max_rt_norm = True
 
+    def _load_file(self, filename: str) -> pd.DataFrame:
+        """Load a Spectronaut output file to a DataFrame."""
+        csv_sep = self._get_table_delimiter(filename)
+        return pd.read_csv(filename, sep=csv_sep, keep_default_na=False)
+
     def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
         """Spectronaut-specific preprocessing of output data."""
         if "ReferenceRun" in df.columns:
@@ -118,6 +123,10 @@ class DiannReader(SpectronautReader):
 
         self._min_max_rt_norm = False
 
+    def _load_file(self, filename: str) -> pd.DataFrame:
+        csv_sep = self._get_table_delimiter(filename)
+        return pd.read_csv(filename, sep=csv_sep, keep_default_na=False)
+
     def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
         """DIANN-specific preprocessing of output data.
 
@@ -167,6 +176,11 @@ class SpectronautReportReader(MaxQuantReader):
 
         self.precursor_column = "EG.PrecursorId"  # TODO: move to yaml
         self._min_max_rt_norm = False
+
+    def _load_file(self, filename: str) -> pd.DataFrame:
+        """Load a Spectronaut report file to a DataFrame."""
+        csv_sep = self._get_table_delimiter(filename)
+        return pd.read_csv(filename, sep=csv_sep, keep_default_na=False)
 
     def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
         """Spectronaut report-specific preprocessing of output data."""
