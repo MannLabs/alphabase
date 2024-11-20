@@ -130,8 +130,8 @@ class PSMReaderBase(ABC):
         """
         self._modification_mapper = ModificationMapper(
             modification_mapping,
-            copy.deepcopy(psm_reader_yaml),
-            self._modification_type,
+            reader_yaml=copy.deepcopy(psm_reader_yaml),
+            modification_type=self._modification_type,
             add_unimod_to_mod_mapping=self._add_unimod_to_mod_mapping,
         )
 
