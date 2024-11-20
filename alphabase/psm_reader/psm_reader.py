@@ -151,6 +151,7 @@ class PSMReaderBase(ABC):
             if mod_seq_columns is not None
             else psm_reader_yaml[self._reader_type].get("mod_seq_columns", [])
         )
+        self.mod_seq_column = None
 
         for key, value in kwargs.items():  # TODO: remove and remove kwargs
             warnings.warn(
@@ -231,12 +232,14 @@ class PSMReaderBase(ABC):
         """
         origin_df = self._load_file(_file)
 
-        self.mod_seq_column = self._get_mod_seq_column(origin_df)
-
         self._psm_df = pd.DataFrame()
 
         if len(origin_df):
             # TODO: think about dropping the 'inplace' pattern here
+
+            origin_df = self._pre_process(origin_df)
+            self.mod_seq_column = self._get_mod_seq_column(origin_df)
+
             self._translate_columns(origin_df)  # only here
             self._transform_table()  # only sage
             self._translate_decoy()  # only sage, mq, msfragger, pfind
@@ -247,6 +250,9 @@ class PSMReaderBase(ABC):
             self._translate_modifications()  # here, sage, msfragger, pfind
             self._post_process()  # here, libraryreader, diann, msfragger
         return self._psm_df
+
+    def _pre_process(self, df: pd.DataFrame) -> None:
+        return df
 
     def _translate_decoy(self) -> None:  # noqa: B027 empty method in an abstract base class
         pass
