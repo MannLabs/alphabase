@@ -9,7 +9,7 @@ from typing import Dict, List, Optional, Set, Type, Union
 import numpy as np
 import pandas as pd
 
-from alphabase.constants._const import CONST_FILE_FOLDER
+from alphabase.constants._const import CONST_FILE_FOLDER, PSM_READER_YAML_FILE_NAME
 from alphabase.peptide import mobility
 from alphabase.peptide.precursor import reset_precursor_df, update_precursor_mz
 from alphabase.psm_reader.keys import PsmDfCols
@@ -23,7 +23,10 @@ from alphabase.utils import _get_delimiter
 from alphabase.yaml_utils import load_yaml
 
 #: See `psm_reader.yaml <https://github.com/MannLabs/alphabase/blob/main/alphabase/constants/const_files/psm_reader.yaml>`_
-psm_reader_yaml = load_yaml(Path(CONST_FILE_FOLDER) / "psm_reader.yaml")
+psm_reader_yaml = load_yaml(Path(CONST_FILE_FOLDER) / PSM_READER_YAML_FILE_NAME)
+
+_MIN_IRT_VALUE = -100
+_MAX_IRT_VALUE = 200
 
 
 class PSMReaderBase(ABC):
@@ -124,7 +127,9 @@ class PSMReaderBase(ABC):
         self._modification_mapper = ModificationMapper(
             modification_mapping,
             reader_yaml=copy.deepcopy(psm_reader_yaml),
-            modification_type=self._modification_type,
+            modification_type=psm_reader_yaml[self._reader_type].get(
+                "modification_mapping_type", None
+            ),
             add_unimod_to_mod_mapping=self._add_unimod_to_mod_mapping,
         )
 
@@ -145,13 +150,17 @@ class PSMReaderBase(ABC):
 
         self._keep_fdr = fdr
         self._keep_decoy = keep_decoy
-        self._engine_rt_unit = (
+
+        self._rt_unit = (
             rt_unit
             if rt_unit is not None
             else psm_reader_yaml[self._reader_type]["rt_unit"]
         )
-        self._min_irt_value = -100
-        self._max_irt_value = 200
+        if self._rt_unit not in ["minute", "second", "irt"]:
+            raise ValueError(
+                f"Invalid rt_unit: {self._rt_unit}. "
+                f"rt_unit should be one of ['minute', 'second', 'irt']."
+            )
 
         for key, value in kwargs.items():  # TODO: remove and remove kwargs
             warnings.warn(
@@ -365,7 +374,7 @@ class PSMReaderBase(ABC):
         if PsmDfCols.RT not in self._psm_df.columns:
             return
 
-        if self._engine_rt_unit == "second":
+        if self._rt_unit == "second":
             self._psm_df[PsmDfCols.RT] = self._psm_df[PsmDfCols.RT] / 60
             if PsmDfCols.RT_START in self._psm_df.columns:
                 self._psm_df[PsmDfCols.RT_START] = self._psm_df[PsmDfCols.RT_START] / 60
@@ -374,9 +383,8 @@ class PSMReaderBase(ABC):
         min_rt = self._psm_df[PsmDfCols.RT].min()
         max_rt = self._psm_df[PsmDfCols.RT].max()
         if min_rt < 0:  # iRT
-            min_rt = max(min_rt, self._min_irt_value)
-            max_rt = min(max_rt, self._max_irt_value)
-
+            min_rt = max(min_rt, _MIN_IRT_VALUE)
+            max_rt = min(max_rt, _MAX_IRT_VALUE)
         elif not self._min_max_rt_norm:
             min_rt = 0
 

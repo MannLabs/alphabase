@@ -152,7 +152,7 @@ class MaxQuantReader(PSMReaderBase):
         fixed_C57 : bool, optional
             If true, the search engine will not show `Carbamidomethyl`
             in the modified sequences.
-            by default True
+            by default read from psm_reader_yaml key `fixed_C57`.
 
         See documentation of `PSMReaderBase` for the rest of parameters.
 
