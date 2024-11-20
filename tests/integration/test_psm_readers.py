@@ -216,6 +216,9 @@ def _assert_reference_df_equal(
         expected_df = pd.read_parquet(out_file_path)
 
         if loose_check:
+            psm_df.to_parquet(
+                f"/home/runner/work/alphabase/alphabase/alphabase/reference_{test_case_name}_new.parquet"
+            )
             # check that the data is the same, but ignore the order
             psm_df = psm_df.sort_values(by=["rt_norm", "precursor_mz"]).reset_index(
                 drop=True
