@@ -213,6 +213,9 @@ def _assert_reference_df_equal(psm_df: pd.DataFrame, test_case_name: str) -> Non
     if out_file_path.exists():
         expected_df = pd.read_parquet(out_file_path)
 
+        expected_df.sort_values(by=["rt_norm", "precursor_mz"], inplace=True)
+        psm_df.sort_values(by=["rt_norm", "precursor_mz"], inplace=True)
+
         pd.testing.assert_frame_equal(psm_df, expected_df)
     else:
         psm_df.to_parquet(out_file_path)
