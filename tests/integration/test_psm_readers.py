@@ -6,7 +6,6 @@ Most of the test data is taken from psm_readers.ipynb
 """
 
 import io
-import logging
 import os
 from io import StringIO
 from pathlib import Path
@@ -195,7 +194,9 @@ test_data_path = Path(f"{current_file_directory}/reference_data")
 # TODO add tests for AlphaPept
 
 
-def _assert_reference_df_equal(psm_df: pd.DataFrame, test_case_name: str) -> None:
+def _assert_reference_df_equal(
+    psm_df: pd.DataFrame, test_case_name: str, check_like: bool = False
+) -> None:
     """Compare the output of a PSM reader against reference data.
 
     If reference is not present, save the output as reference data and raise.
@@ -213,15 +214,7 @@ def _assert_reference_df_equal(psm_df: pd.DataFrame, test_case_name: str) -> Non
 
     if out_file_path.exists():
         expected_df = pd.read_parquet(out_file_path)
-
-        expected_df.sort_values(by=["rt_norm", "precursor_mz"], inplace=True)
-        psm_df.sort_values(by=["rt_norm", "precursor_mz"], inplace=True)
-
-        print(expected_df.head())
-        logging.info(expected_df.head())
-        print(psm_df.head())
-        logging.info(psm_df.head())
-        pd.testing.assert_frame_equal(psm_df, expected_df)
+        pd.testing.assert_frame_equal(psm_df, expected_df, check_like=check_like)
     else:
         psm_df.to_parquet(out_file_path)
         raise ValueError("No reference data found.")
@@ -357,7 +350,8 @@ def test_sage_reader() -> None:
     reader = SageReaderTSV(mp_process_num=1)
     reader.import_file(input_data)
 
-    _assert_reference_df_equal(reader.psm_df, "sage")
+    # TODO find out why results differ in order on github runner
+    _assert_reference_df_equal(reader.psm_df, "sage", check_like=True)
 
 
 def test_diann_speclib_reader() -> None:
