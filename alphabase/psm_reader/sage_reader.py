@@ -490,19 +490,24 @@ def _apply_translate_modifications_mp(
 
     """
     df_list = []
-    with mp.get_context("spawn").Pool(mp_process_num) as p:
-        processing = p.imap(
-            partial(
-                _apply_translate_modifications, mod_translation_df=mod_translation_df
-            ),
-            _batchify_df(psm_df, mp_batch_size),
-        )
-        if progress_bar:
-            df_list = list(
-                tqdm(processing, total=int(np.ceil(len(psm_df) / mp_batch_size)))
+    if mp_process_num == 1:
+        for batch_df in _batchify_df(psm_df, mp_batch_size):
+            df_list.append(_apply_translate_modifications(batch_df, mod_translation_df))  # noqa: PERF401
+    else:
+        with mp.get_context("spawn").Pool(mp_process_num) as p:
+            processing = p.imap(
+                partial(
+                    _apply_translate_modifications,
+                    mod_translation_df=mod_translation_df,
+                ),
+                _batchify_df(psm_df, mp_batch_size),
             )
-        else:
-            df_list = list(processing)
+            if progress_bar:
+                df_list = list(
+                    tqdm(processing, total=int(np.ceil(len(psm_df) / mp_batch_size)))
+                )
+            else:
+                df_list = list(processing)
 
     return pd.concat(df_list, ignore_index=True)
 
