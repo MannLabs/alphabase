@@ -1,7 +1,7 @@
 """Reader for AlphaPept's *.ms_data.hdf files."""
 
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Tuple
 
 import h5py
 import numba
@@ -54,29 +54,12 @@ class AlphaPeptReader(PSMReaderBase):
     _reader_type = "alphapept"
     _modification_type = "alphapept"
 
-    def __init__(
-        self,
-        *,
-        column_mapping: Optional[dict] = None,
-        modification_mapping: Optional[dict] = None,
-        fdr: float = 0.01,
-        keep_decoy: bool = False,
-        **kwargs,
-    ):
-        """Reading PSMs from alphapept's *.ms_data.hdf."""
-        super().__init__(
-            column_mapping=column_mapping,
-            modification_mapping=modification_mapping,
-            fdr=fdr,
-            keep_decoy=keep_decoy,
-            **kwargs,
-        )
-        self.hdf_dataset = "identifications"
-
     def _load_file(self, filename: str) -> pd.DataFrame:
         """Load an AlphaPept output file to a DataFrame."""
         with h5py.File(filename, "r") as _hdf:
-            dataset = _hdf[self.hdf_dataset]
+            dataset = _hdf[
+                "identifications"
+            ]  # TODO: "identifications" could be moved to yaml
             df = pd.DataFrame({col: dataset[col] for col in dataset})
 
         # TODO: make this more stable
