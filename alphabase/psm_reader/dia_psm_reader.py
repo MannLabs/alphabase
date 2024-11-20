@@ -187,6 +187,9 @@ class SpectronautReportReader(MaxQuantReader):
 
     def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
         """Spectronaut report-specific preprocessing of output data."""
+        self.mod_seq_column = self._get_mod_seq_column(
+            df
+        )  # TODO: this needs to be removed
         df[[self.mod_seq_column, PsmDfCols.CHARGE]] = df[
             self.precursor_column
         ].str.split(".", expand=True, n=2)
