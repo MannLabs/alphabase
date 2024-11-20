@@ -107,5 +107,5 @@ def test_get_extended_modifications_with_modifications_starting_with_square_brac
     ]
 
 
-def test_get_extended_modifications_with_modifications_starting_with_underscore_square_bracket():
+def test_get_extended_modifications_with_modifications_starting_with_letter_square_bracket():
     assert get_extended_modifications(["K[Dimethyl]"]) == ["K(Dimethyl)", "K[Dimethyl]"]
