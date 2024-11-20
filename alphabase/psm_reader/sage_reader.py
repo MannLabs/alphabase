@@ -3,8 +3,9 @@
 import logging
 import multiprocessing as mp
 import re
+from abc import ABC
 from functools import partial
-from typing import Generator, List, NoReturn, Optional, Tuple
+from typing import Generator, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -562,7 +563,7 @@ def _sage_spec_idx_from_scan_nr(scan_indicator_str: str) -> int:
     return int(re.search(r"scan=(\d+)", scan_indicator_str).group(1)) - 1
 
 
-class SageReaderBase(PSMReaderBase):
+class SageReaderBase(PSMReaderBase, ABC):
     """Base class for SageReader."""
 
     _reader_type = "sage"
@@ -591,9 +592,6 @@ class SageReaderBase(PSMReaderBase):
             rt_unit=rt_unit,
             **kwargs,
         )
-
-    def _load_file(self, filename: str) -> NoReturn:
-        raise NotImplementedError
 
     def _transform_table(self) -> None:
         self._psm_df[PsmDfCols.SPEC_IDX] = self._psm_df[PsmDfCols.SCANNR].apply(
