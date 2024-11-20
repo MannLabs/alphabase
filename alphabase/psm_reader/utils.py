@@ -111,3 +111,24 @@ def get_extended_modifications(mod_list: List[str]) -> List[str]:
             mod_set.add(f"({mod[1:-1]})")
             mod_set.add(f"_({mod[1:-1]})")
     return sorted(list(mod_set))
+
+
+def get_column_mapping_for_df(column_mapping: dict, df: pd.DataFrame) -> Dict[str, str]:
+    """Determine the mapping of AlphaBase columns to the columns in the given DataFrame.
+
+    For each AlphaBase column name, check if the corresponding search engine-specific
+    name is in the DataFrame columns. If it is, add it to the mapping.
+    If the searchengine-specific name is a list, use the first column name in the list.
+    """
+    mapped_columns = {}
+    for col_alphabase, col_other in column_mapping.items():
+        if isinstance(col_other, str):
+            if col_other in df.columns:
+                mapped_columns[col_alphabase] = col_other
+        elif isinstance(col_other, (list, tuple)):
+            for other_col in col_other:
+                if other_col in df.columns:
+                    mapped_columns[col_alphabase] = other_col
+                    break
+                    # TODO: warn if there's more
+    return mapped_columns
