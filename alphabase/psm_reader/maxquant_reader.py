@@ -177,23 +177,17 @@ class MaxQuantReader(PSMReaderBase):
             deprecated
 
         """
-        if mod_seq_columns is None:
-            mod_seq_columns = [
-                "Modified sequence"
-            ]  # TODO: why not take from psm_reader.yaml?
-
         super().__init__(
             column_mapping=column_mapping,
             modification_mapping=modification_mapping,
             fdr=fdr,
             keep_decoy=keep_decoy,
             rt_unit=rt_unit,
+            mod_seq_columns=mod_seq_columns,
             **kwargs,
         )
 
         self.fixed_C57 = fixed_C57
-        self._mod_seq_columns = mod_seq_columns
-        self.mod_seq_column = "Modified sequence"
 
     def _translate_decoy(self) -> None:
         if PsmDfCols.DECOY in self._psm_df.columns:
@@ -205,22 +199,21 @@ class MaxQuantReader(PSMReaderBase):
         csv_sep = self._get_table_delimiter(filename)
         df = pd.read_csv(filename, sep=csv_sep, keep_default_na=False)
 
-        self._find_mod_seq_column(df)
         df = df[~pd.isna(df["Retention time"])]
         df.fillna("", inplace=True)
 
         # remove MBR PSMs as they are currently not supported and will crash import
         mapped_columns = self._find_mapped_columns(df)
-        if "scan_num" in mapped_columns:
-            scan_num_col = mapped_columns["scan_num"]
+        if PsmDfCols.SCAN_NUM in mapped_columns:
+            scan_num_col = mapped_columns[PsmDfCols.SCAN_NUM]
             no_ms2_mask = df[scan_num_col] == ""
             if (num_no_ms2_mask := np.sum(no_ms2_mask)) > 0:
                 warnings.warn(
-                    f"Maxquant psm file contains {num_no_ms2_mask} MBR PSMs without MS2 scan. This is not yet supported and rows containing MBR PSMs will be removed."
+                    f"MaxQuant PSM file contains {num_no_ms2_mask} MBR PSMs without MS2 scan. This is not yet supported and rows containing MBR PSMs will be removed."
                 )
                 df = df[~no_ms2_mask]
                 df.reset_index(drop=True, inplace=True)
-        df[scan_num_col] = df[scan_num_col].astype(int)
+            df[scan_num_col] = df[scan_num_col].astype(int)
 
         # if 'K0' in df.columns:
         #     df['Mobility'] = df['K0'] # Bug in MaxQuant? It should be 1/K0

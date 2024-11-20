@@ -35,7 +35,7 @@ class PSMReaderBase(ABC):
     # the typ of modification mapping to be used
     _modification_type: Optional[str] = None
 
-    def __init__(
+    def __init__(  # noqa: PLR0913 # too many arguments
         self,
         *,
         column_mapping: Optional[dict] = None,
@@ -43,6 +43,7 @@ class PSMReaderBase(ABC):
         fdr: float = 0.01,
         keep_decoy: bool = False,
         rt_unit: str = "minute",
+        mod_seq_columns: Optional[List[str]] = None,
         **kwargs,
     ):
         """The Base class for all PSMReaders.
@@ -53,13 +54,12 @@ class PSMReaderBase(ABC):
         Parameters
         ----------
         column_mapping : dict, optional
-            A dict that maps alphabase's columns to other search engine's.
+            A dict that maps alphabase's columns to those of other search engines'.
+            If it is None, this dict will be read from psm_reader.yaml key `column_mapping`.
+
             The key of the column_mapping is alphabase's column name, and
             the value could be the column name or a list of column names
-            in other engine's result.
-            If it is None, this dict will be init by
-            `self._init_column_mapping`. The dict values could be
-            either str or list, for example:
+            in other engine's result, for example:
             ```
             columns_mapping = {
                 'sequence': 'NakedSequence',
@@ -67,6 +67,7 @@ class PSMReaderBase(ABC):
                 'proteins':['Proteins','UniprotIDs'] # list, this reader will automatically detect all of them.
             }
             ```
+            The first column name in the list will be mapped to the harmonized column names, the rest will be ignored.
             Defaults to None.
 
         modification_mapping : dict, optional
@@ -95,6 +96,12 @@ class PSMReaderBase(ABC):
         rt_unit : str, optional
             The unit of RT in the search engine result.
             Defaults to 'minute'.
+
+        mod_seq_columns : list, optional
+            The columns to find modified sequences.
+            The first column name in the list will be used, the rest will be ignored.
+            By default read from psm_reader_yaml key "mod_seq_columns".
+            If it is not found there, an empty list is used.
 
         **kwargs: dict
             deprecated
@@ -139,7 +146,11 @@ class PSMReaderBase(ABC):
         self._engine_rt_unit = rt_unit
         self._min_irt_value = -100
         self._max_irt_value = 200
-        self._mod_seq_columns = []
+        self._mod_seq_columns = (
+            mod_seq_columns
+            if mod_seq_columns is not None
+            else psm_reader_yaml[self._reader_type].get("mod_seq_columns", [])
+        )
 
         for key, value in kwargs.items():  # TODO: remove and remove kwargs
             warnings.warn(
@@ -174,12 +185,13 @@ class PSMReaderBase(ABC):
         """
         self._modification_mapper.set_modification_mapping(modification_mapping)
 
-    def _find_mod_seq_column(self, df: pd.DataFrame) -> None:  # called in _load_file
+    def _get_mod_seq_column(self, df: pd.DataFrame) -> Optional[str]:
+        """Get the first column from `_mod_seq_columns` that is a column of `df`."""
         for mod_seq_col in self._mod_seq_columns:
             if mod_seq_col in df.columns:
-                self.mod_seq_column = mod_seq_col
-                break
-            # TODO: warn if there's more
+                return mod_seq_col
+        return None
+        # TODO: warn if there's more
 
     def _read_column_mapping(self) -> Dict[str, str]:
         """Read column mapping from psm_reader yaml file."""
@@ -218,6 +230,9 @@ class PSMReaderBase(ABC):
 
         """
         origin_df = self._load_file(_file)
+
+        self.mod_seq_column = self._get_mod_seq_column(origin_df)
+
         self._psm_df = pd.DataFrame()
 
         if len(origin_df):
@@ -304,17 +319,24 @@ class PSMReaderBase(ABC):
 
         """
 
-    def _find_mapped_columns(self, origin_df: pd.DataFrame) -> Dict[str, str]:
+    def _find_mapped_columns(self, df: pd.DataFrame) -> Dict[str, str]:
+        """Determine the mapping of AlphaBase columns to the columns in the given DataFrame.
+
+        For each AlphaBase column name, check if the corresponding search engine-specific
+        name is in the DataFrame columns. If it is, add it to the mapping.
+        If the searchengine-specific name is a list, use the first column name in the list.
+        """
         mapped_columns = {}
-        for col, map_col in self.column_mapping.items():
-            if isinstance(map_col, str):
-                if map_col in origin_df.columns:
-                    mapped_columns[col] = map_col
-            elif isinstance(map_col, (list, tuple)):
-                for other_col in map_col:
-                    if other_col in origin_df.columns:
-                        mapped_columns[col] = other_col
+        for col_alphabase, col_other in self.column_mapping.items():
+            if isinstance(col_other, str):
+                if col_other in df.columns:
+                    mapped_columns[col_alphabase] = col_other
+            elif isinstance(col_other, (list, tuple)):
+                for other_col in col_other:
+                    if other_col in df.columns:
+                        mapped_columns[col_alphabase] = other_col
                         break
+                        # TODO: warn if there's more
         return mapped_columns
 
     def _translate_columns(self, origin_df: pd.DataFrame) -> None:
