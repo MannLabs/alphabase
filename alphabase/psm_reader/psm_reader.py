@@ -186,6 +186,7 @@ class PSMReaderBase(ABC):
         self._modification_mapper.set_modification_mapping(modification_mapping)
 
     def _get_mod_seq_column(self, df: pd.DataFrame) -> Optional[str]:
+        """Get the first column from `_mod_seq_columns` that is a column of `df`."""
         for mod_seq_col in self._mod_seq_columns:
             if mod_seq_col in df.columns:
                 return mod_seq_col
@@ -318,17 +319,24 @@ class PSMReaderBase(ABC):
 
         """
 
-    def _find_mapped_columns(self, origin_df: pd.DataFrame) -> Dict[str, str]:
+    def _find_mapped_columns(self, df: pd.DataFrame) -> Dict[str, str]:
+        """Determine the mapping of AlphaBase columns to the columns in the given DataFrame.
+
+        For each AlphaBase column name, check if the corresponding search engine-specific
+        name is in the DataFrame columns. If it is, add it to the mapping.
+        If the searchengine-specific name is a list, use the first column name in the list.
+        """
         mapped_columns = {}
         for col_alphabase, col_other in self.column_mapping.items():
             if isinstance(col_other, str):
-                if col_other in origin_df.columns:
+                if col_other in df.columns:
                     mapped_columns[col_alphabase] = col_other
             elif isinstance(col_other, (list, tuple)):
                 for other_col in col_other:
-                    if other_col in origin_df.columns:
+                    if other_col in df.columns:
                         mapped_columns[col_alphabase] = other_col
                         break
+                        # TODO: warn if there's more
         return mapped_columns
 
     def _translate_columns(self, origin_df: pd.DataFrame) -> None:

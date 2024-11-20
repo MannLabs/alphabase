@@ -50,7 +50,9 @@ class SpectronautReader(MaxQuantReader):
         csv_sep = self._get_table_delimiter(filename)
         df = pd.read_csv(filename, sep=csv_sep, keep_default_na=False)
 
-        self.mod_seq_column = self._get_mod_seq_column(df)
+        self.mod_seq_column = self._get_mod_seq_column(
+            df
+        )  # TODO: this needs to be removed
         if "ReferenceRun" in df.columns:
             df.drop_duplicates(
                 ["ReferenceRun", self.mod_seq_column, "PrecursorCharge"], inplace=True
@@ -171,7 +173,9 @@ class SpectronautReportReader(MaxQuantReader):
         csv_sep = self._get_table_delimiter(filename)
         df = pd.read_csv(filename, sep=csv_sep, keep_default_na=False)
 
-        self.mod_seq_column = self._get_mod_seq_column(df)
+        self.mod_seq_column = self._get_mod_seq_column(
+            df
+        )  # TODO: this needs to be removed
         df[[self.mod_seq_column, PsmDfCols.CHARGE]] = df[
             self.precursor_column
         ].str.split(".", expand=True, n=2)
