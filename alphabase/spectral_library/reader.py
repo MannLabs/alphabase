@@ -270,6 +270,14 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
             ],
         )
 
+    def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Library-specific preprocessing of output data.
+
+        Nothing to do here, still method of superclass needs to be overwritten.
+        TODO disentangle the inheritance structure.
+        """
+        return df
+
     def _post_process(
         self,
     ) -> None:

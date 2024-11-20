@@ -74,16 +74,24 @@ class AlphaPeptReader(PSMReaderBase):
         self.hdf_dataset = "identifications"
 
     def _load_file(self, filename: str) -> pd.DataFrame:
+        """Load an AlphaPept output file to a DataFrame."""
         with h5py.File(filename, "r") as _hdf:
             dataset = _hdf[self.hdf_dataset]
             df = pd.DataFrame({col: dataset[col] for col in dataset})
-            df[PsmDfCols.RAW_NAME] = Path(filename).name[: -len(".ms_data.hdf")]
-            df["precursor"] = df["precursor"].str.decode("utf-8")
-            # df['naked_sequence'] = df['naked_sequence'].str.decode('utf-8')
-            if "scan_no" in df.columns:
-                df["scan_no"] = df["scan_no"].astype("int")
-                df["raw_idx"] = df["scan_no"] - 1  # if thermo, use scan-1 as spec_idx
-            df[PsmDfCols.CHARGE] = df[PsmDfCols.CHARGE].astype(int)
+
+        # TODO: make this more stable
+        df[PsmDfCols.RAW_NAME] = Path(filename).name[: -len(".ms_data.hdf")]
+
+        return df
+
+    def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
+        """AlphaPept-specific preprocessing of output data."""
+        df["precursor"] = df["precursor"].str.decode("utf-8")
+        # df['naked_sequence'] = df['naked_sequence'].str.decode('utf-8')
+        if "scan_no" in df.columns:
+            df["scan_no"] = df["scan_no"].astype("int")
+            df["raw_idx"] = df["scan_no"] - 1  # if thermo, use scan-1 as spec_idx
+        df[PsmDfCols.CHARGE] = df[PsmDfCols.CHARGE].astype(int)
         return df
 
     def _load_modifications(self, df: pd.DataFrame) -> None:
