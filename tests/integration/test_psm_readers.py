@@ -346,7 +346,7 @@ def test_sage_reader() -> None:
 
     input_data = StringIO(TEST_DATA_SAGE)
 
-    reader = SageReaderTSV()
+    reader = SageReaderTSV(mp_process_num=1)
     reader.import_file(input_data)
 
     _assert_reference_df_equal(reader.psm_df, "sage")
