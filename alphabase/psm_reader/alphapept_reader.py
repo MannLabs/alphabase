@@ -12,7 +12,6 @@ from alphabase.psm_reader.keys import PsmDfCols
 from alphabase.psm_reader.psm_reader import (
     PSMReaderBase,
     psm_reader_provider,
-    psm_reader_yaml,
 )
 
 
@@ -53,6 +52,7 @@ class AlphaPeptReader(PSMReaderBase):
     """Reader for AlphaPept's *.ms_data.hdf files."""
 
     _reader_type = "alphapept"
+    _modification_type = "alphapept"
 
     def __init__(
         self,
@@ -72,9 +72,6 @@ class AlphaPeptReader(PSMReaderBase):
             **kwargs,
         )
         self.hdf_dataset = "identifications"
-
-    def _init_modification_mapping(self) -> None:
-        self.modification_mapping = psm_reader_yaml["alphapept"]["modification_mapping"]
 
     def _load_file(self, filename: str) -> pd.DataFrame:
         with h5py.File(filename, "r") as _hdf:

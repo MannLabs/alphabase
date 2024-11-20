@@ -212,7 +212,6 @@ library_reader_base:
   reader_type: library_reader_base
   rt_unit: irt
   fixed_C57: False
-  csv_sep: "\t"
   mod_seq_columns:
     - 'ModifiedPeptideSequence'
     - 'ModifiedPeptide'
