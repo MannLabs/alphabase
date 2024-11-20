@@ -98,24 +98,6 @@ class pFindReader(PSMReaderBase):  # noqa: N801 name `pFindReader` should use Ca
 
     _reader_type = "pfind"
 
-    def __init__(
-        self,
-        *,
-        column_mapping: Optional[dict] = None,
-        modification_mapping: Optional[dict] = None,
-        fdr: float = 0.01,
-        keep_decoy: bool = False,
-        **kwargs,
-    ):
-        """Reading PSMs from pFind's *.txt."""
-        super().__init__(
-            column_mapping=column_mapping,
-            modification_mapping=modification_mapping,
-            fdr=fdr,
-            keep_decoy=keep_decoy,
-            **kwargs,
-        )
-
     def _translate_modifications(self) -> None:
         pass
 

@@ -129,7 +129,7 @@ class MaxQuantReader(PSMReaderBase):
     _modification_type = "maxquant"
     _fixed_c57 = True
 
-    def __init__(  # noqa: PLR0913 many arguments in function definition
+    def __init__(  # noqa: PLR0913, D417 # too many arguments in function definition, missing argument descriptions
         self,
         *,
         column_mapping: Optional[dict] = None,
@@ -141,7 +141,20 @@ class MaxQuantReader(PSMReaderBase):
         rt_unit: str = "minute",
         **kwargs,
     ):
-        """Reader for MaxQuant msms.txt and evidence.txt."""
+        """Reader for MaxQuant msms.txt and evidence.txt.
+
+        See documentation of `PSMReaderBase` for more information.
+
+        Parameters
+        ----------
+        fixed_C57 : bool, optional
+            If true, the search engine will not show `Carbamidomethyl`
+            in the modified sequences.
+            by default True
+
+        See documentation of `PSMReaderBase` for the rest of parameters.
+
+        """
         super().__init__(
             column_mapping=column_mapping,
             modification_mapping=modification_mapping,

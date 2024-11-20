@@ -98,7 +98,7 @@ class MSFraggerPepXML(PSMReaderBase):
 
     _reader_type = "msfragger_pepxml"
 
-    def __init__(  # noqa: PLR0913 many arguments in function definition
+    def __init__(  # noqa: PLR0913, D417 # too many arguments in function definition, missing argument descriptions
         self,
         *,
         column_mapping: Optional[dict] = None,
@@ -110,7 +110,21 @@ class MSFraggerPepXML(PSMReaderBase):
         keep_unknown_aa_mass_diffs: bool = False,
         **kwargs,
     ):
-        """MSFragger is not fully supported as we can only access the pepxml file."""
+        """Initialize the MSFraggerreader.
+
+        See documentation of `PSMReaderBase` for more information.
+
+        MSFragger is not fully supported as we can only access the pepxml file.
+
+        Parameters
+        ----------
+            keep_unknown_aa_mass_diffs:
+                whether to keep PSMs with unknown amino acid mass differences, default: False
+
+
+        See documentation of `PSMReaderBase` for the rest of parameters.
+
+        """
         super().__init__(
             column_mapping=column_mapping,
             modification_mapping=modification_mapping,

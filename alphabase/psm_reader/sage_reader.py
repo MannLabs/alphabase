@@ -568,7 +568,7 @@ class SageReaderBase(PSMReaderBase, ABC):
 
     _reader_type = "sage"
 
-    def __init__(  # noqa: PLR0913 many arguments in function definition
+    def __init__(  # noqa: PLR0913, D417 # too many arguments in function definition, missing argument descriptions
         self,
         *,
         column_mapping: Optional[dict] = None,
@@ -581,10 +581,24 @@ class SageReaderBase(PSMReaderBase, ABC):
         mp_process_num: int = 10,
         **kwargs,
     ):
-        """Initialize SageReaderBase."""
-        self.custom_translation_df = custom_translation_df
-        self.mp_process_num = mp_process_num
+        """Initialize SageReaderBase.
 
+        See documentation of `PSMReaderBase` for more information.
+
+        Parameters
+        ----------
+        custom_translation_df : pd.DataFrame
+            A custom translation dataframe with columns 'modification' and 'matched_mod_name'.
+            Optional, default: None
+
+        mp_process_num : int
+            The number of processes to use for translation.
+            Optional, default: 10
+
+
+        See documentation of `PSMReaderBase` for the rest of parameters.
+
+        """
         super().__init__(
             column_mapping=column_mapping,
             modification_mapping=modification_mapping,
@@ -593,6 +607,9 @@ class SageReaderBase(PSMReaderBase, ABC):
             rt_unit=rt_unit,
             **kwargs,
         )
+
+        self.custom_translation_df = custom_translation_df
+        self.mp_process_num = mp_process_num
 
     def _transform_table(self) -> None:
         self._psm_df[PsmDfCols.SPEC_IDX] = self._psm_df[PsmDfCols.SCANNR].apply(
@@ -634,20 +651,12 @@ class SageReaderBase(PSMReaderBase, ABC):
 class SageReaderTSV(SageReaderBase):
     """Reader for Sage output files in TSV format."""
 
-    def __init__(self, *args, **kwargs):
-        """Initialize SageReaderTSV."""
-        super().__init__(*args, **kwargs)
-
     def _load_file(self, filename: str) -> pd.DataFrame:
         return pd.read_csv(filename, sep="\t")
 
 
 class SageReaderParquet(SageReaderBase):
     """Reader for Sage output files in parquet format."""
-
-    def __init__(self, *args, **kwargs):
-        """Initialize SageReaderParquet."""
-        super().__init__(*args, **kwargs)
 
     def _load_file(self, filename: str) -> pd.DataFrame:
         return pd.read_parquet(filename)
