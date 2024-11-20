@@ -53,6 +53,9 @@ class SpectronautReader(MaxQuantReader):
 
     def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
         """Spectronaut-specific preprocessing of output data."""
+        self.mod_seq_column = self._get_mod_seq_column(
+            df
+        )  # TODO: this needs to be removed
         if "ReferenceRun" in df.columns:
             df.drop_duplicates(
                 ["ReferenceRun", self.mod_seq_column, "PrecursorCharge"], inplace=True
