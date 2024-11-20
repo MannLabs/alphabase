@@ -46,7 +46,7 @@ class PSMReaderBase(ABC):
         modification_mapping: Optional[dict] = None,
         fdr: float = 0.01,
         keep_decoy: bool = False,
-        rt_unit: str = "minute",
+        rt_unit: Optional[str] = None,
         mod_seq_columns: Optional[List[str]] = None,
         **kwargs,
     ):
@@ -98,8 +98,8 @@ class PSMReaderBase(ABC):
             Defaults to False.
 
         rt_unit : str, optional
-            The unit of RT in the search engine result.
-            Defaults to 'minute'.
+            The unit of RT in the search engine result, "minute", "second" or "irt".
+            If None, it is read from psm_reader_yaml key "rt_unit".
 
         mod_seq_columns : list, optional
             The columns to find modified sequences.
@@ -145,7 +145,11 @@ class PSMReaderBase(ABC):
 
         self._keep_fdr = fdr
         self._keep_decoy = keep_decoy
-        self._engine_rt_unit = rt_unit
+        self._engine_rt_unit = (
+            rt_unit
+            if rt_unit is not None
+            else psm_reader_yaml[self._reader_type]["rt_unit"]
+        )
         self._min_irt_value = -100
         self._max_irt_value = 200
 

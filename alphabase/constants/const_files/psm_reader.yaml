@@ -119,8 +119,6 @@ pfind:
     'uniprot_ids': 'Proteins'
     'fdr': 'Q-value'
     'decoy': ['Target/Decoy', 'Targe/Decoy']
-  modification_mapping:
-    '': ''
 
 msfragger_pepxml:
   reader_type: msfragger_pepxml
@@ -136,8 +134,6 @@ msfragger_pepxml:
     'proteins': 'protein'
     'raw_name': 'raw_name'
     'mobility': 'ion_mobility'
-  modification_mapping:
-    '': ''
   mass_mapped_mods:
     - 'Oxidation@M' #other Oxidation@X are not needed here
     - 'Carbamidomethyl@C'
@@ -247,7 +243,7 @@ library_reader_base:
 
 sage:
   reader_type: sage
-  rt_unit: minute
+  rt_unit: second
   column_mapping:
     'modified_sequence': 'peptide'
     'sequence': 'stripped_peptide'
