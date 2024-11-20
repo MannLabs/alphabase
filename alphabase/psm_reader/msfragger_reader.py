@@ -124,18 +124,16 @@ class MSFraggerPepXML(PSMReaderBase):
         pass
 
     def _load_file(self, filename: str) -> pd.DataFrame:
-        """Load a MsFragger output file to a DataFrame."""
-        return pepxml.DataFrame(filename)
-
-    def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
-        """MsFragger-specific preprocessing of output data."""
-        df.fillna("", inplace=True)
-        if "ion_mobility" in df.columns:
-            df["ion_mobility"] = df.ion_mobility.astype(float)
-        df[PsmDfCols.RAW_NAME] = df["spectrum"].str.split(".").apply(lambda x: x[0])
-        df["to_remove"] = 0  # TODO: revisit
+        msf_df = pepxml.DataFrame(filename)
+        msf_df.fillna("", inplace=True)
+        if "ion_mobility" in msf_df.columns:
+            msf_df["ion_mobility"] = msf_df.ion_mobility.astype(float)
+        msf_df[PsmDfCols.RAW_NAME] = (
+            msf_df["spectrum"].str.split(".").apply(lambda x: x[0])
+        )
+        msf_df["to_remove"] = 0  # TODO: revisit
         self.column_mapping[PsmDfCols.TO_REMOVE] = "to_remove"
-        return df
+        return msf_df
 
     def _translate_decoy(self) -> None:
         self._psm_df[PsmDfCols.DECOY] = (

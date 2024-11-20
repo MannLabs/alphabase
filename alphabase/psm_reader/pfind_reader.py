@@ -120,16 +120,16 @@ class pFindReader(PSMReaderBase):  # noqa: N801 name `pFindReader` should use Ca
         pass
 
     def _load_file(self, filename: str) -> pd.DataFrame:
-        """Load a pFind output file to a DataFrame."""
-        return pd.read_csv(filename, index_col=False, sep="\t", keep_default_na=False)
-
-    def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
-        """pFind-specific preprocessing of output data."""
-        df.fillna("", inplace=True)
-        df = df[df.Sequence != ""]
-        df[PsmDfCols.RAW_NAME] = df["File_Name"].str.split(".").apply(lambda x: x[0])
-        df["Proteins"] = df["Proteins"].apply(parse_pfind_protein)
-        return df
+        pfind_df = pd.read_csv(
+            filename, index_col=False, sep="\t", keep_default_na=False
+        )
+        pfind_df.fillna("", inplace=True)
+        pfind_df = pfind_df[pfind_df.Sequence != ""]
+        pfind_df[PsmDfCols.RAW_NAME] = (
+            pfind_df["File_Name"].str.split(".").apply(lambda x: x[0])
+        )
+        pfind_df["Proteins"] = pfind_df["Proteins"].apply(parse_pfind_protein)
+        return pfind_df
 
     def _translate_decoy(self) -> None:
         self._psm_df[PsmDfCols.DECOY] = (

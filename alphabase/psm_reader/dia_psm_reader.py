@@ -47,12 +47,9 @@ class SpectronautReader(MaxQuantReader):
         self._min_max_rt_norm = True
 
     def _load_file(self, filename: str) -> pd.DataFrame:
-        """Load a Spectronaut output file to a DataFrame."""
         csv_sep = self._get_table_delimiter(filename)
-        return pd.read_csv(filename, sep=csv_sep, keep_default_na=False)
+        df = pd.read_csv(filename, sep=csv_sep, keep_default_na=False)
 
-    def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Spectronaut-specific preprocessing of output data."""
         self.mod_seq_column = self._get_mod_seq_column(
             df
         )  # TODO: this needs to be removed
@@ -130,14 +127,6 @@ class DiannReader(SpectronautReader):
         csv_sep = self._get_table_delimiter(filename)
         return pd.read_csv(filename, sep=csv_sep, keep_default_na=False)
 
-    def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
-        """DIANN-specific preprocessing of output data.
-
-        Nothing to do for DIANN, still method of superclass needs to be overwritten.
-        TODO disentangle the inheritance structure.
-        """
-        return df
-
     def _post_process(self) -> None:
         super()._post_process()
         self._psm_df.rename(
@@ -181,12 +170,9 @@ class SpectronautReportReader(MaxQuantReader):
         self._min_max_rt_norm = False
 
     def _load_file(self, filename: str) -> pd.DataFrame:
-        """Load a Spectronaut report file to a DataFrame."""
         csv_sep = self._get_table_delimiter(filename)
-        return pd.read_csv(filename, sep=csv_sep, keep_default_na=False)
+        df = pd.read_csv(filename, sep=csv_sep, keep_default_na=False)
 
-    def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Spectronaut report-specific preprocessing of output data."""
         self.mod_seq_column = self._get_mod_seq_column(
             df
         )  # TODO: this needs to be removed
