@@ -11,6 +11,7 @@ from alphabase.peptide.mobility import mobility_to_ccs_for_df
 from alphabase.psm_reader.keys import LibPsmDfCols, PsmDfCols
 from alphabase.psm_reader.maxquant_reader import MaxQuantReader
 from alphabase.spectral_library.base import SpecLibBase
+from alphabase.utils import _get_delimiter
 
 
 class LibraryReaderBase(MaxQuantReader, SpecLibBase):
@@ -242,7 +243,7 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
 
     def _load_file(self, filename: str) -> pd.DataFrame:
         """Load the spectral library from a csv file."""
-        csv_sep = self._get_table_delimiter(filename)
+        csv_sep = _get_delimiter(filename)
 
         return pd.read_csv(
             filename,
