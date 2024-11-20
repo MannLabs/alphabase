@@ -36,8 +36,6 @@ class PSMReaderBase(ABC):
     _reader_type: str
     # whether to add the unimod mappings to the modification mapping
     _add_unimod_to_mod_mapping: bool = False
-    # the typ of modification mapping to be used
-    _modification_type: Optional[str] = None
     # whether 'rt_norm' values in self._psm_dd will be normalized using min/max values
     #  Useful to normalize iRT values as they contain negative values.
     _min_max_rt_norm = False
@@ -127,9 +125,9 @@ class PSMReaderBase(ABC):
         self._modification_mapper = ModificationMapper(
             modification_mapping,
             reader_yaml=copy.deepcopy(psm_reader_yaml),
-            modification_type=psm_reader_yaml[self._reader_type].get(
-                "modification_mapping_type", None
-            ),
+            mapping_type=psm_reader_yaml[self._reader_type][
+                "modification_mapping_type"
+            ],
             add_unimod_to_mod_mapping=self._add_unimod_to_mod_mapping,
         )
 

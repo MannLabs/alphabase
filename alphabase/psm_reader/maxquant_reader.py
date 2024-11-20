@@ -128,7 +128,6 @@ class MaxQuantReader(PSMReaderBase):
 
     _reader_type = "maxquant"
     _add_unimod_to_mod_mapping = True
-    _modification_type = "maxquant"
 
     def __init__(  # noqa: PLR0913, D417 # too many arguments in function definition, missing argument descriptions
         self,

@@ -229,6 +229,8 @@ def _assert_reference_df_equal(
 def test_psm_reader_yaml() -> None:
     """Test that all column mappings in the psm_reader.yaml are covered by string constant keys."""
     for reader_config in psm_reader_yaml.values():
+        if reader_config == "modification_mappings":
+            continue
         ks = [k for k in reader_config["column_mapping"]]
         assert (
             set(ks) - set(PsmDfCols.get_values()) - set(LibPsmDfCols.get_values())
