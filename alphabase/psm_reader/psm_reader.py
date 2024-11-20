@@ -35,7 +35,8 @@ class PSMReaderBase(ABC):
     _add_unimod_to_mod_mapping: bool = False
     # the typ of modification mapping to be used
     _modification_type: Optional[str] = None
-
+    # whether 'rt_norm' values in self._psm_dd will be normalized using min/max values
+    #  Useful to normalize iRT values as they contain negative values.
     _min_max_rt_norm = False
 
     def __init__(  # noqa: PLR0913 # too many arguments
@@ -118,15 +119,6 @@ class PSMReaderBase(ABC):
             We must use self.set_modification_mapping(new_mapping) to update it.
         psm_df : pd.DataFrame
             the PSM DataFrame after loading from search engines.
-        keep_fdr : float
-            The only PSMs with FDR<=keep_fdr were returned in self._psm_df.
-        keep_decoy : bool
-            If keep decoy PSMs in self.psm_df.
-        _min_max_rt_norm : bool
-            if True, the 'rt_norm' values in self._psm_df
-            will be normalized by rt_norm = (self.psm_df[PsmDfCols.RT]-rt_min)/(rt_max-rt_min).
-            It is useful to normalize iRT values as they contain negative values.
-            Defaults to False.
 
         """
         self._modification_mapper = ModificationMapper(
