@@ -2,7 +2,7 @@
 
 import copy
 import warnings
-from abc import ABC, abstractmethod
+from abc import ABC
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Type, Union
 
@@ -15,6 +15,7 @@ from alphabase.peptide.precursor import reset_precursor_df, update_precursor_mz
 from alphabase.psm_reader.keys import PsmDfCols
 from alphabase.psm_reader.modification_mapper import ModificationMapper
 from alphabase.psm_reader.utils import (
+    get_column_mapping_for_df,
     keep_modifications,
     translate_modifications,
 )
@@ -138,21 +139,23 @@ class PSMReaderBase(ABC):
         self.column_mapping = (
             column_mapping
             if column_mapping is not None
-            else self._read_column_mapping()
+            else psm_reader_yaml[self._reader_type]["column_mapping"]
         )
 
-        self._psm_df = pd.DataFrame()
-        self._keep_fdr = fdr
-        self._keep_decoy = keep_decoy
-        self._engine_rt_unit = rt_unit
-        self._min_irt_value = -100
-        self._max_irt_value = 200
         self._mod_seq_columns = (
             mod_seq_columns
             if mod_seq_columns is not None
             else psm_reader_yaml[self._reader_type].get("mod_seq_columns", [])
         )
         self.mod_seq_column = None
+
+        self._psm_df = None
+
+        self._keep_fdr = fdr
+        self._keep_decoy = keep_decoy
+        self._engine_rt_unit = rt_unit
+        self._min_irt_value = -100
+        self._max_irt_value = 200
 
         for key, value in kwargs.items():  # TODO: remove and remove kwargs
             warnings.warn(
@@ -187,18 +190,6 @@ class PSMReaderBase(ABC):
         """
         self._modification_mapper.set_modification_mapping(modification_mapping)
 
-    def _get_mod_seq_column(self, df: pd.DataFrame) -> Optional[str]:
-        """Get the first column from `_mod_seq_columns` that is a column of `df`."""
-        for mod_seq_col in self._mod_seq_columns:
-            if mod_seq_col in df.columns:
-                return mod_seq_col
-        return None
-        # TODO: warn if there's more
-
-    def _read_column_mapping(self) -> Dict[str, str]:
-        """Read column mapping from psm_reader yaml file."""
-        return psm_reader_yaml[self._reader_type]["column_mapping"]
-
     def load(self, _file: Union[List[str], str]) -> pd.DataFrame:
         """Wrapper for import_file()."""
         if isinstance(_file, list):
@@ -214,16 +205,7 @@ class PSMReaderBase(ABC):
     def import_file(self, _file: str) -> pd.DataFrame:
         """Main entry function of PSM readers.
 
-        Imports a file with following steps:
-        ```
-        origin_df = self._load_file(_file)
-        self._translate_columns(origin_df)
-        self._translate_decoy(origin_df)
-        self._translate_score(origin_df)
-        self._load_modifications(origin_df)
-        self._translate_modifications()
-        self._post_process(origin_df)
-        ```.
+        Imports a file and processes it.
 
         Parameters
         ----------
@@ -251,97 +233,25 @@ class PSMReaderBase(ABC):
             self._post_process()  # here, libraryreader, diann, msfragger
         return self._psm_df
 
-    def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
-        return df
-
-    def _translate_decoy(self) -> None:  # noqa: B027 empty method in an abstract base class
-        pass
-
-    def _translate_score(self) -> None:  # noqa: B027 empty method in an abstract base class
-        # some scores are evalue/pvalue, it should be translated
-        # to -log(evalue), as score is the larger the better
-        pass
-
-    def _normalize_rt(self) -> None:
-        if PsmDfCols.RT in self._psm_df.columns:
-            if self._engine_rt_unit == "second":
-                # self.psm_df['rt_sec'] = self.psm_df.rt
-                self._psm_df[PsmDfCols.RT] = self._psm_df[PsmDfCols.RT] / 60
-                if PsmDfCols.RT_START in self._psm_df.columns:
-                    self._psm_df[PsmDfCols.RT_START] = (
-                        self._psm_df[PsmDfCols.RT_START] / 60
-                    )
-                    self._psm_df[PsmDfCols.RT_STOP] = (
-                        self._psm_df[PsmDfCols.RT_STOP] / 60
-                    )
-            # elif self._engine_rt_unit == 'minute':
-            # self.psm_df['rt_sec'] = self.psm_df.rt*60
-            min_rt = self._psm_df[PsmDfCols.RT].min()
-            max_rt = self._psm_df[PsmDfCols.RT].max()
-            if min_rt < 0:  # iRT
-                min_rt = max(min_rt, self._min_irt_value)
-                max_rt = min(max_rt, self._max_irt_value)
-
-            elif not self._min_max_rt_norm:
-                min_rt = 0
-
-            self._psm_df[PsmDfCols.RT_NORM] = (
-                (self._psm_df[PsmDfCols.RT] - min_rt) / (max_rt - min_rt)
-            ).clip(0, 1)
-
-    def normalize_rt_by_raw_name(self) -> None:
-        """Normalize RT by raw name."""
-        if PsmDfCols.RT not in self._psm_df.columns:
-            return
-        if PsmDfCols.RT_NORM not in self._psm_df.columns:
-            self._normalize_rt()
-
-        if PsmDfCols.RAW_NAME not in self._psm_df.columns:
-            return
-        for _, df_group in self._psm_df.groupby(PsmDfCols.RAW_NAME):
-            self._psm_df.loc[df_group.index, PsmDfCols.RT_NORM] = (
-                df_group[PsmDfCols.RT_NORM] / df_group[PsmDfCols.RT_NORM].max()
-            )
-
     def _load_file(self, filename: str) -> pd.DataFrame:
         """Load PSM file into a dataframe.
 
         Different search engines may store PSMs in different ways: tsv, csv, HDF, XML, ...
         This default implementation works for tsv and csv files and thus covers many readers.
-
-        Parameters
-        ----------
-        filename : str
-            psm filename
-
-        Returns
-        -------
-        pd.DataFrame
-            psm file as dataframe
-
         """
         sep = _get_delimiter(filename)
         return pd.read_csv(filename, sep=sep, keep_default_na=False)
 
-    def _find_mapped_columns(self, df: pd.DataFrame) -> Dict[str, str]:
-        """Determine the mapping of AlphaBase columns to the columns in the given DataFrame.
+    def _get_mod_seq_column(self, df: pd.DataFrame) -> Optional[str]:
+        """Get the first column from `_mod_seq_columns` that is a column of `df`."""
+        for mod_seq_col in self._mod_seq_columns:
+            if mod_seq_col in df.columns:
+                return mod_seq_col
+        return None
+        # TODO: warn if there's more
 
-        For each AlphaBase column name, check if the corresponding search engine-specific
-        name is in the DataFrame columns. If it is, add it to the mapping.
-        If the searchengine-specific name is a list, use the first column name in the list.
-        """
-        mapped_columns = {}
-        for col_alphabase, col_other in self.column_mapping.items():
-            if isinstance(col_other, str):
-                if col_other in df.columns:
-                    mapped_columns[col_alphabase] = col_other
-            elif isinstance(col_other, (list, tuple)):
-                for other_col in col_other:
-                    if other_col in df.columns:
-                        mapped_columns[col_alphabase] = other_col
-                        break
-                        # TODO: warn if there's more
-        return mapped_columns
+    def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
+        return df
 
     def _translate_columns(self, origin_df: pd.DataFrame) -> None:
         """Translate the dataframe from other search engines to AlphaBase format.
@@ -357,9 +267,11 @@ class PSMReaderBase(ABC):
             Add information inplace into self._psm_df
 
         """
-        mapped_columns = self._find_mapped_columns(origin_df)
+        column_mapping_for_df = get_column_mapping_for_df(
+            self.column_mapping, origin_df
+        )
 
-        for col, map_col in mapped_columns.items():
+        for col, map_col in column_mapping_for_df.items():
             self._psm_df[col] = origin_df[map_col]
 
         if (
@@ -374,8 +286,15 @@ class PSMReaderBase(ABC):
         Usually only needed in combination with spectral libraries.
         """
 
-    @abstractmethod
-    def _load_modifications(self, origin_df: pd.DataFrame) -> None:
+    def _translate_decoy(self) -> None:  # noqa: B027 empty method in an abstract base class
+        pass
+
+    def _translate_score(self) -> None:  # noqa: B027 empty method in an abstract base class
+        # some scores are evalue/pvalue, it should be translated
+        # to -log(evalue), as score is the larger the better
+        pass
+
+    def _load_modifications(self, origin_df: pd.DataFrame) -> None:  # noqa: B027 empty method in an abstract base class
         """Read modification information from 'origin_df'.
 
         Some search engines use modified_sequence, some of them
@@ -455,6 +374,47 @@ class PSMReaderBase(ABC):
             self._psm_df[PsmDfCols.CCS] = mobility.mobility_to_ccs_for_df(
                 self._psm_df, PsmDfCols.MOBILITY
             )
+
+    def normalize_rt_by_raw_name(self) -> None:
+        """Normalize RT by raw name."""
+        if PsmDfCols.RT not in self._psm_df.columns:
+            return
+        if PsmDfCols.RT_NORM not in self._psm_df.columns:
+            self._normalize_rt()
+
+        if PsmDfCols.RAW_NAME not in self._psm_df.columns:
+            return
+        for _, df_group in self._psm_df.groupby(PsmDfCols.RAW_NAME):
+            self._psm_df.loc[df_group.index, PsmDfCols.RT_NORM] = (
+                df_group[PsmDfCols.RT_NORM] / df_group[PsmDfCols.RT_NORM].max()
+            )
+
+    def _normalize_rt(self) -> None:
+        if PsmDfCols.RT in self._psm_df.columns:
+            if self._engine_rt_unit == "second":
+                # self.psm_df['rt_sec'] = self.psm_df.rt
+                self._psm_df[PsmDfCols.RT] = self._psm_df[PsmDfCols.RT] / 60
+                if PsmDfCols.RT_START in self._psm_df.columns:
+                    self._psm_df[PsmDfCols.RT_START] = (
+                        self._psm_df[PsmDfCols.RT_START] / 60
+                    )
+                    self._psm_df[PsmDfCols.RT_STOP] = (
+                        self._psm_df[PsmDfCols.RT_STOP] / 60
+                    )
+            # elif self._engine_rt_unit == 'minute':
+            # self.psm_df['rt_sec'] = self.psm_df.rt*60
+            min_rt = self._psm_df[PsmDfCols.RT].min()
+            max_rt = self._psm_df[PsmDfCols.RT].max()
+            if min_rt < 0:  # iRT
+                min_rt = max(min_rt, self._min_irt_value)
+                max_rt = min(max_rt, self._max_irt_value)
+
+            elif not self._min_max_rt_norm:
+                min_rt = 0
+
+            self._psm_df[PsmDfCols.RT_NORM] = (
+                (self._psm_df[PsmDfCols.RT] - min_rt) / (max_rt - min_rt)
+            ).clip(0, 1)
 
     def filter_psm_by_modifications(
         self,
