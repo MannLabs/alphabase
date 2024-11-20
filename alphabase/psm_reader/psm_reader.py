@@ -236,10 +236,9 @@ class PSMReaderBase(ABC):
 
         if len(origin_df):
             # TODO: think about dropping the 'inplace' pattern here
-
-            origin_df = self._pre_process(origin_df)
             self.mod_seq_column = self._get_mod_seq_column(origin_df)
 
+            origin_df = self._pre_process(origin_df)
             self._translate_columns(origin_df)  # only here
             self._transform_table()  # only sage
             self._translate_decoy()  # only sage, mq, msfragger, pfind
@@ -251,7 +250,7 @@ class PSMReaderBase(ABC):
             self._post_process()  # here, libraryreader, diann, msfragger
         return self._psm_df
 
-    def _pre_process(self, df: pd.DataFrame) -> None:
+    def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
         return df
 
     def _translate_decoy(self) -> None:  # noqa: B027 empty method in an abstract base class
