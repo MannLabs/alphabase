@@ -6,6 +6,7 @@ Most of the test data is taken from psm_readers.ipynb
 """
 
 import io
+import logging
 import os
 from io import StringIO
 from pathlib import Path
@@ -216,6 +217,10 @@ def _assert_reference_df_equal(psm_df: pd.DataFrame, test_case_name: str) -> Non
         expected_df.sort_values(by=["rt_norm", "precursor_mz"], inplace=True)
         psm_df.sort_values(by=["rt_norm", "precursor_mz"], inplace=True)
 
+        print(expected_df.head())
+        logging.info(expected_df.head())
+        print(psm_df.head())
+        logging.info(psm_df.head())
         pd.testing.assert_frame_equal(psm_df, expected_df)
     else:
         psm_df.to_parquet(out_file_path)
