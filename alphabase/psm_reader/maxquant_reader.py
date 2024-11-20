@@ -127,18 +127,19 @@ class MaxQuantReader(PSMReaderBase):
     _reader_type = "maxquant"
     _add_unimod_to_mod_mapping = True
     _modification_type = "maxquant"
-    _fixed_c57 = True
+    _fixed_c57_default = True
 
     def __init__(  # noqa: PLR0913, D417 # too many arguments in function definition, missing argument descriptions
         self,
         *,
         column_mapping: Optional[dict] = None,
         modification_mapping: Optional[dict] = None,
+        mod_seq_columns: Optional[List[str]] = None,
         fdr: float = 0.01,
         keep_decoy: bool = False,
-        fixed_C57: Optional[bool] = None,  # noqa: N803 TODO: make this  *,fixed_c57  (breaking)
-        mod_seq_columns: Optional[List[str]] = None,
         rt_unit: str = "minute",
+        # MaxQuant reader-specific
+        fixed_C57: Optional[bool] = None,  # noqa: N803 TODO: make this  *,fixed_c57  (breaking)
         **kwargs,
     ):
         """Reader for MaxQuant msms.txt and evidence.txt.
@@ -158,14 +159,14 @@ class MaxQuantReader(PSMReaderBase):
         super().__init__(
             column_mapping=column_mapping,
             modification_mapping=modification_mapping,
+            mod_seq_columns=mod_seq_columns,
             fdr=fdr,
             keep_decoy=keep_decoy,
             rt_unit=rt_unit,
-            mod_seq_columns=mod_seq_columns,
             **kwargs,
         )
 
-        self.fixed_C57 = fixed_C57 if fixed_C57 is not None else self._fixed_c57
+        self.fixed_C57 = fixed_C57 if fixed_C57 is not None else self._fixed_c57_default
 
     def _translate_decoy(self) -> None:
         if PsmDfCols.DECOY in self._psm_df.columns:

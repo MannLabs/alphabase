@@ -573,6 +573,7 @@ class SageReaderBase(PSMReaderBase, ABC):
         *,
         column_mapping: Optional[dict] = None,
         modification_mapping: Optional[dict] = None,
+        # mod_seq_columns: Optional[List[str]] = None,  # TODO: not needed here?
         fdr: float = 0.01,
         keep_decoy: bool = False,
         rt_unit: str = "second",
