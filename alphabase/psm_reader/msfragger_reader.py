@@ -21,12 +21,11 @@ def _is_fragger_decoy(proteins: List[str]) -> bool:
     return all(prot.lower().startswith("rev_") for prot in proteins)
 
 
-mass_mapped_mods = psm_reader_yaml["msfragger_pepxml"]["mass_mapped_mods"]
-mod_mass_tol = psm_reader_yaml["msfragger_pepxml"]["mod_mass_tol"]
-
-
 def _get_mods_from_masses(  # noqa: PLR0912, C901 too many branches, too complex TODO: refactor
-    sequence: str, msf_aa_mods: List[str]
+    sequence: str,
+    msf_aa_mods: List[str],
+    mass_mapped_mods: List[str],
+    mod_mass_tol: float,
 ) -> Tuple[str, str, str, str]:
     mods = []
     mod_sites = []
@@ -134,7 +133,10 @@ class MSFraggerPepXML(PSMReaderBase):
             rt_unit=rt_unit,
             **kwargs,
         )
-        self.keep_unknown_aa_mass_diffs = keep_unknown_aa_mass_diffs
+        self._keep_unknown_aa_mass_diffs = keep_unknown_aa_mass_diffs
+        # TODO: should those be set via API, too?
+        self._mass_mapped_mods = psm_reader_yaml["msfragger_pepxml"]["mass_mapped_mods"]
+        self._mod_mass_tol = psm_reader_yaml["msfragger_pepxml"]["mod_mass_tol"]
 
     def _translate_modifications(self) -> None:
         pass
@@ -183,11 +185,16 @@ class MSFraggerPepXML(PSMReaderBase):
             self._psm_df[PsmDfCols.AA_MASS_DIFF_SITES],
         ) = zip(
             *origin_df[["peptide", "modifications"]].apply(
-                lambda x: _get_mods_from_masses(*x), axis=1
+                lambda x: _get_mods_from_masses(
+                    *x,
+                    mass_mapped_mods=self._mass_mapped_mods,
+                    mod_mass_tol=self._mod_mass_tol,
+                ),
+                axis=1,
             )
         )
 
-        if not self.keep_unknown_aa_mass_diffs:
+        if not self._keep_unknown_aa_mass_diffs:
             self._psm_df[PsmDfCols.TO_REMOVE] += (
                 self._psm_df[PsmDfCols.AA_MASS_DIFFS] != ""
             )

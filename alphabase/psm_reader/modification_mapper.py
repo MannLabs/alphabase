@@ -95,8 +95,8 @@ class ModificationMapper:
         ----------
         modification_mapping:
             If dictionary: the current modification_mapping will be overwritten by this.
-            If str: the parameter will be interpreted as a reader type, and the modification_mapping is read from the
-                "modification_mapping" section of the psm_reader_yaml
+            If str: the parameter will be interpreted as a modification_mapping_type, and the mapping is read from the
+                respective key in the "modification_mappings" section of the psm_reader_yaml
 
         """
         if modification_mapping is None:
