@@ -52,7 +52,6 @@ class AlphaPeptReader(PSMReaderBase):
     """Reader for AlphaPept's *.ms_data.hdf files."""
 
     _reader_type = "alphapept"
-    _modification_type = "alphapept"
 
     def _load_file(self, filename: str) -> pd.DataFrame:
         """Load an AlphaPept output file to a DataFrame."""
