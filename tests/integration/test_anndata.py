@@ -7,6 +7,7 @@ from pathlib import Path
 from alphabase.anndata.anndata_factory import AnnDataFactory
 from alphabase.tools.data_downloader import DataShareDownloader
 from tests.integration.test_psm_readers import (
+    TEST_DATA_DIANN,
     _assert_reference_df_equal,
 )
 
@@ -71,6 +72,7 @@ def test_anndata_diann_190():
             intensity_column="PG.MaxLFQ",
         )
 
+    factory = AnnDataFactory(reader.psm_df)
     adata = factory.create_anndata()
 
     # TODO compare the whole anndata object here not only the df
