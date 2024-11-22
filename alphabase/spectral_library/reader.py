@@ -9,12 +9,12 @@ from tqdm import tqdm
 from alphabase.constants._const import PEAK_INTENSITY_DTYPE
 from alphabase.peptide.mobility import mobility_to_ccs_for_df
 from alphabase.psm_reader.keys import LibPsmDfCols, PsmDfCols
-from alphabase.psm_reader.maxquant_reader import MaxQuantLikeReader
+from alphabase.psm_reader.maxquant_reader import ModifiedSequenceReader
 from alphabase.spectral_library.base import SpecLibBase
 from alphabase.utils import _get_delimiter
 
 
-class LibraryReaderBase(MaxQuantLikeReader, SpecLibBase):
+class LibraryReaderBase(ModifiedSequenceReader, SpecLibBase):
     """Base class for reading spectral libraries."""
 
     _reader_type = "library_reader_base"
@@ -97,7 +97,7 @@ class LibraryReaderBase(MaxQuantLikeReader, SpecLibBase):
             decoy=decoy,
         )
 
-        MaxQuantLikeReader.__init__(
+        ModifiedSequenceReader.__init__(
             self,
             column_mapping=column_mapping,
             modification_mapping=modification_mapping,

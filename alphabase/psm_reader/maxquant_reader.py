@@ -124,7 +124,7 @@ def parse_mod_seq(
     )
 
 
-class MaxQuantLikeReader(PSMReaderBase, ABC):
+class ModifiedSequenceReader(PSMReaderBase, ABC):
     """Reader for MaxQuant-like data."""
 
     _add_unimod_to_mod_mapping = True
@@ -202,7 +202,7 @@ class MaxQuantLikeReader(PSMReaderBase, ABC):
             self._psm_df[PsmDfCols.SEQUENCE] = seqs
 
 
-class MaxQuantReader(MaxQuantLikeReader):
+class MaxQuantReader(ModifiedSequenceReader):
     """Reader for MaxQuant data."""
 
     _reader_type = "maxquant"

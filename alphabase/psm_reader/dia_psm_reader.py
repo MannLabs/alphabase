@@ -4,11 +4,11 @@ import numpy as np
 import pandas as pd
 
 from alphabase.psm_reader.keys import PsmDfCols
-from alphabase.psm_reader.maxquant_reader import MaxQuantLikeReader
+from alphabase.psm_reader.maxquant_reader import ModifiedSequenceReader
 from alphabase.psm_reader.psm_reader import psm_reader_provider
 
 
-class SpectronautReader(MaxQuantLikeReader):
+class SpectronautReader(ModifiedSequenceReader):
     """Reader for Spectronaut's output library TSV/CSV."""
 
     _reader_type = "spectronaut"
@@ -35,7 +35,7 @@ class SwathReader(SpectronautReader):
     _add_unimod_to_mod_mapping = True
 
 
-class DiannReader(MaxQuantLikeReader):
+class DiannReader(ModifiedSequenceReader):
     """Reader for DIANN data."""
 
     _reader_type = "diann"
@@ -50,7 +50,7 @@ class DiannReader(MaxQuantLikeReader):
         super()._post_process()
 
 
-class SpectronautReportReader(MaxQuantLikeReader):
+class SpectronautReportReader(ModifiedSequenceReader):
     """Reader for Spectronaut's report TSV/CSV."""
 
     _reader_type = "spectronaut_report"
