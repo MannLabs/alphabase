@@ -108,7 +108,7 @@ class pFindReader(PSMReaderBase):  # noqa: N801 name `pFindReader` should use Ca
     def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
         """pFind-specific preprocessing of output data."""
         df.fillna("", inplace=True)
-        df = df[df.Sequence != ""]
+        df = df[df["Sequence"] != ""]
         df[PsmDfCols.RAW_NAME] = df["File_Name"].str.split(".").apply(lambda x: x[0])
         df["Proteins"] = df["Proteins"].apply(parse_pfind_protein)
         return df
