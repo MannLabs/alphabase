@@ -1,5 +1,6 @@
 """MSFragger reader."""
 
+import warnings
 from typing import List, Optional, Tuple
 
 import numpy as np
@@ -92,7 +93,7 @@ class MSFragger_PSM_TSV_Reader(PSMReaderBase):  # noqa: N801 name should use Cap
         raise NotImplementedError("MSFragger_PSM_TSV_Reader for psm.tsv")
 
 
-class MSFraggerPepXML(PSMReaderBase):
+class MSFraggerPepXMLReader(PSMReaderBase):
     """Reader for MSFragger's pep.xml file."""
 
     _reader_type = "msfragger_pepxml"
@@ -205,8 +206,21 @@ class MSFraggerPepXML(PSMReaderBase):
         super()._post_process()
 
 
+class MSFraggerPepXML(MSFraggerPepXMLReader):
+    """Deprecated."""
+
+    def __init__(self, *args, **kwargs):
+        """Deprecated."""
+        warnings.warn(
+            "MSFraggerPepXML is deprecated and will ne removed in alphabase>1.5.0.",
+            "Please use the equivalent MSFraggerPepXMLReader instead.",
+            FutureWarning,
+        )
+        super().__init__(*args, **kwargs)
+
+
 def register_readers() -> None:
     """Register MSFragger readers."""
     psm_reader_provider.register_reader("msfragger_psm_tsv", MSFragger_PSM_TSV_Reader)
     psm_reader_provider.register_reader("msfragger", MSFragger_PSM_TSV_Reader)
-    psm_reader_provider.register_reader("msfragger_pepxml", MSFraggerPepXML)
+    psm_reader_provider.register_reader("msfragger_pepxml", MSFraggerPepXMLReader)
