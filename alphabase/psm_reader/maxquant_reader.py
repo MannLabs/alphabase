@@ -20,7 +20,7 @@ warnings.filterwarnings("always")
 mod_to_unimod_dict = {}
 for mod_name, unimod_id in MOD_DF[["mod_name", "unimod_id"]].values:
     unimod_id = int(unimod_id)
-    if unimod_id == -1 or unimod_id == "-1":
+    if unimod_id in (-1, "-1"):
         continue
     if mod_name[-2] == "@":
         mod_to_unimod_dict[mod_name] = f"{mod_name[-1]}(UniMod:{unimod_id})"
@@ -55,7 +55,7 @@ def parse_mod_seq(
     mod_sep: str = "()",
     fixed_C57: bool = True,
 ) -> tuple:
-    """Extract modifications and sites from the modified sequence (modseq)
+    """Extract modifications and sites from the modified sequence (modseq).
 
     Parameters
     ----------
@@ -135,15 +135,15 @@ class MaxQuantReader(PSMReaderBase):
     def __init__(
         self,
         *,
-        column_mapping: dict = None,
-        modification_mapping: dict = None,
+        column_mapping: Optional[dict] = None,
+        modification_mapping: Optional[dict] = None,
         fdr=0.01,
         keep_decoy=False,
         fixed_C57=True,
         mod_seq_columns=None,
         **kwargs,
     ):
-        """Reader for MaxQuant msms.txt and evidence.txt
+        """Reader for MaxQuant msms.txt and evidence.txt.
 
         Parameters
         ----------
@@ -187,32 +187,34 @@ class MaxQuantReader(PSMReaderBase):
         self._mod_seq_columns = mod_seq_columns
         self.mod_seq_column = "Modified sequence"
 
-    def _find_mod_seq_column(self, df):
+    def _find_mod_seq_column(self, df) -> None:
         for mod_seq_col in self._mod_seq_columns:
             if mod_seq_col in df.columns:
                 self.mod_seq_column = mod_seq_col
                 break
 
-    def _init_modification_mapping(self):
+    def _init_modification_mapping(self) -> None:
         self.modification_mapping = copy.deepcopy(
             # otherwise maxquant reader will modify the dict inplace
             psm_reader_yaml["maxquant"]["modification_mapping"]
         )
 
-    def set_modification_mapping(self, modification_mapping: Optional[dict] = None):
+    def set_modification_mapping(
+        self, modification_mapping: Optional[dict] = None
+    ) -> None:
         super().set_modification_mapping(modification_mapping)
         self._add_all_unimod()
         self._extend_mod_brackets()
         self._reverse_mod_mapping()
 
-    def _add_all_unimod(self):
+    def _add_all_unimod(self) -> None:
         for mod_name, unimod in mod_to_unimod_dict.items():
             if mod_name in self.modification_mapping:
                 self.modification_mapping[mod_name].append(unimod)
             else:
                 self.modification_mapping[mod_name] = [unimod]
 
-    def _extend_mod_brackets(self):
+    def _extend_mod_brackets(self) -> None:
         """Update modification_mapping to include different bracket types."""
         for key, mod_list in list(self.modification_mapping.items()):
             mod_set = set(mod_list)
@@ -239,13 +241,13 @@ class MaxQuantReader(PSMReaderBase):
 
             self.modification_mapping[key] = list(mod_set)
 
-    def _translate_decoy(self, origin_df=None):
+    def _translate_decoy(self, origin_df=None) -> None:
         if PsmDfCols.DECOY in self._psm_df.columns:
             self._psm_df[PsmDfCols.DECOY] = (
                 self._psm_df[PsmDfCols.DECOY] == "-"
             ).astype(np.int8)
 
-    def _init_column_mapping(self):
+    def _init_column_mapping(self) -> None:
         self.column_mapping = psm_reader_yaml["maxquant"]["column_mapping"]
 
     def _load_file(self, filename):
@@ -273,7 +275,7 @@ class MaxQuantReader(PSMReaderBase):
         # min_rt = df['Retention time'].min()
         return df
 
-    def _load_modifications(self, origin_df: pd.DataFrame):
+    def _load_modifications(self, origin_df: pd.DataFrame) -> None:
         if origin_df[self.mod_seq_column].str.contains("[", regex=False).any():
             if origin_df[self.mod_seq_column].str.contains("(", regex=False).any():
                 origin_df[self.mod_seq_column] = origin_df[self.mod_seq_column].apply(
@@ -294,5 +296,5 @@ class MaxQuantReader(PSMReaderBase):
             self._psm_df[PsmDfCols.SEQUENCE] = seqs
 
 
-def register_readers():
+def register_readers() -> None:
     psm_reader_provider.register_reader("maxquant", MaxQuantReader)

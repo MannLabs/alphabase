@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 
 import h5py
 import numba
@@ -15,7 +16,7 @@ from alphabase.psm_reader.psm_reader import (
 
 @numba.njit
 def parse_ap(precursor):
-    """Parser to parse peptide strings"""
+    """Parser to parse peptide strings."""
     items = precursor.split("_")
     decoy = 1 if len(items) == 3 else 0
     modseq = items[0]
@@ -50,13 +51,13 @@ class AlphaPeptReader(PSMReaderBase):
     def __init__(
         self,
         *,
-        column_mapping: dict = None,
-        modification_mapping: dict = None,
+        column_mapping: Optional[dict] = None,
+        modification_mapping: Optional[dict] = None,
         fdr=0.01,
         keep_decoy=False,
         **kwargs,
     ):
-        """Reading PSMs from alphapept's *.ms_data.hdf"""
+        """Reading PSMs from alphapept's *.ms_data.hdf."""
         super().__init__(
             column_mapping=column_mapping,
             modification_mapping=modification_mapping,
@@ -66,10 +67,10 @@ class AlphaPeptReader(PSMReaderBase):
         )
         self.hdf_dataset = "identifications"
 
-    def _init_column_mapping(self):
+    def _init_column_mapping(self) -> None:
         self.column_mapping = psm_reader_yaml["alphapept"]["column_mapping"]
 
-    def _init_modification_mapping(self):
+    def _init_modification_mapping(self) -> None:
         self.modification_mapping = psm_reader_yaml["alphapept"]["modification_mapping"]
 
     def _load_file(self, filename):
@@ -85,7 +86,7 @@ class AlphaPeptReader(PSMReaderBase):
             df[PsmDfCols.CHARGE] = df[PsmDfCols.CHARGE].astype(int)
         return df
 
-    def _load_modifications(self, df: pd.DataFrame):
+    def _load_modifications(self, df: pd.DataFrame) -> None:
         if len(df) == 0:
             self._psm_df[PsmDfCols.SEQUENCE] = ""
             self._psm_df[PsmDfCols.MODS] = ""
@@ -103,5 +104,5 @@ class AlphaPeptReader(PSMReaderBase):
         self._psm_df[PsmDfCols.DECOY] = self._psm_df[PsmDfCols.DECOY].astype(np.int8)
 
 
-def register_readers():
+def register_readers() -> None:
     psm_reader_provider.register_reader("alphapept", AlphaPeptReader)

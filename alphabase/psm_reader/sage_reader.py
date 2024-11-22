@@ -187,7 +187,7 @@ class SageModificationTranslation:
             logging.warning(
                 f"UniMod lookup failed for mass {row['modification']} at position {row['previous_aa']}, will be removed."
             )
-        translation_df = pd.concat(
+        return pd.concat(
             [
                 translation_df,
                 discovered_modifications_df[
@@ -195,8 +195,6 @@ class SageModificationTranslation:
                 ],
             ]
         )
-
-        return translation_df
 
 
 def _discover_modifications(psm_df: pd.DataFrame) -> pd.DataFrame:
@@ -461,7 +459,7 @@ def _apply_translate_modifications_mp(
     mp_process_num: int = 10,
     progress_bar: bool = True,
 ) -> pd.DataFrame:
-    """Apply translate modifications with multiprocessing
+    """Apply translate modifications with multiprocessing.
 
     Parameters
     ----------
@@ -553,8 +551,8 @@ class SageReaderBase(PSMReaderBase):
     def __init__(
         self,
         *,
-        column_mapping: dict = None,
-        modification_mapping: dict = None,
+        column_mapping: typing.Optional[dict] = None,
+        modification_mapping: typing.Optional[dict] = None,
         fdr=0.01,
         keep_decoy=False,
         rt_unit="second",
@@ -574,19 +572,19 @@ class SageReaderBase(PSMReaderBase):
             **kwargs,
         )
 
-    def _init_column_mapping(self):
+    def _init_column_mapping(self) -> None:
         self.column_mapping = psm_reader_yaml["sage"]["column_mapping"]
 
-    def _load_file(self, filename):
+    def _load_file(self, filename) -> typing.NoReturn:
         raise NotImplementedError
 
-    def _transform_table(self, origin_df):
+    def _transform_table(self, origin_df) -> None:
         self._psm_df[PsmDfCols.SPEC_IDX] = self._psm_df[PsmDfCols.SCANNR].apply(
             _sage_spec_idx_from_scan_nr
         )
         self._psm_df.drop(columns=[PsmDfCols.SCANNR], inplace=True)
 
-    def _translate_decoy(self, origin_df):
+    def _translate_decoy(self, origin_df) -> None:
         if not self._keep_decoy:
             self._psm_df = self._psm_df[~self._psm_df[PsmDfCols.DECOY]]
 
@@ -603,10 +601,10 @@ class SageReaderBase(PSMReaderBase):
             columns=[PsmDfCols.PEPTIDE_FDR, PsmDfCols.PROTEIN_FDR], inplace=True
         )
 
-    def _load_modifications(self, origin_df):
+    def _load_modifications(self, origin_df) -> None:
         pass
 
-    def _translate_modifications(self):
+    def _translate_modifications(self) -> None:
         sage_translation = SageModificationTranslation(
             custom_translation_df=self.custom_translation_df,
             mp_process_num=self.mp_process_num,
@@ -633,6 +631,6 @@ class SageReaderParquet(SageReaderBase):
         return pd.read_parquet(filename)
 
 
-def register_readers():
+def register_readers() -> None:
     psm_reader_provider.register_reader("sage_tsv", SageReaderTSV)
     psm_reader_provider.register_reader("sage_parquet", SageReaderParquet)

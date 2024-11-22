@@ -1,7 +1,7 @@
 class ConstantsClass(type):
     """A metaclass for classes that should only contain string constants."""
 
-    def __setattr__(self, name, value):
+    def __setattr__(cls, name, value):
         raise TypeError("Constants class cannot be modified")
 
     def get_values(cls):

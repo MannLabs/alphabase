@@ -1,3 +1,5 @@
+from typing import Optional
+
 import numpy as np
 import pandas as pd
 from pyteomics import pepxml
@@ -80,8 +82,8 @@ class MSFragger_PSM_TSV_Reader(PSMReaderBase):
     def __init__(
         self,
         *,
-        column_mapping: dict = None,
-        modification_mapping: dict = None,
+        column_mapping: Optional[dict] = None,
+        modification_mapping: Optional[dict] = None,
         fdr=0.01,
         keep_decoy=False,
         rt_unit="second",
@@ -94,8 +96,8 @@ class MSFraggerPepXML(PSMReaderBase):
     def __init__(
         self,
         *,
-        column_mapping: dict = None,
-        modification_mapping: dict = None,
+        column_mapping: Optional[dict] = None,
+        modification_mapping: Optional[dict] = None,
         fdr=0.001,  # refers to E-value in the PepXML
         keep_decoy=False,
         rt_unit="second",
@@ -113,10 +115,10 @@ class MSFraggerPepXML(PSMReaderBase):
         )
         self.keep_unknown_aa_mass_diffs = keep_unknown_aa_mass_diffs
 
-    def _init_column_mapping(self):
+    def _init_column_mapping(self) -> None:
         self.column_mapping = psm_reader_yaml["msfragger_pepxml"]["column_mapping"]
 
-    def _translate_modifications(self):
+    def _translate_modifications(self) -> None:
         pass
 
     def _load_file(self, filename):
@@ -131,7 +133,7 @@ class MSFraggerPepXML(PSMReaderBase):
         self.column_mapping[PsmDfCols.TO_REMOVE] = "to_remove"
         return msf_df
 
-    def _translate_decoy(self, origin_df=None):
+    def _translate_decoy(self, origin_df=None) -> None:
         self._psm_df[PsmDfCols.DECOY] = (
             self._psm_df[PsmDfCols.PROTEINS].apply(_is_fragger_decoy).astype(np.int8)
         )
@@ -142,11 +144,11 @@ class MSFraggerPepXML(PSMReaderBase):
         if not self._keep_decoy:
             self._psm_df[PsmDfCols.TO_REMOVE] += self._psm_df[PsmDfCols.DECOY] > 0
 
-    def _translate_score(self, origin_df=None):
+    def _translate_score(self, origin_df=None) -> None:
         # evalue score
         self._psm_df[PsmDfCols.SCORE] = -np.log(self._psm_df[PsmDfCols.SCORE] + 1e-100)
 
-    def _load_modifications(self, msf_df):
+    def _load_modifications(self, msf_df) -> None:
         if len(msf_df) == 0:
             self._psm_df[PsmDfCols.MODS] = ""
             self._psm_df[PsmDfCols.MOD_SITES] = ""
@@ -174,7 +176,7 @@ class MSFraggerPepXML(PSMReaderBase):
                 inplace=True,
             )
 
-    def _post_process(self, origin_df: pd.DataFrame):
+    def _post_process(self, origin_df: pd.DataFrame) -> None:
         super()._post_process(origin_df)
         self._psm_df = (
             self._psm_df.query(f"{PsmDfCols.TO_REMOVE}==0")
@@ -183,7 +185,7 @@ class MSFraggerPepXML(PSMReaderBase):
         )
 
 
-def register_readers():
+def register_readers() -> None:
     psm_reader_provider.register_reader("msfragger_psm_tsv", MSFragger_PSM_TSV_Reader)
     psm_reader_provider.register_reader("msfragger", MSFragger_PSM_TSV_Reader)
     psm_reader_provider.register_reader("msfragger_pepxml", MSFraggerPepXML)
