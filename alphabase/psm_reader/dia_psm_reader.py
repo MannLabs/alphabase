@@ -43,10 +43,11 @@ class DiannReader(MaxQuantLikeReader):
     _min_max_rt_norm = False
 
     def _post_process(self) -> None:
-        super()._post_process()
         self._psm_df.rename(
             columns={PsmDfCols.SPEC_IDX: PsmDfCols.DIANN_SPEC_INDEX}, inplace=True
         )
+
+        super()._post_process()
 
 
 class SpectronautReportReader(MaxQuantLikeReader):

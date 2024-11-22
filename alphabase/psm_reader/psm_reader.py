@@ -226,7 +226,6 @@ class PSMReaderBase(ABC):
 
             origin_df = self._pre_process(origin_df)
             self._translate_columns(origin_df)  # only here
-            self._transform_table()  # only sage
             self._translate_decoy()  # only sage, mq, msfragger, pfind
             self._translate_score()  # only msfragger, pfind
             self._load_modifications(
@@ -272,19 +271,11 @@ class PSMReaderBase(ABC):
         ):
             self._psm_df[PsmDfCols.SPEC_IDX] = self._psm_df[PsmDfCols.SCAN_NUM] - 1
 
-    def _transform_table(self) -> None:  # noqa: B027 empty method in an abstract base class
-        """Transform the dataframe format if needed, ddd information inplace into self._psm_df.
-
-        Usually only needed in combination with spectral libraries.
-        """
-
     def _translate_decoy(self) -> None:  # noqa: B027 empty method in an abstract base class
-        pass
+        """Translate decoy information to AlphaBase format, adding information inplace into self._psm_df."""
 
     def _translate_score(self) -> None:  # noqa: B027 empty method in an abstract base class
-        # some scores are evalue/pvalue, it should be translated
-        # to -log(evalue), as score is the larger the better
-        pass
+        """Translate score information to AlphaBase format, adding information inplace into self._psm_df."""
 
     def _load_modifications(self, origin_df: pd.DataFrame) -> None:  # noqa: B027 empty method in an abstract base class
         """Read modification information from 'origin_df'.

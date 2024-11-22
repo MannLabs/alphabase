@@ -612,12 +612,6 @@ class SageReaderBase(PSMReaderBase, ABC):
         self.custom_translation_df = custom_translation_df
         self.mp_process_num = mp_process_num
 
-    def _transform_table(self) -> None:
-        self._psm_df[PsmDfCols.SPEC_IDX] = self._psm_df[PsmDfCols.SCANNR].apply(
-            _sage_spec_idx_from_scan_nr
-        )
-        self._psm_df.drop(columns=[PsmDfCols.SCANNR], inplace=True)
-
     def _translate_decoy(self) -> None:
         if not self._keep_decoy:
             self._psm_df = self._psm_df[~self._psm_df[PsmDfCols.DECOY]]
@@ -644,6 +638,14 @@ class SageReaderBase(PSMReaderBase, ABC):
 
         # drop modified_sequence
         self._psm_df.drop(columns=[PsmDfCols.MODIFIED_SEQUENCE], inplace=True)
+
+    def _post_process(self) -> None:
+        self._psm_df[PsmDfCols.SPEC_IDX] = self._psm_df[PsmDfCols.SCANNR].apply(
+            _sage_spec_idx_from_scan_nr
+        )
+        self._psm_df.drop(columns=[PsmDfCols.SCANNR], inplace=True)
+
+        super()._post_process()
 
 
 class SageReaderTSV(SageReaderBase):
