@@ -4,7 +4,7 @@ from abc import ABC
 
 import pandas as pd
 
-from alphabase.psm_reader import PSMReaderBase, psm_reader_provider
+from alphabase.psm_reader.psm_reader import PSMReaderBase, psm_reader_provider
 
 
 class AlphaDiaReader(PSMReaderBase, ABC):

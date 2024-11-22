@@ -19,7 +19,7 @@ alphadia:
     'fdr': 'fdr'
     'mods': 'mods'
     'intensity': 'intensity'
-modification_mapping_type: 'maxquant' # TODO: None?
+  modification_mapping_type: 'maxquant' # TODO: None?
 
 alphapept:
   reader_type: alphapept
