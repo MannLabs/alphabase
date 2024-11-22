@@ -42,14 +42,6 @@ class DiannReader(MaxQuantLikeReader):
     _add_unimod_to_mod_mapping = True
     _min_max_rt_norm = False
 
-    def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
-        """DIANN-specific preprocessing of output data.
-
-        Nothing to do for DIANN, still method of superclass needs to be overwritten.
-        TODO disentangle the inheritance structure.
-        """
-        return df
-
     def _post_process(self) -> None:
         super()._post_process()
         self._psm_df.rename(
