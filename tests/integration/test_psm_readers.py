@@ -222,7 +222,10 @@ test_data_path = Path(f"{current_file_directory}/reference_data")
 
 
 def _assert_reference_df_equal(
-    psm_df: pd.DataFrame, test_case_name: str, loose_check: bool = False
+    psm_df: pd.DataFrame,
+    test_case_name: str,
+    loose_check: bool = False,
+    check_psf_df_columns=True,
 ) -> None:
     """Compare the output of a PSM reader against reference data.
 
@@ -232,12 +235,13 @@ def _assert_reference_df_equal(
     # psm_df.to_csv(test_data_path / f"reference_{test_case_name}.csv")
 
     # check that all columns are available in PsmDfCols
-    assert (
-        set(psm_df.columns)
-        - set(PsmDfCols.get_values())
-        - set(LibPsmDfCols.get_values())
-        == set()
-    )
+    if check_psf_df_columns:
+        assert (
+            set(psm_df.columns)
+            - set(PsmDfCols.get_values())
+            - set(LibPsmDfCols.get_values())
+            == set()
+        )
 
     if out_file_path.exists():
         expected_df = pd.read_parquet(out_file_path)
