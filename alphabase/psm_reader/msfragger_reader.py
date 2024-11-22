@@ -167,7 +167,7 @@ class MSFraggerPepXML(PSMReaderBase):
             self._psm_df[PsmDfCols.TO_REMOVE] += self._psm_df[PsmDfCols.DECOY] > 0
 
     def _translate_score(self) -> None:
-        # evalue score
+        """Translate MSFragger evalue to AlphaBase score: the larger the better."""
         self._psm_df[PsmDfCols.SCORE] = -np.log(self._psm_df[PsmDfCols.SCORE] + 1e-100)
 
     def _load_modifications(self, origin_df: pd.DataFrame) -> None:

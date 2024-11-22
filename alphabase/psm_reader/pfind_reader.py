@@ -119,6 +119,7 @@ class pFindReader(PSMReaderBase):  # noqa: N801 name `pFindReader` should use Ca
         ).astype(np.int8)
 
     def _translate_score(self) -> None:
+        """Translate pFind pvalue to AlphaBase score: the larger the better."""
         self._psm_df[PsmDfCols.SCORE] = -np.log(
             self._psm_df[PsmDfCols.SCORE].astype(float) + 1e-100
         )
