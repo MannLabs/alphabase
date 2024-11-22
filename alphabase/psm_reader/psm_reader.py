@@ -232,7 +232,7 @@ class PSMReaderBase(ABC):
                 origin_df
             )  # only sage, mq, msfragger, pfind, alphapept
             self._translate_modifications()  # here, sage, msfragger, pfind
-            self._post_process()  # here, libraryreader, diann, msfragger
+            self._post_process(origin_df)  # here, libraryreader, diann, msfragger
         return self._psm_df
 
     def _load_file(self, filename: str) -> pd.DataFrame:
@@ -304,12 +304,14 @@ class PSMReaderBase(ABC):
                 f"Unknown modifications: {unknown_mod_set}. Precursors with unknown modifications will be removed."
             )
 
-    def _post_process(self) -> None:
+    def _post_process(self, origin_df: pd.DataFrame) -> None:
         """Set 'nAA' columns, remove unknown modifications and perform other post processings.
 
         E.g. get 'rt_norm', remove decoys, filter FDR...
 
         """
+        del origin_df  # unused, only here for backwards compatibility in alphapeptdeep
+
         # TODO: this method is doing a lot!
         self._psm_df[PsmDfCols.NAA] = self._psm_df[PsmDfCols.SEQUENCE].str.len()
 

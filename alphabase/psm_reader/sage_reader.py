@@ -640,13 +640,13 @@ class SageReaderBase(PSMReaderBase, ABC):
         # drop modified_sequence
         self._psm_df.drop(columns=[PsmDfCols.MODIFIED_SEQUENCE], inplace=True)
 
-    def _post_process(self) -> None:
+    def _post_process(self, origin_df: pd.DataFrame) -> None:
         self._psm_df[PsmDfCols.SPEC_IDX] = self._psm_df[PsmDfCols.SCANNR].apply(
             _sage_spec_idx_from_scan_nr
         )
         self._psm_df.drop(columns=[PsmDfCols.SCANNR], inplace=True)
 
-        super()._post_process()
+        super()._post_process(origin_df)
 
 
 class SageReaderTSV(SageReaderBase):

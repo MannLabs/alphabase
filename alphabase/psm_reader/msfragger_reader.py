@@ -197,13 +197,13 @@ class MSFraggerPepXMLReader(PSMReaderBase):
                 inplace=True,
             )
 
-    def _post_process(self) -> None:
+    def _post_process(self, origin_df: pd.DataFrame) -> None:
         self._psm_df = (
             self._psm_df.query(f"{PsmDfCols.TO_REMOVE}==0")
             .drop(columns=PsmDfCols.TO_REMOVE)
             .reset_index(drop=True)
         )
-        super()._post_process()
+        super()._post_process(origin_df)
 
 
 class MSFraggerPepXML(MSFraggerPepXMLReader):

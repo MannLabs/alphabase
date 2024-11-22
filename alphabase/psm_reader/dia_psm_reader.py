@@ -42,12 +42,12 @@ class DiannReader(ModifiedSequenceReader):
     _add_unimod_to_mod_mapping = True
     _min_max_rt_norm = False
 
-    def _post_process(self) -> None:
+    def _post_process(self, origin_df: pd.DataFrame) -> None:
         self._psm_df.rename(
             columns={PsmDfCols.SPEC_IDX: PsmDfCols.DIANN_SPEC_INDEX}, inplace=True
         )
 
-        super()._post_process()
+        super()._post_process(origin_df)
 
 
 class SpectronautReportReader(ModifiedSequenceReader):
