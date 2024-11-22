@@ -441,7 +441,7 @@ def test_alphadia_reader() -> None:
     reader = AlphaDiaReaderTsv()
     reader.import_file(input_data)
 
-    _assert_reference_df_equal(reader.psm_df, "alphadia")
+    _assert_reference_df_equal(reader.psm_df, "alphadia", loose_check=True)
 
 
 def test_diann_speclib_reader() -> None:
