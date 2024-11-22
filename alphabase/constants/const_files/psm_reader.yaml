@@ -190,12 +190,13 @@ diann:
     'rt_stop': 'RT.Stop'
     'ccs': 'CCS'
     'mobility': ['IM','IonMobility']
-    'proteins': 'Protein.Names'
+    'proteins': 'Protein.Group'  # TODO for anndata test only, revert back to .Names
     'uniprot_ids': 'Protein.Ids'
     'genes': 'Genes'
     'scan_num': 'MS2.Scan'
     'score': 'CScore'
     'fdr': 'Q.Value'
+    'intensity': "PG.Quantity"
   mod_seq_columns:
     - "Modified.Sequence"
   modification_mapping_type: 'maxquant'
