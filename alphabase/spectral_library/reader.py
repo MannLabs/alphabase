@@ -9,12 +9,12 @@ from tqdm import tqdm
 from alphabase.constants._const import PEAK_INTENSITY_DTYPE
 from alphabase.peptide.mobility import mobility_to_ccs_for_df
 from alphabase.psm_reader.keys import LibPsmDfCols, PsmDfCols
-from alphabase.psm_reader.maxquant_reader import MaxQuantReader
+from alphabase.psm_reader.maxquant_reader import MaxQuantLikeReader
 from alphabase.spectral_library.base import SpecLibBase
 from alphabase.utils import _get_delimiter
 
 
-class LibraryReaderBase(MaxQuantReader, SpecLibBase):
+class LibraryReaderBase(MaxQuantLikeReader, SpecLibBase):
     """Base class for reading spectral libraries."""
 
     _reader_type = "library_reader_base"
@@ -97,7 +97,7 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
             decoy=decoy,
         )
 
-        MaxQuantReader.__init__(
+        MaxQuantLikeReader.__init__(
             self,
             column_mapping=column_mapping,
             modification_mapping=modification_mapping,
@@ -271,14 +271,6 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
                 "null",
             ],
         )
-
-    def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Library-specific preprocessing of output data.
-
-        Nothing to do here, still method of superclass needs to be overwritten.
-        TODO disentangle the inheritance structure.
-        """
-        return df
 
     def _post_process(
         self,
