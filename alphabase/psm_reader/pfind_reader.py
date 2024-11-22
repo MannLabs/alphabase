@@ -125,18 +125,10 @@ class pFindReader(PSMReaderBase):  # noqa: N801 name `pFindReader` should use Ca
         )
 
     def _load_modifications(self, origin_df: pd.DataFrame) -> None:
-        if len(origin_df) == 0:
-            self._psm_df[PsmDfCols.MODS] = ""
-            self._psm_df[PsmDfCols.MOD_SITES] = ""
-            return
+        mods, mod_sites = zip(*origin_df["Modification"].apply(get_pFind_mods))
 
-        (self._psm_df[PsmDfCols.MODS], self._psm_df[PsmDfCols.MOD_SITES]) = zip(
-            *origin_df["Modification"].apply(get_pFind_mods)
-        )
-
-        self._psm_df[PsmDfCols.MODS] = self._psm_df[PsmDfCols.MODS].apply(
-            translate_pFind_mod
-        )
+        self._psm_df[PsmDfCols.MODS] = [translate_pFind_mod(mod) for mod in mods]
+        self._psm_df[PsmDfCols.MOD_SITES] = mod_sites
 
 
 def register_readers() -> None:

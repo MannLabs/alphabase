@@ -613,6 +613,7 @@ class SageReaderBase(PSMReaderBase, ABC):
         self.mp_process_num = mp_process_num
 
     def _translate_decoy(self) -> None:
+        # TODO: this is not doing what the name pretends, plus there's a redundancy with post_process
         if not self._keep_decoy:
             self._psm_df = self._psm_df[~self._psm_df[PsmDfCols.DECOY]]
 

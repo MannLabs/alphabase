@@ -310,6 +310,7 @@ class PSMReaderBase(ABC):
         E.g. get 'rt_norm', remove decoys, filter FDR...
 
         """
+        # TODO: this method is doing a lot!
         self._psm_df[PsmDfCols.NAA] = self._psm_df[PsmDfCols.SEQUENCE].str.len()
 
         self.normalize_rt_by_raw_name()

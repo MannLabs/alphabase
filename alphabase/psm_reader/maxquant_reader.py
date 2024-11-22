@@ -188,13 +188,16 @@ class MaxQuantLikeReader(PSMReaderBase, ABC):
         else:
             mod_sep = "()"
 
-        (seqs, self._psm_df[PsmDfCols.MODS], self._psm_df[PsmDfCols.MOD_SITES]) = zip(
+        seqs, mods, mod_sites = zip(
             *origin_df[self.mod_seq_column].apply(
                 parse_mod_seq,
                 mod_sep=mod_sep,
                 fixed_C57=self.fixed_C57,
             )
         )
+
+        self._psm_df[PsmDfCols.MODS] = mods
+        self._psm_df[PsmDfCols.MOD_SITES] = mod_sites
         if PsmDfCols.SEQUENCE not in self._psm_df.columns:
             self._psm_df[PsmDfCols.SEQUENCE] = seqs
 
