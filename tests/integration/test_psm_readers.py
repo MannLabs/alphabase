@@ -9,6 +9,7 @@ import io
 import os
 from io import StringIO
 from pathlib import Path
+from unittest import skip
 
 import pandas as pd
 import pytest
@@ -25,6 +26,7 @@ from alphabase.psm_reader import (
 )
 from alphabase.psm_reader.keys import LibPsmDfCols, PsmDfCols
 from alphabase.spectral_library.reader import LibraryReaderBase
+from alphabase.test_data_downloader import DataShareDownloader
 
 TEST_DATA_MAXQUANT = """Raw file	Scan number	Scan index	Sequence	Length	Missed cleavages	Modifications	Modified sequence	Oxidation (M) Probabilities	Oxidation (M) Score diffs	Acetyl (Protein_N-term)	Oxidation (M)	Proteins	Charge	Fragmentation	Mass analyzer	Type	Scan event number	Isotope index	m/z	Mass	Mass error [ppm]	Mass error [Da]	Simple mass error [ppm]	Retention time	PEP	Score	Delta score	Score diff	Localization prob	Combinatorics	PIF	Fraction of total spectrum	Base peak fraction	Precursor full scan number	Precursor Intensity	Precursor apex fraction	Precursor apex offset	Precursor apex offset time	Matches	Intensities	Mass deviations [Da]	Mass deviations [ppm]	Masses	Number of matches	Intensity coverage	Peak coverage	Neutral loss level	ETD identification type	Reverse	All scores	All sequences	All modified sequences	Reporter PIF	Reporter fraction	id	Protein group IDs	Peptide ID	Mod. peptide ID	Evidence ID	Oxidation (M) site IDs
     20190402_QX1_SeVW_MA_HeLa_500ng_LC11	81358	73979	AAAAAAAAAPAAAATAPTTAATTAATAAQ	29	0	Unmodified	_(Acetyl (Protein_N-term))AAAAAAAAM(Oxidation (M))PAAAATAPTTAATTAATAAQ_			0	0	sp|P37108|SRP14_HUMAN	3	HCD	FTMS	MULTI-MSMS	13	1	790.07495	2367.203	0.35311	0.00027898	-0.061634807	70.261	0.012774	41.423	36.666	NaN	NaN	1	0	0	0	81345	10653955	0.0338597821787898	-11	0.139877319335938	y1;y2;y3;y4;y11;y1-NH3;y2-NH3;a2;b2;b3;b4;b5;b6;b7;b8;b9;b11;b12;b6(2+);b8(2+);b13(2+);b18(2+)	2000000;2000000;300000;400000;200000;1000000;400000;300000;600000;1000000;2000000;3000000;3000000;3000000;3000000;2000000;600000;500000;1000000;2000000;300000;200000	5.2861228709844E-06;-6.86980268369553E-05;-0.00238178789771837;0.000624715964988809;-0.0145624692099773;-0.000143471782706683;-0.000609501446461991;-0.000524972720768346;0.00010190530804266;5.8620815195809E-05;0.000229901232955854;-0.000108750048696038;-0.000229593152369034;0.00183148682538103;0.00276641182404092;0.000193118923334623;0.00200988580445483;0.000102216846016745;5.86208151389656E-05;0.000229901232955854;-0.00104559184393338;0.00525030008475369	0.0359413365445091;-0.314964433555295;-8.23711898839045;1.60102421155213;-14.8975999917227;-1.10320467763838;-3.03102462870716;-4.56152475051625;0.712219104095465;0.273777366204575;0.806231096969562;-0.305312183824154;-0.537399178230218;3.67572664689217;4.85930954169285;0.301587577451224;2.48616190909398;0.116225745519871;0.273777365939099;0.806231096969562;-2.19774169175011;7.53961026980589	147.076413378177;218.113601150127;289.153028027798;390.197699998035;977.50437775671;130.050013034583;201.087592852046;115.087114392821;143.081402136892;214.118559209185;285.155501716567;356.192954155649;427.230188786552;498.265241494374;569.301420357176;640.341107437877;808.429168310795;879.468189767554;214.118559209185;285.155501716567;475.757386711244;696.362265007215	22	0.262893575628735	0.0826446280991736	None	Unknown		41.4230894199432;4.75668724862449;3.9515580701967	AAAAAAAAAPAAAATAPTTAATTAATAAQ;FHRGPPDKDDMVSVTQILQGK;PVTLWITVTHMQADEVSVWR	_AAAAAAAAAPAAAATAPTTAATTAATAAQ_;_FHRGPPDKDDMVSVTQILQGK_;_PVTLWITVTHMQADEVSVWR_			0	1443	0	0	0
@@ -296,6 +298,34 @@ def test_diann_reader() -> None:
     _assert_reference_df_equal(reader.psm_df, "diann")
 
 
+def test_diann_181_tsv_reader() -> None:
+    """Test the Diann reader with extended input from v1.8.1."""
+
+    url = "https://datashare.biochem.mpg.de/s/Hk41INtwBvBl0kP/download?files=diann_1.8.1_report_head.tsv"
+    file_path = DataShareDownloader(
+        url=url, output_dir=current_file_directory + "/input_data/"
+    ).download()
+
+    reader = DiannReader()
+    reader.import_file(file_path)
+
+    _assert_reference_df_equal(reader.psm_df, "diann_1.8.1_tsv")
+
+
+def test_diann_190_tsv_reader() -> None:
+    """Test the Diann reader with extended input from v1.9.0."""
+
+    url = "https://datashare.biochem.mpg.de/s/Hk41INtwBvBl0kP/download?files=diann_1.9.0_report_head.tsv"
+    file_path = DataShareDownloader(
+        url=url, output_dir=current_file_directory + "/input_data/"
+    ).download()
+
+    reader = DiannReader()
+    reader.import_file(file_path)
+
+    _assert_reference_df_equal(reader.psm_df, "diann_1.9.0_tsv")
+
+
 def test_spectronaut_reader() -> None:
     """Test the Spectronaut reader."""
     input_data = StringIO(TEST_DATA_SPECTRONAUT)
@@ -304,6 +334,21 @@ def test_spectronaut_reader() -> None:
     reader.import_file(input_data)
 
     _assert_reference_df_equal(reader.psm_df, "spectronaut")
+
+
+@skip  # TODO currently not working due to missing column EG.PrecursorId in input data
+def test_spectronaut_report_reader_186() -> None:
+    """Test the Spectronaut report reader with extended input from v18.6."""
+
+    url = "https://datashare.biochem.mpg.de/s/Hk41INtwBvBl0kP/download?files=spectronaut_18.6_report_head.tsv"
+    file_path = DataShareDownloader(
+        url=url, output_dir=current_file_directory + "/input_data/"
+    ).download()
+
+    reader = SpectronautReportReader()
+    reader.import_file(file_path)
+
+    _assert_reference_df_equal(reader.psm_df, "spectronaut_18.6_report")
 
 
 def test_spectronaut_reader_with_mod() -> None:
