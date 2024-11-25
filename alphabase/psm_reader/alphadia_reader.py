@@ -29,6 +29,6 @@ class AlphaDiaReaderParquet(AlphaDiaReader):
 
 
 def register_readers() -> None:
-    """Register MaxQuant reader."""
+    """Register AlphaDIA reader."""
     psm_reader_provider.register_reader("alphadia", AlphaDiaReaderTsv)
     psm_reader_provider.register_reader("alphadia_parquet", AlphaDiaReaderParquet)
