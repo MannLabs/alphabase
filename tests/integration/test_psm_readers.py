@@ -444,6 +444,20 @@ def test_alphadia_reader() -> None:
     _assert_reference_df_equal(reader.psm_df, "alphadia", loose_check=True)
 
 
+def test_alphadia_reader_181() -> None:
+    """Test the AlphaDIA reader with extended input from v1.8.1."""
+
+    url = "https://datashare.biochem.mpg.de/s/Hk41INtwBvBl0kP/download?files=alphadia_1.8.1_report_head.tsv"
+    file_path = DataShareDownloader(
+        url=url, output_dir=current_file_directory + "/input_data/"
+    ).download()
+
+    reader = AlphaDiaReaderTsv()
+    reader.import_file(file_path)
+
+    _assert_reference_df_equal(reader.psm_df, "alphadia_1.8.1_tsv", loose_check=True)
+
+
 def test_diann_speclib_reader() -> None:
     """Test the Diann speclib reader."""
     # this is the head of  "https://datashare.biochem.mpg.de/s/DF12ObSdZnBnqUV" ("diann_speclib.tsv")

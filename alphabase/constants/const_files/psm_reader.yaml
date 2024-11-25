@@ -6,7 +6,7 @@ alphadia:
     'raw_name': 'run'
     'sequence': 'sequence'
     'charge': 'charge'
-    'rt': 'rt'
+    'rt': 'rt_observed'
     'rt_start': 'rt_start'
     'rt_stop': 'rt_stop'
     'ccs': 'ccs'
