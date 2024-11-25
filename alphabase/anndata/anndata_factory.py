@@ -1,11 +1,12 @@
 """Factory class to convert PSM DataFrames to AnnData format."""
 
-from typing import List, Union
+from typing import List, Optional, Union
 
 import anndata as ad
 import numpy as np
 import pandas as pd
 
+from alphabase.psm_reader import PSMReaderBase  # noqa: TCH001
 from alphabase.psm_reader.keys import PsmDfCols
 
 
@@ -62,7 +63,14 @@ class AnnDataFactory:
 
     @classmethod
     def from_files(
-        cls, file_paths: Union[str, List[str]], reader_type: str = "maxquant", **kwargs
+        cls,
+        file_paths: Union[str, List[str]],
+        reader_type: str = "maxquant",
+        *,
+        intensity_column: Optional[str] = None,
+        protein_id_column: Optional[str] = None,
+        raw_name_column: Optional[str] = None,
+        **kwargs,
     ) -> "AnnDataFactory":
         """Create AnnDataFactory from PSM files.
 
@@ -72,6 +80,12 @@ class AnnDataFactory:
             Path(s) to PSM file(s)
         reader_type : str, optional
             Type of PSM reader to use, by default "maxquant"
+        intensity_column: str, optional
+            Name of the column storing intensity data. Default is taken from `psm_reader.yaml`
+        protein_id_column: str, optional
+            Name of the column storing proteins ids. Default is taken from `psm_reader.yaml`
+        raw_name_column: str, optional
+            Name of the column storing raw (or run) name. Default is taken from `psm_reader.yaml`
         **kwargs
             Additional arguments passed to PSM reader
 
@@ -83,9 +97,20 @@ class AnnDataFactory:
         """
         from alphabase.psm_reader.psm_reader import psm_reader_provider
 
-        # TODO: add option to specify column names via API
+        reader: PSMReaderBase = psm_reader_provider.get_reader(reader_type, **kwargs)
 
-        reader = psm_reader_provider.get_reader(reader_type, **kwargs)
+        custom_column_mapping = {
+            k: v
+            for k, v in {
+                PsmDfCols.INTENSITY: intensity_column if intensity_column else None,
+                PsmDfCols.PROTEINS: protein_id_column if protein_id_column else None,
+                PsmDfCols.RAW_NAME: raw_name_column if raw_name_column else None,
+            }.items()
+            if v is not None
+        }
+
+        if custom_column_mapping:
+            reader.add_column_mapping(custom_column_mapping)
 
         psm_df = reader.load(file_paths)
         return cls(psm_df)

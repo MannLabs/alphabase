@@ -198,6 +198,10 @@ class PSMReaderBase(ABC):
         """
         self._modification_mapper.set_modification_mapping(modification_mapping)
 
+    def add_column_mapping(self, column_mapping: Dict) -> None:
+        """Add additional column mappings for the search engine."""
+        self.column_mapping = self.column_mapping | column_mapping
+
     def load(self, _file: Union[List[str], str]) -> pd.DataFrame:
         """Import a single file or multiple files."""
         if isinstance(_file, list):
