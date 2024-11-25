@@ -149,6 +149,11 @@ class PSMReaderBase(ABC):
         self._keep_fdr = fdr
         self._keep_decoy = keep_decoy
 
+        self._precursor_id_columns = psm_reader_yaml[self._reader_type].get(
+            "precursor_id_columns", []
+        )
+        self._precursor_id_column = None
+
         self._rt_unit = (
             rt_unit
             if rt_unit is not None
@@ -222,7 +227,12 @@ class PSMReaderBase(ABC):
 
         if len(origin_df):
             # TODO: think about dropping the 'inplace' pattern here
-            self.mod_seq_column = self._get_mod_seq_column(origin_df)
+            self.mod_seq_column = self._get_actual_column(
+                self._mod_seq_columns, origin_df
+            )
+            self._precursor_id_column = self._get_actual_column(
+                self._precursor_id_columns, origin_df
+            )
 
             origin_df = self._pre_process(origin_df)
             self._translate_columns(origin_df)  # only here
@@ -244,11 +254,15 @@ class PSMReaderBase(ABC):
         sep = _get_delimiter(filename)
         return pd.read_csv(filename, sep=sep, keep_default_na=False)
 
-    def _get_mod_seq_column(self, origin_df: pd.DataFrame) -> Optional[str]:
-        """Get the first column from `_mod_seq_columns` that is a column of `df`."""
-        for mod_seq_col in self._mod_seq_columns:
-            if mod_seq_col in origin_df.columns:
-                return mod_seq_col
+    def _get_actual_column(
+        self,
+        column_list: List[str],
+        df: pd.DataFrame,
+    ) -> Optional[str]:
+        """Get the first column from `column_list` that is a column of `df`."""
+        for column in column_list:
+            if column in df.columns:
+                return column
         return None
         # TODO: warn if there's more
 

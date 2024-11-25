@@ -60,7 +60,7 @@ class SpectronautReportReader(ModifiedSequenceReader):
     def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
         """Spectronaut report-specific preprocessing of output data."""
         df[[self.mod_seq_column, PsmDfCols.CHARGE]] = df[
-            "EG.PrecursorId"  # TODO: move to yaml
+            self._precursor_id_column
         ].str.split(".", expand=True, n=2)
         df[PsmDfCols.CHARGE] = df[PsmDfCols.CHARGE].astype(np.int8)
         return df
