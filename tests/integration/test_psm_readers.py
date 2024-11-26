@@ -327,9 +327,6 @@ def test_diann_190_tsv_reader() -> None:
     reader = DiannReader()
     reader.import_file(file_path)
 
-    reader.psm_df.to_parquet(
-        "/home/runner/work/alphabase/alphabase/alphabase/reference_diann_1.9.0_new.parquet"
-    )
     _assert_reference_df_equal(reader.psm_df, "diann_1.9.0_tsv", loose_check=True)
 
 
