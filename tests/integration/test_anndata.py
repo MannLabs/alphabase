@@ -54,7 +54,7 @@ def test_anndata_diann_181():
     )
 
 
-def test_anndata_diann_1901():
+def test_anndata_diann_190():
     """Test creating anndata from diann files."""
     # Create directly from files
     url = "https://datashare.biochem.mpg.de/s/Hk41INtwBvBl0kP/download?files=diann_1.9.0_report_head.tsv"

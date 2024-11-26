@@ -69,7 +69,7 @@ def test_create_anndata_with_missing_intensity_values():
 
 
 def test_create_anndata_with_duplicate_proteins():
-    """Test that intensity values for duplicate proteins in the same raw file are aggregated."""
+    """Test that intensity values for duplicate proteins in the same raw file are aggregated correctly."""
     psm_df = pd.DataFrame(
         {
             PsmDfCols.RAW_NAME: ["raw1", "raw1", "raw2"],
@@ -86,8 +86,9 @@ def test_create_anndata_with_duplicate_proteins():
     assert adata.obs_names.tolist() == ["raw1", "raw2"]
     assert adata.var_names.tolist() == ["protein1"]
     assert np.array_equal(
-        adata.X, np.array([[150], [300]])
-    )  # mean of 100 and 200 is 150
+        adata.X,
+        np.array([[100], [300]]),  # first is taken
+    )
 
 
 def test_create_anndata_with_empty_dataframe():
