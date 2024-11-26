@@ -7,7 +7,6 @@ from pathlib import Path
 from alphabase.anndata.anndata_factory import AnnDataFactory
 from alphabase.tools.data_downloader import DataShareDownloader
 from tests.integration.test_psm_readers import (
-    TEST_DATA_DIANN,
     _assert_reference_df_equal,
 )
 
@@ -48,6 +47,15 @@ def test_anndata_diann_181():
             protein_id_column="Protein.Group",
             intensity_column="PG.MaxLFQ",
         )
+    url = "https://datashare.biochem.mpg.de/s/Hk41INtwBvBl0kP/download?files=diann_1.8.1_report_head.tsv"
+    with tempfile.TemporaryDirectory() as temp_dir:
+        file_path = DataShareDownloader(url=url, output_dir=temp_dir).download()
+
+        factory = AnnDataFactory.from_files(
+            file_paths=file_path,
+            reader_type="diann",
+            intensity_column="PG.Quantity",
+        )
 
     adata = factory.create_anndata()
 
@@ -72,7 +80,12 @@ def test_anndata_diann_190():
             intensity_column="PG.MaxLFQ",
         )
 
-    factory = AnnDataFactory(reader.psm_df)
+        factory = AnnDataFactory.from_files(
+            file_paths=file_path,
+            reader_type="diann",
+            intensity_column="PG.Quantity",
+        )
+
     adata = factory.create_anndata()
 
     # TODO compare the whole anndata object here not only the df
