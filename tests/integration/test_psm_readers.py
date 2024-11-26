@@ -269,6 +269,7 @@ def _assert_reference_df_equal(
 
     else:
         psm_df.to_parquet(out_file_path)
+        # convenience for local development: on the second run, the reference data is available
         raise ValueError("No reference data found.")
 
 
