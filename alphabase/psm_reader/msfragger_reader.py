@@ -150,7 +150,7 @@ class MSFraggerPepXMLReader(PSMReaderBase):
         """MsFragger-specific preprocessing of output data."""
         df.fillna("", inplace=True)
         if "ion_mobility" in df.columns:
-            df["ion_mobility"] = df.ion_mobility.astype(float)
+            df["ion_mobility"] = df["ion_mobility"].astype(float)
         df[PsmDfCols.RAW_NAME] = df["spectrum"].str.split(".").apply(lambda x: x[0])
         df["to_remove"] = 0  # TODO: revisit
         self.column_mapping[PsmDfCols.TO_REMOVE] = "to_remove"

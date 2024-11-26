@@ -300,12 +300,13 @@ class PSMReaderBase(ABC):
 
     def _translate_modifications(self) -> None:
         """Translate modifications to AlphaBase format."""
-        self._psm_df[PsmDfCols.MODS], unknown_mods = zip(
+        mods, unknown_mods = zip(
             *self._psm_df[PsmDfCols.MODS].apply(
                 translate_modifications,
                 mod_dict=self._modification_mapper.rev_mod_mapping,
             )
         )
+        self._psm_df[PsmDfCols.MODS] = mods
 
         # accumulate unknown mods
         unknown_mod_set = set()
