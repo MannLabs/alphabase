@@ -59,7 +59,7 @@ class PsmDfCols(metaclass=ConstantsClass):
     _QUERY_ID = "query_id"
 
     # part of psm_reader_yaml, but not directly referenced
-    _INTENSITY = "intensity"
+    INTENSITY = "intensity"
 
 
 class LibPsmDfCols(metaclass=ConstantsClass):
