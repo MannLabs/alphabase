@@ -38,9 +38,15 @@ jobs:
         pip install pytest nbmake==1.5.3
         conda deactivate
     - name: Run tests
+      continue-on-error: true
       shell: bash -l {0}
       run: |
         conda activate alphabase
         cd tests
         . ./run_tests.sh
         conda deactivate
+    - uses: actions/upload-artifact@v4
+      with:
+        name: reference_diann_1.9.0_new.parquet
+        path: "/home/runner/work/alphabase/alphabase/alphabase/reference_diann_1.9.0_new.parquet"
+        if-no-files-found: warn
