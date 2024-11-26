@@ -1,5 +1,6 @@
 """Factory class to convert PSM DataFrames to AnnData format."""
 
+import warnings
 from typing import List, Optional, Union
 
 import anndata as ad
@@ -32,6 +33,12 @@ class AnnDataFactory:
 
         self._psm_df = psm_df
 
+        duplicated_proteins = self._psm_df[PsmDfCols.PROTEINS].duplicated()
+        if duplicated_proteins.sum() > 0:
+            warnings.warn(
+                f"Found {duplicated_proteins.sum()} duplicated protein groups. Using only first."
+            )
+
     def create_anndata(self) -> ad.AnnData:
         """Create AnnData object from PSM DataFrame.
 
@@ -50,7 +57,7 @@ class AnnDataFactory:
             index=PsmDfCols.RAW_NAME,
             columns=PsmDfCols.PROTEINS,
             values=PsmDfCols.INTENSITY,
-            aggfunc=np.nanmean,  # how to aggregate intensities for same protein in same raw file TODO first?
+            aggfunc="first",
             fill_value=np.nan,
             dropna=False,
         )
