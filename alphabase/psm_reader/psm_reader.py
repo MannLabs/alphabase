@@ -149,6 +149,11 @@ class PSMReaderBase(ABC):
         self._keep_fdr = fdr
         self._keep_decoy = keep_decoy
 
+        self._precursor_id_columns = psm_reader_yaml[self._reader_type].get(
+            "precursor_id_columns", []
+        )
+        self._precursor_id_column = None
+
         self._rt_unit = (
             rt_unit
             if rt_unit is not None
@@ -222,18 +227,22 @@ class PSMReaderBase(ABC):
 
         if len(origin_df):
             # TODO: think about dropping the 'inplace' pattern here
-            self.mod_seq_column = self._get_mod_seq_column(origin_df)
+            self.mod_seq_column = self._get_actual_column(
+                self._mod_seq_columns, origin_df
+            )
+            self._precursor_id_column = self._get_actual_column(
+                self._precursor_id_columns, origin_df
+            )
 
             origin_df = self._pre_process(origin_df)
             self._translate_columns(origin_df)  # only here
-            self._transform_table()  # only sage
             self._translate_decoy()  # only sage, mq, msfragger, pfind
             self._translate_score()  # only msfragger, pfind
             self._load_modifications(
                 origin_df
             )  # only sage, mq, msfragger, pfind, alphapept
             self._translate_modifications()  # here, sage, msfragger, pfind
-            self._post_process()  # here, libraryreader, diann, msfragger
+            self._post_process(origin_df)  # here, libraryreader, diann, msfragger
         return self._psm_df
 
     def _load_file(self, filename: str) -> pd.DataFrame:
@@ -245,11 +254,15 @@ class PSMReaderBase(ABC):
         sep = _get_delimiter(filename)
         return pd.read_csv(filename, sep=sep, keep_default_na=False)
 
-    def _get_mod_seq_column(self, origin_df: pd.DataFrame) -> Optional[str]:
-        """Get the first column from `_mod_seq_columns` that is a column of `df`."""
-        for mod_seq_col in self._mod_seq_columns:
-            if mod_seq_col in origin_df.columns:
-                return mod_seq_col
+    def _get_actual_column(
+        self,
+        column_list: List[str],
+        df: pd.DataFrame,
+    ) -> Optional[str]:
+        """Get the first column from `column_list` that is a column of `df`."""
+        for column in column_list:
+            if column in df.columns:
+                return column
         return None
         # TODO: warn if there's more
 
@@ -272,19 +285,11 @@ class PSMReaderBase(ABC):
         ):
             self._psm_df[PsmDfCols.SPEC_IDX] = self._psm_df[PsmDfCols.SCAN_NUM] - 1
 
-    def _transform_table(self) -> None:  # noqa: B027 empty method in an abstract base class
-        """Transform the dataframe format if needed, ddd information inplace into self._psm_df.
-
-        Usually only needed in combination with spectral libraries.
-        """
-
     def _translate_decoy(self) -> None:  # noqa: B027 empty method in an abstract base class
-        pass
+        """Translate decoy information to AlphaBase format, adding information inplace into self._psm_df."""
 
     def _translate_score(self) -> None:  # noqa: B027 empty method in an abstract base class
-        # some scores are evalue/pvalue, it should be translated
-        # to -log(evalue), as score is the larger the better
-        pass
+        """Translate score information to AlphaBase format, adding information inplace into self._psm_df."""
 
     def _load_modifications(self, origin_df: pd.DataFrame) -> None:  # noqa: B027 empty method in an abstract base class
         """Read modification information from 'origin_df'.
@@ -313,12 +318,15 @@ class PSMReaderBase(ABC):
                 f"Unknown modifications: {unknown_mod_set}. Precursors with unknown modifications will be removed."
             )
 
-    def _post_process(self) -> None:
+    def _post_process(self, origin_df: pd.DataFrame) -> None:
         """Set 'nAA' columns, remove unknown modifications and perform other post processings.
 
         E.g. get 'rt_norm', remove decoys, filter FDR...
 
         """
+        del origin_df  # unused, only here for backwards compatibility in alphapeptdeep
+
+        # TODO: this method is doing a lot!
         self._psm_df[PsmDfCols.NAA] = self._psm_df[PsmDfCols.SEQUENCE].str.len()
 
         self.normalize_rt_by_raw_name()

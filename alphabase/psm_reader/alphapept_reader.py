@@ -76,21 +76,15 @@ class AlphaPeptReader(PSMReaderBase):
         df[PsmDfCols.CHARGE] = df[PsmDfCols.CHARGE].astype(int)
         return df
 
-    def _load_modifications(self, df: pd.DataFrame) -> None:
-        if len(df) == 0:
-            self._psm_df[PsmDfCols.SEQUENCE] = ""
-            self._psm_df[PsmDfCols.MODS] = ""
-            self._psm_df[PsmDfCols.MOD_SITES] = ""
-            self._psm_df[PsmDfCols.DECOY] = 0
-            return
-
+    def _load_modifications(self, origin_df: pd.DataFrame) -> None:
         (
             self._psm_df[PsmDfCols.SEQUENCE],
             self._psm_df[PsmDfCols.MODS],
             self._psm_df[PsmDfCols.MOD_SITES],
             _charges,
             self._psm_df[PsmDfCols.DECOY],
-        ) = zip(*df["precursor"].apply(parse_ap))
+        ) = zip(*origin_df["precursor"].apply(parse_ap))
+
         self._psm_df[PsmDfCols.DECOY] = self._psm_df[PsmDfCols.DECOY].astype(np.int8)
 
 

@@ -21,6 +21,7 @@ exclude = [
     "alphabase/peptide/*.py",
     "alphabase/io/*.py",
     "alphabase/constants/*.py",
+    "alphabase/tools/*.py",
     "**/spectral_library/validate.py",
     "**/spectral_library/translate.py",
     "**/spectral_library/flat.py",
