@@ -220,8 +220,11 @@ def _assert_reference_df_equal(
         # TODO find out why some results differ in order on github runner
         if loose_check:
             # check that the data is the same, but ignore the order
-            psm_df = psm_df.sort_values(by=["rt"]).reset_index(drop=True)
-            expected_df = expected_df.sort_values(by=["rt"]).reset_index(drop=True)
+            columns_to_sort_by = ["rt", "raw_name"]
+            psm_df = psm_df.sort_values(by=columns_to_sort_by).reset_index(drop=True)
+            expected_df = expected_df.sort_values(by=columns_to_sort_by).reset_index(
+                drop=True
+            )
 
         pd.testing.assert_frame_equal(psm_df, expected_df, check_like=loose_check)
     else:
