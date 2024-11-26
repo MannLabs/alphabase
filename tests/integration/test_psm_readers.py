@@ -217,7 +217,7 @@ def _assert_reference_df_equal(
     if out_file_path.exists():
         expected_df = pd.read_parquet(out_file_path)
 
-        # TODO find out why some results differ in order on github runner
+        # TODO find out why some results differ in order on the github runner
         if loose_check:
             # check that the data is the same, but ignore the order
             columns_to_sort_by = ["rt", "raw_name"]
