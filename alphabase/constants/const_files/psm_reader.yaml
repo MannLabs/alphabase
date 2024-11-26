@@ -185,7 +185,7 @@ diann:
   rt_unit: minute
   fixed_C57: False
   column_mapping:
-    'raw_name': 'Run'
+    'raw_name': 'Run' # File.Name?
     'sequence': 'Stripped.Sequence'
     'charge': 'Precursor.Charge'
     'rt': 'RT'
@@ -193,13 +193,13 @@ diann:
     'rt_stop': 'RT.Stop'
     'ccs': 'CCS'
     'mobility': ['IM','IonMobility']
-    'proteins': 'Protein.Names'
+    'proteins': 'Protein.Names' # Protein.Group ?
     'uniprot_ids': 'Protein.Ids'
     'genes': 'Genes'
     'scan_num': 'MS2.Scan'
     'score': 'CScore'
     'fdr': 'Q.Value'
-#    'intensity': "PG.Quantity"
+#    'intensity': "PG.MaxLFQ"
   mod_seq_columns:
     - "Modified.Sequence"
   modification_mapping_type: 'maxquant'
