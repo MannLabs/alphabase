@@ -1,8 +1,8 @@
-API 
+API
 ===
 
 
-Peptides 
+Peptides
 --------
 
 .. toctree::
@@ -29,7 +29,7 @@ Spectral Library
    modules_spectral_library
 
 
-Reader 
+Reader
 ------
 
 .. toctree::
@@ -53,4 +53,3 @@ Constants
    :maxdepth: 2
 
    modules_constants
-

@@ -9,7 +9,7 @@ Users
 
 Users can install AlphaBase as a Python package in an existing Python environment.
 
-::  
+::
 
     ## Optional: create a python environment
     # conda create -n alphabase python=3.9
@@ -27,9 +27,9 @@ Development version
 -------------------
 For development, clone the latest version from GitHub to an appropriate location on your personal device and install an editable version:
 
-:: 
+::
 
-    ## Optional: Create development environment 
+    ## Optional: Create development environment
     # conda create -n alphabase_dev python=3.9
     # conda activate alphabase_dev
 
@@ -37,5 +37,5 @@ For development, clone the latest version from GitHub to an appropriate location
     git clone https://github.com/MannLabs/alphabase.git
     cd alphabase
 
-    # Install editable development version 
+    # Install editable development version
     pip install -e "./alphabase[development]"
