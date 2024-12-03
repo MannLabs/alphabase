@@ -3,7 +3,7 @@ AlphaBase
 
 **Utility functions for the robust analysis of proteomics data**
 
-The infrastructure of AlphaX ecosystem for MS proteomics, originally published as part of the ``alphapeptdeep`` package [Zeng2022]_.
+The infrastructure of AlphaX ecosystem for MS proteomics [Zeng2022]_.
 For more information, see AlphaBase on `GitHub <https://github.com/MannLabs/alphabase/>`_.
 
 
