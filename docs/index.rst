@@ -10,7 +10,7 @@ For more information, see AlphaBase on `GitHub <https://github.com/MannLabs/alph
 ..
    Overview
    --------
-   Add a more detailed overview of the package and the purpose. 
+   Add a more detailed overview of the package and the purpose. Add overview of ecosystem.
 
 
 Table of Contents
@@ -25,8 +25,8 @@ Table of Contents
 
    api
 
-   .. 
+   ..
 
-      contributing 
+      contributing
 
    references
