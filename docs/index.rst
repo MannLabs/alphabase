@@ -20,3 +20,5 @@ Table of Contents
    :maxdepth: 1
 
    notebooks
+
+   api
