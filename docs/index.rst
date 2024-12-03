@@ -19,6 +19,8 @@ Table of Contents
 .. toctree::
    :maxdepth: 1
 
+   installation
+
    notebooks
 
    api
