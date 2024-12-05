@@ -49,6 +49,10 @@ maxquant:
     'intensity': 'Intensity'
 
   modification_mapping:
+    'mTRAQ@K':
+      - 'K(mTRAQ)'
+    'mTRAQ@Any_N-term':
+      - '(mTRAQ)'
     'Dimethyl@K':
       - 'K(Dimethyl)'
     'Dimethyl@R':
@@ -131,7 +135,6 @@ msfragger_pepxml:
     'query_id': 'spectrum'
     'scan_num': 'start_scan'
     'score': 'expect'
-    'fdr': 'expect'
     'proteins': 'protein'
     'raw_name': 'raw_name'
     'mobility': 'ion_mobility'
