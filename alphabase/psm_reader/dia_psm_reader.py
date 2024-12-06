@@ -21,7 +21,7 @@ class SpectronautReader(MaxQuantReader):
 
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913 many arguments in function definition
         self,
         *,
         column_mapping: Optional[dict] = None,
@@ -66,7 +66,7 @@ class SpectronautReader(MaxQuantReader):
 
 
 class SwathReader(SpectronautReader):
-    def __init__(
+    def __init__(  # noqa: PLR0913 many arguments in function definition
         self,
         *,
         column_mapping: Optional[dict] = None,
@@ -90,7 +90,7 @@ class SwathReader(SpectronautReader):
 
 
 class DiannReader(SpectronautReader):
-    def __init__(
+    def __init__(  # noqa: PLR0913 many arguments in function definition
         self,
         *,
         column_mapping: Optional[dict] = None,
@@ -144,7 +144,7 @@ class SpectronautReportReader(MaxQuantReader):
 
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913 many arguments in function definition
         self,
         *,
         column_mapping: Optional[dict] = None,
