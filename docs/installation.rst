@@ -12,11 +12,11 @@ Users can install AlphaBase as a Python package in an existing Python environmen
 ::
 
     ## Optional: create a python environment
-    # conda create -n alphabase python=3.9
+    # conda create -n alphabase python=3.9 -y && conda activate alphabase
 
     pip install alphabase
 
-To enforce stringent dependencies, you can install the stable version of AlphaBase
+To enforce stringent dependencies (recommended), you can install the stable version of AlphaBase
 
 ::
 
@@ -30,12 +30,11 @@ For development, clone the latest version from GitHub to an appropriate location
 ::
 
     ## Optional: Create development environment
-    # conda create -n alphabase_dev python=3.9
-    # conda activate alphabase_dev
+    # conda create -n alphabase_dev python=3.9 -y && conda activate alphabase_dev
 
     # Clone repository
     git clone https://github.com/MannLabs/alphabase.git
     cd alphabase
 
     # Install editable development version
-    pip install -e "./alphabase[development]"
+    pip install -e ".[development]"
