@@ -38,6 +38,6 @@ Chemical structures
 .. toctree::
    :maxdepth: 1
 
-   nbs/adding_smiles
-   nbs/peptide_smiles
    nbs/tutorial_smiles
+   nbs/peptide_smiles
+   nbs/adding_smiles
