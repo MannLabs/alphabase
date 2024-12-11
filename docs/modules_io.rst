@@ -5,4 +5,4 @@ alphabase.io
    :maxdepth: 1
 
    io/hdf
-.. io/tempmmap
+   io/tempmmap
