@@ -12,3 +12,6 @@ Tutorials and notebooks about how to use AlphaBase.
    nbs/library_from_fasta
    nbs/psm_readers
    nbs/library_reader
+   nbs/adding_smiles
+   nbs/peptide_smiles
+   nbs/tutorial_smiles
