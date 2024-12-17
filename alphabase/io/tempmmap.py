@@ -305,7 +305,7 @@ def _clear() -> None:
     global _TEMP_DIR, TEMP_DIR_NAME
 
     if _TEMP_DIR is not None:
-        logging.warning(
+        logging.info(
             f"Temporary folder {TEMP_DIR_NAME} with memory-mapped arrays is being deleted. "
             "All existing memory-mapped arrays will be unusable!"
         )
