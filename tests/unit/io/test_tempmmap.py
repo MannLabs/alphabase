@@ -41,6 +41,8 @@ def test_create_array():
     arr[1, 1] = 1
     assert arr[1, 1] == 1
 
+    assert tempmmap._TEMP_DIR is not None
+
 
 def test_create_array_with_custom_temp_dir():
     tempmmap = sys.modules["alphabase.io.tempmmap"]
@@ -48,10 +50,40 @@ def test_create_array_with_custom_temp_dir():
     with tempfile.TemporaryDirectory() as temp_dir:
         # when
         arr = tempmmap.array((5, 5), np.int32, tmp_dir_abs_path=temp_dir)
-        assert arr.shape == (5, 5)
-        assert arr.dtype == np.int32
-        assert arr[1, 1] == 0
 
-        # test rw access to array
-        arr[1, 1] = 1
-        assert arr[1, 1] == 1
+    assert arr.shape == (5, 5)
+    assert arr.dtype == np.int32
+    assert arr[1, 1] == 0
+
+    # test rw access to array
+    arr[1, 1] = 1
+    assert arr[1, 1] == 1
+
+    assert tempmmap._TEMP_DIR is not None
+    assert temp_dir == tempmmap.TEMP_DIR_NAME
+
+
+def test_create_zeros():
+    """Test creating and accessing an array of zeros."""
+    tempmmap = sys.modules["alphabase.io.tempmmap"]
+
+    # when
+    arr = tempmmap.zeros((5, 5), np.int32)
+    assert arr[1, 1] == 0
+    assert arr.shape == (5, 5)
+    assert arr.dtype == np.int32
+
+    assert tempmmap._TEMP_DIR is not None
+
+
+def test_create_ones():
+    """Test creating and accessing an array of ones."""
+    tempmmap = sys.modules["alphabase.io.tempmmap"]
+
+    # when
+    arr = tempmmap.ones((5, 5), np.int32)
+    assert arr[1, 1] == 1
+    assert arr.shape == (5, 5)
+    assert arr.dtype == np.int32
+
+    assert tempmmap._TEMP_DIR is not None
