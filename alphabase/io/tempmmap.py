@@ -149,18 +149,18 @@ def array(shape: tuple, dtype: np.dtype, tmp_dir_abs_path: str = None) -> np.nda
         _change_temp_dir_location(tmp_dir_abs_path)
         temp_dir_name = tmp_dir_abs_path
 
-    temp_file_name = os.path.join(
+    temp_file_path = os.path.join(
         temp_dir_name, f"temp_mmap_{np.random.randint(2**63, dtype=np.int64)}.hdf"
     )
 
-    with h5py.File(temp_file_name, "w") as hdf_file:
+    with h5py.File(temp_file_path, "w") as hdf_file:
         created_array = hdf_file.create_dataset("array", shape=shape, dtype=dtype)
         created_array[0] = (
             np.string_("") if isinstance(dtype, np.dtypes.StrDType) else 0
         )
         offset = created_array.id.get_offset()
 
-    with open(temp_file_name, "rb+") as raw_hdf_file:
+    with open(temp_file_path, "rb+") as raw_hdf_file:
         mmap_obj = mmap.mmap(raw_hdf_file.fileno(), 0, access=mmap.ACCESS_WRITE)
 
         return np.frombuffer(
