@@ -311,6 +311,7 @@ def _clear() -> None:
         )
 
         del _TEMP_DIR
+        _TEMP_DIR = None
         TEMP_DIR_NAME = None
 
 

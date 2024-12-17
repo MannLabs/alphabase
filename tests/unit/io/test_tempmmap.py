@@ -22,9 +22,8 @@ def teardown_function(function):
     tempmmap = sys.modules["alphabase.io.tempmmap"]
     tempmmap._clear()  # simulating @atexit.register
 
-    # # later:
-    # assert tempmmap._TEMP_DIR is None
-    # assert tempmmap.TEMP_DIR_NAME is None
+    assert tempmmap._TEMP_DIR is None
+    assert tempmmap.TEMP_DIR_NAME is None
 
     del sys.modules["alphabase.io.tempmmap"]
 
