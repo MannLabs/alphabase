@@ -47,6 +47,7 @@ def test_create_array():
 
 
 def test_create_array_with_custom_temp_dir():
+    """Test creating and accessing an array with custom temp dir."""
     tempmmap = sys.modules["alphabase.io.tempmmap"]
 
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -66,6 +67,7 @@ def test_create_array_with_custom_temp_dir():
 
 
 def test_mmap_array_from_path():
+    """Test reconnecting to an existing array."""
     tempmmap = sys.modules["alphabase.io.tempmmap"]
 
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -108,7 +110,7 @@ def test_create_empty():
 
 
 def test_create_empty_with_custom_temp_dir():
-    """Test creating and accessing an empty array."""
+    """Test creating and accessing an empty array with custom temp dir."""
     tempmmap = sys.modules["alphabase.io.tempmmap"]
 
     # when
@@ -131,7 +133,7 @@ def test_create_empty_with_custom_temp_dir():
 
 
 def test_create_empty_with_custom_file_path():
-    """Test creating and accessing an empty array."""
+    """Test creating and accessing an empty array with custom file path."""
     tempmmap = sys.modules["alphabase.io.tempmmap"]
 
     # when
@@ -155,7 +157,7 @@ def test_create_empty_with_custom_file_path():
 
 
 def test_create_empty_with_custom_file_path_error_cases():
-    """Test creating and accessing an empty array."""
+    """Test creating and accessing an empty array: error cases."""
     tempmmap = sys.modules["alphabase.io.tempmmap"]
 
     # when
