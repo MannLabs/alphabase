@@ -85,14 +85,16 @@ def _get_file_location(abs_file_path: str, overwrite=False) -> str:
 
     # ensure that the filename conforms to the naming convention
     if not os.path.basename(abs_file_path).endswith(".hdf"):
-        raise ValueError("The chosen file name needs to end with .hdf")
+        raise ValueError(
+            f"The chosen file name '{os.path.basename(abs_file_path)}' needs to end with .hdf"
+        )
 
     # ensure that the directory in which the file should be created exists
     if os.path.isdir(os.path.dirname(abs_file_path)):
         return abs_file_path
     else:
         raise ValueError(
-            f"The directory {os.path.commonpath(abs_file_path)} in which the file should be created does not exist."
+            f"The directory '{os.path.dirname(abs_file_path)}' in which the file should be created does not exist."
         )
 
 
@@ -221,13 +223,15 @@ def create_empty_mmap(
             TEMP_DIR_NAME, f"temp_mmap_{np.random.randint(2**63, dtype=np.int64)}.hdf"
         )
     else:
-        temp_file_name = _get_file_location(file_path, overwrite=False)
+        temp_file_name = _get_file_location(
+            file_path, overwrite=False
+        )  # TODO overwrite=overwrite
 
     with h5py.File(temp_file_name, "w") as hdf_file:
         array = hdf_file.create_dataset("array", shape=shape, dtype=dtype)
         array[0] = np.string_("") if isinstance(dtype, np.dtypes.StrDType) else 0
 
-    return temp_file_name
+    return temp_file_name  # TODO temp_file_path
 
 
 def mmap_array_from_path(hdf_file: str) -> np.ndarray:

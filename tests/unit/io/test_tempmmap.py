@@ -9,6 +9,7 @@ import sys
 import tempfile
 
 import numpy as np
+import pytest
 
 
 def setup_function(function):
@@ -85,6 +86,91 @@ def test_mmap_array_from_path():
 
         arr[1, 1] = 3
         assert reconnected_arr[1, 1] == 3
+
+
+def test_create_empty():
+    """Test creating and accessing an empty array."""
+    tempmmap = sys.modules["alphabase.io.tempmmap"]
+
+    # when
+    file_path = tempmmap.create_empty_mmap((5, 5), np.float32)
+    arr = tempmmap.mmap_array_from_path(file_path)
+
+    assert arr[1, 1] == 0
+    assert arr.shape == (5, 5)
+    assert arr.dtype == np.float32
+
+    # test rw access to array
+    arr[1, 1] = 1
+    assert arr[1, 1] == 1
+
+    assert tempmmap._TEMP_DIR is not None
+
+
+def test_create_empty_with_custom_temp_dir():
+    """Test creating and accessing an empty array."""
+    tempmmap = sys.modules["alphabase.io.tempmmap"]
+
+    # when
+    with tempfile.TemporaryDirectory() as temp_dir:
+        file_path = tempmmap.create_empty_mmap(
+            (5, 5), np.float32, tmp_dir_abs_path=temp_dir
+        )
+        arr = tempmmap.mmap_array_from_path(file_path)
+
+        assert arr[1, 1] == 0
+        assert arr.shape == (5, 5)
+        assert arr.dtype == np.float32
+
+        # test rw access to array
+        arr[1, 1] = 1
+        assert arr[1, 1] == 1
+
+        assert tempmmap._TEMP_DIR is not None
+        assert temp_dir == tempmmap.TEMP_DIR_NAME
+
+
+def test_create_empty_with_custom_file_path():
+    """Test creating and accessing an empty array."""
+    tempmmap = sys.modules["alphabase.io.tempmmap"]
+
+    # when
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp_file_path = f"{temp_dir}/temp_mmap.hdf"
+        file_path = tempmmap.create_empty_mmap(
+            (5, 5), np.float32, file_path=temp_file_path
+        )
+        arr = tempmmap.mmap_array_from_path(file_path)
+
+        assert arr[1, 1] == 0
+        assert arr.shape == (5, 5)
+        assert arr.dtype == np.float32
+
+        # test rw access to array
+        arr[1, 1] = 1
+        assert arr[1, 1] == 1
+
+        assert tempmmap._TEMP_DIR is not None
+        assert temp_dir != tempmmap.TEMP_DIR_NAME
+
+
+def test_create_empty_with_custom_file_path_error_cases():
+    """Test creating and accessing an empty array."""
+    tempmmap = sys.modules["alphabase.io.tempmmap"]
+
+    # when
+    temp_file_path = "temp_dir/temp_mmap.hdfx"
+    with pytest.raises(
+        ValueError, match="The chosen file name 'temp_mmap.hdfx' needs to end with .hdf"
+    ):
+        _ = tempmmap.create_empty_mmap((5, 5), np.float32, file_path=temp_file_path)
+
+    temp_file_path = "/temp_dir/temp_mmap.hdf"
+    with pytest.raises(
+        ValueError,
+        match="The directory '/temp_dir' in which the file should be created does not exist.",
+    ):
+        _ = tempmmap.create_empty_mmap((5, 5), np.float32, file_path=temp_file_path)
 
 
 def test_create_zeros():
