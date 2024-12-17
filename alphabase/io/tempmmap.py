@@ -25,14 +25,14 @@ def _init_temp_dir(prefix: str = "temp_mmap_") -> str:
         TEMP_DIR_NAME = _TEMP_DIR.name
 
         logging.info(
-            f"Temporary memory-mapped arrays are written to {TEMP_DIR_NAME}. "
+            f"Temp mmap arrays are written to {TEMP_DIR_NAME}. "
             "Cleanup of this folder is OS dependent and might need to be triggered manually!"
         )
 
     return TEMP_DIR_NAME
 
 
-def _change_temp_dir_location(abs_path: str) -> None:
+def _change_temp_dir_location(abs_path: str) -> str:
     """
     Check if the directory to which the temp arrays should be written exists, if so defines this as the new temp dir location. If not raise a value error.
 
@@ -314,7 +314,7 @@ def _clear() -> None:
 
     if _TEMP_DIR is not None:
         logging.warning(
-            f"Folder {TEMP_DIR_NAME} with temporary memory-mapped arrays is being deleted. "
+            f"Folder {TEMP_DIR_NAME} with temp mmap arrays is being deleted. "
             "All existing temp mmapp arrays will be unusable!"
         )
 
