@@ -51,7 +51,7 @@ def _change_temp_dir_location(abs_path: str) -> None:
         if os.path.isdir(abs_path):
             TEMP_DIR_NAME = abs_path
         else:
-            raise ValueError(f"The path '{abs_path} 'does not point to a directory.")
+            raise ValueError(f"The path '{abs_path}' does not point to a directory.")
     else:
         raise ValueError(
             f"The directory '{abs_path}' in which the file should be created does not exist."
@@ -214,9 +214,7 @@ def create_empty_mmap(
             temp_dir_name, f"temp_mmap_{np.random.randint(2**63, dtype=np.int64)}.hdf"
         )
     else:
-        temp_file_name = _get_file_location(
-            file_path, overwrite=False
-        )  # TODO overwrite=overwrite
+        temp_file_name = _get_file_location(file_path, overwrite=overwrite)
 
     with h5py.File(temp_file_name, "w") as hdf_file:
         created_array = hdf_file.create_dataset("array", shape=shape, dtype=dtype)
