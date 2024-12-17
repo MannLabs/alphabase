@@ -51,10 +51,10 @@ def _change_temp_dir_location(abs_path: str) -> None:
         if os.path.isdir(abs_path):
             TEMP_DIR_NAME = abs_path
         else:
-            raise ValueError(f"The path {abs_path} does not point to a directory.")
+            raise ValueError(f"The path '{abs_path} 'does not point to a directory.")
     else:
         raise ValueError(
-            f"The directory {abs_path} in which the file should be created does not exist."
+            f"The directory '{abs_path}' in which the file should be created does not exist."
         )
 
 
