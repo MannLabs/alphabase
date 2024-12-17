@@ -197,3 +197,16 @@ def test_create_ones():
     assert arr.dtype == np.int32
 
     assert tempmmap._TEMP_DIR is not None
+
+
+def test_redefine_location():
+    """Test redefining temp location."""
+    tempmmap = sys.modules["alphabase.io.tempmmap"]
+
+    old_temp_dir = tempmmap._TEMP_DIR
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        tempmmap.redefine_temp_location(temp_dir)
+
+    assert old_temp_dir != tempmmap._TEMP_DIR
+    assert os.path.dirname(tempmmap.TEMP_DIR_NAME) == temp_dir
