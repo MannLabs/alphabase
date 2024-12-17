@@ -20,7 +20,7 @@ def setup_function(function):
 def teardown_function(function):
     """Simulate `atexit.register` and delete the module before every test."""
     tempmmap = sys.modules["alphabase.io.tempmmap"]
-    tempmmap.clear()  # simulating @atexit.register
+    tempmmap._clear()  # simulating @atexit.register
 
     # # later:
     # assert tempmmap._TEMP_DIR is None
