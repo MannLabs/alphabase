@@ -25,14 +25,14 @@ def _init_temp_dir(prefix: str = "temp_mmap_") -> str:
         TEMP_DIR_NAME = _TEMP_DIR.name
 
         logging.info(
-            f"Temp mmap arrays are written to {TEMP_DIR_NAME}. "
+            f"Memory-mapped arrays are written to temporary directory {TEMP_DIR_NAME}. "
             "Cleanup of this folder is OS dependent and might need to be triggered manually!"
         )
 
     return TEMP_DIR_NAME
 
 
-def _change_temp_dir_location(abs_path: str) -> str:
+def _change_temp_dir_location(abs_path: str) -> None:
     """
     Check if the directory to which the temp arrays should be written exists, if so defines this as the new temp dir location. If not raise a value error.
 
@@ -69,7 +69,7 @@ def _get_file_location(abs_file_path: str, overwrite=False) -> str:
 
     Parameters
     ----------
-    abs_path : str
+    abs_file_path : str
         The absolute path to the new temporary file.
 
     Returns
@@ -77,19 +77,16 @@ def _get_file_location(abs_file_path: str, overwrite=False) -> str:
     str
         The file path if it is valid.
     """
-    # check overwrite status and existence of file
     if not overwrite and os.path.exists(abs_file_path):
         raise ValueError(
-            "The file already exists. Set overwrite to True to overwrite the file or choose a different name."
+            f"The file '{abs_file_path}' already exists. Set overwrite to True to overwrite the file or choose a different name."
         )
 
-    # ensure that the filename conforms to the naming convention
     if not os.path.basename(abs_file_path).endswith(".hdf"):
         raise ValueError(
             f"The chosen file name '{os.path.basename(abs_file_path)}' needs to end with .hdf"
         )
 
-    # ensure that the directory in which the file should be created exists
     if os.path.isdir(os.path.dirname(abs_file_path)):
         return abs_file_path
     else:
@@ -98,9 +95,8 @@ def _get_file_location(abs_file_path: str, overwrite=False) -> str:
         )
 
 
-def redefine_temp_location(path):
-    """
-    Redfine the location where the temp arrays are written to.
+def redefine_temp_location(path: str) -> str:
+    """Redefine the location where the temp arrays are written to.
 
     Parameters
     ----------
@@ -113,24 +109,17 @@ def redefine_temp_location(path):
 
     """
 
-    global _TEMP_DIR, TEMP_DIR_NAME
+    global TEMP_DIR_NAME
 
-    logging.warning(
-        f"""Folder {TEMP_DIR_NAME} with temp mmap arrays is being deleted. All existing temp mmapp arrays will be unusable!"""
-    )
+    _clear()
 
-    # cleaup old temporary directory
+    # cleanup old temporary directory
     shutil.rmtree(TEMP_DIR_NAME, ignore_errors=True)
 
     # create new tempfile at desired location
-    _TEMP_DIR = tempfile.TemporaryDirectory(prefix=os.path.join(path, "temp_mmap_"))
-    TEMP_DIR_NAME = _TEMP_DIR.name
+    temp_dir_name = _init_temp_dir(prefix=os.path.join(path, "temp_mmap_"))
 
-    logging.warning(
-        f"""New temp folder location. Temp mmap arrays are written to {TEMP_DIR_NAME}. Cleanup of this folder is OS dependant, and might need to be triggered manually!"""
-    )
-
-    return TEMP_DIR_NAME
+    return temp_dir_name
 
 
 def array(shape: tuple, dtype: np.dtype, tmp_dir_abs_path: str = None) -> np.ndarray:
@@ -165,12 +154,15 @@ def array(shape: tuple, dtype: np.dtype, tmp_dir_abs_path: str = None) -> np.nda
     )
 
     with h5py.File(temp_file_name, "w") as hdf_file:
-        array = hdf_file.create_dataset("array", shape=shape, dtype=dtype)
-        array[0] = np.string_("") if isinstance(dtype, np.dtypes.StrDType) else 0
-        offset = array.id.get_offset()
+        created_array = hdf_file.create_dataset("array", shape=shape, dtype=dtype)
+        created_array[0] = (
+            np.string_("") if isinstance(dtype, np.dtypes.StrDType) else 0
+        )
+        offset = created_array.id.get_offset()
 
     with open(temp_file_name, "rb+") as raw_hdf_file:
         mmap_obj = mmap.mmap(raw_hdf_file.fileno(), 0, access=mmap.ACCESS_WRITE)
+
         return np.frombuffer(
             mmap_obj, dtype=dtype, count=np.prod(shape), offset=offset
         ).reshape(shape)
@@ -227,8 +219,10 @@ def create_empty_mmap(
         )  # TODO overwrite=overwrite
 
     with h5py.File(temp_file_name, "w") as hdf_file:
-        array = hdf_file.create_dataset("array", shape=shape, dtype=dtype)
-        array[0] = np.string_("") if isinstance(dtype, np.dtypes.StrDType) else 0
+        created_array = hdf_file.create_dataset("array", shape=shape, dtype=dtype)
+        created_array[0] = (
+            np.string_("") if isinstance(dtype, np.dtypes.StrDType) else 0
+        )
 
     return temp_file_name  # TODO temp_file_path
 
@@ -251,10 +245,10 @@ def mmap_array_from_path(hdf_file: str) -> np.ndarray:
 
     # read parameters required to reinitialize the mmap object
     with h5py.File(path, "r") as hdf_file:
-        array = hdf_file["array"]
-        offset = array.id.get_offset()
-        shape = array.shape
-        dtype = array.dtype
+        array_ = hdf_file["array"]
+        offset = array_.id.get_offset()
+        shape = array_.shape
+        dtype = array_.dtype
 
     # reinitialize the mmap object
     with open(path, "rb+") as raw_hdf_file:
@@ -279,9 +273,9 @@ def zeros(shape: tuple, dtype: np.dtype) -> np.ndarray:
     type
         A writable temporary mmapped array filled with zeros.
     """
-    _array = array(shape, dtype)
-    _array[:] = 0
-    return _array
+    array_ = array(shape, dtype)
+    array_[:] = 0
+    return array_
 
 
 def ones(shape: tuple, dtype: np.dtype) -> np.ndarray:
@@ -299,9 +293,9 @@ def ones(shape: tuple, dtype: np.dtype) -> np.ndarray:
     type
         A writable temporary mmapped array filled with ones.
     """
-    _array = array(shape, dtype)
-    _array[:] = 1
-    return _array
+    array_ = array(shape, dtype)
+    array_[:] = 1
+    return array_
 
 
 @atexit.register
@@ -314,8 +308,8 @@ def _clear() -> None:
 
     if _TEMP_DIR is not None:
         logging.warning(
-            f"Folder {TEMP_DIR_NAME} with temp mmap arrays is being deleted. "
-            "All existing temp mmapp arrays will be unusable!"
+            f"Temporary folder {TEMP_DIR_NAME} with memory-mapped arrays is being deleted. "
+            "All existing memory-mapped arrays will be unusable!"
         )
 
         del _TEMP_DIR
