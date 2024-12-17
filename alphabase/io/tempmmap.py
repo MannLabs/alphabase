@@ -123,7 +123,7 @@ def redefine_temp_location(path: str) -> str:
 
 
 def array(shape: tuple, dtype: np.dtype, tmp_dir_abs_path: str = None) -> np.ndarray:
-    """Create a writable temporary mmapped array.
+    """Create a writable temporary memory-mapped array.
 
     Parameters
     ----------
@@ -139,7 +139,7 @@ def array(shape: tuple, dtype: np.dtype, tmp_dir_abs_path: str = None) -> np.nda
     Returns
     -------
     type
-        A writable temporary mmapped array.
+        A writable temporary memory-mapped array.
     """
     temp_dir_name = _init_temp_dir()
 
@@ -226,7 +226,7 @@ def create_empty_mmap(
 
 
 def mmap_array_from_path(hdf_file: str) -> np.ndarray:
-    """reconnect to an exisiting HDF5 file to generate a writable temporary mmapped array.
+    """reconnect to an exisiting HDF5 file to generate a writable temporary memory-mapped array.
 
     Parameters
     ----------
@@ -236,7 +236,7 @@ def mmap_array_from_path(hdf_file: str) -> np.ndarray:
     Returns
     -------
     type
-        A writable temporary mmapped array.
+        A writable temporary memory-mapped array.
     """
 
     path = os.path.join(hdf_file)
@@ -257,7 +257,7 @@ def mmap_array_from_path(hdf_file: str) -> np.ndarray:
 
 
 def zeros(shape: tuple, dtype: np.dtype) -> np.ndarray:
-    """Create a writable temporary mmapped array filled with zeros.
+    """Create a writable temporary memory-mapped array filled with zeros.
 
     Parameters
     ----------
@@ -269,7 +269,7 @@ def zeros(shape: tuple, dtype: np.dtype) -> np.ndarray:
     Returns
     -------
     type
-        A writable temporary mmapped array filled with zeros.
+        A writable temporary memory-mapped array filled with zeros.
     """
     array_ = array(shape, dtype)
     array_[:] = 0
@@ -277,7 +277,7 @@ def zeros(shape: tuple, dtype: np.dtype) -> np.ndarray:
 
 
 def ones(shape: tuple, dtype: np.dtype) -> np.ndarray:
-    """Create a writable temporary mmapped array filled with ones.
+    """Create a writable temporary memory-mapped array filled with ones.
 
     Parameters
     ----------
@@ -289,7 +289,7 @@ def ones(shape: tuple, dtype: np.dtype) -> np.ndarray:
     Returns
     -------
     type
-        A writable temporary mmapped array filled with ones.
+        A writable temporary memory-mapped array filled with ones.
     """
     array_ = array(shape, dtype)
     array_[:] = 1
@@ -298,7 +298,7 @@ def ones(shape: tuple, dtype: np.dtype) -> np.ndarray:
 
 @atexit.register
 def _clear() -> None:
-    """Reset the temporary folder containing temp mmapped arrays.
+    """Reset the temporary folder containing temp memory-mapped arrays.
 
     WARNING: All existing temp mmapp arrays will be unusable!
     """
@@ -315,7 +315,7 @@ def _clear() -> None:
 
 
 def clear() -> str:
-    """Reset the temporary folder containing temp mmapped arrays and create a new one.
+    """Reset the temporary folder containing temp memory-mapped arrays and create a new one.
 
     WARNING: All existing temp mmapp arrays will be unusable!
 
