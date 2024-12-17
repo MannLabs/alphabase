@@ -1,35 +1,35 @@
-#!python
-"""This module allows to create temporary mmapped arrays."""
+"""This module allows to create temporary memory-mapped arrays."""
 
-# builtin
 import atexit
 import logging
 import mmap
 import os
 import shutil
 import tempfile
+from typing import Optional
 
 import h5py
-
-# external
 import numpy as np
 
-# TODO initialize temp_dir not on import but when it is first needed
-_TEMP_DIR = tempfile.TemporaryDirectory(prefix="temp_mmap_")
-TEMP_DIR_NAME = _TEMP_DIR.name
-
-is_cleanup_info_logged = False
+_TEMP_DIR: Optional[tempfile.TemporaryDirectory] = None
+TEMP_DIR_NAME = Optional[None]
 
 
-def _log_cleanup_info_once() -> None:
-    """Logs a info on temp array cleanup once."""
-    global is_cleanup_info_logged
-    if not is_cleanup_info_logged:
+def _init_temp_dir(prefix: str = "temp_mmap_") -> str:
+    """Initialize the temporary directory for the temp mmap arrays if not already done."""
+
+    global _TEMP_DIR, TEMP_DIR_NAME
+
+    if _TEMP_DIR is None:
+        _TEMP_DIR = tempfile.TemporaryDirectory(prefix=prefix)
+        TEMP_DIR_NAME = _TEMP_DIR.name
+
         logging.info(
             f"Temp mmap arrays are written to {TEMP_DIR_NAME}. "
             "Cleanup of this folder is OS dependent and might need to be triggered manually!"
         )
-        is_cleanup_info_logged = True
+
+    return TEMP_DIR_NAME
 
 
 def _change_temp_dir_location(abs_path: str) -> str:
@@ -85,14 +85,16 @@ def _get_file_location(abs_file_path: str, overwrite=False) -> str:
 
     # ensure that the filename conforms to the naming convention
     if not os.path.basename(abs_file_path).endswith(".hdf"):
-        raise ValueError("The chosen file name needs to end with .hdf")
+        raise ValueError(
+            f"The chosen file name '{os.path.basename(abs_file_path)}' needs to end with .hdf"
+        )
 
     # ensure that the directory in which the file should be created exists
     if os.path.isdir(os.path.dirname(abs_file_path)):
         return abs_file_path
     else:
         raise ValueError(
-            f"The directory {os.path.commonpath(abs_file_path)} in which the file should be created does not exist."
+            f"The directory '{os.path.dirname(abs_file_path)}' in which the file should be created does not exist."
         )
 
 
@@ -150,17 +152,16 @@ def array(shape: tuple, dtype: np.dtype, tmp_dir_abs_path: str = None) -> np.nda
     type
         A writable temporary mmapped array.
     """
-    global TEMP_DIR_NAME
-
-    _log_cleanup_info_once()
+    temp_dir_name = _init_temp_dir()
 
     # redefine the temporary directory if a new location is given otherwise read from global variable
     # this allows you to ensure that the correct temp directory location is used when working with multiple threads
     if tmp_dir_abs_path is not None:
         _change_temp_dir_location(tmp_dir_abs_path)
+        temp_dir_name = tmp_dir_abs_path
 
     temp_file_name = os.path.join(
-        TEMP_DIR_NAME, f"temp_mmap_{np.random.randint(2**63, dtype=np.int64)}.hdf"
+        temp_dir_name, f"temp_mmap_{np.random.randint(2**63, dtype=np.int64)}.hdf"
     )
 
     with h5py.File(temp_file_name, "w") as hdf_file:
@@ -206,28 +207,30 @@ def create_empty_mmap(
     str
         path to the newly created file.
     """
-    global TEMP_DIR_NAME
 
-    _log_cleanup_info_once()
+    temp_dir_name = _init_temp_dir()
 
     # redefine the temporary directory if a new location is given otherwise read from global variable
     # this allows you to ensure that the correct temp directory location is used when working with multiple threads
     if tmp_dir_abs_path is not None:
         _change_temp_dir_location(tmp_dir_abs_path)
+        temp_dir_name = tmp_dir_abs_path
 
     # if path does not exist generate a random file name in the TEMP directory
     if file_path is None:
         temp_file_name = os.path.join(
-            TEMP_DIR_NAME, f"temp_mmap_{np.random.randint(2**63, dtype=np.int64)}.hdf"
+            temp_dir_name, f"temp_mmap_{np.random.randint(2**63, dtype=np.int64)}.hdf"
         )
     else:
-        temp_file_name = _get_file_location(file_path, overwrite=False)
+        temp_file_name = _get_file_location(
+            file_path, overwrite=False
+        )  # TODO overwrite=overwrite
 
     with h5py.File(temp_file_name, "w") as hdf_file:
         array = hdf_file.create_dataset("array", shape=shape, dtype=dtype)
         array[0] = np.string_("") if isinstance(dtype, np.dtypes.StrDType) else 0
 
-    return temp_file_name
+    return temp_file_name  # TODO temp_file_path
 
 
 def mmap_array_from_path(hdf_file: str) -> np.ndarray:
@@ -243,7 +246,6 @@ def mmap_array_from_path(hdf_file: str) -> np.ndarray:
     type
         A writable temporary mmapped array.
     """
-    _log_cleanup_info_once()
 
     path = os.path.join(hdf_file)
 
@@ -303,8 +305,25 @@ def ones(shape: tuple, dtype: np.dtype) -> np.ndarray:
 
 
 @atexit.register
-def clear() -> str:
+def _clear() -> None:
     """Reset the temporary folder containing temp mmapped arrays.
+
+    WARNING: All existing temp mmapp arrays will be unusable!
+    """
+    global _TEMP_DIR, TEMP_DIR_NAME
+
+    if _TEMP_DIR is not None:
+        logging.warning(
+            f"Folder {TEMP_DIR_NAME} with temp mmap arrays is being deleted. "
+            "All existing temp mmapp arrays will be unusable!"
+        )
+
+        del _TEMP_DIR
+        TEMP_DIR_NAME = None
+
+
+def clear() -> str:
+    """Reset the temporary folder containing temp mmapped arrays and create a new one.
 
     WARNING: All existing temp mmapp arrays will be unusable!
 
@@ -313,15 +332,8 @@ def clear() -> str:
     str
         The name of the new temporary folder.
     """
-    global _TEMP_DIR, TEMP_DIR_NAME
+    _clear()
 
-    logging.warning(
-        f"Folder {TEMP_DIR_NAME} with temp mmap arrays is being deleted. "
-        "All existing temp mmapp arrays will be unusable!"
-    )
+    temp_dir_name = _init_temp_dir()
 
-    del _TEMP_DIR
-
-    _TEMP_DIR = tempfile.TemporaryDirectory(prefix="temp_mmap_")
-    TEMP_DIR_NAME = _TEMP_DIR.name
-    return TEMP_DIR_NAME
+    return temp_dir_name
