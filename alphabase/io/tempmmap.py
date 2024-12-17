@@ -58,7 +58,7 @@ def _change_temp_dir_location(abs_path: str) -> None:
         )
 
 
-def _get_file_location(abs_file_path: str, overwrite=False) -> str:
+def _get_file_location(abs_file_path: str, overwrite: bool = False) -> str:
     """
     Check if the path specified for the new temporary file is valid. If not raise a value error.
 
@@ -87,12 +87,12 @@ def _get_file_location(abs_file_path: str, overwrite=False) -> str:
             f"The chosen file name '{os.path.basename(abs_file_path)}' needs to end with .hdf"
         )
 
-    if os.path.isdir(os.path.dirname(abs_file_path)):
-        return abs_file_path
-    else:
+    if not os.path.isdir(os.path.dirname(abs_file_path)):
         raise ValueError(
             f"The directory '{os.path.dirname(abs_file_path)}' in which the file should be created does not exist."
         )
+
+    return abs_file_path
 
 
 def redefine_temp_location(path: str) -> str:
@@ -210,19 +210,19 @@ def create_empty_mmap(
 
     # if path does not exist generate a random file name in the TEMP directory
     if file_path is None:
-        temp_file_name = os.path.join(
+        temp_file_path = os.path.join(
             temp_dir_name, f"temp_mmap_{np.random.randint(2**63, dtype=np.int64)}.hdf"
         )
     else:
-        temp_file_name = _get_file_location(file_path, overwrite=overwrite)
+        temp_file_path = _get_file_location(file_path, overwrite=overwrite)
 
-    with h5py.File(temp_file_name, "w") as hdf_file:
+    with h5py.File(temp_file_path, "w") as hdf_file:
         created_array = hdf_file.create_dataset("array", shape=shape, dtype=dtype)
         created_array[0] = (
             np.string_("") if isinstance(dtype, np.dtypes.StrDType) else 0
         )
 
-    return temp_file_name  # TODO temp_file_path
+    return temp_file_path
 
 
 def mmap_array_from_path(hdf_file: str) -> np.ndarray:
