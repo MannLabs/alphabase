@@ -66,6 +66,18 @@ def test_create_array_with_custom_temp_dir():
     assert temp_dir == tempmmap.TEMP_DIR_NAME
 
 
+def test_create_array_with_custom_temp_dir_nonexisting():
+    tempmmap = sys.modules["alphabase.io.tempmmap"]
+
+    temp_dir = "nonexisting_dir"
+    # when
+    with pytest.raises(
+        ValueError,
+        match="The directory 'nonexisting_dir' in which the file should be created does not exist.",
+    ):
+        _ = tempmmap.array((5, 5), np.int32, tmp_dir_abs_path=temp_dir)
+
+
 def test_mmap_array_from_path():
     """Test reconnecting to an existing array."""
     tempmmap = sys.modules["alphabase.io.tempmmap"]
