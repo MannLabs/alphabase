@@ -5,6 +5,7 @@ import numpy as np
 from alphabase.yaml_utils import load_yaml
 
 CONST_FILE_FOLDER = os.path.join(os.path.dirname(__file__), "const_files")
+PSM_READER_YAML_FILE_NAME = "psm_reader.yaml"
 
 common_const_dict: dict = load_yaml(
     os.path.join(CONST_FILE_FOLDER, "common_constants.yaml")

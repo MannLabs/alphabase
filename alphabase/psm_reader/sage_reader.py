@@ -576,7 +576,7 @@ class SageReaderBase(PSMReaderBase, ABC):
         # mod_seq_columns: Optional[List[str]] = None,  # TODO: not needed here?
         fdr: float = 0.01,
         keep_decoy: bool = False,
-        rt_unit: str = "second",
+        rt_unit: Optional[str] = None,
         # sage reader-specific:
         custom_translation_df: pd.DataFrame = None,
         mp_process_num: int = 10,

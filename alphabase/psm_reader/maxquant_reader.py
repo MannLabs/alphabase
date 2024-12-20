@@ -11,6 +11,7 @@ from alphabase.psm_reader.keys import PsmDfCols
 from alphabase.psm_reader.psm_reader import (
     PSMReaderBase,
     psm_reader_provider,
+    psm_reader_yaml,
 )
 from alphabase.psm_reader.utils import get_column_mapping_for_df
 
@@ -127,8 +128,6 @@ class MaxQuantReader(PSMReaderBase):
 
     _reader_type = "maxquant"
     _add_unimod_to_mod_mapping = True
-    _modification_type = "maxquant"
-    _fixed_c57_default = True
 
     def __init__(  # noqa: PLR0913, D417 # too many arguments in function definition, missing argument descriptions
         self,
@@ -138,7 +137,7 @@ class MaxQuantReader(PSMReaderBase):
         mod_seq_columns: Optional[List[str]] = None,
         fdr: float = 0.01,
         keep_decoy: bool = False,
-        rt_unit: str = "minute",
+        rt_unit: Optional[str] = None,
         # MaxQuant reader-specific
         fixed_C57: Optional[bool] = None,  # noqa: N803 TODO: make this  *,fixed_c57  (breaking)
         **kwargs,
@@ -152,7 +151,7 @@ class MaxQuantReader(PSMReaderBase):
         fixed_C57 : bool, optional
             If true, the search engine will not show `Carbamidomethyl`
             in the modified sequences.
-            by default True
+            by default read from psm_reader_yaml key `fixed_C57`.
 
         See documentation of `PSMReaderBase` for the rest of parameters.
 
@@ -167,7 +166,11 @@ class MaxQuantReader(PSMReaderBase):
             **kwargs,
         )
 
-        self.fixed_C57 = fixed_C57 if fixed_C57 is not None else self._fixed_c57_default
+        self.fixed_C57 = (
+            fixed_C57
+            if fixed_C57 is not None
+            else psm_reader_yaml[self._reader_type]["fixed_C57"]
+        )
 
     def _translate_decoy(self) -> None:
         if PsmDfCols.DECOY in self._psm_df.columns:
