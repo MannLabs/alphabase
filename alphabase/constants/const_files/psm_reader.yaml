@@ -124,7 +124,7 @@ pfind:
     'uniprot_ids': 'Proteins'
     'fdr': 'Q-value'
     'decoy': ['Target/Decoy', 'Targe/Decoy']
-  modification_mapping_type: 'maxquant'
+  modification_mapping_type: null  # no mapping required
 
 msfragger_pepxml:
   reader_type: msfragger_pepxml
@@ -265,4 +265,4 @@ sage:
     'peptide_fdr': 'peptide_q'
     'protein_fdr': 'protein_q'
     'decoy': 'is_decoy'
-  modification_mapping_type: 'maxquant'
+  modification_mapping_type: null # custom mapping in code

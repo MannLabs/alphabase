@@ -103,7 +103,7 @@ class ModificationMapper:
             self._init_modification_mapping()
         elif isinstance(
             modification_mapping,
-            str,  # interprete as modification_mapping_type
+            str,  # interpret as modification_mapping_type
         ):
             self.modification_mapping = self._psm_reader_yaml["modification_mappings"][
                 modification_mapping
@@ -122,9 +122,11 @@ class ModificationMapper:
 
     def _init_modification_mapping(self) -> None:
         """Initialize the modification mapping from the psm_reader_yaml or as an empty dictionary."""
-        self.modification_mapping = self._psm_reader_yaml["modification_mappings"][
-            self._mapping_type
-        ]
+        self.modification_mapping = (
+            self._psm_reader_yaml["modification_mappings"][self._mapping_type]
+            if self._mapping_type is not None
+            else {}
+        )
 
     def _add_all_unimod(self) -> None:
         """Add all unimod modifications to the modification mapping."""
