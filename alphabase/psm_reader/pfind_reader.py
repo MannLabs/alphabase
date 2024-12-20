@@ -108,7 +108,7 @@ class pFindReader(PSMReaderBase):  # noqa: N801 name `pFindReader` should use Ca
     def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
         """pFind-specific preprocessing of output data."""
         df.fillna("", inplace=True)
-        df = df[df.Sequence != ""]
+        df = df[df["Sequence"] != ""]
         df[PsmDfCols.RAW_NAME] = df["File_Name"].str.split(".").apply(lambda x: x[0])
         df["Proteins"] = df["Proteins"].apply(parse_pfind_protein)
         return df
@@ -119,23 +119,16 @@ class pFindReader(PSMReaderBase):  # noqa: N801 name `pFindReader` should use Ca
         ).astype(np.int8)
 
     def _translate_score(self) -> None:
+        """Translate pFind pvalue to AlphaBase score: the larger the better."""
         self._psm_df[PsmDfCols.SCORE] = -np.log(
             self._psm_df[PsmDfCols.SCORE].astype(float) + 1e-100
         )
 
     def _load_modifications(self, origin_df: pd.DataFrame) -> None:
-        if len(origin_df) == 0:
-            self._psm_df[PsmDfCols.MODS] = ""
-            self._psm_df[PsmDfCols.MOD_SITES] = ""
-            return
+        mods, mod_sites = zip(*origin_df["Modification"].apply(get_pFind_mods))
 
-        (self._psm_df[PsmDfCols.MODS], self._psm_df[PsmDfCols.MOD_SITES]) = zip(
-            *origin_df["Modification"].apply(get_pFind_mods)
-        )
-
-        self._psm_df[PsmDfCols.MODS] = self._psm_df[PsmDfCols.MODS].apply(
-            translate_pFind_mod
-        )
+        self._psm_df[PsmDfCols.MODS] = [translate_pFind_mod(mod) for mod in mods]
+        self._psm_df[PsmDfCols.MOD_SITES] = mod_sites
 
 
 def register_readers() -> None:

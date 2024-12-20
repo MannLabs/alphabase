@@ -1,5 +1,6 @@
 """MSFragger reader."""
 
+import warnings
 from typing import List, Optional, Tuple
 
 import numpy as np
@@ -92,7 +93,7 @@ class MSFragger_PSM_TSV_Reader(PSMReaderBase):  # noqa: N801 name should use Cap
         raise NotImplementedError("MSFragger_PSM_TSV_Reader for psm.tsv")
 
 
-class MSFraggerPepXML(PSMReaderBase):
+class MSFraggerPepXMLReader(PSMReaderBase):
     """Reader for MSFragger's pep.xml file."""
 
     _reader_type = "msfragger_pepxml"
@@ -167,17 +168,10 @@ class MSFraggerPepXML(PSMReaderBase):
             self._psm_df[PsmDfCols.TO_REMOVE] += self._psm_df[PsmDfCols.DECOY] > 0
 
     def _translate_score(self) -> None:
-        # evalue score
+        """Translate MSFragger evalue to AlphaBase score: the larger the better."""
         self._psm_df[PsmDfCols.SCORE] = -np.log(self._psm_df[PsmDfCols.SCORE] + 1e-100)
 
     def _load_modifications(self, origin_df: pd.DataFrame) -> None:
-        if len(origin_df) == 0:
-            self._psm_df[PsmDfCols.MODS] = ""
-            self._psm_df[PsmDfCols.MOD_SITES] = ""
-            self._psm_df[PsmDfCols.AA_MASS_DIFFS] = ""
-            self._psm_df[PsmDfCols.AA_MASS_DIFF_SITES] = ""
-            return
-
         (
             self._psm_df[PsmDfCols.MODS],
             self._psm_df[PsmDfCols.MOD_SITES],
@@ -203,17 +197,30 @@ class MSFraggerPepXML(PSMReaderBase):
                 inplace=True,
             )
 
-    def _post_process(self) -> None:
-        super()._post_process()
+    def _post_process(self, origin_df: pd.DataFrame) -> None:
         self._psm_df = (
             self._psm_df.query(f"{PsmDfCols.TO_REMOVE}==0")
             .drop(columns=PsmDfCols.TO_REMOVE)
             .reset_index(drop=True)
         )
+        super()._post_process(origin_df)
+
+
+class MSFraggerPepXML(MSFraggerPepXMLReader):
+    """Deprecated."""
+
+    def __init__(self, *args, **kwargs):
+        """Deprecated."""
+        warnings.warn(
+            "MSFraggerPepXML is deprecated and will ne removed in alphabase>1.5.0.",
+            "Please use the equivalent MSFraggerPepXMLReader instead.",
+            FutureWarning,
+        )
+        super().__init__(*args, **kwargs)
 
 
 def register_readers() -> None:
     """Register MSFragger readers."""
     psm_reader_provider.register_reader("msfragger_psm_tsv", MSFragger_PSM_TSV_Reader)
     psm_reader_provider.register_reader("msfragger", MSFragger_PSM_TSV_Reader)
-    psm_reader_provider.register_reader("msfragger_pepxml", MSFraggerPepXML)
+    psm_reader_provider.register_reader("msfragger_pepxml", MSFraggerPepXMLReader)
