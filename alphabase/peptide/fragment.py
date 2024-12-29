@@ -19,6 +19,30 @@ from alphabase.peptide.precursor import (
 from alphabase.utils import DeprecatedDict
 
 
+class DIRECTION:
+    FORWARD = 1
+    REVERSE = -1
+
+
+# because we dont know the loss, we assume every loss type is phospho
+class LOSS:
+    GENERIC = 98
+    PHOSPHORYLATION = 98
+    H2O = 18
+    NH3 = 17
+    H = 1
+    NONE = 0
+
+
+class SERIES:
+    A = 97
+    B = 98
+    C = 99
+    X = 120
+    Y = 121
+    Z = 122
+
+
 @dataclass(frozen=True)
 class FragmentType:
     name: str
@@ -27,7 +51,20 @@ class FragmentType:
     modloss: bool
     add_mass: float
 
-    def __init__(self, name: str, ref_ion: str, formula: str, modloss: bool) -> None:
+    series: int
+    loss: int
+    direction: int
+
+    def __init__(
+        self,
+        name: str,
+        ref_ion: str,
+        formula: str,
+        modloss: bool,
+        series: int,
+        loss: int,
+        direction: int,
+    ) -> None:
         """
         Class which represents a constant fragment type.
 
@@ -41,8 +78,12 @@ class FragmentType:
             Formula of the fragment type
         modloss : bool
             Whether the fragment type has a modification neutral loss
-        add_mass : float
-            Mass to add to the reference ion
+        series : int
+            Series of the fragment type
+        loss : int
+            Loss of the fragment type
+        direction : int
+            Direction of the fragment type
         """
         # Need to use object.__setattr__ to set fields in frozen dataclass
         object.__setattr__(self, "name", name)
@@ -50,39 +91,140 @@ class FragmentType:
         object.__setattr__(self, "formula", formula)
         object.__setattr__(self, "modloss", modloss)
         object.__setattr__(self, "add_mass", calc_mass_from_formula(formula))
+        object.__setattr__(self, "series", series)
+        object.__setattr__(self, "loss", loss)
+        object.__setattr__(self, "direction", direction)
+
+        super().__init__()
 
 
 # constant which contains all valid fragment types
 FRAGMENT_TYPES = {
-    "a": FragmentType(name="a", ref_ion="b", formula="C(-1)O(-1)", modloss=False),
-    "b": FragmentType(name="b", ref_ion="b", formula="", modloss=False),
-    "c": FragmentType(name="c", ref_ion="b", formula="N(1)H(3)", modloss=False),
-    "x": FragmentType(name="x", ref_ion="y", formula="C(1)O(1)H(-2)", modloss=False),
-    "y": FragmentType(name="y", ref_ion="y", formula="", modloss=False),
-    "z": FragmentType(name="z", ref_ion="y", formula="N(-1)H(-2)", modloss=False),
+    "a": FragmentType(
+        name="a",
+        ref_ion="b",
+        formula="C(-1)O(-1)",
+        modloss=False,
+        series=SERIES.A,
+        loss=LOSS.NONE,
+        direction=DIRECTION.FORWARD,
+    ),
+    "b": FragmentType(
+        name="b",
+        ref_ion="b",
+        formula="",
+        modloss=False,
+        series=SERIES.B,
+        loss=LOSS.NONE,
+        direction=DIRECTION.FORWARD,
+    ),
+    "c": FragmentType(
+        name="c",
+        ref_ion="b",
+        formula="N(1)H(3)",
+        modloss=False,
+        series=SERIES.C,
+        loss=LOSS.NONE,
+        direction=DIRECTION.FORWARD,
+    ),
+    "x": FragmentType(
+        name="x",
+        ref_ion="y",
+        formula="C(1)O(1)H(-2)",
+        modloss=False,
+        series=SERIES.X,
+        loss=LOSS.NONE,
+        direction=DIRECTION.REVERSE,
+    ),
+    "y": FragmentType(
+        name="y",
+        ref_ion="y",
+        formula="",
+        modloss=False,
+        series=SERIES.Y,
+        loss=LOSS.NONE,
+        direction=DIRECTION.REVERSE,
+    ),
+    "z": FragmentType(
+        name="z",
+        ref_ion="y",
+        formula="N(-1)H(-2)",
+        modloss=False,
+        series=SERIES.Z,
+        loss=LOSS.NONE,
+        direction=DIRECTION.REVERSE,
+    ),
     "b_modloss": FragmentType(
-        name="b_modloss", ref_ion="b", formula="N(1)H(3)", modloss=True
+        name="b_modloss",
+        ref_ion="b",
+        formula="N(1)H(3)",
+        modloss=True,
+        series=SERIES.B,
+        loss=LOSS.GENERIC,
+        direction=DIRECTION.FORWARD,
     ),
     "b_H2O": FragmentType(
-        name="b_H2O", ref_ion="b", formula="H(-2)O(-1)", modloss=False
+        name="b_H2O",
+        ref_ion="b",
+        formula="H(-2)O(-1)",
+        modloss=False,
+        series=SERIES.B,
+        loss=LOSS.H2O,
+        direction=DIRECTION.FORWARD,
     ),
     "b_NH3": FragmentType(
-        name="b_NH3", ref_ion="b", formula="N(-1)H(-3)", modloss=False
+        name="b_NH3",
+        ref_ion="b",
+        formula="N(-1)H(-3)",
+        modloss=False,
+        series=SERIES.B,
+        loss=LOSS.NH3,
+        direction=DIRECTION.FORWARD,
     ),
     "c_lossH": FragmentType(
-        name="c_lossH", ref_ion="b", formula="N(1)H(2)", modloss=False
+        name="c_lossH",
+        ref_ion="b",
+        formula="N(1)H(2)",
+        modloss=False,
+        series=SERIES.C,
+        loss=LOSS.H,
+        direction=DIRECTION.FORWARD,
     ),
     "y_modloss": FragmentType(
-        name="y_modloss", ref_ion="y", formula="N(-1)H(-2)", modloss=True
+        name="y_modloss",
+        ref_ion="y",
+        formula="N(-1)H(-2)",
+        modloss=True,
+        series=SERIES.Y,
+        loss=LOSS.GENERIC,
+        direction=DIRECTION.REVERSE,
     ),
     "y_H2O": FragmentType(
-        name="y_H2O", ref_ion="y", formula="H(-2)O(-1)", modloss=False
+        name="y_H2O",
+        ref_ion="y",
+        formula="H(-2)O(-1)",
+        modloss=False,
+        series=SERIES.Y,
+        loss=LOSS.H2O,
+        direction=DIRECTION.REVERSE,
     ),
     "y_NH3": FragmentType(
-        name="y_NH3", ref_ion="y", formula="N(-1)H(-3)", modloss=False
+        name="y_NH3",
+        ref_ion="y",
+        formula="N(-1)H(-3)",
+        modloss=False,
+        series=SERIES.Y,
+        loss=LOSS.NH3,
+        direction=DIRECTION.REVERSE,
     ),
     "z_addH": FragmentType(
-        name="z_addH", ref_ion="y", formula="N(-1)H(-1)", modloss=False
+        name="z_addH",
+        ref_ion="y",
+        formula="N(-1)H(-1)",
+        modloss=False,
+        series=SERIES.Z,
+        loss=LOSS.H,
+        direction=DIRECTION.REVERSE,
     ),
 }
 
@@ -140,6 +282,14 @@ def parse_all_frag_type_representation():
 parse_all_frag_type_representation()
 
 
+def sort_charged_frag_types(charged_frag_types: List[str]) -> List[str]:
+    """charged frag types are sorted by (no-loss, loss) and then alphabetically"""
+    has_loss = [f.count("_") > 1 for f in charged_frag_types]
+    no_loss = [f for f, hl in zip(charged_frag_types, has_loss) if not hl]
+    loss = [f for f, hl in zip(charged_frag_types, has_loss) if hl]
+    return sorted(no_loss) + sorted(loss)
+
+
 def get_charged_frag_types(
     frag_types: List[str], max_frag_charge: int = 2
 ) -> List[str]:
@@ -173,7 +323,7 @@ def get_charged_frag_types(
                 charged_frag_types.append(f"{_type}_z{_ch}")
         else:
             raise ValueError(f"Fragment type {_type} is currently not supported")
-    return sorted(charged_frag_types)
+    return sort_charged_frag_types(charged_frag_types)
 
 
 def parse_charged_frag_type(charged_frag_type: str) -> Tuple[str, int]:
@@ -529,9 +679,9 @@ def calc_fragment_mz_values_for_same_nAA(
         elif frag_type == "y_modloss":
             _mass = (y_mass - y_modloss) / charge + MASS_PROTON
             _mass[y_modloss == 0] = 0
-        elif frag_type in frag_mass_from_ref_ion_dict:
-            ref_ion = frag_mass_from_ref_ion_dict[frag_type].ref_ion
-            add_mass = frag_mass_from_ref_ion_dict[frag_type].add_mass
+        elif frag_type in FRAGMENT_TYPES:
+            ref_ion = FRAGMENT_TYPES[frag_type].ref_ion
+            add_mass = FRAGMENT_TYPES[frag_type].add_mass
             if ref_ion == "b":
                 _mass = (b_mass + add_mass) / charge + MASS_PROTON
             elif ref_ion == "y":
@@ -754,13 +904,11 @@ def flatten_fragments(
 
     - mz:        :data:`PEAK_MZ_DTYPE`, fragment mz value
     - intensity: :data:`PEAK_INTENSITY_DTYPE`, fragment intensity value
-    - type:      uint8, ASCII code of the ion type. Small caps are for regular scoring ions used during search: (97=a, 98=b, 99=c, 120=x, 121=y, 122=z).
-                        Small caps subtracted by 64 are used for ions only quantified and not scored: (33=a, 34=b, 35=c, 56=x, 57=y, 58=z).
-                        By default all ions are scored and quantified. It is left to the user or search engine to decide which ions to use.
+    - type:      uint8, ASCII code of the ion series. Must be a part of the `SERIES` (97=a, 98=b, 99=c, 120=x, 121=y, 122=z).
     - number:    uint32, fragment series number
     - position:  uint32, fragment position in sequence (from left to right, starts with 0)
     - charge:    uint8, fragment charge
-    - loss_type: int16, fragment loss type, 0=noloss, 17=NH3, 18=H2O, 98=H3PO4 (phos), ...
+    - loss_type: int16, fragment loss type. Must be a part of the `LOSS` (0=noloss, 1=H, 17=NH3, 18=H2O, 98=generic, ...).
 
     The fragment pointers `frag_start_idx` and `frag_stop_idx`
     will be reannotated to the new fragment format.
@@ -796,17 +944,7 @@ def flatten_fragments(
         precursor dataframe with added `flat_frag_start_idx` and `flat_frag_stop_idx` columns
     pd.DataFrame
         fragment dataframe with columns: `mz`, `intensity`, `type`, `number`,
-        `charge` and `loss_type`, where each column refers to:
-
-        - mz:        :data:`PEAK_MZ_DTYPE`, fragment mz value
-        - intensity: :data:`PEAK_INTENSITY_DTYPE`, fragment intensity value
-        - type:      uint8, ASCII code of the ion type. Small caps are for regular scoring ions used during search: (97=a, 98=b, 99=c, 120=x, 121=y, 122=z).
-                            Small caps subtracted by 64 are used for ions only quantified and not scored: (33=a, 34=b, 35=c, 56=x, 57=y, 58=z).
-                            By default all ions are scored and quantified. It is left to the user or search engine to decide which ions to use.
-        - number:    uint32, fragment series number
-        - position:  uint32, fragment position in sequence (from left to right, starts with 0)
-        - charge:    uint8, fragment charge
-        - loss_type: int16, fragment loss type, 0=noloss, 17=NH3, 18=H2O, 98=H3PO4 (phos), ...
+        `charge` and `loss_type`.
     """
     if len(precursor_df) == 0:
         return precursor_df, pd.DataFrame()
@@ -830,25 +968,12 @@ def flatten_fragments(
     frag_charges = []
     frag_directions = []  # 'abc': direction=1, 'xyz': direction=-1, otherwise 0
 
-    for col in fragment_mz_df.columns.values:
-        _types = col.split("_")
-        frag_types.append(ord(_types[0]))  # using ASCII code
-        frag_charges.append(int(_types[-1][1:]))
-        if len(_types) == 2:
-            frag_loss_types.append(0)
-        else:
-            if _types[1] == "NH3":
-                frag_loss_types.append(17)
-            elif _types[1] == "H2O":
-                frag_loss_types.append(18)
-            else:
-                frag_loss_types.append(98)
-        if ord(_types[0]) >= 97 and ord(_types[0]) <= 109:  # a-m
-            frag_directions.append(1)
-        elif ord(_types[0]) >= 110 and ord(_types[0]) <= 122:  # n-z
-            frag_directions.append(-1)
-        else:
-            frag_directions.append(0)
+    for charged_frag_type in fragment_mz_df.columns.values:
+        frag_type, charge = parse_charged_frag_type(charged_frag_type)
+        frag_charges.append(charge)
+        frag_types.append(FRAGMENT_TYPES[frag_type].series)
+        frag_loss_types.append(FRAGMENT_TYPES[frag_type].loss)
+        frag_directions.append(FRAGMENT_TYPES[frag_type].direction)
 
     if "type" in custom_columns:
         frag_df["type"] = np.array(
