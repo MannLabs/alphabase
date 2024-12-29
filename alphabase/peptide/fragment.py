@@ -88,7 +88,7 @@ FRAGMENT_TYPES = {
 
 FRAGMENT_CHARGE_SEPARATOR = "_z"
 
-# Replace the original dictionaries with warning versions
+# TODO: remove this dictionary
 frag_type_representation_dict = DeprecatedDict(
     {
         "c": "b+N(1)H(3)",
@@ -105,12 +105,14 @@ frag_type_representation_dict = DeprecatedDict(
     warning_message="frag_type_representation_dict is deprecated and will be removed in the future version",
 )
 
+# TODO: remove this dictionary
 frag_mass_from_ref_ion_dict = DeprecatedDict(
     {},
     warning_message="frag_mass_from_ref_ion_dict is deprecated and will be removed in a future version",
 )
 
 
+# TODO: remove this function
 def add_new_frag_type(frag_type: str, representation: str):
     """Add new modifications into :data:`frag_type_representation_dict`
     and update :data:`frag_mass_from_ref_ion_dict`.
@@ -129,6 +131,7 @@ def add_new_frag_type(frag_type: str, representation: str):
     )
 
 
+# TODO: remove this function
 def parse_all_frag_type_representation():
     for frag, representation in frag_type_representation_dict.items():
         add_new_frag_type(frag, representation)
