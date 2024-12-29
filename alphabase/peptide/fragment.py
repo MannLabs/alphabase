@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import Dict, List, Tuple, Union
 
 import numba as nb
@@ -15,29 +16,99 @@ from alphabase.peptide.precursor import (
     is_precursor_refined,
     refine_precursor_df,
 )
+from alphabase.utils import DeprecatedDict
 
-frag_type_representation_dict = {
-    "c": "b+N(1)H(3)",
-    "z": "y+N(-1)H(-2)",
-    "a": "b+C(-1)O(-1)",
-    "x": "y+C(1)O(1)H(-2)",
-    "b_H2O": "b+H(-2)O(-1)",
-    "y_H2O": "y+H(-2)O(-1)",
-    "b_NH3": "b+N(-1)H(-3)",
-    "y_NH3": "y+N(-1)H(-3)",
-    "c_lossH": "b+N(1)H(2)",
-    "z_addH": "y+N(-1)H(-1)",
+
+@dataclass(frozen=True)
+class FragmentType:
+    name: str
+    ref_ion: str
+    formula: str
+    modloss: bool
+    add_mass: float
+
+    def __init__(self, name: str, ref_ion: str, formula: str, modloss: bool) -> None:
+        """
+        Class which represents a constant fragment type.
+
+        Parameters
+        ----------
+        name : str
+            Name of the fragment type
+        ref_ion : str
+            Reference ion of the fragment type
+        formula : str
+            Formula of the fragment type
+        modloss : bool
+            Whether the fragment type has a modification neutral loss
+        add_mass : float
+            Mass to add to the reference ion
+        """
+        # Need to use object.__setattr__ to set fields in frozen dataclass
+        object.__setattr__(self, "name", name)
+        object.__setattr__(self, "ref_ion", ref_ion)
+        object.__setattr__(self, "formula", formula)
+        object.__setattr__(self, "modloss", modloss)
+        object.__setattr__(self, "add_mass", calc_mass_from_formula(formula))
+
+
+# constant which contains all valid fragment types
+FRAGMENT_TYPES = {
+    "a": FragmentType(name="a", ref_ion="b", formula="C(-1)O(-1)", modloss=False),
+    "b": FragmentType(name="b", ref_ion="b", formula="", modloss=False),
+    "c": FragmentType(name="c", ref_ion="b", formula="N(1)H(3)", modloss=False),
+    "x": FragmentType(name="x", ref_ion="y", formula="C(1)O(1)H(-2)", modloss=False),
+    "y": FragmentType(name="y", ref_ion="y", formula="", modloss=False),
+    "z": FragmentType(name="z", ref_ion="y", formula="N(-1)H(-2)", modloss=False),
+    "b_modloss": FragmentType(
+        name="b_modloss", ref_ion="b", formula="N(1)H(3)", modloss=True
+    ),
+    "b_H2O": FragmentType(
+        name="b_H2O", ref_ion="b", formula="H(-2)O(-1)", modloss=False
+    ),
+    "b_NH3": FragmentType(
+        name="b_NH3", ref_ion="b", formula="N(-1)H(-3)", modloss=False
+    ),
+    "c_lossH": FragmentType(
+        name="c_lossH", ref_ion="b", formula="N(1)H(2)", modloss=False
+    ),
+    "y_modloss": FragmentType(
+        name="y_modloss", ref_ion="y", formula="N(-1)H(-2)", modloss=True
+    ),
+    "y_H2O": FragmentType(
+        name="y_H2O", ref_ion="y", formula="H(-2)O(-1)", modloss=False
+    ),
+    "y_NH3": FragmentType(
+        name="y_NH3", ref_ion="y", formula="N(-1)H(-3)", modloss=False
+    ),
+    "z_addH": FragmentType(
+        name="z_addH", ref_ion="y", formula="N(-1)H(-1)", modloss=False
+    ),
 }
-"""
-Represent fragment ion types from b/y ions.
-Modification neutral losses (i.e. modloss) are not here
-as they have variable atoms added to b/y ions.
-"""
 
-frag_mass_from_ref_ion_dict = {}
-"""
-Masses parsed from :data:`frag_type_representation_dict`.
-"""
+FRAGMENT_CHARGE_SEPARATOR = "_z"
+
+# Replace the original dictionaries with warning versions
+frag_type_representation_dict = DeprecatedDict(
+    {
+        "c": "b+N(1)H(3)",
+        "z": "y+N(-1)H(-2)",
+        "a": "b+C(-1)O(-1)",
+        "x": "y+C(1)O(1)H(-2)",
+        "b_H2O": "b+H(-2)O(-1)",
+        "y_H2O": "y+H(-2)O(-1)",
+        "b_NH3": "b+N(-1)H(-3)",
+        "y_NH3": "y+N(-1)H(-3)",
+        "c_lossH": "b+N(1)H(2)",
+        "z_addH": "y+N(-1)H(-1)",
+    },
+    warning_message="frag_type_representation_dict is deprecated and will be removed in the future version",
+)
+
+frag_mass_from_ref_ion_dict = DeprecatedDict(
+    {},
+    warning_message="frag_mass_from_ref_ion_dict is deprecated and will be removed in a future version",
+)
 
 
 def add_new_frag_type(frag_type: str, representation: str):
@@ -70,7 +141,8 @@ def get_charged_frag_types(
     frag_types: List[str], max_frag_charge: int = 2
 ) -> List[str]:
     """
-    Combine fragment types and charge states.
+    Calculate the combination of fragment types and charge states.
+    Returns a sorted list of charged fragment types.
 
     Parameters
     ----------
@@ -93,9 +165,12 @@ def get_charged_frag_types(
     """
     charged_frag_types = []
     for _type in frag_types:
-        for _ch in range(1, max_frag_charge + 1):
-            charged_frag_types.append(f"{_type}_z{_ch}")
-    return charged_frag_types
+        if _type in FRAGMENT_TYPES:
+            for _ch in range(1, max_frag_charge + 1):
+                charged_frag_types.append(f"{_type}_z{_ch}")
+        else:
+            raise ValueError(f"Fragment type {_type} is currently not supported")
+    return sorted(charged_frag_types)
 
 
 def parse_charged_frag_type(charged_frag_type: str) -> Tuple[str, int]:
@@ -114,8 +189,14 @@ def parse_charged_frag_type(charged_frag_type: str) -> Tuple[str, int]:
 
         int. Charge state
     """
-    _type, _ch = charged_frag_type.split("_z")
-    return _type, int(_ch)
+
+    if FRAGMENT_CHARGE_SEPARATOR in charged_frag_type:
+        _type, _ch = charged_frag_type.split(FRAGMENT_CHARGE_SEPARATOR)
+        return _type, int(_ch)
+    else:
+        raise ValueError(
+            "Only charged fragment types are supported. Please add charge state to the fragment type. e.g. 'b_z1'"
+        )
 
 
 def init_zero_fragment_dataframe(
@@ -432,59 +513,33 @@ def calc_fragment_mz_values_for_same_nAA(
             break
 
     mz_values = []
-    add_proton = MASS_PROTON
+
     for charged_frag_type in charged_frag_types:
-        # Neutral masses also considered for future uses
-        if charged_frag_type == "b":
-            mz_values.append(b_mass)
-            continue
-        elif charged_frag_type == "y":
-            mz_values.append(y_mass)
-            continue
         frag_type, charge = parse_charged_frag_type(charged_frag_type)
         if frag_type == "b":
-            _mass = b_mass / charge + add_proton
+            _mass = b_mass / charge + MASS_PROTON
         elif frag_type == "y":
-            _mass = y_mass / charge + add_proton
+            _mass = y_mass / charge + MASS_PROTON
         elif frag_type == "b_modloss":
-            _mass = (b_mass - b_modloss) / charge + add_proton
+            _mass = (b_mass - b_modloss) / charge + MASS_PROTON
             _mass[b_modloss == 0] = 0
         elif frag_type == "y_modloss":
-            _mass = (y_mass - y_modloss) / charge + add_proton
+            _mass = (y_mass - y_modloss) / charge + MASS_PROTON
             _mass[y_modloss == 0] = 0
         elif frag_type in frag_mass_from_ref_ion_dict:
-            ref_ion = frag_mass_from_ref_ion_dict[frag_type]["ref_ion"]
-            add_mass = frag_mass_from_ref_ion_dict[frag_type]["add_mass"]
+            ref_ion = frag_mass_from_ref_ion_dict[frag_type].ref_ion
+            add_mass = frag_mass_from_ref_ion_dict[frag_type].add_mass
             if ref_ion == "b":
-                _mass = (b_mass + add_mass) / charge + add_proton
+                _mass = (b_mass + add_mass) / charge + MASS_PROTON
             elif ref_ion == "y":
-                _mass = (y_mass + add_mass) / charge + add_proton
+                _mass = (y_mass + add_mass) / charge + MASS_PROTON
             else:
                 raise KeyError(
                     f"ref_ion only allows `b` and `y`, but {ref_ion} is given"
                 )
-        # elif frag_type == 'b_H2O':
-        #     _mass = (b_mass-MASS_H2O)/charge + add_proton
-        # elif frag_type == 'y_H2O':
-        #     _mass = (y_mass-MASS_H2O)/charge + add_proton
-        # elif frag_type == 'b_NH3':
-        #     _mass = (b_mass-MASS_NH3)/charge + add_proton
-        # elif frag_type == 'y_NH3':
-        #     _mass = (y_mass-MASS_NH3)/charge + add_proton
-        # elif frag_type == 'c':
-        #     _mass = (MASS_NH3+b_mass)/charge + add_proton
-        # elif frag_type == 'c_lossH': # H rearrangement: c-1
-        #     _mass = (MASS_NH3-MASS_H+b_mass)/charge + add_proton
-        # elif frag_type == 'z':
-        #     _mass = (MASS_H-MASS_NH3+y_mass)/charge + add_proton
-        # elif frag_type == 'z_addH': # H rearrangement: z+1
-        #     _mass = (MASS_H*2-MASS_NH3+y_mass)/charge + add_proton
-        # elif frag_type == 'a':
-        #     _mass = (-MASS_C-MASS_O+b_mass)/charge + add_proton
-        # elif frag_type == 'x':
-        #     _mass = (MASS_C+MASS_O-MASS_H*2+y_mass)/charge + add_proton
+
         else:
-            raise KeyError(f'Fragment type "{frag_type}" is not in fragment_mz_df.')
+            raise KeyError(f'Fragment type "{frag_type}" is not supported')
         mz_values.append(_mass)
     return np.array(mz_values).T
 
