@@ -26,12 +26,22 @@ class DIRECTION:
 
 # because we dont know the loss, we assume every loss type is phospho
 class LOSS:
-    GENERIC = 98
-    PHOSPHORYLATION = 98
+    MODLOSS = 98
     H2O = 18
     NH3 = 17
-    H = 1
+    LOSSH = 1
+    ADDH = 2
     NONE = 0
+
+
+LOSS_INVERSE = {
+    18: "H2O",
+    17: "NH3",
+    98: "modloss",
+    1: "lossH",
+    0: "",
+    2: "addH",
+}
 
 
 class SERIES:
@@ -41,6 +51,16 @@ class SERIES:
     X = 120
     Y = 121
     Z = 122
+
+
+SERIES_INVERSE = {
+    97: "a",
+    98: "b",
+    99: "c",
+    120: "x",
+    121: "y",
+    122: "z",
+}
 
 
 @dataclass(frozen=True)
@@ -160,7 +180,7 @@ FRAGMENT_TYPES = {
         formula="N(1)H(3)",
         modloss=True,
         series=SERIES.B,
-        loss=LOSS.GENERIC,
+        loss=LOSS.MODLOSS,
         direction=DIRECTION.FORWARD,
     ),
     "b_H2O": FragmentType(
@@ -187,7 +207,7 @@ FRAGMENT_TYPES = {
         formula="N(1)H(2)",
         modloss=False,
         series=SERIES.C,
-        loss=LOSS.H,
+        loss=LOSS.LOSSH,
         direction=DIRECTION.FORWARD,
     ),
     "y_modloss": FragmentType(
@@ -196,7 +216,7 @@ FRAGMENT_TYPES = {
         formula="N(-1)H(-2)",
         modloss=True,
         series=SERIES.Y,
-        loss=LOSS.GENERIC,
+        loss=LOSS.MODLOSS,
         direction=DIRECTION.REVERSE,
     ),
     "y_H2O": FragmentType(
@@ -223,7 +243,7 @@ FRAGMENT_TYPES = {
         formula="N(-1)H(-1)",
         modloss=False,
         series=SERIES.Z,
-        loss=LOSS.H,
+        loss=LOSS.ADDH,
         direction=DIRECTION.REVERSE,
     ),
 }
@@ -908,7 +928,7 @@ def flatten_fragments(
     - number:    uint32, fragment series number
     - position:  uint32, fragment position in sequence (from left to right, starts with 0)
     - charge:    uint8, fragment charge
-    - loss_type: int16, fragment loss type. Must be a part of the `LOSS` (0=noloss, 1=H, 17=NH3, 18=H2O, 98=generic, ...).
+    - loss_type: int16, fragment loss type. Must be a part of the `LOSS` (0=noloss, 1=H, 17=NH3, 18=H2O, 98=MODLOSS, ...).
 
     The fragment pointers `frag_start_idx` and `frag_stop_idx`
     will be reannotated to the new fragment format.
