@@ -1777,8 +1777,56 @@ def _start_stop_to_idx(precursor_df, fragment_df, index_column="precursor_idx"):
 
 
 def _create_dense_matrices(
-    precursor_df, fragment_df, charged_frag_types, flat_columns=None
-):
+    precursor_df: pd.DataFrame,
+    fragment_df: pd.DataFrame,
+    charged_frag_types: list,
+    flat_columns: list | None = None,
+) -> tuple[dict, np.ndarray, np.ndarray]:
+    """
+    Create dense matrices for fragment dataframes.
+
+    Parameters
+    ----------
+    precursor_df : pd.DataFrame
+        Precursor dataframe
+    fragment_df : pd.DataFrame
+        Fragment dataframe
+    charged_frag_types : list
+        List of charged fragment types
+    flat_columns : list | None, optional
+        List of columns to create dense matrices for, by default None
+
+    Returns
+    -------
+    dict
+        Dictionary with dense matrices
+    np.ndarray
+        Start indices for the dense fragments
+    np.ndarray
+        Stop indices for the dense fragments
+    """
+
+    if flat_columns is None:
+        flat_columns = ["intensity"]
+
+    if ("precursor_idx" in precursor_df.columns) and (
+        "precursor_idx" in fragment_df.columns
+    ):
+        precursor_df_idx = precursor_df["precursor_idx"]
+        fragment_df_idx = fragment_df["precursor_idx"]
+
+    elif ("flat_frag_start_idx" in fragment_df.columns) and (
+        "flat_frag_stop_idx" in fragment_df.columns
+    ):
+        precursor_df_idx, fragment_df_idx = _start_stop_to_idx(
+            precursor_df, fragment_df
+        )
+
+    else:
+        raise ValueError(
+            "Mapping of fragment indices to precursor indices failed, no 'precursor_idx' or 'flat_frag_start_idx' and 'flat_frag_stop_idx' columns found."
+        )
+
     precursor_df_copy = precursor_df[
         ["sequence", "mods", "mod_sites", "charge", "nAA"]
     ].copy()
@@ -1787,32 +1835,14 @@ def _create_dense_matrices(
         charged_frag_types,
     )
 
-    if ("precursor_idx" in precursor_df_copy.columns) and (
-        "precursor_idx" in fragment_df.columns
-    ):
-        precursor_df_idx = precursor_df_copy["precursor_idx"]
-        fragment_df_idx = fragment_df["precursor_idx"]
-
-    elif ("flat_frag_start_idx" in fragment_df.columns) and (
-        "flat_frag_stop_idx" in fragment_df.columns
-    ):
-        precursor_df_idx, fragment_df_idx = _start_stop_to_idx(
-            precursor_df_copy, fragment_df
-        )
-
-    else:
-        raise ValueError(
-            "Mapping of fragment indices to precursor indices failed, no 'precursor_idx' or 'flat_frag_start_idx' and 'flat_frag_stop_idx' columns found."
-        )
-
     column_indices = _calc_column_indices(fragment_df, charged_frag_types)
     row_indices, frag_start_idx, frag_stop_idx = _calc_row_indices(
         precursor_df_copy["nAA"].to_numpy(),
         fragment_df["position"].to_numpy(),
         precursor_df_idx,
         fragment_df_idx,
-        fragment_df["frag_start_idx"].to_numpy(),
-        fragment_df["frag_stop_idx"].to_numpy(),
+        precursor_df_copy["frag_start_idx"].to_numpy(),
+        precursor_df_copy["frag_stop_idx"].to_numpy(),
     )
 
     # remove all fragments that could not be mapped to a column
@@ -1820,9 +1850,7 @@ def _create_dense_matrices(
     column_indices = column_indices[match_mask]
     row_indices = row_indices[match_mask]
 
-    if flat_columns is None:
-        flat_columns = ["intensity"]
-
+    # create a dictionary with the mz matrix and the flat columns
     df_collection = {"mz": fragment_mz_df}
     for column_name in flat_columns:
         matrix = np.zeros_like(fragment_mz_df.values, dtype=PEAK_INTENSITY_DTYPE)
