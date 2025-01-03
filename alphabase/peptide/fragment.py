@@ -1774,3 +1774,61 @@ def _start_stop_to_idx(precursor_df, fragment_df, index_column="precursor_idx"):
     precursor_df_idx = precursor_df_resorted[index_column].to_numpy()
 
     return precursor_df_idx, fragment_df_idx
+
+
+def _create_dense_matrices(
+    precursor_df, fragment_df, charged_frag_types, flat_columns=None
+):
+    precursor_df_copy = precursor_df[
+        ["sequence", "mods", "mod_sites", "charge", "nAA"]
+    ].copy()
+    fragment_mz_df = create_fragment_mz_dataframe(
+        precursor_df_copy,
+        charged_frag_types,
+    )
+
+    if ("precursor_idx" in precursor_df_copy.columns) and (
+        "precursor_idx" in fragment_df.columns
+    ):
+        precursor_df_idx = precursor_df_copy["precursor_idx"]
+        fragment_df_idx = fragment_df["precursor_idx"]
+
+    elif ("flat_frag_start_idx" in fragment_df.columns) and (
+        "flat_frag_stop_idx" in fragment_df.columns
+    ):
+        precursor_df_idx, fragment_df_idx = _start_stop_to_idx(
+            precursor_df_copy, fragment_df
+        )
+
+    else:
+        raise ValueError(
+            "Mapping of fragment indices to precursor indices failed, no 'precursor_idx' or 'flat_frag_start_idx' and 'flat_frag_stop_idx' columns found."
+        )
+
+    column_indices = _calc_column_indices(fragment_df, charged_frag_types)
+    row_indices, frag_start_idx, frag_stop_idx = _calc_row_indices(
+        precursor_df_copy["nAA"].to_numpy(),
+        fragment_df["position"].to_numpy(),
+        precursor_df_idx,
+        fragment_df_idx,
+        fragment_df["frag_start_idx"].to_numpy(),
+        fragment_df["frag_stop_idx"].to_numpy(),
+    )
+
+    # remove all fragments that could not be mapped to a column
+    match_mask = column_indices != -1
+    column_indices = column_indices[match_mask]
+    row_indices = row_indices[match_mask]
+
+    if flat_columns is None:
+        flat_columns = ["intensity"]
+
+    df_collection = {"mz": fragment_mz_df}
+    for column_name in flat_columns:
+        matrix = np.zeros_like(fragment_mz_df.values, dtype=PEAK_INTENSITY_DTYPE)
+        matrix[row_indices, column_indices] = fragment_df[column_name].values[
+            match_mask
+        ]
+        df_collection[column_name] = pd.DataFrame(matrix, columns=charged_frag_types)
+
+    return df_collection, frag_start_idx, frag_stop_idx
