@@ -1654,6 +1654,8 @@ def _calc_row_indices(
     fragment_position: np.ndarray,
     precursor_df_idx: np.ndarray,
     fragment_df_idx: np.ndarray,
+    frag_start_idx: None | np.ndarray = None,
+    frag_stop_idx: None | np.ndarray = None,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Calculate new start and stop index mapping for flat fragments.
@@ -1685,13 +1687,25 @@ def _calc_row_indices(
     if len(precursor_naa) != len(precursor_df_idx):
         raise ValueError("precursor_naa and precursor_df_idx must have the same length")
 
-    frag_stop_idx = (precursor_naa - 1).cumsum()
+    build_index = (frag_start_idx is None) or (frag_stop_idx is None)
+    if build_index:
+        frag_stop_idx = (precursor_naa - 1).cumsum()
 
-    # Start indices for each precursor is the accumlated nAA of the previous precursor and for the first precursor is 0
-    frag_start_idx = np.zeros_like(frag_stop_idx)
-    frag_start_idx[1:] = frag_stop_idx[
-        :-1
-    ]  # shift values right by 1, first element remains 0
+        # Start indices for each precursor is the accumlated nAA of the previous precursor and for the first precursor is 0
+        frag_start_idx = np.zeros_like(frag_stop_idx)
+        frag_start_idx[1:] = frag_stop_idx[
+            :-1
+        ]  # shift values right by 1, first element remains 0
+
+    else:
+        if (frag_start_idx is None) or (frag_stop_idx is None):
+            raise ValueError(
+                "frag_start_idx and frag_stop_idx must both be provided if one is provided"
+            )
+        elif len(frag_start_idx) != len(frag_stop_idx):
+            raise ValueError(
+                "frag_start_idx and frag_stop_idx must have the same length"
+            )
 
     # Row indices of a fragment being the accumlated nAA of the precursor + fragment position -1
     precursor_idx_to_accumlated_nAA = dict(zip(precursor_df_idx, frag_start_idx))
@@ -1702,6 +1716,10 @@ def _calc_row_indices(
             precursor_idx_to_accumlated_nAA, na_action="ignore"
         )
     ).to_numpy() + fragment_position
+
+    # fill nan with -1 and cast to int32
+    row_indices[np.isnan(row_indices)] = -1
+    row_indices = row_indices.astype(np.int32)
 
     return row_indices, frag_start_idx, frag_stop_idx
 

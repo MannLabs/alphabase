@@ -119,48 +119,56 @@ def test_calc_row_indices_mismatched_lengths():
         )
 
 
-def test_calc_row_indices_realistic_example():
+def test_calc_row_indices_no_start_stop():
     """Test with a realistic example including multiple fragment types"""
     # Setup
-    precursor_naa = np.array([4, 5])  # Two peptides with 3 and 4 fragments respectively
-    # Create positions for b and y ions for each peptide
+    precursor_naa = np.array(
+        [4, 5, 3]
+    )  # Two peptides with 3 and 4 fragments respectively
+    precursor_df_idx = np.array([0, 1, 2])
+
     fragment_position = np.array(
         [
-            # First peptide (3 fragments x 2 ion types)
             0,
             1,
-            2,  # b ions
+            2,  # noqa
             0,
             1,
-            2,  # y ions
-            # Second peptide (4 fragments x 2 ion types)
+            2,  # noqa
             0,
             1,
-            2,
-            3,  # b ions
+            2,  # noqa
             0,
             1,
-            2,
-            3,  # y ions
+            2,  # noqa
+            0,
+            1,
+            2,  # noqa
+            0,
+            1,
+            2,  # noqa
         ]
     )
-    precursor_df_idx = np.array([0, 1])
     fragment_df_idx = np.array(
         [
+            1,
+            1,
+            1,
+            9,
+            9,
+            9,
             0,
             0,
             0,
-            0,
-            0,
-            0,  # First peptide fragments
-            1,
-            1,
-            1,
-            1,
-            1,
-            1,
-            1,
-            1,  # Second peptide fragments
+            10,
+            10,
+            10,
+            2,
+            2,
+            2,
+            11,
+            11,
+            11,
         ]
     )
 
@@ -169,28 +177,163 @@ def test_calc_row_indices_realistic_example():
         precursor_naa, fragment_position, precursor_df_idx, fragment_df_idx
     )
 
-    # Assert
+    expected_mask = np.array(
+        [
+            True,
+            True,
+            True,
+            False,
+            False,
+            False,
+            True,
+            True,
+            True,
+            False,
+            False,
+            False,
+            True,
+            True,
+            True,
+            False,
+            False,
+            False,
+        ]
+    )
+    frag_start_idx_expected = np.array([0, 3, 7])
+    frag_stop_idx_expected = np.array([3, 7, 9])
+
+    mask = row_indices != -1
+    np.testing.assert_array_equal(mask, expected_mask)
+
+    np.testing.assert_array_equal(frag_start_idx, frag_start_idx_expected)
+    np.testing.assert_array_equal(frag_stop_idx, frag_stop_idx_expected)
+
+
+def test_calc_row_indices_with_start_stop():
+    """Test with a realistic example including multiple fragment types"""
+    # Setup
+    precursor_naa = np.array(
+        [4, 5, 3]
+    )  # Two peptides with 3 and 4 fragments respectively
+    precursor_df_idx = np.array([0, 1, 2])
+
+    frag_start_idx = np.array(
+        [
+            7,
+            0,
+            3,
+        ]
+    )
+    frag_stop_idx = np.array([9, 3, 7])
+
+    fragment_position = np.array(
+        [
+            0,
+            1,
+            2,  # noqa
+            0,
+            1,
+            2,  # noqa
+            0,
+            1,
+            2,  # noqa
+            0,
+            1,
+            2,  # noqa
+            0,
+            1,
+            2,  # noqa
+            0,
+            1,
+            2,  # noqa
+        ]
+    )
+    fragment_df_idx = np.array(
+        [
+            1,
+            1,
+            1,
+            9,
+            9,
+            9,
+            0,
+            0,
+            0,
+            10,
+            10,
+            10,
+            2,
+            2,
+            2,
+            11,
+            11,
+            11,
+        ]
+    )
+
+    # Execute
+    row_indices, _frag_start_idx, _frag_stop_idx = _calc_row_indices(
+        precursor_naa,
+        fragment_position,
+        precursor_df_idx,
+        fragment_df_idx,
+        frag_start_idx,
+        frag_stop_idx,
+    )
+
+    expected_mask = np.array(
+        [
+            True,
+            True,
+            True,
+            False,
+            False,
+            False,
+            True,
+            True,
+            True,
+            False,
+            False,
+            False,
+            True,
+            True,
+            True,
+            False,
+            False,
+            False,
+        ]
+    )
+
     expected_row_indices = np.array(
         [
             0,
             1,
             2,
-            0,
-            1,
-            2,  # First peptide (3 positions x 2 ion types)
+            -1,
+            -1,
+            -1,
+            7,
+            8,
+            9,
+            -1,
+            -1,
+            -1,
             3,
             4,
             5,
-            6,
-            3,
-            4,
-            5,
-            6,  # Second peptide (4 positions x 2 ion types)
+            -1,
+            -1,
+            -1,
         ]
     )
+
+    mask = row_indices != -1
+    np.testing.assert_array_equal(mask, expected_mask)
+
     np.testing.assert_array_equal(row_indices, expected_row_indices)
-    np.testing.assert_array_equal(frag_start_idx, np.array([0, 3]))
-    np.testing.assert_array_equal(frag_stop_idx, np.array([3, 7]))
+
+    np.testing.assert_array_equal(frag_start_idx, _frag_start_idx)
+    np.testing.assert_array_equal(frag_stop_idx, _frag_stop_idx)
 
 
 def test_start_stop_to_idx_unordered():
