@@ -1815,8 +1815,8 @@ def _create_dense_matrices(
         precursor_df_idx = precursor_df["precursor_idx"]
         fragment_df_idx = fragment_df["precursor_idx"]
 
-    elif ("flat_frag_start_idx" in fragment_df.columns) and (
-        "flat_frag_stop_idx" in fragment_df.columns
+    elif ("flat_frag_start_idx" in precursor_df.columns) and (
+        "flat_frag_stop_idx" in precursor_df.columns
     ):
         precursor_df_idx, fragment_df_idx = _start_stop_to_idx(
             precursor_df, fragment_df

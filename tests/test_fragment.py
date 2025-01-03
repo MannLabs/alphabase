@@ -7,6 +7,7 @@ from alphabase.peptide.fragment import (
     SERIES,
     _calc_column_indices,
     _calc_row_indices,
+    _create_dense_matrices,
     _start_stop_to_idx,
 )
 
@@ -376,3 +377,124 @@ def test_start_stop_to_idx_empty():
 
     assert len(precursor_df_idx) == 0
     assert len(fragment_df_idx) == 0
+
+
+def test_create_dense_matrices_with_precursor_idx():
+    """Test _create_dense_matrices with precursor_idx mapping"""
+    # Setup test data
+    precursor_df = pd.DataFrame(
+        {
+            "sequence": ["PEP", "PRO", "PEP"],
+            "mods": ["", "", ""],
+            "mod_sites": ["", "", ""],
+            "charge": [2, 2, 2],
+            "nAA": [3, 3, 3],
+            "precursor_idx": [2, 0, 1],
+        }
+    )
+
+    fragment_df = pd.DataFrame(
+        {
+            "type": [SERIES.B, SERIES.Y, SERIES.B, SERIES.Y, SERIES.B, SERIES.Y],
+            "position": [0, 1, 0, 1, 0, 1],
+            "charge": [1, 1, 1, 1, 1, 1],
+            "loss_type": [LOSS.NONE] * 6,
+            "intensity": [100, 200, 300, 400, 500, 600],
+            "precursor_idx": [0, 0, 1, 1, 2, 2],
+        }
+    )
+
+    charged_frag_types = ["b_z1", "y_z1"]
+
+    # Execute
+    df_collection, frag_start_idx, frag_stop_idx = _create_dense_matrices(
+        precursor_df, fragment_df, charged_frag_types
+    )
+
+    # Assert
+    assert set(df_collection.keys()) == {"mz", "intensity"}
+    assert df_collection["intensity"].shape == (
+        6,
+        2,
+    )  # 2 peptides * 6 positions * 2 ion types
+    assert list(df_collection["intensity"].columns) == charged_frag_types
+
+    print(precursor_df["precursor_idx"].values)
+    print(frag_start_idx)
+    print(frag_stop_idx)
+    print(df_collection["intensity"])
+
+    # Check intensity values are in correct positions
+    np.testing.assert_array_equal(
+        df_collection["intensity"].values,
+        np.array(
+            [
+                [500, 0],
+                [0, 600],
+                [100, 0],
+                [0, 200],
+                [300, 0],
+                [0, 400],
+            ]
+        ),
+    )
+
+
+def test_create_dense_matrices_with_frag_start_idx():
+    """Test _create_dense_matrices with fragment start/stop indices"""
+    # Setup test data
+    precursor_df = pd.DataFrame(
+        {
+            "sequence": ["PEP", "PRO", "PEP"],
+            "mods": ["", "", ""],
+            "mod_sites": ["", "", ""],
+            "charge": [2, 2, 2],
+            "nAA": [3, 3, 3],
+            "flat_frag_start_idx": [0, 2, 4],  # Each precursor has 2 fragments
+            "flat_frag_stop_idx": [2, 4, 6],
+        }
+    )
+
+    fragment_df = pd.DataFrame(
+        {
+            "type": [SERIES.B, SERIES.Y, SERIES.B, SERIES.Y, SERIES.B, SERIES.Y],
+            "position": [0, 1, 0, 1, 0, 1],
+            "charge": [1, 1, 1, 1, 1, 1],
+            "loss_type": [LOSS.NONE] * 6,
+            "intensity": [100, 200, 300, 400, 500, 600],
+        }
+    )
+
+    charged_frag_types = ["b_z1", "y_z1"]
+
+    # Execute
+    df_collection, frag_start_idx, frag_stop_idx = _create_dense_matrices(
+        precursor_df, fragment_df, charged_frag_types
+    )
+
+    # Assert
+    assert set(df_collection.keys()) == {"mz", "intensity"}
+    assert df_collection["intensity"].shape == (
+        6,
+        2,
+    )  # 3 peptides * 2 positions * 2 ion types
+    assert list(df_collection["intensity"].columns) == charged_frag_types
+
+    # Check intensity values are in correct positions
+    np.testing.assert_array_equal(
+        df_collection["intensity"].values,
+        np.array(
+            [
+                [100, 0],
+                [0, 200],
+                [300, 0],
+                [0, 400],
+                [500, 0],
+                [0, 600],
+            ]
+        ),
+    )
+
+    # Check fragment start/stop indices
+    np.testing.assert_array_equal(frag_start_idx, [0, 2, 4])
+    np.testing.assert_array_equal(frag_stop_idx, [2, 4, 6])
