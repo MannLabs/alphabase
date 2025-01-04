@@ -1809,31 +1809,36 @@ def _create_dense_matrices(
     if flat_columns is None:
         flat_columns = ["intensity"]
 
-    if ("precursor_idx" in precursor_df.columns) and (
+    optional_columns = [
+        col
+        for col in ["precursor_idx", "flat_frag_start_idx", "flat_frag_stop_idx"]
+        if col in precursor_df.columns
+    ]
+    precursor_df_copy = precursor_df[
+        ["sequence", "mods", "mod_sites", "charge", "nAA"] + optional_columns
+    ].copy()
+    fragment_mz_df = create_fragment_mz_dataframe(
+        precursor_df_copy,
+        charged_frag_types,
+    )
+
+    if ("precursor_idx" in precursor_df_copy.columns) and (
         "precursor_idx" in fragment_df.columns
     ):
-        precursor_df_idx = precursor_df["precursor_idx"]
+        precursor_df_idx = precursor_df_copy["precursor_idx"]
         fragment_df_idx = fragment_df["precursor_idx"]
 
-    elif ("flat_frag_start_idx" in precursor_df.columns) and (
-        "flat_frag_stop_idx" in precursor_df.columns
+    elif ("flat_frag_start_idx" in precursor_df_copy.columns) and (
+        "flat_frag_stop_idx" in precursor_df_copy.columns
     ):
         precursor_df_idx, fragment_df_idx = _start_stop_to_idx(
-            precursor_df, fragment_df
+            precursor_df_copy, fragment_df
         )
 
     else:
         raise ValueError(
             "Mapping of fragment indices to precursor indices failed, no 'precursor_idx' or 'flat_frag_start_idx' and 'flat_frag_stop_idx' columns found."
         )
-
-    precursor_df_copy = precursor_df[
-        ["sequence", "mods", "mod_sites", "charge", "nAA"]
-    ].copy()
-    fragment_mz_df = create_fragment_mz_dataframe(
-        precursor_df_copy,
-        charged_frag_types,
-    )
 
     column_indices = _calc_column_indices(fragment_df, charged_frag_types)
     row_indices, frag_start_idx, frag_stop_idx = _calc_row_indices(

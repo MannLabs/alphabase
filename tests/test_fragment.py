@@ -9,7 +9,10 @@ from alphabase.peptide.fragment import (
     _calc_row_indices,
     _create_dense_matrices,
     _start_stop_to_idx,
+    get_charged_frag_types,
 )
+from alphabase.spectral_library.base import SpecLibBase
+from alphabase.spectral_library.flat import SpecLibFlat
 
 
 def test_calc_column_indices_unmapped_fragments():
@@ -498,3 +501,103 @@ def test_create_dense_matrices_with_frag_start_idx():
     # Check fragment start/stop indices
     np.testing.assert_array_equal(frag_start_idx, [0, 2, 4])
     np.testing.assert_array_equal(frag_stop_idx, [2, 4, 6])
+
+
+def test_speclib_base_to_flat_conversion():
+    """Test conversion from SpecLibBase to SpecLibFlat and back to dense matrices,
+    including handling of missing fragment types"""
+
+    # Create test precursor data
+    repeat = 10
+    precursor_df = pd.DataFrame(
+        {
+            "sequence": ["PEPTIDE", "PROTEIN", "MREPEPTIDES", "MDPEPTIDE"] * repeat,
+            "mods": ["", "Acetyl@Any_N-term", "", "Oxidation@M"] * repeat,
+            "mod_sites": ["", "0", "", "1"] * repeat,
+            "charge": [2, 3, 2, 3] * repeat,
+        }
+    )
+    precursor_df["nAA"] = precursor_df["sequence"].str.len()
+
+    # Initialize SpecLibBase with only b and y ions
+    base_frag_types = [
+        "b",
+        "y",
+        "b_H2O",
+        "y_H2O",
+        "b_NH3",
+        "y_NH3",
+        "b_modloss",
+        "y_modloss",
+    ]
+    charged_frag_types = get_charged_frag_types(base_frag_types, 2)
+    speclib_base = SpecLibBase(charged_frag_types=charged_frag_types)
+    speclib_base.precursor_df = precursor_df
+
+    # Calculate fragment m/z values
+    speclib_base.calc_fragment_mz_df()
+
+    # Create random intensities for fragments
+    speclib_base._fragment_intensity_df = pd.DataFrame(
+        np.random.rand(*speclib_base.fragment_mz_df.shape),
+        columns=speclib_base.charged_frag_types,
+    )
+
+    # Convert to flat representation
+    speclib_flat = SpecLibFlat()
+    speclib_flat.parse_base_library(speclib_base)
+
+    # Store original m/z values
+    speclib_flat.fragment_df["mz_old"] = speclib_flat.fragment_df["mz"]
+
+    # Convert back to dense matrices, including a and x ions that weren't in original data
+    dense_frag_types = ["a", "b", "x", "y"]
+    df_collection, frag_start_idx, frag_stop_idx = _create_dense_matrices(
+        speclib_flat.precursor_df,
+        speclib_flat.fragment_df,
+        get_charged_frag_types(dense_frag_types, 2),
+        flat_columns=["intensity", "mz_old"],
+    )
+
+    # Verify the conversion
+    assert "mz" in df_collection
+    assert "mz_old" in df_collection
+
+    # Get the column names for each ion type
+    a_cols = [col for col in df_collection["mz"].columns if col.startswith("a_")]
+    b_cols = [col for col in df_collection["mz"].columns if col.startswith("b_")]
+    x_cols = [col for col in df_collection["mz"].columns if col.startswith("x_")]
+    y_cols = [col for col in df_collection["mz"].columns if col.startswith("y_")]
+
+    # Verify b and y ions have values
+    assert not df_collection["mz_old"][b_cols].isna().all().all()
+    assert not df_collection["mz_old"][y_cols].isna().all().all()
+
+    # Verify a and x ions are empty (all zeros or NaN)
+    assert (df_collection["mz_old"][a_cols] == 0).all().all()
+    assert (df_collection["mz_old"][x_cols] == 0).all().all()
+
+    # Compare original and reconstructed m/z values for b and y ions
+    for col_type in [b_cols, y_cols]:
+        mz_mask = df_collection["mz_old"][col_type].values != 0
+
+        # Check that non-zero m/z values match within tolerance
+        np.testing.assert_allclose(
+            df_collection["mz"][col_type].values[mz_mask],
+            df_collection["mz_old"][col_type].values[mz_mask],
+            rtol=1e-6,
+        )
+
+    # Verify structure of output
+    assert isinstance(frag_start_idx, np.ndarray)
+    assert isinstance(frag_stop_idx, np.ndarray)
+    assert len(frag_start_idx) == len(precursor_df)
+    assert len(frag_stop_idx) == len(precursor_df)
+    assert all(stop > start for start, stop in zip(frag_start_idx, frag_stop_idx))
+
+    # Verify dimensions
+    expected_rows = sum(
+        (stop - start) for start, stop in zip(frag_start_idx, frag_stop_idx)
+    )
+    expected_cols = len(get_charged_frag_types(dense_frag_types, 2))
+    assert df_collection["mz"].shape == (expected_rows, expected_cols)
