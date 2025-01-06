@@ -719,21 +719,6 @@ class SpecLibBase:
         self._fragment_mz_df = _hdf.library.fragment_mz_df.values
         self._fragment_intensity_df = _hdf.library.fragment_intensity_df.values
 
-        self._fragment_mz_df = self._fragment_mz_df[
-            [
-                frag
-                for frag in self.charged_frag_types
-                if frag in self._fragment_mz_df.columns
-            ]
-        ]
-        self._fragment_intensity_df = self._fragment_intensity_df[
-            [
-                frag
-                for frag in self.charged_frag_types
-                if frag in self._fragment_intensity_df.columns
-            ]
-        ]
-
     @staticmethod
     def _replace_mod_name_whitespaces(mod_seq_df: pd.DataFrame) -> None:
         """Replace whitespaces in-place in `mod_seq_df` in column `mod_name` with underscores."""
