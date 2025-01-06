@@ -7,6 +7,8 @@ from alphabase.peptide.fragment import (
     _create_dense_matrices,
     flatten_fragments,
     remove_unused_fragments,
+    sort_charged_frag_types,
+    validate_charged_frag_types,
 )
 from alphabase.spectral_library.base import SpecLibBase
 
@@ -198,8 +200,20 @@ class SpecLibFlat(SpecLibBase):
         )
         self._fragment_df = _hdf.library.fragment_df.values
         self._protein_df = _hdf.library.protein_df.values
+
         self._fragment_mz_df = _hdf.library.fragment_mz_df.values
+        self._fragment_mz_df = self._fragment_mz_df[
+            sort_charged_frag_types(
+                validate_charged_frag_types(self._fragment_mz_df.columns.values)
+            )
+        ]
+
         self._fragment_intensity_df = _hdf.library.fragment_intensity_df.values
+        self._fragment_intensity_df = self._fragment_intensity_df[
+            sort_charged_frag_types(
+                validate_charged_frag_types(self._fragment_intensity_df.columns.values)
+            )
+        ]
 
     def get_full_charged_types(self, frag_df: pd.DataFrame) -> list:
         """

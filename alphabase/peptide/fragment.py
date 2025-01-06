@@ -346,6 +346,51 @@ def get_charged_frag_types(
     return sort_charged_frag_types(charged_frag_types)
 
 
+def validate_charged_frag_types(
+    charged_frag_types: List[str],
+) -> Tuple[List[str], List[bool]]:
+    """
+    Validates a list of charged fragment types and returns the valid fragment types.
+    A valid charged fragment type must:
+    1. Follow the format: {fragment_type}_z{charge} (e.g. 'b_z1', 'y_modloss_z2')
+    2. Use a fragment type that exists in FRAGMENT_TYPES
+    3. Have a positive integer charge
+
+    Parameters
+    ----------
+    charged_frag_types : List[str]
+        List of charged fragment types to validate (e.g. ['b_z1', 'y_z2', 'invalid_z1', 'b_modloss_z2'])
+
+    Returns
+    -------
+    List[str]
+        List of valid charged fragment types
+
+    Examples
+    --------
+    >>> valid_types = validate_charged_frag_types(['b_z1', 'y_z2', 'invalid_z1', 'b_modloss_z2'])
+    >>> valid_types
+    ['b_z1', 'y_z2', 'b_modloss_z2']
+    """
+    import warnings
+
+    valid_types = []
+
+    for frag_type in charged_frag_types:
+        base_type, charge = parse_charged_frag_type(frag_type)
+        if base_type not in FRAGMENT_TYPES:
+            warnings.warn(
+                f"Fragment type {frag_type} is not supported and will be ignored"
+            )
+            continue
+        elif charge <= 0:
+            warnings.warn(f"Charge state of fragment type {frag_type} is not positive")
+            continue
+        valid_types.append(frag_type)
+
+    return valid_types
+
+
 def parse_charged_frag_type(charged_frag_type: str) -> Tuple[str, int]:
     """
     Oppsite to `get_charged_frag_types`.
