@@ -9,6 +9,7 @@ def import_data(
     samples_subset=None,
     results_dir=None,
     use_alphaquant_format=False,
+    filter_dict=None,
 ):
     """
     Function to import peptide level data. Depending on available columns in the provided file,
@@ -26,6 +27,7 @@ def import_data(
             input_file=input_file,
             input_type_to_use=input_type_to_use,
             use_alphaquant_format=use_alphaquant_format,
+            filter_dict=filter_dict
         )
 
     input_reshaped = pd.read_csv(
@@ -43,11 +45,14 @@ def add_ion_protein_headers_if_applicable(samples_subset):
 
 
 def reformat_and_save_input_file(
-    input_file, input_type_to_use=None, use_alphaquant_format=False
+    input_file, input_type_to_use=None, use_alphaquant_format=False, filter_dict = None
 ):
     input_type, config_dict_for_type, sep = (
         config_dict_loader.get_input_type_and_config_dict(input_file, input_type_to_use)
     )
+
+    if filter_dict is not None:
+        config_dict_for_type['filters']=  dict(config_dict_for_type.get('filters', {}),**filter_dict)
     print(f"using input type {input_type}")
     format = config_dict_for_type.get("format")
     outfile_name = f"{input_file}.{input_type}.aq_reformat.tsv"
