@@ -928,13 +928,13 @@ def remove_unused_fragments(
         returns the reindexed precursor DataFrame and the sliced fragment DataFrames
     """
 
-    precursor_df = precursor_df.sort_values([frag_start_col], ascending=True)
+
     frag_idx = precursor_df[[frag_start_col, frag_stop_col]].values
 
     new_frag_idx, fragment_pointer = compress_fragment_indices(frag_idx)
 
     precursor_df[[frag_start_col, frag_stop_col]] = new_frag_idx
-    precursor_df = precursor_df.sort_index()
+    precursor_df = precursor_df.reset_index(drop=True)
 
     output_tuple = []
 
