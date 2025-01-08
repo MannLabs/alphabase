@@ -238,8 +238,8 @@ You can run the checks yourself using:
 pre-commit run --all-files
 ```
 
-#### 6. Tagging of changes
-In order to have release notes automatically generated, changes need to be tagged with labels.
+#### 6. Tagging of Pull Requests
+In order to have release notes automatically generated, pull requests need to be tagged with labels.
 The following labels are used (should be safe-explanatory):
 `breaking-change`, `bug`, `enhancement`.
 
