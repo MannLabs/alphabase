@@ -44,8 +44,9 @@ def hdf_data():
     )
 
     # Data for fragment_intensity_df
-    num_rows = len(sequences)
-    fragment_intensity_data = np.random.uniform(0.0, 600.0, size=(num_rows, 4))
+    fragment_intensity_data = np.random.uniform(
+        0.0, 600.0, size=(max(precursor_df["frag_stop_idx"]), 4)
+    )
     fragment_intensity_df = pd.DataFrame(
         fragment_intensity_data, columns=["b_z1", "b_z2", "y_z1", "y_z2"]
     )
