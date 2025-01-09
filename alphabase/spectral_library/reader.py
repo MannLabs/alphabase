@@ -38,6 +38,7 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
         fixed_C57: bool = False,  # noqa: FBT001, FBT002, N803 TODO: make this  *,fixed_c57  (breaking)
         mod_seq_columns: Optional[List[str]] = None,
         rt_unit: str = "irt",
+        # library reader-specific:
         precursor_mz_min: float = 400,
         precursor_mz_max: float = 2000,
         decoy: Optional[str] = None,

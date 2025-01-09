@@ -35,6 +35,8 @@ class PSMReaderBase(ABC):
     # the typ of modification mapping to be used
     _modification_type: Optional[str] = None
 
+    _min_max_rt_norm = False
+
     def __init__(  # noqa: PLR0913 # too many arguments
         self,
         *,
@@ -142,7 +144,6 @@ class PSMReaderBase(ABC):
         self._psm_df = pd.DataFrame()
         self._keep_fdr = fdr
         self._keep_decoy = keep_decoy
-        self._min_max_rt_norm = False
         self._engine_rt_unit = rt_unit
         self._min_irt_value = -100
         self._max_irt_value = 200
