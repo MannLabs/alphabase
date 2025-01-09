@@ -933,7 +933,7 @@ def remove_unused_fragments(
     new_frag_idx, fragment_pointer = compress_fragment_indices(frag_idx)
 
     precursor_df[[frag_start_col, frag_stop_col]] = new_frag_idx
-    precursor_df = precursor_df.reset_index(drop=True)
+    precursor_df = precursor_df.sort_index()
 
     output_tuple = []
 
