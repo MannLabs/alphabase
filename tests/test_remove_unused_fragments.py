@@ -1,28 +1,55 @@
-import os
-
+import numpy as np
+import pandas as pd
 import pytest
 
-import alphabase.io.hdf
 from alphabase.peptide.fragment import remove_unused_fragments
 
 
 @pytest.fixture
 def hdf_data():
     """
-    Fixture to load HDF data and provide precursor_df and fragment_intensity_df.
+    Fixture to automatically generate precursor_df and fragment_intensity_df.
     """
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    hdf_file_name = os.path.join(
-        current_dir,
-        "..",
-        "test_data",
-        "unit_tests",
-        "input_hdf_formats",
-        "mini_sample_remove_unused_fragments.hdf",
+    # Data for precursor_df
+    sequences = [
+        "PSKGPLQSVQVFGR",
+        "FLISLLEEYFK",
+        "MTEDALRLNLLK",
+        "FMSAYEQR",
+        "PGPKGEAGPTGPQGEPGVR",
+        "YEITEQR",
+        "DAEAAEATAEGALKAEK",
+        "FGDSRGGGGNFGPGPGSNFR",
+        "LDEKENLSAK",
+        "ATVASSTQKFQDLGVK",
+        "GFALVGVGSEASSKK",
+        "LQLEIDQKK",
+        "MAGLELLSDQGYR",
+        "RGGPGGPPGPLMEQMGGR",
+    ]
+
+    frag_start_idx = [151, 81, 110, 24, 296, 17, 229, 334, 69, 183, 180, 26, 123, 284]
+    frag_stop_idx = [164, 91, 121, 31, 314, 23, 245, 353, 78, 198, 194, 34, 135, 301]
+    charge = [2] * len(sequences)
+    nAA = [len(seq) for seq in sequences]
+
+    precursor_df = pd.DataFrame(
+        {
+            "sequence": sequences,
+            "frag_start_idx": frag_start_idx,
+            "frag_stop_idx": frag_stop_idx,
+            "charge": charge,
+            "nAA": nAA,
+        }
     )
-    hdf_file = alphabase.io.hdf.HDF_File(hdf_file_name, read_only=True)
-    precursor_df = hdf_file.dfs.psm_df.values
-    fragment_intensity_df = hdf_file.dfs.fragment_intensity_df.values
+
+    # Data for fragment_intensity_df
+    num_rows = len(sequences)
+    fragment_intensity_data = np.random.uniform(0.0, 600.0, size=(num_rows, 4))
+    fragment_intensity_df = pd.DataFrame(
+        fragment_intensity_data, columns=["b_z1", "b_z2", "y_z1", "y_z2"]
+    )
+
     return precursor_df, fragment_intensity_df
 
 
