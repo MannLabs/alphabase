@@ -13,13 +13,8 @@ alphapept:
     'raw_name': 'raw_name' #parse from `ms_data.hdf`` file
     'fdr': 'q_value'
     'decoy': 'decoy'
-  modification_mapping:
-    'Carbamidomethyl@C': 'cC'
-    'Oxidation@M': 'oxM'
-    'Phospho@S': 'pS'
-    'Phospho@T': 'pT'
-    'Phospho@Y': 'pY'
-    'Acetyl@Protein_N-term': 'a'
+  modification_mapping_type: 'alphapept'
+
 
 maxquant:
   reader_type: maxquant
@@ -49,7 +44,10 @@ maxquant:
     'genes': ['Gene Names','Gene names']
     'decoy': 'Reverse'
     'intensity': 'Intensity'
-  modification_mapping:
+  modification_mapping_type: 'maxquant'
+
+modification_mappings:
+  maxquant:
     'mTRAQ@K':
       - 'K(mTRAQ)'
     'mTRAQ@Any_N-term':
@@ -107,6 +105,13 @@ maxquant:
     'Deamidated@Q': ['Q(Deamidation (NQ))','Q(de)']
     'GlyGly@K': ['K(GlyGly (K))', 'K(gl)']
     'hydroxyisobutyryl@K': 'K(2-)'
+  alphapept:
+    'Carbamidomethyl@C': 'cC'
+    'Oxidation@M': 'oxM'
+    'Phospho@S': 'pS'
+    'Phospho@T': 'pT'
+    'Phospho@Y': 'pY'
+    'Acetyl@Protein_N-term': 'a'
 
 pfind:
   reader_type: pfind
@@ -123,8 +128,7 @@ pfind:
     'uniprot_ids': 'Proteins'
     'fdr': 'Q-value'
     'decoy': ['Target/Decoy', 'Targe/Decoy']
-  modification_mapping:
-    '': ''
+  modification_mapping_type: null  # no mapping required
 
 msfragger_pepxml:
   reader_type: msfragger_pepxml
@@ -139,8 +143,6 @@ msfragger_pepxml:
     'proteins': 'protein'
     'raw_name': 'raw_name'
     'mobility': 'ion_mobility'
-  modification_mapping:
-    '': ''
   mass_mapped_mods:
     - 'Oxidation@M' #other Oxidation@X are not needed here
     - 'Carbamidomethyl@C'
@@ -153,6 +155,7 @@ msfragger_pepxml:
     - 'Dimethyl@K' # Any_N-term is not needed here as it will be infered in-the-fly
     - 'Methyl@E' #an example of a PTM that can be C-term
   mod_mass_tol: 0.1 # Da
+  modification_mapping_type: 'maxquant'
 
 diann:
   reader_type: diann
@@ -175,7 +178,7 @@ diann:
     'fdr': 'Q.Value'
   mod_seq_columns:
     - "Modified.Sequence"
-  modification_mapping: 'maxquant'
+  modification_mapping_type: 'maxquant'
 
 spectronaut_report:
   reader_type: spectronaut_report
@@ -191,7 +194,7 @@ spectronaut_report:
     'charge': 'charge'
   mod_seq_columns:
     - 'ModifiedSequence'
-  modification_mapping: 'maxquant'
+  modification_mapping_type: 'maxquant'
 
 spectronaut:
   reader_type: spectronaut
@@ -215,7 +218,7 @@ spectronaut:
     - 'ModifiedPeptideSequence'
     - 'LabeledSequence'
     - 'FullUniModPeptideName'
-  modification_mapping: 'maxquant'
+  modification_mapping_type: 'maxquant'
 
 library_reader_base:
   reader_type: library_reader_base
@@ -246,11 +249,11 @@ library_reader_base:
     - 'FullUniModPeptideName'
     - 'LabeledSequence'
     - 'FullUniModPeptideName'
-  modification_mapping: 'maxquant'
+  modification_mapping_type: 'maxquant'
 
 sage:
   reader_type: sage
-  rt_unit: minute
+  rt_unit: second
   column_mapping:
     'modified_sequence': 'peptide'
     'sequence': 'stripped_peptide'
@@ -265,3 +268,4 @@ sage:
     'peptide_fdr': 'peptide_q'
     'protein_fdr': 'protein_q'
     'decoy': 'is_decoy'
+  modification_mapping_type: null # custom mapping in code

@@ -15,7 +15,7 @@ class ModificationMapper:
         custom_modification_mapping: Optional[Dict[str, str]],
         *,
         reader_yaml: Dict,
-        modification_type: Optional[str],
+        mapping_type: str,
         add_unimod_to_mod_mapping: bool,
     ):
         """Initialize the ModificationMapper.
@@ -35,7 +35,7 @@ class ModificationMapper:
         reader_yaml:
             the yaml (read from file) containing the modification mappings
 
-        modification_type:
+        mapping_type:
             the type of modification mapping ("maxquant" or "alphapept")
 
         add_unimod_to_mod_mapping:
@@ -44,7 +44,7 @@ class ModificationMapper:
         """
         self._psm_reader_yaml = reader_yaml
         self._add_unimod_to_mod_mapping = add_unimod_to_mod_mapping
-        self._modification_type = modification_type
+        self._mapping_type = mapping_type
 
         self.modification_mapping = None
         self.rev_mod_mapping = None
@@ -95,23 +95,20 @@ class ModificationMapper:
         ----------
         modification_mapping:
             If dictionary: the current modification_mapping will be overwritten by this.
-            If str: the parameter will be interpreted as a reader type, and the modification_mapping is read from the
-                "modification_mapping" section of the psm_reader_yaml
+            If str: the parameter will be interpreted as a modification_mapping_type, and the mapping is read from the
+                respective key in the "modification_mappings" section of the psm_reader_yaml
 
         """
         if modification_mapping is None:
             self._init_modification_mapping()
         elif isinstance(
-            modification_mapping, str
-        ):  # TODO: remove this overloading of the parameter by introducing yaml key "modification_mapping_type"
-            if modification_mapping in self._psm_reader_yaml:
-                self.modification_mapping = self._psm_reader_yaml[modification_mapping][
-                    "modification_mapping"
-                ]
-            else:
-                raise ValueError(
-                    f"Unknown modification mapping: {modification_mapping}"
-                )
+            modification_mapping,
+            str,  # interpret as modification_mapping_type
+        ):
+            self.modification_mapping = self._psm_reader_yaml["modification_mappings"][
+                modification_mapping
+            ]
+
         else:
             self.modification_mapping = copy.deepcopy(modification_mapping)
 
@@ -125,12 +122,11 @@ class ModificationMapper:
 
     def _init_modification_mapping(self) -> None:
         """Initialize the modification mapping from the psm_reader_yaml or as an empty dictionary."""
-        if self._modification_type is not None:
-            self.modification_mapping = self._psm_reader_yaml[self._modification_type][
-                "modification_mapping"
-            ]
-        else:
-            self.modification_mapping = {}
+        self.modification_mapping = (
+            self._psm_reader_yaml["modification_mappings"][self._mapping_type]
+            if self._mapping_type is not None
+            else {}
+        )
 
     def _add_all_unimod(self) -> None:
         """Add all unimod modifications to the modification mapping."""

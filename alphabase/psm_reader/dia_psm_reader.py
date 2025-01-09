@@ -18,7 +18,6 @@ class SpectronautReader(MaxQuantReader):
     _reader_type = "spectronaut"
     _add_unimod_to_mod_mapping = True
     _min_max_rt_norm = True
-    _fixed_c57_default = False
 
     def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
         """Spectronaut-specific preprocessing of output data."""
