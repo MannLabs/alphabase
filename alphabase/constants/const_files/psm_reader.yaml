@@ -48,6 +48,10 @@ maxquant:
     'decoy': 'Reverse'
     'intensity': 'Intensity'
   modification_mapping:
+    'mTRAQ@K':
+      - 'K(mTRAQ)'
+    'mTRAQ@Any_N-term':
+      - '(mTRAQ)'
     'Dimethyl@K':
       - 'K(Dimethyl)'
     'Dimethyl@R':
@@ -55,7 +59,7 @@ maxquant:
     'Dimethyl@Any_N-term':
       - '(Dimethyl)'
     'Acetyl@Protein_N-term':
-      - '_(Acetyl (Protein_N-term))'
+      - '_(Acetyl (Protein N-term))'
       - '_(ac)'
     'Acetyl@K':
       - 'K(ac)'
@@ -130,7 +134,6 @@ msfragger_pepxml:
     'query_id': 'spectrum'
     'scan_num': 'start_scan'
     'score': 'expect'
-    'fdr': 'expect'
     'proteins': 'protein'
     'raw_name': 'raw_name'
     'mobility': 'ion_mobility'
