@@ -11,6 +11,7 @@ __all__ = [
     "MSFragger_PSM_TSV_Reader",
     "pFindReader",
     "MSFraggerPepXML",
+    "MSFraggerPepXMLReader",
     "SageReaderTSV",
     "SageReaderParquet",
 ]
@@ -39,6 +40,7 @@ from alphabase.psm_reader.maxquant_reader import (
 from alphabase.psm_reader.msfragger_reader import (
     MSFragger_PSM_TSV_Reader,
     MSFraggerPepXML,
+    MSFraggerPepXMLReader,
 )
 from alphabase.psm_reader.msfragger_reader import (
     register_readers as register_fragger_readers,

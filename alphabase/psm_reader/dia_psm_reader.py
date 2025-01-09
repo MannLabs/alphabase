@@ -4,16 +4,12 @@ import numpy as np
 import pandas as pd
 
 from alphabase.psm_reader.keys import PsmDfCols
-from alphabase.psm_reader.maxquant_reader import MaxQuantReader
+from alphabase.psm_reader.maxquant_reader import ModifiedSequenceReader
 from alphabase.psm_reader.psm_reader import psm_reader_provider
 
 
-class SpectronautReader(MaxQuantReader):
-    """Reader for Spectronaut's output library TSV/CSV.
-
-    Other parameters, please see `MaxQuantReader`
-    in `alphabase.psm_reader.maxquant_reader`
-    """
+class SpectronautReader(ModifiedSequenceReader):
+    """Reader for Spectronaut's output library TSV/CSV."""
 
     _reader_type = "spectronaut"
     _add_unimod_to_mod_mapping = True
@@ -39,34 +35,23 @@ class SwathReader(SpectronautReader):
     _add_unimod_to_mod_mapping = True
 
 
-class DiannReader(MaxQuantReader):
+class DiannReader(ModifiedSequenceReader):
     """Reader for DIANN data."""
 
     _reader_type = "diann"
     _add_unimod_to_mod_mapping = True
     _min_max_rt_norm = False
 
-    def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
-        """DIANN-specific preprocessing of output data.
-
-        Nothing to do for DIANN, still method of superclass needs to be overwritten.
-        TODO disentangle the inheritance structure.
-        """
-        return df
-
-    def _post_process(self) -> None:
-        super()._post_process()
+    def _post_process(self, origin_df: pd.DataFrame) -> None:
         self._psm_df.rename(
             columns={PsmDfCols.SPEC_IDX: PsmDfCols.DIANN_SPEC_INDEX}, inplace=True
         )
 
+        super()._post_process(origin_df)
 
-class SpectronautReportReader(MaxQuantReader):
-    """Reader for Spectronaut's report TSV/CSV.
 
-    Other parameters, please see `MaxQuantReader`
-    in `alphabase.psm_reader.maxquant_reader`
-    """
+class SpectronautReportReader(ModifiedSequenceReader):
+    """Reader for Spectronaut's report TSV/CSV."""
 
     _reader_type = "spectronaut_report"
     _add_unimod_to_mod_mapping = True
@@ -75,7 +60,7 @@ class SpectronautReportReader(MaxQuantReader):
     def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
         """Spectronaut report-specific preprocessing of output data."""
         df[[self.mod_seq_column, PsmDfCols.CHARGE]] = df[
-            "EG.PrecursorId"  # TODO: move to yaml
+            self._precursor_id_column
         ].str.split(".", expand=True, n=2)
         df[PsmDfCols.CHARGE] = df[PsmDfCols.CHARGE].astype(np.int8)
         return df

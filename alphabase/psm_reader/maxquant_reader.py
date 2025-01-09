@@ -1,6 +1,7 @@
 """Reader for MaxQuant data."""
 
 import warnings
+from abc import ABC
 from typing import List, Optional
 
 import numba
@@ -123,10 +124,9 @@ def parse_mod_seq(
     )
 
 
-class MaxQuantReader(PSMReaderBase):
-    """Reader for MaxQuant data."""
+class ModifiedSequenceReader(PSMReaderBase, ABC):
+    """Reader for MaxQuant-like data."""
 
-    _reader_type = "maxquant"
     _add_unimod_to_mod_mapping = True
 
     def __init__(  # noqa: PLR0913, D417 # too many arguments in function definition, missing argument descriptions
@@ -142,7 +142,7 @@ class MaxQuantReader(PSMReaderBase):
         fixed_C57: Optional[bool] = None,  # noqa: N803 TODO: make this  *,fixed_c57  (breaking)
         **kwargs,
     ):
-        """Reader for MaxQuant msms.txt and evidence.txt.
+        """Reader for MaxQuant-like data (in terms of modification loading and decoy translation).
 
         See documentation of `PSMReaderBase` for more information.
 
@@ -178,6 +178,35 @@ class MaxQuantReader(PSMReaderBase):
                 self._psm_df[PsmDfCols.DECOY] == "-"
             ).astype(np.int8)
 
+    def _load_modifications(self, origin_df: pd.DataFrame) -> None:
+        if origin_df[self.mod_seq_column].str.contains("[", regex=False).any():
+            if origin_df[self.mod_seq_column].str.contains("(", regex=False).any():
+                origin_df[self.mod_seq_column] = origin_df[self.mod_seq_column].apply(
+                    replace_parentheses_with_brackets
+                )
+            mod_sep = "[]"
+        else:
+            mod_sep = "()"
+
+        seqs, mods, mod_sites = zip(
+            *origin_df[self.mod_seq_column].apply(
+                parse_mod_seq,
+                mod_sep=mod_sep,
+                fixed_C57=self.fixed_C57,
+            )
+        )
+
+        self._psm_df[PsmDfCols.MODS] = mods
+        self._psm_df[PsmDfCols.MOD_SITES] = mod_sites
+        if PsmDfCols.SEQUENCE not in self._psm_df.columns:
+            self._psm_df[PsmDfCols.SEQUENCE] = seqs
+
+
+class MaxQuantReader(ModifiedSequenceReader):
+    """Reader for MaxQuant data."""
+
+    _reader_type = "maxquant"
+
     def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
         """MaxQuant-specific preprocessing of output data."""
         df = df[~pd.isna(df["Retention time"])]
@@ -200,26 +229,6 @@ class MaxQuantReader(PSMReaderBase):
         #     df['Mobility'] = df['K0'] # Bug in MaxQuant? It should be 1/K0
         # min_rt = df['Retention time'].min()
         return df
-
-    def _load_modifications(self, origin_df: pd.DataFrame) -> None:
-        if origin_df[self.mod_seq_column].str.contains("[", regex=False).any():
-            if origin_df[self.mod_seq_column].str.contains("(", regex=False).any():
-                origin_df[self.mod_seq_column] = origin_df[self.mod_seq_column].apply(
-                    replace_parentheses_with_brackets
-                )
-            mod_sep = "[]"
-        else:
-            mod_sep = "()"
-
-        (seqs, self._psm_df[PsmDfCols.MODS], self._psm_df[PsmDfCols.MOD_SITES]) = zip(
-            *origin_df[self.mod_seq_column].apply(
-                parse_mod_seq,
-                mod_sep=mod_sep,
-                fixed_C57=self.fixed_C57,
-            )
-        )
-        if PsmDfCols.SEQUENCE not in self._psm_df.columns:
-            self._psm_df[PsmDfCols.SEQUENCE] = seqs
 
 
 def register_readers() -> None:

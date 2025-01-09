@@ -194,6 +194,8 @@ spectronaut_report:
     'charge': 'charge'
   mod_seq_columns:
     - 'ModifiedSequence'
+  precursor_id_columns:
+    - "EG.PrecursorId"
   modification_mapping_type: 'maxquant'
 
 spectronaut:
@@ -218,6 +220,8 @@ spectronaut:
     - 'ModifiedPeptideSequence'
     - 'LabeledSequence'
     - 'FullUniModPeptideName'
+  precursor_id_columns:
+    - "EG.PrecursorId"
   modification_mapping_type: 'maxquant'
 
 library_reader_base:
