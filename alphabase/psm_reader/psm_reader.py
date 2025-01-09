@@ -2,6 +2,7 @@
 
 import copy
 import warnings
+from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Dict, List, NoReturn, Optional, Set, Type, Union
 
@@ -81,8 +82,11 @@ def _keep_modifications(mod_str: str, mod_set: set) -> str:
 psm_reader_yaml = load_yaml(Path(CONST_FILE_FOLDER) / "psm_reader.yaml")
 
 
-class PSMReaderBase:
+class PSMReaderBase(ABC):
     """The Base class for all PSMReaders."""
+
+    # the type of the reader, this references a key in psm_reader.yaml
+    _reader_type: str
 
     def __init__(
         self,
@@ -108,12 +112,12 @@ class PSMReaderBase:
             in other engine's result.
             If it is None, this dict will be init by
             `self._init_column_mapping`. The dict values could be
-            either str or list, for exaplme:
+            either str or list, for example:
             ```
             columns_mapping = {
-            'sequence': 'NakedSequence', #str
-            'charge': 'Charge', #str
-            'proteins':['Proteins','UniprotIDs'], # list, this reader will automatically detect all of them.
+                'sequence': 'NakedSequence',
+                'charge': 'Charge',
+                'proteins':['Proteins','UniprotIDs'] # list, this reader will automatically detect all of them.
             }
             ```
             Defaults to None.
@@ -279,9 +283,7 @@ class PSMReaderBase:
                 self.rev_mod_mapping[other_mod] = this_mod
 
     def _init_column_mapping(self) -> NoReturn:
-        raise NotImplementedError(
-            f'"{self.__class__}" must implement "_init_column_mapping()"'
-        )
+        self.column_mapping = psm_reader_yaml[self._reader_type]["column_mapping"]
 
     def load(self, _file: Union[List[str], str]) -> pd.DataFrame:
         """Wrapper for import_file()."""
@@ -316,23 +318,25 @@ class PSMReaderBase:
 
         """
         origin_df = self._load_file(_file)
-        if len(origin_df) == 0:
-            self._psm_df = pd.DataFrame()
-        else:
+        self._psm_df = pd.DataFrame()
+
+        if len(origin_df):
             # TODO: think about dropping the 'inplace' pattern here
-            self._translate_columns(origin_df)
-            self._transform_table()
-            self._translate_decoy()
-            self._translate_score()
-            self._load_modifications(origin_df)
-            self._translate_modifications()
-            self._post_process()
+            self._translate_columns(origin_df)  # only here
+            self._transform_table()  # only sage
+            self._translate_decoy()  # only sage, mq, msfragger, pfind
+            self._translate_score()  # only msfragger, pfind
+            self._load_modifications(
+                origin_df
+            )  # only sage, mq, msfragger, pfind, alphapept
+            self._translate_modifications()  # here, sage, msfragger, pfind
+            self._post_process()  # here, libraryreader, diann, msfragger
         return self._psm_df
 
-    def _translate_decoy(self) -> None:
+    def _translate_decoy(self) -> None:  # noqa: B027 empty method in an abstract base class
         pass
 
-    def _translate_score(self) -> None:
+    def _translate_score(self) -> None:  # noqa: B027 empty method in an abstract base class
         # some scores are evalue/pvalue, it should be translated
         # to -log(evalue), as score is the larger the better
         pass
@@ -381,6 +385,7 @@ class PSMReaderBase:
                 df_group[PsmDfCols.RT_NORM] / df_group[PsmDfCols.RT_NORM].max()
             )
 
+    @abstractmethod
     def _load_file(self, filename: str) -> pd.DataFrame:
         """Load original dataframe from PSM filename.
 
@@ -392,18 +397,12 @@ class PSMReaderBase:
         filename : str
             psm filename
 
-        Raises
-        ------
-        NotImplementedError
-            Subclasses must re-implement this method
-
         Returns
         -------
         pd.DataFrame
             loaded dataframe
 
         """
-        raise NotImplementedError(f'"{self.__class__}" must implement "_load_file()"')
 
     def _find_mapped_columns(self, origin_df: pd.DataFrame) -> Dict[str, str]:
         mapped_columns = {}
@@ -433,7 +432,7 @@ class PSMReaderBase:
 
         """
         mapped_columns = self._find_mapped_columns(origin_df)
-        self._psm_df = pd.DataFrame()
+
         for col, map_col in mapped_columns.items():
             self._psm_df[col] = origin_df[map_col]
 
@@ -443,7 +442,7 @@ class PSMReaderBase:
         ):
             self._psm_df[PsmDfCols.SPEC_IDX] = self._psm_df[PsmDfCols.SCAN_NUM] - 1
 
-    def _transform_table(self) -> None:
+    def _transform_table(self) -> None:  # noqa: B027 empty method in an abstract base class
         """Transform the dataframe format if needed.
 
         Usually only needed in combination with spectral libraries.
@@ -460,6 +459,7 @@ class PSMReaderBase:
 
         """
 
+    @abstractmethod
     def _load_modifications(self, origin_df: pd.DataFrame) -> NoReturn:
         """Read modification information from 'origin_df'.
 
@@ -472,9 +472,6 @@ class PSMReaderBase:
             dataframe of original search engine.
 
         """
-        raise NotImplementedError(
-            f'"{self.__class__}" must implement "_load_modifications()"'
-        )
 
     def _translate_modifications(self) -> None:
         """Translate modifications to AlphaBase format.

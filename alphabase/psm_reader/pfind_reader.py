@@ -11,7 +11,6 @@ from alphabase.psm_reader.keys import PsmDfCols
 from alphabase.psm_reader.psm_reader import (
     PSMReaderBase,
     psm_reader_provider,
-    psm_reader_yaml,
 )
 
 
@@ -97,6 +96,8 @@ def parse_pfind_protein(protein: str, *, keep_reverse: bool = True) -> str:
 class pFindReader(PSMReaderBase):  # noqa: N801 name `pFindReader` should use CapWords convention TODO: used by peptdeep, alpharaw
     """Reader for pFind's *.txt files."""
 
+    _reader_type = "pfind"
+
     def __init__(
         self,
         *,
@@ -114,9 +115,6 @@ class pFindReader(PSMReaderBase):  # noqa: N801 name `pFindReader` should use Ca
             keep_decoy=keep_decoy,
             **kwargs,
         )
-
-    def _init_column_mapping(self) -> None:
-        self.column_mapping = psm_reader_yaml["pfind"]["column_mapping"]
 
     def _translate_modifications(self) -> None:
         pass
