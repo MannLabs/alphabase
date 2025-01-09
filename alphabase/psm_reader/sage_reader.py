@@ -96,7 +96,9 @@ class SageModificationTranslation:
         )
 
         # 4. Apply translation to PSMs
-        translated_psm_df = _apply_translate_modifications_mp(psm_df, translation_df)
+        translated_psm_df = _apply_translate_modifications_mp(
+            psm_df, translation_df, mp_process_num=self.mp_process_num
+        )
 
         # 5. Drop PSMs with missing modifications
         is_null = translated_psm_df[PsmDfCols.MOD_SITES].isna()
@@ -487,11 +489,11 @@ def _apply_translate_modifications_mp(
         Whether to show a progress bar. Defaults to True
 
     """
-    df_list = []
     with mp.get_context("spawn").Pool(mp_process_num) as p:
         processing = p.imap(
             partial(
-                _apply_translate_modifications, mod_translation_df=mod_translation_df
+                _apply_translate_modifications,
+                mod_translation_df=mod_translation_df,
             ),
             _batchify_df(psm_df, mp_batch_size),
         )
