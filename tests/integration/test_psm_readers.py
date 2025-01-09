@@ -221,7 +221,7 @@ def _assert_reference_df_equal(
             # check that the data is the same, but ignore the order
             psm_df = psm_df.sort_values(by=["rt"]).reset_index(drop=True)
             expected_df = expected_df.sort_values(by=["rt"]).reset_index(drop=True)
-                
+
         try:
             pd.testing.assert_frame_equal(psm_df, expected_df, check_like=loose_check)
         except AssertionError as e:
@@ -251,7 +251,7 @@ def test_psm_reader_yaml() -> None:
 
 def test_maxquant_reader() -> None:
     """Test the MaxQuant reader."""
-    
+
     input_data = io.StringIO(TEST_DATA_MAXQUANT)
 
     reader = MaxQuantReader()
