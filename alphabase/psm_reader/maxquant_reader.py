@@ -1,3 +1,5 @@
+"""Reader for MaxQuant data."""
+
 import copy
 import warnings
 from typing import List, Optional
@@ -32,6 +34,7 @@ for mod_name, unimod_id_ in MOD_DF[["mod_name", "unimod_id"]].to_numpy():
 def replace_parentheses_with_brackets(
     modseq: str,
 ) -> str:
+    """Replace parentheses with brackets in the modified sequence."""
     mod_depth = 0
     for i, aa in enumerate(modseq):
         if aa == "(":
@@ -66,9 +69,9 @@ def parse_mod_seq(
         separator to indicate the modification section.
         Defaults to '()'
 
-    fixed_C : bool
+    fixed_C57 : bool
         If Carbamidomethyl@C is a fixed modification
-        and not displayed in the sequence. Defaults to True for MaxQuant.
+        and not displayed in the sequence. Defaults to True.
 
     Returns
     -------
@@ -132,6 +135,8 @@ def parse_mod_seq(
 
 
 class MaxQuantReader(PSMReaderBase):
+    """Reader for MaxQuant data."""
+
     def __init__(  # noqa: PLR0913 many arguments in function definition
         self,
         *,
@@ -172,6 +177,9 @@ class MaxQuantReader(PSMReaderBase):
             The columns to find modified sequences,
             by default ['Modified sequence']
 
+        **kwargs : dict
+            deprecated
+
         """
         if mod_seq_columns is None:
             mod_seq_columns = [
@@ -205,6 +213,7 @@ class MaxQuantReader(PSMReaderBase):
     def set_modification_mapping(
         self, modification_mapping: Optional[dict] = None
     ) -> None:
+        """Set modification mapping."""
         super().set_modification_mapping(modification_mapping)
         self._add_all_unimod()
         self._extend_mod_brackets()
@@ -300,4 +309,5 @@ class MaxQuantReader(PSMReaderBase):
 
 
 def register_readers() -> None:
+    """Register MaxQuant reader."""
     psm_reader_provider.register_reader("maxquant", MaxQuantReader)

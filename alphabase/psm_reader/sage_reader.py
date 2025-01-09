@@ -1,3 +1,5 @@
+"""SageReader for reading Sage output files."""
+
 import logging
 import multiprocessing as mp
 import re
@@ -18,6 +20,8 @@ from alphabase.psm_reader.psm_reader import (
 
 
 class SageModificationTranslation:
+    """Translate Sage style modifications to alphabase style modifications."""
+
     def __init__(
         self,
         custom_translation_df: pd.DataFrame = None,
@@ -25,6 +29,7 @@ class SageModificationTranslation:
         mp_process_num: int = 10,
     ):
         """Translate Sage style modifications to alphabase style modifications.
+
         A modified sequence like VM[+15.9949]QENSSSFSDLSER will be translated to mods: Oxidation@M, mod_sites: 2.
         By default, the translation is done by matching the observed mass and location to the UniMod database.
         If a custom translation dataframe is provided, the translation will be done based on the custom translation dataframe first.
@@ -57,6 +62,7 @@ class SageModificationTranslation:
 
     def __call__(self, psm_df: pd.DataFrame) -> pd.DataFrame:
         """Translate modifications in the PSMs to alphabase style modifications.
+
         1. Discover all modifications in the PSMs.
         2. Annotate modifications from custom translation df, if provided.
         3. Annotate all remaining modifications from UniMod.
@@ -107,6 +113,7 @@ class SageModificationTranslation:
         self, discovered_modifications_df: pd.DataFrame, translation_df: pd.DataFrame
     ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """Annotate modifications from custom translation df, if provided.
+
         Discovered modifications are first matched using the custom translation dataframe.
         If no match is found, the modifications are returned for matching using UniMod.
 
@@ -153,6 +160,7 @@ class SageModificationTranslation:
         self, discovered_modifications_df: pd.DataFrame, translation_df: pd.DataFrame
     ) -> pd.DataFrame:
         """Annotate all remaining modifications from UniMod.
+
         UniMod modification are used from the global MOD_DF.
 
         Parameters
@@ -476,6 +484,9 @@ def _apply_translate_modifications_mp(
     mp_process_num : int
         The number of parallel processes
 
+    progress_bar : bool, optional
+        Whether to show a progress bar. Defaults to True
+
     """
     df_list = []
     with mp.get_context("spawn").Pool(mp_process_num) as p:
@@ -497,6 +508,7 @@ def _apply_translate_modifications_mp(
 
 def _get_annotated_mod_df() -> pd.DataFrame:
     """Annotates the modification dataframe for annotation of sage output.
+
     Due to the modified sequence based notation,
     C-Terminal and sidechain modifications on the last AA could be confused.
 
@@ -526,6 +538,7 @@ def _get_annotated_mod_df() -> pd.DataFrame:
 
 def _sage_spec_idx_from_scan_nr(scan_indicator_str: str) -> int:
     """Extract the spectrum index from the scan_nr field in Sage output.
+
     Sage uses 1-based indexing for spectra, so we need to subtract 1 to convert to 0-based indexing.
 
     Parameters
@@ -549,6 +562,8 @@ def _sage_spec_idx_from_scan_nr(scan_indicator_str: str) -> int:
 
 
 class SageReaderBase(PSMReaderBase):
+    """Base class for SageReader."""
+
     def __init__(  # noqa: PLR0913 many arguments in function definition
         self,
         *,
@@ -561,6 +576,7 @@ class SageReaderBase(PSMReaderBase):
         mp_process_num: int = 10,
         **kwargs,
     ):
+        """Initialize SageReaderBase."""
         self.custom_translation_df = custom_translation_df
         self.mp_process_num = mp_process_num
 
@@ -617,7 +633,10 @@ class SageReaderBase(PSMReaderBase):
 
 
 class SageReaderTSV(SageReaderBase):
+    """Reader for Sage output files in TSV format."""
+
     def __init__(self, *args, **kwargs):
+        """Initialize SageReaderTSV."""
         super().__init__(*args, **kwargs)
 
     def _load_file(self, filename: str) -> pd.DataFrame:
@@ -625,7 +644,10 @@ class SageReaderTSV(SageReaderBase):
 
 
 class SageReaderParquet(SageReaderBase):
+    """Reader for Sage output files in parquet format."""
+
     def __init__(self, *args, **kwargs):
+        """Initialize SageReaderParquet."""
         super().__init__(*args, **kwargs)
 
     def _load_file(self, filename: str) -> pd.DataFrame:
@@ -633,5 +655,6 @@ class SageReaderParquet(SageReaderBase):
 
 
 def register_readers() -> None:
+    """Register Sage readers."""
     psm_reader_provider.register_reader("sage_tsv", SageReaderTSV)
     psm_reader_provider.register_reader("sage_parquet", SageReaderParquet)

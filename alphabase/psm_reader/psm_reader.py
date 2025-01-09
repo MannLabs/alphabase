@@ -1,3 +1,5 @@
+"""The base class for all PSM readers and the provider for all readers."""
+
 import copy
 import warnings
 from pathlib import Path
@@ -15,18 +17,17 @@ from alphabase.yaml_utils import load_yaml
 
 
 def translate_other_modification(mod_str: str, mod_dict: dict) -> str:
-    """Translate modifications of `mod_str` to the AlphaBase
-    format mapped by mod_dict.
+    """Translate modifications of `mod_str` to the AlphaBase format mapped by mod_dict.
 
     Parameters
     ----------
-        mod_str : str
-            mod list in str format, seperated by ';',
-            e.g. ModA;ModB
-        mod_dict : dict
-            translate mod dict from others to AlphaBase,
-            e.g. for pFind, key=['Phospho[S]','Oxidation[M]'],
-            value=['Phospho@S','Oxidation@M']
+    mod_str : str
+        mod list in str format, seperated by ';',
+        e.g. ModA;ModB
+    mod_dict : dict
+        translate mod dict from others to AlphaBase,
+        e.g. for pFind, key=['Phospho[S]','Oxidation[M]'],
+        value=['Phospho@S','Oxidation@M']
 
     Returns
     -------
@@ -81,6 +82,8 @@ psm_reader_yaml = load_yaml(Path(CONST_FILE_FOLDER) / "psm_reader.yaml")
 
 
 class PSMReaderBase:
+    """The Base class for all PSMReaders."""
+
     def __init__(
         self,
         *,
@@ -91,7 +94,9 @@ class PSMReaderBase:
         rt_unit: str = "minute",
         **kwargs,
     ):
-        """The Base class for all PSMReaders. The key of the sub-classes for different
+        """The Base class for all PSMReaders.
+
+        The key of the sub-classes for different
         search engine format is to re-define `column_mapping` and `modification_mapping`.
 
         Parameters
@@ -112,6 +117,7 @@ class PSMReaderBase:
             }
             ```
             Defaults to None.
+
         modification_mapping : dict, optional
             A dict that maps alphabase's modifications to other engine's.
             If it is None, this dict will be init by
@@ -126,12 +132,21 @@ class PSMReaderBase:
             }
             ```
             Defaults to None.
+
         fdr : float, optional
             FDR level to keep PSMs.
             Defaults to 0.01.
+
         keep_decoy : bool, optional
             If keep decoy PSMs in self.psm_df.
-            Defautls to False.
+            Defaults to False.
+
+        rt_unit : str, optional
+            The unit of RT in the search engine result.
+            Defaults to 'minute'.
+
+        **kwargs: dict
+            deprecated
 
         Attributes
         ----------
@@ -140,10 +155,8 @@ class PSMReaderBase:
         modification_mapping : dict
             Dict structure same as modification_mapping in Args.
             We must use self.set_modification_mapping(new_mapping) to update it.
-        _psm_df : pd.DataFrame
-            the PSM DataFrame after loading from search engines.
         psm_df : pd.DataFrame
-            the getter of self._psm_df
+            the PSM DataFrame after loading from search engines.
         keep_fdr : float
             The only PSMs with FDR<=keep_fdr were returned in self._psm_df.
         keep_decoy : bool
@@ -183,6 +196,7 @@ class PSMReaderBase:
 
     @property
     def psm_df(self) -> pd.DataFrame:
+        """Get the PSM DataFrame."""
         return self._psm_df
 
     def add_modification_mapping(self, modification_mapping: dict) -> None:
@@ -224,6 +238,7 @@ class PSMReaderBase:
     def set_modification_mapping(
         self, modification_mapping: Optional[dict] = None
     ) -> None:
+        """Set the modification mapping."""
         if modification_mapping is None:
             self._init_modification_mapping()
         elif isinstance(modification_mapping, str):
@@ -275,13 +290,15 @@ class PSMReaderBase:
         return self.import_file(_file)
 
     def import_files(self, file_list: List[str]) -> pd.DataFrame:
+        """Import multiple files."""
         df_list = [self.import_file(file) for file in file_list]
         self._psm_df = pd.concat(df_list, ignore_index=True)
         return self._psm_df
 
     def import_file(self, _file: str) -> pd.DataFrame:
-        """This is the main entry function of PSM readers,
-        it imports the file with following steps:
+        """Main entry function of PSM readers.
+
+        Imports a file with following steps:
         ```
         origin_df = self._load_file(_file)
         self._translate_columns(origin_df)
@@ -351,10 +368,12 @@ class PSMReaderBase:
             ).clip(0, 1)
 
     def normalize_rt_by_raw_name(self) -> None:
+        """Normalize RT by raw name."""
         if PsmDfCols.RT not in self._psm_df.columns:
             return
         if PsmDfCols.RT_NORM not in self._psm_df.columns:
             self._normalize_rt()
+
         if PsmDfCols.RAW_NAME not in self._psm_df.columns:
             return
         for _, df_group in self._psm_df.groupby(PsmDfCols.RAW_NAME):
@@ -364,6 +383,7 @@ class PSMReaderBase:
 
     def _load_file(self, filename: str) -> pd.DataFrame:
         """Load original dataframe from PSM filename.
+
         Different search engines may store PSMs in different ways:
         tsv, csv, HDF, XML, ...
 
@@ -399,8 +419,7 @@ class PSMReaderBase:
         return mapped_columns
 
     def _translate_columns(self, origin_df: pd.DataFrame) -> None:
-        """Translate the dataframe from other search engines
-        to AlphaBase format.
+        """Translate the dataframe from other search engines to AlphaBase format.
 
         Parameters
         ----------
@@ -426,6 +445,7 @@ class PSMReaderBase:
 
     def _transform_table(self) -> None:
         """Transform the dataframe format if needed.
+
         Usually only needed in combination with spectral libraries.
 
         Parameters
@@ -442,7 +462,8 @@ class PSMReaderBase:
 
     def _load_modifications(self, origin_df: pd.DataFrame) -> NoReturn:
         """Read modification information from 'origin_df'.
-        Some of search engines use modified_sequence, some of them
+
+        Some search engines use modified_sequence, some of them
         use additional columns to store modifications and the sites.
 
         Parameters
@@ -483,9 +504,9 @@ class PSMReaderBase:
             )
 
     def _post_process(self) -> None:
-        """Set 'nAA' columns, remove unknown modifications
-        and perform other post processings,
-        e.g. get 'rt_norm', remove decoys, filter FDR...
+        """Set 'nAA' columns, remove unknown modifications and perform other post processings.
+
+        E.g. get 'rt_norm', remove decoys, filter FDR...
 
         """
         self._psm_df[PsmDfCols.NAA] = self._psm_df[PsmDfCols.SEQUENCE].str.len()
@@ -544,12 +565,16 @@ class PSMReaderBase:
 
 
 class PSMReaderProvider:
+    """A factory class to register and get readers for different PSM types."""
+
     def __init__(self):
+        """Initialize PSMReaderProvider."""
         self.reader_dict = {}
 
     def register_reader(
         self, reader_type: str, reader_class: Type[PSMReaderBase]
     ) -> None:
+        """Register a reader by reader_type."""
         self.reader_dict[reader_type.lower()] = reader_class
 
     def get_reader(
@@ -562,6 +587,7 @@ class PSMReaderProvider:
         keep_decoy: bool = False,
         **kwargs,
     ) -> PSMReaderBase:
+        """Get a reader by reader_type."""
         return self.reader_dict[reader_type.lower()](
             column_mapping=column_mapping,
             modification_mapping=modification_mapping,
@@ -574,6 +600,7 @@ class PSMReaderProvider:
         self,
         yaml_dict: dict,
     ) -> PSMReaderBase:
+        """Get a reader by a yaml dict."""
         return self.get_reader(**copy.deepcopy(yaml_dict))
 
 

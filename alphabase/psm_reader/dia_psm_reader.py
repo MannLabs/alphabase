@@ -1,3 +1,5 @@
+"""Readers for Spectronaut's output library and reports, Swath data and DIANN data."""
+
 from typing import List, Optional
 
 import numpy as np
@@ -33,6 +35,7 @@ class SpectronautReader(MaxQuantReader):
         rt_unit: str = "minute",
         **kwargs,
     ):
+        """Initialize SpectronautReader."""
         if mod_seq_columns is None:
             mod_seq_columns = psm_reader_yaml["spectronaut"]["mod_seq_columns"]
 
@@ -69,6 +72,8 @@ class SpectronautReader(MaxQuantReader):
 
 
 class SwathReader(SpectronautReader):
+    """Reader for SWATH or OpenSWATH library TSV/CSV."""
+
     def __init__(  # noqa: PLR0913 many arguments in function definition
         self,
         *,
@@ -96,6 +101,8 @@ class SwathReader(SpectronautReader):
 
 
 class DiannReader(SpectronautReader):
+    """Reader for DIANN data."""
+
     def __init__(  # noqa: PLR0913 many arguments in function definition
         self,
         *,
@@ -107,9 +114,7 @@ class DiannReader(SpectronautReader):
         rt_unit: str = "minute",
         **kwargs,
     ):
-        """Also similar to `MaxQuantReader`,
-        but different in column_mapping and modification_mapping.
-        """
+        """Similar to `SpectronautReader` but different in column_mapping and modification_mapping."""
         super().__init__(
             column_mapping=column_mapping,
             modification_mapping=modification_mapping,
@@ -161,6 +166,7 @@ class SpectronautReportReader(MaxQuantReader):
         rt_unit: str = "minute",
         **kwargs,
     ):
+        """Initialize SpectronautReportReader."""
         super().__init__(
             column_mapping=column_mapping,
             modification_mapping=modification_mapping,
@@ -190,6 +196,7 @@ class SpectronautReportReader(MaxQuantReader):
 
 
 def register_readers() -> None:
+    """Register readers for Spectronaut's output library and reports, Swath data and DIANN data."""
     psm_reader_provider.register_reader("spectronaut", SpectronautReader)
     psm_reader_provider.register_reader("speclib_tsv", SpectronautReader)
     psm_reader_provider.register_reader("openswath", SwathReader)
