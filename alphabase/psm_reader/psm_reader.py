@@ -4,7 +4,7 @@ import copy
 import warnings
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Dict, List, NoReturn, Optional, Set, Type, Union
+from typing import Dict, List, Optional, Set, Type, Union
 
 import numpy as np
 import pandas as pd
@@ -151,6 +151,7 @@ class PSMReaderBase(ABC):
             if mod_seq_columns is not None
             else psm_reader_yaml[self._reader_type].get("mod_seq_columns", [])
         )
+        self.mod_seq_column = None
 
         for key, value in kwargs.items():  # TODO: remove and remove kwargs
             warnings.warn(
@@ -231,12 +232,13 @@ class PSMReaderBase(ABC):
         """
         origin_df = self._load_file(_file)
 
-        self.mod_seq_column = self._get_mod_seq_column(origin_df)
-
         self._psm_df = pd.DataFrame()
 
         if len(origin_df):
             # TODO: think about dropping the 'inplace' pattern here
+            self.mod_seq_column = self._get_mod_seq_column(origin_df)
+
+            origin_df = self._pre_process(origin_df)
             self._translate_columns(origin_df)  # only here
             self._transform_table()  # only sage
             self._translate_decoy()  # only sage, mq, msfragger, pfind
@@ -248,6 +250,9 @@ class PSMReaderBase(ABC):
             self._post_process()  # here, libraryreader, diann, msfragger
         return self._psm_df
 
+    def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
+        return df
+
     def _translate_decoy(self) -> None:  # noqa: B027 empty method in an abstract base class
         pass
 
@@ -255,9 +260,6 @@ class PSMReaderBase(ABC):
         # some scores are evalue/pvalue, it should be translated
         # to -log(evalue), as score is the larger the better
         pass
-
-    def _get_table_delimiter(self, filename: str) -> str:
-        return _get_delimiter(filename)
 
     def _normalize_rt(self) -> None:
         if PsmDfCols.RT in self._psm_df.columns:
@@ -300,12 +302,11 @@ class PSMReaderBase(ABC):
                 df_group[PsmDfCols.RT_NORM] / df_group[PsmDfCols.RT_NORM].max()
             )
 
-    @abstractmethod
     def _load_file(self, filename: str) -> pd.DataFrame:
-        """Load original dataframe from PSM filename.
+        """Load PSM file into a dataframe.
 
-        Different search engines may store PSMs in different ways:
-        tsv, csv, HDF, XML, ...
+        Different search engines may store PSMs in different ways: tsv, csv, HDF, XML, ...
+        This default implementation works for tsv and csv files and thus covers many readers.
 
         Parameters
         ----------
@@ -315,9 +316,11 @@ class PSMReaderBase(ABC):
         Returns
         -------
         pd.DataFrame
-            loaded dataframe
+            psm file as dataframe
 
         """
+        sep = _get_delimiter(filename)
+        return pd.read_csv(filename, sep=sep, keep_default_na=False)
 
     def _find_mapped_columns(self, df: pd.DataFrame) -> Dict[str, str]:
         """Determine the mapping of AlphaBase columns to the columns in the given DataFrame.
@@ -371,7 +374,7 @@ class PSMReaderBase(ABC):
         """
 
     @abstractmethod
-    def _load_modifications(self, origin_df: pd.DataFrame) -> NoReturn:
+    def _load_modifications(self, origin_df: pd.DataFrame) -> None:
         """Read modification information from 'origin_df'.
 
         Some search engines use modified_sequence, some of them

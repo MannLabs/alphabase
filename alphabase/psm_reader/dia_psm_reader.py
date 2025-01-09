@@ -46,13 +46,8 @@ class SpectronautReader(MaxQuantReader):
 
         self._min_max_rt_norm = True
 
-    def _load_file(self, filename: str) -> pd.DataFrame:
-        csv_sep = self._get_table_delimiter(filename)
-        df = pd.read_csv(filename, sep=csv_sep, keep_default_na=False)
-
-        self.mod_seq_column = self._get_mod_seq_column(
-            df
-        )  # TODO: this needs to be removed
+    def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Spectronaut-specific preprocessing of output data."""
         if "ReferenceRun" in df.columns:
             df.drop_duplicates(
                 ["ReferenceRun", self.mod_seq_column, "PrecursorCharge"], inplace=True
@@ -93,7 +88,7 @@ class SwathReader(SpectronautReader):
         )
 
 
-class DiannReader(SpectronautReader):
+class DiannReader(MaxQuantReader):
     """Reader for DIANN data."""
 
     _reader_type = "diann"
@@ -123,9 +118,13 @@ class DiannReader(SpectronautReader):
 
         self._min_max_rt_norm = False
 
-    def _load_file(self, filename: str) -> pd.DataFrame:
-        csv_sep = self._get_table_delimiter(filename)
-        return pd.read_csv(filename, sep=csv_sep, keep_default_na=False)
+    def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
+        """DIANN-specific preprocessing of output data.
+
+        Nothing to do for DIANN, still method of superclass needs to be overwritten.
+        TODO disentangle the inheritance structure.
+        """
+        return df
 
     def _post_process(self) -> None:
         super()._post_process()
@@ -169,13 +168,8 @@ class SpectronautReportReader(MaxQuantReader):
         self.precursor_column = "EG.PrecursorId"  # TODO: move to yaml
         self._min_max_rt_norm = False
 
-    def _load_file(self, filename: str) -> pd.DataFrame:
-        csv_sep = self._get_table_delimiter(filename)
-        df = pd.read_csv(filename, sep=csv_sep, keep_default_na=False)
-
-        self.mod_seq_column = self._get_mod_seq_column(
-            df
-        )  # TODO: this needs to be removed
+    def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Spectronaut report-specific preprocessing of output data."""
         df[[self.mod_seq_column, PsmDfCols.CHARGE]] = df[
             self.precursor_column
         ].str.split(".", expand=True, n=2)

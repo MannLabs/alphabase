@@ -195,10 +195,8 @@ class MaxQuantReader(PSMReaderBase):
                 self._psm_df[PsmDfCols.DECOY] == "-"
             ).astype(np.int8)
 
-    def _load_file(self, filename: str) -> pd.DataFrame:
-        csv_sep = self._get_table_delimiter(filename)
-        df = pd.read_csv(filename, sep=csv_sep, keep_default_na=False)
-
+    def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
+        """MaxQuant-specific preprocessing of output data."""
         df = df[~pd.isna(df["Retention time"])]
         df.fillna("", inplace=True)
 
