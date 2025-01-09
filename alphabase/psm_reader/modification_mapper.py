@@ -13,9 +13,9 @@ class ModificationMapper:
     def __init__(
         self,
         custom_modification_mapping: Optional[Dict[str, str]],
+        *,
         reader_yaml: Dict,
         modification_type: Optional[str],
-        *,
         add_unimod_to_mod_mapping: bool,
     ):
         """Initialize the ModificationMapper.

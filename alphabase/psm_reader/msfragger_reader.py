@@ -168,8 +168,8 @@ class MSFraggerPepXML(PSMReaderBase):
         # evalue score
         self._psm_df[PsmDfCols.SCORE] = -np.log(self._psm_df[PsmDfCols.SCORE] + 1e-100)
 
-    def _load_modifications(self, msf_df: pd.DataFrame) -> None:
-        if len(msf_df) == 0:
+    def _load_modifications(self, origin_df: pd.DataFrame) -> None:
+        if len(origin_df) == 0:
             self._psm_df[PsmDfCols.MODS] = ""
             self._psm_df[PsmDfCols.MOD_SITES] = ""
             self._psm_df[PsmDfCols.AA_MASS_DIFFS] = ""
@@ -182,7 +182,7 @@ class MSFraggerPepXML(PSMReaderBase):
             self._psm_df[PsmDfCols.AA_MASS_DIFFS],
             self._psm_df[PsmDfCols.AA_MASS_DIFF_SITES],
         ) = zip(
-            *msf_df[["peptide", "modifications"]].apply(
+            *origin_df[["peptide", "modifications"]].apply(
                 lambda x: _get_mods_from_masses(*x), axis=1
             )
         )
