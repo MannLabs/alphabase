@@ -47,7 +47,6 @@ maxquant:
     'genes': ['Gene Names','Gene names']
     'decoy': 'Reverse'
     'intensity': 'Intensity'
-
   modification_mapping:
     'mTRAQ@K':
       - 'K(mTRAQ)'
