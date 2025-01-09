@@ -928,7 +928,6 @@ def remove_unused_fragments(
         returns the reindexed precursor DataFrame and the sliced fragment DataFrames
     """
 
-
     frag_idx = precursor_df[[frag_start_col, frag_stop_col]].values
 
     new_frag_idx, fragment_pointer = compress_fragment_indices(frag_idx)
