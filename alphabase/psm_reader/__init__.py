@@ -14,8 +14,17 @@ __all__ = [
     "MSFraggerPepXMLReader",
     "SageReaderTSV",
     "SageReaderParquet",
+    "AlphaDiaReaderTsv",
+    "AlphaDiaReaderParquet",
 ]
 
+from alphabase.psm_reader.alphadia_reader import (
+    AlphaDiaReaderParquet,
+    AlphaDiaReaderTsv,
+)
+from alphabase.psm_reader.alphadia_reader import (
+    register_readers as register_alphadia_readers,
+)
 from alphabase.psm_reader.alphapept_reader import (
     AlphaPeptReader,
 )
@@ -70,3 +79,4 @@ register_fragger_readers()
 register_mq_readers()
 register_pf_readers()
 register_sage_readers()
+register_alphadia_readers()

@@ -1,3 +1,26 @@
+alphadia:
+  reader_type: alphadia
+  rt_unit: minute
+  fixed_C57: False
+  column_mapping:
+    'raw_name': 'run'
+    'sequence': 'sequence'
+    'charge': 'charge'
+    'rt': 'rt_observed'
+    'rt_start': 'rt_start'
+    'rt_stop': 'rt_stop'
+    'ccs': 'ccs'
+    'mobility': 'mobility'
+    'proteins': 'proteins'
+    'uniprot_ids': 'uniprot_ids'
+    'genes': 'genes'
+#    'scan_num': '' ?
+    'score': 'score'
+    'fdr': 'fdr'
+    'mods': 'mods'
+    'intensity': 'intensity'
+  modification_mapping_type: 'maxquant' # TODO: None?
+
 alphapept:
   reader_type: alphapept
   rt_unit: minute
