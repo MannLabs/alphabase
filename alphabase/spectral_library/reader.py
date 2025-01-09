@@ -10,7 +10,6 @@ from alphabase.constants._const import PEAK_INTENSITY_DTYPE
 from alphabase.peptide.mobility import mobility_to_ccs_for_df
 from alphabase.psm_reader.keys import LibPsmDfCols, PsmDfCols
 from alphabase.psm_reader.maxquant_reader import MaxQuantReader
-from alphabase.psm_reader.psm_reader import psm_reader_yaml
 from alphabase.spectral_library.base import SpecLibBase
 
 
@@ -88,9 +87,6 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
             deprecated
 
         """
-        if mod_seq_columns is None:
-            mod_seq_columns = psm_reader_yaml["library_reader_base"]["mod_seq_columns"]
-
         SpecLibBase.__init__(
             self,
             charged_frag_types=charged_frag_types,
@@ -248,7 +244,7 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
         """Load the spectral library from a csv file."""
         csv_sep = self._get_table_delimiter(filename)
 
-        df = pd.read_csv(
+        return pd.read_csv(
             filename,
             sep=csv_sep,
             keep_default_na=False,
@@ -273,9 +269,6 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
                 "null",
             ],
         )
-        self._find_mod_seq_column(df)
-
-        return df
 
     def _post_process(
         self,
