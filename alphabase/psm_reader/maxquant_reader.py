@@ -225,7 +225,7 @@ class MaxQuantReader(PSMReaderBase):
         super().set_modification_mapping(modification_mapping)
         self._add_all_unimod()
         self._extend_mod_brackets()
-        self._reverse_mod_mapping()
+        self.rev_mod_mapping = self._get_reversed_mod_mapping()
 
     def _add_all_unimod(self) -> None:
         for mod_name, unimod in mod_to_unimod_dict.items():
