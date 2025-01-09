@@ -1,3 +1,4 @@
+import warnings
 from typing import List, Optional
 
 import numpy as np
@@ -28,9 +29,9 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
         column_mapping: Optional[dict] = None,
         modification_mapping: Optional[dict] = None,
         fdr: float = 0.01,
-        fixed_C57: bool = False,
-        mod_seq_columns=psm_reader_yaml["library_reader_base"]["mod_seq_columns"],
-        rt_unit="irt",
+        fixed_C57: bool = False,  # noqa: FBT001, FBT002, N803 TODO: make this  *,fixed_c57  (breaking)
+        mod_seq_columns: Optional[List[str]] = None,
+        rt_unit: str = "irt",
         precursor_mz_min: float = 400,
         precursor_mz_max: float = 2000,
         decoy: Optional[str] = None,
@@ -76,6 +77,10 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
             Can be either `pseudo_reverse` or `diann`
 
         """
+
+        if mod_seq_columns is None:
+            mod_seq_columns = psm_reader_yaml["library_reader_base"]["mod_seq_columns"]
+
         SpecLibBase.__init__(
             self,
             charged_frag_types=charged_frag_types,
@@ -94,6 +99,13 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
             mod_seq_columns=mod_seq_columns,
             rt_unit=rt_unit,
         )
+
+        for key, value in kwargs.items():  # TODO: remove and remove kwargs
+            warnings.warn(
+                f"Passed unknown arguments to {self.__class__.__name__} "
+                f"({key}={value}) will be forbidden in alphabase>1.5.0.",
+                FutureWarning,
+            )
 
     def _init_column_mapping(self) -> None:
         """Initialize the column mapping from the `psm_reader.yaml` file."""
@@ -124,7 +136,7 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
         if PsmDfCols.MOD_SITES not in lib_df.columns:
             lib_df[PsmDfCols.MOD_SITES] = ""
 
-    def _get_fragment_intensity(self, lib_df: pd.DataFrame):  # noqa: PLR0912, C901 too many branches, too complex TODO: refactor
+    def _get_fragment_intensity(self, lib_df: pd.DataFrame) -> pd.DataFrame:  # noqa: PLR0912, C901 too many branches, too complex TODO: refactor
         """Create the self._fragment_intensity dataframe from a given spectral library.
         In the process, the input dataframe is converted from long format to a precursor dataframe and returned.
 
@@ -231,7 +243,7 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
 
         return df
 
-    def _load_file(self, filename: str):
+    def _load_file(self, filename: str) -> pd.DataFrame:
         """Load the spectral library from a csv file.
         Reimplementation of `PSMReaderBase._translate_columns`.
         """
@@ -268,7 +280,6 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
 
     def _post_process(
         self,
-        lib_df: pd.DataFrame,
     ) -> None:
         """Process the spectral library and create the `fragment_intensity`, `fragment_mz`dataframe.
         Reimplementation of `PSMReaderBase._post_process`.

@@ -1,6 +1,6 @@
 import copy
 import warnings
-from typing import Optional
+from typing import List, Optional
 
 import numba
 import numpy as np
@@ -31,7 +31,7 @@ for mod_name, unimod_id_ in MOD_DF[["mod_name", "unimod_id"]].to_numpy():
 @numba.njit
 def replace_parentheses_with_brackets(
     modseq: str,
-):
+) -> str:
     mod_depth = 0
     for i, aa in enumerate(modseq):
         if aa == "(":
@@ -53,7 +53,7 @@ def replace_parentheses_with_brackets(
 def parse_mod_seq(
     modseq: str,
     mod_sep: str = "()",
-    fixed_C57: bool = True,
+    fixed_C57: bool = True,  # noqa: FBT001, FBT002, N803 TODO: make this  *,fixed_c57  (breaking)
 ) -> tuple:
     """Extract modifications and sites from the modified sequence (modseq).
 
@@ -137,10 +137,10 @@ class MaxQuantReader(PSMReaderBase):
         *,
         column_mapping: Optional[dict] = None,
         modification_mapping: Optional[dict] = None,
-        fdr=0.01,
-        keep_decoy=False,
-        fixed_C57=True,
-        mod_seq_columns=None,
+        fdr: float = 0.01,
+        keep_decoy: bool = False,
+        fixed_C57: bool = True,  # noqa: N803 TODO: make this  *,fixed_c57  (breaking)
+        mod_seq_columns: Optional[List[str]] = None,
         **kwargs,
     ):
         """Reader for MaxQuant msms.txt and evidence.txt.
@@ -174,7 +174,10 @@ class MaxQuantReader(PSMReaderBase):
 
         """
         if mod_seq_columns is None:
-            mod_seq_columns = ["Modified sequence"]
+            mod_seq_columns = [
+                "Modified sequence"
+            ]  # TODO: why not take from psm_reader.yaml?
+
         super().__init__(
             column_mapping=column_mapping,
             modification_mapping=modification_mapping,
@@ -187,7 +190,7 @@ class MaxQuantReader(PSMReaderBase):
         self._mod_seq_columns = mod_seq_columns
         self.mod_seq_column = "Modified sequence"
 
-    def _find_mod_seq_column(self, df) -> None:
+    def _find_mod_seq_column(self, df: pd.DataFrame) -> None:
         for mod_seq_col in self._mod_seq_columns:
             if mod_seq_col in df.columns:
                 self.mod_seq_column = mod_seq_col
@@ -241,7 +244,7 @@ class MaxQuantReader(PSMReaderBase):
 
             self.modification_mapping[key] = list(mod_set)
 
-    def _translate_decoy(self, origin_df=None) -> None:
+    def _translate_decoy(self) -> None:
         if PsmDfCols.DECOY in self._psm_df.columns:
             self._psm_df[PsmDfCols.DECOY] = (
                 self._psm_df[PsmDfCols.DECOY] == "-"
@@ -250,7 +253,7 @@ class MaxQuantReader(PSMReaderBase):
     def _init_column_mapping(self) -> None:
         self.column_mapping = psm_reader_yaml["maxquant"]["column_mapping"]
 
-    def _load_file(self, filename):
+    def _load_file(self, filename: str) -> pd.DataFrame:
         csv_sep = self._get_table_delimiter(filename)
         df = pd.read_csv(filename, sep=csv_sep, keep_default_na=False)
         self._find_mod_seq_column(df)

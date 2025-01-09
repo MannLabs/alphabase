@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Tuple
 
 import h5py
 import numba
@@ -15,7 +15,7 @@ from alphabase.psm_reader.psm_reader import (
 
 
 @numba.njit
-def parse_ap(precursor):
+def parse_ap(precursor: str) -> Tuple[str, str, str, str, int]:
     """Parser to parse peptide strings."""
     items = precursor.split("_")
     decoy = 1 if len(items) == 3 else 0  # noqa: PLR2004 magic value
@@ -53,8 +53,8 @@ class AlphaPeptReader(PSMReaderBase):
         *,
         column_mapping: Optional[dict] = None,
         modification_mapping: Optional[dict] = None,
-        fdr=0.01,
-        keep_decoy=False,
+        fdr: float = 0.01,
+        keep_decoy: bool = False,
         **kwargs,
     ):
         """Reading PSMs from alphapept's *.ms_data.hdf."""
@@ -73,7 +73,7 @@ class AlphaPeptReader(PSMReaderBase):
     def _init_modification_mapping(self) -> None:
         self.modification_mapping = psm_reader_yaml["alphapept"]["modification_mapping"]
 
-    def _load_file(self, filename):
+    def _load_file(self, filename: str) -> pd.DataFrame:
         with h5py.File(filename, "r") as _hdf:
             dataset = _hdf[self.hdf_dataset]
             df = pd.DataFrame({col: dataset[col] for col in dataset})
