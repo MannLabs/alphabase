@@ -1,4 +1,4 @@
-import typing
+from typing import List, Optional
 
 import numpy as np
 import pandas as pd
@@ -6,7 +6,6 @@ from tqdm import tqdm
 
 from alphabase.constants._const import PEAK_INTENSITY_DTYPE
 from alphabase.peptide.mobility import mobility_to_ccs_for_df
-from alphabase.psm_reader import psm_reader_provider
 from alphabase.psm_reader.keys import LibPsmDfCols, PsmDfCols
 from alphabase.psm_reader.maxquant_reader import MaxQuantReader
 from alphabase.psm_reader.psm_reader import psm_reader_yaml
@@ -14,9 +13,9 @@ from alphabase.spectral_library.base import SpecLibBase
 
 
 class LibraryReaderBase(MaxQuantReader, SpecLibBase):
-    def __init__(
+    def __init__(  # noqa: PLR0913 many arguments in function definition
         self,
-        charged_frag_types: typing.List[str] = [
+        charged_frag_types: List[str] = [
             "b_z1",
             "b_z2",
             "y_z1",
@@ -26,15 +25,15 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
             "y_modloss_z1",
             "y_modloss_z2",
         ],
-        column_mapping: typing.Optional[dict] = None,
-        modification_mapping: typing.Optional[dict] = None,
-        fdr=0.01,
-        fixed_C57=False,
+        column_mapping: Optional[dict] = None,
+        modification_mapping: Optional[dict] = None,
+        fdr: float = 0.01,
+        fixed_C57: bool = False,
         mod_seq_columns=psm_reader_yaml["library_reader_base"]["mod_seq_columns"],
         rt_unit="irt",
         precursor_mz_min: float = 400,
         precursor_mz_max: float = 2000,
-        decoy: typing.Optional[str] = None,
+        decoy: Optional[str] = None,
         **kwargs,
     ):
         """Base class for reading spectral libraries from long format csv files.
@@ -125,7 +124,7 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
         if PsmDfCols.MOD_SITES not in lib_df.columns:
             lib_df[PsmDfCols.MOD_SITES] = ""
 
-    def _get_fragment_intensity(self, lib_df: pd.DataFrame):
+    def _get_fragment_intensity(self, lib_df: pd.DataFrame):  # noqa: PLR0912, C901 too many branches, too complex TODO: refactor
         """Create the self._fragment_intensity dataframe from a given spectral library.
         In the process, the input dataframe is converted from long format to a precursor dataframe and returned.
 
@@ -152,7 +151,7 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
         precursor_df_list = []
 
         frag_intens_list = []
-        nAA_list = []
+        n_aa_list = []
 
         fragment_columns = [
             LibPsmDfCols.FRAGMENT_MZ,
@@ -169,13 +168,13 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
         for keys, df_group in tqdm(lib_df.groupby(non_fragment_columns)):
             precursor_columns = dict(zip(non_fragment_columns, keys))
 
-            nAA = len(precursor_columns[PsmDfCols.SEQUENCE])
+            n_aa = len(precursor_columns[PsmDfCols.SEQUENCE])
 
-            intens = np.zeros(
-                (nAA - 1, len(self.charged_frag_types)),
+            intensities = np.zeros(
+                (n_aa - 1, len(self.charged_frag_types)),
                 dtype=PEAK_INTENSITY_DTYPE,
             )
-            for frag_type, frag_num, loss_type, frag_charge, inten in df_group[
+            for frag_type_, frag_num_, loss_type, frag_charge, intensity in df_group[
                 [
                     LibPsmDfCols.FRAGMENT_TYPE,
                     LibPsmDfCols.FRAGMENT_SERIES,
@@ -183,39 +182,39 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
                     LibPsmDfCols.FRAGMENT_CHARGE,
                     LibPsmDfCols.FRAGMENT_INTENSITY,
                 ]
-            ].values:
-                if frag_type in "abc":
-                    frag_num -= 1
-                elif frag_type in "xyz":
-                    frag_num = nAA - frag_num - 1
+            ].to_numpy():
+                if frag_type_ in "abc":
+                    frag_num = frag_num_ - 1
+                elif frag_type_ in "xyz":
+                    frag_num = n_aa - frag_num_ - 1
                 else:
                     continue
 
                 if loss_type == "":
-                    frag_type = f"{frag_type}_z{frag_charge}"
+                    frag_type = f"{frag_type_}_z{frag_charge}"
                 elif loss_type == "H3PO4":
-                    frag_type = f"{frag_type}_modloss_z{frag_charge}"
+                    frag_type = f"{frag_type_}_modloss_z{frag_charge}"
                 elif loss_type == "H2O":
-                    frag_type = f"{frag_type}_H2O_z{frag_charge}"
+                    frag_type = f"{frag_type_}_H2O_z{frag_charge}"
                 elif loss_type == "NH3":
-                    frag_type = f"{frag_type}_NH3_z{frag_charge}"
+                    frag_type = f"{frag_type_}_NH3_z{frag_charge}"
                 elif loss_type == "unknown":  # DiaNN+fragger
-                    frag_type = f"{frag_type}_z{frag_charge}"
+                    frag_type = f"{frag_type_}_z{frag_charge}"
                 else:
                     continue
 
                 if frag_type not in frag_col_dict:
                     continue
                 frag_col_idx = frag_col_dict[frag_type]
-                intens[frag_num, frag_col_idx] = inten
-            max_inten = np.max(intens)
-            if max_inten <= 0:
+                intensities[frag_num, frag_col_idx] = intensity
+            max_intensity = np.max(intensities)
+            if max_intensity <= 0:
                 continue
-            intens /= max_inten
+            normalized_intensities = intensities / max_intensity
 
             precursor_df_list.append(precursor_columns)
-            frag_intens_list.append(intens)
-            nAA_list.append(nAA)
+            frag_intens_list.append(normalized_intensities)
+            n_aa_list.append(n_aa)
 
         df = pd.DataFrame(precursor_df_list)
 
@@ -223,8 +222,8 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
             np.concatenate(frag_intens_list), columns=self.charged_frag_types
         )
 
-        indices = np.zeros(len(nAA_list) + 1, dtype=np.int64)
-        indices[1:] = np.array(nAA_list) - 1
+        indices = np.zeros(len(n_aa_list) + 1, dtype=np.int64)
+        indices[1:] = np.array(n_aa_list) - 1
         indices = np.cumsum(indices)
 
         df[LibPsmDfCols.FRAG_START_IDX] = indices[:-1]
@@ -302,57 +301,3 @@ class LibraryReaderBase(MaxQuantReader, SpecLibBase):
 
 # legacy
 SWATHLibraryReader = LibraryReaderBase
-
-
-class LibraryReaderFromRawData(SpecLibBase):
-    def __init__(
-        self,
-        charged_frag_types: typing.Optional[typing.List[str]] = None,
-        precursor_mz_min: float = 400,
-        precursor_mz_max: float = 2000,
-        decoy: typing.Optional[str] = None,
-        **kwargs,
-    ):
-        if charged_frag_types is None:
-            charged_frag_types = [
-                "b_z1",
-                "b_z2",
-                "y_z1",
-                "y_z2",
-                "b_modloss_z1",
-                "b_modloss_z2",
-                "y_modloss_z1",
-                "y_modloss_z2",
-            ]
-        super().__init__(
-            charged_frag_types=charged_frag_types,
-            precursor_mz_min=precursor_mz_min,
-            precursor_mz_max=precursor_mz_max,
-            decoy=decoy,
-        )
-
-    def import_psms(self, psm_files: list, psm_type: str) -> None:
-        psm_reader = psm_reader_provider.get_reader(psm_type)
-        if isinstance(psm_files, str):
-            self._precursor_df = psm_reader.import_file(psm_files)
-            self._psm_df = self._precursor_df
-        else:
-            psm_df_list = []
-            for psm_file in psm_files:
-                psm_df_list.append(psm_reader.import_file(psm_file))
-            self._precursor_df = pd.concat(psm_df_list, ignore_index=True)
-            self._psm_df = self._precursor_df
-
-    def extract_fragments(self, raw_files: list) -> None:
-        """Include two steps:
-            1. self.calc_fragment_mz_df() to generate self.fragment_mz_df
-            2. Extract self.fragment_intensity_df from RAW files using AlphaRAW.
-
-        Parameters
-        ----------
-        raw_files : list
-            RAW file paths
-
-        """
-        self.calc_fragment_mz_df()
-        # TODO Use AlphaRAW to extract fragment intensities

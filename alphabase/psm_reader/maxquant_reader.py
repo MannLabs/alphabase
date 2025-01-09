@@ -18,8 +18,8 @@ from alphabase.psm_reader.psm_reader import (
 warnings.filterwarnings("always")
 
 mod_to_unimod_dict = {}
-for mod_name, unimod_id in MOD_DF[["mod_name", "unimod_id"]].values:
-    unimod_id = int(unimod_id)
+for mod_name, unimod_id_ in MOD_DF[["mod_name", "unimod_id"]].to_numpy():
+    unimod_id = int(unimod_id_)
     if unimod_id in (-1, "-1"):
         continue
     if mod_name[-2] == "@":
@@ -81,14 +81,14 @@ def parse_mod_seq(
         0 for N-term; -1 for C-term; 1 to N for normal modifications.
 
     """
-    PeptideModSeq = modseq
+    peptide_mod_seq = modseq
     underscore_for_ncterm = modseq[0] == "_"
     mod_list = []
     site_list = []
-    site = PeptideModSeq.find(mod_sep[0])
+    site = peptide_mod_seq.find(mod_sep[0])
     while site != -1:
-        site_end = PeptideModSeq.find(mod_sep[1], site + 1) + 1
-        if site_end < len(PeptideModSeq) and PeptideModSeq[site_end] == mod_sep[1]:
+        site_end = peptide_mod_seq.find(mod_sep[1], site + 1) + 1
+        if site_end < len(peptide_mod_seq) and peptide_mod_seq[site_end] == mod_sep[1]:
             site_end += 1
         if underscore_for_ncterm:
             site_list.append(site - 1)
@@ -97,42 +97,42 @@ def parse_mod_seq(
         start_mod = site
         if start_mod > 0:
             start_mod -= 1
-        mod_list.append(PeptideModSeq[start_mod:site_end])
-        PeptideModSeq = PeptideModSeq[:site] + PeptideModSeq[site_end:]
-        site = PeptideModSeq.find(mod_sep[0], site)
+        mod_list.append(peptide_mod_seq[start_mod:site_end])
+        peptide_mod_seq = peptide_mod_seq[:site] + peptide_mod_seq[site_end:]
+        site = peptide_mod_seq.find(mod_sep[0], site)
 
     # patch for phos. How many other modification formats does MQ have?
-    site = PeptideModSeq.find("p")
+    site = peptide_mod_seq.find("p")
     while site != -1:
-        mod_list.append(PeptideModSeq[site : site + 2])
+        mod_list.append(peptide_mod_seq[site : site + 2])
         site_list = [i - 1 if i > site else i for i in site_list]
         if underscore_for_ncterm:
             site_list.append(site)
         else:
             site_list.append(site + 1)
-        PeptideModSeq = PeptideModSeq[:site] + PeptideModSeq[site + 1 :]
-        site = PeptideModSeq.find("p", site)
+        peptide_mod_seq = peptide_mod_seq[:site] + peptide_mod_seq[site + 1 :]
+        site = peptide_mod_seq.find("p", site)
 
     if fixed_C57:
-        site = PeptideModSeq.find("C")
+        site = peptide_mod_seq.find("C")
         while site != -1:
             if underscore_for_ncterm:
                 site_list.append(site)
             else:
                 site_list.append(site + 1)
             mod_list.append("C" + "Carbamidomethyl (C)".join(mod_sep))
-            site = PeptideModSeq.find("C", site + 1)
-    sequence = PeptideModSeq.strip("_")
-    nAA = len(sequence)
+            site = peptide_mod_seq.find("C", site + 1)
+    sequence = peptide_mod_seq.strip("_")
+    n_aa = len(sequence)
     return (
         sequence,
         ";".join(mod_list),
-        ";".join([str(i) if i <= nAA else "-1" for i in site_list]),
+        ";".join([str(i) if i <= n_aa else "-1" for i in site_list]),
     )
 
 
 class MaxQuantReader(PSMReaderBase):
-    def __init__(
+    def __init__(  # noqa: PLR0913 many arguments in function definition
         self,
         *,
         column_mapping: Optional[dict] = None,

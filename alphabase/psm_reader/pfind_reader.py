@@ -12,7 +12,7 @@ from alphabase.psm_reader.psm_reader import (
 )
 
 
-def convert_one_pFind_mod(mod):
+def _convert_one_pfind_mod(mod: str) -> Optional[str]:  # noqa:  C901 too complex (11 > 10) TODO: refactor
     if mod[-1] == ")":
         mod = mod[: (mod.find("(") - 1)]
         idx = mod.rfind("[")
@@ -22,40 +22,44 @@ def convert_one_pFind_mod(mod):
         idx = mod.rfind("[")
         name = mod[:idx]
         site = mod[(idx + 1) : -1]
+
     if len(site) == 1:
-        return name + "@" + site
-    if site == "AnyN-term":
-        return name + "@" + "Any_N-term"
-    if site == "ProteinN-term":
-        return name + "@" + "Protein_N-term"
-    if site.startswith("AnyN-term"):
-        return name + "@" + site[-1] + "^Any_N-term"
-    if site.startswith("ProteinN-term"):
-        return name + "@" + site[-1] + "^Protein_N-term"
-    if site == "AnyC-term":
-        return name + "@" + "Any_C-term"
-    if site == "ProteinC-term":
-        return name + "@" + "Protein_C-term"
-    if site.startswith("AnyC-term"):
-        return name + "@" + site[-1] + "^Any_C-term"
-    if site.startswith("ProteinC-term"):
-        return name + "@" + site[-1] + "^Protein_C-term"
-    return None
+        return_value = name + "@" + site
+    elif site == "AnyN-term":
+        return_value = name + "@" + "Any_N-term"
+    elif site == "ProteinN-term":
+        return_value = name + "@" + "Protein_N-term"
+    elif site.startswith("AnyN-term"):
+        return_value = name + "@" + site[-1] + "^Any_N-term"
+    elif site.startswith("ProteinN-term"):
+        return_value = name + "@" + site[-1] + "^Protein_N-term"
+    elif site == "AnyC-term":
+        return_value = name + "@" + "Any_C-term"
+    elif site == "ProteinC-term":
+        return_value = name + "@" + "Protein_C-term"
+    elif site.startswith("AnyC-term"):
+        return_value = name + "@" + site[-1] + "^Any_C-term"
+    elif site.startswith("ProteinC-term"):
+        return_value = name + "@" + site[-1] + "^Protein_C-term"
+    else:
+        return_value = None
+
+    return return_value
 
 
-def translate_pFind_mod(mod_str):
+def translate_pFind_mod(mod_str):  # noqa: N802 name `get_pFind_mods` should be lowercase TODO: used by peptdeep
     if not mod_str:
         return ""
     ret_mods = []
-    for mod in mod_str.split(";"):
-        mod = convert_one_pFind_mod(mod)
+    for mod_ in mod_str.split(";"):
+        mod = _convert_one_pfind_mod(mod_)
         if not mod or mod not in ap_mod.MOD_INFO_DICT:
             return pd.NA
         ret_mods.append(mod)
     return ";".join(ret_mods)
 
 
-def get_pFind_mods(pfind_mod_str):
+def get_pFind_mods(pfind_mod_str):  # noqa: N802 name `get_pFind_mods` should be lowercase TODO: used by peptdeep
     pfind_mod_str = pfind_mod_str.strip(";")
     if not pfind_mod_str:
         return "", ""
@@ -84,7 +88,7 @@ def parse_pfind_protein(protein, keep_reverse=True):
     )
 
 
-class pFindReader(PSMReaderBase):
+class pFindReader(PSMReaderBase):  # noqa: N801 name `pFindReader` should use CapWords convention TODO: used by peptdeep, alpharaw
     def __init__(
         self,
         *,

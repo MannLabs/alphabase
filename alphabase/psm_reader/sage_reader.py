@@ -1,8 +1,8 @@
 import logging
 import multiprocessing as mp
 import re
-import typing
 from functools import partial
+from typing import Generator, List, NoReturn, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -94,7 +94,7 @@ class SageModificationTranslation:
         translated_psm_df = _apply_translate_modifications_mp(psm_df, translation_df)
 
         # 5. Drop PSMs with missing modifications
-        is_null = translated_psm_df[PsmDfCols.MOD_SITES].isnull()
+        is_null = translated_psm_df[PsmDfCols.MOD_SITES].isna()
         translated_psm_df = translated_psm_df[~is_null]
         if np.sum(is_null) > 0:
             logging.warning(
@@ -105,7 +105,7 @@ class SageModificationTranslation:
 
     def _annotate_from_custom_translation(
         self, discovered_modifications_df: pd.DataFrame, translation_df: pd.DataFrame
-    ) -> typing.Tuple[pd.DataFrame, pd.DataFrame]:
+    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """Annotate modifications from custom translation df, if provided.
         Discovered modifications are first matched using the custom translation dataframe.
         If no match is found, the modifications are returned for matching using UniMod.
@@ -129,7 +129,7 @@ class SageModificationTranslation:
                 self.custom_translation_df, on="modification", how="left"
             )
             for _, row in discovered_modifications_df[
-                discovered_modifications_df["matched_mod_name"].isnull()
+                discovered_modifications_df["matched_mod_name"].isna()
             ].iterrows():
                 logging.warning(
                     f"No modification found for mass {row['modification']} at position {row['previous_aa']} found in custom_translation_df, will be matched using UniMod"
@@ -139,12 +139,12 @@ class SageModificationTranslation:
                 [
                     translation_df,
                     discovered_modifications_df[
-                        discovered_modifications_df["matched_mod_name"].notnull()
+                        discovered_modifications_df["matched_mod_name"].notna()
                     ],
                 ]
             )
             discovered_modifications_df = discovered_modifications_df[
-                discovered_modifications_df["matched_mod_name"].isnull()
+                discovered_modifications_df["matched_mod_name"].isna()
             ]
 
         return discovered_modifications_df, translation_df
@@ -182,7 +182,7 @@ class SageModificationTranslation:
             )
         )
         for _, row in discovered_modifications_df[
-            discovered_modifications_df["matched_mod_name"].isnull()
+            discovered_modifications_df["matched_mod_name"].isna()
         ].iterrows():
             logging.warning(
                 f"UniMod lookup failed for mass {row['modification']} at position {row['previous_aa']}, will be removed."
@@ -191,7 +191,7 @@ class SageModificationTranslation:
             [
                 translation_df,
                 discovered_modifications_df[
-                    discovered_modifications_df["matched_mod_name"].notnull()
+                    discovered_modifications_df["matched_mod_name"].notna()
                 ],
             ]
         )
@@ -217,7 +217,7 @@ def _discover_modifications(psm_df: pd.DataFrame) -> pd.DataFrame:
         .explode()
         .unique()
     )
-    modifications = modifications[~pd.isnull(modifications)]
+    modifications = modifications[~pd.isna(modifications)]
     return pd.DataFrame(
         list(modifications),
         columns=["modification", "previous_aa", "is_nterm", "is_cterm", "mass"],
@@ -226,7 +226,7 @@ def _discover_modifications(psm_df: pd.DataFrame) -> pd.DataFrame:
 
 def _match_modified_sequence(
     sequence: str,
-) -> typing.List[typing.Tuple[str, str, bool, bool, float]]:
+) -> List[Tuple[str, str, bool, bool, float]]:
     """Get all matches with the amino acid location.
 
     P[-100.0]EPTIDE -> [('[-100.0]', 'P', False, False, -100.0)]
@@ -292,7 +292,7 @@ def _lookup_modification(
         The name of the matched modification in alphabase format.
 
     """
-    mass_distance = mod_annotated_df["mass"].values - mass_observed
+    mass_distance = mod_annotated_df["mass"].to_numpy() - mass_observed
     ppm_distance = mass_distance / mass_observed * 1e6
     ppm_distance = np.abs(ppm_distance)
 
@@ -323,7 +323,7 @@ def _lookup_modification(
 
 def _translate_modifications(
     sequence: str, mod_translation_df: pd.DataFrame
-) -> typing.Tuple[typing.Optional[str], typing.Optional[str]]:
+) -> Tuple[Optional[str], Optional[str]]:
     """Translate modifications in the sequence to alphabase style modifications.
 
     Parameters
@@ -431,7 +431,7 @@ def _apply_translate_modifications(
     return psm_df
 
 
-def _batchify_df(df: pd.DataFrame, mp_batch_size: int) -> typing.Generator:
+def _batchify_df(df: pd.DataFrame, mp_batch_size: int) -> Generator:
     """Internal funciton for applying translation modifications in parallel.
 
     Parameters
@@ -548,11 +548,11 @@ def _sage_spec_idx_from_scan_nr(scan_indicator_str: str) -> int:
 
 
 class SageReaderBase(PSMReaderBase):
-    def __init__(
+    def __init__(  # noqa: PLR0913 many arguments in function definition
         self,
         *,
-        column_mapping: typing.Optional[dict] = None,
-        modification_mapping: typing.Optional[dict] = None,
+        column_mapping: Optional[dict] = None,
+        modification_mapping: Optional[dict] = None,
         fdr=0.01,
         keep_decoy=False,
         rt_unit="second",
@@ -575,7 +575,7 @@ class SageReaderBase(PSMReaderBase):
     def _init_column_mapping(self) -> None:
         self.column_mapping = psm_reader_yaml["sage"]["column_mapping"]
 
-    def _load_file(self, filename) -> typing.NoReturn:
+    def _load_file(self, filename) -> NoReturn:
         raise NotImplementedError
 
     def _transform_table(self, origin_df) -> None:
