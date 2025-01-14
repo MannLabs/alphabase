@@ -180,6 +180,7 @@ class SpectronautReportReader(MaxQuantReader):
         df[[self.mod_seq_column, PsmDfCols.CHARGE]] = df[
             self.precursor_column
         ].str.split(".", expand=True, n=2)
+        # TODO use 'FG.Charge' & 'FG.LabeledSequence' here ?
         df[PsmDfCols.CHARGE] = df[PsmDfCols.CHARGE].astype(np.int8)
         return df
 
