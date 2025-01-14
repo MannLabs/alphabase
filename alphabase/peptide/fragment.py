@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, List, Tuple, Union
 
 import numba as nb
@@ -19,103 +19,114 @@ from alphabase.peptide.precursor import (
 from alphabase.utils import DeprecatedDict
 
 
-class DIRECTION:
-    FORWARD = 1
-    REVERSE = -1
+class Direction:
+    """String constants defining fragment directions."""
+
+    FORWARD = "forward"
+    REVERSE = "reverse"
 
 
-# because we dont know the loss, we assume every loss type is phospho
-class LOSS:
-    MODLOSS = 98
-    H2O = 18
-    NH3 = 17
-    LOSSH = 1
-    ADDH = 2
-    NONE = 0
+DIRECTION_MAPPING = {Direction.FORWARD: 1, Direction.REVERSE: -1}
+
+DIRECTION_MAPPING_INV = {v: k for k, v in DIRECTION_MAPPING.items()}
 
 
-LOSS_INVERSE = {
-    18: "H2O",
-    17: "NH3",
-    98: "modloss",
-    1: "lossH",
-    0: "",
-    2: "addH",
+class Loss:
+    """String constants defining fragment losses."""
+
+    MODLOSS = "modloss"
+    H2O = "H2O"
+    NH3 = "NH3"
+    LOSSH = "lossH"
+    ADDH = "addH"
+    NONE = "none"
+
+
+LOSS_MAPPING = {
+    # we use 98 because it is similar to the molecular weight of a phosphate group
+    Loss.MODLOSS: 98,
+    # we use 18 because it is similar to the molecular weight of a water molecule
+    Loss.H2O: 18,
+    # we use 17 because it is similar to the molecular weight of an ammonia molecule
+    Loss.NH3: 17,
+    # we use 1 because it is similar to the molecular weight of a hydrogen atom
+    Loss.LOSSH: 1,
+    # there is no -1 so we use 2
+    Loss.ADDH: 2,
+    Loss.NONE: 0,
 }
 
-
-class SERIES:
-    A = 97
-    B = 98
-    C = 99
-    X = 120
-    Y = 121
-    Z = 122
+LOSS_MAPPING_INV = {v: k for k, v in LOSS_MAPPING.items()}
 
 
-SERIES_INVERSE = {
-    97: "a",
-    98: "b",
-    99: "c",
-    120: "x",
-    121: "y",
-    122: "z",
+class Series:
+    """String constants defining fragment series types."""
+
+    A = "a"
+    B = "b"
+    C = "c"
+    X = "x"
+    Y = "y"
+    Z = "z"
+
+
+SERIES_MAPPING = {
+    # ascii value for a, b, c, x, y, z
+    Series.A: 97,
+    Series.B: 98,
+    Series.C: 99,
+    Series.X: 120,
+    Series.Y: 121,
+    Series.Z: 122,
 }
+
+SERIES_MAPPING_INV = {v: k for k, v in SERIES_MAPPING.items()}
 
 
 @dataclass(frozen=True)
 class FragmentType:
+    """
+    Class which represents a constant fragment type.
+
+    Parameters
+    ----------
+    name : str
+        Name of the fragment type
+    ref_ion : str
+        Reference ion of the fragment type
+    delta_formula : str
+        Chemical formula representing the mass difference from the reference ion
+    delta_mass : float
+        Mass difference calculated from delta_formula, set during initialization
+    modloss : bool
+        Whether the fragment type has a modification neutral loss
+    series_id : int
+        Series ID of the fragment type (e.g., 97=a, 98=b, 99=c, 120=x, 121=y, 122=z), from SERIES_MAPPING
+    loss_id : int
+        Loss type ID of the fragment (e.g., 0=none, 1=lossH, 2=addH, 17=NH3, 18=H2O, 98=modloss), from LOSS_MAPPING
+    direction_id : int
+        Direction ID of the fragment type (forward=1, reverse=-1), from DIRECTION_MAPPING
+
+    Attributes
+    ----------
+    delta_mass : float
+        Mass difference calculated from delta_formula, set during initialization
+    """
+
     name: str
     ref_ion: str
-    formula: str
+    delta_formula: str
+    delta_mass: float = field(init=False)
     modloss: bool
-    add_mass: float
+    series_id: int
+    loss_id: int
+    direction_id: int
 
-    series: int
-    loss: int
-    direction: int
-
-    def __init__(
-        self,
-        name: str,
-        ref_ion: str,
-        formula: str,
-        modloss: bool,
-        series: int,
-        loss: int,
-        direction: int,
-    ) -> None:
-        """
-        Class which represents a constant fragment type.
-
-        Parameters
-        ----------
-        name : str
-            Name of the fragment type
-        ref_ion : str
-            Reference ion of the fragment type
-        formula : str
-            Formula of the fragment type
-        modloss : bool
-            Whether the fragment type has a modification neutral loss
-        series : int
-            Series of the fragment type
-        loss : int
-            Loss of the fragment type
-        direction : int
-            Direction of the fragment type
-        """
-        # Need to use object.__setattr__ to set fields in frozen dataclass
-        object.__setattr__(self, "name", name)
-        object.__setattr__(self, "ref_ion", ref_ion)
-        object.__setattr__(self, "formula", formula)
-        object.__setattr__(self, "modloss", modloss)
-        object.__setattr__(self, "add_mass", calc_mass_from_formula(formula))
-        object.__setattr__(self, "series", series)
-        object.__setattr__(self, "loss", loss)
-        object.__setattr__(self, "direction", direction)
-
-        super().__init__()
+    def __post_init__(self):
+        """Set delta_mass after initialization using delta_formula"""
+        object.__setattr__(
+            self, "delta_mass", calc_mass_from_formula(self.delta_formula)
+        )
 
 
 # constant which contains all valid fragment types
@@ -123,128 +134,128 @@ FRAGMENT_TYPES = {
     "a": FragmentType(
         name="a",
         ref_ion="b",
-        formula="C(-1)O(-1)",
+        delta_formula="C(-1)O(-1)",
         modloss=False,
-        series=SERIES.A,
-        loss=LOSS.NONE,
-        direction=DIRECTION.FORWARD,
+        series_id=SERIES_MAPPING[Series.A],
+        loss_id=LOSS_MAPPING[Loss.NONE],
+        direction_id=DIRECTION_MAPPING[Direction.FORWARD],
     ),
     "b": FragmentType(
         name="b",
         ref_ion="b",
-        formula="",
+        delta_formula="",
         modloss=False,
-        series=SERIES.B,
-        loss=LOSS.NONE,
-        direction=DIRECTION.FORWARD,
+        series_id=SERIES_MAPPING[Series.B],
+        loss_id=LOSS_MAPPING[Loss.NONE],
+        direction_id=DIRECTION_MAPPING[Direction.FORWARD],
     ),
     "c": FragmentType(
         name="c",
         ref_ion="b",
-        formula="N(1)H(3)",
+        delta_formula="N(1)H(3)",
         modloss=False,
-        series=SERIES.C,
-        loss=LOSS.NONE,
-        direction=DIRECTION.FORWARD,
+        series_id=SERIES_MAPPING[Series.C],
+        loss_id=LOSS_MAPPING[Loss.NONE],
+        direction_id=DIRECTION_MAPPING[Direction.FORWARD],
     ),
     "x": FragmentType(
         name="x",
         ref_ion="y",
-        formula="C(1)O(1)H(-2)",
+        delta_formula="C(1)O(1)H(-2)",
         modloss=False,
-        series=SERIES.X,
-        loss=LOSS.NONE,
-        direction=DIRECTION.REVERSE,
+        series_id=SERIES_MAPPING[Series.X],
+        loss_id=LOSS_MAPPING[Loss.NONE],
+        direction_id=DIRECTION_MAPPING[Direction.REVERSE],
     ),
     "y": FragmentType(
         name="y",
         ref_ion="y",
-        formula="",
+        delta_formula="",
         modloss=False,
-        series=SERIES.Y,
-        loss=LOSS.NONE,
-        direction=DIRECTION.REVERSE,
+        series_id=SERIES_MAPPING[Series.Y],
+        loss_id=LOSS_MAPPING[Loss.NONE],
+        direction_id=DIRECTION_MAPPING[Direction.REVERSE],
     ),
     "z": FragmentType(
         name="z",
         ref_ion="y",
-        formula="N(-1)H(-2)",
+        delta_formula="N(-1)H(-2)",
         modloss=False,
-        series=SERIES.Z,
-        loss=LOSS.NONE,
-        direction=DIRECTION.REVERSE,
+        series_id=SERIES_MAPPING[Series.Z],
+        loss_id=LOSS_MAPPING[Loss.NONE],
+        direction_id=DIRECTION_MAPPING[Direction.REVERSE],
     ),
     "b_modloss": FragmentType(
         name="b_modloss",
         ref_ion="b",
-        formula="N(1)H(3)",
+        delta_formula="N(1)H(3)",
         modloss=True,
-        series=SERIES.B,
-        loss=LOSS.MODLOSS,
-        direction=DIRECTION.FORWARD,
+        series_id=SERIES_MAPPING[Series.B],
+        loss_id=LOSS_MAPPING[Loss.MODLOSS],
+        direction_id=DIRECTION_MAPPING[Direction.FORWARD],
     ),
     "b_H2O": FragmentType(
         name="b_H2O",
         ref_ion="b",
-        formula="H(-2)O(-1)",
+        delta_formula="H(-2)O(-1)",
         modloss=False,
-        series=SERIES.B,
-        loss=LOSS.H2O,
-        direction=DIRECTION.FORWARD,
+        series_id=SERIES_MAPPING[Series.B],
+        loss_id=LOSS_MAPPING[Loss.H2O],
+        direction_id=DIRECTION_MAPPING[Direction.FORWARD],
     ),
     "b_NH3": FragmentType(
         name="b_NH3",
         ref_ion="b",
-        formula="N(-1)H(-3)",
+        delta_formula="N(-1)H(-3)",
         modloss=False,
-        series=SERIES.B,
-        loss=LOSS.NH3,
-        direction=DIRECTION.FORWARD,
+        series_id=SERIES_MAPPING[Series.B],
+        loss_id=LOSS_MAPPING[Loss.NH3],
+        direction_id=DIRECTION_MAPPING[Direction.FORWARD],
     ),
     "c_lossH": FragmentType(
         name="c_lossH",
         ref_ion="b",
-        formula="N(1)H(2)",
+        delta_formula="N(1)H(2)",
         modloss=False,
-        series=SERIES.C,
-        loss=LOSS.LOSSH,
-        direction=DIRECTION.FORWARD,
+        series_id=SERIES_MAPPING[Series.C],
+        loss_id=LOSS_MAPPING[Loss.LOSSH],
+        direction_id=DIRECTION_MAPPING[Direction.FORWARD],
     ),
     "y_modloss": FragmentType(
         name="y_modloss",
         ref_ion="y",
-        formula="N(-1)H(-2)",
+        delta_formula="N(-1)H(-2)",
         modloss=True,
-        series=SERIES.Y,
-        loss=LOSS.MODLOSS,
-        direction=DIRECTION.REVERSE,
+        series_id=SERIES_MAPPING[Series.Y],
+        loss_id=LOSS_MAPPING[Loss.MODLOSS],
+        direction_id=DIRECTION_MAPPING[Direction.REVERSE],
     ),
     "y_H2O": FragmentType(
         name="y_H2O",
         ref_ion="y",
-        formula="H(-2)O(-1)",
+        delta_formula="H(-2)O(-1)",
         modloss=False,
-        series=SERIES.Y,
-        loss=LOSS.H2O,
-        direction=DIRECTION.REVERSE,
+        series_id=SERIES_MAPPING[Series.Y],
+        loss_id=LOSS_MAPPING[Loss.H2O],
+        direction_id=DIRECTION_MAPPING[Direction.REVERSE],
     ),
     "y_NH3": FragmentType(
         name="y_NH3",
         ref_ion="y",
-        formula="N(-1)H(-3)",
+        delta_formula="N(-1)H(-3)",
         modloss=False,
-        series=SERIES.Y,
-        loss=LOSS.NH3,
-        direction=DIRECTION.REVERSE,
+        series_id=SERIES_MAPPING[Series.Y],
+        loss_id=LOSS_MAPPING[Loss.NH3],
+        direction_id=DIRECTION_MAPPING[Direction.REVERSE],
     ),
     "z_addH": FragmentType(
         name="z_addH",
         ref_ion="y",
-        formula="N(-1)H(-1)",
+        delta_formula="N(-1)H(-1)",
         modloss=False,
-        series=SERIES.Z,
-        loss=LOSS.ADDH,
-        direction=DIRECTION.REVERSE,
+        series_id=SERIES_MAPPING[Series.Z],
+        loss_id=LOSS_MAPPING[Loss.ADDH],
+        direction_id=DIRECTION_MAPPING[Direction.REVERSE],
     ),
 }
 
@@ -304,7 +315,10 @@ parse_all_frag_type_representation()
 
 def sort_charged_frag_types(charged_frag_types: List[str]) -> List[str]:
     """charged frag types are sorted by (no-loss, loss) and then alphabetically"""
-    has_loss = [f.count("_") > 1 for f in charged_frag_types]
+    has_loss = [
+        f.replace(FRAGMENT_CHARGE_SEPARATOR, "").count("_") > 0
+        for f in charged_frag_types
+    ]
     no_loss = [f for f, hl in zip(charged_frag_types, has_loss) if not hl]
     loss = [f for f, hl in zip(charged_frag_types, has_loss) if hl]
     return sorted(no_loss) + sorted(loss)
@@ -337,12 +351,12 @@ def get_charged_frag_types(
     ['b_z1','b_z2','y_z1','y_z2','b_modloss_z1','b_modloss_z2','y_modloss_z1','y_modloss_z2']
     """
     charged_frag_types = []
-    for _type in frag_types:
-        if _type in FRAGMENT_TYPES:
-            for _ch in range(1, max_frag_charge + 1):
-                charged_frag_types.append(f"{_type}_z{_ch}")
+    for frag_type in frag_types:
+        if frag_type in FRAGMENT_TYPES:
+            for charge in range(1, max_frag_charge + 1):
+                charged_frag_types.append(f"{frag_type}_z{charge}")
         else:
-            raise ValueError(f"Fragment type {_type} is currently not supported")
+            raise ValueError(f"Fragment type {frag_type} is currently not supported")
     return sort_charged_frag_types(charged_frag_types)
 
 
@@ -361,11 +375,28 @@ def parse_charged_frag_type(charged_frag_type: str) -> Tuple[str, int]:
         str. Fragment type, e.g. 'b','y'
 
         int. Charge state
+
+    Raises
+    ------
+    ValueError
+        If charge state is not an integer or if fragment type is not charged
     """
 
-    if FRAGMENT_CHARGE_SEPARATOR in charged_frag_type:
-        _type, _ch = charged_frag_type.split(FRAGMENT_CHARGE_SEPARATOR)
-        return _type, int(_ch)
+    if charged_frag_type.count(FRAGMENT_CHARGE_SEPARATOR) == 1:
+        fragment_type, charge = charged_frag_type.split(FRAGMENT_CHARGE_SEPARATOR)
+        try:
+            charge = int(charge)
+        except ValueError as err:
+            raise ValueError(
+                f"Charge state must be an integer, got '{charge}' from fragment type '{charged_frag_type}'"
+            ) from err
+
+        if fragment_type not in FRAGMENT_TYPES:
+            raise ValueError(
+                f"Fragment type {fragment_type} is currently not supported"
+            )
+
+        return fragment_type, charge
     else:
         raise ValueError(
             "Only charged fragment types are supported. Please add charge state to the fragment type. e.g. 'b_z1'"
@@ -991,9 +1022,9 @@ def flatten_fragments(
     for charged_frag_type in fragment_mz_df.columns.values:
         frag_type, charge = parse_charged_frag_type(charged_frag_type)
         frag_charges.append(charge)
-        frag_types.append(FRAGMENT_TYPES[frag_type].series)
-        frag_loss_types.append(FRAGMENT_TYPES[frag_type].loss)
-        frag_directions.append(FRAGMENT_TYPES[frag_type].direction)
+        frag_types.append(FRAGMENT_TYPES[frag_type].series_id)
+        frag_loss_types.append(FRAGMENT_TYPES[frag_type].loss_id)
+        frag_directions.append(FRAGMENT_TYPES[frag_type].direction_id)
 
     if "type" in custom_columns:
         frag_df["type"] = np.array(

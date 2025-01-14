@@ -6,7 +6,6 @@ import pandas as pd
 import tqdm
 
 
-# Create a warning class for deprecation
 class AlphabaseDeprecationWarning(DeprecationWarning):
     pass
 
