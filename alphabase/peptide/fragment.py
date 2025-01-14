@@ -1685,8 +1685,8 @@ def _calc_row_indices(
     fragment_position: np.ndarray,
     precursor_df_idx: np.ndarray,
     fragment_df_idx: np.ndarray,
-    frag_start_idx: None | np.ndarray = None,
-    frag_stop_idx: None | np.ndarray = None,
+    frag_start_idx: Union[None, np.ndarray] = None,
+    frag_stop_idx: Union[None, np.ndarray] = None,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Calculate new start and stop index mapping for flat fragments.
@@ -1811,7 +1811,7 @@ def _create_dense_matrices(
     precursor_df: pd.DataFrame,
     fragment_df: pd.DataFrame,
     charged_frag_types: list,
-    flat_columns: list | None = None,
+    flat_columns: Union[list, None] = None,
 ) -> tuple[dict, np.ndarray, np.ndarray]:
     """
     Create dense matrices for fragment dataframes.
@@ -1824,7 +1824,7 @@ def _create_dense_matrices(
         Fragment dataframe
     charged_frag_types : list
         List of charged fragment types
-    flat_columns : list | None, optional
+    flat_columns : Union[list, None], optional
         List of columns to create dense matrices for, by default ['intensity']
         Add 'mz' to include observed m/z values, will overwrite any existing mz columns
 
