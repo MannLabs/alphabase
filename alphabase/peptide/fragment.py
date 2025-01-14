@@ -39,7 +39,7 @@ class Loss:
     NH3 = "NH3"
     LOSSH = "lossH"
     ADDH = "addH"
-    NONE = "none"
+    NONE = ""
 
 
 LOSS_MAPPING = {
@@ -732,11 +732,11 @@ def calc_fragment_mz_values_for_same_nAA(
             _mass[y_modloss == 0] = 0
         elif frag_type in FRAGMENT_TYPES:
             ref_ion = FRAGMENT_TYPES[frag_type].ref_ion
-            add_mass = FRAGMENT_TYPES[frag_type].add_mass
+            delta_mass = FRAGMENT_TYPES[frag_type].delta_mass
             if ref_ion == "b":
-                _mass = (b_mass + add_mass) / charge + MASS_PROTON
+                _mass = (b_mass + delta_mass) / charge + MASS_PROTON
             elif ref_ion == "y":
-                _mass = (y_mass + add_mass) / charge + MASS_PROTON
+                _mass = (y_mass + delta_mass) / charge + MASS_PROTON
             else:
                 raise KeyError(
                     f"ref_ion only allows `b` and `y`, but {ref_ion} is given"
@@ -1653,7 +1653,7 @@ def _calc_column_indices(
     # features.LOSS_INVERSE but with separator '_' for non-empty values
     _loss_inverse_separator = {
         key: ("_" + value if value != "" else value)
-        for key, value in LOSS_INVERSE.items()
+        for key, value in LOSS_MAPPING_INV.items()
     }
 
     sorted_charged_frag_types = sort_charged_frag_types(charged_frag_types)
@@ -1665,7 +1665,7 @@ def _calc_column_indices(
 
     # mapping of fragment type, loss type, charge to a dense column name
     frag_type_list = (
-        fragment_df["type"].map(SERIES_INVERSE)
+        fragment_df["type"].map(SERIES_MAPPING_INV)
         + fragment_df["loss_type"].map(_loss_inverse_separator)
         + FRAGMENT_CHARGE_SEPARATOR
         + fragment_df["charge"].astype(str)
@@ -1739,12 +1739,12 @@ def _calc_row_indices(
             )
 
     # Row indices of a fragment being the accumlated nAA of the precursor + fragment position -1
-    precursor_idx_to_accumlated_nAA = dict(zip(precursor_df_idx, frag_start_idx))
+    precursor_idx_to_accumulated_naa = dict(zip(precursor_df_idx, frag_start_idx))
     # Convert numpy array to pandas Series for mapping
     # This massively speeds up the mapping
     row_indices = (
         pd.Series(fragment_df_idx).map(
-            precursor_idx_to_accumlated_nAA, na_action="ignore"
+            precursor_idx_to_accumulated_naa, na_action="ignore"
         )
     ).to_numpy() + fragment_position
 
@@ -1782,8 +1782,8 @@ def _start_stop_to_idx(precursor_df, fragment_df, index_column="precursor_idx"):
         precursor_df[["flat_frag_start_idx", "flat_frag_stop_idx"]]
         .copy()
         .reset_index(drop=True)
+        .sort_values("flat_frag_start_idx")
     )
-    precursor_df_sorted = precursor_df_sorted.sort_values("flat_frag_start_idx")
 
     # Add precursor_idx to precursor_df as 0,1,2,3...
     precursor_df_sorted[index_column] = np.arange(precursor_df_sorted.shape[0])
@@ -1825,7 +1825,8 @@ def _create_dense_matrices(
     charged_frag_types : list
         List of charged fragment types
     flat_columns : list | None, optional
-        List of columns to create dense matrices for, by default None
+        List of columns to create dense matrices for, by default ['intensity']
+        Add 'mz' to include observed m/z values, will overwrite any existing mz columns
 
     Returns
     -------
@@ -1845,25 +1846,25 @@ def _create_dense_matrices(
         for col in ["precursor_idx", "flat_frag_start_idx", "flat_frag_stop_idx"]
         if col in precursor_df.columns
     ]
-    precursor_df_copy = precursor_df[
+    precursor_df_ = precursor_df[
         ["sequence", "mods", "mod_sites", "charge", "nAA"] + optional_columns
     ].copy()
     fragment_mz_df = create_fragment_mz_dataframe(
-        precursor_df_copy,
+        precursor_df_,
         charged_frag_types,
     )
 
-    if ("precursor_idx" in precursor_df_copy.columns) and (
+    if ("precursor_idx" in precursor_df_.columns) and (
         "precursor_idx" in fragment_df.columns
     ):
-        precursor_df_idx = precursor_df_copy["precursor_idx"]
+        precursor_df_idx = precursor_df_["precursor_idx"]
         fragment_df_idx = fragment_df["precursor_idx"]
 
-    elif ("flat_frag_start_idx" in precursor_df_copy.columns) and (
-        "flat_frag_stop_idx" in precursor_df_copy.columns
+    elif ("flat_frag_start_idx" in precursor_df_.columns) and (
+        "flat_frag_stop_idx" in precursor_df_.columns
     ):
         precursor_df_idx, fragment_df_idx = _start_stop_to_idx(
-            precursor_df_copy, fragment_df
+            precursor_df_, fragment_df
         )
 
     else:
@@ -1873,16 +1874,16 @@ def _create_dense_matrices(
 
     column_indices = _calc_column_indices(fragment_df, charged_frag_types)
     row_indices, frag_start_idx, frag_stop_idx = _calc_row_indices(
-        precursor_df_copy["nAA"].to_numpy(),
+        precursor_df_["nAA"].to_numpy(),
         fragment_df["position"].to_numpy(),
         precursor_df_idx,
         fragment_df_idx,
-        precursor_df_copy["frag_start_idx"].to_numpy(),
-        precursor_df_copy["frag_stop_idx"].to_numpy(),
+        precursor_df_["frag_start_idx"].to_numpy(),
+        precursor_df_["frag_stop_idx"].to_numpy(),
     )
 
     # remove all fragments that could not be mapped to a column
-    match_mask = column_indices != -1
+    match_mask = (column_indices != -1) & (row_indices != -1)
     column_indices = column_indices[match_mask]
     row_indices = row_indices[match_mask]
 
