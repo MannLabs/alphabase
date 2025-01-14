@@ -9,8 +9,8 @@ from alphabase.peptide.fragment import (
     Series,
     _calc_column_indices,
     _calc_row_indices,
-    _create_dense_matrices,
     _start_stop_to_idx,
+    create_dense_matrices,
     get_charged_frag_types,
 )
 from alphabase.spectral_library.base import SpecLibBase
@@ -251,7 +251,7 @@ def test_start_stop_to_idx_empty():
 
 
 def test_create_dense_matrices_with_precursor_idx():
-    """Test _create_dense_matrices with precursor_idx mapping"""
+    """Test create_dense_matrices with precursor_idx mapping"""
     # Setup test data
     precursor_df = pd.DataFrame(
         {
@@ -285,7 +285,7 @@ def test_create_dense_matrices_with_precursor_idx():
     charged_frag_types = ["b_z1", "y_z1"]
 
     # Execute
-    df_collection, frag_start_idx, frag_stop_idx = _create_dense_matrices(
+    df_collection, frag_start_idx, frag_stop_idx = create_dense_matrices(
         precursor_df, fragment_df, charged_frag_types
     )
 
@@ -319,7 +319,7 @@ def test_create_dense_matrices_with_precursor_idx():
 
 
 def test_create_dense_matrices_with_frag_start_idx():
-    """Test _create_dense_matrices with fragment start/stop indices"""
+    """Test create_dense_matrices with fragment start/stop indices"""
     # Setup test data
     precursor_df = pd.DataFrame(
         {
@@ -353,7 +353,7 @@ def test_create_dense_matrices_with_frag_start_idx():
     charged_frag_types = ["b_z1", "y_z1"]
 
     # Execute
-    df_collection, frag_start_idx, frag_stop_idx = _create_dense_matrices(
+    df_collection, frag_start_idx, frag_stop_idx = create_dense_matrices(
         precursor_df, fragment_df, charged_frag_types
     )
 
@@ -434,7 +434,7 @@ def test_speclib_base_to_flat_conversion():
 
     # Convert back to dense matrices, including a and x ions that weren't in original data
     dense_frag_types = ["a", "b", "x", "y"]
-    df_collection, frag_start_idx, frag_stop_idx = _create_dense_matrices(
+    df_collection, frag_start_idx, frag_stop_idx = create_dense_matrices(
         speclib_flat.precursor_df,
         speclib_flat.fragment_df,
         get_charged_frag_types(dense_frag_types, 2),
@@ -503,10 +503,16 @@ def test_calc_dense_fragments():
     # Create test fragment data
     fragment_df = pd.DataFrame(
         {
-            "type": [SERIES.B, SERIES.Y, SERIES.B, SERIES.Y] * 2,
+            "type": [
+                SERIES_MAPPING[Series.B],
+                SERIES_MAPPING[Series.Y],
+                SERIES_MAPPING[Series.B],
+                SERIES_MAPPING[Series.Y],
+            ]
+            * 2,
             "position": [0, 0, 1, 1] * 2,
             "charge": [1, 1, 1, 1] * 2,
-            "loss_type": [LOSS.NONE] * 8,
+            "loss_type": [LOSS_MAPPING[Loss.NONE]] * 8,
             "intensity": [100, 200, 300, 400, 500, 600, 700, 800],
             "mz": [800, 700, 600, 500, 400, 300, 200, 100],
             "correlation": [10] * 8,
