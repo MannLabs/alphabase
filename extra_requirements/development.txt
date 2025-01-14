@@ -1,6 +1,6 @@
 jupyter
 twine
-bumpversion
+bump-my-version
 pipdeptree
 ipykernel
 pyteomics
