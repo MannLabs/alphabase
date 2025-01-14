@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, List, Tuple, Union
 
 import numba as nb
@@ -12,110 +12,117 @@ from alphabase.constants.atom import (
 )
 from alphabase.constants.modification import calc_modloss_mass
 from alphabase.peptide.mass_calc import calc_b_y_and_peptide_masses_for_same_len_seqs
-from alphabase.peptide.precursor import (
-    is_precursor_refined,
-    refine_precursor_df,
-)
 from alphabase.utils import DeprecatedDict
 
 
-class DIRECTION:
-    FORWARD = 1
-    REVERSE = -1
+class Direction:
+    """String constants defining fragment directions."""
+
+    FORWARD = "forward"
+    REVERSE = "reverse"
 
 
-# because we dont know the loss, we assume every loss type is phospho
-class LOSS:
-    MODLOSS = 98
-    H2O = 18
-    NH3 = 17
-    LOSSH = 1
-    ADDH = 2
-    NONE = 0
+DIRECTION_MAPPING = {Direction.FORWARD: 1, Direction.REVERSE: -1}
+
+DIRECTION_MAPPING_INV = {v: k for k, v in DIRECTION_MAPPING.items()}
 
 
-LOSS_INVERSE = {
-    18: "H2O",
-    17: "NH3",
-    98: "modloss",
-    1: "lossH",
-    0: "",
-    2: "addH",
+class Loss:
+    """String constants defining fragment losses."""
+
+    MODLOSS = "modloss"
+    H2O = "H2O"
+    NH3 = "NH3"
+    LOSSH = "lossH"
+    ADDH = "addH"
+    NONE = "none"
+
+
+LOSS_MAPPING = {
+    # we use 98 because it is similar to the molecular weight of a phosphate group
+    Loss.MODLOSS: 98,
+    # we use 18 because it is similar to the molecular weight of a water molecule
+    Loss.H2O: 18,
+    # we use 17 because it is similar to the molecular weight of an ammonia molecule
+    Loss.NH3: 17,
+    # we use 1 because it is similar to the molecular weight of a hydrogen atom
+    Loss.LOSSH: 1,
+    # there is no -1 so we use 2
+    Loss.ADDH: 2,
+    Loss.NONE: 0,
 }
 
-
-class SERIES:
-    A = 97
-    B = 98
-    C = 99
-    X = 120
-    Y = 121
-    Z = 122
+LOSS_MAPPING_INV = {v: k for k, v in LOSS_MAPPING.items()}
 
 
-SERIES_INVERSE = {
-    97: "a",
-    98: "b",
-    99: "c",
-    120: "x",
-    121: "y",
-    122: "z",
+class Series:
+    """String constants defining fragment series types."""
+
+    A = "a"
+    B = "b"
+    C = "c"
+    X = "x"
+    Y = "y"
+    Z = "z"
+
+
+SERIES_MAPPING = {
+    # ascii value for a, b, c, x, y, z
+    Series.A: 97,
+    Series.B: 98,
+    Series.C: 99,
+    Series.X: 120,
+    Series.Y: 121,
+    Series.Z: 122,
 }
+
+SERIES_MAPPING_INV = {v: k for k, v in SERIES_MAPPING.items()}
 
 
 @dataclass(frozen=True)
 class FragmentType:
+    """
+    Class which represents a constant fragment type.
+
+    Parameters
+    ----------
+    name : str
+        Name of the fragment type
+    ref_ion : str
+        Reference ion of the fragment type
+    delta_formula : str
+        Chemical formula representing the mass difference from the reference ion
+    delta_mass : float
+        Mass difference calculated from delta_formula, set during initialization
+    modloss : bool
+        Whether the fragment type has a modification neutral loss
+    series_id : int
+        Series ID of the fragment type (e.g., 97=a, 98=b, 99=c, 120=x, 121=y, 122=z), from SERIES_MAPPING
+    loss_id : int
+        Loss type ID of the fragment (e.g., 0=none, 1=lossH, 2=addH, 17=NH3, 18=H2O, 98=modloss), from LOSS_MAPPING
+    direction_id : int
+        Direction ID of the fragment type (forward=1, reverse=-1), from DIRECTION_MAPPING
+
+    Attributes
+    ----------
+    delta_mass : float
+        Mass difference calculated from delta_formula, set during initialization
+    """
+
     name: str
     ref_ion: str
-    formula: str
+    delta_formula: str
+    delta_mass: float = field(init=False)
     modloss: bool
-    add_mass: float
+    series_id: int
+    loss_id: int
+    direction_id: int
 
-    series: int
-    loss: int
-    direction: int
-
-    def __init__(
-        self,
-        name: str,
-        ref_ion: str,
-        formula: str,
-        modloss: bool,
-        series: int,
-        loss: int,
-        direction: int,
-    ) -> None:
-        """
-        Class which represents a constant fragment type.
-
-        Parameters
-        ----------
-        name : str
-            Name of the fragment type
-        ref_ion : str
-            Reference ion of the fragment type
-        formula : str
-            Formula of the fragment type
-        modloss : bool
-            Whether the fragment type has a modification neutral loss
-        series : int
-            Series of the fragment type
-        loss : int
-            Loss of the fragment type
-        direction : int
-            Direction of the fragment type
-        """
-        # Need to use object.__setattr__ to set fields in frozen dataclass
-        object.__setattr__(self, "name", name)
-        object.__setattr__(self, "ref_ion", ref_ion)
-        object.__setattr__(self, "formula", formula)
-        object.__setattr__(self, "modloss", modloss)
-        object.__setattr__(self, "add_mass", calc_mass_from_formula(formula))
-        object.__setattr__(self, "series", series)
-        object.__setattr__(self, "loss", loss)
-        object.__setattr__(self, "direction", direction)
-
-        super().__init__()
+    def __post_init__(self):
+        """Set delta_mass after initialization using delta_formula"""
+        object.__setattr__(
+            self, "delta_mass", calc_mass_from_formula(self.delta_formula)
+        )
 
 
 # constant which contains all valid fragment types
@@ -123,128 +130,128 @@ FRAGMENT_TYPES = {
     "a": FragmentType(
         name="a",
         ref_ion="b",
-        formula="C(-1)O(-1)",
+        delta_formula="C(-1)O(-1)",
         modloss=False,
-        series=SERIES.A,
-        loss=LOSS.NONE,
-        direction=DIRECTION.FORWARD,
+        series_id=SERIES_MAPPING[Series.A],
+        loss_id=LOSS_MAPPING[Loss.NONE],
+        direction_id=DIRECTION_MAPPING[Direction.FORWARD],
     ),
     "b": FragmentType(
         name="b",
         ref_ion="b",
-        formula="",
+        delta_formula="",
         modloss=False,
-        series=SERIES.B,
-        loss=LOSS.NONE,
-        direction=DIRECTION.FORWARD,
+        series_id=SERIES_MAPPING[Series.B],
+        loss_id=LOSS_MAPPING[Loss.NONE],
+        direction_id=DIRECTION_MAPPING[Direction.FORWARD],
     ),
     "c": FragmentType(
         name="c",
         ref_ion="b",
-        formula="N(1)H(3)",
+        delta_formula="N(1)H(3)",
         modloss=False,
-        series=SERIES.C,
-        loss=LOSS.NONE,
-        direction=DIRECTION.FORWARD,
+        series_id=SERIES_MAPPING[Series.C],
+        loss_id=LOSS_MAPPING[Loss.NONE],
+        direction_id=DIRECTION_MAPPING[Direction.FORWARD],
     ),
     "x": FragmentType(
         name="x",
         ref_ion="y",
-        formula="C(1)O(1)H(-2)",
+        delta_formula="C(1)O(1)H(-2)",
         modloss=False,
-        series=SERIES.X,
-        loss=LOSS.NONE,
-        direction=DIRECTION.REVERSE,
+        series_id=SERIES_MAPPING[Series.X],
+        loss_id=LOSS_MAPPING[Loss.NONE],
+        direction_id=DIRECTION_MAPPING[Direction.REVERSE],
     ),
     "y": FragmentType(
         name="y",
         ref_ion="y",
-        formula="",
+        delta_formula="",
         modloss=False,
-        series=SERIES.Y,
-        loss=LOSS.NONE,
-        direction=DIRECTION.REVERSE,
+        series_id=SERIES_MAPPING[Series.Y],
+        loss_id=LOSS_MAPPING[Loss.NONE],
+        direction_id=DIRECTION_MAPPING[Direction.REVERSE],
     ),
     "z": FragmentType(
         name="z",
         ref_ion="y",
-        formula="N(-1)H(-2)",
+        delta_formula="N(-1)H(-2)",
         modloss=False,
-        series=SERIES.Z,
-        loss=LOSS.NONE,
-        direction=DIRECTION.REVERSE,
+        series_id=SERIES_MAPPING[Series.Z],
+        loss_id=LOSS_MAPPING[Loss.NONE],
+        direction_id=DIRECTION_MAPPING[Direction.REVERSE],
     ),
     "b_modloss": FragmentType(
         name="b_modloss",
         ref_ion="b",
-        formula="N(1)H(3)",
+        delta_formula="N(1)H(3)",
         modloss=True,
-        series=SERIES.B,
-        loss=LOSS.MODLOSS,
-        direction=DIRECTION.FORWARD,
+        series_id=SERIES_MAPPING[Series.B],
+        loss_id=LOSS_MAPPING[Loss.MODLOSS],
+        direction_id=DIRECTION_MAPPING[Direction.FORWARD],
     ),
     "b_H2O": FragmentType(
         name="b_H2O",
         ref_ion="b",
-        formula="H(-2)O(-1)",
+        delta_formula="H(-2)O(-1)",
         modloss=False,
-        series=SERIES.B,
-        loss=LOSS.H2O,
-        direction=DIRECTION.FORWARD,
+        series_id=SERIES_MAPPING[Series.B],
+        loss_id=LOSS_MAPPING[Loss.H2O],
+        direction_id=DIRECTION_MAPPING[Direction.FORWARD],
     ),
     "b_NH3": FragmentType(
         name="b_NH3",
         ref_ion="b",
-        formula="N(-1)H(-3)",
+        delta_formula="N(-1)H(-3)",
         modloss=False,
-        series=SERIES.B,
-        loss=LOSS.NH3,
-        direction=DIRECTION.FORWARD,
+        series_id=SERIES_MAPPING[Series.B],
+        loss_id=LOSS_MAPPING[Loss.NH3],
+        direction_id=DIRECTION_MAPPING[Direction.FORWARD],
     ),
     "c_lossH": FragmentType(
         name="c_lossH",
         ref_ion="b",
-        formula="N(1)H(2)",
+        delta_formula="N(1)H(2)",
         modloss=False,
-        series=SERIES.C,
-        loss=LOSS.LOSSH,
-        direction=DIRECTION.FORWARD,
+        series_id=SERIES_MAPPING[Series.C],
+        loss_id=LOSS_MAPPING[Loss.LOSSH],
+        direction_id=DIRECTION_MAPPING[Direction.FORWARD],
     ),
     "y_modloss": FragmentType(
         name="y_modloss",
         ref_ion="y",
-        formula="N(-1)H(-2)",
+        delta_formula="N(-1)H(-2)",
         modloss=True,
-        series=SERIES.Y,
-        loss=LOSS.MODLOSS,
-        direction=DIRECTION.REVERSE,
+        series_id=SERIES_MAPPING[Series.Y],
+        loss_id=LOSS_MAPPING[Loss.MODLOSS],
+        direction_id=DIRECTION_MAPPING[Direction.REVERSE],
     ),
     "y_H2O": FragmentType(
         name="y_H2O",
         ref_ion="y",
-        formula="H(-2)O(-1)",
+        delta_formula="H(-2)O(-1)",
         modloss=False,
-        series=SERIES.Y,
-        loss=LOSS.H2O,
-        direction=DIRECTION.REVERSE,
+        series_id=SERIES_MAPPING[Series.Y],
+        loss_id=LOSS_MAPPING[Loss.H2O],
+        direction_id=DIRECTION_MAPPING[Direction.REVERSE],
     ),
     "y_NH3": FragmentType(
         name="y_NH3",
         ref_ion="y",
-        formula="N(-1)H(-3)",
+        delta_formula="N(-1)H(-3)",
         modloss=False,
-        series=SERIES.Y,
-        loss=LOSS.NH3,
-        direction=DIRECTION.REVERSE,
+        series_id=SERIES_MAPPING[Series.Y],
+        loss_id=LOSS_MAPPING[Loss.NH3],
+        direction_id=DIRECTION_MAPPING[Direction.REVERSE],
     ),
     "z_addH": FragmentType(
         name="z_addH",
         ref_ion="y",
-        formula="N(-1)H(-1)",
+        delta_formula="N(-1)H(-1)",
         modloss=False,
-        series=SERIES.Z,
-        loss=LOSS.ADDH,
-        direction=DIRECTION.REVERSE,
+        series_id=SERIES_MAPPING[Series.Z],
+        loss_id=LOSS_MAPPING[Loss.ADDH],
+        direction_id=DIRECTION_MAPPING[Direction.REVERSE],
     ),
 }
 
@@ -304,7 +311,10 @@ parse_all_frag_type_representation()
 
 def sort_charged_frag_types(charged_frag_types: List[str]) -> List[str]:
     """charged frag types are sorted by (no-loss, loss) and then alphabetically"""
-    has_loss = [f.count("_") > 1 for f in charged_frag_types]
+    has_loss = [
+        f.replace(FRAGMENT_CHARGE_SEPARATOR, "").count("_") > 0
+        for f in charged_frag_types
+    ]
     no_loss = [f for f, hl in zip(charged_frag_types, has_loss) if not hl]
     loss = [f for f, hl in zip(charged_frag_types, has_loss) if hl]
     return sorted(no_loss) + sorted(loss)
@@ -337,12 +347,12 @@ def get_charged_frag_types(
     ['b_z1','b_z2','y_z1','y_z2','b_modloss_z1','b_modloss_z2','y_modloss_z1','y_modloss_z2']
     """
     charged_frag_types = []
-    for _type in frag_types:
-        if _type in FRAGMENT_TYPES:
-            for _ch in range(1, max_frag_charge + 1):
-                charged_frag_types.append(f"{_type}_z{_ch}")
+    for frag_type in frag_types:
+        if frag_type in FRAGMENT_TYPES:
+            for charge in range(1, max_frag_charge + 1):
+                charged_frag_types.append(f"{frag_type}_z{charge}")
         else:
-            raise ValueError(f"Fragment type {_type} is currently not supported")
+            raise ValueError(f"Fragment type {frag_type} is currently not supported")
     return sort_charged_frag_types(charged_frag_types)
 
 
@@ -361,11 +371,28 @@ def parse_charged_frag_type(charged_frag_type: str) -> Tuple[str, int]:
         str. Fragment type, e.g. 'b','y'
 
         int. Charge state
+
+    Raises
+    ------
+    ValueError
+        If charge state is not an integer or if fragment type is not charged
     """
 
-    if FRAGMENT_CHARGE_SEPARATOR in charged_frag_type:
-        _type, _ch = charged_frag_type.split(FRAGMENT_CHARGE_SEPARATOR)
-        return _type, int(_ch)
+    if charged_frag_type.count(FRAGMENT_CHARGE_SEPARATOR) == 1:
+        fragment_type, charge = charged_frag_type.split(FRAGMENT_CHARGE_SEPARATOR)
+        try:
+            charge = int(charge)
+        except ValueError as err:
+            raise ValueError(
+                f"Charge state must be an integer, got '{charge}' from fragment type '{charged_frag_type}'"
+            ) from err
+
+        if fragment_type not in FRAGMENT_TYPES:
+            raise ValueError(
+                f"Fragment type {fragment_type} is currently not supported"
+            )
+
+        return fragment_type, charge
     else:
         raise ValueError(
             "Only charged fragment types are supported. Please add charge state to the fragment type. e.g. 'b_z1'"
@@ -991,9 +1018,9 @@ def flatten_fragments(
     for charged_frag_type in fragment_mz_df.columns.values:
         frag_type, charge = parse_charged_frag_type(charged_frag_type)
         frag_charges.append(charge)
-        frag_types.append(FRAGMENT_TYPES[frag_type].series)
-        frag_loss_types.append(FRAGMENT_TYPES[frag_type].loss)
-        frag_directions.append(FRAGMENT_TYPES[frag_type].direction)
+        frag_types.append(FRAGMENT_TYPES[frag_type].series_id)
+        frag_loss_types.append(FRAGMENT_TYPES[frag_type].loss_id)
+        frag_directions.append(FRAGMENT_TYPES[frag_type].direction_id)
 
     if "type" in custom_columns:
         frag_df["type"] = np.array(
@@ -1061,282 +1088,6 @@ def flatten_fragments(
     ]
 
     return precursor_df, frag_df
-
-
-@nb.njit()
-def compress_fragment_indices(frag_idx):
-    """
-    recalculates fragment indices to remove unused fragments. Can be used to compress a fragment library.
-    Expects fragment indices to be ordered by increasing values (!!!).
-    It should be O(N) runtime with N being the number of fragment rows.
-
-    >>> frag_idx = [[6,  10],
-                [12, 14],
-                [20, 22]]
-
-    >>> frag_idx = [[0, 4],
-                [4, 6],
-                [6, 8]]
-    >>> fragment_pointer = [6,7,8,9,12,13,20,21]
-    """
-    frag_idx_len = frag_idx[:, 1] - frag_idx[:, 0]
-
-    # This sum does not include the fragment at the index position and has therefore len N +1
-    frag_idx_cumsum = np.zeros(shape=len(frag_idx_len) + 1, dtype="int64")
-    frag_idx_cumsum[1:] = np.cumsum(frag_idx_len)
-
-    fragment_pointer = np.zeros(np.sum(frag_idx_len), dtype="int64")
-
-    for i in range(len(frag_idx)):
-        start_index = frag_idx_cumsum[i]
-
-        for j, k in enumerate(range(frag_idx[i, 0], frag_idx[i, 1])):
-            fragment_pointer[start_index + j] = k
-
-    new_frag_idx = np.column_stack((frag_idx_cumsum[:-1], frag_idx_cumsum[1:]))
-    return new_frag_idx, fragment_pointer
-
-
-def remove_unused_fragments(
-    precursor_df: pd.DataFrame,
-    fragment_df_list: Tuple[pd.DataFrame, ...],
-    frag_start_col: str = "frag_start_idx",
-    frag_stop_col: str = "frag_stop_idx",
-) -> Tuple[pd.DataFrame, Tuple[pd.DataFrame, ...]]:
-    """Removes unused fragments of removed precursors,
-    reannotates the `frag_start_col` and `frag_stop_col`
-
-    Parameters
-    ----------
-    precursor_df : pd.DataFrame
-        Precursor dataframe which contains frag_start_idx and frag_stop_idx columns
-
-    fragment_df_list : List[pd.DataFrame]
-        A list of fragment dataframes which should be compressed by removing unused fragments.
-        Multiple fragment dataframes can be provided which will all be sliced in the same way.
-        This allows to slice both the fragment_mz_df and fragment_intensity_df.
-        At least one fragment dataframe needs to be provided.
-
-    frag_start_col : str, optional
-        Fragment start idx column in `precursor_df`, such as "frag_start_idx" and "peak_start_idx".
-        Defaults to "frag_start_idx".
-
-    frag_stop_col : str, optional
-        Fragment stop idx column in `precursor_df`, such as "frag_stop_idx" and "peak_stop_idx".
-        Defaults to "frag_stop_idx".
-
-    Returns
-    -------
-    pd.DataFrame, List[pd.DataFrame]
-        returns the reindexed precursor DataFrame and the sliced fragment DataFrames
-    """
-
-    precursor_df = precursor_df.sort_values([frag_start_col], ascending=True)
-    frag_idx = precursor_df[[frag_start_col, frag_stop_col]].values
-
-    new_frag_idx, fragment_pointer = compress_fragment_indices(frag_idx)
-
-    precursor_df[[frag_start_col, frag_stop_col]] = new_frag_idx
-    precursor_df = precursor_df.sort_index()
-
-    output_tuple = []
-
-    for i in range(len(fragment_df_list)):
-        output_tuple.append(
-            fragment_df_list[i].iloc[fragment_pointer].copy().reset_index(drop=True)
-        )
-
-    return precursor_df, tuple(output_tuple)
-
-
-def create_fragment_mz_dataframe_by_sort_precursor(
-    precursor_df: pd.DataFrame,
-    charged_frag_types: List,
-    batch_size: int = 500000,
-    dtype: np.dtype = PEAK_MZ_DTYPE,
-) -> pd.DataFrame:
-    """Sort nAA in precursor_df for faster fragment mz dataframe creation.
-
-    Because the fragment mz values are continous in memory, so it is faster
-    when setting values in pandas.
-
-    Note that this function will change the order and index of precursor_df
-
-    Parameters
-    ----------
-    precursor_df : pd.DataFrame
-        precursor dataframe
-
-    charged_frag_types : List
-        fragment types list
-
-    batch_size : int, optional
-        Calculate fragment mz values in batch.
-        Defaults to 500000.
-    """
-    if "frag_start_idx" in precursor_df.columns:
-        precursor_df.drop(columns=["frag_start_idx", "frag_stop_idx"], inplace=True)
-
-    refine_precursor_df(precursor_df)
-
-    fragment_mz_df = init_fragment_by_precursor_dataframe(
-        precursor_df,
-        charged_frag_types,
-        dtype=dtype,
-    )
-
-    _grouped = precursor_df.groupby("nAA")
-    for nAA, big_df_group in _grouped:
-        for i in range(0, len(big_df_group), batch_size):
-            batch_end = i + batch_size
-
-            df_group = big_df_group.iloc[i:batch_end, :]
-
-            mz_values = calc_fragment_mz_values_for_same_nAA(
-                df_group, nAA, charged_frag_types
-            )
-
-            fragment_mz_df.iloc[
-                df_group.frag_start_idx.values[0] : df_group.frag_stop_idx.values[-1], :
-            ] = mz_values.astype(PEAK_MZ_DTYPE)
-    return mask_fragments_for_charge_greater_than_precursor_charge(
-        fragment_mz_df,
-        precursor_df.charge.values,
-        precursor_df.nAA.values,
-    )
-
-
-def create_fragment_mz_dataframe(
-    precursor_df: pd.DataFrame,
-    charged_frag_types: List,
-    *,
-    reference_fragment_df: pd.DataFrame = None,
-    inplace_in_reference: bool = False,
-    batch_size: int = 500000,
-    dtype: np.dtype = PEAK_MZ_DTYPE,
-) -> pd.DataFrame:
-    """
-    Generate fragment mass dataframe for the precursor_df. If
-    the `reference_fragment_df` is provided and precursor_df contains `frag_start_idx`,
-    it will generate  the mz dataframe based on the reference. Otherwise it
-    generates the mz dataframe from scratch.
-
-    Parameters
-    ----------
-    precursor_df : pd.DataFrame
-        precursors to generate fragment masses,
-        if `precursor_df` contains the 'frag_start_idx' column,
-        `reference_fragment_df` must be provided
-
-    charged_frag_types : List
-        `['b_z1','b_z2','y_z1','y_z2','b_modloss_1','y_H2O_z1'...]`
-
-    reference_fragment_df : pd.DataFrame
-        kwargs only. Generate fragment_mz_df based on this reference,
-        as `precursor_df.frag_start_idx` and
-        `precursor.frag_stop_idx` point to the indices in
-        `reference_fragment_df`.
-        Defaults to None
-
-    inplace_in_reference : bool
-        kwargs only. Change values in place in the `reference_fragment_df`.
-        Defaults to False
-
-    batch_size: int
-        Number of peptides for each batch, to save RAM.
-
-    Returns
-    -------
-    pd.DataFrame
-        `fragment_mz_df` with given `charged_frag_types`
-    """
-    if reference_fragment_df is None and "frag_start_idx" in precursor_df.columns:
-        # raise ValueError(
-        #     "`precursor_df` contains 'frag_start_idx' column, "\
-        #     "please provide `reference_fragment_df` argument"
-        # )
-        fragment_mz_df = init_fragment_by_precursor_dataframe(
-            precursor_df,
-            charged_frag_types,
-            dtype=dtype,
-        )
-        return create_fragment_mz_dataframe(
-            precursor_df=precursor_df,
-            charged_frag_types=charged_frag_types,
-            reference_fragment_df=fragment_mz_df,
-            inplace_in_reference=True,
-            batch_size=batch_size,
-            dtype=dtype,
-        )
-    if "nAA" not in precursor_df.columns:
-        # fast
-        return create_fragment_mz_dataframe_by_sort_precursor(
-            precursor_df,
-            charged_frag_types,
-            batch_size,
-            dtype=dtype,
-        )
-
-    if is_precursor_refined(precursor_df) and reference_fragment_df is None:
-        # fast
-        return create_fragment_mz_dataframe_by_sort_precursor(
-            precursor_df, charged_frag_types, batch_size, dtype=dtype
-        )
-
-    else:
-        # slow
-        if reference_fragment_df is not None:
-            if inplace_in_reference:
-                fragment_mz_df = reference_fragment_df.loc[
-                    :,
-                    [
-                        _fr
-                        for _fr in charged_frag_types
-                        if _fr in reference_fragment_df.columns
-                    ],
-                ]
-            else:
-                fragment_mz_df = pd.DataFrame(
-                    np.zeros(
-                        (len(reference_fragment_df), len(charged_frag_types)),
-                        dtype=dtype,
-                    ),
-                    columns=charged_frag_types,
-                )
-        else:
-            fragment_mz_df = init_fragment_by_precursor_dataframe(
-                precursor_df,
-                charged_frag_types,
-                dtype=dtype,
-            )
-
-        frag_mz_values = fragment_mz_df.to_numpy(copy=True)
-
-        _grouped = precursor_df.groupby("nAA")
-        for nAA, big_df_group in _grouped:
-            for i in range(0, len(big_df_group), batch_size):
-                batch_end = i + batch_size
-
-                df_group = big_df_group.iloc[i:batch_end, :]
-
-                mz_values = calc_fragment_mz_values_for_same_nAA(
-                    df_group, nAA, fragment_mz_df.columns
-                )
-
-                update_sliced_fragment_dataframe(
-                    fragment_mz_df,
-                    frag_mz_values,
-                    mz_values,
-                    df_group[["frag_start_idx", "frag_stop_idx"]].values,
-                )
-
-    fragment_mz_df.iloc[:] = frag_mz_values
-
-    return mask_fragments_for_charge_greater_than_precursor_charge(
-        fragment_mz_df,
-        precursor_df.charge.values,
-        precursor_df.nAA.values,
-    )
 
 
 @nb.njit(nogil=True)
