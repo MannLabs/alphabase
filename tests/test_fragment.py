@@ -3,12 +3,14 @@ import pandas as pd
 import pytest
 
 from alphabase.peptide.fragment import (
-    LOSS,
-    SERIES,
+    LOSS_MAPPING,
+    SERIES_MAPPING,
+    Loss,
+    Series,
     _calc_column_indices,
     _calc_row_indices,
-    _create_dense_matrices,
     _start_stop_to_idx,
+    create_dense_matrices,
     get_charged_frag_types,
     validate_charged_frag_types,
 )
@@ -20,8 +22,12 @@ def test_calc_column_indices_unmapped_fragments():
     """Test handling of fragments that don't map to any charged_frag_types"""
     fragment_df = pd.DataFrame(
         {
-            "type": [SERIES.B, SERIES.Y, SERIES.A],
-            "loss_type": [LOSS.NONE] * 3,
+            "type": [
+                SERIES_MAPPING[Series.B],
+                SERIES_MAPPING[Series.Y],
+                SERIES_MAPPING[Series.A],
+            ],
+            "loss_type": [LOSS_MAPPING[Loss.NONE]] * 3,
             "charge": [1, 1, 1],
         }
     )
@@ -40,8 +46,18 @@ def test_calc_column_indices_complex_mix():
     """Test complex mixture of fragment types, losses and charges"""
     fragment_df = pd.DataFrame(
         {
-            "type": [SERIES.B, SERIES.Y, SERIES.B, SERIES.Y],
-            "loss_type": [LOSS.NONE, LOSS.H2O, LOSS.NH3, LOSS.NONE],
+            "type": [
+                SERIES_MAPPING[Series.B],
+                SERIES_MAPPING[Series.Y],
+                SERIES_MAPPING[Series.B],
+                SERIES_MAPPING[Series.Y],
+            ],
+            "loss_type": [
+                LOSS_MAPPING[Loss.NONE],
+                LOSS_MAPPING[Loss.H2O],
+                LOSS_MAPPING[Loss.NH3],
+                LOSS_MAPPING[Loss.NONE],
+            ],
             "charge": [1, 1, 2, 2],
         }
     )
@@ -132,78 +148,19 @@ def test_calc_row_indices_no_start_stop():
     )  # Two peptides with 3 and 4 fragments respectively
     precursor_df_idx = np.array([0, 1, 2])
 
-    fragment_position = np.array(
-        [
-            0,
-            1,
-            2,  # noqa
-            0,
-            1,
-            2,  # noqa
-            0,
-            1,
-            2,  # noqa
-            0,
-            1,
-            2,  # noqa
-            0,
-            1,
-            2,  # noqa
-            0,
-            1,
-            2,  # noqa
-        ]
-    )
-    fragment_df_idx = np.array(
-        [
-            1,
-            1,
-            1,
-            9,
-            9,
-            9,
-            0,
-            0,
-            0,
-            10,
-            10,
-            10,
-            2,
-            2,
-            2,
-            11,
-            11,
-            11,
-        ]
-    )
+    # fmt: off
+    fragment_position = np.array([0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2])
+    fragment_df_idx = np.array([1, 1, 1, 9, 9, 9, 0, 0, 0, 10, 10, 10, 2, 2, 2, 11, 11, 11])
+
 
     # Execute
     row_indices, frag_start_idx, frag_stop_idx = _calc_row_indices(
         precursor_naa, fragment_position, precursor_df_idx, fragment_df_idx
     )
 
-    expected_mask = np.array(
-        [
-            True,
-            True,
-            True,
-            False,
-            False,
-            False,
-            True,
-            True,
-            True,
-            False,
-            False,
-            False,
-            True,
-            True,
-            True,
-            False,
-            False,
-            False,
-        ]
-    )
+    expected_mask = np.array([True, True, True, False, False, False, True, True, True, False, False, False, True, True, True, False, False, False])
+
+    # fmt: on
     frag_start_idx_expected = np.array([0, 3, 7])
     frag_stop_idx_expected = np.array([3, 7, 9])
 
@@ -222,59 +179,13 @@ def test_calc_row_indices_with_start_stop():
     )  # Two peptides with 3 and 4 fragments respectively
     precursor_df_idx = np.array([0, 1, 2])
 
-    frag_start_idx = np.array(
-        [
-            7,
-            0,
-            3,
-        ]
-    )
+    # fmt: off
+    frag_start_idx = np.array([7, 0, 3])
     frag_stop_idx = np.array([9, 3, 7])
 
-    fragment_position = np.array(
-        [
-            0,
-            1,
-            2,  # noqa
-            0,
-            1,
-            2,  # noqa
-            0,
-            1,
-            2,  # noqa
-            0,
-            1,
-            2,  # noqa
-            0,
-            1,
-            2,  # noqa
-            0,
-            1,
-            2,  # noqa
-        ]
-    )
-    fragment_df_idx = np.array(
-        [
-            1,
-            1,
-            1,
-            9,
-            9,
-            9,
-            0,
-            0,
-            0,
-            10,
-            10,
-            10,
-            2,
-            2,
-            2,
-            11,
-            11,
-            11,
-        ]
-    )
+    fragment_position = np.array([0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2])
+    fragment_df_idx = np.array([1, 1, 1, 9, 9, 9, 0, 0, 0, 10, 10, 10, 2, 2, 2, 11, 11, 11])
+    # fmt: on
 
     # Execute
     row_indices, _frag_start_idx, _frag_stop_idx = _calc_row_indices(
@@ -286,57 +197,14 @@ def test_calc_row_indices_with_start_stop():
         frag_stop_idx,
     )
 
-    expected_mask = np.array(
-        [
-            True,
-            True,
-            True,
-            False,
-            False,
-            False,
-            True,
-            True,
-            True,
-            False,
-            False,
-            False,
-            True,
-            True,
-            True,
-            False,
-            False,
-            False,
-        ]
-    )
-
-    expected_row_indices = np.array(
-        [
-            0,
-            1,
-            2,
-            -1,
-            -1,
-            -1,
-            7,
-            8,
-            9,
-            -1,
-            -1,
-            -1,
-            3,
-            4,
-            5,
-            -1,
-            -1,
-            -1,
-        ]
-    )
+    # fmt: off
+    expected_mask = np.array([True, True, True, False, False, False, True, True, True, False, False, False, True, True, True, False, False, False])
+    expected_row_indices = np.array([0, 1, 2, -1, -1, -1, 7, 8, 9, -1, -1, -1, 3, 4, 5, -1, -1, -1])
+    # fmt: on
 
     mask = row_indices != -1
     np.testing.assert_array_equal(mask, expected_mask)
-
     np.testing.assert_array_equal(row_indices, expected_row_indices)
-
     np.testing.assert_array_equal(frag_start_idx, _frag_start_idx)
     np.testing.assert_array_equal(frag_stop_idx, _frag_stop_idx)
 
@@ -384,7 +252,7 @@ def test_start_stop_to_idx_empty():
 
 
 def test_create_dense_matrices_with_precursor_idx():
-    """Test _create_dense_matrices with precursor_idx mapping"""
+    """Test create_dense_matrices with precursor_idx mapping"""
     # Setup test data
     precursor_df = pd.DataFrame(
         {
@@ -399,10 +267,17 @@ def test_create_dense_matrices_with_precursor_idx():
 
     fragment_df = pd.DataFrame(
         {
-            "type": [SERIES.B, SERIES.Y, SERIES.B, SERIES.Y, SERIES.B, SERIES.Y],
+            "type": [
+                SERIES_MAPPING[Series.B],
+                SERIES_MAPPING[Series.Y],
+                SERIES_MAPPING[Series.B],
+                SERIES_MAPPING[Series.Y],
+                SERIES_MAPPING[Series.B],
+                SERIES_MAPPING[Series.Y],
+            ],
             "position": [0, 1, 0, 1, 0, 1],
             "charge": [1, 1, 1, 1, 1, 1],
-            "loss_type": [LOSS.NONE] * 6,
+            "loss_type": [LOSS_MAPPING[Loss.NONE]] * 6,
             "intensity": [100, 200, 300, 400, 500, 600],
             "precursor_idx": [0, 0, 1, 1, 2, 2],
         }
@@ -411,7 +286,7 @@ def test_create_dense_matrices_with_precursor_idx():
     charged_frag_types = ["b_z1", "y_z1"]
 
     # Execute
-    df_collection, frag_start_idx, frag_stop_idx = _create_dense_matrices(
+    df_collection, frag_start_idx, frag_stop_idx = create_dense_matrices(
         precursor_df, fragment_df, charged_frag_types
     )
 
@@ -445,7 +320,7 @@ def test_create_dense_matrices_with_precursor_idx():
 
 
 def test_create_dense_matrices_with_frag_start_idx():
-    """Test _create_dense_matrices with fragment start/stop indices"""
+    """Test create_dense_matrices with fragment start/stop indices"""
     # Setup test data
     precursor_df = pd.DataFrame(
         {
@@ -461,10 +336,17 @@ def test_create_dense_matrices_with_frag_start_idx():
 
     fragment_df = pd.DataFrame(
         {
-            "type": [SERIES.B, SERIES.Y, SERIES.B, SERIES.Y, SERIES.B, SERIES.Y],
+            "type": [
+                SERIES_MAPPING[Series.B],
+                SERIES_MAPPING[Series.Y],
+                SERIES_MAPPING[Series.B],
+                SERIES_MAPPING[Series.Y],
+                SERIES_MAPPING[Series.B],
+                SERIES_MAPPING[Series.Y],
+            ],
             "position": [0, 1, 0, 1, 0, 1],
             "charge": [1, 1, 1, 1, 1, 1],
-            "loss_type": [LOSS.NONE] * 6,
+            "loss_type": [LOSS_MAPPING[Loss.NONE]] * 6,
             "intensity": [100, 200, 300, 400, 500, 600],
         }
     )
@@ -472,7 +354,7 @@ def test_create_dense_matrices_with_frag_start_idx():
     charged_frag_types = ["b_z1", "y_z1"]
 
     # Execute
-    df_collection, frag_start_idx, frag_stop_idx = _create_dense_matrices(
+    df_collection, frag_start_idx, frag_stop_idx = create_dense_matrices(
         precursor_df, fragment_df, charged_frag_types
     )
 
@@ -553,7 +435,7 @@ def test_speclib_base_to_flat_conversion():
 
     # Convert back to dense matrices, including a and x ions that weren't in original data
     dense_frag_types = ["a", "b", "x", "y"]
-    df_collection, frag_start_idx, frag_stop_idx = _create_dense_matrices(
+    df_collection, frag_start_idx, frag_stop_idx = create_dense_matrices(
         speclib_flat.precursor_df,
         speclib_flat.fragment_df,
         get_charged_frag_types(dense_frag_types, 2),
@@ -622,10 +504,16 @@ def test_calc_dense_fragments():
     # Create test fragment data
     fragment_df = pd.DataFrame(
         {
-            "type": [SERIES.B, SERIES.Y, SERIES.B, SERIES.Y] * 2,
+            "type": [
+                SERIES_MAPPING[Series.B],
+                SERIES_MAPPING[Series.Y],
+                SERIES_MAPPING[Series.B],
+                SERIES_MAPPING[Series.Y],
+            ]
+            * 2,
             "position": [0, 0, 1, 1] * 2,
             "charge": [1, 1, 1, 1] * 2,
-            "loss_type": [LOSS.NONE] * 8,
+            "loss_type": [LOSS_MAPPING[Loss.NONE]] * 8,
             "intensity": [100, 200, 300, 400, 500, 600, 700, 800],
             "mz": [800, 700, 600, 500, 400, 300, 200, 100],
             "correlation": [10] * 8,
