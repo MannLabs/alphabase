@@ -9,9 +9,9 @@ xxhash
 biopython
 tqdm
 regex
-# pydivsufsort  # TODO this is used by lcp_digest.py?
 dask
 dask_expr
 pyahocorasick
 pyteomics
+lxml
 rdkit==2024.3.3 # test: tolerate_version
