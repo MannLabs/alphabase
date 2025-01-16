@@ -1805,7 +1805,7 @@ def _start_stop_to_idx(precursor_df, fragment_df, index_column="precursor_idx"):
     return precursor_df_idx, fragment_df_idx
 
 
-def _create_dense_matrices(
+def create_dense_matrices(
     precursor_df: pd.DataFrame,
     fragment_df: pd.DataFrame,
     charged_frag_types: list,

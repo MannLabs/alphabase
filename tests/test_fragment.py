@@ -9,8 +9,8 @@ from alphabase.peptide.fragment import (
     Series,
     _calc_column_indices,
     _calc_row_indices,
-    _create_dense_matrices,
     _start_stop_to_idx,
+    create_dense_matrices,
     get_charged_frag_types,
 )
 from alphabase.spectral_library.base import SpecLibBase
@@ -251,7 +251,7 @@ def test_start_stop_to_idx_empty():
 
 
 def test_create_dense_matrices_with_precursor_idx():
-    """Test _create_dense_matrices with precursor_idx mapping"""
+    """Test create_dense_matrices with precursor_idx mapping"""
     # Setup test data
     precursor_df = pd.DataFrame(
         {
@@ -285,7 +285,7 @@ def test_create_dense_matrices_with_precursor_idx():
     charged_frag_types = ["b_z1", "y_z1"]
 
     # Execute
-    df_collection, frag_start_idx, frag_stop_idx = _create_dense_matrices(
+    df_collection, frag_start_idx, frag_stop_idx = create_dense_matrices(
         precursor_df, fragment_df, charged_frag_types
     )
 
@@ -319,7 +319,7 @@ def test_create_dense_matrices_with_precursor_idx():
 
 
 def test_create_dense_matrices_with_frag_start_idx():
-    """Test _create_dense_matrices with fragment start/stop indices"""
+    """Test create_dense_matrices with fragment start/stop indices"""
     # Setup test data
     precursor_df = pd.DataFrame(
         {
@@ -353,7 +353,7 @@ def test_create_dense_matrices_with_frag_start_idx():
     charged_frag_types = ["b_z1", "y_z1"]
 
     # Execute
-    df_collection, frag_start_idx, frag_stop_idx = _create_dense_matrices(
+    df_collection, frag_start_idx, frag_stop_idx = create_dense_matrices(
         precursor_df, fragment_df, charged_frag_types
     )
 
@@ -434,7 +434,7 @@ def test_speclib_base_to_flat_conversion():
 
     # Convert back to dense matrices, including a and x ions that weren't in original data
     dense_frag_types = ["a", "b", "x", "y"]
-    df_collection, frag_start_idx, frag_stop_idx = _create_dense_matrices(
+    df_collection, frag_start_idx, frag_stop_idx = create_dense_matrices(
         speclib_flat.precursor_df,
         speclib_flat.fragment_df,
         get_charged_frag_types(dense_frag_types, 2),
@@ -483,3 +483,133 @@ def test_speclib_base_to_flat_conversion():
     )
     expected_cols = len(get_charged_frag_types(dense_frag_types, 2))
     assert df_collection["mz"].shape == (expected_rows, expected_cols)
+
+
+def test_calc_dense_fragments():
+    """Test calc_dense_fragments method of SpecLibFlat"""
+    # Create test precursor data
+    precursor_df = pd.DataFrame(
+        {
+            "sequence": ["PEPTIDE", "PROTEIN"],
+            "mods": ["", "Acetyl@Any_N-term"],
+            "mod_sites": ["", "0"],
+            "charge": [2, 3],
+            "nAA": [7, 7],
+            "flat_frag_start_idx": [0, 4],
+            "flat_frag_stop_idx": [4, 8],
+        }
+    )
+
+    # Create test fragment data
+    fragment_df = pd.DataFrame(
+        {
+            "type": [
+                SERIES_MAPPING[Series.B],
+                SERIES_MAPPING[Series.Y],
+                SERIES_MAPPING[Series.B],
+                SERIES_MAPPING[Series.Y],
+            ]
+            * 2,
+            "position": [0, 0, 1, 1] * 2,
+            "charge": [1, 1, 1, 1] * 2,
+            "loss_type": [LOSS_MAPPING[Loss.NONE]] * 8,
+            "intensity": [100, 200, 300, 400, 500, 600, 700, 800],
+            "mz": [800, 700, 600, 500, 400, 300, 200, 100],
+            "correlation": [10] * 8,
+        }
+    )
+
+    # Initialize SpecLibFlat
+    speclib_flat = SpecLibFlat()
+    speclib_flat._precursor_df = precursor_df
+    speclib_flat._fragment_df = fragment_df
+
+    # Call calc_dense_fragments with additional columns
+    speclib_flat.calc_dense_fragments(
+        additional_columns=["intensity", "mz", "correlation"],
+        charged_frag_types=["b_z1", "y_z1", "b_H2O_z1"],
+    )
+
+    # Verify the dense matrices were created
+    assert hasattr(speclib_flat, "_fragment_mz_df")
+    assert hasattr(speclib_flat, "_fragment_intensity_df")
+
+    # Check dimensions of created matrices
+    expected_rows = (
+        12  # Total number of fragment positions (4 per peptide * 2 peptides)
+    )
+    expected_cols = 3  # Number of fragment types (b_z1, y_z1)
+    assert speclib_flat._fragment_mz_df.shape == (expected_rows, expected_cols)
+    assert speclib_flat._fragment_intensity_df.shape == (expected_rows, expected_cols)
+
+    # Verify fragment indices were updated in precursor_df
+    assert "frag_start_idx" in speclib_flat.precursor_df.columns
+    assert "frag_stop_idx" in speclib_flat.precursor_df.columns
+
+    np.testing.assert_array_equal(
+        speclib_flat.precursor_df["frag_start_idx"].values, [0, 6]
+    )
+    np.testing.assert_array_equal(
+        speclib_flat.precursor_df["frag_stop_idx"].values, [6, 12]
+    )
+
+    # Check intensity values are in correct positions
+    expected_intensities = np.array(
+        [
+            [100, 200, 0],
+            [300, 400, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+            [500, 600, 0],
+            [700, 800, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+        ]
+    )
+    np.testing.assert_array_equal(
+        speclib_flat._fragment_intensity_df.values, expected_intensities
+    )
+
+    # After the intensity test, add m/z test
+    expected_mz = np.array(
+        [
+            [800, 700, 0],
+            [600, 500, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+            [400, 300, 0],
+            [200, 100, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+        ]
+    )
+    np.testing.assert_array_equal(speclib_flat._fragment_mz_df.values, expected_mz)
+
+    # Add correlation test
+    expected_correlation = np.array(
+        [
+            [10, 10, 0],
+            [10, 10, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+            [10, 10, 0],
+            [10, 10, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+        ]
+    )
+    np.testing.assert_array_equal(
+        speclib_flat._fragment_correlation_df.values, expected_correlation
+    )

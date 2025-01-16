@@ -1,10 +1,14 @@
 import warnings
+from typing import Union
 
-import numpy as np
 import pandas as pd
 
 from alphabase.io.hdf import HDF_File
-from alphabase.peptide.fragment import flatten_fragments, remove_unused_fragments
+from alphabase.peptide.fragment import (
+    create_dense_matrices,
+    flatten_fragments,
+    remove_unused_fragments,
+)
 from alphabase.spectral_library.base import SpecLibBase
 
 
@@ -215,6 +219,11 @@ class SpecLibFlat(SpecLibBase):
             The full set of charged fragment types in the form of a list of strings such as ['a_z1','b_z1','c_z1','x_z1','y_z1','z_z1']
 
         """
+        warnings.warn(
+            "The get_full_charged_types method is deprecated. Use get_charged_frag_types instead.",
+            DeprecationWarning,
+        )
+
         unique_charge_type_pairs = frag_df[
             ["type", "loss_type", "charge"]
         ].drop_duplicates()
@@ -240,152 +249,139 @@ class SpecLibFlat(SpecLibBase):
                 )
         return list(charged_frag_types)
 
-    def to_SpecLibBase(self) -> SpecLibBase:
+    def calc_dense_fragments(
+        self,
+        additional_columns: Union[list, None] = None,
+        charged_frag_types: Union[list, None] = None,
+    ) -> None:
         """
-        Convert the flat library to SpecLibBase object.
+        Create a hybrid SpecLibFlat which has both flat and dense fragment representations.
+        Converts the flat fragment representation to dense matrices and stores them in the object.
 
-        Returns:
-        --------
+        Creates fragment_mz_df (using calculated m/z values) and fragment_intensity_df by default.
+        For each additional column specified (e.g., 'intensity'), creates a corresponding
+        _fragment_<column>_df matrix. Including 'mz' in additional_columns will use observed
+        rather than calculated m/z values.
+
+        Fragment types can be specified explicitly or inherited from self.charged_frag_types.
+        Only fragments matching these types will be included in the dense matrices. Each fragment
+        type (e.g., 'b_z1', 'y_z2') becomes a column in the resulting dense matrices.
+
+        Updates the precursor_df with new frag_start_idx and frag_stop_idx columns for the
+        dense representation.
+
+        Parameters
+        ----------
+        additional_columns : Union[list, None], optional
+            Additional fragment columns to convert to dense format, defaults to ['intensity']
+        charged_frag_types : Union[list, None], optional
+            Fragment types to include in dense format, defaults to self.charged_frag_types
+
+        Returns
+        -------
+        None
+            Modifies the SpecLibFlat object in place
+        """
+
+        if charged_frag_types is None:
+            charged_frag_types = self.charged_frag_types
+
+        if additional_columns is None:
+            additional_columns = ["intensity"]
+
+        df_collection, frag_start_idx, frag_stop_idx = create_dense_matrices(
+            self._precursor_df,
+            self._fragment_df,
+            charged_frag_types,
+            flat_columns=additional_columns,
+        )
+
+        for col, df in df_collection.items():
+            setattr(self, f"_fragment_{col}_df", df)
+
+        self.precursor_df["frag_start_idx"] = frag_start_idx
+        self.precursor_df["frag_stop_idx"] = frag_stop_idx
+
+    def to_speclib_base(
+        self,
+        additional_columns: Union[list, None] = None,
+        charged_frag_types: Union[list, None] = None,
+    ) -> SpecLibBase:
+        """
+        Convert the flat library to a new SpecLibBase object with dense fragment matrices.
+
+        Creates a new SpecLibBase containing fragment_mz_df (using calculated m/z values).
+        Flat columns like 'intensity' are transformed into dense matrices as fragment_intensity_df.
+        For all columns specified in additional_columns, a corresponding _fragment_<column>_df matrix is created and assigned to the new SpecLibBase object.
+
+        Warning
+        -------
+        If the column 'mz' is added to additional_columns, it will override the calculated m/z values in fragment_mz_df.
+        To mitigate this behavior and get observed as calculated m/z values, rename the flat mz column to 'mz_observed' before calling to_speclib_base.
+
+        Fragment types can be specified explicitly or inherited from self.charged_frag_types.
+        Only fragments matching these types will be included in the dense matrices. Each fragment
+        type (e.g., 'b_z1', 'y_z2') becomes a column in the resulting dense matrices.
+
+        The precursor_df is copied and updated with new dense fragment indices, removing any
+        flat-specific columns (flat_frag_start_idx, flat_frag_stop_idx).
+
+        Parameters
+        ----------
+        additional_columns : Union[list, None], optional
+            Additional fragment columns to convert to dense format, defaults to ['intensity']
+
+        charged_frag_types : Union[list, None], optional
+            Fragment types to include in dense format, defaults to self.charged_frag_types
+
+        Returns
+        -------
         SpecLibBase
-            A SpecLibBase object with `precursor_df`, `fragment_mz_df` and `fragment_intensity_df`, and
-            '_additional_fragment_columns_df' if there was more than mz and intensity in the original fragment_df.
+            A new SpecLibBase object with dense fragment representations
         """
-        # Check that fragment_df has the following columns ['mz', 'intensity', 'type', 'charge', 'position', 'loss_type']
-        assert set(
-            ["mz", "intensity", "type", "charge", "position", "loss_type"]
-        ).issubset(
-            self._fragment_df.columns
-        ), f'fragment_df does not have the following columns: {set(["mz", "intensity", "type", "charge", "position", "loss_type"]) - set(self._fragment_df.columns)}'
-        self.charged_frag_types = self.get_full_charged_types(
-            self._fragment_df
-        )  # Infer the full set of charged fragment types from data
-        # charged_frag_types = self.charged_frag_types #Use pre-defined charged_frag_types
-        frag_type_to_col_dict = dict(
-            zip(self.charged_frag_types, range(len(self.charged_frag_types)))
-        )
-        loss_number_to_type = {0: "", 18: "_H2O", 17: "_NH3", 98: "_modloss"}
 
-        available_frag_types = self._fragment_df["type"].unique()
-        self.frag_types_as_char = {i: chr(i) for i in available_frag_types}
-
-        frag_types_z_charge = (
-            self._fragment_df["type"].map(self.frag_types_as_char)
-            + self._fragment_df["loss_type"].map(loss_number_to_type)
-            + "_z"
-            + self._fragment_df["charge"].astype(str)
-        )
-
-        # Print number of nAA less 1
-        accumlated_nAA = (self._precursor_df["nAA"] - 1).cumsum()
-        # Define intensity and mz as a matrix of shape (accumlated_nAA[-1], len(self.charged_frag_types), 2) - 2 for mz and intensity
-        intensity_and_mz = np.zeros(
-            (accumlated_nAA.iloc[-1], len(self.charged_frag_types), 2)
-        )
-
-        # Start indices for each precursor is the accumlated nAA of the previous precursor and for the first precursor is 0
-        start_indexes = accumlated_nAA.shift(1).fillna(0).astype(int)
-
-        column_indices = frag_types_z_charge.map(frag_type_to_col_dict)
-
-        # We need to calculate for each fragment the precursor_idx that maps a fragment to a precursor
-        drop_precursor_idx = False
-        if "precursor_idx" not in self._fragment_df.columns:
-            drop_precursor_idx = True
-            # Sort precursor_df by 'flat_frag_start_idx'
-            self._precursor_df = self._precursor_df.sort_values("flat_frag_start_idx")
-            # Add precursor_idx to precursor_df as 0,1,2,3...
-            self._precursor_df["precursor_idx"] = range(self._precursor_df.shape[0])
-
-            # Add precursor_idx to fragment_df
-            frag_precursor_idx = np.repeat(
-                self._precursor_df["precursor_idx"],
-                self._precursor_df["flat_frag_stop_idx"]
-                - self._precursor_df["flat_frag_start_idx"],
+        if "mz" in additional_columns:
+            warnings.warn(
+                "additional_columns contains 'mz', this will override the calculated m/z values in fragment_mz_df. If this is not intended, rename the flat mz column to 'mz_observed' before calling to_speclib_base.",
+                UserWarning,
             )
-
-            assert (
-                len(frag_precursor_idx) == self._fragment_df.shape[0]
-            ), f"Number of fragments {len(frag_precursor_idx)} is not equal to the number of rows in fragment_df {self._fragment_df.shape[0]}"
-
-            self._fragment_df["precursor_idx"] = frag_precursor_idx.values
-
-        # Row indices of a fragment being the accumlated nAA of the precursor + fragment position -1
-        precursor_idx_to_accumlated_nAA = dict(
-            zip(self._precursor_df["precursor_idx"], start_indexes)
-        )
-        row_indices = (
-            self._fragment_df["precursor_idx"].map(
-                precursor_idx_to_accumlated_nAA, na_action="ignore"
-            )
-            + self._fragment_df["position"]
-        )
-
-        # Drop elements were the column_indices is nan and drop them from both row_indices and column_indices
-        nan_indices = column_indices.index[column_indices.isna()]
-        row_indices = row_indices.drop(nan_indices)
-        column_indices = column_indices.drop(nan_indices)
-
-        assert (
-            row_indices.shape[0] == column_indices.shape[0]
-        ), f"row_indices {row_indices.shape[0]} is not equal to column_indices {column_indices.shape[0]}"
-
-        assert (
-            np.max(row_indices) <= intensity_and_mz.shape[0]
-        ), f"row_indices {np.max(row_indices)} is greater than the number of fragments {intensity_and_mz.shape[0]}"
-
-        # Assign the intensity and mz to the correct position in the matrix
-        intensity_indices = np.array(
-            (row_indices, column_indices, np.zeros_like(row_indices)), dtype=int
-        ).tolist()
-        mz_indices = np.array(
-            (row_indices, column_indices, np.ones_like(row_indices)), dtype=int
-        ).tolist()
-
-        intensity_and_mz[tuple(intensity_indices)] = self._fragment_df["intensity"]
-        intensity_and_mz[tuple(mz_indices)] = self._fragment_df["mz"]
-
-        # Create fragment_mz_df and fragment_intensity_df
-        fragment_mz_df = pd.DataFrame(
-            intensity_and_mz[:, :, 1], columns=self.charged_frag_types
-        )
-        fragment_intensity_df = pd.DataFrame(
-            intensity_and_mz[:, :, 0], columns=self.charged_frag_types
-        )
-
-        # Add columns frag_start_idx and frag_stop_idx to the precursor_df
-        self._precursor_df["frag_start_idx"] = start_indexes
-        self._precursor_df["frag_stop_idx"] = accumlated_nAA
-
-        # Drop precursor Idx from both fragment_df and precursor_df
-        if drop_precursor_idx:
-            self._fragment_df = self._fragment_df.drop(columns=["precursor_idx"])
-            self._precursor_df = self._precursor_df.drop(columns=["precursor_idx"])
-
-        # Drop flat indices from precursor_df
-        self._precursor_df = self._precursor_df.drop(
-            columns=["flat_frag_start_idx", "flat_frag_stop_idx"]
-        )
 
         # Create SpecLibBase object
-        spec_lib_base = SpecLibBase()
-        spec_lib_base._precursor_df = self._precursor_df
-        spec_lib_base._fragment_mz_df = fragment_mz_df
-        spec_lib_base._fragment_intensity_df = fragment_intensity_df
-        spec_lib_base.charged_frag_types = self.charged_frag_types
+        speclib_base = SpecLibBase()
+        speclib_base._precursor_df = self._precursor_df.copy()
 
-        #  Add additional columns from frag_df that were not mz and intensity
-        additional_columns = set(self._fragment_df.columns) - set(
-            ["mz", "intensity", "type", "charge", "position", "loss_type"]
+        if charged_frag_types is None:
+            charged_frag_types = self.charged_frag_types
+
+        if additional_columns is None:
+            additional_columns = ["intensity"]
+
+        speclib_base.charged_frag_types = charged_frag_types
+
+        df_collection, frag_start_idx, frag_stop_idx = create_dense_matrices(
+            speclib_base._precursor_df,
+            self._fragment_df,
+            speclib_base.charged_frag_types,
+            flat_columns=additional_columns,
         )
-        for col in additional_columns:
-            additional_matrix = np.zeros(
-                (accumlated_nAA.iloc[-1], len(self.charged_frag_types))
-            )
-            data_indices = np.array((row_indices, column_indices), dtype=int).tolist()
-            additional_matrix[tuple(data_indices)] = self._fragment_df[col]
-            additional_df = pd.DataFrame(
-                additional_matrix, columns=self.charged_frag_types
-            )
-            setattr(spec_lib_base, f"_fragment_{col}_df", additional_df)
 
-        return spec_lib_base
+        speclib_base.precursor_df["frag_start_idx"] = frag_start_idx
+        speclib_base.precursor_df["frag_stop_idx"] = frag_stop_idx
+
+        for col, df in df_collection.items():
+            setattr(speclib_base, f"_fragment_{col}_df", df)
+
+        # Drop flat indices from precursor_df if they exist
+        speclib_base._precursor_df = speclib_base._precursor_df.drop(
+            ["flat_frag_start_idx", "flat_frag_stop_idx"], axis=1, errors="ignore"
+        )
+
+        return speclib_base
+
+    def to_SpecLibBase(self):
+        # raise a deprecation warning
+        warnings.warn(
+            "The to_SpecLibBase method is deprecated. Use to_speclib_base instead.",
+            DeprecationWarning,
+        )
+        return self.to_speclib_base()
