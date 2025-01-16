@@ -1,0 +1,22 @@
+# Dependencies required for running the "loose" version of alphabase.
+# All dependencies that are also included in `requirements.txt` must be added also here (enforced by a test).
+# TODO clean the requirements
+numba
+numpy
+pyyaml
+pandas
+h5py
+contextlib2
+xxhash
+biopython
+psutil
+tqdm
+scikit-learn
+regex
+# pydivsufsort  # TODO this is used by lcp_digest.py?
+dask
+dask_expr
+pyahocorasick
+pyteomics
+lxml
+rdkit==2024.3.3 # test: tolerate_version

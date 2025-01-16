@@ -1,3 +1,4 @@
+# TODO clean the requirements and split into dev, test, docs
 jupyter
 twine
 bumpversion
