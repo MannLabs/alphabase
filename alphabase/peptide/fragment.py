@@ -1906,12 +1906,6 @@ def create_dense_matrices(
     if flat_columns is None:
         flat_columns = ["intensity"]
 
-    if "mz" in flat_columns:
-        warnings.warn(
-            "flat_columns contains 'mz', this will override the calculated m/z values in fragment_mz_df. If this is not intended, rename the flat mz column to 'mz_observed' before calling to_speclib_base.",
-            UserWarning,
-        )
-
     optional_columns = [
         col
         for col in ["precursor_idx", "flat_frag_start_idx", "flat_frag_stop_idx"]
@@ -1960,6 +1954,13 @@ def create_dense_matrices(
 
     # create a dictionary with the mz matrix and the flat columns
     df_collection = {"mz": fragment_mz_df}
+
+    # df_collection["mz"] might be overridden by flat_columns["mz"]
+    if "mz" in flat_columns:
+        warnings.warn(
+            "flat_columns contains 'mz', this will override the calculated m/z values in fragment_mz_df. If this is not intended, rename the flat mz column to 'mz_observed' before calling to_speclib_base.",
+            UserWarning,
+        )
     for column_name in flat_columns:
         matrix = np.zeros_like(fragment_mz_df.values, dtype=PEAK_INTENSITY_DTYPE)
         matrix[row_indices, column_indices] = fragment_df[column_name].values[
