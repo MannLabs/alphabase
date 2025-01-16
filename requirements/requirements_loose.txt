@@ -2,7 +2,7 @@
 # All dependencies that are also included in `requirements.txt` must be added also here (enforced by a test).
 # TODO clean the requirements
 numba
-numpy<2.0 # test: tolerate_version
+numpy
 pyyaml
 pandas
 h5py
