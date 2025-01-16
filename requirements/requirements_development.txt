@@ -1,6 +1,5 @@
-# TODO clean the requirements and split into dev, test, docs
+# Dependencies helping for development
 jupyter
 bumpversion
 pipdeptree
 ipykernel
-matplotlib

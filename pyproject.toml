@@ -50,7 +50,7 @@ find = {}
 dependencies = {file = ["requirements/requirements_loose.txt"]}
 optional-dependencies = { stable = { file = ["requirements/requirements.txt",
 ] }, tests = { file = [ "requirements/requirements_tests.txt",
-] }, development = { file = ["requirements/requirements_dev.txt", "requirements/requirements_tests.txt", "requirements/requirements_docs.txt"
+] }, development = { file = ["requirements/requirements_development.txt", "requirements/requirements_tests.txt", "requirements/requirements_docs.txt"
 ] }}
 version = {attr = "alphabase.__version__"}
 
