@@ -1,8 +1,30 @@
 import io
 import itertools
+import warnings
 
 import pandas as pd
 import tqdm
+
+
+class AlphabaseDeprecationWarning(DeprecationWarning):
+    pass
+
+
+# Custom dict class that issues warnings
+class DeprecatedDict(dict):
+    def __init__(self, *args, **kwargs):
+        self.warning_message = kwargs.pop(
+            "warning_message", "This dictionary is deprecated"
+        )
+        super().__init__(*args, **kwargs)
+
+    def __getitem__(self, key):
+        warnings.warn(self.warning_message, AlphabaseDeprecationWarning, stacklevel=2)
+        return super().__getitem__(key)
+
+    def get(self, key, default=None):
+        warnings.warn(self.warning_message, AlphabaseDeprecationWarning, stacklevel=2)
+        return super().get(key, default)
 
 
 # from alphatims
