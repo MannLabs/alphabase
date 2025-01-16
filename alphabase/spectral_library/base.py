@@ -12,8 +12,10 @@ from alphabase.peptide.fragment import (
     calc_fragment_count,
     create_fragment_mz_dataframe,
     filter_fragment_number,
+    filter_valid_charged_frag_types,
     join_left,
     remove_unused_fragments,
+    sort_charged_frag_types,
 )
 from alphabase.peptide.precursor import (
     calc_precursor_isotope_info,
@@ -716,22 +718,18 @@ class SpecLibBase:
 
             self._precursor_df[cols] = mod_seq_df[cols]
 
-        self._fragment_mz_df = _hdf.library.fragment_mz_df.values
-        self._fragment_intensity_df = _hdf.library.fragment_intensity_df.values
-
-        self._fragment_mz_df = self._fragment_mz_df[
-            [
-                frag
-                for frag in self.charged_frag_types
-                if frag in self._fragment_mz_df.columns
-            ]
+        _fragment_mz_df = _hdf.library.fragment_mz_df.values
+        self._fragment_mz_df = _fragment_mz_df[
+            sort_charged_frag_types(
+                filter_valid_charged_frag_types(_fragment_mz_df.columns.values)
+            )
         ]
-        self._fragment_intensity_df = self._fragment_intensity_df[
-            [
-                frag
-                for frag in self.charged_frag_types
-                if frag in self._fragment_intensity_df.columns
-            ]
+
+        _fragment_intensity_df = _hdf.library.fragment_intensity_df.values
+        self._fragment_intensity_df = _fragment_intensity_df[
+            sort_charged_frag_types(
+                filter_valid_charged_frag_types(_fragment_intensity_df.columns.values)
+            )
         ]
 
     @staticmethod

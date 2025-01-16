@@ -11,6 +11,7 @@ from alphabase.peptide.fragment import (
     _calc_row_indices,
     _start_stop_to_idx,
     create_dense_matrices,
+    filter_valid_charged_frag_types,
     get_charged_frag_types,
 )
 from alphabase.spectral_library.base import SpecLibBase
@@ -613,3 +614,52 @@ def test_calc_dense_fragments():
     np.testing.assert_array_equal(
         speclib_flat._fragment_correlation_df.values, expected_correlation
     )
+
+
+def test_filter_valid_charged_frag_types_valid_input():
+    """Test that valid fragment types are returned unchanged"""
+    valid_types = ["b_z1", "y_z2", "b_modloss_z2", "y_H2O_z1"]
+    result = filter_valid_charged_frag_types(valid_types)
+    assert result == valid_types
+
+
+def test_filter_valid_charged_frag_types_invalid_base():
+    """Test that invalid fragment base types raise warnings and are filtered out"""
+    with pytest.warns(
+        UserWarning, match="Fragment type invalid is currently not supported"
+    ):
+        result = filter_valid_charged_frag_types(["invalid_z1"])
+    assert result == []
+
+
+def test_filter_valid_charged_frag_types_zero_charge():
+    """Test that zero charge states raise warnings and are filtered out"""
+    with pytest.warns(
+        UserWarning, match="Charge state of fragment type b_z0 is not positive"
+    ):
+        result = filter_valid_charged_frag_types(["b_z0"])
+    assert result == []
+
+
+def test_filter_valid_charged_frag_types_negative_charge():
+    """Test that negative charge states raise warnings and are filtered out"""
+    with pytest.warns(
+        UserWarning,
+        match="Charge state must be a positive integer, got '-1' from fragment type 'y_z-1'",
+    ):
+        result = filter_valid_charged_frag_types(["y_z-1"])
+    assert result == []
+
+
+def test_filter_valid_charged_frag_types_mixed():
+    """Test handling of mixed valid and invalid fragment types"""
+    with pytest.warns(UserWarning) as record:
+        result = filter_valid_charged_frag_types(["b_z1", "invalid_z1", "y_z2", "x_z0"])
+    assert result == ["b_z1", "y_z2"]
+    assert len(record) == 2  # Should have 2 warning messages
+
+
+def test_filter_valid_charged_frag_types_empty():
+    """Test handling of empty input list"""
+    result = filter_valid_charged_frag_types([])
+    assert result == []

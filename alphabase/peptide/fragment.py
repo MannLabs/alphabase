@@ -1,3 +1,4 @@
+import warnings
 from dataclasses import dataclass, field
 from typing import Dict, List, Tuple, Union
 
@@ -360,6 +361,50 @@ def get_charged_frag_types(
     return sort_charged_frag_types(charged_frag_types)
 
 
+def filter_valid_charged_frag_types(
+    charged_frag_types: List[str],
+) -> List[str]:
+    """
+    Filters a list of charged fragment types and returns only the valid ones.
+    A valid charged fragment type must:
+    1. Follow the format: {fragment_type}_z{charge} (e.g. 'b_z1', 'y_modloss_z2')
+    2. Use a fragment type that exists in FRAGMENT_TYPES
+    3. Have a positive integer charge
+
+    Parameters
+    ----------
+    charged_frag_types : List[str]
+        List of charged fragment types to filter (e.g. ['b_z1', 'y_z2', 'invalid_z1', 'b_modloss_z2'])
+
+    Returns
+    -------
+    List[str]
+        List containing only the valid charged fragment types
+    """
+    valid_types = []
+
+    for frag_type in charged_frag_types:
+        try:
+            base_type, charge = parse_charged_frag_type(frag_type)
+            if base_type not in FRAGMENT_TYPES:
+                warnings.warn(
+                    f"Fragment type {frag_type} is not supported and will be ignored"
+                )
+                continue
+            elif charge <= 0:
+                warnings.warn(
+                    f"Charge state of fragment type {frag_type} is not positive and will be ignored"
+                )
+                continue
+            valid_types.append(frag_type)
+        except ValueError as e:
+            # Convert ValueError exceptions to warnings
+            warnings.warn(str(e))
+            continue
+
+    return valid_types
+
+
 def parse_charged_frag_type(charged_frag_type: str) -> Tuple[str, int]:
     """
     Oppsite to `get_charged_frag_types`.
@@ -379,7 +424,7 @@ def parse_charged_frag_type(charged_frag_type: str) -> Tuple[str, int]:
     Raises
     ------
     ValueError
-        If charge state is not an integer or if fragment type is not charged
+        If charge state is not a positive integer or if fragment type is not charged
     """
 
     if charged_frag_type.count(FRAGMENT_CHARGE_SEPARATOR) != 1:
@@ -389,10 +434,15 @@ def parse_charged_frag_type(charged_frag_type: str) -> Tuple[str, int]:
 
     fragment_type, charge = charged_frag_type.split(FRAGMENT_CHARGE_SEPARATOR)
     try:
+        # Check if charge is a valid integer string (no decimals)
+        if not charge.isdigit():
+            raise ValueError(
+                f"Charge state must be a positive integer, got '{charge}' from fragment type '{charged_frag_type}'"
+            )
         charge = int(charge)
     except ValueError as err:
         raise ValueError(
-            f"Charge state must be an integer, got '{charge}' from fragment type '{charged_frag_type}'"
+            f"Charge state must be a positive integer, got '{charge}' from fragment type '{charged_frag_type}'"
         ) from err
 
     if fragment_type not in FRAGMENT_TYPES:
