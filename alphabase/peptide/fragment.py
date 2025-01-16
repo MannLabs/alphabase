@@ -426,30 +426,29 @@ def parse_charged_frag_type(charged_frag_type: str) -> Tuple[str, int]:
     ValueError
         If charge state is not a positive integer or if fragment type is not charged
     """
-    if charged_frag_type.count(FRAGMENT_CHARGE_SEPARATOR) == 1:
-        fragment_type, charge = charged_frag_type.split(FRAGMENT_CHARGE_SEPARATOR)
-        try:
-            # Check if charge is a valid integer string (no decimals)
-            if not charge.isdigit():
-                raise ValueError(
-                    f"Charge state must be a positive integer, got '{charge}' from fragment type '{charged_frag_type}'"
-                )
-            charge = int(charge)
-        except ValueError as err:
-            raise ValueError(
-                f"Charge state must be a positive integer, got '{charge}' from fragment type '{charged_frag_type}'"
-            ) from err
 
-        if fragment_type not in FRAGMENT_TYPES:
-            raise ValueError(
-                f"Fragment type {fragment_type} is currently not supported"
-            )
-
-        return fragment_type, charge
-    else:
+    if charged_frag_type.count(FRAGMENT_CHARGE_SEPARATOR) != 1:
         raise ValueError(
             "Only charged fragment types are supported. Please add charge state to the fragment type. e.g. 'b_z1'"
         )
+
+    fragment_type, charge = charged_frag_type.split(FRAGMENT_CHARGE_SEPARATOR)
+    try:
+        # Check if charge is a valid integer string (no decimals)
+        if not charge.isdigit():
+            raise ValueError(
+                f"Charge state must be a positive integer, got '{charge}' from fragment type '{charged_frag_type}'"
+            )
+        charge = int(charge)
+    except ValueError as err:
+        raise ValueError(
+            f"Charge state must be a positive integer, got '{charge}' from fragment type '{charged_frag_type}'"
+        ) from err
+
+    if fragment_type not in FRAGMENT_TYPES:
+        raise ValueError(f"Fragment type {fragment_type} is currently not supported")
+
+    return fragment_type, charge
 
 
 def init_zero_fragment_dataframe(
@@ -1004,11 +1003,11 @@ def flatten_fragments(
 
     - mz:        :data:`PEAK_MZ_DTYPE`, fragment mz value
     - intensity: :data:`PEAK_INTENSITY_DTYPE`, fragment intensity value
-    - type:      uint8, ASCII code of the ion series. Must be a part of the `SERIES` (97=a, 98=b, 99=c, 120=x, 121=y, 122=z).
+    - type:      uint8, ASCII code of the ion series. Must be a part of the `SERIES_MAPPING`.
     - number:    uint32, fragment series number
     - position:  uint32, fragment position in sequence (from left to right, starts with 0)
     - charge:    uint8, fragment charge
-    - loss_type: int16, fragment loss type. Must be a part of the `LOSS` (0=noloss, 1=H, 17=NH3, 18=H2O, 98=MODLOSS, ...).
+    - loss_type: int16, fragment loss type. Must be a part of the `LOSS_MAPPING`.
 
     The fragment pointers `frag_start_idx` and `frag_stop_idx`
     will be reannotated to the new fragment format.

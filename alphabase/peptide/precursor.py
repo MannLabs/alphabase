@@ -138,7 +138,7 @@ def calc_precursor_mz(precursor_df: pd.DataFrame, batch_size: int = 500000):
 
     warnings.warn(
         "`alphabase.peptide.precursor.calc_precursor_mz()` is deprecated, "
-        "it will be removed in alphabse>=2.0.0. "
+        "it will be removed in alphabase>=2.0.0. "
         "Please use `alphabase.peptide.precursor.update_precursor_mz()` instead.",
         FutureWarning,
     )

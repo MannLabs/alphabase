@@ -56,13 +56,13 @@ def explode_multiple_columns(df: pd.DataFrame, columns: list):
         return ret_df
 
 
-def get_delimiter(tsv_file: str):
-    if isinstance(tsv_file, io.StringIO):
+def _get_delimiter(file_path: str) -> str:
+    if isinstance(file_path, io.StringIO):
         # for unit tests
-        line = tsv_file.readline().strip()
-        tsv_file.seek(0)
+        line = file_path.readline().strip()
+        file_path.seek(0)
     else:
-        with open(tsv_file) as f:
+        with open(file_path) as f:
             line = f.readline().strip()
     if "\t" in line:
         return "\t"

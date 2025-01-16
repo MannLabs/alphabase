@@ -8,21 +8,24 @@ import zipfile
 from abc import ABC, abstractmethod
 from urllib.request import urlopen, urlretrieve
 
-import progressbar
-
 
 class Progress:  # pragma: no cover
     """Class to report the download progress of a file to the console."""
 
     def __init__(self):
-        self.pbar = None
+        try:
+            import progressbar  # noqa: F401
+
+            self.pbar = None
+        except ModuleNotFoundError:
+            print("Could not import progressbar")
+            self.pbar = -1
 
     def __call__(self, block_num: int, block_size: int, total_size: int) -> None:
         """Report download progress to console.
 
         Parameters
         ----------
-
         block_num : int
             number of blocks downloaded
 
@@ -33,13 +36,16 @@ class Progress:  # pragma: no cover
             total size of the file to be downloaded in bytes
 
         """
+        if self.pbar == -1:
+            # not initialized
+            return
 
         if total_size < 0:
             # disable progress when the downloaded item is a directory
             return
 
         if not self.pbar:
-            self.pbar = progressbar.ProgressBar(maxval=total_size)
+            self.pbar = progressbar.ProgressBar(maxval=total_size)  # noqa: F821
             self.pbar.start()
 
         downloaded = block_num * block_size
@@ -57,7 +63,6 @@ class FileDownloader(ABC):
 
         Parameters
         ----------
-
         url : str
             sharing link to download file from
 
@@ -85,9 +90,9 @@ class FileDownloader(ABC):
 
     def download(self) -> str:  # pragma: no cover
         """Download file from sharing link if it does not yet exist and return its location."""
-
         if not os.path.exists(self._unzipped_output_path):
             print(f"{self._unzipped_output_path} does not yet exist")
+            os.makedirs(self._output_dir, exist_ok=True)
             self._download_file()
 
             self._handle_archive()
@@ -144,7 +149,6 @@ class OnedriveDownloader(FileDownloader):
 
     def _encode_url(self) -> str:  # pragma: no cover
         """Encode onedrive sharing link as url for downloading files."""
-
         b64_string = base64.urlsafe_b64encode(str.encode(self._url)).decode("utf-8")
         encoded_url = f'https://api.onedrive.com/v1.0/shares/u!{b64_string.replace("=", "")}/root/content'
         return encoded_url
@@ -155,7 +159,6 @@ class DataShareDownloader(FileDownloader):
 
     def _encode_url(self) -> str:  # pragma: no cover
         """Encode datashare sharing link as url for downloading files."""
-
         # this is the case if the url points to a folder
         if "/download?" not in self._url:
             return f"{self._url}/download"

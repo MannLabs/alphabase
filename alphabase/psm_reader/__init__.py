@@ -11,10 +11,20 @@ __all__ = [
     "MSFragger_PSM_TSV_Reader",
     "pFindReader",
     "MSFraggerPepXML",
+    "MSFraggerPepXMLReader",
     "SageReaderTSV",
     "SageReaderParquet",
+    "AlphaDiaReaderTsv",
+    "AlphaDiaReaderParquet",
 ]
 
+from alphabase.psm_reader.alphadia_reader import (
+    AlphaDiaReaderParquet,
+    AlphaDiaReaderTsv,
+)
+from alphabase.psm_reader.alphadia_reader import (
+    register_readers as register_alphadia_readers,
+)
 from alphabase.psm_reader.alphapept_reader import (
     AlphaPeptReader,
 )
@@ -39,6 +49,7 @@ from alphabase.psm_reader.maxquant_reader import (
 from alphabase.psm_reader.msfragger_reader import (
     MSFragger_PSM_TSV_Reader,
     MSFraggerPepXML,
+    MSFraggerPepXMLReader,
 )
 from alphabase.psm_reader.msfragger_reader import (
     register_readers as register_fragger_readers,
@@ -68,3 +79,4 @@ register_fragger_readers()
 register_mq_readers()
 register_pf_readers()
 register_sage_readers()
+register_alphadia_readers()

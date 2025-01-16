@@ -1,3 +1,26 @@
+alphadia:
+  reader_type: alphadia
+  rt_unit: minute
+  fixed_C57: False
+  column_mapping:
+    'raw_name': 'run'
+    'sequence': 'sequence'
+    'charge': 'charge'
+    'rt': 'rt_observed'
+    'rt_start': 'rt_start'
+    'rt_stop': 'rt_stop'
+    'ccs': 'ccs'
+    'mobility': 'mobility'
+    'proteins': 'proteins'
+    'uniprot_ids': 'uniprot_ids'
+    'genes': 'genes'
+#    'scan_num': '' ?
+    'score': 'score'
+    'fdr': 'fdr'
+    'mods': 'mods'
+    'intensity': 'intensity'
+  modification_mapping_type: 'maxquant' # TODO: None?
+
 alphapept:
   reader_type: alphapept
   rt_unit: minute
@@ -13,18 +36,15 @@ alphapept:
     'raw_name': 'raw_name' #parse from `ms_data.hdf`` file
     'fdr': 'q_value'
     'decoy': 'decoy'
-  modification_mapping:
-    'Carbamidomethyl@C': 'cC'
-    'Oxidation@M': 'oxM'
-    'Phospho@S': 'pS'
-    'Phospho@T': 'pT'
-    'Phospho@Y': 'pY'
-    'Acetyl@Protein_N-term': 'a'
+  modification_mapping_type: 'alphapept'
+
 
 maxquant:
   reader_type: maxquant
   rt_unit: minute
   fixed_C57: True
+  mod_seq_columns:
+    - 'Modified sequence'
   column_mapping:
     'sequence': 'Sequence'
     'charge': 'Charge'
@@ -47,8 +67,10 @@ maxquant:
     'genes': ['Gene Names','Gene names']
     'decoy': 'Reverse'
     'intensity': 'Intensity'
+  modification_mapping_type: 'maxquant'
 
-  modification_mapping:
+modification_mappings:
+  maxquant:
     'mTRAQ@K':
       - 'K(mTRAQ)'
     'mTRAQ@Any_N-term':
@@ -106,6 +128,13 @@ maxquant:
     'Deamidated@Q': ['Q(Deamidation (NQ))','Q(de)']
     'GlyGly@K': ['K(GlyGly (K))', 'K(gl)']
     'hydroxyisobutyryl@K': 'K(2-)'
+  alphapept:
+    'Carbamidomethyl@C': 'cC'
+    'Oxidation@M': 'oxM'
+    'Phospho@S': 'pS'
+    'Phospho@T': 'pT'
+    'Phospho@Y': 'pY'
+    'Acetyl@Protein_N-term': 'a'
 
 pfind:
   reader_type: pfind
@@ -122,8 +151,7 @@ pfind:
     'uniprot_ids': 'Proteins'
     'fdr': 'Q-value'
     'decoy': ['Target/Decoy', 'Targe/Decoy']
-  modification_mapping:
-    '': ''
+  modification_mapping_type: null  # no mapping required
 
 msfragger_pepxml:
   reader_type: msfragger_pepxml
@@ -138,8 +166,6 @@ msfragger_pepxml:
     'proteins': 'protein'
     'raw_name': 'raw_name'
     'mobility': 'ion_mobility'
-  modification_mapping:
-    '': ''
   mass_mapped_mods:
     - 'Oxidation@M' #other Oxidation@X are not needed here
     - 'Carbamidomethyl@C'
@@ -152,6 +178,7 @@ msfragger_pepxml:
     - 'Dimethyl@K' # Any_N-term is not needed here as it will be infered in-the-fly
     - 'Methyl@E' #an example of a PTM that can be C-term
   mod_mass_tol: 0.1 # Da
+  modification_mapping_type: 'maxquant'
 
 diann:
   reader_type: diann
@@ -172,7 +199,9 @@ diann:
     'scan_num': 'MS2.Scan'
     'score': 'CScore'
     'fdr': 'Q.Value'
-  modification_mapping: 'maxquant'
+  mod_seq_columns:
+    - "Modified.Sequence"
+  modification_mapping_type: 'maxquant'
 
 spectronaut_report:
   reader_type: spectronaut_report
@@ -186,19 +215,16 @@ spectronaut_report:
     'genes': 'PG.Genes'
     'uniprot_ids': 'PG.UniProtIds'
     'charge': 'charge'
-  modification_mapping: 'maxquant'
+  mod_seq_columns:
+    - 'ModifiedSequence'
+  precursor_id_columns:
+    - "EG.PrecursorId"
+  modification_mapping_type: 'maxquant'
 
 spectronaut:
   reader_type: spectronaut
   rt_unit: irt
   fixed_C57: False
-  mod_seq_columns:
-    - 'ModifiedPeptide'
-    - 'ModifiedSequence'
-    - 'FullUniModPeptideName'
-    - 'ModifiedPeptideSequence'
-    - 'LabeledSequence'
-    - 'FullUniModPeptideName'
   column_mapping:
     'raw_name': 'ReferenceRun'
     'sequence': ['StrippedPeptide','PeptideSequence']
@@ -210,20 +236,21 @@ spectronaut:
     'proteins': ['Protein Name','ProteinId','ProteinID','ProteinName','ProteinGroup','ProteinGroups']
     'uniprot_ids': ['UniProtIds','UniProtID','UniprotId']
     'genes': ['Genes','Gene','GeneName','GeneNames']
-  modification_mapping: 'maxquant'
+  mod_seq_columns:
+    - 'ModifiedPeptide'
+    - 'ModifiedSequence'
+    - 'FullUniModPeptideName'
+    - 'ModifiedPeptideSequence'
+    - 'LabeledSequence'
+    - 'FullUniModPeptideName'
+  precursor_id_columns:
+    - "EG.PrecursorId"
+  modification_mapping_type: 'maxquant'
 
 library_reader_base:
   reader_type: library_reader_base
   rt_unit: irt
   fixed_C57: False
-  csv_sep: "\t"
-  mod_seq_columns:
-    - 'ModifiedPeptideSequence'
-    - 'ModifiedPeptide'
-    - 'ModifiedSequence'
-    - 'FullUniModPeptideName'
-    - 'LabeledSequence'
-    - 'FullUniModPeptideName'
   column_mapping:
     'raw_name': 'ReferenceRun'
     'sequence': ['PeptideSequence', 'StrippedPeptide']
@@ -242,11 +269,18 @@ library_reader_base:
     'fragment_charge' : ['FragmentCharge', 'FragmentIonCharge', 'ProductCharge', 'ProductIonCharge']
     'fragment_series': ['FragmentSeriesNumber','FragmentNumber']
     'fragment_loss_type': ['FragmentLossType', 'FragmentIonLossType', 'ProductLossType', 'ProductIonLossType']
-  modification_mapping: 'maxquant'
+  mod_seq_columns:
+    - 'ModifiedPeptideSequence'
+    - 'ModifiedPeptide'
+    - 'ModifiedSequence'
+    - 'FullUniModPeptideName'
+    - 'LabeledSequence'
+    - 'FullUniModPeptideName'
+  modification_mapping_type: 'maxquant'
 
 sage:
   reader_type: sage
-  rt_unit: minute
+  rt_unit: second
   column_mapping:
     'modified_sequence': 'peptide'
     'sequence': 'stripped_peptide'
@@ -261,3 +295,4 @@ sage:
     'peptide_fdr': 'peptide_q'
     'protein_fdr': 'protein_q'
     'decoy': 'is_decoy'
+  modification_mapping_type: null # custom mapping in code
