@@ -13,7 +13,7 @@ psutil
 tqdm
 scikit-learn
 regex
-# pydivsufsort  # TODO this is used by lcp_digest.py?
+# pydivsufsort
 dask
 dask_expr
 pyahocorasick

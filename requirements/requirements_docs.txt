@@ -1,5 +1,4 @@
 # Dependencies required for building documentation
-#sphinx
 autodocsumm
 myst_parser
 sphinx
