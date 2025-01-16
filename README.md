@@ -198,17 +198,35 @@ For an even more interactive participation, check out the
 
 ### Notes for developers
 
-#### Tagging of changes
-In order to have release notes automatically generated, changes need to be tagged with labels.
-The following labels are used (should be safe-explanatory):
-`breaking-change`, `bug`, `enhancement`.
+#### 1. Code Structure
+While AlphaBase offers an object-oriented interface, algorithms for manipulating data should be implemented in a functional way and called from class methods. This allows the functions to be reused without instatiating a class.
 
-#### Release a new version
-This package uses a shared release process defined in the
-[alphashared](https://github.com/MannLabs/alphashared) repository. Please see the instructions
-[there](https://github.com/MannLabs/alphashared/blob/reusable-release-workflow/.github/workflows/README.md#release-a-new-version).
+#### 2. DataFrame Handling
+- Return DataFrames in the same order as they were passed
+- Minimize in-place modifications of DataFrames. Mention them explicitly in the docstring
+- Implement low-level functions that operate on numpy arrays and return arrays. Use higher-level functions to assign array results to DataFrames
 
-#### pre-commit hooks
+#### 3. Data Assumptions
+Avoid making assumptions about:
+- Precursor ordering by `nAA`
+- Fragment indices ordering (e.g., `frag_start_idx`)
+- Continuity of `frag_start_idx` where `frag_start_idx[i+1] == frag_stop_idx[i]`
+- All fragments being assigned to a precursor
+
+Assumptions are only permitted for low-level or optimized functions and should be documented in the docstring.
+
+#### 3. Optimization Strategy
+When performance optimization is needed:
+1. Implement the general solution first
+2. Add optimized versions for special cases for refined precursor df or order `nAA`
+3. Check conditions at runtime to use optimized versions when applicable
+
+#### 4. Code Quality
+- Include python type hints
+- Include docstrings in numpy style (see [numpy docstring example](https://www.sphinx-doc.org/en/master/usage/extensions/example_numpy.html#example-numpy))
+
+
+#### 5. pre-commit hooks
 It is highly recommended to use the provided pre-commit hooks, as the CI pipeline enforces all checks therein to
 pass in order to merge a branch.
 
@@ -221,9 +239,19 @@ You can run the checks yourself using:
 pre-commit run --all-files
 ```
 
+#### 6. Tagging of Pull Requests
+In order to have release notes automatically generated, pull requests need to be tagged with labels.
+The following labels are used (should be safe-explanatory):
+`breaking-change`, `bug`, `enhancement`.
+
+#### 7. Release a new version
+This package uses a shared release process defined in the
+[alphashared](https://github.com/MannLabs/alphashared) repository. Please see the instructions
+[there](https://github.com/MannLabs/alphashared/blob/reusable-release-workflow/.github/workflows/README.md#release-a-new-version).
+
+
 ------------------------------------------------------------------------
 
 ## Changelog
 
-See the [HISTORY.md](HISTORY.md) for a full overview of the changes made
-in each version.
+For a full overview of the changes made in each version see [CHANGELOG.md](CHANGELOG.md) (until version 1.1.0) and the github release notes (from >1.1.0).
