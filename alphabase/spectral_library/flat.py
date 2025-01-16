@@ -372,13 +372,8 @@ class SpecLibFlat(SpecLibBase):
             setattr(speclib_base, f"_fragment_{col}_df", df)
 
         # Drop flat indices from precursor_df if they exist
-        drop_columns = [
-            col
-            for col in ["flat_frag_start_idx", "flat_frag_stop_idx"]
-            if col in speclib_base._precursor_df.columns
-        ]
         speclib_base._precursor_df = speclib_base._precursor_df.drop(
-            drop_columns, axis=1
+            ["flat_frag_start_idx", "flat_frag_stop_idx"], axis=1, errors="ignore"
         )
 
         return speclib_base
