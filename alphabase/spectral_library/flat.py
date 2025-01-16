@@ -318,7 +318,7 @@ class SpecLibFlat(SpecLibBase):
 
     def to_speclib_base(
         self,
-        additional_columns: Union[list, None] = None,
+        flat_columns: Union[list, None] = None,
         charged_frag_types: Union[list, None] = None,
     ) -> SpecLibBase:
         """
@@ -326,11 +326,11 @@ class SpecLibFlat(SpecLibBase):
 
         Creates a new SpecLibBase containing fragment_mz_df (using calculated m/z values).
         Flat columns like 'intensity' are transformed into dense matrices as fragment_intensity_df.
-        For all columns specified in additional_columns, a corresponding _fragment_<column>_df matrix is created and assigned to the new SpecLibBase object.
+        For all columns specified in flat_columns, a corresponding _fragment_<column>_df matrix is created and assigned to the new SpecLibBase object.
 
         Warning
         -------
-        If the column 'mz' is added to additional_columns, it will override the calculated m/z values in fragment_mz_df.
+        If the column 'mz' is added to flat_columns, it will override the calculated m/z values in fragment_mz_df.
         To mitigate this behavior and get observed as calculated m/z values, rename the flat mz column to 'mz_observed' before calling to_speclib_base.
 
         Fragment types can be specified explicitly or inherited from self.charged_frag_types.
@@ -342,8 +342,8 @@ class SpecLibFlat(SpecLibBase):
 
         Parameters
         ----------
-        additional_columns : Union[list, None], optional
-            Additional fragment columns to convert to dense format, defaults to ['intensity']
+        flat_columns : Union[list, None], optional
+            Fragment columns from the flat representation to convert to dense format, defaults to ['intensity']
 
         charged_frag_types : Union[list, None], optional
             Fragment types to include in dense format, defaults to self.charged_frag_types
@@ -353,13 +353,6 @@ class SpecLibFlat(SpecLibBase):
         SpecLibBase
             A new SpecLibBase object with dense fragment representations
         """
-
-        if "mz" in additional_columns:
-            warnings.warn(
-                "additional_columns contains 'mz', this will override the calculated m/z values in fragment_mz_df. If this is not intended, rename the flat mz column to 'mz_observed' before calling to_speclib_base.",
-                UserWarning,
-            )
-
         # Create SpecLibBase object
         speclib_base = SpecLibBase()
         speclib_base._precursor_df = self._precursor_df.copy()
@@ -367,8 +360,8 @@ class SpecLibFlat(SpecLibBase):
         if charged_frag_types is None:
             charged_frag_types = self.charged_frag_types
 
-        if additional_columns is None:
-            additional_columns = ["intensity"]
+        if flat_columns is None:
+            flat_columns = ["intensity"]
 
         speclib_base.charged_frag_types = charged_frag_types
 
@@ -376,7 +369,7 @@ class SpecLibFlat(SpecLibBase):
             speclib_base._precursor_df,
             self._fragment_df,
             speclib_base.charged_frag_types,
-            flat_columns=additional_columns,
+            flat_columns=flat_columns,
         )
 
         speclib_base.precursor_df["frag_start_idx"] = frag_start_idx
