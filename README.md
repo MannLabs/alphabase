@@ -199,7 +199,7 @@ For an even more interactive participation, check out the
 ### Notes for developers
 
 #### 1. Code Structure
-While AlphaBase offers an object-oriented interface, implement algorithms for manipulating data in a functional way and call them from class methods.
+While AlphaBase offers an object-oriented interface, algorithms for manipulating data should be implemented in a functional way and called from class methods. This allows the functions to be reused without instatiating a class.
 
 #### 2. DataFrame Handling
 - Return DataFrames in the same order as they were passed
@@ -210,7 +210,7 @@ While AlphaBase offers an object-oriented interface, implement algorithms for ma
 Avoid making assumptions about:
 - Precursor ordering by `nAA`
 - Fragment indices ordering (e.g., `frag_start_idx`)
-- Continuity of `frag_start_idx` where `frag_start_idx[i+1] = frag_stop_idx[i]`
+- Continuity of `frag_start_idx` where `frag_start_idx[i+1] == frag_stop_idx[i]`
 - All fragments being assigned to a precursor
 
 Assumptions are only permitted for low-level or optimized functions and should be documented in the docstring.
@@ -222,8 +222,9 @@ When performance optimization is needed:
 3. Check conditions at runtime to use optimized versions when applicable
 
 #### 4. Code Quality
-- Include type hints for all functions (see [numpy docstring example](https://www.sphinx-doc.org/en/master/usage/extensions/example_numpy.html#example-numpy))
 - Include python type hints
+- Include docstrings in numpy style (see [numpy docstring example](https://www.sphinx-doc.org/en/master/usage/extensions/example_numpy.html#example-numpy))
+
 
 #### 5. pre-commit hooks
 It is highly recommended to use the provided pre-commit hooks, as the CI pipeline enforces all checks therein to
@@ -253,5 +254,4 @@ This package uses a shared release process defined in the
 
 ## Changelog
 
-See the [HISTORY.md](HISTORY.md) for a full overview of the changes made
-in each version.
+For a full overview of the changes made in each version see [CHANGELOG.md](CHANGELOG.md) (until version 1.1.0) and the github release notes (from >1.1.0).
