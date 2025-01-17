@@ -1862,28 +1862,44 @@ def create_dense_matrices(
     flat_columns: Union[list, None] = None,
 ) -> tuple[dict, np.ndarray, np.ndarray]:
     """
-    Create dense matrices for fragment dataframes.
+    Convert the flat library to a new SpecLibBase object with dense fragment matrices.
+
+    Creates a new SpecLibBase containing fragment_mz_df (using calculated m/z values).
+    Flat columns like 'intensity' are transformed into dense matrices as fragment_intensity_df.
+    For all columns specified in flat_columns, a corresponding _fragment_<column>_df matrix is created and assigned to the new SpecLibBase object.
+
+    Warning
+    -------
+    If the column 'mz' is added to flat_columns, it will override the calculated m/z values in fragment_mz_df.
+    To mitigate this behavior and get observed as calculated m/z values, rename the flat mz column to 'mz_observed' before calling to_speclib_base.
+
+    Fragment types can be specified explicitly or inherited from self.charged_frag_types.
+    Only fragments matching these types will be included in the dense matrices. Each fragment
+    type (e.g., 'b_z1', 'y_z2') becomes a column in the resulting dense matrices.
+
+    The precursor_df is copied and updated with new dense fragment indices, removing any
+    flat-specific columns (flat_frag_start_idx, flat_frag_stop_idx).
 
     Parameters
     ----------
     precursor_df : pd.DataFrame
         Precursor dataframe
     fragment_df : pd.DataFrame
-        Fragment dataframe
+        Fragment dataframe in flat format
     charged_frag_types : list
-        List of charged fragment types
+        List of charged fragment types (e.g., ['b_z1', 'y_z1'])
     flat_columns : Union[list, None], optional
-        List of columns to create dense matrices for, by default ['intensity']
-        Add 'mz' to include observed m/z values, will overwrite any existing mz columns
+        Fragment columns from the flat representation to convert to dense format, defaults to ['intensity']
 
     Returns
     -------
     dict
-        Dictionary with dense matrices
+        Dictionary mapping column names to dense matrices as DataFrames
+        Always includes 'mz', plus any specified flat_columns
     np.ndarray
-        Start indices for the dense fragments
+        Start indices for fragments in the dense representation
     np.ndarray
-        Stop indices for the dense fragments
+        Stop indices for fragments in the dense representation
     """
 
     if flat_columns is None:
@@ -1937,6 +1953,13 @@ def create_dense_matrices(
 
     # create a dictionary with the mz matrix and the flat columns
     df_collection = {"mz": fragment_mz_df}
+
+    # df_collection["mz"] might be overridden by flat_columns["mz"]
+    if "mz" in flat_columns:
+        warnings.warn(
+            "flat_columns contains 'mz', this will override the calculated m/z values in fragment_mz_df. If this is not intended, rename the flat mz column to 'mz_observed' before calling to_speclib_base.",
+            UserWarning,
+        )
     for column_name in flat_columns:
         matrix = np.zeros_like(fragment_mz_df.values, dtype=PEAK_INTENSITY_DTYPE)
         matrix[row_indices, column_indices] = fragment_df[column_name].values[
