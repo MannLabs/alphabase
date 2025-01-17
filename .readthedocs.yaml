@@ -22,4 +22,6 @@ sphinx:
 # # Optionally set the version of Python and requirements required to build your docs
 python:
   install:
+    - method: pip
+      path: .
     - requirements: extra_requirements/development.txt
