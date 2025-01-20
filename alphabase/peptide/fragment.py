@@ -369,7 +369,7 @@ def filter_valid_charged_frag_types(
     A valid charged fragment type must:
     1. Follow the format: {fragment_type}_z{charge} (e.g. 'b_z1', 'y_modloss_z2')
     2. Use a fragment type that exists in FRAGMENT_TYPES
-    3. Have a positive integer charge
+    3. Have a strictly positive integer charge
 
     Parameters
     ----------
@@ -383,22 +383,12 @@ def filter_valid_charged_frag_types(
     """
     valid_types = []
 
-    for frag_type in charged_frag_types:
+    for charged_frag_type in charged_frag_types:
         try:
-            base_type, charge = parse_charged_frag_type(frag_type)
-            if base_type not in FRAGMENT_TYPES:
-                warnings.warn(
-                    f"Fragment type {frag_type} is not supported and will be ignored"
-                )
-                continue
-            elif charge <= 0:
-                warnings.warn(
-                    f"Charge state of fragment type {frag_type} is not positive and will be ignored"
-                )
-                continue
-            valid_types.append(frag_type)
+            parsed_type, _ = parse_charged_frag_type(charged_frag_type)
+
+            valid_types.append(parsed_type)
         except ValueError as e:
-            # Convert ValueError exceptions to warnings
             warnings.warn(str(e))
             continue
 
@@ -424,31 +414,27 @@ def parse_charged_frag_type(charged_frag_type: str) -> Tuple[str, int]:
     Raises
     ------
     ValueError
-        If charge state is not a positive integer or if fragment type is not charged
+        If charge state is not given or not a strictly positive integer or if fragment type is not supported
     """
 
     if charged_frag_type.count(FRAGMENT_CHARGE_SEPARATOR) != 1:
         raise ValueError(
-            "Only charged fragment types are supported. Please add charge state to the fragment type. e.g. 'b_z1'"
+            "Only charged fragment types are supported. Please add charge state to the fragment type, "
+            f"using {FRAGMENT_CHARGE_SEPARATOR} as separator. e.g. 'b{FRAGMENT_CHARGE_SEPARATOR}1'"
         )
 
     fragment_type, charge = charged_frag_type.split(FRAGMENT_CHARGE_SEPARATOR)
-    try:
-        # Check if charge is a valid integer string (no decimals)
-        if not charge.isdigit():
-            raise ValueError(
-                f"Charge state must be a positive integer, got '{charge}' from fragment type '{charged_frag_type}'"
-            )
-        charge = int(charge)
-    except ValueError as err:
+
+    # Check if charge is a valid integer string (no decimals)
+    if not charge.isdigit() or not (charge_int := int(charge)) > 0:
         raise ValueError(
             f"Charge state must be a positive integer, got '{charge}' from fragment type '{charged_frag_type}'"
-        ) from err
+        )
 
     if fragment_type not in FRAGMENT_TYPES:
         raise ValueError(f"Fragment type {fragment_type} is currently not supported")
 
-    return fragment_type, charge
+    return fragment_type, charge_int
 
 
 def init_zero_fragment_dataframe(
