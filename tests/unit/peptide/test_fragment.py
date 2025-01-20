@@ -1,6 +1,11 @@
+from unittest.mock import patch
+
 import pytest
 
-from alphabase.peptide.fragment import parse_charged_frag_type
+from alphabase.peptide.fragment import (
+    filter_valid_charged_frag_types,
+    parse_charged_frag_type,
+)
 
 
 @pytest.mark.parametrize(
@@ -11,6 +16,7 @@ from alphabase.peptide.fragment import parse_charged_frag_type
     ],
 )
 def test_parse_charged_frag_type_with_valid_input(input_str, expected):
+    """Test parse_charged_frag_type with valid input."""
     result = parse_charged_frag_type(input_str)
     assert result == (expected[0], expected[1])
 
@@ -26,5 +32,14 @@ def test_parse_charged_frag_type_with_valid_input(input_str, expected):
     ],
 )
 def test_parse_charged_frag_type_with_exceptions(input_str, match):
+    """Test parse_charged_frag_type handles errors correctly."""
     with pytest.raises(ValueError, match=match):
         parse_charged_frag_type(input_str)
+
+
+@patch("alphabase.peptide.fragment.parse_charged_frag_type")
+def test_filter_valid_charged_frag_types(mock_parse):
+    """Test filter_valid_charged_frag_types handles errors correctly."""
+    mock_parse.side_effect = [("b", 1), ValueError]
+    result = filter_valid_charged_frag_types(["b_z1", "unsupported_z1"])
+    assert result == ["b"]
