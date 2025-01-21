@@ -683,6 +683,7 @@ class SpecLibBase:
         hdf_file: str,
         load_mod_seq: bool = True,
         support_legacy_mods_format: bool = True,
+        infer_charged_frag_types: bool = True,
     ):
         """Load the hdf library from hdf_file
 
@@ -702,6 +703,10 @@ class SpecLibBase:
             Defaults to True.
             DeprecationWarning: future versions will have a different default and eventually this flag will be dropped.
 
+        infer_charged_frag_types : bool, optional
+            if True, infer the charged fragment types as defined in the hdf file, defaults to True.
+            This is the default as users most likely don't know the charged fragment types in the hdf file.
+            If set to False, only charged frag types defined in `charged_frag_types` will be loaded.
         """
         _hdf = HDF_File(hdf_file)
         self._precursor_df: pd.DataFrame = _hdf.library.precursor_df.values
@@ -719,17 +724,26 @@ class SpecLibBase:
             self._precursor_df[cols] = mod_seq_df[cols]
 
         _fragment_mz_df = _hdf.library.fragment_mz_df.values
-        self._fragment_mz_df = _fragment_mz_df[
-            sort_charged_frag_types(
+        if infer_charged_frag_types:
+            self.charged_frag_types = sort_charged_frag_types(
                 filter_valid_charged_frag_types(_fragment_mz_df.columns.values)
             )
+
+        self._fragment_mz_df = _fragment_mz_df[
+            [
+                frag
+                for frag in self.charged_frag_types
+                if frag in _fragment_mz_df.columns
+            ]
         ]
 
         _fragment_intensity_df = _hdf.library.fragment_intensity_df.values
         self._fragment_intensity_df = _fragment_intensity_df[
-            sort_charged_frag_types(
-                filter_valid_charged_frag_types(_fragment_intensity_df.columns.values)
-            )
+            [
+                frag
+                for frag in self.charged_frag_types
+                if frag in _fragment_intensity_df.columns
+            ]
         ]
 
     @staticmethod
