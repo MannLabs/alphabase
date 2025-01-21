@@ -256,7 +256,7 @@ def _assert_reference_df_equal(
             )
 
         try:
-            pd.testing.assert_frame_equal(psm_df, expected_df, check_like=loose_check)
+            pd.testing.assert_frame_equal(expected_df, psm_df, check_like=loose_check)
         except AssertionError as e:
             # for whatever reason, columns are int32 on windows runners
             logging.warning(f"Converting int32 to int64 for comparison: {e}")
@@ -265,7 +265,7 @@ def _assert_reference_df_equal(
                 if psm_df[column].dtype == np.int32:
                     psm_df[column] = psm_df[column].astype(np.int64)
 
-            pd.testing.assert_frame_equal(psm_df, expected_df, check_like=loose_check)
+            pd.testing.assert_frame_equal(expected_df, psm_df, check_like=loose_check)
 
     else:
         psm_df.to_parquet(out_file_path)
