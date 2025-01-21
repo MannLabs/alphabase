@@ -379,15 +379,15 @@ def filter_valid_charged_frag_types(
     Returns
     -------
     List[str]
-        List containing only the valid charged fragment types
+        List containing only the valid charged fragment types, (e.g. ['b', 'y', 'b_modloss'])
     """
     valid_types = []
 
     for charged_frag_type in charged_frag_types:
         try:
-            parsed_type, _ = parse_charged_frag_type(charged_frag_type)
+            _ = parse_charged_frag_type(charged_frag_type)
 
-            valid_types.append(parsed_type)
+            valid_types.append(charged_frag_type)
         except ValueError as e:
             warnings.warn(str(e))
             continue
