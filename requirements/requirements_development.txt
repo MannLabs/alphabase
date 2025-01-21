@@ -1,5 +1,5 @@
 # Dependencies helping for development
 jupyter
-bumpversion
-pipdeptree
+bump-my-version
+# pipdeptree
 ipykernel
