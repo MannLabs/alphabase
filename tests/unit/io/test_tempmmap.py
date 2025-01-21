@@ -22,9 +22,8 @@ def teardown_function(function):
     tempmmap = sys.modules["alphabase.io.tempmmap"]
     tempmmap._clear()  # simulating @atexit.register
 
-    # # later:
-    # assert tempmmap._TEMP_DIR is None
-    # assert tempmmap.TEMP_DIR_NAME is None
+    assert tempmmap._TEMP_DIR is None
+    assert tempmmap.TEMP_DIR_NAME is None
 
     del sys.modules["alphabase.io.tempmmap"]
 
@@ -46,6 +45,22 @@ def test_create_array():
     assert tempmmap._TEMP_DIR is not None
 
 
+def test_check_temp_dir_deletion():
+    """Test that tempdir is deleted at exit."""
+    tempmmap = sys.modules["alphabase.io.tempmmap"]
+
+    _ = tempmmap.array((5, 5), np.float32)
+    temp_dir_name = tempmmap._TEMP_DIR.name
+
+    # check presence of temp dir first
+    assert os.path.exists(temp_dir_name)
+
+    # when
+    tempmmap._clear()
+
+    assert not os.path.exists(temp_dir_name)
+
+
 def test_create_array_with_custom_temp_dir():
     """Test creating and accessing an array with custom temp dir."""
     tempmmap = sys.modules["alphabase.io.tempmmap"]
@@ -64,6 +79,33 @@ def test_create_array_with_custom_temp_dir():
 
     assert tempmmap._TEMP_DIR is not None
     assert temp_dir == tempmmap.TEMP_DIR_NAME
+
+
+def test_create_array_with_custom_temp_dir_nonexisting():
+    """Test creating an array with custom temp dir: not existing."""
+    tempmmap = sys.modules["alphabase.io.tempmmap"]
+
+    temp_dir = "nonexisting_dir"
+    # when
+    with pytest.raises(
+        ValueError,
+        match="The directory 'nonexisting_dir' in which the file should be created does not exist.",
+    ):
+        _ = tempmmap.array((5, 5), np.int32, tmp_dir_abs_path=temp_dir)
+
+
+def test_create_array_with_custom_temp_dir_not_a_dir():
+    """Test creating an array with custom temp dir: not a directory."""
+    tempmmap = sys.modules["alphabase.io.tempmmap"]
+
+    with tempfile.TemporaryFile() as temp_file, pytest.raises(
+        ValueError,
+        match=f"The path '{temp_file.name}' does not point to a directory.",
+    ):
+        # when
+        _ = tempmmap.create_empty_mmap(
+            (5, 5), np.int32, tmp_dir_abs_path=temp_file.name
+        )
 
 
 def test_mmap_array_from_path():
@@ -154,6 +196,27 @@ def test_create_empty_with_custom_file_path():
 
         assert tempmmap._TEMP_DIR is not None
         assert temp_dir != tempmmap.TEMP_DIR_NAME
+
+
+def test_create_empty_with_custom_file_path_exists():
+    """Test creating and accessing an empty array with custom file path that exists."""
+    tempmmap = sys.modules["alphabase.io.tempmmap"]
+
+    # when
+    with tempfile.TemporaryFile() as temp_file, pytest.raises(
+        ValueError,
+        match=f"The file '{temp_file.name}' already exists. Set overwrite to True to overwrite the file or choose a different name.",
+    ):
+        _ = tempmmap.create_empty_mmap((5, 5), np.float32, file_path=temp_file.name)
+
+    # when 2
+    with tempfile.TemporaryDirectory() as temp_dir, open(
+        f"{temp_dir}/temp_mmap.hdf", "w"
+    ) as temp_file:
+        _ = tempmmap.create_empty_mmap(
+            (5, 5), np.float32, file_path=temp_file.name, overwrite=True
+        )
+        # did not raise -> OK
 
 
 def test_create_empty_with_custom_file_path_error_cases():
