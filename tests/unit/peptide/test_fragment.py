@@ -40,6 +40,12 @@ def test_parse_charged_frag_type_with_exceptions(input_str, match):
 @patch("alphabase.peptide.fragment.parse_charged_frag_type")
 def test_filter_valid_charged_frag_types(mock_parse):
     """Test filter_valid_charged_frag_types handles errors correctly."""
-    mock_parse.side_effect = [("b", 1), ValueError]
-    result = filter_valid_charged_frag_types(["b_z1", "unsupported_z1"])
-    assert result == ["b"]
+    mock_parse.side_effect = [("b", 1), ValueError, ("y", 2)]
+    result = filter_valid_charged_frag_types(
+        [
+            "b_z1",
+            "unsupported_z1",
+            "y_z2",
+        ]
+    )
+    assert result == ["b", "y"]
