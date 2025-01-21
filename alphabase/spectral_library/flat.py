@@ -11,7 +11,7 @@ from alphabase.peptide.fragment import (
     remove_unused_fragments,
     sort_charged_frag_types,
 )
-from alphabase.spectral_library.base import SpecLibBase
+from alphabase.spectral_library.base import SpecLibBase, get_available_columns
 
 
 class SpecLibFlat(SpecLibBase):
@@ -221,20 +221,12 @@ class SpecLibFlat(SpecLibBase):
 
         _fragment_intensity_df = _hdf.library.fragment_intensity_df.values
         self._fragment_intensity_df = _fragment_intensity_df[
-            [
-                frag
-                for frag in self.charged_frag_types
-                if frag in _fragment_intensity_df.columns
-            ]
+            get_available_columns(_fragment_intensity_df, self.charged_frag_types)
         ]
 
         _fragment_mz_df = _hdf.library.fragment_mz_df.values
         self._fragment_mz_df = _fragment_mz_df[
-            [
-                frag
-                for frag in self.charged_frag_types
-                if frag in _fragment_mz_df.columns
-            ]
+            get_available_columns(_fragment_mz_df, self.charged_frag_types)
         ]
 
     def get_full_charged_types(self, frag_df: pd.DataFrame) -> list:

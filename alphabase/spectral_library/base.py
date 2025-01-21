@@ -730,20 +730,12 @@ class SpecLibBase:
             )
 
         self._fragment_mz_df = _fragment_mz_df[
-            [
-                frag
-                for frag in self.charged_frag_types
-                if frag in _fragment_mz_df.columns
-            ]
+            get_available_columns(_fragment_mz_df, self.charged_frag_types)
         ]
 
         _fragment_intensity_df = _hdf.library.fragment_intensity_df.values
         self._fragment_intensity_df = _fragment_intensity_df[
-            [
-                frag
-                for frag in self.charged_frag_types
-                if frag in _fragment_intensity_df.columns
-            ]
+            get_available_columns(_fragment_intensity_df, self.charged_frag_types)
         ]
 
     @staticmethod
@@ -836,3 +828,27 @@ def annotate_fragments_from_speclib(
     speclib._fragment_intensity_df = fragment_speclib._fragment_intensity_df.copy()
 
     return speclib
+
+
+def get_available_columns(df, columns):
+    """Get a list of column names that exist in the given dataframe.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The dataframe to check columns against
+    columns : list
+        List of column names to check
+
+    Returns
+    -------
+    list
+        List of column names that exist in the dataframe
+
+    Examples
+    --------
+    >>> df = pd.DataFrame({'a': [1], 'b': [2]})
+    >>> get_available_columns(df, ['a', 'b', 'c'])
+    ['a', 'b']
+    """
+    return [col for col in columns if col in df.columns]
