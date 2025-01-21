@@ -44,7 +44,6 @@ class PsmDfCols(metaclass=ConstantsClass):
     MOBILITY = "mobility"
     PEPTIDE_FDR = "peptide_fdr"
     PROTEIN_FDR = "protein_fdr"
-    INTENSITY = "intensity"
 
     RAW_NAME = "raw_name"
     CHARGE = "charge"
@@ -54,10 +53,19 @@ class PsmDfCols(metaclass=ConstantsClass):
     PRECURSOR_MZ = "precursor_mz"
     DIANN_SPEC_INDEX = "diann_spec_idx"
 
-    # part of the output, but not directly referenced
-    _UNIPROT_IDS = "uniprot_ids"
-    _GENES = "genes"
-    _QUERY_ID = "query_id"
+    # part of the output, but not directly referenced in code
+    UNIPROT_IDS = "uniprot_ids"
+    GENES = "genes"
+    QUERY_ID = "query_id"
+
+    INTENSITY = "intensity"
+
+    # part of psm_reader.yaml, but not part of output
+    # extra FDR columns for DIANN
+    FDR2 = "_fdr2"  # first search
+    FDR3 = "_fdr3"  # first search
+    FDR4 = "_fdr4"  # second search
+    FDR5 = "_fdr5"  # second search
 
 
 class LibPsmDfCols(metaclass=ConstantsClass):
