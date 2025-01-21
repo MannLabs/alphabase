@@ -57,7 +57,7 @@ class AnnDataFactory:
             index=PsmDfCols.RAW_NAME,
             columns=PsmDfCols.PROTEINS,
             values=PsmDfCols.INTENSITY,
-            aggfunc="first",
+            aggfunc="first",  # DataFrameGroupBy.first -> will skip NA
             fill_value=np.nan,
             dropna=False,
         )
