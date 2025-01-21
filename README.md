@@ -102,10 +102,10 @@ AlphaBase like this. Also note the double quotes `"`.
 
 For those who are really adventurous, it is also possible to directly
 install any branch (e.g. `@development`) with any extras
-(e.g. `#egg=alphabase[stable,development-stable]`) from GitHub with e.g.
+(e.g. `#egg=alphabase[stable,development]`) from GitHub with e.g.
 
 ``` bash
-pip install "git+https://github.com/MannLabs/alphabase.git@development#egg=alphabase[stable,development-stable]"
+pip install "git+https://github.com/MannLabs/alphabase.git@development#egg=alphabase[stable,development]"
 ```
 
 ### Developer
@@ -155,7 +155,7 @@ pip install -e "./alphabase[development]"
 
 By default this installs loose dependancies (no explicit versioning),
 although it is also possible to use stable dependencies
-(e.g. `pip install -e "./alphabase[stable,development-stable]"`).
+(e.g. `pip install -e "./alphabase[stable,development]"`).
 
 ***By using the editable flag `-e`, all modifications to the [AlphaBase
 source code folder](alphabase) are directly reflected when running

@@ -23,7 +23,7 @@ jobs:
     with:
       python-version: ${{ matrix.python-version }}
       os: ${{ matrix.os }}
-      install-script: "loose_pip_install.sh"
+      install-script: pip_install.sh tests
   get-code-review-input:
     runs-on: ubuntu-latest
     #if: contains(github.event.pull_request.labels.*.name, 'code-review')

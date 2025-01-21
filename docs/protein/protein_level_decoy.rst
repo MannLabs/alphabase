@@ -1,5 +1,5 @@
 alphabase.protein.protein_level_decoy
-===========================
+=====================================
 
 Protein reverse decoy defined in
 :obj:`ProteinReverseDecoy <alphabase.protein.protein_level_decoy.ProteinReverseDecoy>`.
