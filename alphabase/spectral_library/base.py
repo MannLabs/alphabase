@@ -683,6 +683,7 @@ class SpecLibBase:
         hdf_file: str,
         load_mod_seq: bool = True,
         support_legacy_mods_format: bool = True,
+        infer_charged_frag_types: bool = True,
     ):
         """Load the hdf library from hdf_file
 
@@ -702,6 +703,10 @@ class SpecLibBase:
             Defaults to True.
             DeprecationWarning: future versions will have a different default and eventually this flag will be dropped.
 
+        infer_charged_frag_types : bool, optional
+            if True, infer the charged fragment types as defined in the hdf file, defaults to True.
+            This is the default as users most likely don't know the charged fragment types in the hdf file.
+            If set to False, only charged frag types defined in `charged_frag_types` will be loaded.
         """
         _hdf = HDF_File(hdf_file)
         self._precursor_df: pd.DataFrame = _hdf.library.precursor_df.values
@@ -719,17 +724,18 @@ class SpecLibBase:
             self._precursor_df[cols] = mod_seq_df[cols]
 
         _fragment_mz_df = _hdf.library.fragment_mz_df.values
-        self._fragment_mz_df = _fragment_mz_df[
-            sort_charged_frag_types(
-                filter_valid_charged_frag_types(_fragment_mz_df.columns.values)
+        if infer_charged_frag_types:
+            self.charged_frag_types = sort_charged_frag_types(
+                filter_valid_charged_frag_types(_fragment_mz_df.columns)
             )
+
+        self._fragment_mz_df = _fragment_mz_df[
+            get_available_columns(_fragment_mz_df, self.charged_frag_types)
         ]
 
         _fragment_intensity_df = _hdf.library.fragment_intensity_df.values
         self._fragment_intensity_df = _fragment_intensity_df[
-            sort_charged_frag_types(
-                filter_valid_charged_frag_types(_fragment_intensity_df.columns.values)
-            )
+            get_available_columns(_fragment_intensity_df, self.charged_frag_types)
         ]
 
     @staticmethod
@@ -822,3 +828,27 @@ def annotate_fragments_from_speclib(
     speclib._fragment_intensity_df = fragment_speclib._fragment_intensity_df.copy()
 
     return speclib
+
+
+def get_available_columns(df, columns):
+    """Get a list of column names that exist in the given dataframe.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The dataframe to check columns against
+    columns : list
+        List of column names to check
+
+    Returns
+    -------
+    list
+        List of column names that exist in the dataframe
+
+    Examples
+    --------
+    >>> df = pd.DataFrame({'a': [1], 'b': [2]})
+    >>> get_available_columns(df, ['a', 'b', 'c'])
+    ['a', 'b']
+    """
+    return [col for col in columns if col in df.columns]

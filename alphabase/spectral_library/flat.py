@@ -11,7 +11,7 @@ from alphabase.peptide.fragment import (
     remove_unused_fragments,
     sort_charged_frag_types,
 )
-from alphabase.spectral_library.base import SpecLibBase
+from alphabase.spectral_library.base import SpecLibBase, get_available_columns
 
 
 class SpecLibFlat(SpecLibBase):
@@ -182,7 +182,12 @@ class SpecLibFlat(SpecLibBase):
         _hdf.library.fragment_mz_df = self.fragment_mz_df
         _hdf.library.fragment_intensity_df = self.fragment_intensity_df
 
-    def load_hdf(self, hdf_file: str, load_mod_seq: bool = False):
+    def load_hdf(
+        self,
+        hdf_file: str,
+        load_mod_seq: bool = False,
+        infer_charged_frag_types: bool = True,
+    ):
         """Load the hdf library from hdf_file
 
         Parameters
@@ -194,6 +199,11 @@ class SpecLibFlat(SpecLibBase):
             if also load mod_seq_df.
             Defaults to False.
 
+        infer_charged_frag_types : bool, optional
+            if True, infer the charged fragment types as defined in the hdf file, defaults to True.
+            This is the default as users most likely don't know the charged fragment types in the hdf file.
+            If set to False, only charged frag types defined in `SpecLibBase.charged_frag_types` will be loaded.
+
         """
         super().load_hdf(hdf_file, load_mod_seq=load_mod_seq)
         _hdf = HDF_File(
@@ -202,18 +212,19 @@ class SpecLibFlat(SpecLibBase):
         self._fragment_df = _hdf.library.fragment_df.values
         self._protein_df = _hdf.library.protein_df.values
 
-        _fragment_mz_df = _hdf.library.fragment_mz_df.values
-        self._fragment_mz_df = _fragment_mz_df[
-            sort_charged_frag_types(
-                filter_valid_charged_frag_types(_fragment_mz_df.columns.values)
+        if infer_charged_frag_types:
+            self.charged_frag_types = sort_charged_frag_types(
+                filter_valid_charged_frag_types(_hdf.library.fragment_mz_df.columns)
             )
-        ]
 
         _fragment_intensity_df = _hdf.library.fragment_intensity_df.values
         self._fragment_intensity_df = _fragment_intensity_df[
-            sort_charged_frag_types(
-                filter_valid_charged_frag_types(_fragment_intensity_df.columns.values)
-            )
+            get_available_columns(_fragment_intensity_df, self.charged_frag_types)
+        ]
+
+        _fragment_mz_df = _hdf.library.fragment_mz_df.values
+        self._fragment_mz_df = _fragment_mz_df[
+            get_available_columns(_fragment_mz_df, self.charged_frag_types)
         ]
 
     def get_full_charged_types(self, frag_df: pd.DataFrame) -> list:
