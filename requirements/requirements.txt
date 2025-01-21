@@ -2,6 +2,7 @@
 # Only usage of fixed versions is allowed, and all dependencies listed here must also be
 # included in `requirements_loose.txt` (enforced by a test).
 # TODO clean the requirements
+anndata==0.11.1
 numba==0.60.0
 numpy<2.0 # test: tolerate_version  # rdkit==2024.3.3 is not compatible with numpy >= 2.0
 pyyaml==6.0.2
