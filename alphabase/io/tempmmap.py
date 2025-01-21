@@ -310,8 +310,11 @@ def _clear() -> None:
             "All existing memory-mapped arrays will be unusable!"
         )
 
-        del _TEMP_DIR
-        _TEMP_DIR = None
+        _TEMP_DIR = None  # TempDirectory will take care of the cleanup
+        if os.path.exists(TEMP_DIR_NAME):
+            logging.info(
+                f"Temporary folder {TEMP_DIR_NAME} still exists, manual removal necessary."
+            )
         TEMP_DIR_NAME = None
 
 

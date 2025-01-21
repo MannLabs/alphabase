@@ -45,6 +45,22 @@ def test_create_array():
     assert tempmmap._TEMP_DIR is not None
 
 
+def test_check_temp_dir_deletion():
+    """Test that tempdir is deleted at exit."""
+    tempmmap = sys.modules["alphabase.io.tempmmap"]
+
+    _ = tempmmap.array((5, 5), np.float32)
+    temp_dir_name = tempmmap._TEMP_DIR.name
+
+    # check presence of temp dir first
+    assert os.path.exists(temp_dir_name)
+
+    # when
+    tempmmap._clear()
+
+    assert not os.path.exists(temp_dir_name)
+
+
 def test_create_array_with_custom_temp_dir():
     """Test creating and accessing an array with custom temp dir."""
     tempmmap = sys.modules["alphabase.io.tempmmap"]
