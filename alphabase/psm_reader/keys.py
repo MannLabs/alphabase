@@ -44,6 +44,7 @@ class PsmDfCols(metaclass=ConstantsClass):
     MOBILITY = "mobility"
     PEPTIDE_FDR = "peptide_fdr"
     PROTEIN_FDR = "protein_fdr"
+    INTENSITY = "intensity"
 
     RAW_NAME = "raw_name"
     CHARGE = "charge"
@@ -57,9 +58,6 @@ class PsmDfCols(metaclass=ConstantsClass):
     _UNIPROT_IDS = "uniprot_ids"
     _GENES = "genes"
     _QUERY_ID = "query_id"
-
-    # part of psm_reader_yaml, but not directly referenced
-    INTENSITY = "intensity"
 
 
 class LibPsmDfCols(metaclass=ConstantsClass):
