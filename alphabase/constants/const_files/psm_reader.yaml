@@ -199,6 +199,13 @@ diann:
     'scan_num': 'MS2.Scan'
     'score': 'CScore'
     'fdr': 'Q.Value'
+    'intensity': "PG.MaxLFQ"
+    # extra columns for performing FDR cutoff, not propagated to the output
+    '_fdr2': 'Global.Q.Value'  # first search
+    '_fdr3': 'Global.PG.Q.Value'  # first search
+    '_fdr4': 'Lib.Q.Value'  # second search
+    '_fdr5': 'Lib.PG.Q.Value' # second search
+
   mod_seq_columns:
     - "Modified.Sequence"
   modification_mapping_type: 'maxquant'
