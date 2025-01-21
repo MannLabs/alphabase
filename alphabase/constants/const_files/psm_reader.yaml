@@ -180,7 +180,7 @@ msfragger_pepxml:
   mod_mass_tol: 0.1 # Da
   modification_mapping_type: 'maxquant'
 
-diann:
+diann: # 1.8.1
   reader_type: diann
   rt_unit: minute
   fixed_C57: False
@@ -199,7 +199,7 @@ diann:
     'scan_num': 'MS2.Scan'
     'score': 'CScore'
     'fdr': 'Q.Value'
-#    'intensity': "PG.MaxLFQ"
+    'intensity': "PG.MaxLFQ"
   mod_seq_columns:
     - "Modified.Sequence"
   modification_mapping_type: 'maxquant'
