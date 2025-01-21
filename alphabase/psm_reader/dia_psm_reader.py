@@ -47,7 +47,28 @@ class DiannReader(ModifiedSequenceReader):
             columns={PsmDfCols.SPEC_IDX: PsmDfCols.DIANN_SPEC_INDEX}, inplace=True
         )
 
+        self._perform_additional_fdr()
+
         super()._post_process(origin_df)
+
+    def _perform_additional_fdr(self) -> None:
+        """Filter PSMs based on additional FDR columns and drop the temporary columns."""
+        mask = np.ones(len(self._psm_df), dtype=bool)
+
+        extra_fdr_columns = [
+            PsmDfCols.FDR2,
+            PsmDfCols.FDR3,
+            PsmDfCols.FDR4,
+            PsmDfCols.FDR5,
+        ]
+        for col in extra_fdr_columns:
+            if col in self._psm_df.columns:
+                mask &= self._psm_df[PsmDfCols.FDR] <= self._keep_fdr
+
+        if not all(mask):
+            self._psm_df = self._psm_df[mask]
+
+        self._psm_df = self._psm_df.drop(columns=extra_fdr_columns, errors="ignore")
 
 
 class SpectronautReportReader(ModifiedSequenceReader):
