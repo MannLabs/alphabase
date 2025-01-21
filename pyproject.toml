@@ -1,3 +1,63 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "alphabase"
+requires-python = ">=3.8"
+dynamic = ["version", "dependencies", "optional-dependencies"]
+
+authors = [
+    {name = "Mann Labs", email = "jalew188@gmail.com"}
+]
+description = "An infrastructure Python package of the AlphaX ecosystem"
+readme = "README.md"
+keywords = [
+    "mass spectrometry",
+    "proteomics",
+    "bioinformatics",
+    "AlphaPept",
+    "AlphaPept ecosystem",
+    "AlphaX ecosystem",
+]
+license = {file = "LICENSE.txt"}
+classifiers = [
+    "Development Status :: 4 - Beta",
+    # "Development Status :: 5 - Production/Stable",
+    # "Development Status :: 6 - Mature",
+    # "Development Status :: 7 - Inactive"
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
+
+[project.urls]
+
+"Paper preprint" = "https://www.biochem.mpg.de/mann"
+Repository = "https://github.com/MannLabs/alphabase"
+Documentation = "https://alphabase.readthedocs.io/en/latest/"
+#Changelog = "https://github.com/me/spam/blob/master/CHANGELOG.md"
+Issues = "https://github.com/MannLabs/alphabase/issues"
+"Mann Labs Homepage" = "https://www.biochem.mpg.de/mann"
+
+[tool.setuptools.packages]
+find = {}
+
+[tool.setuptools.dynamic]
+# https://stackoverflow.com/a/73600610
+dependencies = {file = ["requirements/requirements_loose.txt"]}
+optional-dependencies = { stable = { file = ["requirements/requirements.txt",
+] }, tests = { file = [ "requirements/requirements_tests.txt",
+] }, development = { file = ["requirements/requirements_development.txt", "requirements/requirements_tests.txt", "requirements/requirements_docs.txt"
+] }}
+version = {attr = "alphabase.__version__"}
+
+[project.scripts]
+alphabase = "alphabase.cli:run"
+
+
 [tool.ruff.lint]
 select =  [
     # pycodestyle
