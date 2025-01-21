@@ -119,3 +119,32 @@ def test_from_files(mock_reader):
     assert np.array_equal(
         adata.X, np.array([[100, 200], [300, np.nan]]), equal_nan=True
     )
+
+
+@patch("alphabase.psm_reader.psm_reader.psm_reader_provider.get_reader")
+def test_from_files_nan(mock_reader):
+    df = pd.concat(
+        [
+            pd.DataFrame(
+                {
+                    PsmDfCols.RAW_NAME: ["raw2"],
+                    PsmDfCols.PROTEINS: ["protein2"],
+                    PsmDfCols.INTENSITY: [np.nan],
+                }
+            ),
+            _get_test_psm_df(),
+        ]
+    )
+    mock_reader.return_value.load.return_value = df
+
+    factory = AnnDataFactory.from_files(["file1", "file2"], reader_type="diann")
+
+    # when
+    adata = factory.create_anndata()
+
+    assert adata.shape == (2, 2)
+    assert adata.obs_names.tolist() == ["raw1", "raw2"]
+    assert adata.var_names.tolist() == ["protein1", "protein2"]
+    assert np.array_equal(
+        adata.X, np.array([[100, 200], [300, np.nan]]), equal_nan=True
+    )
