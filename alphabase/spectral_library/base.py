@@ -726,7 +726,7 @@ class SpecLibBase:
         _fragment_mz_df = _hdf.library.fragment_mz_df.values
         if infer_charged_frag_types:
             self.charged_frag_types = sort_charged_frag_types(
-                filter_valid_charged_frag_types(_fragment_mz_df.columns.values)
+                filter_valid_charged_frag_types(_fragment_mz_df.columns)
             )
 
         self._fragment_mz_df = _fragment_mz_df[

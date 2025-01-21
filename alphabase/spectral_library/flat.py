@@ -214,9 +214,7 @@ class SpecLibFlat(SpecLibBase):
 
         if infer_charged_frag_types:
             self.charged_frag_types = sort_charged_frag_types(
-                filter_valid_charged_frag_types(
-                    _hdf.library.fragment_mz_df.columns.values
-                )
+                filter_valid_charged_frag_types(_hdf.library.fragment_mz_df.columns)
             )
 
         _fragment_intensity_df = _hdf.library.fragment_intensity_df.values
