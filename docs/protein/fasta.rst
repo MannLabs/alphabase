@@ -1,5 +1,5 @@
 alphabase.protein.fasta
-===========================
+=======================
 
 The :obj:`SpecLibFasta <alphabase.protein.fasta.SpecLibFasta>`
 provides the highest level APIs based on all other

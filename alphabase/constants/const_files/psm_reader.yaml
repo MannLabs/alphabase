@@ -71,6 +71,10 @@ maxquant:
 
 modification_mappings:
   maxquant:
+    'mTRAQ@K':
+      - 'K(mTRAQ)'
+    'mTRAQ@Any_N-term':
+      - '(mTRAQ)'
     'Dimethyl@K':
       - 'K(Dimethyl)'
     'Dimethyl@R':
@@ -78,7 +82,7 @@ modification_mappings:
     'Dimethyl@Any_N-term':
       - '(Dimethyl)'
     'Acetyl@Protein_N-term':
-      - '_(Acetyl (Protein_N-term))'
+      - '_(Acetyl (Protein N-term))'
       - '_(ac)'
     'Acetyl@K':
       - 'K(ac)'
@@ -147,7 +151,7 @@ pfind:
     'uniprot_ids': 'Proteins'
     'fdr': 'Q-value'
     'decoy': ['Target/Decoy', 'Targe/Decoy']
-  modification_mapping_type: 'maxquant'
+  modification_mapping_type: null  # no mapping required
 
 msfragger_pepxml:
   reader_type: msfragger_pepxml
@@ -159,7 +163,6 @@ msfragger_pepxml:
     'query_id': 'spectrum'
     'scan_num': 'start_scan'
     'score': 'expect'
-    'fdr': 'expect'
     'proteins': 'protein'
     'raw_name': 'raw_name'
     'mobility': 'ion_mobility'
@@ -293,4 +296,4 @@ sage:
     'peptide_fdr': 'peptide_q'
     'protein_fdr': 'protein_q'
     'decoy': 'is_decoy'
-  modification_mapping_type: 'maxquant'
+  modification_mapping_type: null # custom mapping in code

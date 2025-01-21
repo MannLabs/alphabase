@@ -1,0 +1,23 @@
+# Dependencies required for running the "stable" version of alphaDIA.
+# Only usage of fixed versions is allowed, and all dependencies listed here must also be
+# included in `requirements_loose.txt` (enforced by a test).
+# TODO clean the requirements
+numba==0.60.0
+numpy<2.0 # test: tolerate_version  # rdkit==2024.3.3 is not compatible with numpy >= 2.0
+pyyaml==6.0.2
+pandas==2.2.3
+h5py==3.12.1
+contextlib2==21.6.0
+xxhash==3.5.0
+biopython==1.84
+psutil==6.1.0
+tqdm==4.67.0
+scikit-learn==1.5.2
+regex==2024.11.6
+# pydivsufsort
+dask==2024.8.0
+dask_expr==1.1.10
+pyahocorasick==2.1.0
+pyteomics==4.7.5
+lxml==5.3.0
+rdkit==2024.3.3

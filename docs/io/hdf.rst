@@ -1,5 +1,5 @@
 alphabase.io.hdf
-===========================
+================
 
 .. automodule:: alphabase.io.hdf
    :members:

@@ -1,0 +1,5 @@
+# Dependencies helping for development
+jupyter
+bump-my-version
+# pipdeptree
+ipykernel
