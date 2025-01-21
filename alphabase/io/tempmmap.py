@@ -88,7 +88,7 @@ def _get_file_location(abs_file_path: str, overwrite=False) -> str:
         raise ValueError("The chosen file name needs to end with .hdf")
 
     # ensure that the directory in which the file should be created exists
-    if os.path.isdir(os.path.commonpath(abs_file_path)):
+    if os.path.isdir(os.path.dirname(abs_file_path)):
         return abs_file_path
     else:
         raise ValueError(
