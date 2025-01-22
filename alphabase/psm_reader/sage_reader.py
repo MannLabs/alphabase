@@ -617,7 +617,8 @@ class SageReaderBase(PSMReaderBase, ABC):
         if not self._keep_decoy:
             self._psm_df = self._psm_df[~self._psm_df[PsmDfCols.DECOY]]
 
-        self._psm_df = self._psm_df[self._psm_df[PsmDfCols.FDR] <= self._keep_fdr]
+        self._psm_df = self._filter_fdr(self._psm_df)
+
         self._psm_df = self._psm_df[
             self._psm_df[PsmDfCols.PEPTIDE_FDR] <= self._keep_fdr
         ]
