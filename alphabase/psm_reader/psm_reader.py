@@ -6,7 +6,6 @@ from abc import ABC
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Type, Union
 
-import numpy as np
 import pandas as pd
 
 from alphabase.constants._const import CONST_FILE_FOLDER, PSM_READER_YAML_FILE_NAME
@@ -334,13 +333,10 @@ class PSMReaderBase(ABC):
 
         self._psm_df = self._psm_df[~self._psm_df[PsmDfCols.MODS].isna()]
 
-        keep_rows = np.ones(len(self._psm_df), dtype=bool)
-        if PsmDfCols.FDR in self._psm_df.columns:
-            keep_rows &= self._psm_df[PsmDfCols.FDR] <= self._keep_fdr
-        if PsmDfCols.DECOY in self._psm_df.columns and not self._keep_decoy:
-            keep_rows &= self._psm_df[PsmDfCols.DECOY] == 0
+        self._psm_df = self._filter_fdr(self._psm_df)
 
-        self._psm_df = self._psm_df[keep_rows]
+        if PsmDfCols.DECOY in self._psm_df.columns and not self._keep_decoy:
+            self._psm_df = self._psm_df[self._psm_df[PsmDfCols.DECOY] == 0]
 
         reset_precursor_df(self._psm_df)
 
@@ -361,6 +357,13 @@ class PSMReaderBase(ABC):
             self._psm_df[PsmDfCols.CCS] = mobility.mobility_to_ccs_for_df(
                 self._psm_df, PsmDfCols.MOBILITY
             )
+
+    def _filter_fdr(self, psm_df: pd.DataFrame) -> pd.DataFrame:
+        """Filter PSMs by FDR."""
+        if PsmDfCols.FDR not in psm_df.columns:
+            return psm_df
+
+        return psm_df[psm_df[PsmDfCols.FDR] <= self._keep_fdr]
 
     def normalize_rt_by_raw_name(self) -> None:
         """Normalize RT by raw name."""
