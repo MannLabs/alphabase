@@ -1,8 +1,11 @@
+"""SageReader for reading Sage output files."""
+
 import logging
 import multiprocessing as mp
 import re
-import typing
+from abc import ABC
 from functools import partial
+from typing import Generator, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -13,18 +16,20 @@ from alphabase.psm_reader.keys import PsmDfCols
 from alphabase.psm_reader.psm_reader import (
     PSMReaderBase,
     psm_reader_provider,
-    psm_reader_yaml,
 )
 
 
 class SageModificationTranslation:
+    """Translate Sage style modifications to alphabase style modifications."""
+
     def __init__(
         self,
         custom_translation_df: pd.DataFrame = None,
         ppm_tolerance: int = 10,
-        mp_process_num=10,
+        mp_process_num: int = 10,
     ):
         """Translate Sage style modifications to alphabase style modifications.
+
         A modified sequence like VM[+15.9949]QENSSSFSDLSER will be translated to mods: Oxidation@M, mod_sites: 2.
         By default, the translation is done by matching the observed mass and location to the UniMod database.
         If a custom translation dataframe is provided, the translation will be done based on the custom translation dataframe first.
@@ -41,7 +46,6 @@ class SageModificationTranslation:
             The number of processes to use for translation.
 
         """
-
         self.custom_translation_df = custom_translation_df
         self.ppm_tolerance = ppm_tolerance
         self.mp_process_num = mp_process_num
@@ -58,6 +62,7 @@ class SageModificationTranslation:
 
     def __call__(self, psm_df: pd.DataFrame) -> pd.DataFrame:
         """Translate modifications in the PSMs to alphabase style modifications.
+
         1. Discover all modifications in the PSMs.
         2. Annotate modifications from custom translation df, if provided.
         3. Annotate all remaining modifications from UniMod.
@@ -73,8 +78,8 @@ class SageModificationTranslation:
         -------
         pd.DataFrame
             The PSM dataframe with columns 'mod_sites' and 'mods'.
-        """
 
+        """
         # 1. Discover all modifications in the PSMs
         discovered_modifications_df = _discover_modifications(psm_df)
         translation_df = pd.DataFrame()
@@ -92,10 +97,12 @@ class SageModificationTranslation:
         )
 
         # 4. Apply translation to PSMs
-        translated_psm_df = _apply_translate_modifications_mp(psm_df, translation_df)
+        translated_psm_df = _apply_translate_modifications_mp(
+            psm_df, translation_df, mp_process_num=self.mp_process_num
+        )
 
         # 5. Drop PSMs with missing modifications
-        is_null = translated_psm_df[PsmDfCols.MOD_SITES].isnull()
+        is_null = translated_psm_df[PsmDfCols.MOD_SITES].isna()
         translated_psm_df = translated_psm_df[~is_null]
         if np.sum(is_null) > 0:
             logging.warning(
@@ -106,14 +113,14 @@ class SageModificationTranslation:
 
     def _annotate_from_custom_translation(
         self, discovered_modifications_df: pd.DataFrame, translation_df: pd.DataFrame
-    ) -> typing.Tuple[pd.DataFrame, pd.DataFrame]:
+    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """Annotate modifications from custom translation df, if provided.
+
         Discovered modifications are first matched using the custom translation dataframe.
         If no match is found, the modifications are returned for matching using UniMod.
 
         Parameters
         ----------
-
         discovered_modifications_df : pd.DataFrame
             The discovered modifications dataframe.
 
@@ -122,7 +129,6 @@ class SageModificationTranslation:
 
         Returns
         -------
-
         typing.Tuple[pd.DataFrame, pd.DataFrame]
             The updated discovered modifications dataframe and translation dataframe.
 
@@ -132,7 +138,7 @@ class SageModificationTranslation:
                 self.custom_translation_df, on="modification", how="left"
             )
             for _, row in discovered_modifications_df[
-                discovered_modifications_df["matched_mod_name"].isnull()
+                discovered_modifications_df["matched_mod_name"].isna()
             ].iterrows():
                 logging.warning(
                     f"No modification found for mass {row['modification']} at position {row['previous_aa']} found in custom_translation_df, will be matched using UniMod"
@@ -142,12 +148,12 @@ class SageModificationTranslation:
                 [
                     translation_df,
                     discovered_modifications_df[
-                        discovered_modifications_df["matched_mod_name"].notnull()
+                        discovered_modifications_df["matched_mod_name"].notna()
                     ],
                 ]
             )
             discovered_modifications_df = discovered_modifications_df[
-                discovered_modifications_df["matched_mod_name"].isnull()
+                discovered_modifications_df["matched_mod_name"].isna()
             ]
 
         return discovered_modifications_df, translation_df
@@ -156,6 +162,7 @@ class SageModificationTranslation:
         self, discovered_modifications_df: pd.DataFrame, translation_df: pd.DataFrame
     ) -> pd.DataFrame:
         """Annotate all remaining modifications from UniMod.
+
         UniMod modification are used from the global MOD_DF.
 
         Parameters
@@ -170,8 +177,8 @@ class SageModificationTranslation:
         -------
         pd.DataFrame
             The updated translation dataframe.
-        """
 
+        """
         annotated_df = _get_annotated_mod_df()
         discovered_modifications_df["matched_mod_name"] = (
             discovered_modifications_df.apply(
@@ -185,21 +192,19 @@ class SageModificationTranslation:
             )
         )
         for _, row in discovered_modifications_df[
-            discovered_modifications_df["matched_mod_name"].isnull()
+            discovered_modifications_df["matched_mod_name"].isna()
         ].iterrows():
             logging.warning(
                 f"UniMod lookup failed for mass {row['modification']} at position {row['previous_aa']}, will be removed."
             )
-        translation_df = pd.concat(
+        return pd.concat(
             [
                 translation_df,
                 discovered_modifications_df[
-                    discovered_modifications_df["matched_mod_name"].notnull()
+                    discovered_modifications_df["matched_mod_name"].notna()
                 ],
             ]
         )
-
-        return translation_df
 
 
 def _discover_modifications(psm_df: pd.DataFrame) -> pd.DataFrame:
@@ -216,14 +221,13 @@ def _discover_modifications(psm_df: pd.DataFrame) -> pd.DataFrame:
         A dataframe with columns 'modification', 'previous_aa', 'is_nterm', 'is_cterm', 'mass'.
 
     """
-
     modifications = (
         psm_df[PsmDfCols.MODIFIED_SEQUENCE]
         .apply(_match_modified_sequence)
         .explode()
         .unique()
     )
-    modifications = modifications[~pd.isnull(modifications)]
+    modifications = modifications[~pd.isna(modifications)]
     return pd.DataFrame(
         list(modifications),
         columns=["modification", "previous_aa", "is_nterm", "is_cterm", "mass"],
@@ -232,7 +236,7 @@ def _discover_modifications(psm_df: pd.DataFrame) -> pd.DataFrame:
 
 def _match_modified_sequence(
     sequence: str,
-) -> typing.List[typing.Tuple[str, str, bool, bool, float]]:
+) -> List[Tuple[str, str, bool, bool, float]]:
     """Get all matches with the amino acid location.
 
     P[-100.0]EPTIDE -> [('[-100.0]', 'P', False, False, -100.0)]
@@ -241,7 +245,6 @@ def _match_modified_sequence(
 
     Parameters
     ----------
-
     sequence : str
         The sequence string.
 
@@ -252,7 +255,6 @@ def _match_modified_sequence(
         Each match has the structure (match, previous_aa, is_nterm, is_cterm, mass)
 
     """
-
     matches = []
     # Matches the square bracket modification pattern from modified sequences
     # [-100.0]-PEPTIDE -> [('[-100.0]', '', True, False, -100.0)]
@@ -278,12 +280,10 @@ def _lookup_modification(
     mod_annotated_df: pd.DataFrame,
     ppm_tolerance: int = 10,
 ) -> str:
-    """
-    Look up a single modification based on the observed mass and the previous amino acid.
+    """Look up a single modification based on the observed mass and the previous amino acid.
 
     Parameters
     ----------
-
     mass_observed : float
         The observed mass of the modification.
 
@@ -298,13 +298,11 @@ def _lookup_modification(
 
     Returns
     -------
-
     str
         The name of the matched modification in alphabase format.
 
     """
-
-    mass_distance = mod_annotated_df["mass"].values - mass_observed
+    mass_distance = mod_annotated_df["mass"].to_numpy() - mass_observed
     ppm_distance = mass_distance / mass_observed * 1e6
     ppm_distance = np.abs(ppm_distance)
 
@@ -335,7 +333,7 @@ def _lookup_modification(
 
 def _translate_modifications(
     sequence: str, mod_translation_df: pd.DataFrame
-) -> typing.Tuple[typing.Optional[str], typing.Optional[str]]:
+) -> Tuple[Optional[str], Optional[str]]:
     """Translate modifications in the sequence to alphabase style modifications.
 
     Parameters
@@ -352,7 +350,6 @@ def _translate_modifications(
         A tuple with the translated modification sites and names.
 
     """
-
     accumulated_non_sequence_chars = 0
 
     mod_sites = []
@@ -424,7 +421,6 @@ def _apply_translate_modifications(
 
     Parameters
     ----------
-
     psm_df : pd.DataFrame
         The PSM dataframe with column 'modified_sequence'.
 
@@ -433,12 +429,10 @@ def _apply_translate_modifications(
 
     Returns
     -------
-
     pd.DataFrame
         The PSM dataframe with columns 'mod_sites' and 'mods'.
 
     """
-
     psm_df[PsmDfCols.MOD_SITES], psm_df[PsmDfCols.MODS] = zip(
         *psm_df[PsmDfCols.MODIFIED_SEQUENCE].apply(
             lambda x: _translate_modifications(x, mod_translation_df)
@@ -447,7 +441,7 @@ def _apply_translate_modifications(
     return psm_df
 
 
-def _batchify_df(df: pd.DataFrame, mp_batch_size: int) -> typing.Generator:
+def _batchify_df(df: pd.DataFrame, mp_batch_size: int) -> Generator:
     """Internal funciton for applying translation modifications in parallel.
 
     Parameters
@@ -460,11 +454,10 @@ def _batchify_df(df: pd.DataFrame, mp_batch_size: int) -> typing.Generator:
 
     Returns
     -------
-
     typing.Generator
         A generator for the batchified dataframe.
-    """
 
+    """
     for i in range(0, len(df), mp_batch_size):
         yield df.iloc[i : i + mp_batch_size, :]
 
@@ -474,13 +467,13 @@ def _apply_translate_modifications_mp(
     mod_translation_df: pd.DataFrame,
     mp_batch_size: int = 50000,
     mp_process_num: int = 10,
+    *,
     progress_bar: bool = True,
 ) -> pd.DataFrame:
-    """Apply translate modifications with multiprocessing
+    """Apply translate modifications with multiprocessing.
 
     Parameters
     ----------
-
     psm_df : pd.DataFrame
         The PSM dataframe.
 
@@ -492,13 +485,16 @@ def _apply_translate_modifications_mp(
 
     mp_process_num : int
         The number of parallel processes
-    """
 
-    df_list = []
+    progress_bar : bool, optional
+        Whether to show a progress bar. Defaults to True
+
+    """
     with mp.get_context("spawn").Pool(mp_process_num) as p:
         processing = p.imap(
             partial(
-                _apply_translate_modifications, mod_translation_df=mod_translation_df
+                _apply_translate_modifications,
+                mod_translation_df=mod_translation_df,
             ),
             _batchify_df(psm_df, mp_batch_size),
         )
@@ -514,12 +510,12 @@ def _apply_translate_modifications_mp(
 
 def _get_annotated_mod_df() -> pd.DataFrame:
     """Annotates the modification dataframe for annotation of sage output.
+
     Due to the modified sequence based notation,
     C-Terminal and sidechain modifications on the last AA could be confused.
 
     Returns
     -------
-
     pd.DataFrame
         The annotated modification dataframe with columns 'mass', 'previous_aa', 'is_nterm', 'is_cterm', 'unimod_id', 'localizer_rank'.
 
@@ -544,24 +540,22 @@ def _get_annotated_mod_df() -> pd.DataFrame:
 
 def _sage_spec_idx_from_scan_nr(scan_indicator_str: str) -> int:
     """Extract the spectrum index from the scan_nr field in Sage output.
+
     Sage uses 1-based indexing for spectra, so we need to subtract 1 to convert to 0-based indexing.
 
     Parameters
     ----------
-
     scan_indicator_str : str
         The scan_indicator_str field in Sage output.
         e.g. `'controllerType=0 controllerNumber=1 scan=7846'`
 
     Returns
     -------
-
     int
         The 0-based spectrum index.
 
     Examples
     --------
-
     >>> _sage_spec_idx_from_scan_nr('controllerType=0 controllerNumber=1 scan=7846')
     7845
 
@@ -569,22 +563,43 @@ def _sage_spec_idx_from_scan_nr(scan_indicator_str: str) -> int:
     return int(re.search(r"scan=(\d+)", scan_indicator_str).group(1)) - 1
 
 
-class SageReaderBase(PSMReaderBase):
-    def __init__(
+class SageReaderBase(PSMReaderBase, ABC):
+    """Base class for SageReader."""
+
+    _reader_type = "sage"
+
+    def __init__(  # noqa: PLR0913, D417 # too many arguments in function definition, missing argument descriptions
         self,
         *,
-        column_mapping: dict = None,
-        modification_mapping: dict = None,
-        fdr=0.01,
-        keep_decoy=False,
-        rt_unit="second",
-        custom_translation_df=None,
-        mp_process_num=10,
+        column_mapping: Optional[dict] = None,
+        modification_mapping: Optional[dict] = None,
+        # mod_seq_columns: Optional[List[str]] = None,  # TODO: not needed here?
+        fdr: float = 0.01,
+        keep_decoy: bool = False,
+        rt_unit: Optional[str] = None,
+        # sage reader-specific:
+        custom_translation_df: pd.DataFrame = None,
+        mp_process_num: int = 10,
         **kwargs,
     ):
-        self.custom_translation_df = custom_translation_df
-        self.mp_process_num = mp_process_num
+        """Initialize SageReaderBase.
 
+        See documentation of `PSMReaderBase` for more information.
+
+        Parameters
+        ----------
+        custom_translation_df : pd.DataFrame
+            A custom translation dataframe with columns 'modification' and 'matched_mod_name'.
+            Optional, default: None
+
+        mp_process_num : int
+            The number of processes to use for translation.
+            Optional, default: 10
+
+
+        See documentation of `PSMReaderBase` for the rest of parameters.
+
+        """
         super().__init__(
             column_mapping=column_mapping,
             modification_mapping=modification_mapping,
@@ -594,19 +609,11 @@ class SageReaderBase(PSMReaderBase):
             **kwargs,
         )
 
-    def _init_column_mapping(self):
-        self.column_mapping = psm_reader_yaml["sage"]["column_mapping"]
+        self.custom_translation_df = custom_translation_df
+        self.mp_process_num = mp_process_num
 
-    def _load_file(self, filename):
-        raise NotImplementedError
-
-    def _transform_table(self, origin_df):
-        self._psm_df[PsmDfCols.SPEC_IDX] = self._psm_df[PsmDfCols.SCANNR].apply(
-            _sage_spec_idx_from_scan_nr
-        )
-        self._psm_df.drop(columns=[PsmDfCols.SCANNR], inplace=True)
-
-    def _translate_decoy(self, origin_df):
+    def _translate_decoy(self) -> None:
+        # TODO: this is not doing what the name pretends, plus there's a redundancy with post_process
         if not self._keep_decoy:
             self._psm_df = self._psm_df[~self._psm_df[PsmDfCols.DECOY]]
 
@@ -623,10 +630,7 @@ class SageReaderBase(PSMReaderBase):
             columns=[PsmDfCols.PEPTIDE_FDR, PsmDfCols.PROTEIN_FDR], inplace=True
         )
 
-    def _load_modifications(self, origin_df):
-        pass
-
-    def _translate_modifications(self):
+    def _translate_modifications(self) -> None:
         sage_translation = SageModificationTranslation(
             custom_translation_df=self.custom_translation_df,
             mp_process_num=self.mp_process_num,
@@ -636,23 +640,30 @@ class SageReaderBase(PSMReaderBase):
         # drop modified_sequence
         self._psm_df.drop(columns=[PsmDfCols.MODIFIED_SEQUENCE], inplace=True)
 
+    def _post_process(self, origin_df: pd.DataFrame) -> None:
+        self._psm_df[PsmDfCols.SPEC_IDX] = self._psm_df[PsmDfCols.SCANNR].apply(
+            _sage_spec_idx_from_scan_nr
+        )
+        self._psm_df.drop(columns=[PsmDfCols.SCANNR], inplace=True)
+
+        super()._post_process(origin_df)
+
 
 class SageReaderTSV(SageReaderBase):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    """Reader for Sage output files in TSV format."""
 
-    def _load_file(self, filename):
+    def _load_file(self, filename: str) -> pd.DataFrame:
         return pd.read_csv(filename, sep="\t")
 
 
 class SageReaderParquet(SageReaderBase):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    """Reader for Sage output files in parquet format."""
 
-    def _load_file(self, filename):
+    def _load_file(self, filename: str) -> pd.DataFrame:
         return pd.read_parquet(filename)
 
 
-def register_readers():
+def register_readers() -> None:
+    """Register Sage readers."""
     psm_reader_provider.register_reader("sage_tsv", SageReaderTSV)
     psm_reader_provider.register_reader("sage_parquet", SageReaderParquet)

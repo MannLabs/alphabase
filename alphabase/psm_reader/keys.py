@@ -1,10 +1,16 @@
+"""Constants for accessing the columns of a PSM dataframe."""
+
+from typing import Any, List, NoReturn
+
+
 class ConstantsClass(type):
     """A metaclass for classes that should only contain string constants."""
 
-    def __setattr__(self, name, value):
+    def __setattr__(cls, name: Any, value: Any) -> NoReturn:  # noqa: ANN401
+        """Raise an error when trying to set an attribute."""
         raise TypeError("Constants class cannot be modified")
 
-    def get_values(cls):
+    def get_values(cls) -> List[str]:
         """Get all user-defined string values of the class."""
         return [
             value
