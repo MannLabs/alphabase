@@ -8,18 +8,21 @@ import zipfile
 from abc import ABC, abstractmethod
 from urllib.request import urlopen, urlretrieve
 
+# we don't want to have to install anything in order for this to work
+try:
+    import progressbar  # noqa: F401
+
+    _progressbar_imported = True
+except ModuleNotFoundError:
+    print("Could not import progressbar")
+    _progressbar_imported = False
+
 
 class Progress:  # pragma: no cover
     """Class to report the download progress of a file to the console."""
 
     def __init__(self):
-        try:
-            import progressbar  # noqa: F401
-
-            self.pbar = None
-        except ModuleNotFoundError:
-            print("Could not import progressbar")
-            self.pbar = -1
+        self.pbar = None
 
     def __call__(self, block_num: int, block_size: int, total_size: int) -> None:
         """Report download progress to console.
@@ -36,8 +39,7 @@ class Progress:  # pragma: no cover
             total size of the file to be downloaded in bytes
 
         """
-        if self.pbar == -1:
-            # not initialized
+        if not _progressbar_imported:
             return
 
         if total_size < 0:
