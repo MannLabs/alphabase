@@ -13,8 +13,6 @@ exclude = [
     "test_*",
     "alphabase/__init__.py",
     "alphabase/*utils.py",
-    "alphabase/gui.py",
-    "alphabase/cli.py",
     "alphabase/quantification/*.py",
     "alphabase/smiles/*.py",
     "alphabase/protein/*.py",

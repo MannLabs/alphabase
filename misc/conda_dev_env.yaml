@@ -1,6 +1,0 @@
-name: alphabase
-channels:
-  - defaults
-dependencies:
-  - pip:
-    - -e ../.[development]
