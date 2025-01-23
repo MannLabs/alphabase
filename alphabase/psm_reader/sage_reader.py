@@ -622,10 +622,10 @@ class SageReaderBase(PSMReaderBase, ABC):
         super()._filter_fdr()
 
         self._psm_df = self._psm_df[
-            self._psm_df[PsmDfCols.PEPTIDE_FDR] <= self._keep_fdr
+            self._psm_df[PsmDfCols.PEPTIDE_FDR] <= self._fdr_threshold
         ]
         self._psm_df = self._psm_df[
-            self._psm_df[PsmDfCols.PROTEIN_FDR] <= self._keep_fdr
+            self._psm_df[PsmDfCols.PROTEIN_FDR] <= self._fdr_threshold
         ]
 
         self._psm_df.drop(

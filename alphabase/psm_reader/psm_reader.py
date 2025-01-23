@@ -145,7 +145,7 @@ class PSMReaderBase(ABC):
 
         self._psm_df = None
 
-        self._keep_fdr = fdr
+        self._fdr_threshold = fdr
         self._keep_decoy = keep_decoy
 
         self._precursor_id_columns = psm_reader_yaml[self._reader_type].get(
@@ -360,7 +360,9 @@ class PSMReaderBase(ABC):
     def _filter_fdr(self) -> None:
         """Filter PSMs by FDR."""
         if PsmDfCols.FDR in self._psm_df.columns:
-            self._psm_df = self._psm_df[self._psm_df[PsmDfCols.FDR] <= self._keep_fdr]
+            self._psm_df = self._psm_df[
+                self._psm_df[PsmDfCols.FDR] <= self._fdr_threshold
+            ]
 
     def normalize_rt_by_raw_name(self) -> None:
         """Normalize RT by raw name."""
