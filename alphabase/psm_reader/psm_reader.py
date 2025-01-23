@@ -334,8 +334,8 @@ class PSMReaderBase(ABC):
 
         self._psm_df = self._psm_df[~self._psm_df[PsmDfCols.MODS].isna()]
 
-        if PsmDfCols.DECOY in self._psm_df.columns and not self._keep_decoy:
-            self._psm_df = self._psm_df[self._psm_df[PsmDfCols.DECOY] == 0]
+        # if PsmDfCols.DECOY in self._psm_df.columns and not self._keep_decoy:
+        #     self._psm_df = self._psm_df[self._psm_df[PsmDfCols.DECOY] == 0]
 
         reset_precursor_df(self._psm_df)
 
