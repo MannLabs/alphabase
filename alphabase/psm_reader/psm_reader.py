@@ -235,13 +235,13 @@ class PSMReaderBase(ABC):
 
             origin_df = self._pre_process(origin_df)
             self._translate_columns(origin_df)  # only here
-            self._filter_fdr()
             self._translate_decoy()  # only sage, mq, msfragger, pfind
             self._translate_score()  # only msfragger, pfind
             self._load_modifications(
                 origin_df
             )  # only sage, mq, msfragger, pfind, alphapept
             self._translate_modifications()  # here, sage, msfragger, pfind
+            self._filter_fdr()
             self._post_process(origin_df)  # here, libraryreader, diann, msfragger
         return self._psm_df
 
@@ -334,8 +334,8 @@ class PSMReaderBase(ABC):
 
         self._psm_df = self._psm_df[~self._psm_df[PsmDfCols.MODS].isna()]
 
-        if PsmDfCols.DECOY in self._psm_df.columns and not self._keep_decoy:
-            self._psm_df = self._psm_df[self._psm_df[PsmDfCols.DECOY] == 0]
+        # if PsmDfCols.DECOY in self._psm_df.columns and not self._keep_decoy:
+        #     self._psm_df = self._psm_df[self._psm_df[PsmDfCols.DECOY] == 0]
 
         reset_precursor_df(self._psm_df)
 
