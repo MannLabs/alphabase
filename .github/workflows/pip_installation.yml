@@ -17,6 +17,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest, macos-latest-xlarge]
+        python-version : [3.9]
     uses: ./.github/workflows/_run_tests.yml
     with:
       os: ${{ matrix.os }}
