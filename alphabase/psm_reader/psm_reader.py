@@ -357,7 +357,7 @@ class PSMReaderBase(ABC):
                 self._psm_df, PsmDfCols.MOBILITY
             )
 
-    def _filter_fdr(self) -> pd.DataFrame:
+    def _filter_fdr(self) -> None:
         """Filter PSMs by FDR."""
         if PsmDfCols.FDR in self._psm_df.columns:
             self._psm_df = self._psm_df[self._psm_df[PsmDfCols.FDR] <= self._keep_fdr]
