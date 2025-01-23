@@ -3,7 +3,7 @@ import pandas as pd
 from alphabase.psm_reader.dia_psm_reader import DiannReader
 
 
-def test_perform_additional_fdr_columns_above_threshold():
+def test_filter_fdr_columns_above_threshold():
     """Test that PSMs are filtered based on additional FDR columns."""
     reader = DiannReader()
     reader._psm_df = pd.DataFrame(
@@ -19,14 +19,14 @@ def test_perform_additional_fdr_columns_above_threshold():
     reader._keep_fdr = 0.05
 
     # when
-    reader._perform_additional_fdr()
+    reader._filter_fdr()
 
     pd.testing.assert_frame_equal(
         reader._psm_df, pd.DataFrame({"name": ["p1"], "intensity": [1]})
     )
 
 
-def test_perform_additional_fdr_columns_above_threshold_missing_columns():
+def test_filter_fdr_columns_above_threshold_missing_columns():
     """Test that PSMs are filtered based on additional FDR columns, tolerates missing columns."""
     reader = DiannReader()
     reader._psm_df = pd.DataFrame(
@@ -45,7 +45,7 @@ def test_perform_additional_fdr_columns_above_threshold_missing_columns():
     reader._keep_fdr = 0.05
 
     # when
-    reader._perform_additional_fdr()
+    reader._filter_fdr()
 
     pd.testing.assert_frame_equal(
         reader._psm_df, pd.DataFrame({"name": ["p1"], "intensity": [1]})

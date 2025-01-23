@@ -47,12 +47,12 @@ class DiannReader(ModifiedSequenceReader):
             columns={PsmDfCols.SPEC_IDX: PsmDfCols.DIANN_SPEC_INDEX}, inplace=True
         )
 
-        self._perform_additional_fdr()
-
         super()._post_process(origin_df)
 
-    def _perform_additional_fdr(self) -> None:
+    def _filter_fdr(self) -> None:
         """Filter PSMs based on additional FDR columns and drop the temporary columns."""
+        super()._filter_fdr()
+
         mask = np.ones(len(self._psm_df), dtype=bool)
 
         extra_fdr_columns = [
