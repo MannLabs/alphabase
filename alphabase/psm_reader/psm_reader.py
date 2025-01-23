@@ -235,6 +235,7 @@ class PSMReaderBase(ABC):
 
             origin_df = self._pre_process(origin_df)
             self._translate_columns(origin_df)  # only here
+            self._filter_fdr()
             self._translate_decoy()  # only sage, mq, msfragger, pfind
             self._translate_score()  # only msfragger, pfind
             self._load_modifications(
@@ -333,8 +334,6 @@ class PSMReaderBase(ABC):
 
         self._psm_df = self._psm_df[~self._psm_df[PsmDfCols.MODS].isna()]
 
-        self._psm_df = self._filter_fdr(self._psm_df)
-
         if PsmDfCols.DECOY in self._psm_df.columns and not self._keep_decoy:
             self._psm_df = self._psm_df[self._psm_df[PsmDfCols.DECOY] == 0]
 
@@ -358,12 +357,10 @@ class PSMReaderBase(ABC):
                 self._psm_df, PsmDfCols.MOBILITY
             )
 
-    def _filter_fdr(self, psm_df: pd.DataFrame) -> pd.DataFrame:
+    def _filter_fdr(self) -> pd.DataFrame:
         """Filter PSMs by FDR."""
-        if PsmDfCols.FDR not in psm_df.columns:
-            return psm_df
-
-        return psm_df[psm_df[PsmDfCols.FDR] <= self._keep_fdr]
+        if PsmDfCols.FDR in self._psm_df.columns:
+            self._psm_df = self._psm_df[self._psm_df[PsmDfCols.FDR] <= self._keep_fdr]
 
     def normalize_rt_by_raw_name(self) -> None:
         """Normalize RT by raw name."""
