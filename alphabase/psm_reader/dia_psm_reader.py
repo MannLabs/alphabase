@@ -63,7 +63,7 @@ class DiannReader(ModifiedSequenceReader):
         ]
         for col in extra_fdr_columns:
             if col in self._psm_df.columns:
-                mask &= self._psm_df[col] <= self._keep_fdr
+                mask &= self._psm_df[col] <= self._fdr_threshold
 
         if not all(mask):
             self._psm_df = self._psm_df[mask]
