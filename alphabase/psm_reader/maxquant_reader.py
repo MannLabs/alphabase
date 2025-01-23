@@ -129,6 +129,70 @@ class ModifiedSequenceReader(PSMReaderBase, ABC):
 
     _add_unimod_to_mod_mapping = True
 
+    def __init__(  # noqa: PLR0913 # too many arguments in function definition, missing argument descriptions
+        self,
+        *,
+        column_mapping: Optional[dict] = None,
+        modification_mapping: Optional[dict] = None,
+        mod_seq_columns: Optional[List[str]] = None,
+        fdr: float = 0.01,
+        keep_decoy: bool = False,
+        rt_unit: Optional[str] = None,
+        **kwargs,
+    ):
+        """Reader for MaxQuant-like data (in terms of modification loading and decoy translation).
+
+        See documentation of `PSMReaderBase` for more information.
+
+        See documentation of `PSMReaderBase` for the parameters.
+        """
+        super().__init__(
+            column_mapping=column_mapping,
+            modification_mapping=modification_mapping,
+            mod_seq_columns=mod_seq_columns,
+            fdr=fdr,
+            keep_decoy=keep_decoy,
+            rt_unit=rt_unit,
+            **kwargs,
+        )
+
+        self.fixed_C57 = False
+
+    def _translate_decoy(self) -> None:
+        if PsmDfCols.DECOY in self._psm_df.columns:
+            self._psm_df[PsmDfCols.DECOY] = (
+                self._psm_df[PsmDfCols.DECOY] == "-"
+            ).astype(np.int8)
+
+    def _load_modifications(self, origin_df: pd.DataFrame) -> None:
+        if origin_df[self.mod_seq_column].str.contains("[", regex=False).any():
+            if origin_df[self.mod_seq_column].str.contains("(", regex=False).any():
+                origin_df[self.mod_seq_column] = origin_df[self.mod_seq_column].apply(
+                    replace_parentheses_with_brackets
+                )
+            mod_sep = "[]"
+        else:
+            mod_sep = "()"
+
+        seqs, mods, mod_sites = zip(
+            *origin_df[self.mod_seq_column].apply(
+                parse_mod_seq,
+                mod_sep=mod_sep,
+                fixed_C57=self.fixed_C57,
+            )
+        )
+
+        self._psm_df[PsmDfCols.MODS] = mods
+        self._psm_df[PsmDfCols.MOD_SITES] = mod_sites
+        if PsmDfCols.SEQUENCE not in self._psm_df.columns:
+            self._psm_df[PsmDfCols.SEQUENCE] = seqs
+
+
+class MaxQuantReader(ModifiedSequenceReader):
+    """Reader for MaxQuant data."""
+
+    _reader_type = "maxquant"
+
     def __init__(  # noqa: PLR0913, D417 # too many arguments in function definition, missing argument descriptions
         self,
         *,
@@ -171,41 +235,6 @@ class ModifiedSequenceReader(PSMReaderBase, ABC):
             if fixed_C57 is not None
             else psm_reader_yaml[self._reader_type]["fixed_C57"]
         )
-
-    def _translate_decoy(self) -> None:
-        if PsmDfCols.DECOY in self._psm_df.columns:
-            self._psm_df[PsmDfCols.DECOY] = (
-                self._psm_df[PsmDfCols.DECOY] == "-"
-            ).astype(np.int8)
-
-    def _load_modifications(self, origin_df: pd.DataFrame) -> None:
-        if origin_df[self.mod_seq_column].str.contains("[", regex=False).any():
-            if origin_df[self.mod_seq_column].str.contains("(", regex=False).any():
-                origin_df[self.mod_seq_column] = origin_df[self.mod_seq_column].apply(
-                    replace_parentheses_with_brackets
-                )
-            mod_sep = "[]"
-        else:
-            mod_sep = "()"
-
-        seqs, mods, mod_sites = zip(
-            *origin_df[self.mod_seq_column].apply(
-                parse_mod_seq,
-                mod_sep=mod_sep,
-                fixed_C57=self.fixed_C57,
-            )
-        )
-
-        self._psm_df[PsmDfCols.MODS] = mods
-        self._psm_df[PsmDfCols.MOD_SITES] = mod_sites
-        if PsmDfCols.SEQUENCE not in self._psm_df.columns:
-            self._psm_df[PsmDfCols.SEQUENCE] = seqs
-
-
-class MaxQuantReader(ModifiedSequenceReader):
-    """Reader for MaxQuant data."""
-
-    _reader_type = "maxquant"
 
     def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
         """MaxQuant-specific preprocessing of output data."""
