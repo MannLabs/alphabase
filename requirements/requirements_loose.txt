@@ -1,6 +1,7 @@
 # Dependencies required for running the "loose" version of alphabase.
 # All dependencies that are also included in `requirements.txt` must be added also here (enforced by a test).
 # TODO clean the requirements
+anndata
 numba
 numpy
 pyyaml
