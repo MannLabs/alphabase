@@ -48,6 +48,7 @@ class PsmDfCols(metaclass=ConstantsClass):
     RAW_NAME = "raw_name"
     CHARGE = "charge"
     PROTEINS = "proteins"
+    INTENSITY = "intensity"
 
     SCAN_NUM = "scan_num"
     PRECURSOR_MZ = "precursor_mz"
@@ -57,8 +58,6 @@ class PsmDfCols(metaclass=ConstantsClass):
     UNIPROT_IDS = "uniprot_ids"
     GENES = "genes"
     QUERY_ID = "query_id"
-
-    INTENSITY = "intensity"
 
     # part of psm_reader.yaml, but not part of output
     # extra FDR columns for DIANN

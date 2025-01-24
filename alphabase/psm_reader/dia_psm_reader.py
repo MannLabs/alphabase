@@ -58,17 +58,17 @@ class DiannReader(ModifiedSequenceReader):
         filter_second_search_fdr: bool = False,
         **kwargs,
     ):
-        """Reader for MaxQuant-like data (in terms of modification loading and decoy translation).
+        """Reader for DIANN data.
 
         See documentation of `PSMReaderBase` for more information.
 
         Parameters
         ----------
         filter_first_search_fdr : bool, optional
-            If true, the FDR filtering will be also to the first search (columns _fdr2 and _fdr3)
+            If True, the FDR filtering will be done also to the first search columns (_fdr2 and _fdr3)
 
         filter_second_search_fdr : bool, optional
-            If true, the FDR filtering will be also to the second search (columns _fdr4 and _fdr5)
+            If True, the FDR filtering will be done also to the second columns (_fdr4 and _fdr5)
 
         See documentation of `PSMReaderBase` for the rest of parameters.
 
