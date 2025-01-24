@@ -1,7 +1,8 @@
 """Factory class to convert PSM DataFrames to AnnData format."""
 
 import warnings
-from typing import List, Optional, Union
+from collections import defaultdict
+from typing import Any, Dict, List, Optional, Union
 
 import anndata as ad
 import numpy as np
@@ -104,7 +105,11 @@ class AnnDataFactory:
         """
         from alphabase.psm_reader.psm_reader import psm_reader_provider
 
-        reader: PSMReaderBase = psm_reader_provider.get_reader(reader_type, **kwargs)
+        reader_config = cls._get_reader_configuration(reader_type)
+
+        reader: PSMReaderBase = psm_reader_provider.get_reader(
+            reader_type, **reader_config, **kwargs
+        )
 
         custom_column_mapping = {
             k: v
@@ -121,3 +126,15 @@ class AnnDataFactory:
 
         psm_df = reader.load(file_paths)
         return cls(psm_df)
+
+    @classmethod
+    def _get_reader_configuration(cls, reader_type: str) -> Dict[str, Dict[str, Any]]:
+        """Get reader-specific configuration for mapping PSMs to anndata."""
+        reader_kwargs = defaultdict(dict)
+
+        reader_kwargs["diann"] = {
+            "filter_first_search_fdr": False,
+            "filter_second_search_fdr": False,
+        }
+
+        return reader_kwargs[reader_type]
