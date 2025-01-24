@@ -206,7 +206,7 @@ class MaxQuantReader(ModifiedSequenceReader):
         fixed_C57: Optional[bool] = None,  # noqa: N803 TODO: make this  *,fixed_c57  (breaking)
         **kwargs,
     ):
-        """Reader for MaxQuant-like data (in terms of modification loading and decoy translation).
+        """Reader for MaxQuant data.
 
         See documentation of `PSMReaderBase` for more information.
 

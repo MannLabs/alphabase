@@ -162,6 +162,7 @@ def test_from_files_nan(mock_reader):
 
 def test_get_reader_configuration_with_valid_reader_type():
     """Test that the correct configuration is returned for a valid reader type."""
+    # when
     config = AnnDataFactory._get_reader_configuration(
         "diann"
     )  # diann is taken as an example here
@@ -174,6 +175,6 @@ def test_get_reader_configuration_with_valid_reader_type():
 
 def test_get_reader_configuration_with_unknown_reader_type():
     """Test that a reader type without special config is handled correctly."""
-
+    # when
     config = AnnDataFactory._get_reader_configuration("invalid_reader_type")
     assert config == {}
