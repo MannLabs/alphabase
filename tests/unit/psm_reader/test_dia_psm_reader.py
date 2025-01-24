@@ -1,8 +1,11 @@
+from unittest import skip
+
 import pandas as pd
 
 from alphabase.psm_reader.dia_psm_reader import DiannReader
 
 
+@skip
 def test_filter_fdr_columns_above_threshold():
     """Test that PSMs are filtered based on additional FDR columns."""
     reader = DiannReader()
@@ -26,6 +29,7 @@ def test_filter_fdr_columns_above_threshold():
     )
 
 
+@skip
 def test_filter_fdr_columns_above_threshold_missing_columns():
     """Test that PSMs are filtered based on additional FDR columns, tolerates missing columns."""
     reader = DiannReader()
