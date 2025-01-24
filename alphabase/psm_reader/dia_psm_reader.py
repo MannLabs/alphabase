@@ -97,6 +97,22 @@ class DiannReader(ModifiedSequenceReader):
         """Filter PSMs based on additional FDR columns and drop the temporary columns."""
         super()._filter_fdr()
 
+        extra_fdr_columns = []
+
+        if self._filter_first_search_fdr:
+            extra_fdr_columns += [PsmDfCols.FDR2, PsmDfCols.FDR3]
+
+        if self._filter_second_search_fdr:
+            extra_fdr_columns += [PsmDfCols.FDR4, PsmDfCols.FDR5]
+
+        mask = np.ones(len(self._psm_df), dtype=bool)
+        for col in extra_fdr_columns:
+            if col in self._psm_df.columns:
+                mask &= self._psm_df[col] <= self._fdr_threshold
+
+        if not all(mask):
+            self._psm_df = self._psm_df[mask]
+
         self._psm_df = self._psm_df.drop(
             columns=[PsmDfCols.FDR2, PsmDfCols.FDR3, PsmDfCols.FDR4, PsmDfCols.FDR5],
             errors="ignore",
