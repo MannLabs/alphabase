@@ -167,8 +167,8 @@ def test_get_reader_configuration_with_valid_reader_type():
     )  # diann is taken as an example here
 
     assert config == {
-        "filter_first_search_fdr": False,
-        "filter_second_search_fdr": False,
+        "filter_first_search_fdr": True,
+        "filter_second_search_fdr": True,
     }
 
 

@@ -133,8 +133,8 @@ class AnnDataFactory:
         reader_kwargs = defaultdict(dict)
 
         reader_kwargs["diann"] = {
-            "filter_first_search_fdr": False,
-            "filter_second_search_fdr": False,
+            "filter_first_search_fdr": True,
+            "filter_second_search_fdr": True,
         }
 
         return reader_kwargs[reader_type]
