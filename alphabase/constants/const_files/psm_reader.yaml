@@ -185,7 +185,7 @@ diann: # 1.8.1
   rt_unit: minute
   fixed_C57: False
   column_mapping:
-    'raw_name': 'Run' # File.Name?
+    'raw_name': 'Run'
     'sequence': 'Stripped.Sequence'
     'charge': 'Precursor.Charge'
     'rt': 'RT'
@@ -200,6 +200,12 @@ diann: # 1.8.1
     'score': 'CScore'
     'fdr': 'Q.Value'
     'intensity': "PG.MaxLFQ"
+    # extra columns for performing FDR cutoff, not propagated to the output
+    '_fdr2': 'Global.Q.Value'  # first search
+    '_fdr3': 'Global.PG.Q.Value'  # first search
+    '_fdr4': 'Lib.Q.Value'  # second search
+    '_fdr5': 'Lib.PG.Q.Value' # second search
+
   mod_seq_columns:
     - "Modified.Sequence"
   modification_mapping_type: 'maxquant'

@@ -1,5 +1,7 @@
 """Readers for Spectronaut's output library and reports, Swath data and DIANN data."""
 
+from typing import List, Optional
+
 import numpy as np
 import pandas as pd
 
@@ -42,12 +44,79 @@ class DiannReader(ModifiedSequenceReader):
     _add_unimod_to_mod_mapping = True
     _min_max_rt_norm = False
 
+    def __init__(  # noqa: PLR0913, D417 # too many arguments in function definition, missing argument descriptions
+        self,
+        *,
+        column_mapping: Optional[dict] = None,
+        modification_mapping: Optional[dict] = None,
+        mod_seq_columns: Optional[List[str]] = None,
+        fdr: float = 0.01,
+        keep_decoy: bool = False,
+        rt_unit: Optional[str] = None,
+        # DIANN reader-specific
+        filter_first_search_fdr: bool = False,
+        filter_second_search_fdr: bool = False,
+        **kwargs,
+    ):
+        """Reader for DIANN data.
+
+        See documentation of `PSMReaderBase` for more information.
+
+        Parameters
+        ----------
+        filter_first_search_fdr : bool, optional
+            If True, the FDR filtering will be done also to the first search columns (_fdr2 and _fdr3)
+
+        filter_second_search_fdr : bool, optional
+            If True, the FDR filtering will be done also to the second columns (_fdr4 and _fdr5)
+
+        See documentation of `PSMReaderBase` for the rest of parameters.
+
+        """
+        super().__init__(
+            column_mapping=column_mapping,
+            modification_mapping=modification_mapping,
+            mod_seq_columns=mod_seq_columns,
+            fdr=fdr,
+            keep_decoy=keep_decoy,
+            rt_unit=rt_unit,
+            **kwargs,
+        )
+
+        self._filter_first_search_fdr = filter_first_search_fdr
+        self._filter_second_search_fdr = filter_second_search_fdr
+
     def _post_process(self, origin_df: pd.DataFrame) -> None:
         self._psm_df.rename(
             columns={PsmDfCols.SPEC_IDX: PsmDfCols.DIANN_SPEC_INDEX}, inplace=True
         )
 
         super()._post_process(origin_df)
+
+    def _filter_fdr(self) -> None:
+        """Filter PSMs based on additional FDR columns and drop the temporary columns."""
+        super()._filter_fdr()
+
+        extra_fdr_columns = []
+
+        if self._filter_first_search_fdr:
+            extra_fdr_columns += [PsmDfCols.FDR2, PsmDfCols.FDR3]
+
+        if self._filter_second_search_fdr:
+            extra_fdr_columns += [PsmDfCols.FDR4, PsmDfCols.FDR5]
+
+        mask = np.ones(len(self._psm_df), dtype=bool)
+        for col in extra_fdr_columns:
+            if col in self._psm_df.columns:
+                mask &= self._psm_df[col] <= self._fdr_threshold
+
+        if not all(mask):
+            self._psm_df = self._psm_df[mask]
+
+        self._psm_df = self._psm_df.drop(
+            columns=[PsmDfCols.FDR2, PsmDfCols.FDR3, PsmDfCols.FDR4, PsmDfCols.FDR5],
+            errors="ignore",
+        )
 
 
 class SpectronautReportReader(ModifiedSequenceReader):

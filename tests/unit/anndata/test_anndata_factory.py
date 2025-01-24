@@ -105,10 +105,14 @@ def test_create_anndata_with_empty_dataframe():
 
 
 @patch("alphabase.psm_reader.psm_reader.psm_reader_provider.get_reader")
-def test_from_files(mock_reader):
+@patch("alphabase.anndata.anndata_factory.AnnDataFactory._get_reader_configuration")
+def test_from_files(mock_get_reader_configuration, mock_reader):
     mock_reader.return_value.load.return_value = _get_test_psm_df()
 
-    factory = AnnDataFactory.from_files(["file1", "file2"], reader_type="maxquant")
+    mock_get_reader_configuration.return_value = {"extra_key": "extra_value"}
+    factory = AnnDataFactory.from_files(
+        ["file1", "file2"], reader_type="some_reader_type"
+    )
 
     # when
     adata = factory.create_anndata()
@@ -119,3 +123,58 @@ def test_from_files(mock_reader):
     assert np.array_equal(
         adata.X, np.array([[100, 200], [300, np.nan]]), equal_nan=True
     )
+
+    mock_reader.assert_called_once_with("some_reader_type", extra_key="extra_value")
+
+
+@patch("alphabase.psm_reader.psm_reader.psm_reader_provider.get_reader")
+def test_from_files_nan(mock_reader):
+    df = pd.concat(
+        [
+            pd.DataFrame(
+                {
+                    PsmDfCols.RAW_NAME: ["raw2"],
+                    PsmDfCols.PROTEINS: ["protein2"],
+                    PsmDfCols.INTENSITY: [np.nan],
+                }
+            ),
+            _get_test_psm_df(),
+        ]
+    )
+    mock_reader.return_value.load.return_value = df
+
+    factory = AnnDataFactory.from_files(
+        ["file1", "file2"], reader_type="some_reader_type"
+    )
+
+    # when
+    adata = factory.create_anndata()
+
+    assert adata.shape == (2, 2)
+    assert adata.obs_names.tolist() == ["raw1", "raw2"]
+    assert adata.var_names.tolist() == ["protein1", "protein2"]
+    assert np.array_equal(
+        adata.X, np.array([[100, 200], [300, np.nan]]), equal_nan=True
+    )
+
+    mock_reader.assert_called_once_with("some_reader_type")
+
+
+def test_get_reader_configuration_with_valid_reader_type():
+    """Test that the correct configuration is returned for a valid reader type."""
+    # when
+    config = AnnDataFactory._get_reader_configuration(
+        "diann"
+    )  # diann is taken as an example here
+
+    assert config == {
+        "filter_first_search_fdr": True,
+        "filter_second_search_fdr": True,
+    }
+
+
+def test_get_reader_configuration_with_unknown_reader_type():
+    """Test that a reader type without special config is handled correctly."""
+    # when
+    config = AnnDataFactory._get_reader_configuration("invalid_reader_type")
+    assert config == {}
