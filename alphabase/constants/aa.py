@@ -134,9 +134,6 @@ def calc_AA_masses_for_same_len_seqs(sequence_array: np.ndarray) -> np.ndarray:
     ValueError
         If sequences are not with the same length.
     """
-    if not all(len(sequence_array[0]) == len(seq) for seq in sequence_array):
-        raise ValueError("Sequences must have same length.")
-
     return AA_ASCII_MASS[
         # we use np.int32 here because unicode str
         # uses 4 bytes for a char.
