@@ -143,10 +143,6 @@ def calc_modification_mass(
     for site, mod in zip(mod_sites, mod_names):
         if site == 0 or site == -1:
             masses[site] += MOD_MASS[mod]
-        elif site < -1 or site > nAA:
-            raise ValueError(
-                f"Invalid modification site {site} for peptide length {nAA}"
-            )
         else:
             masses[site - 1] += MOD_MASS[mod]
     return masses
