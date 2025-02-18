@@ -1,4 +1,4 @@
 # Dependencies helping for development
 jupyter
-bumpversion
+bump-my-version
 ipykernel

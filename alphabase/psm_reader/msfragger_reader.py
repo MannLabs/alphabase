@@ -1,10 +1,14 @@
-import logging
+"""MSFragger reader."""
+
+import warnings
+from typing import List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
+import logging
 
 try:
-    import pyteomics.pepxml as pepxml
+    from pyteomics import pepxml
 
     HAS_PYTEOMICS = True
 except ModuleNotFoundError:
@@ -24,15 +28,16 @@ from alphabase.psm_reader.psm_reader import (
 )
 
 
-def _is_fragger_decoy(proteins):
+def _is_fragger_decoy(proteins: List[str]) -> bool:
     return all(prot.lower().startswith("rev_") for prot in proteins)
 
 
-mass_mapped_mods = psm_reader_yaml["msfragger_pepxml"]["mass_mapped_mods"]
-mod_mass_tol = psm_reader_yaml["msfragger_pepxml"]["mod_mass_tol"]
-
-
-def _get_mods_from_masses(sequence, msf_aa_mods):
+def _get_mods_from_masses(  # noqa: PLR0912, C901 too many branches, too complex TODO: refactor
+    sequence: str,
+    msf_aa_mods: List[str],
+    mass_mapped_mods: List[str],
+    mod_mass_tol: float,
+) -> Tuple[str, str, str, str]:
     mods = []
     mod_sites = []
     aa_mass_diffs = []
@@ -87,33 +92,50 @@ def _get_mods_from_masses(sequence, msf_aa_mods):
     )
 
 
-class MSFragger_PSM_TSV_Reader(PSMReaderBase):
+class MSFragger_PSM_TSV_Reader(PSMReaderBase):  # noqa: N801 name should use CapWords convention TODO: refactor
+    """Reader for MSFragger's psm.tsv file."""
+
     def __init__(
         self,
-        *,
-        column_mapping: dict = None,
-        modification_mapping: dict = None,
-        fdr=0.01,
-        keep_decoy=False,
-        rt_unit="second",
         **kwargs,
     ):
+        """Constructor."""
         raise NotImplementedError("MSFragger_PSM_TSV_Reader for psm.tsv")
 
 
-class MSFraggerPepXML(PSMReaderBase):
-    def __init__(
+class MSFraggerPepXMLReader(PSMReaderBase):
+    """Reader for MSFragger's pep.xml file."""
+
+    _reader_type = "msfragger_pepxml"
+
+    def __init__(  # noqa: PLR0913, D417 # too many arguments in function definition, missing argument descriptions
         self,
         *,
-        column_mapping: dict = None,
-        modification_mapping: dict = None,
-        fdr=0.001,  # refers to E-value in the PepXML
-        keep_decoy=False,
-        rt_unit="second",
-        keep_unknown_aa_mass_diffs=False,
+        column_mapping: Optional[dict] = None,
+        modification_mapping: Optional[dict] = None,
+        # mod_seq_columns: Optional[List[str]] = None,# TODO: not needed here?
+        fdr: float = 0.001,  # refers to E-value in the PepXML
+        keep_decoy: bool = False,
+        rt_unit: Optional[str] = None,
+        # MSFragger reader-specific:
+        keep_unknown_aa_mass_diffs: bool = False,
         **kwargs,
     ):
-        """MSFragger is not fully supported as we can only access the pepxml file."""
+        """Initialize the MSFraggerreader.
+
+        See documentation of `PSMReaderBase` for more information.
+
+        MSFragger is not fully supported as we can only access the pepxml file.
+
+        Parameters
+        ----------
+            keep_unknown_aa_mass_diffs:
+                whether to keep PSMs with unknown amino acid mass differences, default: False
+
+
+        See documentation of `PSMReaderBase` for the rest of parameters.
+
+        """
         super().__init__(
             column_mapping=column_mapping,
             modification_mapping=modification_mapping,
@@ -122,32 +144,34 @@ class MSFraggerPepXML(PSMReaderBase):
             rt_unit=rt_unit,
             **kwargs,
         )
-        self.keep_unknown_aa_mass_diffs = keep_unknown_aa_mass_diffs
-
         if not HAS_PYTEOMICS:
             raise ValueError(
                 "pyteomics is not installed. Please install AlphaBase with the 'mzml' extra to read pepxml files."
             )
 
-    def _init_column_mapping(self):
-        self.column_mapping = psm_reader_yaml["msfragger_pepxml"]["column_mapping"]
+        self._keep_unknown_aa_mass_diffs = keep_unknown_aa_mass_diffs
+        # TODO: should those be set via API, too?
+        self._mass_mapped_mods = psm_reader_yaml["msfragger_pepxml"]["mass_mapped_mods"]
+        self._mod_mass_tol = psm_reader_yaml["msfragger_pepxml"]["mod_mass_tol"]
 
-    def _translate_modifications(self):
+    def _translate_modifications(self) -> None:
         pass
 
-    def _load_file(self, filename):
-        msf_df = pepxml.DataFrame(filename)
-        msf_df.fillna("", inplace=True)
-        if "ion_mobility" in msf_df.columns:
-            msf_df["ion_mobility"] = msf_df.ion_mobility.astype(float)
-        msf_df[PsmDfCols.RAW_NAME] = (
-            msf_df["spectrum"].str.split(".").apply(lambda x: x[0])
-        )
-        msf_df["to_remove"] = 0  # TODO revisit
-        self.column_mapping[PsmDfCols.TO_REMOVE] = "to_remove"
-        return msf_df
+    def _load_file(self, filename: str) -> pd.DataFrame:
+        """Load a MsFragger output file to a DataFrame."""
+        return pepxml.DataFrame(filename)
 
-    def _translate_decoy(self, origin_df=None):
+    def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
+        """MsFragger-specific preprocessing of output data."""
+        df.fillna("", inplace=True)
+        if "ion_mobility" in df.columns:
+            df["ion_mobility"] = df["ion_mobility"].astype(float)
+        df[PsmDfCols.RAW_NAME] = df["spectrum"].str.split(".").apply(lambda x: x[0])
+        df["to_remove"] = 0  # TODO: revisit
+        self.column_mapping[PsmDfCols.TO_REMOVE] = "to_remove"
+        return df
+
+    def _translate_decoy(self) -> None:
         self._psm_df[PsmDfCols.DECOY] = (
             self._psm_df[PsmDfCols.PROTEINS].apply(_is_fragger_decoy).astype(np.int8)
         )
@@ -158,30 +182,28 @@ class MSFraggerPepXML(PSMReaderBase):
         if not self._keep_decoy:
             self._psm_df[PsmDfCols.TO_REMOVE] += self._psm_df[PsmDfCols.DECOY] > 0
 
-    def _translate_score(self, origin_df=None):
-        # evalue score
+    def _translate_score(self) -> None:
+        """Translate MSFragger evalue to AlphaBase score: the larger the better."""
         self._psm_df[PsmDfCols.SCORE] = -np.log(self._psm_df[PsmDfCols.SCORE] + 1e-100)
 
-    def _load_modifications(self, msf_df):
-        if len(msf_df) == 0:
-            self._psm_df[PsmDfCols.MODS] = ""
-            self._psm_df[PsmDfCols.MOD_SITES] = ""
-            self._psm_df[PsmDfCols.AA_MASS_DIFFS] = ""
-            self._psm_df[PsmDfCols.AA_MASS_DIFF_SITES] = ""
-            return
-
+    def _load_modifications(self, origin_df: pd.DataFrame) -> None:
         (
             self._psm_df[PsmDfCols.MODS],
             self._psm_df[PsmDfCols.MOD_SITES],
             self._psm_df[PsmDfCols.AA_MASS_DIFFS],
             self._psm_df[PsmDfCols.AA_MASS_DIFF_SITES],
         ) = zip(
-            *msf_df[["peptide", "modifications"]].apply(
-                lambda x: _get_mods_from_masses(*x), axis=1
+            *origin_df[["peptide", "modifications"]].apply(
+                lambda x: _get_mods_from_masses(
+                    *x,
+                    mass_mapped_mods=self._mass_mapped_mods,
+                    mod_mass_tol=self._mod_mass_tol,
+                ),
+                axis=1,
             )
         )
 
-        if not self.keep_unknown_aa_mass_diffs:
+        if not self._keep_unknown_aa_mass_diffs:
             self._psm_df[PsmDfCols.TO_REMOVE] += (
                 self._psm_df[PsmDfCols.AA_MASS_DIFFS] != ""
             )
@@ -190,17 +212,31 @@ class MSFraggerPepXML(PSMReaderBase):
                 inplace=True,
             )
 
-    def _post_process(self, origin_df: pd.DataFrame):
-        super()._post_process(origin_df)
+    def _post_process(self, origin_df: pd.DataFrame) -> None:
         self._psm_df = (
             self._psm_df.query(f"{PsmDfCols.TO_REMOVE}==0")
             .drop(columns=PsmDfCols.TO_REMOVE)
             .reset_index(drop=True)
         )
+        super()._post_process(origin_df)
 
 
-def register_readers():
+class MSFraggerPepXML(MSFraggerPepXMLReader):
+    """Deprecated."""
+
+    def __init__(self, *args, **kwargs):
+        """Deprecated."""
+        warnings.warn(
+            "MSFraggerPepXML is deprecated and will ne removed in alphabase>1.5.0.",
+            "Please use the equivalent MSFraggerPepXMLReader instead.",
+            FutureWarning,
+        )
+        super().__init__(*args, **kwargs)
+
+
+def register_readers() -> None:
+    """Register MSFragger readers."""
     psm_reader_provider.register_reader("msfragger_psm_tsv", MSFragger_PSM_TSV_Reader)
     psm_reader_provider.register_reader("msfragger", MSFragger_PSM_TSV_Reader)
     if HAS_PYTEOMICS:
-        psm_reader_provider.register_reader("msfragger_pepxml", MSFraggerPepXML)
+        psm_reader_provider.register_reader("msfragger_pepxml", MSFraggerPepXMLReader)

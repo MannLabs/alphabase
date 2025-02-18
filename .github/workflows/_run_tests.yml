@@ -14,7 +14,7 @@ on:
         required: true
         type: string
 jobs:
-  pre-commit:
+  run-tests:
     runs-on: ${{ inputs.os }}
     steps:
     - uses: actions/checkout@v3
@@ -35,7 +35,7 @@ jobs:
       shell: bash -le {0}
       run: |
         conda activate alphabase
-        pip install pytest nbmake==1.5.3
+        pip install -r requirements/requirements_tests.txt
         conda deactivate
     - name: Run tests
       shell: bash -le {0}
