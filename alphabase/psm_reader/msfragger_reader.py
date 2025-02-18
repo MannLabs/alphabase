@@ -1,6 +1,17 @@
+import logging
+
 import numpy as np
 import pandas as pd
-import pyteomics.pepxml as pepxml
+
+try:
+    import pyteomics.pepxml as pepxml
+
+    HAS_PYTEOMICS = True
+except ModuleNotFoundError:
+    logging.warning(
+        "pyteomics not installed. If you want to read mzml files, install with the 'mzml' extra."
+    )
+    HAS_PYTEOMICS = False
 
 from alphabase.constants.aa import AA_ASCII_MASS
 from alphabase.constants.atom import MASS_H, MASS_O
@@ -113,6 +124,11 @@ class MSFraggerPepXML(PSMReaderBase):
         )
         self.keep_unknown_aa_mass_diffs = keep_unknown_aa_mass_diffs
 
+        if not HAS_PYTEOMICS:
+            raise ValueError(
+                "pyteomics is not installed. Please install AlphaBase with the 'mzml' extra to read pepxml files."
+            )
+
     def _init_column_mapping(self):
         self.column_mapping = psm_reader_yaml["msfragger_pepxml"]["column_mapping"]
 
@@ -186,4 +202,5 @@ class MSFraggerPepXML(PSMReaderBase):
 def register_readers():
     psm_reader_provider.register_reader("msfragger_psm_tsv", MSFragger_PSM_TSV_Reader)
     psm_reader_provider.register_reader("msfragger", MSFragger_PSM_TSV_Reader)
-    psm_reader_provider.register_reader("msfragger_pepxml", MSFraggerPepXML)
+    if HAS_PYTEOMICS:
+        psm_reader_provider.register_reader("msfragger_pepxml", MSFraggerPepXML)
