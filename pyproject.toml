@@ -60,9 +60,6 @@ optional-dependencies.development = { file = [
 
 version = {attr = "alphabase.__version__"}
 
-[project.scripts]
-alphabase = "alphabase.cli:run"
-
 
 [tool.ruff.lint]
 select =  [

@@ -102,11 +102,11 @@ AlphaBase like this. Also note the double quotes `"`.
 The "mzml(-stable)" extra can be omitted if alphabase does not need to handle mzml files.
 
 For those who are really adventurous, it is also possible to directly
-install any branch (e.g. `@development`) with any extras
+install any branch (e.g. `@main`) with any extras
 (e.g. `#egg=alphabase[stable,development]`) from GitHub with e.g.
 
 ``` bash
-pip install "git+https://github.com/MannLabs/alphabase.git@development#egg=alphabase[stable,development]"
+pip install "git+https://github.com/MannLabs/alphabase.git@main#egg=alphabase[stable,development]"
 ```
 
 ### Developer
