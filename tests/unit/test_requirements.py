@@ -4,6 +4,7 @@ import logging
 import os
 import re
 
+import pytest
 from packaging.requirements import Requirement
 
 # special comment to tolerate
@@ -69,7 +70,8 @@ def _get_requirements_path():
     return requirements_path
 
 
-def test_requirements():
+@pytest.mark.parametrize("extra_name", ["", "_mzml"])
+def test_requirements(extra_name):
     """Test the strict and loose requirements.
 
     The strict requirements must have one fixed version.
@@ -79,8 +81,8 @@ def test_requirements():
     stated by the "test:tolerate_version" comment.
     """
 
-    file_name_strict = "requirements.txt"
-    file_name_loose = "requirements_loose.txt"
+    file_name_strict = f"requirements{extra_name}.txt"
+    file_name_loose = f"requirements{extra_name}_loose.txt"
     requirements_path = _get_requirements_path()
     file_path_strict = os.path.join(requirements_path, file_name_strict)
     file_path_loose = os.path.join(requirements_path, file_name_loose)

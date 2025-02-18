@@ -1,0 +1,4 @@
+# Dependencies required for running the "loose" version of alphabase.
+# All dependencies that are also included in `requirements_mzml.txt` must be added also here (enforced by a test).
+pyteomics
+lxml

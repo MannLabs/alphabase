@@ -1,4 +1,4 @@
-# Dependencies required for running the "stable" version of alphaDIA.
+# Dependencies required for running the "stable" version of alphabase.
 # Only usage of fixed versions is allowed, and all dependencies listed here must also be
 # included in `requirements_loose.txt` (enforced by a test).
 numba==0.60.0
