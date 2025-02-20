@@ -1,21 +1,11 @@
 """MSFragger reader."""
 
-import logging
 import warnings
 from typing import List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
-
-try:
-    from pyteomics import pepxml
-
-    HAS_PYTEOMICS = True
-except ModuleNotFoundError:
-    logging.warning(
-        "pyteomics not installed. If you want to read mzml files, install with the 'mzml' extra."
-    )
-    HAS_PYTEOMICS = False
+from pyteomics import pepxml
 
 from alphabase.constants.aa import AA_ASCII_MASS
 from alphabase.constants.atom import MASS_H, MASS_O
@@ -144,11 +134,6 @@ class MSFraggerPepXMLReader(PSMReaderBase):
             rt_unit=rt_unit,
             **kwargs,
         )
-        if not HAS_PYTEOMICS:
-            raise ValueError(
-                "pyteomics is not installed. Please install AlphaBase with the 'mzml' extra to read pepxml files."
-            )
-
         self._keep_unknown_aa_mass_diffs = keep_unknown_aa_mass_diffs
         # TODO: should those be set via API, too?
         self._mass_mapped_mods = psm_reader_yaml["msfragger_pepxml"]["mass_mapped_mods"]
@@ -238,5 +223,4 @@ def register_readers() -> None:
     """Register MSFragger readers."""
     psm_reader_provider.register_reader("msfragger_psm_tsv", MSFragger_PSM_TSV_Reader)
     psm_reader_provider.register_reader("msfragger", MSFragger_PSM_TSV_Reader)
-    if HAS_PYTEOMICS:
-        psm_reader_provider.register_reader("msfragger_pepxml", MSFraggerPepXMLReader)
+    psm_reader_provider.register_reader("msfragger_pepxml", MSFraggerPepXMLReader)

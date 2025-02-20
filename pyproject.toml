@@ -49,8 +49,6 @@ find = {}
 # https://stackoverflow.com/a/73600610
 dependencies = {file = ["requirements/requirements_loose.txt"]}
 optional-dependencies.stable = { file = ["requirements/requirements.txt" ] }
-optional-dependencies.mzml = { file = ["requirements/requirements_mzml_loose.txt" ] }
-optional-dependencies.mzml-stable = { file = ["requirements/requirements_mzml.txt" ] }
 optional-dependencies.tests = { file = ["requirements/requirements_tests.txt" ] }
 optional-dependencies.development = { file = [
     "requirements/requirements_development.txt",

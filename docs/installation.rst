@@ -14,15 +14,13 @@ Users can install AlphaBase as a Python package in an existing Python environmen
     ## Optional: create a python environment
     # conda create -n alphabase python=3.9 -y && conda activate alphabase
 
-    pip install "alphabase[mzml]"
+    pip install alphabase
 
 To enforce stringent dependencies (recommended), you can install the stable version of AlphaBase
 
 ::
 
-    pip install "alphabase[stable,mzml-stable]"
-
-The "mzml(-stable)" extra can be omitted if alphabase does not need to handle mzml files.
+    pip install "alphabase[stable]"
 
 Development version
 -------------------
@@ -38,4 +36,4 @@ For development, clone the latest version from GitHub to an appropriate location
     cd alphabase
 
     # Install editable development version
-    pip install -e ".[mzml,development]"
+    pip install -e ".[development]"
