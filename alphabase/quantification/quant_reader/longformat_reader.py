@@ -1,15 +1,17 @@
 import glob
-import logging
 import os
 import os.path
 import shutil
+import warnings
 
 try:
     import dask.dataframe as dd
 
     HAS_DASK = True
 except ModuleNotFoundError:
-    logging.warning("Dask not installed. Falling back to non-dask base processing.")
+    warnings.warn(
+        "Dependency 'dask' not installed. If you want to use its functionality, install alphabase with the 'dask' extra. Falling back to non-dask based processing."
+    )
     HAS_DASK = False
 
 import pandas as pd
