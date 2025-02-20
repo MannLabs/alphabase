@@ -9,8 +9,6 @@ xxhash
 biopython
 tqdm
 regex
-dask
-dask_expr
 pyahocorasick
 pyteomics
 lxml
