@@ -22,7 +22,6 @@ To enforce stringent dependencies (recommended), you can install the stable vers
 
     pip install "alphabase[stable]"
 
-
 Development version
 -------------------
 For development, clone the latest version from GitHub to an appropriate location on your personal device and install an editable version:
