@@ -1,5 +1,0 @@
-# Dependencies required for running the "mzml" version of alphabase.
-# Only usage of fixed versions is allowed, and all dependencies listed here must also be
-# included in `requirements_loose.txt` (enforced by a test).
-pyteomics==4.7.5
-lxml==5.3.0  # required by pyteomics
