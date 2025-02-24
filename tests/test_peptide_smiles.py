@@ -134,3 +134,79 @@ def test_peptide_to_mol_multiple_modifications(encoder):
     )
     actual_mass = Descriptors.ExactMolWt(mol) - MASS_H2O
     assert np.isclose(actual_mass, expected_mass, atol=1e-4)
+
+
+def test_peptide_to_smiles_per_aa_is_complete(encoder):
+    # Given a peptide sequence
+    sequence = "QMNPSIR"
+    # When converting the peptide to SMILES per amino acid
+    smiles = encoder.peptide_to_smiles_per_amino_acid(sequence)
+    # Then the number of SMILES should match the number of amino acids
+    assert isinstance(smiles, list)
+    assert len(smiles) == len(sequence)
+
+
+def test_peptide_to_smiles_per_aa_no_modifications(encoder):
+    # Given a peptide sequence
+    sequence = "QMNPHIR"
+
+    formulas = [get_mod_seq_formula(aa, "") for aa in sequence]
+    expected_masses = [
+        np.sum([CHEM_MONO_MASS[elem] * n for elem, n in formula])
+        for formula in formulas
+    ]
+
+    # When converting the peptide to SMILES per amino acid
+    smiles = encoder.peptide_to_smiles_per_amino_acid(sequence)
+    generated_masses = [
+        Descriptors.ExactMolWt(Chem.MolFromSmiles(s, True)) - MASS_H2O for s in smiles
+    ]
+
+    # Then the masses should match the expected masses
+    assert np.allclose(generated_masses, expected_masses, atol=1e-4)
+
+
+def test_peptide_to_smiles_per_aa_multiple_modifications(encoder):
+    # Given a peptide sequence and multiple modifications
+    sequence = "QMNPSIR"
+    mods = "Acetyl@Any_N-term;Oxidation@M;Phospho@S"
+    mod_sites = "0;2;5"
+    mods_per_aa = ["Acetyl@Any_N-term", "Oxidation@M", "", "", "Phospho@S", "", ""]
+
+    formulas = [get_mod_seq_formula(aa, m) for aa, m in zip(sequence, mods_per_aa)]
+    expected_masses = [
+        np.sum([CHEM_MONO_MASS[elem] * n for elem, n in formula])
+        for formula in formulas
+    ]
+
+    # When converting the peptide to SMILES per amino acid
+    smiles = encoder.peptide_to_smiles_per_amino_acid(sequence, mods, mod_sites)
+    generated_masses = [
+        Descriptors.ExactMolWt(Chem.MolFromSmiles(s, True)) - MASS_H2O for s in smiles
+    ]
+
+    # Then the masses should match the expected masses
+    assert np.allclose(generated_masses, expected_masses, atol=1e-4)
+
+
+def test_peptide_to_smiles_per_aa_c_terminal_modification(encoder):
+    # Given a peptide sequence and a C-terminal modification
+    sequence = "QMNPHIR"
+    mods = "Amidated@Any_C-term"
+    mod_sites = "-1"
+    mods_per_aa = ["", "", "", "", "", "", "Amidated@Any_C-term"]
+
+    formulas = [get_mod_seq_formula(aa, m) for aa, m in zip(sequence, mods_per_aa)]
+    expected_masses = [
+        np.sum([CHEM_MONO_MASS[elem] * n for elem, n in formula])
+        for formula in formulas
+    ]
+
+    # When converting the peptide to SMILES per amino acid
+    smiles = encoder.peptide_to_smiles_per_amino_acid(sequence, mods, mod_sites)
+    generated_masses = [
+        Descriptors.ExactMolWt(Chem.MolFromSmiles(s, True)) - MASS_H2O for s in smiles
+    ]
+
+    # Then the masses should match the expected masses
+    assert np.allclose(generated_masses, expected_masses, atol=1e-4)
