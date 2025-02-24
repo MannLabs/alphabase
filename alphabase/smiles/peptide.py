@@ -13,7 +13,7 @@ class PeptideSmilesEncoder:
     def __init__(self):
         self.amino_acid_modifier = AminoAcidModifier()
 
-    def peptide_to_per_aa_smiles(
+    def peptide_to_smiles_per_amino_acid(
         self,
         sequence: str,
         mods: Optional[str] = "",
@@ -33,7 +33,7 @@ class PeptideSmilesEncoder:
 
         Returns
         -------
-        str
+        list
             The list of SMILES strings for each amino acid in the peptide.
         """
         if mods and mod_site:
@@ -41,30 +41,24 @@ class PeptideSmilesEncoder:
         else:
             mods = {}
 
-        # List to hold the amino acid molecules
-        amino_acid_mols = []
+        smiles_list = []
 
         n_term_placeholder_mol = Chem.MolFromSmiles(
-            self.peptide_encoder.amino_acid_modifier.N_TERM_PLACEHOLDER, sanitize=False
+            self.amino_acid_modifier.N_TERM_PLACEHOLDER, sanitize=False
         )
         c_term_placeholder_mol = Chem.MolFromSmiles(
-            self.peptide_encoder.amino_acid_modifier.C_TERM_PLACEHOLDER, sanitize=False
+            self.amino_acid_modifier.C_TERM_PLACEHOLDER, sanitize=False
         )
-        n_term_mod = None
-        c_term_mod = None
 
-        if 0 in mods:
-            n_term_mod = mods[0]
-        if -1 in mods:
-            c_term_mod = mods[-1]
+        n_term_mod = mods.get(0, None)
+        c_term_mod = mods.get(-1, None)
+
         # Process each amino acid in the sequence
         for idx, aa in enumerate(sequence):
             if idx + 1 in mods:
-                aa_smiles = self.peptide_encoder.amino_acid_modifier.ptm_dict.get(
-                    mods[idx + 1], None
-                )
+                aa_smiles = self.amino_acid_modifier.ptm_dict.get(mods[idx + 1], None)
             else:
-                aa_smiles = self.peptide_encoder.amino_acid_modifier.aa_smiles.get(aa)
+                aa_smiles = self.amino_acid_modifier.aa_smiles.get(aa)
             if not aa_smiles:
                 raise ValueError(
                     f"Unknown amino acid code: {aa} or modification: {mods.get(idx + 1, 'no mod')} (SMILES for it might be missing)"
@@ -75,41 +69,37 @@ class PeptideSmilesEncoder:
                 raise ValueError(
                     f"Invalid SMILES for amino acid {aa}, mod {mods.get(idx + 1, 'no mod')}: {aa_smiles}"
                 )
-            amino_acid_mols.append(aa_mol)
-
-        # Modified molecules
-        modified_mols = []
-        n_mol = amino_acid_mols[0]
-        n_mol = self.peptide_encoder.amino_acid_modifier._apply_n_terminal_modification(
-            n_mol,
-            n_term_placeholder_mol=n_term_placeholder_mol,
-            n_term_mod=n_term_mod,
-        )
-        Chem.SanitizeMol(n_mol)
-        modified_mols.append(n_mol)
-        for idx in range(1, len(amino_acid_mols) - 1):
-            mol = (
-                self.peptide_encoder.amino_acid_modifier._apply_n_terminal_modification(
-                    mol=amino_acid_mols[idx],
+            # Apply N-terminal modification if this is the first amino acid
+            if idx == 0:
+                aa_mol = self.amino_acid_modifier._apply_n_terminal_modification(
+                    aa_mol,
+                    n_term_placeholder_mol=n_term_placeholder_mol,
+                    n_term_mod=n_term_mod,
+                )
+            else:
+                aa_mol = self.amino_acid_modifier._apply_n_terminal_modification(
+                    aa_mol,
                     n_term_placeholder_mol=n_term_placeholder_mol,
                     n_term_mod=None,
                 )
-            )
-            Chem.SanitizeMol(mol)
-            modified_mols.append(mol)
 
-        c_mol = amino_acid_mols[-1]
-        c_mol = self.peptide_encoder.amino_acid_modifier._apply_c_terminal_modification(
-            c_mol,
-            c_term_placeholder_mol=c_term_placeholder_mol,
-            c_term_mod=c_term_mod,
-        )
-        Chem.SanitizeMol(c_mol)
-        modified_mols.append(c_mol)
+            # Apply C-terminal modification if this is the last amino acid
+            if idx == len(sequence) - 1:
+                aa_mol = self.amino_acid_modifier._apply_c_terminal_modification(
+                    aa_mol,
+                    c_term_placeholder_mol=c_term_placeholder_mol,
+                    c_term_mod=c_term_mod,
+                )
+            else:
+                aa_mol = self.amino_acid_modifier._apply_c_terminal_modification(
+                    aa_mol,
+                    c_term_placeholder_mol=c_term_placeholder_mol,
+                    c_term_mod=None,
+                )
 
-        # to smiles
-        smiles = [Chem.MolToSmiles(mol) for mol in modified_mols]
-        return smiles
+            # Convert back to SMILES and store
+            smiles_list.append(Chem.MolToSmiles(aa_mol))
+        return smiles_list
 
     def peptide_to_smiles(
         self,
