@@ -76,8 +76,7 @@ def _read_parquet_file(input_file, usecols=None, chunksize=None):
         return _read_parque_file_chunkwise(
             input_file, usecols=usecols, chunksize=chunksize
         )
-    else:
-        return pd.read_parquet(input_file, columns=usecols)
+    return pd.read_parquet(input_file, columns=usecols)
 
 
 def _read_parque_file_chunkwise(input_file, usecols=None, chunksize=None):
@@ -90,5 +89,4 @@ def read_columns_from_file(file, sep="\t"):
     if file.endswith(".parquet"):
         parquet_file = pyarrow.parquet.ParquetFile(file)
         return parquet_file.schema.names
-    else:
-        return pd.read_csv(file, sep=sep, nrows=1).columns.tolist()
+    return pd.read_csv(file, sep=sep, nrows=1).columns.tolist()
