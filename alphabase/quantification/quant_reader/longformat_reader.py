@@ -225,7 +225,9 @@ def process_with_dask(
         if use_alphaquant_format:
             input_df = quantreader_utils.read_file_with_pandas(file, sep="\t")
         else:
-            input_df = quantreader_utils.read_file_with_pandas(file, sep="\t").set_index(hierarchy_columns)
+            input_df = quantreader_utils.read_file_with_pandas(
+                file, sep="\t"
+            ).set_index(hierarchy_columns)
         if len(input_df.index) < 2:
             continue
         input_reshaped = reshape_input_df(input_df, config_dict_for_type)

@@ -1,5 +1,3 @@
-import pandas as pd
-
 from . import quantreader_utils, table_reformatter
 
 

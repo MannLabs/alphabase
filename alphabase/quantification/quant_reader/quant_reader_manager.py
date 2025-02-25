@@ -1,6 +1,9 @@
-import pandas as pd
-
-from . import config_dict_loader, longformat_reader, wideformat_reader, quantreader_utils
+from . import (
+    config_dict_loader,
+    longformat_reader,
+    quantreader_utils,
+    wideformat_reader,
+)
 
 
 def import_data(
