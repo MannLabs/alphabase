@@ -44,9 +44,7 @@ def filter_input(filter_dict, input):
     return input
 
 
-def read_file_with_pandas(
-    input_file, decimal=".", usecols=None, chunksize=None, sep=None
-):
+def read_file(input_file, decimal=".", usecols=None, chunksize=None, sep=None):
     input_file = str(input_file)
     if ".parquet" in input_file:
         return _read_parquet_file(input_file, usecols=usecols, chunksize=chunksize)

@@ -31,7 +31,7 @@ def import_data(
             use_alphaquant_format=use_alphaquant_format,
         )
 
-    input_reshaped = quantreader_utils.read_file_with_pandas(
+    input_reshaped = quantreader_utils.read_file(
         file_to_read, sep="\t", usecols=samples_subset
     )
     input_reshaped = input_reshaped.drop_duplicates(subset="quant_id")
