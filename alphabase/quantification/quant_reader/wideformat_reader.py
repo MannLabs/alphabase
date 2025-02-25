@@ -4,7 +4,7 @@ from . import quantreader_utils, table_reformatter
 
 
 def reformat_and_write_wideformat_table(peptides_tsv, outfile_name, config_dict):
-    input_df = pd.read_csv(peptides_tsv, sep="\t", encoding="latin1")
+    input_df = quantreader_utils.read_file_with_pandas(peptides_tsv, sep="\t")
     filter_dict = config_dict.get("filters")
 
     input_df = quantreader_utils.filter_input(filter_dict, input_df)

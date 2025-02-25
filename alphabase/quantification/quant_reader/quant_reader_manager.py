@@ -1,6 +1,6 @@
 import pandas as pd
 
-from . import config_dict_loader, longformat_reader, wideformat_reader
+from . import config_dict_loader, longformat_reader, wideformat_reader, quantreader_utils
 
 
 def import_data(
@@ -28,8 +28,8 @@ def import_data(
             use_alphaquant_format=use_alphaquant_format,
         )
 
-    input_reshaped = pd.read_csv(
-        file_to_read, sep="\t", encoding="latin1", usecols=samples_subset
+    input_reshaped = quantreader_utils.read_file_with_pandas(
+        file_to_read, sep="\t", usecols=samples_subset
     )
     input_reshaped = input_reshaped.drop_duplicates(subset="quant_id")
     return input_reshaped

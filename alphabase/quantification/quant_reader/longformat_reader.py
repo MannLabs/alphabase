@@ -78,12 +78,11 @@ def process_out_of_memory(
     relevant_cols = config_dict_loader.get_relevant_columns_config_dict(
         config_dict_for_type
     )
-    input_df_it = pd.read_csv(
+    input_df_it = quantreader_utils.read_file_with_pandas(
         input_file,
         sep=sep,
         decimal=decimal,
         usecols=relevant_cols,
-        encoding="latin1",
         chunksize=chunksize,
     )
     header = True
@@ -129,12 +128,11 @@ def process_in_memory(
     relevant_cols = config_dict_loader.get_relevant_columns_config_dict(
         config_dict_for_type
     )
-    input_df_it = pd.read_csv(
+    input_df_it = quantreader_utils.read_file_with_pandas(
         input_file,
         sep=sep,
         decimal=decimal,
         usecols=relevant_cols,
-        encoding="latin1",
         chunksize=chunksize,
     )
     input_df_list = []
@@ -225,9 +223,9 @@ def process_with_dask(
     header = True
     for file in files_dask:
         if use_alphaquant_format:
-            input_df = pd.read_csv(file, sep="\t")
+            input_df = quantreader_utils.read_file_with_pandas(file, sep="\t")
         else:
-            input_df = pd.read_csv(file, sep="\t", index_col=hierarchy_columns)
+            input_df = quantreader_utils.read_file_with_pandas(file, sep="\t").set_index(hierarchy_columns)
         if len(input_df.index) < 2:
             continue
         input_reshaped = reshape_input_df(input_df, config_dict_for_type)
