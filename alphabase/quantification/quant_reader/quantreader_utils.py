@@ -47,14 +47,14 @@ def filter_input(filter_dict, input):
 def read_file_with_pandas(
     input_file, decimal=".", usecols=None, chunksize=None, sep=None
 ):
-    filename = str(input_file)
-    if ".parquet" in filename:
+    input_file = str(input_file)
+    if ".parquet" in input_file:
         return _read_parquet_file(input_file, usecols=usecols, chunksize=chunksize)
     else:
         if sep is None:
-            if ".csv" in filename:
+            if ".csv" in input_file:
                 sep = ","
-            elif ".tsv" in filename:
+            elif ".tsv" in input_file:
                 sep = "\t"
             else:
                 sep = "\t"
