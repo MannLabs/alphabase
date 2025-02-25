@@ -73,13 +73,13 @@ def read_file_with_pandas(
 
 def _read_parquet_file(input_file, usecols=None, chunksize=None):
     if chunksize is not None:
-        return _read_parque_file_chunkwise(
+        return _read_parquet_file_chunkwise(
             input_file, usecols=usecols, chunksize=chunksize
         )
     return pd.read_parquet(input_file, columns=usecols)
 
 
-def _read_parque_file_chunkwise(input_file, usecols=None, chunksize=None):
+def _read_parquet_file_chunkwise(input_file, usecols=None, chunksize=None):
     parquet_file = pyarrow.parquet.ParquetFile(input_file)
     for batch in parquet_file.iter_batches(columns=usecols, batch_size=chunksize):
         yield batch.to_pandas()
