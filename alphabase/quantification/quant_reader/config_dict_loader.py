@@ -6,15 +6,11 @@ import re
 
 import pandas as pd
 import yaml
-
-INTABLE_CONFIG = os.path.join(
-    pathlib.Path(__file__).parent.absolute(),
-    "../../../alphabase/constants/const_files/quant_reader_config.yaml",
-)  # the yaml config is located one directory below the python library files
+from . import quant_reader_config
 
 
 def get_input_type_and_config_dict(input_file, input_type_to_use=None):
-    all_config_dicts = _load_config(INTABLE_CONFIG)
+    all_config_dicts = _load_config(quant_reader_config.INTABLE_CONFIG)
     type2relevant_columns = _get_type2relevant_cols(all_config_dicts)
 
     if "aq_reformat.tsv" in input_file:
