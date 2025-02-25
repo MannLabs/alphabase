@@ -1,6 +1,8 @@
 import pandas as pd
 
-from . import config_dict_loader, longformat_reader, wideformat_reader
+from . import config_dict_loader, longformat_reader, wideformat_reader, quant_reader_config
+
+
 
 
 def import_data(
@@ -10,6 +12,9 @@ def import_data(
     results_dir=None,
     use_alphaquant_format=False,
     filter_dict=None,
+    protein_id="protein",
+    quant_id="quant_id",
+    intable_config_file=quant_reader_config.DEFAULT_CONFIG_PATH,
 ):
     """
     Function to import peptide level data. Depending on available columns in the provided file,
@@ -18,6 +23,10 @@ def import_data(
     :param file input_file: quantified peptide/ion -level data
     :param file results_folder: the folder where the directlfq outputs are stored
     """
+
+    ##set global config if applicable
+    quant_reader_config.set_global_protein_and_ion_id(protein_id=protein_id, quant_id=quant_id)
+    quant_reader_config.set_intable_config_file(intable_config_file=intable_config_file)
 
     samples_subset = add_ion_protein_headers_if_applicable(samples_subset)
     if "aq_reformat" in input_file:
