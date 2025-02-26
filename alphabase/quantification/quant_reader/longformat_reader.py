@@ -2,8 +2,18 @@ import glob
 import os
 import os.path
 import shutil
+import warnings
 
-import dask.dataframe as dd
+try:
+    import dask.dataframe as dd
+
+    HAS_DASK = True
+except ModuleNotFoundError:
+    warnings.warn(
+        "Dependency 'dask' not installed. If you want to use its functionality, install alphabase with the 'dask' extra. Falling back to non-dask based processing."
+    )
+    HAS_DASK = False
+
 import pandas as pd
 
 from . import (
@@ -31,7 +41,7 @@ def reformat_and_write_longtable_according_to_config(
 
     file_is_large = check_if_file_is_large(input_file, enforce_largefile_processing)
 
-    if file_is_large:
+    if file_is_large and HAS_DASK:
         process_out_of_memory(
             input_file=input_file,
             outfile_name=outfile_name,
