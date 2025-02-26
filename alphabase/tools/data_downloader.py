@@ -4,23 +4,28 @@ import base64
 import cgi
 import os
 import traceback
+import warnings
 import zipfile
 from abc import ABC, abstractmethod
 from typing import Optional
 from urllib.request import urlopen, urlretrieve
+
+try:
+    import progressbar  # noqa: F401
+
+    _HAS_PROGRESSBAR = True
+except ModuleNotFoundError:
+    warnings.warn(
+        "Dependency 'progressbar' not installed. Download progress will not be displayed."
+    )
+    _HAS_PROGRESSBAR = False
 
 
 class Progress:  # pragma: no cover
     """Class to report the download progress of a file to the console."""
 
     def __init__(self):
-        try:
-            import progressbar  # noqa: F401
-
-            self.pbar = None
-        except ModuleNotFoundError:
-            print("Could not import progressbar")
-            self.pbar = -1
+        self.pbar = None
 
     def __call__(self, block_num: int, block_size: int, total_size: int) -> None:
         """Report download progress to console.
@@ -37,8 +42,7 @@ class Progress:  # pragma: no cover
             total size of the file to be downloaded in bytes
 
         """
-        if self.pbar == -1:
-            # not initialized
+        if not _HAS_PROGRESSBAR:
             return
 
         if total_size < 0:
