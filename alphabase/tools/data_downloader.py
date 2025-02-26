@@ -4,19 +4,21 @@ import base64
 import cgi
 import os
 import traceback
+import warnings
 import zipfile
 from abc import ABC, abstractmethod
 from typing import Optional
 from urllib.request import urlopen, urlretrieve
 
-# we don't want to have to install anything in order for this to work
 try:
     import progressbar  # noqa: F401
 
-    _progressbar_imported = True
+    _HAS_PROGRESSBAR = True
 except ModuleNotFoundError:
-    print("Could not import progressbar")
-    _progressbar_imported = False
+    warnings.warn(
+        "Dependency 'progressbar' not installed. Download progress will not be displayed."
+    )
+    _HAS_PROGRESSBAR = False
 
 
 class Progress:  # pragma: no cover
@@ -40,7 +42,7 @@ class Progress:  # pragma: no cover
             total size of the file to be downloaded in bytes
 
         """
-        if not _progressbar_imported:
+        if not _HAS_PROGRESSBAR:
             return
 
         if total_size < 0:
