@@ -1,4 +1,5 @@
 import itertools
+import logging
 import os
 import os.path
 import pathlib
@@ -8,6 +9,7 @@ import yaml
 
 from . import quantreader_utils
 
+LOGGER = logging.getLogger(__name__)
 INTABLE_CONFIG = os.path.join(
     pathlib.Path(__file__).parent.absolute(),
     "../../../alphabase/constants/const_files/quant_reader_config.yaml",
@@ -47,17 +49,14 @@ def _get_original_file_from_aq_reformat(input_file):
 def _get_seperator(input_file):
     filename = str(input_file)
     if ".csv" in filename:
-        sep = ","
-    if ".tsv" in filename:
-        sep = "\t"
-    if ".txt" in filename:
-        sep = "\t"
-
-    if "sep" not in locals():
-        raise TypeError(
-            f"neither of the file extensions (.tsv, .csv, .txt) detected for file {input_file}! Your filename has to contain one of these extensions. Please modify your file name accordingly."
+        return ","
+    elif ".tsv" in filename:
+        return "\t"
+    else:
+        LOGGER.info(
+            f"neither of the file extensions (.tsv, .csv) detected for file {input_file}! Trying with tab separation. In the case that it fails, please provide the correct file extension"
         )
-    return sep
+    return "\t"
 
 
 def _load_config(config_yaml):
