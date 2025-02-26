@@ -6,6 +6,7 @@ import os
 import traceback
 import zipfile
 from abc import ABC, abstractmethod
+from typing import Optional
 from urllib.request import urlopen, urlretrieve
 
 # we don't want to have to install anything in order for this to work
@@ -90,14 +91,31 @@ class FileDownloader(ABC):
     def _encode_url(self) -> None:
         pass
 
-    def download(self) -> str:  # pragma: no cover
-        """Download file from sharing link if it does not yet exist and return its location."""
+    def download(self, max_size_kb: Optional[int] = None) -> str:  # pragma: no cover
+        """Download file from sharing link.
+
+        Parameters
+        ----------
+        max_size_kb : if given, the file will be truncated to this size in kilobytes, and the last line will be removed.
+            The file name will be appended with '.truncated{max_size_kb}'.
+            Note: don't use with binary files, as they will get corrupted!
+
+        Returns
+        -------
+        local path to downloaded file
+        """
+        if self._is_archive and max_size_kb is not None:
+            raise ValueError(
+                "Cannot download a truncated archive. Please remove the max_size_kb parameter."
+            )
+
         if not os.path.exists(self._unzipped_output_path):
             print(f"{self._unzipped_output_path} does not yet exist")
             os.makedirs(self._output_dir, exist_ok=True)
-            self._download_file()
+            self._download_file(max_size_kb)
 
-            self._handle_archive()
+            if self._is_archive:
+                self._handle_archive()
 
         else:
             print(f"{self._unzipped_output_path} already exists")
@@ -108,17 +126,17 @@ class FileDownloader(ABC):
         """Get filename from url."""
         try:
             remotefile = urlopen(self._encoded_url)
-        except Exception:
-            print(f"Could not open {self._url} for reading filename")
-            raise ValueError(
-                f"Could not open {self._url} for reading filename"
-            ) from None
+        except Exception as e:
+            print(f"Could not open {self._url} for reading filename: {e}")
+            raise ValueError(f"Could not open {self._url} for reading filename") from e
 
         info = remotefile.info()["Content-Disposition"]
         value, params = cgi.parse_header(info)
         return params["filename"]
 
-    def _download_file(self) -> None:  # pragma: no cover
+    def _download_file(
+        self, max_size_kb: Optional[int] = None
+    ) -> None:  # pragma: no cover
         """Download file from sharing link.
 
         Returns
@@ -128,22 +146,44 @@ class FileDownloader(ABC):
 
         """
         try:
-            path, message = urlretrieve(
-                self._encoded_url, self._output_path, Progress()
-            )
-            print(f"{self._file_name} successfully downloaded to {path}")
+            if max_size_kb:
+                self._output_path = self._unzipped_output_path = (
+                    f"{self._output_path}.truncated{max_size_kb}"
+                )
+                with urlopen(self._encoded_url) as response, open(
+                    self._output_path, "wb"
+                ) as out_file:
+                    out_file.write(response.read(max_size_kb * 1024))
+                print(
+                    f"First {max_size_kb} bytes of {self._file_name} successfully downloaded to {self._output_path}"
+                )
+
+                # truncate file as last line is most likely incomplete
+                self._truncate_file(self._output_path)
+
+            else:
+                path, _ = urlretrieve(self._encoded_url, self._output_path, Progress())
+                print(f"{self._file_name} successfully downloaded to {path}")
 
         except Exception as e:
             print(f"{e} {traceback.print_exc()}")
             raise ValueError(f"Could not download {self._file_name}: {e}") from e
 
+    @staticmethod
+    def _truncate_file(file_path: str) -> None:
+        """Remove the last line from a file."""
+        with open(file_path) as file:
+            lines = file.readlines()
+        if lines:
+            with open(file_path, "w") as file:
+                file.writelines(lines[:-1])
+
     def _handle_archive(self) -> None:
         """Unpack archive and remove it."""
-        if self._is_archive:
-            with zipfile.ZipFile(self._output_path, "r") as zip_ref:
-                zip_ref.extractall(self._output_dir)
-            print(f"{self._file_name} successfully unzipped")
-            os.remove(self._output_path)
+        with zipfile.ZipFile(self._output_path, "r") as zip_ref:
+            zip_ref.extractall(self._output_dir)
+        print(f"{self._file_name} successfully unzipped")
+        os.remove(self._output_path)
 
 
 class OnedriveDownloader(FileDownloader):
