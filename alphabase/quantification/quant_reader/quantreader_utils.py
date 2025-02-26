@@ -46,7 +46,7 @@ def filter_input(filter_dict, input):
 
 def read_file(input_file, decimal=".", usecols=None, chunksize=None, sep=None):
     input_file = str(input_file)
-    if ".parquet" in input_file:
+    if input_file.endswith(".parquet"):
         return _read_parquet_file(input_file, usecols=usecols, chunksize=chunksize)
     else:
         if sep is None:
