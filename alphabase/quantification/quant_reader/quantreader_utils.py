@@ -44,23 +44,23 @@ def filter_input(filter_dict, input):
     return input
 
 
-def read_file(input_file, decimal=".", usecols=None, chunksize=None, sep=None):
-    input_file = str(input_file)
-    if input_file.endswith(".parquet"):
-        return _read_parquet_file(input_file, usecols=usecols, chunksize=chunksize)
+def read_file(file_path, decimal=".", usecols=None, chunksize=None, sep=None):
+    file_path = str(file_path)
+    if file_path.endswith(".parquet"):
+        return _read_parquet_file(file_path, usecols=usecols, chunksize=chunksize)
     else:
         if sep is None:
-            if ".csv" in input_file:
+            if ".csv" in file_path:
                 sep = ","
-            elif ".tsv" in input_file:
+            elif ".tsv" in file_path:
                 sep = "\t"
             else:
                 sep = "\t"
                 LOGGER.info(
-                    f"neither of the file extensions (.tsv, .csv) detected for file {input_file}! Trying with tab separation. In the case that it fails, please provide the correct file extension"
+                    f"neither of the file extensions (.tsv, .csv) detected for file {file_path}! Trying with tab separation. In the case that it fails, please provide the correct file extension"
                 )
         return pd.read_csv(
-            input_file,
+            file_path,
             sep=sep,
             decimal=decimal,
             usecols=usecols,
@@ -69,16 +69,16 @@ def read_file(input_file, decimal=".", usecols=None, chunksize=None, sep=None):
         )
 
 
-def _read_parquet_file(input_file, usecols=None, chunksize=None):
+def _read_parquet_file(file_path, usecols=None, chunksize=None):
     if chunksize is not None:
         return _read_parquet_file_chunkwise(
-            input_file, usecols=usecols, chunksize=chunksize
+            file_path, usecols=usecols, chunksize=chunksize
         )
-    return pd.read_parquet(input_file, columns=usecols)
+    return pd.read_parquet(file_path, columns=usecols)
 
 
-def _read_parquet_file_chunkwise(input_file, usecols=None, chunksize=None):
-    parquet_file = pyarrow.parquet.ParquetFile(input_file)
+def _read_parquet_file_chunkwise(file_path, usecols=None, chunksize=None):
+    parquet_file = pyarrow.parquet.ParquetFile(file_path)
     for batch in parquet_file.iter_batches(columns=usecols, batch_size=chunksize):
         yield batch.to_pandas()
 
