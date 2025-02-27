@@ -125,6 +125,10 @@ class FileDownloader(ABC):
             if self._is_archive:
                 self._handle_archive()
 
+            size_mb = self._get_size() / 1024**2
+            print(
+                f"{self._unzipped_output_path} successfully downloaded ({size_mb} MB)"
+            )
         else:
             size_mb = self._get_size() / 1024**2
             print(f"{self._unzipped_output_path} already exists ({size_mb} MB)")
@@ -133,14 +137,20 @@ class FileDownloader(ABC):
 
     def _get_size(self) -> int:
         """Return the size in bytes of the downloaded file or folder."""
-        if os.path.isdir(self._unzipped_output_path):
-            size = sum(
-                os.path.getsize(os.path.join(dirpath, filename))
-                for dirpath, dirnames, filenames in os.walk(self._unzipped_output_path)
-                for filename in filenames
-            )
-        else:
-            size = os.path.getsize(self._unzipped_output_path)
+        size = -1
+        try:
+            if os.path.isdir(self._unzipped_output_path):
+                size = sum(
+                    os.path.getsize(os.path.join(dirpath, filename))
+                    for dirpath, dirnames, filenames in os.walk(
+                        self._unzipped_output_path
+                    )
+                    for filename in filenames
+                )
+            else:
+                size = os.path.getsize(self._unzipped_output_path)
+        except Exception as e:
+            print(f"Could not get size of {self._unzipped_output_path}: {e}")
         return size
 
     def _get_filename(self) -> str:  # pragma: no cover
@@ -172,16 +182,13 @@ class FileDownloader(ABC):
                     self._output_path, "wb"
                 ) as out_file:
                     out_file.write(response.read(max_size_kb * 1024))
-                print(
-                    f"First {max_size_kb} bytes of {self._file_name} successfully downloaded to {self._output_path}"
-                )
+                print(f"Truncating file to max. {max_size_kb} bytes ..")
 
                 # truncate file as last line is most likely incomplete
                 self._truncate_file(self._output_path)
 
             else:
                 path, _ = urlretrieve(self._encoded_url, self._output_path, Progress())
-                print(f"{self._file_name} successfully downloaded to {path}")
 
         except Exception as e:
             print(f"{e} {traceback.print_exc()}")
