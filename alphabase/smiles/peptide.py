@@ -16,7 +16,7 @@ class PeptideSmilesEncoder:
     def _parse_modifications(
         self,
         mods: Optional[str] = "",
-        mod_site: Optional[str] = "",
+        mod_sites: Optional[str] = "",
     ) -> dict:
         """
         Parse the modifications and sites into a dictionary.
@@ -25,16 +25,18 @@ class PeptideSmilesEncoder:
         ----------
         mods : Optional[str]
             Modifications in the format "GG@K;Oxidation@M;Carbamidomethyl@C".
-        mod_site : Optional[str]
+        mod_sites : Optional[str]
             Corresponding modification sites in the format "4;5;6".
 
         Returns
         -------
         dict
-            Dictionary mapping position indices to modification strings.
+            Dictionary mapping position indices to modification strings, empty dict if no mods and mod_sites provided.
         """
-        if mods and mod_site:
-            return {int(m): mod for m, mod in zip(mod_site.split(";"), mods.split(";"))}
+        if mods and mod_sites:
+            return {
+                int(m): mod for m, mod in zip(mod_sites.split(";"), mods.split(";"))
+            }
         return {}
 
     def _get_terminal_placeholders(self):
@@ -53,6 +55,24 @@ class PeptideSmilesEncoder:
             self.amino_acid_modifier.C_TERM_PLACEHOLDER, sanitize=False
         )
         return n_term_placeholder_mol, c_term_placeholder_mol
+
+    def _get_terminal_mods(self, mods: dict) -> tuple:
+        """
+        Get the N-terminal and C-terminal modifications.
+
+        Parameters
+        ----------
+        mods : dict
+            Dictionary of modifications.
+
+        Returns
+        -------
+        tuple
+            (n_term_mod, c_term_mod)
+        """
+        n_term_mod = mods.get(0)
+        c_term_mod = mods.get(-1, None)
+        return n_term_mod, c_term_mod
 
     def _get_amino_acid_smiles(self, aa: str, mod_idx: int, mods: dict) -> str:
         """
@@ -201,8 +221,7 @@ class PeptideSmilesEncoder:
         n_term_placeholder_mol, c_term_placeholder_mol = (
             self._get_terminal_placeholders()
         )
-        n_term_mod = mods.get(0, None)
-        c_term_mod = mods.get(-1, None)
+        n_term_mod, c_term_mod = self._get_terminal_mods(mods)
 
         # Process each amino acid in the sequence
         smiles_list = []
@@ -304,8 +323,6 @@ class PeptideSmilesEncoder:
         n_term_placeholder_mol, c_term_placeholder_mol = (
             self._get_terminal_placeholders()
         )
-        n_term_mod = mods.get(0, None)
-        c_term_mod = mods.get(-1, None)
 
         # Get molecules for each amino acid in the sequence
         for idx, aa in enumerate(sequence):
@@ -314,6 +331,7 @@ class PeptideSmilesEncoder:
             amino_acid_mols.append(aa_mol)
 
         # Now, assemble the peptide
+        n_term_mod, c_term_mod = self._get_terminal_mods(mods)
         peptide_mol = amino_acid_mols[0]
         peptide_mol = self.amino_acid_modifier._apply_n_terminal_modification(
             peptide_mol,
