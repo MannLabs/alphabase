@@ -126,9 +126,22 @@ class FileDownloader(ABC):
                 self._handle_archive()
 
         else:
-            print(f"{self._unzipped_output_path} already exists")
+            size_mb = self._get_size() / 1024**2
+            print(f"{self._unzipped_output_path} already exists ({size_mb} MB)")
 
         return self._unzipped_output_path
+
+    def _get_size(self) -> int:
+        """Return the size in bytes of the downloaded file or folder."""
+        if os.path.isdir(self._unzipped_output_path):
+            size = sum(
+                os.path.getsize(os.path.join(dirpath, filename))
+                for dirpath, dirnames, filenames in os.walk(self._unzipped_output_path)
+                for filename in filenames
+            )
+        else:
+            size = os.path.getsize(self._unzipped_output_path)
+        return size
 
     def _get_filename(self) -> str:  # pragma: no cover
         """Get filename from url."""
