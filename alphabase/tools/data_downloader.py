@@ -16,7 +16,8 @@ try:
     _HAS_PROGRESSBAR = True
 except ModuleNotFoundError:
     warnings.warn(
-        "Dependency 'progressbar' not installed. Download progress will not be displayed."
+        "Dependency 'progressbar' not installed. Download progress will not be displayed.",
+        ImportWarning,
     )
     _HAS_PROGRESSBAR = False
 
@@ -111,6 +112,11 @@ class FileDownloader(ABC):
                 "Cannot download a truncated archive. Please remove the max_size_kb parameter."
             )
 
+        if max_size_kb:
+            self._output_path = self._unzipped_output_path = (
+                f"{self._output_path}.truncated{max_size_kb}"
+            )
+
         if not os.path.exists(self._unzipped_output_path):
             print(f"{self._unzipped_output_path} does not yet exist")
             os.makedirs(self._output_dir, exist_ok=True)
@@ -149,9 +155,6 @@ class FileDownloader(ABC):
         """
         try:
             if max_size_kb:
-                self._output_path = self._unzipped_output_path = (
-                    f"{self._output_path}.truncated{max_size_kb}"
-                )
                 with urlopen(self._encoded_url) as response, open(
                     self._output_path, "wb"
                 ) as out_file:
