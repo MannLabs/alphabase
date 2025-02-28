@@ -202,6 +202,7 @@ class FileDownloader(ABC):
         if lines:
             with open(file_path, "w") as file:
                 file.writelines(lines[:-1])
+            print(f"Truncated {file_path} to {len(lines) - 1} lines")
 
     def _handle_archive(self) -> None:
         """Unpack archive and remove it."""
