@@ -129,6 +129,7 @@ class FileDownloader(ABC):
             print(
                 f"{self._unzipped_output_path} successfully downloaded ({size_mb} MB)"
             )
+            # TODO check if its a binary file and warn/raise?
         else:
             size_mb = self._get_size() / 1024**2
             print(f"{self._unzipped_output_path} already exists ({size_mb} MB)")
