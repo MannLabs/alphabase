@@ -27,6 +27,8 @@ MOD_Composition: dict = {}
 #: Modification loss importance
 MOD_LOSS_IMPORTANCE: dict = {}
 
+_MOD_CLASSIFICATION_USER_ADDED = "User-added"
+
 
 def update_all_by_MOD_DF():
     """
@@ -436,7 +438,14 @@ def _add_a_new_modification(
             "unimod_id",
             "smiles",
         ],
-    ] = [mod_name, composition, modloss_composition, "User-added", 0, smiles]
+    ] = [
+        mod_name,
+        composition,
+        modloss_composition,
+        _MOD_CLASSIFICATION_USER_ADDED,
+        0,
+        smiles,
+    ]
     composition_mass = calc_mass_from_formula(composition)
     modloss_mass = calc_mass_from_formula(modloss_composition)
     MOD_DF.loc[mod_name, ["mass", "modloss"]] = (
@@ -447,6 +456,11 @@ def _add_a_new_modification(
         MOD_DF.loc[mod_name, "modloss_importance"] = 1e10
     MOD_DF.fillna(0, inplace=True)
     # update_all_by_MOD_DF()
+
+
+def has_custom_mods():
+    """Returns whether `MOD_DF` has user-defined modifications or not."""
+    return len(MOD_DF[MOD_DF["classification"] == _MOD_CLASSIFICATION_USER_ADDED]) > 0
 
 
 def add_new_modifications(new_mods: Union[list, dict]):

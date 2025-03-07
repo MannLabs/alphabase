@@ -13,8 +13,8 @@ class AminoAcidModifier:
     A class for modifying amino acids with N-terminal and C-terminal modifications.
     """
 
-    N_TERM_PLACEHOLDER = "[Xe]"
-    C_TERM_PLACEHOLDER = "[Rn]"
+    N_TERM_PLACEHOLDER = "[Fl]"
+    C_TERM_PLACEHOLDER = "[Ts]"
 
     def __init__(self):
         self._aa_smiles = None
@@ -141,7 +141,7 @@ class AminoAcidModifier:
         Parameters
         ----------
         aa_smiles : str
-            SMILES of an amino acid with or without PTMs, must have the placeholder atoms [Xe] for N-term and [Rn] for C-term.
+            SMILES of an amino acid with or without PTMs, must have the placeholder atoms [Fl] for N-term and [Ts] for C-term.
         n_term_mod : Optional[str], optional
             N-terminal modification name. Options are the keys in the n_term_modifications dict.
         c_term_mod : Optional[str], optional
@@ -188,7 +188,7 @@ class AminoAcidModifier:
         Parameters
         ----------
         aa_smiles : str
-            SMILES of an amino acid with or without PTMs, must have the placeholder atoms [Xe] for N-term and [Rn] for C-term.
+            SMILES of an amino acid with or without PTMs, must have the placeholder atoms [Fl] for N-term and [Ts] for C-term.
         n_term_mod : Optional[str], optional
             N-terminal modification name. Options are the keys in the n_term_modifications dict.
             If None, the amino acid is not modified, so using hydrogen atoms.
