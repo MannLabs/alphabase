@@ -9,6 +9,7 @@ xxhash
 biopython
 tqdm
 regex
+pyarrow
 pyahocorasick
 pyteomics
 lxml
