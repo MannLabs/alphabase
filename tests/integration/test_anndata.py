@@ -4,7 +4,7 @@ import os
 import tempfile
 from pathlib import Path
 
-from alphabase.anndata.anndata_factory import AnnDataFactory
+from alphabase._anndata.anndata_factory import AnnDataFactory
 from alphabase.tools.data_downloader import DataShareDownloader
 from tests.integration.test_psm_readers import (
     _assert_reference_df_equal,

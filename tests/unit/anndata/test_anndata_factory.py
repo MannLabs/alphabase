@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from alphabase.anndata.anndata_factory import AnnDataFactory
+from alphabase._anndata.anndata_factory import AnnDataFactory
 from alphabase.psm_reader.keys import PsmDfCols
 
 
