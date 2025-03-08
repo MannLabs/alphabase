@@ -14,5 +14,5 @@ dask_expr
 pyahocorasick
 pyteomics
 lxml
-rdkit==2024.3.3 # test: tolerate_version
+rdkit
 pyarrow
