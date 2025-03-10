@@ -7,7 +7,6 @@ import warnings
 import numpy as np
 import pandas as pd
 
-from alphabase.constants.modification import has_custom_mods
 from alphabase.io.hdf import HDF_File
 from alphabase.peptide.fragment import (
     calc_fragment_count,
@@ -417,9 +416,14 @@ class SpecLibBase:
         mp_batch_size : int, optional
             The batch size for multiprocessing.
 
-        mp_processes : int, optional
+        mp_process_num : int, optional
             The number of processes for multiprocessing.
 
+        normalize : typing.Literal["mono", "sum"], optional
+            How to normalize the isotope intensities.
+            "mono": normalize to monoisotopic peak
+            "sum": normalize to sum of all peaks
+            Defaults to "sum".
         """
 
         if "precursor_mz" not in self._precursor_df.columns:
@@ -429,13 +433,7 @@ class SpecLibBase:
             mp_process_num > 1 and len(self.precursor_df) > mp_batch_size
         )
 
-        if do_multiprocessing and has_custom_mods():
-            logging.warning(
-                "Multiprocessing not compatible with custom modifications yet, falling back to single process."
-            )
-            do_multiprocessing = False
-            # TODO enable multiprocessing also in this case
-
+        # Custom modifications are now supported in multiprocessing
         if do_multiprocessing:
             (self._precursor_df) = calc_precursor_isotope_intensity_mp(
                 self.precursor_df,
@@ -477,15 +475,29 @@ class SpecLibBase:
     ):
         """
         Append isotope columns into self.precursor_df.
-        See `alphabase.peptide.calc_precursor_isotope` for details.
+        See `alphabase.peptide.calc_precursor_isotope_info` for details.
+
+        Parameters
+        ----------
+        mp_process_num : int, optional
+            The number of processes for multiprocessing. Defaults to 8.
+
+        mp_process_bar : tqdm.tqdm, optional
+            Progress bar. Defaults to None.
+
+        mp_batch_size : int, optional
+            The batch size for multiprocessing. Defaults to 10000.
         """
         if "precursor_mz" not in self._precursor_df.columns:
             self.calc_and_clip_precursor_mz()
+
+        # Custom modifications are now supported in multiprocessing
         if mp_process_num > 1 and len(self.precursor_df) > mp_batch_size:
             (self._precursor_df) = calc_precursor_isotope_info_mp(
                 self.precursor_df,
                 processes=mp_process_num,
-                process_bar=mp_process_bar,
+                progress_bar=mp_process_bar,
+                mp_batch_size=mp_batch_size,
             )
         else:
             (self._precursor_df) = calc_precursor_isotope_info(self.precursor_df)

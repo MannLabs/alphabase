@@ -149,3 +149,4 @@ _docs*
 .idea
 
 test_data
+*/integration/input_data

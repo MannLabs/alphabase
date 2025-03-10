@@ -463,6 +463,55 @@ def has_custom_mods():
     return len(MOD_DF[MOD_DF["classification"] == _MOD_CLASSIFICATION_USER_ADDED]) > 0
 
 
+def get_custom_mods():
+    """
+    Returns a dictionary of user-defined modifications that can be serialized and passed to child processes.
+
+    Returns
+    -------
+    dict
+        Dictionary with modification names as keys and modification details as values
+    """
+    if not has_custom_mods():
+        return {}
+
+    custom_mods = MOD_DF[MOD_DF["classification"] == _MOD_CLASSIFICATION_USER_ADDED]
+    result = {}
+
+    for mod_name, row in custom_mods.iterrows():
+        result[mod_name] = {
+            "composition": row["composition"],
+            "modloss_composition": row["modloss_composition"],
+            "smiles": row["smiles"],
+        }
+
+    return result
+
+
+def init_custom_mods(custom_mods_dict):
+    """
+    Initialize custom modifications in a child process from a dictionary.
+
+    Parameters
+    ----------
+    custom_mods_dict : dict
+        Dictionary of custom modifications as returned by get_custom_mods()
+    """
+    if not custom_mods_dict:
+        return
+
+    for mod_name, mod_info in custom_mods_dict.items():
+        _add_a_new_modification(
+            mod_name=mod_name,
+            composition=mod_info["composition"],
+            modloss_composition=mod_info["modloss_composition"],
+            smiles=mod_info["smiles"],
+        )
+
+    # Update all dictionaries after adding modifications
+    update_all_by_MOD_DF()
+
+
 def add_new_modifications(new_mods: Union[list, dict]):
     """Add new modifications into :data:`MOD_DF`.
 
