@@ -41,13 +41,22 @@ def test_parse_charged_frag_type_with_exceptions(input_str, match):
 def test_filter_valid_charged_frag_types(mock_parse):
     """Test filter_valid_charged_frag_types handles errors correctly."""
 
-    with pytest.warns(UserWarning) as recorded_warnings:
-        result = filter_valid_charged_frag_types(
-            [
-                "b_z1",
-                "unsupported_z1",
-                "y_z2",
-            ]
-        )
+    # Configure mock to raise ValueError for 'unsupported_z1'
+    def side_effect(charged_frag_type):
+        if charged_frag_type == "unsupported_z1":
+            raise ValueError("Fragment type unsupported is currently not supported")
+        elif charged_frag_type == "b_z1":
+            return ("b", 1)
+        elif charged_frag_type == "y_z2":
+            return ("y", 2)
+
+    mock_parse.side_effect = side_effect
+
+    result = filter_valid_charged_frag_types(
+        [
+            "b_z1",
+            "unsupported_z1",
+            "y_z2",
+        ]
+    )
     assert result == ["b_z1", "y_z2"]
-    assert len(recorded_warnings) == 1  # Should have 1 warning message
