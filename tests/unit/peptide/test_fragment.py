@@ -40,7 +40,7 @@ def test_parse_charged_frag_type_with_exceptions(input_str, match):
 @patch("alphabase.peptide.fragment.parse_charged_frag_type")
 def test_filter_valid_charged_frag_types(mock_parse):
     """Test filter_valid_charged_frag_types handles errors correctly."""
-    mock_parse.side_effect = [("b", 1), ValueError, ("y", 2)]
+
     with pytest.warns(UserWarning) as recorded_warnings:
         result = filter_valid_charged_frag_types(
             [
@@ -50,4 +50,4 @@ def test_filter_valid_charged_frag_types(mock_parse):
             ]
         )
     assert result == ["b_z1", "y_z2"]
-    assert len(recorded_warnings) == 1  # Should have 2 warning messages
+    assert len(recorded_warnings) == 1  # Should have 1 warning message
