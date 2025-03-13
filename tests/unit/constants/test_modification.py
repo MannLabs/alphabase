@@ -5,6 +5,7 @@ from alphabase.constants.modification import (
     MOD_Composition,
     add_new_modifications,
     get_custom_mods,
+    get_new_context,
     init_custom_mods,
 )
 
@@ -191,3 +192,45 @@ def test_serialization_roundtrip(cleanup_test_mods):
     # Check that MOD_Composition was updated
     assert "RoundTrip1@N-term" in MOD_Composition
     assert "RoundTrip2@S" in MOD_Composition
+
+
+def test_modification_context():
+    """Test the ModificationContext class."""
+    # Create a new independent context
+    context = get_new_context()
+
+    # Load modifications from the default file
+    context.load_mod_df()
+
+    # The context should have some modifications loaded
+    assert len(context.mod_df) > 0
+    assert len(context.mod_mass) > 0
+    assert len(context.mod_composition) > 0
+
+    # Add a custom modification to the context
+    context.add_new_modifications([("ContextMod@N-term", "C(2)H(3)O(1)", "H(2)O(1)")])
+
+    # Verify the modification was added to this context
+    assert "ContextMod@N-term" in context.mod_df.index
+    assert "ContextMod@N-term" in context.mod_composition
+
+    # But not to the global context
+    assert "ContextMod@N-term" not in MOD_DF.index
+    assert "ContextMod@N-term" not in MOD_Composition
+
+    # Test calculation functions
+    mass = context.calc_modification_mass_sum(["ContextMod@N-term"])
+    assert mass > 0
+
+    # Test custom mods serialization
+    custom_mods = context.get_custom_mods()
+    assert "ContextMod@N-term" in custom_mods
+
+    # Create another context and initialize with custom mods
+    another_context = get_new_context()
+    another_context.load_mod_df()
+    another_context.init_custom_mods(custom_mods)
+
+    # Verify the custom mod was transferred
+    assert "ContextMod@N-term" in another_context.mod_df.index
+    assert "ContextMod@N-term" in another_context.mod_composition
