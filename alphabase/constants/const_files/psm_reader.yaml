@@ -180,12 +180,12 @@ msfragger_pepxml:
   mod_mass_tol: 0.1 # Da
   modification_mapping_type: 'maxquant'
 
-diann:
+diann: # 1.8.1
   reader_type: diann
   rt_unit: minute
   fixed_C57: False
   column_mapping:
-    'raw_name': 'Run'
+    'raw_name': 'Run' # File.Name?
     'sequence': 'Stripped.Sequence'
     'charge': 'Precursor.Charge'
     'rt': 'RT'
