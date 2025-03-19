@@ -66,9 +66,6 @@ class PsmDfCols(metaclass=ConstantsClass):
     FDR4 = "_fdr4"  # second search
     FDR5 = "_fdr5"  # second search
 
-    # part of psm_reader_yaml, but not directly referenced
-    _INTENSITY = "intensity"
-
 
 class LibPsmDfCols(metaclass=ConstantsClass):
     """Constants for accessing the columns of a Library PSM dataframe."""
