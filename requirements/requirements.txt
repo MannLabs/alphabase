@@ -11,10 +11,8 @@ biopython==1.84
 tqdm==4.67.0
 regex==2024.11.6
 # pydivsufsort  # TODO this is used by lcp_digest.py?
-dask==2024.8.0
-dask_expr==1.1.10
+pyarrow==19.0.1
 pyahocorasick==2.1.0
 pyteomics==4.7.5
 lxml==5.3.0  # required by pyteomics
 rdkit==2024.3.3
-pyarrow==19.0.1

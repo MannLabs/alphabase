@@ -1,0 +1,3 @@
+# Dependencies required for running the "stable dask" version of alphabase.
+dask==2024.8.0
+dask_expr==1.1.10
