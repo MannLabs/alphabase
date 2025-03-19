@@ -78,7 +78,10 @@ def psm_example(request) -> tuple[str, io.StringIO, tuple[int, int]]:
 
 
 def test_read_psm(psm_example):
+    """Verify that PSM files from different search engines are correctly parsed to pd.DataFrames"""
     search_engine, data, expected_shape = psm_example
     psm_reader = psm_reader_provider.get_reader(search_engine)
+
+    # when
     df = psm_reader.import_file(copy(data))
     assert df.shape == expected_shape
