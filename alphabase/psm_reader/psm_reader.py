@@ -197,6 +197,10 @@ class PSMReaderBase(ABC):
         """
         self._modification_mapper.set_modification_mapping(modification_mapping)
 
+    def add_column_mapping(self, column_mapping: Dict) -> None:
+        """Add additional column mappings for the search engine."""
+        self.column_mapping = self.column_mapping | column_mapping
+
     def load(self, _file: Union[List[str], str]) -> pd.DataFrame:
         """Import a single file or multiple files."""
         if isinstance(_file, list):
@@ -446,13 +450,19 @@ class PSMReaderProvider:
         **kwargs,
     ) -> PSMReaderBase:
         """Get a reader by reader_type."""
-        return self.reader_dict[reader_type.lower()](
-            column_mapping=column_mapping,
-            modification_mapping=modification_mapping,
-            fdr=fdr,
-            keep_decoy=keep_decoy,
-            **kwargs,
-        )
+        try:
+            return self.reader_dict[reader_type.lower()](
+                column_mapping=column_mapping,
+                modification_mapping=modification_mapping,
+                fdr=fdr,
+                keep_decoy=keep_decoy,
+                **kwargs,
+            )
+        except KeyError as e:
+            raise KeyError(
+                f"Unknown reader type '{reader_type}'. Available readers: "
+                f"{', '.join(self.reader_dict.keys())}"
+            ) from e
 
     def get_reader_by_yaml(
         self,
