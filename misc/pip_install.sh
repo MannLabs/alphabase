@@ -22,4 +22,4 @@ conda run -n $ENV_NAME --no-capture-output pip freeze
 
 # conda 'run' vs. 'activate', cf. https://stackoverflow.com/a/72395091
 conda run -n $ENV_NAME --no-capture-output pip install -e "../.$INSTALL_STRING"
-conda run -n $ENV_NAME --no-capture-output alphabase
+conda run -n $ENV_NAME --no-capture-output python -c "import alphabase; print('OK')" -v

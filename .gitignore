@@ -147,3 +147,5 @@ _docs*
 .gitconfig
 
 .idea
+
+test_data
