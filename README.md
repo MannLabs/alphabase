@@ -82,7 +82,7 @@ single `bash` command. *This `bash` command can also be run directly
 from within a Jupyter notebook by prepending it with a `!`*:
 
 ``` bash
-pip install "alphabase[dask]"
+pip install alphabase
 ```
 
 Installing AlphaBase like this avoids conflicts when integrating it in
@@ -94,12 +94,13 @@ can always force AlphaBase to use dependancy versions which are known to
 be compatible with:
 
 ``` bash
-pip install "alphabase[stable,dask-stable]"
+pip install "alphabase[stable]"
 ```
 
 NOTE: You might need to run `pip install -U pip` before installing
 AlphaBase like this. Also note the double quotes `"`.
-The "dask(-stable)" extra can be omitted if dask is not needed (currently only used by quant-readers for large files.
+If you are using the `quant_reader` module, it is advisable to add the
+`dask-stable` or `dask` extras to speed up processing large files.
 
 For those who are really adventurous, it is also possible to directly
 install any branch (e.g. `@main`) with any extras
