@@ -175,7 +175,7 @@ def calc_AA_masses_for_var_len_seqs(sequence_array: np.ndarray) -> np.ndarray:
     Returns
     -------
     np.ndarray
-        1D array of masses, values of 1e8 are used to fill the max length.
+        1D array of masses, values of 1e8 are used to fill the max length. # TODO change this to 0
     """
     return AA_ASCII_MASS[np.array(sequence_array).view(np.int32)].reshape(
         len(sequence_array), -1
