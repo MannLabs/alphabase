@@ -86,11 +86,11 @@ pip install alphabase
 ```
 
 Installing AlphaBase like this avoids conflicts when integrating it in
-other tools, as this does not enforce strict versioning of dependancies.
-However, if new versions of dependancies are released, they are not
+other tools, as this does not enforce strict versioning of dependencies.
+However, if new versions of dependencies are released, they are not
 guaranteed to be fully compatible with AlphaBase. While this should only
 occur in rare cases where dependencies are not backwards compatible, you
-can always force AlphaBase to use dependancy versions which are known to
+can always force AlphaBase to use dependency versions which are known to
 be compatible with:
 
 ``` bash
@@ -137,7 +137,7 @@ git clone https://github.com/MannLabs/alphabase.git
 
 For any Python package, it is highly recommended to use a separate
 [conda virtual environment](https://docs.conda.io/en/latest/), as
-otherwise *dependancy conflicts can occur with already existing
+otherwise *dependency conflicts can occur with already existing
 packages*.
 
 ``` bash
@@ -145,7 +145,7 @@ conda create --name alphabase python=3.9 -y
 conda activate alphabase
 ```
 
-Finally, AlphaBase and all its [dependancies](requirements) need to be
+Finally, AlphaBase and all its [dependencies](requirements) need to be
 installed. To take advantage of all features and allow development (with
 the `-e` flag), this is best done by also installing the [development
 dependencies](requirements/requirements_development.txt) instead of only
@@ -155,9 +155,9 @@ the [core dependencies](requirements/requirements.txt):
 pip install -e "./alphabase[development]"
 ```
 
-By default this installs loose dependancies (no explicit versioning),
+By default this installs loose dependencies (no explicit versioning),
 although it is also possible to use stable dependencies
-(e.g. `pip install -e "./alphabase[stable,dask-stable,development]"`).
+(e.g. `pip install -e "./alphabase[stable,development]"`).
 
 ***By using the editable flag `-e`, all modifications to the [AlphaBase
 source code folder](alphabase) are directly reflected when running
