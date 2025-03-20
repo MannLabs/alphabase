@@ -42,7 +42,7 @@ alphapept:
 maxquant:
   reader_type: maxquant
   rt_unit: minute
-  fixed_C57: True
+  fixed_C57: True # does not show Carbamidomethyl in the modified sequences
   mod_seq_columns:
     - 'Modified sequence'
   column_mapping:
@@ -199,6 +199,13 @@ diann:
     'scan_num': 'MS2.Scan'
     'score': 'CScore'
     'fdr': 'Q.Value'
+    'intensity': "PG.MaxLFQ"
+    # extra columns for performing FDR cutoff
+    'fdr1_search1': 'Global.Q.Value'  # first search
+    'fdr2_search1': 'Global.PG.Q.Value'  # first search
+    'fdr1_search2': 'Lib.Q.Value'  # second search
+    'fdr2_search2': 'Lib.PG.Q.Value' # second search
+
   mod_seq_columns:
     - "Modified.Sequence"
   modification_mapping_type: 'maxquant'

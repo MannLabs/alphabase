@@ -48,15 +48,22 @@ class PsmDfCols(metaclass=ConstantsClass):
     RAW_NAME = "raw_name"
     CHARGE = "charge"
     PROTEINS = "proteins"
+    INTENSITY = "intensity"
 
     SCAN_NUM = "scan_num"
     PRECURSOR_MZ = "precursor_mz"
     DIANN_SPEC_INDEX = "diann_spec_idx"
 
-    # part of the output, but not directly referenced
-    _UNIPROT_IDS = "uniprot_ids"
-    _GENES = "genes"
-    _QUERY_ID = "query_id"
+    # part of the output, but not directly referenced in code
+    UNIPROT_IDS = "uniprot_ids"
+    GENES = "genes"
+    QUERY_ID = "query_id"
+
+    # extra FDR columns for DIANN
+    FDR1_SEARCH1 = "fdr1_search1"
+    FDR2_SEARCH1 = "fdr2_search1"
+    FDR1_SEARCH2 = "fdr1_search2"
+    FDR2_SEARCH2 = "fdr2_search2"
 
     # part of psm_reader_yaml, but not directly referenced
     _INTENSITY = "intensity"

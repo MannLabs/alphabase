@@ -330,7 +330,7 @@ def test_pfind_reader() -> None:
 
 def test_diann_reader() -> None:
     """Test the Diann reader."""
-    input_data = StringIO(TEST_DATA_DIANN)
+    input_data = StringIO(TEST_DATA_DIANN)  # column Lib.PG.Q.Value missing here
 
     reader = DiannReader()
     reader.import_file(input_data)
