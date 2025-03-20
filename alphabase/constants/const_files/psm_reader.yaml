@@ -185,7 +185,7 @@ diann: # 1.8.1
   rt_unit: minute
   fixed_C57: False
   column_mapping:
-    'raw_name': 'Run' # File.Name?
+    'raw_name': 'Run'
     'sequence': 'Stripped.Sequence'
     'charge': 'Precursor.Charge'
     'rt': 'RT'
