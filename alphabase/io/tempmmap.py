@@ -10,10 +10,10 @@ from typing import Optional
 
 import h5py
 import numpy as np
+from pathlib import PosixPath
 
 _TEMP_DIR: Optional[tempfile.TemporaryDirectory] = None
-TEMP_DIR_NAME = Optional[None]
-
+TEMP_DIR_NAME: Optional[None | str | PosixPath] = None
 
 def _init_temp_dir(prefix: str = "temp_mmap_") -> str:
     """Initialize the temporary directory for the temp mmap arrays if not already done."""
@@ -114,7 +114,8 @@ def redefine_temp_location(path: str) -> str:
     _clear()
 
     # cleanup old temporary directory
-    shutil.rmtree(TEMP_DIR_NAME, ignore_errors=True)
+    if TEMP_DIR_NAME is not None:
+        shutil.rmtree(TEMP_DIR_NAME, ignore_errors=True)
 
     # create new tempfile at desired location
     temp_dir_name = _init_temp_dir(prefix=os.path.join(path, "temp_mmap_"))
