@@ -94,7 +94,10 @@ class DiannReader(ModifiedSequenceReader):
         super()._post_process(origin_df)
 
     def _filter_fdr(self) -> None:
-        """Filter PSMs based on additional FDR columns and drop the temporary columns."""
+        """Filter PSMs based on additional FDR columns if requested.
+
+        If a column is not present in the dataframe, it is ignored.
+        """
         super()._filter_fdr()
 
         extra_fdr_columns = []

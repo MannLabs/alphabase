@@ -618,7 +618,10 @@ class SageReaderBase(PSMReaderBase, ABC):
             self._psm_df = self._psm_df[~self._psm_df[PsmDfCols.DECOY]]
 
     def _filter_fdr(self) -> None:
-        """Filter PSMs by FDR."""
+        """Filter PSMs by FDR.
+
+        If a column is not present in the dataframe, a generic pandas error is raised.
+        """
         super()._filter_fdr()
 
         self._psm_df = self._psm_df[
