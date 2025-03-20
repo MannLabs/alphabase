@@ -59,7 +59,6 @@ class PsmDfCols(metaclass=ConstantsClass):
     GENES = "genes"
     QUERY_ID = "query_id"
 
-    # part of psm_reader.yaml, but not part of output
     # extra FDR columns for DIANN
     FDR1_SEARCH1 = "fdr1_search1"
     FDR2_SEARCH1 = "fdr2_search1"

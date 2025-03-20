@@ -113,11 +113,6 @@ class DiannReader(ModifiedSequenceReader):
         if not all(mask):
             self._psm_df = self._psm_df[mask]
 
-        self._psm_df = self._psm_df.drop(
-            columns=[PsmDfCols.FDR2, PsmDfCols.FDR3, PsmDfCols.FDR4, PsmDfCols.FDR5],
-            errors="ignore",
-        )
-
 
 class SpectronautReportReader(ModifiedSequenceReader):
     """Reader for Spectronaut's report TSV/CSV."""

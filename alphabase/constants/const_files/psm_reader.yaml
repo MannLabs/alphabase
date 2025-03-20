@@ -200,7 +200,7 @@ diann:
     'score': 'CScore'
     'fdr': 'Q.Value'
     'intensity': "PG.MaxLFQ"
-    # extra columns for performing FDR cutoff, not propagated to the output
+    # extra columns for performing FDR cutoff
     'fdr1_search1': 'Global.Q.Value'  # first search
     'fdr2_search1': 'Global.PG.Q.Value'  # first search
     'fdr1_search2': 'Lib.Q.Value'  # second search
