@@ -42,7 +42,7 @@ alphapept:
 maxquant:
   reader_type: maxquant
   rt_unit: minute
-  fixed_C57: True
+  fixed_C57: True # does not show Carbamidomethyl in the modified sequences
   mod_seq_columns:
     - 'Modified sequence'
   column_mapping:

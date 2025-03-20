@@ -230,6 +230,7 @@ class MaxQuantReader(ModifiedSequenceReader):
             **kwargs,
         )
 
+        # set True if the search engine will not show Carbamidomethyl in the modified sequences
         self.fixed_C57 = (
             fixed_C57
             if fixed_C57 is not None
