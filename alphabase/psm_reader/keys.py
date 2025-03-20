@@ -61,10 +61,10 @@ class PsmDfCols(metaclass=ConstantsClass):
 
     # part of psm_reader.yaml, but not part of output
     # extra FDR columns for DIANN
-    FDR2 = "_fdr2"  # first search
-    FDR3 = "_fdr3"  # first search
-    FDR4 = "_fdr4"  # second search
-    FDR5 = "_fdr5"  # second search
+    FDR1_SEARCH1 = "fdr1_search1"
+    FDR2_SEARCH1 = "fdr2_search1"
+    FDR1_SEARCH2 = "fdr1_search2"
+    FDR2_SEARCH2 = "fdr2_search2"
 
     # part of psm_reader_yaml, but not directly referenced
     _INTENSITY = "intensity"

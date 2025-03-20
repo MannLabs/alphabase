@@ -201,10 +201,10 @@ diann:
     'fdr': 'Q.Value'
     'intensity': "PG.MaxLFQ"
     # extra columns for performing FDR cutoff, not propagated to the output
-    '_fdr2': 'Global.Q.Value'  # first search
-    '_fdr3': 'Global.PG.Q.Value'  # first search
-    '_fdr4': 'Lib.Q.Value'  # second search
-    '_fdr5': 'Lib.PG.Q.Value' # second search
+    'fdr1_search1': 'Global.Q.Value'  # first search
+    'fdr2_search1': 'Global.PG.Q.Value'  # first search
+    'fdr1_search2': 'Lib.Q.Value'  # second search
+    'fdr2_search2': 'Lib.PG.Q.Value' # second search
 
   mod_seq_columns:
     - "Modified.Sequence"

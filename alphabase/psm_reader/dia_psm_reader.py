@@ -100,10 +100,10 @@ class DiannReader(ModifiedSequenceReader):
         extra_fdr_columns = []
 
         if self._filter_first_search_fdr:
-            extra_fdr_columns += [PsmDfCols.FDR2, PsmDfCols.FDR3]
+            extra_fdr_columns += [PsmDfCols.FDR1_SEARCH1, PsmDfCols.FDR2_SEARCH1]
 
         if self._filter_second_search_fdr:
-            extra_fdr_columns += [PsmDfCols.FDR4, PsmDfCols.FDR5]
+            extra_fdr_columns += [PsmDfCols.FDR1_SEARCH2, PsmDfCols.FDR2_SEARCH2]
 
         mask = np.ones(len(self._psm_df), dtype=bool)
         for col in extra_fdr_columns:
