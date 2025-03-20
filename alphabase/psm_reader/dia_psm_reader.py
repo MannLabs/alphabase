@@ -65,10 +65,10 @@ class DiannReader(ModifiedSequenceReader):
         Parameters
         ----------
         filter_first_search_fdr : bool, optional
-            If True, the FDR filtering will be done also to the first search columns (_fdr2 and _fdr3)
+            If True, the FDR filtering will be done also to the first search columns (fdr1_search1 and fdr2_search1)
 
         filter_second_search_fdr : bool, optional
-            If True, the FDR filtering will be done also to the second columns (_fdr4 and _fdr5)
+            If True, the FDR filtering will be done also to the second columns (fdr1_search2 and fdr2_search2)
 
         See documentation of `PSMReaderBase` for the rest of parameters.
 
