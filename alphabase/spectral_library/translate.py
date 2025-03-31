@@ -299,6 +299,11 @@ def speclib_to_single_df(
             df["IonMobility"] = speclib.precursor_df[im_col]
             break
 
+    for ccs_col in ["ccs_pred", "ccs"]:
+        if ccs_col in speclib.precursor_df.columns:
+            df["CCS"] = speclib.precursor_df[ccs_col]
+            break
+
     # df['LabelModifiedSequence'] = df['ModifiedPeptide']
     df["StrippedPeptide"] = speclib.precursor_df["sequence"]
 
