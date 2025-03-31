@@ -293,23 +293,11 @@ def speclib_to_single_df(
             break
     if "RT" not in df.columns:
         raise ValueError("precursor_df must contain the RT columns")
-    # if 'irt_pred' in speclib._precursor_df.columns:
-    #     df['RT'] = speclib._precursor_df['irt_pred']
-    # elif 'rt_pred' in speclib._precursor_df.columns:
-    #     df['RT'] = speclib._precursor_df['rt_pred']
-    # elif 'rt_norm' in speclib._precursor_df.columns:
-    #     df['RT'] = speclib._precursor_df['rt_norm']
-    # else:
-    #     raise ValueError('precursor_df must contain the "rt_pred" or "rt_norm" column')
 
     for im_col in ["mobility_pred", "mobility"]:
         if im_col in speclib.precursor_df.columns:
             df["IonMobility"] = speclib.precursor_df[im_col]
             break
-    # if 'mobility_pred' in speclib._precursor_df.columns:
-    #     df['IonMobility'] = speclib._precursor_df.mobility_pred
-    # elif 'mobility' in speclib._precursor_df.columns:
-    #     df['IonMobility'] = speclib._precursor_df.mobility
 
     # df['LabelModifiedSequence'] = df['ModifiedPeptide']
     df["StrippedPeptide"] = speclib.precursor_df["sequence"]
@@ -322,10 +310,6 @@ def speclib_to_single_df(
         if prot_col in speclib.precursor_df.columns:
             df["ProteinID"] = speclib.precursor_df[prot_col]
             break
-    # if 'uniprot_ids' in speclib._precursor_df.columns:
-    #     df['ProteinID'] = speclib._precursor_df.uniprot_ids
-    # elif 'proteins' in speclib._precursor_df.columns:
-    #     df['ProteinID'] = speclib._precursor_df.proteins
 
     if "genes" in speclib._precursor_df.columns:
         df["Genes"] = speclib._precursor_df["genes"]
