@@ -6,14 +6,15 @@ import mmap
 import os
 import shutil
 import tempfile
+from pathlib import PosixPath
 from typing import Optional, Union
 
 import h5py
 import numpy as np
-from pathlib import PosixPath
 
 _TEMP_DIR: Optional[tempfile.TemporaryDirectory] = None
-TEMP_DIR_NAME: Optional[Union[str,PosixPath]] = None
+TEMP_DIR_NAME: Optional[Union[str, PosixPath]] = None
+
 
 def _init_temp_dir(prefix: str = "temp_mmap_") -> str:
     """Initialize the temporary directory for the temp mmap arrays if not already done."""
