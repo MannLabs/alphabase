@@ -1,87 +1,30 @@
-import io
-from copy import copy
-
 import pytest
 
-from alphabase.psm_reader import psm_reader_provider
-
-PSM_EXAMPLES = [
-    {
-        "search_engine": "diann",
-        "data": """File.Name	Run	Protein.Group	Protein.Ids	Protein.Names	Genes	PG.Quantity	PG.Normalised	PG.MaxLFQ	Genes.Quantity	Genes.Normalised	Genes.MaxLFQ	Genes.MaxLFQ.Unique	Modified.Sequence	Stripped.Sequence	Precursor.Id	Precursor.Charge	Q.Value	Global.Q.Value	Protein.Q.Value	PG.Q.Value	Global.PG.Q.Value	GG.Q.Value	Translated.Q.Value	Proteotypic	Precursor.Quantity	Precursor.Normalised	Precursor.Translated	Quantity.Quality	RT	RT.Start	RT.Stop	iRT	Predicted.RT	Predicted.iRT	Lib.Q.Value	Ms1.Profile.Corr	Ms1.Area	Evidence	Spectrum.Similarity	Mass.Evidence	CScore	Decoy.Evidence	Decoy.CScore	Fragment.Quant.Raw	Fragment.Quant.Corrected	Fragment.Correlations	MS2.Scan	IM	iIM	Predicted.IM	Predicted.iIM
-        F:\XXX\20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-A2_1_22636.d	20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-A2_1_22636	Q9UH36	Q9UH36		SRRD	3296.49	3428.89	3428.89	3296.49	3428.89	3428.89	3428.89	(UniMod:1)AAAAAAALESWQAAAPR	AAAAAAALESWQAAAPR	(UniMod:1)AAAAAAALESWQAAAPR2	2	3.99074e-05	1.96448e-05	0.000159821	0.000159821	0.000146135	0.000161212	0	1	3296.49	3428.89	3296.49	0.852479	19.9208	19.8731	19.9685	123.9	19.8266	128.292	0	0.960106	5308.05	1.96902	0.683134	0.362287	0.999997	1.23691	3.43242e-05	1212.01;2178.03;1390.01;1020.01;714.008;778.008;	1212.01;1351.73;887.591;432.92;216.728;732.751;	0.956668;0.757581;0.670497;0.592489;0.47072;0.855203;	30053	1.19708	1.19328	1.19453	1.19469
-        F:\XXX\20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-A8_1_22642.d	20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-A8_1_22642	Q9UH36	Q9UH36		SRRD	2365	2334.05	2334.05	2365	2334.05	2334.05	2334.05	(UniMod:1)AAAAAAALESWQAAAPR	AAAAAAALESWQAAAPR	(UniMod:1)AAAAAAALESWQAAAPR2	2	0.000184434	1.96448e-05	0.000596659	0.000596659	0.000146135	0.000604961	0	1	2365	2334.05	2365	0.922581	19.905	19.8573	19.9527	123.9	19.782	128.535	0	0.940191	4594.04	1.31068	0.758988	0	0.995505	0.28633	2.12584e-06	1209.02;1210.02;1414.02;1051.01;236.003;130.002;	1209.02;1109.89;732.154;735.384;0;46.0967;	0.919244;0.937624;0.436748;0.639369;0.296736;0.647924;	30029	1.195	1.19328	1.19381	1.19339
-        F:\XXX\20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-B2_1_22648.d	20201218_tims03_Evo03_PS_SA_HeLa_200ng_high_speed_21min_8cm_S2-B2_1_22648	Q9UH36	Q9UH36		SRRD	1664.51	1635.46	1635.47	1664.51	1635.46	1635.47	1635.47	(UniMod:1)AAAAAAALESWQAAAPR	AAAAAAALESWQAAAPR	(UniMod:1)AAAAAAALESWQAAAPR2	2	0.000185123	1.96448e-05	0.000307409	0.000307409	0.000146135	0.000311332	0	1	1664.51	1635.46	1664.51	0.811147	19.8893	19.8416	19.937	123.9	19.7567	128.896	0	0.458773	6614.06	1.7503	0.491071	0.00111683	0.997286	1.92753	2.80543e-05	744.01;1708.02;1630.02;1475.02;0;533.006;	322.907;808.594;577.15;536.033;0;533.006;	0.760181;0.764072;0.542005;0.415779;0;0.913438;	30005	1.19409	1.19328	1.19323	1.19308
-        """,
-        "expected_shape": (3, 20),
-    },
-    {
-        "search_engine": "pfind",
-        "data": """File_Name	Scan_No	Exp.MH+	Charge	Q-value	Sequence	Calc.MH+	Mass_Shift(Exp.-Calc.)	Raw_Score	Final_Score	Modification	Specificity	Proteins	Positions	Label	Target/Decoy	Miss.Clv.Sites	Avg.Frag.Mass.Shift	Others
-        Ecoli-1to1to1-un-C13-N15-10mM-20150823.30507.30507.2.0.dta	30507	2074.030369	2	0	AMIEAGAAAVHFEDQLASVK	2074.027271	0.003098	35.299588	5.15726e-013	2,Oxidation[M];	3	gi|16131841|ref|NP_418439.1|/	173,K,K/	1|0|	target	0	0.948977	131070	0	0	0	262143	0	0	0	32
-        Ecoli-1to1to1-un-C13-N15-150mM-20150823.41501.41501.3.0.dta	41501	2712.197421	3	0	EGDNYVVLSDILGDEDHLGDMDFK	2712.198013	-0.000592	27.073978	9.82619e-010	21,Unknown[M];	3	gi|145698316|ref|NP_417633.4|/	470,K,V/	1|0|	target	0	0.814438	65596	0	0	0	4194288	0	0	0	36
-        XXX.25802.25802.4.0.dta	25802	2388.339186	4	0.0032066	SVFLIKGDKVWVYPPEKKEK	2388.332468	0.006718	17.822784	0.100787	21,Didehydro[AnyC-termK];	0	sp|P02790|HEMO_HUMAN/	106,N,G/	1|0|	target	0	0.704714	36
-        """,
-        "expected_shape": (2, 15),
-    },
-    {
-        "search_engine": "spectronaut",
-        "data": """ReferenceRun	PrecursorCharge	Workflow	IntModifiedPeptide	CV	AllowForNormalization	ModifiedPeptide	StrippedPeptide	iRT	IonMobility	iRTSourceSpecific	BGSInferenceId	IsProteotypic	IntLabeledPeptide	LabeledPeptide	PrecursorMz	ReferenceRunQvalue	ReferenceRunMS1Response	FragmentLossType	FragmentNumber	FragmentType	FragmentCharge	FragmentMz	RelativeIntensity	ExcludeFromAssay	Database	ProteinGroups	UniProtIds	Protein Name	ProteinDescription	Organisms	OrganismId	Genes	Protein Existence	Sequence Version	FASTAName
-        202106018_TIMS03_EVO03_PaSk_SA_HeLa_EGF_Phospho_100ug_test_S4-A1_1_25843	2		_ALVAT[+80]PGK_		True	_ALVAT[Phospho (STY)]PGK_	ALVATPGK	-5.032703	0.758	-5.032703	P19338	False	_ALVAT[+80]PGK_	_ALVAT[Phospho (STY)]PGK_	418.717511324722	0	10352	noloss	3	y	1	301.187031733932	53.1991	False	sp	P19338	P19338	NUCL_HUMAN	Nucleolin	Homo sapiens		NCL	1	3	MCT_human_UP000005640_9606
-        202106018_TIMS03_EVO03_PaSk_SA_HeLa_EGF_Phospho_100ug_test_S4-A1_1_25843	2		_ALVAT[+80]PGK_		True	_ALVAT[Phospho (STY)]PGK_	ALVATPGK	-5.032703	0.758	-5.032703	P19338	False	_ALVAT[+80]PGK_	_ALVAT[Phospho (STY)]PGK_	418.717511324722	0	10352	H3PO4	4	y	1	384.224142529733	26.31595	False	sp	P19338	P19338	NUCL_HUMAN	Nucleolin	Homo sapiens		NCL	1	3	MCT_human_UP000005640_9606
-        202106018_TIMS03_EVO03_PaSk_SA_HeLa_EGF_Phospho_100ug_test_S4-A1_1_25843	2		_TLT[+80]PCPLR_		True	_TLT[Phospho (STY)]PC[Carbamidomethyl (C)]PLR_	TLTPCPLR	27.71659	0.818	27.71659	Q5T200	False	_TLT[+80]PPLR_	_TLT[Phospho (STY)]PPLR_	439.230785875227	0.000138389150379226	23117	noloss	3	b	1	396.153027901512	6.3264	False	sp	Q5T200	Q5T200	ZC3HD_HUMAN	Zinc finger CCCH domain-containing protein 13	Homo sapiens		ZC3H13	1	1	MCT_human_UP000005640_9606
-        202106018_TIMS03_EVO03_PaSk_SA_HeLa_EGF_Phospho_100ug_test_S4-A1_1_25843	2		_TLT[+80]PCPLR_		True	_TLT[Phospho (STY)]PC[Carbamidomethyl (C)]PLR_	TLTPCPLR	27.71659	0.818	27.71659	Q5T200	False	_TLT[+80]PPLR_	_TLT[Phospho (STY)]PPLR_	439.230785875227	0.000138389150379226	23117	noloss	3	y	1	385.255780000092	29.70625	False	sp	Q5T200	Q5T200	ZC3HD_HUMAN	Zinc finger CCCH domain-containing protein 13	Homo sapiens		ZC3H13	1	1	MCT_human_UP000005640_9606
-        202106018_TIMS03_EVO03_PaSk_SA_HeLa_EGF_Phospho_library25_S4-C1_1_25867	2		_LFVT[+80]PPEGSSR_		True	_[Acetyl (Protein_N-term)]LFVS[Phospho (STY)]PPEGSSR_	LFVSPPEGSSR	38.05031	0.917	38.05031	Q14244;Q14244-6;Q14244-7	False	_LFVT[+80]PPEGSSR_	_LFVT[Phospho (STY)]PPEGSSR_	635.297385373987	0	14164	H3PO4	4	b	1	443.265279065723	12.24525	False	sp	Q14244;Q14244-6;Q14244-7	Q14244;Q14244-6;Q14244-7	MAP7_HUMAN	Ensconsin;Isoform of Q14244, Isoform 6 of Ensconsin;Isoform of Q14244, Isoform 7 of Ensconsin	Homo sapiens		MAP7	1;;	1;;	MCT_human_UP000005640_9606;MCT_human2_UP000005640_9606_additional;MCT_human2_UP000005640_9606_additional
-        202106018_TIMS03_EVO03_PaSk_SA_HeLa_EGF_Phospho_library25_S4-C1_1_25867	2		_LFVT[+80]PPEGSSR_		True	_[Acetyl (Protein_N-term)]LFVS[Phospho (STY)]PPEGSSR_	LFVSPPEGSSR	38.05031	0.917	38.05031	Q14244;Q14244-6;Q14244-7	False	_LFVT[+80]PPEGSSR_	_LFVT[Phospho (STY)]PPEGSSR_	635.297385373987	0	14164	noloss	6	y	1	632.299829640042	46.07855	False	sp	Q14244;Q14244-6;Q14244-7	Q14244;Q14244-6;Q14244-7	MAP7_HUMAN	Ensconsin;Isoform of Q14244, Isoform 6 of Ensconsin;Isoform of Q14244, Isoform 7 of Ensconsin	Homo sapiens		MAP7	1;;	1;;	MCT_human_UP000005640_9606;MCT_human2_UP000005640_9606_additional;MCT_human2_UP000005640_9606_additional
-        202106018_TIMS03_EVO03_PaSk_SA_HeLa_EGF_Phospho_library25_S4-C1_1_25867	2		_LFVT[+80]PPEGSSR_		True	_[Acetyl (Protein_N-term)]LFVS[Phospho (STY)]PPEGSSR_	LFVSPPEGSSR	38.05031	0.917	38.05031	Q14244;Q14244-6;Q14244-7	False	_LFVT[+80]PPEGSSR_	_LFVT[Phospho (STY)]PPEGSSR_	635.297385373987	0	14164	noloss	7	y	1	729.352593488892	100	False	sp	Q14244;Q14244-6;Q14244-7	Q14244;Q14244-6;Q14244-7	MAP7_HUMAN	Ensconsin;Isoform of Q14244, Isoform 6 of Ensconsin;Isoform of Q14244, Isoform 7 of Ensconsin	Homo sapiens		MAP7	1;;	1;;	MCT_human_UP000005640_9606;MCT_human2_UP000005640_9606_additional;MCT_human2_UP000005640_9606_additional
-        """,
-        "expected_shape": (2, 14),
-    },
-    {
-        "search_engine": "openswath",
-        "data": """PrecursorMz	ProductMz	Tr_recalibrated	transition_name	CE	LibraryIntensity	transition_group_id	decoy	PeptideSequence	ProteinName	Annotation	FullUniModPeptideName	PrecursorCharge	GroupLabel	UniprotID	FragmentType	FragmentCharge	FragmentSeriesNumber
-        685.732240417	886.020494795	59.0	255_AAAAAAAAAASGAAIPPLIPPRR_3	-1	5257.9	13_AAAAAAAAAASGAAIPPLIPPRR_3	0	AAAAAAAAAASGAAIPPLIPPRR	1/O14654	y19^2/0.002	AAAAAAAAAASGAAIPPLIPPRR	3	light	1/O14654	y	2	19
-        514.550999438	473.303261576	59.2	268_AAAAAAAAAASGAAIPPLIPPRR_4	-1	10000.0	14_AAAAAAAAAASGAAIPPLIPPRR_4	0	AAAAAAAAAASGAAIPPLIPPRR	1/O14654	y8^2/0.002	AAAAAAAAAASGAAIPPLIPPRR	4	light	1/O14654	y	2	8
-        514.550999438	629.39313922	59.2	276_AAAAAAAAAASGAAIPPLIPPRR_4	-1	5923.1	14_AAAAAAAAAASGAAIPPLIPPRR_4	0	AAAAAAAAAASGAAIPPLIPPRR	1/O14654	y12^2/0.001	AAAAAAAAAASGAAIPPLIPPRR	4	light	1/O14654	y	2	12
-        514.550999438	672.909153425	59.2	279_AAAAAAAAAASGAAIPPLIPPRR_4	-1	5249.8	14_AAAAAAAAAASGAAIPPLIPPRR_4	0	AAAAAAAAAASGAAIPPLIPPRR	1/O14654	y13^2/0.001	AAAAAAAAAASGAAIPPLIPPRR	4	light	1/O14654	y	2	13
-        514.550999438	356.19284545	59.2	262_AAAAAAAAAASGAAIPPLIPPRR_4	-1	5233.6	14_AAAAAAAAAASGAAIPPLIPPRR_4	0	AAAAAAAAAASGAAIPPLIPPRR	1/O14654	b5/0.001,b10^2/0.001,m6:10/0.001	AAAAAAAAAASGAAIPPLIPPRR	4	light	1/O14654	b	1	5
-        514.550999438	498.26707303	59.2	269_AAAAAAAAAASGAAIPPLIPPRR_4	-1	4976.0	14_AAAAAAAAAASGAAIPPLIPPRR_4	0	AAAAAAAAAASGAAIPPLIPPRR	1/O14654	b7/0.001,m4:10/0.001	AAAAAAAAAASGAAIPPLIPPRR	4	light	1/O14654	b	1	7
-        514.550999438	427.22995924	59.2	265_AAAAAAAAAASGAAIPPLIPPRR_4	-1	4859.4	14_AAAAAAAAAASGAAIPPLIPPRR_4	0	AAAAAAAAAASGAAIPPLIPPRR	1/O14654	b6/0.002,m5:10/0.002	AAAAAAAAAASGAAIPPLIPPRR	4	light	1/O14654	b	1	6
-        728.201724416	356.19284545	101.8	292_AAAAAAAAAASGAAIPPLIPPRRVITLYQC(UniMod:4)FSVSQR_5	-1	10000.0	15_AAAAAAAAAASGAAIPPLIPPRRVITLYQC(UniMod:4)FSVSQR_5	0	AAAAAAAAAASGAAIPPLIPPRRVITLYQCFSVSQR	1/O14654	b5/0.003,b10^2/0.003,m6:10/0.003	AAAAAAAAAASGAAIPPLIPPRRVITLYQC(UniMod:4)FSVSQR	5	light	1/O14654	b	1	5
-        728.201724416	576.310000482	101.8	297_AAAAAAAAAASGAAIPPLIPPRRVITLYQC(UniMod:4)FSVSQR_5	-1	7611.0	15_AAAAAAAAAASGAAIPPLIPPRRVITLYQC(UniMod:4)FSVSQR_5	0	AAAAAAAAAASGAAIPPLIPPRRVITLYQCFSVSQR	1/O14654	y5/0.002	AAAAAAAAAASGAAIPPLIPPRRVITLYQC(UniMod:4)FSVSQR	5	light	1/O14654	y	1	5
-        728.201724416	427.22995924	101.8	293_AAAAAAAAAASGAAIPPLIPPRRVITLYQC(UniMod:4)FSVSQR_5	-1	6805.1	15_AAAAAAAAAASGAAIPPLIPPRRVITLYQC(UniMod:4)FSVSQR_5	0	AAAAAAAAAASGAAIPPLIPPRRVITLYQCFSVSQR	1/O14654	b6/-0.002,m5:10/-0.002	AAAAAAAAAASGAAIPPLIPPRRVITLYQC(UniMod:4)FSVSQR	5	light	1/O14654	b	1	6
-        728.201724416	569.30418682	101.8	296_AAAAAAAAAASGAAIPPLIPPRRVITLYQC(UniMod:4)FSVSQR_5	-1	6312.7	15_AAAAAAAAAASGAAIPPLIPPRRVITLYQC(UniMod:4)FSVSQR_5	0	AAAAAAAAAASGAAIPPLIPPRRVITLYQCFSVSQR	1/O14654	b8/0.009,m3:10/0.009	AAAAAAAAAASGAAIPPLIPPRRVITLYQC(UniMod:4)FSVSQR	5	light	1/O14654	b	1	8
-        """,
-        "expected_shape": (3, 9),
-    },
-    {
-        "search_engine": "spectronaut_report",
-        "data": """R.FileName,R.Replicate,EG.PrecursorId,EG.ApexRT,FG.CalibratedMassAccuracy (PPM),FG.CalibratedMz
-        20211203_EXPL2_SoSt_SA_DIA_HeLa_1000mz_noCB_01,1,_VIETPENDFK_.2,40.826847076416,-0.6350307649846,596.298998773218
-        20211203_EXPL2_SoSt_SA_DIA_HeLa_1000mz_noCB_01,1,_GFSNEVSSK_.2,19.1254806518555,-1.54873822486555,477.730400257423
-        20211203_EXPL2_SoSt_SA_DIA_HeLa_1000mz_noCB_01,1,_HLLNQAVGEEEVPK_.3,42.0593299865723,-0.309173676987587,521.611288926824
-        20211203_EXPL2_SoSt_SA_DIA_HeLa_1000mz_noCB_01,1,_DATM[Oxidation (M)]EVQR_.2,12.8398199081421,-3.31103772642203,483.222124398527
-        """,
-        "expected_shape": (4, 9),
-    },
-]
+from alphabase.psm_reader import PSMReaderBase, psm_reader_provider
 
 
-@pytest.fixture(params=PSM_EXAMPLES)
-def psm_example(request) -> tuple[str, io.StringIO, tuple[int, int]]:
-    parameters = request.param
-    return (
-        parameters.get("search_engine"),
-        io.StringIO(parameters.get("data")),
-        parameters.get("expected_shape"),
-    )
+@pytest.mark.parametrize(
+    "reader_type",
+    [
+        "alphadia",
+        "alphapept",
+        "maxquant",
+        "pfind",
+        "msfragger_pepxml",
+        "diann",
+        "spectronaut_report",
+        "spectronaut",
+        "sage_parquet",
+        "sage_tsv",
+    ],
+)
+def test_psm_reader_provider(reader_type):
+    """Test whether the PSM reader provider returns a PSM Reader"""
+    reader = psm_reader_provider.get_reader(reader_type=reader_type)
+    assert isinstance(reader, PSMReaderBase)
 
 
-def test_read_psm(psm_example):
-    """Verify that PSM files from different search engines are correctly parsed to pd.DataFrames"""
-    search_engine, data, expected_shape = psm_example
-    psm_reader = psm_reader_provider.get_reader(search_engine)
-
-    # when
-    df = psm_reader.import_file(copy(data))
-    assert df.shape == expected_shape
+def test_psm_reader_provider_error():
+    """Test whether the PSM reader provider raises an error in case of passing an invalid reader name"""
+    with pytest.raises(KeyError):
+        psm_reader_provider.get_reader(reader_type="this_is_not_a_valid_reader")
