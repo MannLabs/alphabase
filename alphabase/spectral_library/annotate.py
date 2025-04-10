@@ -1,14 +1,13 @@
 """Module for annotating spectral libraries with raw mass spectrometry data."""
 
-from typing import Optional
-
 import numba as nb
 import numpy as np
 import pandas as pd
-from alpharaw.mzml import MzMLReader
-from alpharaw.thermo import ThermoRawData
 
-from alphabase.constants.spectral_library import LOSS_NUMBER_TO_TYPE
+from alphabase.peptide.fragment import (
+    create_dense_matrices,
+    filter_valid_charged_frag_types,
+)
 from alphabase.spectral_library.flat import SpecLibFlat
 
 UNANNOTATED_TYPE = 255
@@ -44,7 +43,7 @@ REQUIRED_RAW_COLUMNS = [
 
 def annotate_precursors_flat(
     speclib_flat: SpecLibFlat,
-    raw_data: MzMLReader | ThermoRawData,
+    raw_data_spectrum_df: pd.DataFrame,
     spec_idx_offset: int = 0,
 ) -> SpecLibFlat:
     """Annotate precursor information in a spectral library flat with raw data.
@@ -57,7 +56,7 @@ def annotate_precursors_flat(
     ----------
     speclib_flat : SpecLibFlat
         A spectral library flat object containing precursor information.
-    raw_data : MzMLReader | ThermoRawData
+    raw_data_spectrum_df : pd.DataFrame
         Raw data object containing spectrum information.
     spec_idx_offset : int, optional
         Offset to apply to spec_idx in raw_data, by default 0.
@@ -69,19 +68,19 @@ def annotate_precursors_flat(
 
     """
     # Define required columns
-    if "activation" not in raw_data.spectrum_df.columns:
-        raw_data.spectrum_df["activation"] = "Any"
+    if "activation" not in raw_data_spectrum_df.columns:
+        raw_data_spectrum_df["activation"] = "Any"
 
-    if "nce" not in raw_data.spectrum_df.columns:
-        raw_data.spectrum_df["nce"] = 0
+    if "nce" not in raw_data_spectrum_df.columns:
+        raw_data_spectrum_df["nce"] = 0
 
-    raw_data.spectrum_df["rt_max"] = raw_data.spectrum_df["rt"].max()
-    raw_data.spectrum_df["rt_norm"] = (
-        raw_data.spectrum_df["rt"] / raw_data.spectrum_df["rt_max"]
+    raw_data_spectrum_df["rt_max"] = raw_data_spectrum_df["rt"].max()
+    raw_data_spectrum_df["rt_norm"] = (
+        raw_data_spectrum_df["rt"] / raw_data_spectrum_df["rt_max"]
     )
 
-    raw_data.spectrum_df["_spec_idx"] = (
-        raw_data.spectrum_df["spec_idx"] + spec_idx_offset
+    raw_data_spectrum_df["_spec_idx"] = (
+        raw_data_spectrum_df["spec_idx"] + spec_idx_offset
     )
     # Check if all required columns are present
     if not all(
@@ -90,14 +89,14 @@ def annotate_precursors_flat(
         raise ValueError(
             f"The following columns are missing from speclib_flat.precursor_df: {set(REQUIRED_PSM_COLUMNS) - set(speclib_flat.precursor_df.columns)}"
         )
-    if not all(col in raw_data.spectrum_df.columns for col in REQUIRED_RAW_COLUMNS):
+    if not all(col in raw_data_spectrum_df.columns for col in REQUIRED_RAW_COLUMNS):
         raise ValueError(
-            f"The following columns are missing from raw_data.spectrum_df: {set(REQUIRED_RAW_COLUMNS) - set(raw_data.spectrum_df.columns)}"
+            f"The following columns are missing from raw_data_spectrum_df: {set(REQUIRED_RAW_COLUMNS) - set(raw_data_spectrum_df.columns)}"
         )
 
     # Merge precursor data with raw data
     merged_precursor_df = speclib_flat.precursor_df[REQUIRED_PSM_COLUMNS].merge(
-        raw_data.spectrum_df[REQUIRED_RAW_COLUMNS],
+        raw_data_spectrum_df[REQUIRED_RAW_COLUMNS],
         left_on="spec_idx",
         right_on="_spec_idx",
         how="left",
@@ -136,7 +135,7 @@ def annotate_precursors_flat(
 
 def annotate_fragments_flat(
     speclib_flat: SpecLibFlat,
-    raw_data: MzMLReader | ThermoRawData,
+    raw_data_peak_df: pd.DataFrame,
     mass_error_ppm: float = 20,
 ) -> SpecLibFlat:
     """Annotate a spectral library flat with raw data and calculate PIF.
@@ -149,7 +148,7 @@ def annotate_fragments_flat(
     ----------
     speclib_flat : SpecLibFlat
         A spectral library flat object containing precursor and fragment information.
-    raw_data : MzMLReader | ThermoRawData
+    raw_data_peak_df : pd.DataFrame
         Raw data object containing peak information.
     mass_error_ppm : float, optional
         Mass error tolerance in parts per million (default: 20.0).
@@ -165,7 +164,7 @@ def annotate_fragments_flat(
         for col in ["peak_start_idx", "peak_stop_idx"]
     ):
         raise ValueError(
-            "peak_start_idx and peak_stop_idx must be present in raw_data.peak_df. Please run annotate_fragments_flat() first."
+            "peak_start_idx and peak_stop_idx must be present in speclib_flat.precursor_df. Please run annotate_precursors_flat() first."
         )
 
     fragment_df_list = []
@@ -181,7 +180,7 @@ def annotate_fragments_flat(
             matched_precursor_df["flat_frag_stop_idx"],
         )
     ):
-        spectrum_peak_df = raw_data.peak_df.iloc[peak_start:peak_stop].copy()
+        spectrum_peak_df = raw_data_peak_df.iloc[peak_start:peak_stop].copy()
         fragment_df = speclib_flat.fragment_df.iloc[flat_frag_start:flat_frag_stop]
 
         (
@@ -371,159 +370,6 @@ def annotate_spectrum(  # noqa: PLR0913
     )
 
 
-def _get_dense_column(  # noqa: PLR0913
-    frag_type: int,
-    loss_type: int,
-    charge: int,
-    frag_type_mapping: dict,
-    loss_type_mapping: dict,
-    charge_type_mapping: set,
-) -> str:
-    """Convert the fragment type, loss type and charge to a dense column name.
-
-    Parameters
-    ----------
-    frag_type : int
-        fragment type like ord('b'), ord('y') etc.
-    loss_type : int
-        loss type like 17, 18 etc.
-    charge : int
-        charge
-    frag_type_mapping : dict
-        mapping of fragment type to string
-    loss_type_mapping : dict
-        mapping of loss type to string
-    charge_type_mapping : dict
-        mapping of charge to string
-
-    Returns
-    -------
-    str
-        column name
-
-    """
-    items = []
-
-    if frag_type in frag_type_mapping:
-        items.append(frag_type_mapping[frag_type])
-
-    if loss_type in loss_type_mapping:
-        items.append(loss_type_mapping[loss_type])
-
-    if charge in charge_type_mapping:
-        items.append(charge_type_mapping[charge])
-
-    return "_".join(items)
-
-
-def _add_frag_column_annotation(
-    flatlib: SpecLibFlat,
-    charged_frag_types: Optional[list[str] | tuple[str, ...]] = None,
-) -> None:
-    """Add the fragment column annotation ['b_z1',...] to the long format fragment dataframe.
-
-    Important
-    ---------
-    This function operates in place and modifies the flatlib object.
-
-    Parameters
-    ----------
-    flatlib : SpecLibFlat
-        The flatlib object to be modified
-
-    charged_frag_types : Union[list, tuple]
-        A list of fragment types that should be considered as charged. for example: `get_charged_frag_types(["b", "y", "b_NH3", "y_NH3","b_H2O", "y_H2O"], 2)`
-
-    Returns
-    -------
-    None
-
-    """
-    frag_type_mapping = {
-        ord(frag_char.split("_")[0]): frag_char.split("_")[0]
-        for frag_char in charged_frag_types
-    }
-
-    loss_type_mapping = {
-        loss_type: LOSS_NUMBER_TO_TYPE[loss_type].replace("_", "")
-        for loss_type in LOSS_NUMBER_TO_TYPE
-        if loss_type != 0
-    }
-
-    charge_type_mapping = {
-        int(frag_char.split("_")[-1][1:]): frag_char.split("_")[-1]
-        for frag_char in charged_frag_types
-    }
-
-    flatlib.fragment_df["frag_column"] = flatlib.fragment_df.apply(
-        lambda row: _get_dense_column(
-            row["type"],
-            row["loss_type"],
-            row["charge"],
-            frag_type_mapping,
-            loss_type_mapping,
-            charge_type_mapping,
-        ),
-        axis=1,
-    )
-
-
-def _assign_to_dense(
-    flatlib: SpecLibFlat, charged_frag_types: list[str] | tuple[str, ...]
-) -> None:
-    """Assign the fragment intensities to the dense format.
-
-    Important
-    ---------
-    This function operates in place and modifies the flatlib object.
-
-    Parameters
-    ----------
-    flatlib : SpecLibFlat
-        The flatlib object to be modified
-
-    charged_frag_types : Union[list, tuple]
-        A list of fragment types that should be considered as charged. for example: `get_charged_frag_types(["b", "y", "b_NH3", "y_NH3","b_H2O", "y_H2O"], 2)`
-
-    Returns
-    -------
-    None
-
-    """
-    flatlib.charged_frag_types = charged_frag_types
-    flatlib.calc_fragment_mz_df()
-    flatlib._fragment_intensity_df = pd.DataFrame(  # noqa: SLF001
-        np.zeros(flatlib.fragment_mz_df.shape), columns=flatlib.fragment_mz_df.columns
-    )
-
-    for flat_frag_start_idx, flat_frag_stop_idx, frag_start_idx, frag_stop_idx in zip(
-        flatlib.precursor_df["flat_frag_start_idx"],
-        flatlib.precursor_df["flat_frag_stop_idx"],
-        flatlib.precursor_df["frag_start_idx"],
-        flatlib.precursor_df["frag_stop_idx"],
-    ):
-        current_flat_fragment_df = flatlib.fragment_df.iloc[
-            flat_frag_start_idx:flat_frag_stop_idx
-        ]
-        for frag_type in charged_frag_types:
-            current_frag_type_df = current_flat_fragment_df[
-                current_flat_fragment_df["frag_column"] == frag_type
-            ]
-
-            if current_frag_type_df.empty:
-                continue
-
-            intensity = flatlib._fragment_intensity_df.iloc[  # noqa: SLF001
-                frag_start_idx:frag_stop_idx
-            ][frag_type].to_numpy()
-            intensity[current_frag_type_df["position"].to_numpy()] = (
-                current_frag_type_df["intensity"].to_numpy()
-            )
-            flatlib._fragment_intensity_df.iloc[frag_start_idx:frag_stop_idx][  # noqa: SLF001
-                frag_type
-            ] = intensity
-
-
 def _sequence_coverage_metric(flatlib: SpecLibFlat) -> None:
     """Calculate the sequence coverage metric for the precursors.
 
@@ -652,8 +498,8 @@ def _mass_accuracy_metric(flatlib: SpecLibFlat) -> None:
 
     """
     # Vectorized operation to calculate coverage for all precursors at once
-    start_indices = flatlib.precursor_df["flat_frag_start_idx"].to_numpy()
-    stop_indices = flatlib.precursor_df["flat_frag_stop_idx"].to_numpy()
+    start_indices = flatlib.precursor_df["frag_start_idx"].to_numpy()
+    stop_indices = flatlib.precursor_df["frag_stop_idx"].to_numpy()
 
     flatlib.precursor_df["mass_accuracy"] = np.array(
         [
@@ -684,12 +530,26 @@ def add_dense_lib(
     """
     outlib_flat = flatlib.copy()
 
-    _add_frag_column_annotation(outlib_flat, charged_frag_types=charged_frag_types)
-    _assign_to_dense(outlib_flat, charged_frag_types=charged_frag_types)
+    valid_charged_frag_types = filter_valid_charged_frag_types(charged_frag_types)
+
+    outlib_flat.charged_frag_types = valid_charged_frag_types
+
+    df_collection, frag_start_idx, frag_stop_idx = create_dense_matrices(
+        outlib_flat.precursor_df,
+        outlib_flat.fragment_df,
+        valid_charged_frag_types,
+        flat_columns=["intensity", "error"],
+    )
+
+    outlib_flat._fragment_mz_df = df_collection["mz"]  # noqa: SLF001
+    outlib_flat._fragment_intensity_df = df_collection["intensity"]  # noqa: SLF001
+
+    outlib_flat.precursor_df["frag_start_idx"] = frag_start_idx
+    outlib_flat.precursor_df["frag_stop_idx"] = frag_stop_idx
+
     _sequence_coverage_metric(outlib_flat)
     _sequence_gini_metric(outlib_flat)
     _normalized_count_metric(outlib_flat)
     _mass_accuracy_metric(outlib_flat)
-    # calculate precursor coverage
 
     return outlib_flat
