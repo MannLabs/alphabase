@@ -483,12 +483,25 @@ def _batchify_df(df_group, mp_batch_size):
 
 
 def _count_batchify_df(df_group, mp_batch_size):
-    """Internal funciton for multiprocessing"""
+    """Internal function"""
     count = 0
-    for _, df in df_group:
-        for _ in range(0, len(df), mp_batch_size):
-            count += 1
+    for _, group in df_group:
+        count += (len(group) + mp_batch_size - 1) // mp_batch_size
     return count
+
+
+def _init_worker(custom_mods_dict):
+    """
+    Initialize a worker process with custom modifications.
+
+    Parameters
+    ----------
+    custom_mods_dict : dict
+        Dictionary of custom modifications as returned by get_custom_mods()
+    """
+    from alphabase.constants.modification import init_custom_mods
+
+    init_custom_mods(custom_mods_dict)
 
 
 # `progress_bar` should be replaced by more advanced tqdm wrappers created by Sander
@@ -501,43 +514,58 @@ def calc_precursor_isotope_info_mp(
     min_right_most_intensity: float = 0.2,
     min_precursor_num_to_run_mp: int = 10000,
 ) -> pd.DataFrame:
-    """`calc_precursor_isotope` is not that fast for large dataframes,
-    so here we use multiprocessing for faster isotope pattern calculation.
-    The speed is acceptable with multiprocessing (3.8 min for 21M precursors, 8 processes).
+    """Calculate isotope info for precursor_df using multiprocessing.
 
     Parameters
     ----------
+
     precursor_df : pd.DataFrame
-        Precursor_df to calculate
+        Precursor_df to calculate isotope info
 
     processes : int
         Process number. Optional, by default 8
 
     mp_batch_size : int
-        Multiprocessing batch size. Optional, by default 100000.
+        Multiprocessing batch size. Optional, by default 10000.
 
-    progress_bar : Callable
-        The tqdm-based callback function
-        to check multiprocessing. Defaults to None.
+    progress_bar : tqdm.tqdm
+        Progress bar. Optional, by default None
 
     min_right_most_intensity : float
         The minimal intensity value of the right-most peak relative to apex peak.
-        Optional, by default 0.2
+
+    min_precursor_num_to_run_mp : int
+        The minimal number of precursors to run multiprocessing. Optional, by default 10000.
 
     Returns
     -------
+
     pd.DataFrame
-        DataFrame with `isotope_*` columns,
-        see :meth:'calc_precursor_isotope()'.
+        precursor_df with additional columns:
+        - isotope_apex_offset
+        - isotope_apex_mz
+        - isotope_apex_intensity
+        - isotope_right_most_offset
+        - isotope_right_most_mz
+        - isotope_right_most_intensity
+        - isotope_m1_mz
+        - isotope_m1_intensity
+        - mono_isotope_idx
     """
-    if len(precursor_df) < min_precursor_num_to_run_mp or processes <= 1:
-        return calc_precursor_isotope_info(
-            precursor_df=precursor_df,
-            min_right_most_intensity=min_right_most_intensity,
-        )
+    if processes <= 1 or len(precursor_df) < min_precursor_num_to_run_mp:
+        return calc_precursor_isotope_info(precursor_df)
+
+    # Get custom modifications to pass to worker processes
+    from alphabase.constants.modification import get_custom_mods
+
+    custom_mods_dict = get_custom_mods()
+
     df_list = []
     df_group = precursor_df.groupby("nAA")
-    with mp.get_context("spawn").Pool(processes) as p:
+
+    with mp.get_context("spawn").Pool(
+        processes, initializer=_init_worker, initargs=(custom_mods_dict,)
+    ) as p:
         processing = p.imap(
             partial(
                 calc_precursor_isotope_info,
@@ -545,12 +573,15 @@ def calc_precursor_isotope_info_mp(
             ),
             _batchify_df(df_group, mp_batch_size),
         )
+
         if progress_bar:
-            processing = progress_bar(
+            for df in progress_bar(
                 processing, _count_batchify_df(df_group, mp_batch_size)
-            )
-        for df in processing:
-            df_list.append(df)
+            ):
+                df_list.append(df)
+        else:
+            for df in processing:
+                df_list.append(df)
     return pd.concat(df_list)
 
 
@@ -653,6 +684,12 @@ def calc_precursor_isotope_intensity_mp(
     min_right_most_intensity : float
         The minimal intensity value of the right-most peak relative to apex peak.
 
+    normalize : typing.Literal["mono", "sum"]
+        How to normalize the isotope intensities.
+        "mono": normalize to monoisotopic peak
+        "sum": normalize to sum of all peaks
+        Optional, by default "sum"
+
     mp_batch_size : int
         Multiprocessing batch size. Optional, by default 1000.
 
@@ -678,10 +715,17 @@ def calc_precursor_isotope_intensity_mp(
             normalize=normalize,
         )
 
+    # Get custom modifications to pass to worker processes
+    from alphabase.constants.modification import get_custom_mods
+
+    custom_mods_dict = get_custom_mods()
+
     df_list = []
     df_group = precursor_df.groupby("nAA")
 
-    with mp.get_context("spawn").Pool(mp_process_num) as p:
+    with mp.get_context("spawn").Pool(
+        mp_process_num, initializer=_init_worker, initargs=(custom_mods_dict,)
+    ) as p:
         processing = p.imap(
             partial(
                 calc_precursor_isotope_intensity,
@@ -699,7 +743,7 @@ def calc_precursor_isotope_intensity_mp(
         else:
             df_list = list(processing)
 
-    return pd.concat(df_list, ignore_index=True)
+    return pd.concat(df_list)
 
 
 calc_precursor_isotope = calc_precursor_isotope_intensity
