@@ -1,5 +1,7 @@
 """Module for annotating spectral libraries with raw mass spectrometry data."""
 
+from typing import List, Tuple, Union
+
 import numba as nb
 import numpy as np
 import pandas as pd
@@ -510,7 +512,7 @@ def _mass_accuracy_metric(flatlib: SpecLibFlat) -> None:
 
 
 def add_dense_lib(
-    flatlib: SpecLibFlat, charged_frag_types: list[str] | tuple[str, ...]
+    flatlib: SpecLibFlat, charged_frag_types: Union[List[str], Tuple[str, ...]]
 ) -> SpecLibFlat:
     """Add dense format to the flatlib object.
 
@@ -519,7 +521,7 @@ def add_dense_lib(
     flatlib : SpecLibFlat
         The flatlib object to be modified
 
-    charged_frag_types : Union[list, tuple]
+    charged_frag_types : Union[List[str], Tuple[str, ...]]
         A list of fragment types that should be considered as charged. for example: `get_charged_frag_types(["b", "y", "b_NH3", "y_NH3","b_H2O", "y_H2O"], 2)`
 
     Returns
