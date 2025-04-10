@@ -6,13 +6,14 @@ import mmap
 import os
 import shutil
 import tempfile
-from typing import Optional
+from pathlib import PosixPath
+from typing import Optional, Union
 
 import h5py
 import numpy as np
 
 _TEMP_DIR: Optional[tempfile.TemporaryDirectory] = None
-TEMP_DIR_NAME = Optional[None]
+TEMP_DIR_NAME: Optional[Union[str, PosixPath]] = None
 
 
 def _init_temp_dir(prefix: str = "temp_mmap_") -> str:
@@ -114,7 +115,9 @@ def redefine_temp_location(path: str) -> str:
     _clear()
 
     # cleanup old temporary directory
-    shutil.rmtree(TEMP_DIR_NAME, ignore_errors=True)
+    if TEMP_DIR_NAME is not None:
+        # in python 3.12, ignore_errors does not work if None is passed
+        shutil.rmtree(TEMP_DIR_NAME, ignore_errors=True)
 
     # create new tempfile at desired location
     temp_dir_name = _init_temp_dir(prefix=os.path.join(path, "temp_mmap_"))
