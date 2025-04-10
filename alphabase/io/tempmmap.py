@@ -116,6 +116,7 @@ def redefine_temp_location(path: str) -> str:
 
     # cleanup old temporary directory
     if TEMP_DIR_NAME is not None:
+        # in python 3.12, ignore_errors does not work if None is passed
         shutil.rmtree(TEMP_DIR_NAME, ignore_errors=True)
 
     # create new tempfile at desired location
