@@ -12,5 +12,6 @@ regex
 pyarrow
 pyahocorasick
 pyteomics
+pyyaml
 lxml
 rdkit
