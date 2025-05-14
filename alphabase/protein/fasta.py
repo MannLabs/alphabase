@@ -113,6 +113,27 @@ Pre-built protease dict with regular expression.
 """
 
 
+def get_cut_positions(regex_pattern: re.Pattern, sequence: str) -> np.ndarray:
+    """Get digest positions for a given sequence with a protease regex.
+
+    Parameters
+    ----------
+    regex_pattern : re.Pattern
+        Regex pattern for the protease.
+    sequence : str
+        The protein sequence to be cleaved.
+
+    Returns
+    -------
+    np.ndarray[int64]
+        The digest/cut positions in the sequence.
+    """
+    cut_pos = [0]
+    cut_pos.extend([m.start() + 1 for m in regex_pattern.finditer(sequence)])
+    cut_pos.append(len(sequence))
+    return np.array(cut_pos, dtype=np.int64)
+
+
 @numba.njit
 def cleave_sequence_with_cut_pos(
     sequence: str,
@@ -152,11 +173,14 @@ def cleave_sequence_with_cut_pos(
         List[bool]. If N-term peptide
 
         List[bool]. If C-term pepetide
+
+        np.ndarray[2D int64]. The start and end positions of the cleaved peptides.
     """
     seq_list = []
     miss_list = []
     nterm_list = []
     cterm_list = []
+    digest_range_list = []
     for i, start_pos in enumerate(cut_pos):
         for n_miss, end_pos in enumerate(cut_pos[i + 1 : i + 2 + n_missed_cleavages]):
             if end_pos > start_pos + pep_length_max:
@@ -164,6 +188,7 @@ def cleave_sequence_with_cut_pos(
             elif end_pos < start_pos + pep_length_min:
                 continue
             else:
+                digest_range_list.append((start_pos, end_pos))
                 seq_list.append(sequence[start_pos:end_pos])
                 miss_list.append(n_miss)
                 if start_pos == 0:
@@ -174,7 +199,7 @@ def cleave_sequence_with_cut_pos(
                     cterm_list.append(True)
                 else:
                     cterm_list.append(False)
-    return seq_list, miss_list, nterm_list, cterm_list
+    return seq_list, miss_list, nterm_list, cterm_list, np.array(digest_range_list)
 
 
 class Digest:
@@ -212,12 +237,6 @@ class Digest:
         else:
             self.regex_pattern = re.compile(protease)
 
-    def get_cut_positions(self, sequence):
-        cut_pos = [0]
-        cut_pos.extend([m.start() + 1 for m in self.regex_pattern.finditer(sequence)])
-        cut_pos.append(len(sequence))
-        return np.array(cut_pos, dtype=np.int64)
-
     def cleave_sequence(
         self,
         sequence: str,
@@ -239,9 +258,9 @@ class Digest:
             list[bool]: is protein C-term
         """
 
-        cut_pos = self.get_cut_positions(sequence)
+        cut_pos = get_cut_positions(self.regex_pattern, sequence)
 
-        (seq_list, miss_list, nterm_list, cterm_list) = cleave_sequence_with_cut_pos(
+        (seq_list, miss_list, nterm_list, cterm_list, _) = cleave_sequence_with_cut_pos(
             sequence,
             cut_pos,
             self.n_miss_cleave,
