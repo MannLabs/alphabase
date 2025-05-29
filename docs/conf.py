@@ -80,6 +80,9 @@ def linkcode_resolve(domain, info):
     except TypeError:
         # e.g. object is a typing.Union
         return None
+    except OSError:
+        # Ignore OSError: could not get source code
+        return None
     file = os.path.relpath(file, os.path.abspath(".."))
     if not file.startswith("alphabase"):
         # e.g. object is a typing.NewType
