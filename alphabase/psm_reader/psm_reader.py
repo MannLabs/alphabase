@@ -65,7 +65,7 @@ class PSMReaderBase(ABC):
             the value could be the column name or a list of column names
             in other engine's result, for example:
 
-            Example::
+            .. code-block:: python
 
                 columns_mapping = {
                     'sequence': 'NakedSequence',
@@ -84,7 +84,7 @@ class PSMReaderBase(ABC):
             The dict values can be
             either str or list, for exaplme:
 
-            Example::
+            .. code-block:: python
 
                 modification_mapping = {
                     'Oxidation@M': 'Oxidation (M)', # str
