@@ -89,5 +89,5 @@ class AlphaPeptReader(PSMReaderBase):
 
 
 def register_readers() -> None:
-    """Register readers for AlphaPept's *.ms_data.hdf files."""
+    """Register readers for AlphaPept's .ms_data.hdf files."""
     psm_reader_provider.register_reader("alphapept", AlphaPeptReader)
