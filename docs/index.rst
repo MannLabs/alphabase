@@ -25,8 +25,4 @@ Table of Contents
 
    api
 
-   ..
-
-      contributing
-
    references
