@@ -873,13 +873,12 @@ class SpecLibFasta(SpecLibBase):
         self,
         fasta_files: list,
     ):
-        """
-        Import and process a fasta file or a list of fasta files.
+        """Import and process a fasta file or a list of fasta files.
+
         It includes 3 steps:
 
-        1. Digest and get peptide sequences, it uses `self.get_peptides_from_...()`
-        2. Process the peptides including add modifications,
-        it uses :meth:`process_from_naked_peptide_seqs()`.
+            1. Digest and get peptide sequences, it uses `self.get_peptides_from_...()`
+            2. Process the peptides including add modifications, it uses :meth:`process_from_naked_peptide_seqs()`.
 
         Parameters
         ----------

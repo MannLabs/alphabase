@@ -64,13 +64,15 @@ class PSMReaderBase(ABC):
             The key of the column_mapping is alphabase's column name, and
             the value could be the column name or a list of column names
             in other engine's result, for example:
-            ```
-            columns_mapping = {
-                'sequence': 'NakedSequence',
-                'charge': 'Charge',
-                'proteins':['Proteins','UniprotIDs'] # list, this reader will automatically detect all of them.
-            }
-            ```
+
+            .. code-block:: python
+
+                columns_mapping = {
+                    'sequence': 'NakedSequence',
+                    'charge': 'Charge',
+                    'proteins':['Proteins','UniprotIDs'] # list, this reader will automatically detect all of them.
+                }
+
             The first column name in the list will be mapped to the harmonized column names, the rest will be ignored.
             Defaults to None.
 
@@ -81,12 +83,14 @@ class PSMReaderBase(ABC):
             (see :data:`psm_reader_yaml`).
             The dict values can be
             either str or list, for exaplme:
-            ```
-            modification_mapping = {
-            'Oxidation@M': 'Oxidation (M)', # str
-            'Phospho@S': ['S(Phospho (STY))','S(ph)','pS'], # list, this reader will automatically detect all of them.
-            }
-            ```
+
+            .. code-block:: python
+
+                modification_mapping = {
+                    'Oxidation@M': 'Oxidation (M)', # str
+                    'Phospho@S': ['S(Phospho (STY))','S(ph)','pS'], # list, this reader will automatically detect all of them.
+                }
+
             Defaults to None.
 
         fdr : float, optional

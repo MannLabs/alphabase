@@ -95,11 +95,18 @@ MASS_NH3: int = None
 
 
 def update_atom_infos(new_atom_info: typing.Dict):
-    """
+    """Update the atom information in CHEM_INFO_DICT.
+
     Args:
-        atom_dict (Dict): Example, replacing N with 15N
+        new_atom_info (Dict): A dictionary specifying new isotopic abundances and masses.
+
+    Examples:
+        Replacing N with 15N
+
+        .. code-block:: python
+
           {"N":
-            {"abundance": [0.01,0.99]},
+            {"abundance": [0.01, 0.99]},
             {"mass": [14.00307400443, 15.00010889888]},
           }
     """
