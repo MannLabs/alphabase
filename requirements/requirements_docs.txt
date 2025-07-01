@@ -6,3 +6,5 @@ nbsphinx
 jinja2
 contextfilter
 furo
+anndata
+mudata
