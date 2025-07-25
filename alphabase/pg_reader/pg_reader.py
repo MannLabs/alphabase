@@ -2,7 +2,7 @@
 
 import re
 import warnings
-from copy import copy
+from copy import deepcopy
 from pathlib import Path
 from typing import Any, Dict, Iterable, Optional, Type
 
@@ -241,7 +241,7 @@ class PGReaderProvider:
         yaml_dict: dict,
     ) -> PGReaderBase:
         """Get a reader by a yaml dict."""
-        return self.get_reader(**copy.deepcopy(yaml_dict))
+        return self.get_reader(**deepcopy(yaml_dict))
 
 
 pg_reader_provider = PGReaderProvider()
