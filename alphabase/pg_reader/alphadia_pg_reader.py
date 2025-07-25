@@ -4,7 +4,7 @@ from .pg_reader import PGReaderBase, pg_reader_provider
 
 
 class AlphaDiaPGReader(PGReaderBase):
-    """Reader for proteing group matrices from the alphaDIA search engine."""
+    """Reader for protein group matrices from the alphaDIA search engine."""
 
     _reader_type = "alphadia"
 

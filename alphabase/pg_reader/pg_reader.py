@@ -155,7 +155,7 @@ class PGReaderBase:
         all supported search engines.
 
         """
-        if Path(filename).suffix == "hdf":
+        if Path(filename).suffix == ".hdf":
             return pd.read_hdf(filename)
 
         sep = _get_delimiter(filename)
@@ -174,7 +174,7 @@ class PGReaderBase:
     def _filter_measurement(
         self, df: pd.DataFrame, regex: str, extra_columns: Iterable[str] | None = None
     ) -> pd.DataFrame:
-        """Subset :class:`pd.DataFrame to columns matching a regex plus extra columns.
+        """Subset :class:`pd.DataFrame` to columns matching a regex plus extra columns.
 
         Parameters
         ----------
