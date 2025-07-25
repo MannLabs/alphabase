@@ -172,7 +172,10 @@ class PGReaderBase:
         return df.rename(columns=column_mapping)
 
     def _filter_measurement(
-        self, df: pd.DataFrame, regex: str, extra_columns: Iterable[str] | None = None
+        self,
+        df: pd.DataFrame,
+        regex: str,
+        extra_columns: Optional[Iterable[str]] = None,
     ) -> pd.DataFrame:
         """Subset :class:`pd.DataFrame` to columns matching a regex plus extra columns.
 
