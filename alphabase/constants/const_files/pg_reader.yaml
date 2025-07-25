@@ -1,0 +1,6 @@
+# https://alphadia.readthedocs.io/en/latest/methods/output-format.html#pg-matrix-tsv
+alphadia:
+  reader_type: "alphadia"
+  column_mapping:
+    proteins: "pg"
+  measurement_regex: null # all remaining columns are sample columns
