@@ -1,3 +1,18 @@
+# ## Example configuration
+# example:
+#   # reader_type: str
+#   # (name as defined in the PGReader: alphabase.pg_reader.pg_reader.PGReaderBase attribute `_reader_type`)
+#   reader_type: "name"
+#   # column_mapping: dict[str, str]
+#   # Mapping between standardized columns and search engine-specific columns
+#   # Standardized columns must be defined in `alphabase.pg_reader.keys.PGCols`
+#   column_mapping:
+#     proteins: "pg"
+#   # measurement_regex: str | null
+#   # Default regular expression to match the sample columns (e.g. "LFQ$" to match `xxx_LFQ` but not `xxx`)
+#   # If null, selects all columns in the dataframe that are not values in `column_mapping`
+#   measurement_regex: null
+
 # https://alphadia.readthedocs.io/en/latest/methods/output-format.html#pg-matrix-tsv
 alphadia:
   reader_type: "alphadia"
