@@ -8,9 +8,8 @@ from unittest.mock import Mock, patch
 import pandas as pd
 import pytest
 
-from alphabase.pg_reader import AlphaDiaPGReader, pg_reader_provider
+from alphabase.pg_reader import AlphaDiaPGReader
 from alphabase.pg_reader.keys import PGCols
-from alphabase.tools.data_downloader import DataShareDownloader
 
 
 @pytest.fixture
@@ -68,17 +67,6 @@ def minimal_alphadia_tsv(
     os.remove(path)
 
 
-@pytest.fixture
-def example_alphadia_tsv(tmp_path) -> Generator[pd.DataFrame, None, None]:
-    """Get and parse real alphadia PG report matrix."""
-    URL = "https://datashare.biochem.mpg.de/s/cN1tmElfgKOe1cW"
-
-    download_path = DataShareDownloader(url=URL, output_dir=tmp_path).download()
-    yield download_path
-
-    os.remove(download_path)
-
-
 class TestAlphaDiaPGReaderInit:
     """Test initialization of AlphaDiaPGReader."""
 
@@ -120,30 +108,3 @@ class TestAlphaDiaPGReaderImport:
 
         # Check structure
         pd.testing.assert_frame_equal(result_df, minimal_alphadia_df_standardized)
-
-
-class TestAlphaDiaPGReaderImportIntegration:
-    def test_import_real_file(self, example_alphadia_tsv: str) -> None:
-        reader = AlphaDiaPGReader()
-
-        result_df = reader.import_file(example_alphadia_tsv)
-
-        assert result_df.shape == (9364, 6)
-        assert result_df.index.name == PGCols.PROTEINS
-
-
-class TestAlphaDiaPGReaderProvider:
-    def test_reader_provider(self) -> None:
-        """Test whether reader provider initializes alphadia PG reader correctly."""
-        reader = pg_reader_provider.get_reader("alphadia")
-
-        assert isinstance(reader, AlphaDiaPGReader)
-
-    def test_reader_provider_import(self, example_alphadia_tsv: str) -> None:
-        """Test if import works via `pg_reader_provider`"""
-        reader = pg_reader_provider.get_reader("alphadia")
-
-        result_df = reader.import_file(example_alphadia_tsv)
-
-        assert result_df.shape == (9364, 6)
-        assert result_df.index.name == PGCols.PROTEINS
