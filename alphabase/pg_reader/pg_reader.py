@@ -110,7 +110,7 @@ class PGReaderBase:
         Parameters
         ----------
         file_path: str
-            Absolute path to the file containing pg data
+            Absolute path to the file containing protein group data
 
         Returns
         -------
@@ -174,13 +174,13 @@ class PGReaderBase:
         return pd.read_csv(file_path, sep=sep, keep_default_na=False)
 
     def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Preprocess dataframe before standardizing columns. Per default, returns the unchanged dataframe."""
+        """Preprocess dataframe before standardizing columns and return the updated dataframe."""
         return df
 
     def _translate_columns(
         self, df: pd.DataFrame, column_mapping: dict[str, str]
     ) -> pd.DataFrame:
-        """Translate standardized columns in dataframe from other search engines to AlphaBase format."""
+        """Translate standardized columns in dataframe from other search engines to AlphaBase format and return the updated dataframe."""
         return df.rename(columns=column_mapping)
 
     def _filter_measurement(
@@ -189,7 +189,7 @@ class PGReaderBase:
         regex: str,
         extra_columns: Optional[Iterable[str]] = None,
     ) -> pd.DataFrame:
-        """Subset :class:`pd.DataFrame` to columns matching a regex plus plus optionally extra columns.
+        """Subset :class:`pd.DataFrame` to columns matching a regex plus plus optionally extra columns and return the updated dataframe.
 
         Parameters
         ----------
