@@ -23,14 +23,26 @@ _MEASUREMENT_REGEX = "measurement_regex"
 
 
 class PGReaderBase:
-    """Base class for all PG readers.
+    """Base class for all protein group (PG) readers.
 
-    Supports reading of protein groups of five common types:
-        - Type 1 — Minimal: Wide format (~features x samples), with sample names as columns and protein group intensities as values. Example: AlphaDIA.
-        - Type 2 — Multiple Intensity Fields: Wide format with multiple intensity types per sample (e.g., SampleA_LFQ, SampleB_raw). Example: AlphaPept.
-        - Type 3 — Additional Feature Metadata: Similar to Type 1 but includes extra feature columns (e.g., Gene, Description). Example: DIA-NN.
-        - Type 4 — Additional Sample Metadata: Non-standard format.
-        - Type 5 — Combined: Includes both multiple intensity fields and additional feature metadata. Examples: Spectronaut, MZTab, MaxQuant.
+    Supports reading of protein groups of common types:
+
+    - **Type 1 — Minimal**: A basic features x samples matrix.
+      Only intensity values are stored, with sample names as columns and protein groups as the index.
+      **Example**: AlphaDIA.
+
+    - **Type 2 — Multiple Intensity Fields**: A wide matrix where each sample may appear multiple times
+      with different quantification types (e.g., `SampleA_LFQ`, `SampleB_raw`). Intensity columns are typically
+      identifiable using regular expressions. Only intensity fields are included.
+      **Example**: AlphaPept.
+
+    - **Type 3 — Feature Metadata**: A features x samples matrix with one intensity value per sample,
+      plus additional feature-level metadata columns (e.g., gene names, descriptions).
+      **Example**: DIA-NN.
+
+    - **Type 4 — Combined**: A composite structure including both multiple intensity fields (Type 2)
+      and feature-level metadata (Type 3).
+      **Examples**: Spectronaut, MZTab, MaxQuant.
     """
 
     _reader_type: str
@@ -41,7 +53,7 @@ class PGReaderBase:
         column_mapping: Optional[dict[str, Any]] = None,
         measurement_regex: Optional[str] = None,
     ):
-        """Read PG matrices into the standardized alphabase format.
+        """Read protein group (PG) matrices into the standardized alphabase format.
 
         Parameters
         ----------
@@ -65,7 +77,7 @@ class PGReaderBase:
 
         Notes
         -----
-        Standardizes PG reports to a protein group dataframe (features x samples) in wide format. Contains at least
+        Standardizes protein group reports to a protein group dataframe (features x samples) in wide format. Contains at least
             - sample (run) identifier: :att:`pg_reader.keys.PGCols.SAMPLE_NAME` as column index
             - protein group identifier: :att:`pg_reader.keys.PGCols.protein` as index
             - protein group intensity: :att:`pg_reader.keys.PGCols.INTENSITY` as values
@@ -90,9 +102,9 @@ class PGReaderBase:
         self.column_mapping = {**self.column_mapping, **column_mapping}
 
     def import_file(self, file_path: str) -> pd.DataFrame:
-        """Import a PG matrix and process it to the alphabase convention.
+        """Import a protein group (PG) matrix and process it to the alphabase convention.
 
-        Loads the PG matrix, standardizes feature metadata columns, and filters for the
+        Loads the protein group matrix, standardizes feature metadata columns, and filters for the
         desired measurement type
 
         Parameters
@@ -100,11 +112,10 @@ class PGReaderBase:
         file_path: str
             Absolute path to the file containing pg data
 
-
         Returns
         -------
         :class:`pd.DataFrame`
-            Protein Group Matrix with feature metadata as index
+            protein group Matrix with feature metadata as index
 
         """
         # Load to dataframe
@@ -138,7 +149,7 @@ class PGReaderBase:
         return df.set_index(feature_columns)
 
     def _load_file(self, file_path: str) -> pd.DataFrame:
-        """Load PG file into a dataframe.
+        """Load protein group (PG) file into a dataframe.
 
         Parameters
         ----------
@@ -148,7 +159,7 @@ class PGReaderBase:
         Returns
         -------
         :class:`pd.DataFrame`
-            PG Matrix
+            Protein group matrix
 
         Notes
         -----
@@ -178,7 +189,7 @@ class PGReaderBase:
         regex: str,
         extra_columns: Optional[Iterable[str]] = None,
     ) -> pd.DataFrame:
-        """Subset :class:`pd.DataFrame` to columns matching a regex plus extra columns.
+        """Subset :class:`pd.DataFrame` to columns matching a regex plus plus optionally extra columns.
 
         Parameters
         ----------
@@ -187,7 +198,7 @@ class PGReaderBase:
         regex
             Regular expression that matches the respective columns
         extra_columns
-            Keep the specified columns although they do not match the regex
+            Keep the specified columns although they do not match the regex, defaults to `None`.
 
         Returns
         -------
@@ -209,7 +220,7 @@ class PGReaderBase:
 
 # TODO: Refactor and create base class for PG Reader provider and PSMReaderProvider
 class PGReaderProvider:
-    """A factory class to register and get readers for different PG types."""
+    """A factory class to register and get readers for different protein group report types."""
 
     def __init__(self):
         """Initialize PGReaderProvider."""
@@ -250,5 +261,5 @@ class PGReaderProvider:
 
 pg_reader_provider = PGReaderProvider()
 """
-A factory :class:`PGReaderProvider` object to register and get readers for different PG types.
+A factory :class:`PGReaderProvider` object to register and get readers for different protein group report types.
 """
