@@ -115,7 +115,7 @@ class PGReaderBase:
         Returns
         -------
         :class:`pd.DataFrame`
-            protein group Matrix with feature metadata as index
+            Protein group matrix with feature metadata as index
 
         """
         # Load to dataframe
