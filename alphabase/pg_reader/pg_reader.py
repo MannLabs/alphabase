@@ -89,7 +89,7 @@ class PGReaderBase:
         """Add additional column mappings for the search engine."""
         self.column_mapping = {**self.column_mapping, **column_mapping}
 
-    def import_file(self, filename: str) -> pd.DataFrame:
+    def import_file(self, file_path: str) -> pd.DataFrame:
         """Import a PG matrix and process it to the alphabase convention.
 
         Loads the PG matrix, standardizes feature metadata columns, and filters for the
@@ -97,8 +97,9 @@ class PGReaderBase:
 
         Parameters
         ----------
-        filename: str
-            File path
+        file_path: str
+            Absolute path to the file containing pg data
+
 
         Returns
         -------
@@ -107,7 +108,7 @@ class PGReaderBase:
 
         """
         # Load to dataframe
-        df = self._load_file(filename)
+        df = self._load_file(file_path)
 
         df = self._pre_process(df)
 
@@ -136,13 +137,13 @@ class PGReaderBase:
 
         return df.set_index(feature_columns)
 
-    def _load_file(self, filename: str) -> pd.DataFrame:
+    def _load_file(self, file_path: str) -> pd.DataFrame:
         """Load PG file into a dataframe.
 
         Parameters
         ----------
-        filename
-            Path to file, must be .csv, .tsv, or .hdf
+        file_path
+            File path, must be .csv, .tsv, or .hdf
 
         Returns
         -------
@@ -155,11 +156,11 @@ class PGReaderBase:
         all supported search engines.
 
         """
-        if Path(filename).suffix == ".hdf":
-            return pd.read_hdf(filename)
+        if Path(file_path).suffix == ".hdf":
+            return pd.read_hdf(file_path)
 
-        sep = _get_delimiter(filename)
-        return pd.read_csv(filename, sep=sep, keep_default_na=False)
+        sep = _get_delimiter(file_path)
+        return pd.read_csv(file_path, sep=sep, keep_default_na=False)
 
     def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
         """Preprocess dataframe before standardizing columns. Per default, returns the unchanged dataframe."""
