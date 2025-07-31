@@ -210,7 +210,7 @@ class PGReaderBase:
         extra_columns = extra_columns if extra_columns is not None else []
 
         pattern = re.compile(regex)
-        regex_columns = [col for col in df.columns if re.match(pattern, col)]
+        regex_columns = [col for col in df.columns if re.search(pattern, col)]
 
         if len(regex_columns) == 0:
             warnings.warn(f"regex {regex} did not match any columns in the dataframe")
