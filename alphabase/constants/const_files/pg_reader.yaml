@@ -13,6 +13,7 @@
 #   # If null, selects all columns in the dataframe that are not values in `column_mapping`
 #   measurement_regex: null
 
+# Based on version 1.10.4
 # https://alphadia.readthedocs.io/en/latest/methods/output-format.html#pg-matrix-tsv
 alphadia:
   reader_type: "alphadia"
