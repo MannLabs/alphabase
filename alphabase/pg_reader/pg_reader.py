@@ -174,13 +174,13 @@ class PGReaderBase:
         return pd.read_csv(file_path, sep=sep, keep_default_na=False)
 
     def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Preprocess dataframe before standardizing columns and return the updated dataframe."""
+        """Preprocess dataframe before standardizing columns and return an updated copy."""
         return df
 
     def _translate_columns(
         self, df: pd.DataFrame, column_mapping: dict[str, str]
     ) -> pd.DataFrame:
-        """Translate standardized columns in dataframe from other search engines to AlphaBase format and return the updated dataframe."""
+        """Translate standardized columns in dataframe from other search engines to AlphaBase format an updated copy."""
         return df.rename(columns=column_mapping)
 
     def _filter_measurement(
@@ -189,7 +189,7 @@ class PGReaderBase:
         regex: str,
         extra_columns: Optional[Iterable[str]] = None,
     ) -> pd.DataFrame:
-        """Subset :class:`pd.DataFrame` to columns matching a regex plus plus optionally extra columns and return the updated dataframe.
+        """Subset :class:`pd.DataFrame` to columns matching a regex plus plus optionally extra columns an updated copy.
 
         Parameters
         ----------
