@@ -12,6 +12,7 @@
 #   # Default regular expression to match the sample columns (e.g. "LFQ$" to match `xxx_LFQ` but not `xxx`)
 #   # If null, selects all columns in the dataframe that are not values in `column_mapping`
 #   measurement_regex: null
+#   TODO: add drop_columns: list[str]
 
 # Based on version 1.10.4
 # https://alphadia.readthedocs.io/en/latest/methods/output-format.html#pg-matrix-tsv
@@ -20,3 +21,15 @@ alphadia:
   column_mapping:
     uniprot_ids: "pg"
   measurement_regex: null # all remaining columns are sample columns
+
+# Based on DIANN version 1.8.1
+diann:
+  reader_type: "diann"
+  column_mapping:
+    "proteins": "Protein.Names" # see also psm_reader.yaml * **Protein.Names** names (UniProt names) of the proteins in the Protein.Group after protein inference
+    "uniprot_ids": "Protein.Group" # Protein.Ids lists all sequence identifiers associated with the peptide. see also psm_reader.yaml
+    "genes": "Genes" # see also psm_reader.yaml
+    # TODO: Drop columns `protein_candidates` and `deescription` as they are confusing and do not add valuable information
+    "protein_candidates": "Protein.Ids" # All proteins that possibly match the precursor before protein inference
+    "description": "First.Protein.Description" # Full description of first protein in Protein.Group
+  measurement_regex: null
