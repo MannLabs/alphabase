@@ -34,3 +34,19 @@ diann:
     "peptide_count": "N.Sequences" # DIANN 2.1
     "proteotypic_peptide_count": "N.Proteotypic.Sequences" # DIANN 2.1
   measurement_regex: null
+
+
+# Based on alphapept 0.5.6
+alphapept:
+  reader_type: "alphapept"
+  # Column mapping is empty
+  # Mapping is performed by _pre_process function so these are identity transforms
+  # "proteins": "proteins"
+  # "uniprot_ids": "uniprot_ids"
+  # "ensembl_ids": "ensembl_ids"
+  # "source_db": "source_db"
+  # "is_decoy": "is_decoy"
+  column_mapping: {}
+  # Match raw intensities per default.
+  # Match everything at the start but not a trailing LFQ
+  measurement_regex: "^.*(?<!_LFQ)$"
