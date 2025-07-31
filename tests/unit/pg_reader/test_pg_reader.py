@@ -130,12 +130,12 @@ class TestPGReaderBaseInit:
         )
 
     @patch("alphabase.pg_reader.pg_reader.pg_reader_yaml")
+    @pytest.mark.parametrize(("custom_regex",), [(r".*_intensity$",), ("_intensity",)])
     def test_init_with_custom_measurement_regex(
-        self, mock_yaml: Mock, mock_yaml_data: dict[str, Any]
+        self, mock_yaml: Mock, mock_yaml_data: dict[str, Any], custom_regex: str
     ) -> None:
         """Test initialization with custom measurement regex."""
         mock_yaml.__getitem__.return_value = mock_yaml_data["test_reader"]
-        custom_regex = r".*_intensity$"
 
         reader = ExamplePGReader(measurement_regex=custom_regex)
 
