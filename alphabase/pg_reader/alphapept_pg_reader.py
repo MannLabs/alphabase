@@ -13,12 +13,16 @@ class AlphaPeptPGReader(PGReaderBase):
 
     _reader_type: str = "alphapept"
 
+    # Report file settings (delimiter + index column)
     _FILE_DELIMITER: str = ","
     _INDEX_COL: str = 0
 
+    # Feature settings
     # Decoys are prefixed with REV__ in alphapept
     _DECOY_REGEX: str = "^REV__"
+    # Ensembl IDs are identified with a ENSEMBL prefix
     _ENSEMBL_REGEX: str = "^ENSEMBL:"
+    # The expected length of fasta headers is 3 (sp|Uniprot ID|Uniprot Name)
     _FASTA_HEADER_DEFAULT_LENGTH: int = 3
 
     def _load_file(self, file_path: str) -> pd.DataFrame:
