@@ -29,5 +29,5 @@ class PGCols(metaclass=ConstantsClass):
     PROTEINS = "proteins"
     UNIPROT_IDS = "uniprot_ids"
     GENES = "genes"
-    PROTEIN_CANDIDATES = "protein_candidates"
+    PROTEIN_CANDIATES = "protein_candidates"
     DESCRIPTION = "description"
