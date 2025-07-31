@@ -78,7 +78,7 @@ class AlphaPeptPGReader(PGReaderBase):
 
         return df
 
-    def _parse_alphapept_index(self, identifier: pd.Index) -> dict[str, str]:
+    def _parse_alphapept_index(self, identifier: str) -> dict[str, str]:
         """Parse protein identifier from AlphaPept protein group table.
 
         Parameters
