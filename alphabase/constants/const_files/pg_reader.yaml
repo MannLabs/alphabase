@@ -18,5 +18,5 @@
 alphadia:
   reader_type: "alphadia"
   column_mapping:
-    proteins: "pg"
+    uniprot_ids: "pg"
   measurement_regex: null # all remaining columns are sample columns

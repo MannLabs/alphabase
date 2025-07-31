@@ -11,4 +11,4 @@ class TestAlphaDiaPGReaderImportIntegration:
         result_df = reader.import_file(example_alphadia_tsv)
 
         assert result_df.shape == (9364, 6)
-        assert result_df.index.name == PGCols.PROTEINS
+        assert result_df.index.name == PGCols.UNIPROT_IDS
