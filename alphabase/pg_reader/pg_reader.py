@@ -146,6 +146,7 @@ class PGReaderBase:
                 extra_columns=feature_columns,
             )
 
+        # Keep dataframe index as default if no features are specified in column mapping
         return df.set_index(feature_columns) if len(feature_columns) > 0 else df
 
     def _load_file(self, file_path: str) -> pd.DataFrame:
