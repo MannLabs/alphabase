@@ -146,7 +146,7 @@ class PGReaderBase:
                 extra_columns=feature_columns,
             )
 
-        return df.set_index(feature_columns)
+        return df.set_index(feature_columns) if len(feature_columns) > 0 else df
 
     def _load_file(self, file_path: str) -> pd.DataFrame:
         """Load protein group (PG) file into a dataframe.
