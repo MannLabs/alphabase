@@ -99,7 +99,7 @@ class AlphaPeptPGReader(PGReaderBase):
         Parameters
         ----------
         file_path
-            File path, must be an alphapept `.csv` proteing roup report.
+            File path, must be an alphapept `.csv` protein roup report.
 
         Returns
         -------
