@@ -1,6 +1,7 @@
 """The base class for all PSM readers and the provider for all readers."""
 
 import copy
+import io
 import warnings
 from abc import ABC
 from pathlib import Path
@@ -253,7 +254,7 @@ class PSMReaderBase(ABC):
             self._post_process(origin_df)  # here, libraryreader, diann, msfragger
         return self._psm_df
 
-    def _load_file(self, filename: str) -> pd.DataFrame:
+    def _load_file(self, filename: Union[str, Path, io.StringIO]) -> pd.DataFrame:
         """Load PSM file into a dataframe.
 
         Different search engines may store PSMs in different ways: tsv, csv, HDF, XML, parquet ...
@@ -261,16 +262,21 @@ class PSMReaderBase(ABC):
 
         Parameters
         ----------
-        filename : str
-            The file path to the PSM file. 
+        filename : str | pathlib.Path | io.StringIO
+            The file path to the PSM file or the file in the io.StringIO.
 
         """
-
-        if filename.endswith(".parquet"):
-            return pd.read_parquet(filename)
-        else:
+        if isinstance(filename, io.StringIO):
             sep = _get_delimiter(filename)
             return pd.read_csv(filename, sep=sep, keep_default_na=False)
+
+        file_path = Path(filename)
+
+        if file_path.suffix == ".parquet":
+            return pd.read_parquet(file_path)
+
+        sep = _get_delimiter(str(file_path))
+        return pd.read_csv(file_path, sep=sep, keep_default_na=False)
 
     def _get_actual_column(
         self,
