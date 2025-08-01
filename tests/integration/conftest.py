@@ -38,3 +38,12 @@ def example_diann_tsv(tmp_path) -> tuple[Path, pd.DataFrame]:
     reference = pd.read_parquet(reference_download_path)
 
     return (download_path, reference)
+
+
+@pytest.fixture(scope="function")
+def example_alphapept_csv(tmp_path) -> Path:
+    """Get and parse real alphapept protein group report matrix."""
+    URL = "https://datashare.biochem.mpg.de/s/6G6KHJqwcRPQiOO"
+
+    download_path = DataShareDownloader(url=URL, output_dir=tmp_path).download()
+    return download_path
