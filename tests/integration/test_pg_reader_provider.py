@@ -53,7 +53,7 @@ class TestDiannPGReaderProvider:
 
 class TestAlphapeptPGReaderProvider:
     def test_reader_provider(self) -> None:
-        """Test whether reader provider initializes alphapept PG reader correctly."""
+        """Test whether reader provider initializes alphapept protein group reader correctly."""
         reader = pg_reader_provider.get_reader("alphapept")
 
         assert isinstance(reader, AlphaPeptPGReader)
@@ -76,7 +76,7 @@ class TestAlphapeptPGReaderProvider:
         expected_shape: tuple[int, int],
         expected_colums: list[str],
     ) -> None:
-        """Test if diann protein group report import works via `pg_reader_provider`"""
+        """Test if alphapept protein group report import works via `pg_reader_provider`"""
         reader = pg_reader_provider.get_reader(
             "alphapept", measurement_regex=measurement_regex
         )
