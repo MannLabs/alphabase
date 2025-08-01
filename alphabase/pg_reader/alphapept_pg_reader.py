@@ -71,7 +71,7 @@ class AlphaPeptPGReader(PGReaderBase):
 
     .. code-block:: python
 
-        # Get rid of data
+        # Clean up
         os.rmdir(download_dir)
 
 
