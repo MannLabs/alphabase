@@ -1,3 +1,5 @@
+from typing import Union
+
 import pytest
 
 from alphabase.pg_reader import AlphaPeptPGReader
@@ -82,16 +84,22 @@ class TestAlphapeptPGReader:
             ),
         ],
     )
-    def test_parse_alphapept_index(self, reader, identifier, expected):
+    def test_parse_alphapept_index(
+        self,
+        reader: AlphaPeptPGReader,
+        identifier: str,
+        expected: dict[str, Union[str, bool]],
+    ) -> None:
         """Test _parse_alphapept_index with various identifier formats."""
 
-        reader = AlphaPeptPGReader()
         result = reader._parse_alphapept_index(identifier)
 
         # Assert that the result matches the expected output
         assert result == expected
 
-    def test_parse_alphapept_index_multiple_decoys(self, reader):
+    def test_parse_alphapept_index_multiple_decoys(
+        self, reader: AlphaPeptPGReader
+    ) -> None:
         """Test _parse_alphapept_index with multiple decoy entries."""
         identifier = "REV__sp|Q13085|ACACA_HUMAN,REV__sp|P35520|CBS_HUMAN"
         expected = {
@@ -104,7 +112,9 @@ class TestAlphapeptPGReader:
         result = reader._parse_alphapept_index(identifier)
         assert result == expected
 
-    def test_parse_alphapept_index_mixed_decoy_regular(self, reader):
+    def test_parse_alphapept_index_mixed_decoy_regular(
+        self, reader: AlphaPeptPGReader
+    ) -> None:
         """Test _parse_alphapept_index with mixed decoy and regular entries."""
         identifier = "sp|Q9NQT4|EXOS5_HUMAN,REV__sp|Q13085|ACACA_HUMAN"
         # This tests whether is_decoy is True if ANY entry is a decoy
