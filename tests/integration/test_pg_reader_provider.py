@@ -23,13 +23,13 @@ class TestAlphaDiaPGReaderProvider:
 
 class TestDiannPGReaderProvider:
     def test_reader_provider(self) -> None:
-        """Test whether reader provider initializes alphadia PG reader correctly."""
+        """Test whether reader provider initializes DIANN PG reader correctly."""
         reader = pg_reader_provider.get_reader("diann")
 
         assert isinstance(reader, DiannPGReader)
 
     def test_reader_provider_import(self, example_diann_tsv: str) -> None:
-        """Test if diann protein group report import works via `pg_reader_provider`"""
+        """Test if DIANN protein group report import works via `pg_reader_provider`"""
         reader = pg_reader_provider.get_reader("diann")
 
         result_df = reader.import_file(example_diann_tsv)

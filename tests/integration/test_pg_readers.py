@@ -16,6 +16,7 @@ class TestAlphaDiaPGReaderImportIntegration:
 
 class TestDiannPGReaderImportIntegration:
     def test_import_real_file(self, example_diann_tsv: str) -> None:
+        """Test import of real DIANN file"""
         reader = DiannPGReader()
 
         result_df = reader.import_file(example_diann_tsv)
