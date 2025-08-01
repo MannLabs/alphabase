@@ -6,6 +6,7 @@ from alphabase.pg_reader.keys import PGCols
 
 class TestAlphaDiaPGReaderImportIntegration:
     def test_import_real_file(self, example_alphadia_tsv: str) -> None:
+        """Test import of real AlphaDIA file"""
         reader = AlphaDiaPGReader()
 
         result_df = reader.import_file(example_alphadia_tsv)
