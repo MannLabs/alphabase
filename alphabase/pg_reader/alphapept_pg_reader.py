@@ -23,7 +23,7 @@ class AlphaPeptPGReader(PGReaderBase):
     .. code-block:: python
 
         import os
-        import tmpfile
+        import tempfile
         from alphabase.tools.data_downloader import DataShareDownloader
         from alphabase.pg_reader import AlphaPeptPGReader
 
@@ -162,7 +162,7 @@ class AlphaPeptPGReader(PGReaderBase):
             - uniprot_ids: str, semicolon-separated UniProt IDs or "na"
             - ensembl_ids: str, semicolon-separated ENSEMBL IDs or "na"
             - source_db: str, semicolon-separated data sources or "na"
-            - is_decoy: bool, True if identifier starts with "REV__"
+            - is_decoy: bool, True if any identifier in a protein group starts with "REV__"
 
         Examples
         --------
