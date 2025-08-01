@@ -117,7 +117,7 @@ class AlphaPeptPGReader(PGReaderBase):
             {"source_db": "ENSEMBL;sp", "uniprot_ids": "P35520", "ensembl_ids": "ENSBTAP00000024146", "proteins": "CBS_HUMAN", "is_decoy": False}
 
             # REV__sp|Q13085|ACACA_HUMAN
-            {"source_db": "sp", "uniprot_ids": "Q13085", "ensembl_ids": "na", "proteins": "ACACA_HUMAN", "is_decoy": True}
+            {"source_db": "REV__sp", "uniprot_ids": "Q13085", "ensembl_ids": "na", "proteins": "ACACA_HUMAN", "is_decoy": True}
 
         """
         decoy_pattern = re.compile(self._DECOY_REGEX)
