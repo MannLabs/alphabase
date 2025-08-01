@@ -1,6 +1,6 @@
 import pytest
 
-from alphabase.pg_reader.alphapept_pg_reader import AlphaPeptPGReader
+from alphabase.pg_reader import AlphaPeptPGReader
 
 
 class TestAlphapeptPGReader:
