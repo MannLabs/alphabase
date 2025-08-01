@@ -256,11 +256,21 @@ class PSMReaderBase(ABC):
     def _load_file(self, filename: str) -> pd.DataFrame:
         """Load PSM file into a dataframe.
 
-        Different search engines may store PSMs in different ways: tsv, csv, HDF, XML, ...
-        This default implementation works for tsv and csv files and thus covers many readers.
+        Different search engines may store PSMs in different ways: tsv, csv, HDF, XML, parquet ...
+        This default implementation works for tsv, csv and parquet files and thus covers many readers.
+
+        Parameters
+        ----------
+        filename : str
+            The file path to the PSM file. 
+
         """
-        sep = _get_delimiter(filename)
-        return pd.read_csv(filename, sep=sep, keep_default_na=False)
+
+        if filename.endswith(".parquet"):
+            return pd.read_parquet(filename)
+        else:
+            sep = _get_delimiter(filename)
+            return pd.read_csv(filename, sep=sep, keep_default_na=False)
 
     def _get_actual_column(
         self,
