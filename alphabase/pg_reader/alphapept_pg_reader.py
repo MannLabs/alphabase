@@ -9,7 +9,75 @@ from .pg_reader import PGReaderBase, pg_reader_provider
 
 
 class AlphaPeptPGReader(PGReaderBase):
-    """Reader for protein group matrices from the alphapept search engine."""
+    """Reader for protein group matrices from the alphapept search engine.
+
+    Per default, the reader will read raw intensities from the protein group matrix. By passing a
+    suitable regular expression, it is also possible to extract LFQ corrected intensities from the
+    reader.
+
+    Example:
+    -------
+    AlphaPept protein group matrices contain both raw intensities and LFQ-corrected intensities.
+    The LFQ-corrected intensities are marked by an `_LFQ` suffix.
+
+    .. code-block:: python
+
+        import os
+        import tmpfile
+        from alphabase.tools.data_downloader import DataShareDownloader
+        from alphabase.pg_reader import AlphaPeptPGReader
+
+
+        # Get example data
+        URL = "https://datashare.biochem.mpg.de/s/6G6KHJqwcRPQiOO"
+        download_dir = tempfile.mkdtemp()
+
+        download_path = DataShareDownloader(url=URL, output_dir=download_dir).download()
+
+
+    Per default, the reader will return the raw intensities
+
+    .. code-block:: python
+
+        # Get raw intensities
+        reader = AlphaPeptPGReader()
+        results = reader.import_file(download_path)
+        results.index.names
+        > FrozenList(['proteins', 'uniprot_ids', 'ensembl_ids', 'source_db', 'is_decoy'])
+        results.columns
+        > Index(['A', 'B'], dtype='object')
+
+    To read the LFQ values, pass the regex `LFQ` to the reader
+
+    .. code-block:: python
+
+        # Get raw intensities
+        reader = AlphaPeptPGReader(measurement_regex="LFQ")
+        results = reader.import_file(download_path)
+        results.index.names
+        > FrozenList(['proteins', 'uniprot_ids', 'ensembl_ids', 'source_db', 'is_decoy'])
+        results.columns
+        > Index(['A_LFQ', 'B_LFQ'], dtype='object')
+
+
+    To get all values via a custom regex, pass `.*` that matches any column name.
+
+    .. code-block:: python
+
+        reader = AlphaPeptPGReader(measurement_regex=".*")
+        results.columns
+        > Index(['A_LFQ', 'B_LFQ', 'A', 'B'], dtype='object')
+
+
+    .. code-block:: python
+
+        # Get rid of data
+        os.rmdir(download_dir)
+
+
+
+
+    """
 
     _reader_type: str = "alphapept"
 
