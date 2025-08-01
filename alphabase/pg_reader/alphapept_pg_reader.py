@@ -135,19 +135,17 @@ class AlphaPeptPGReader(PGReaderBase):
         for entry in protein_entries:
             # Decoys
             # Identify decoys and remove decoy prefix if present
-            entry_is_decoy = bool(decoy_pattern.match(identifier))
-
-            if entry_is_decoy:
-                identifier = re.sub(decoy_pattern, "", identifier)
-
+            entry_is_decoy = bool(decoy_pattern.search(entry))
             is_decoy.append(entry_is_decoy)
 
             # Check for ENSEMBL format (ENSEMBL:IDENTIFIER)
-            if re.match(ensembl_pattern, entry):
+            if re.search(ensembl_pattern, entry):
                 source_db.append("ENSEMBL")
 
                 # Remove "ENSEMBL:" prefix
-                ensembl_ids.append(re.sub(ensembl_pattern, entry, ""))
+                uniprot_ids.append("na")
+                proteins.append("na")
+                ensembl_ids.append(re.sub(ensembl_pattern, "", entry))
 
             # Check if entry contains pipe separators (UniProt format)
             # Options:
@@ -162,16 +160,19 @@ class AlphaPeptPGReader(PGReaderBase):
                     source_db.append(parts[0])
                     uniprot_ids.append(parts[1])
                     proteins.append(parts[2])
+                    ensembl_ids.append("na")
                 else:
                     # Handle unexpected format
                     source_db.append("na")
                     uniprot_ids.append("na")
                     proteins.append(entry)
+                    ensembl_ids.append("na")
             else:
                 # No pipes or ENSEMBL prefix, assume it's just a UniProt ID
                 uniprot_ids.append(entry)
                 source_db.append("na")
                 proteins.append("na")
+                ensembl_ids.append("na")
 
         # Join with semicolons or use "na" if empty
         source_db_str = ";".join(source_db) if source_db else "na"
