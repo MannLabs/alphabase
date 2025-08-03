@@ -47,3 +47,12 @@ def example_alphapept_csv(tmp_path) -> Path:
 
     download_path = DataShareDownloader(url=URL, output_dir=tmp_path).download()
     return download_path
+
+
+@pytest.fixture(scope="function")
+def example_alphapept_hdf(tmp_path) -> Path:
+    """Get and parse real alphapept protein group report matrix."""
+    URL = "https://datashare.biochem.mpg.de/s/ZKwmZGssk9dHtic"
+
+    download_path = DataShareDownloader(url=URL, output_dir=tmp_path).download()
+    return download_path

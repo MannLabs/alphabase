@@ -41,20 +41,56 @@ class TestAlphapeptPGReaderImportIntegration:
             (".*", (3781, 4), ["A_LFQ", "B_LFQ", "A", "B"]),
         ],
     )
-    def test_import_real_file(
+    def test_import_csv_file(
         self,
         example_alphapept_csv: str,
         measurement_regex: str,
         expected_shape: tuple[int, int],
         expected_colums: list[str],
     ) -> None:
-        """Test alphapept protein group reader import with real data.
+        """Test alphapept protein group reader import with real data from alphapept csv report.
 
         Tests whether the reader can import raw data (default), LFQ data, and all columns
         """
         reader = AlphaPeptPGReader(measurement_regex=measurement_regex)
 
         result_df = reader.import_file(example_alphapept_csv)
+
+        assert result_df.shape == expected_shape
+        assert list(result_df.columns) == expected_colums
+        assert result_df.index.names == [
+            PGCols.PROTEINS,
+            PGCols.UNIPROT_IDS,
+            PGCols.ENSEMBL_IDS,
+            PGCols.SOURCE_DB,
+            PGCols.DECOY_INDICATOR,
+        ]
+
+    @pytest.mark.parametrize(
+        ("measurement_regex", "expected_shape", "expected_colums"),
+        [
+            # Default
+            (None, (3781, 2), ["A", "B"]),
+            # LFQ
+            ("LFQ", (3781, 2), ["A_LFQ", "B_LFQ"]),
+            # Get all
+            (".*", (3781, 4), ["A_LFQ", "B_LFQ", "A", "B"]),
+        ],
+    )
+    def test_import_hdf_file(
+        self,
+        example_alphapept_hdf: str,
+        measurement_regex: str,
+        expected_shape: tuple[int, int],
+        expected_colums: list[str],
+    ) -> None:
+        """Test alphapept protein group reader import with real data from alphapept hdf report.
+
+        Tests whether the reader can import raw data (default), LFQ data, and all columns
+        """
+        reader = AlphaPeptPGReader(measurement_regex=measurement_regex)
+
+        result_df = reader.import_file(example_alphapept_hdf)
 
         assert result_df.shape == expected_shape
         assert list(result_df.columns) == expected_colums
