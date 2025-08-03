@@ -80,7 +80,8 @@ class AlphaPeptPGReader(PGReaderBase):
 
     # Report file settings (delimiter + index column)
     _FILE_DELIMITER: str = ","
-    _INDEX_COL: str = 0
+    # alphapept does not set a name for the feature column, i.e. it is set to the pandas default
+    _INDEX_COL: str = "Unnamed: 0"
 
     # Feature settings
     # Decoys are prefixed with REV__ in alphapept
@@ -90,32 +91,10 @@ class AlphaPeptPGReader(PGReaderBase):
     # The expected length of fasta headers is 3 (sp|Uniprot ID|Uniprot Name)
     _FASTA_HEADER_DEFAULT_LENGTH: int = 3
 
-    def _load_file(self, file_path: str) -> pd.DataFrame:
-        """Load protein group (PG) file from alphapept into a dataframe.
-
-        Parameters
-        ----------
-        file_path
-            File path, must be an alphapept `.csv` protein group report.
-
-        Returns
-        -------
-        :class:`pd.DataFrame`
-            Protein group matrix
-
-        """
-        # alphapept does not name its feature index column, i.e. its not possible to use the standard
-        # column mapping procedure
-        # The easiest way is to overwrite the `_load_file` method and set the feature column directly as index
-        return pd.read_csv(
-            file_path,
-            sep=self._FILE_DELIMITER,
-            keep_default_na=False,
-            index_col=self._INDEX_COL,
-        )
-
     def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
         """Preprocess of alphapept protein group report and return modified copy of the dataframe.
+
+        Processes feature index to a parsed, streamlined version.
 
         Parameters
         ----------
@@ -134,11 +113,17 @@ class AlphaPeptPGReader(PGReaderBase):
 
         """
         df = df.copy()
+
+        # alphapept does not set a name for the feature column
+        # load it as regular column and set it to index afterwards
+        df = df.set_index(self._INDEX_COL)
+
         # Parse index
         parsed_index: list[dict[str, str]] = list(
             df.index.map(lambda idx: self._parse_alphapept_index(idx))
         )
 
+        # Overwrite index with streamlined version
         df.index = pd.MultiIndex.from_frame(pd.DataFrame(parsed_index))
 
         return df
