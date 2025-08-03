@@ -74,9 +74,6 @@ class AlphaPeptPGReader(PGReaderBase):
         # Clean up
         os.rmdir(download_dir)
 
-
-
-
     """
 
     _reader_type: str = "alphapept"
@@ -99,7 +96,7 @@ class AlphaPeptPGReader(PGReaderBase):
         Parameters
         ----------
         file_path
-            File path, must be an alphapept `.csv` protein roup report.
+            File path, must be an alphapept `.csv` protein group report.
 
         Returns
         -------
