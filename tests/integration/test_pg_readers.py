@@ -177,7 +177,7 @@ class TestMaxQuantPGReader:
 
 class TestSpectronautPGReader:
     def test_import_real_file(self, example_spectronaut_tsv: str) -> None:
-        """Test import of real MaxQuant file"""
+        """Test import of real spectronaut file"""
         reader = SpectronautPGReader()
 
         result_df = reader.import_file(example_spectronaut_tsv)

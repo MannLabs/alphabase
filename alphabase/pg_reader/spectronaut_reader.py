@@ -65,7 +65,7 @@ class SpectronautPGReader(PGReaderBase):
         self,
         *,
         column_mapping: Optional[dict[str, str]] = None,
-        measurement_regex: Union[str, Literal["default"], None] = "default",  # noqa: PYI051 raw and lfq are special casees and not equivalent to string
+        measurement_regex: Union[str, Literal["default"], None] = "default",  # noqa: PYI051 raw and lfq are special cases and not equivalent to string
     ):
         super().__init__(
             column_mapping=column_mapping, measurement_regex=measurement_regex
