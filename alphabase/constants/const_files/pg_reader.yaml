@@ -89,7 +89,7 @@ spectronaut:
     "default": "^\\[[0-9]+\\]"
 
 
-# https://fragpipe.nesvilab.org/docs/tutorial_fragpipe_outputs.html#combined_proteintsv
+# https://fragpipe.nesvilab.org/docs/tutorial_fragpipe_outputs.html#proteintsv
 fragpipe:
   reader_type: "fragpipe"
   column_mapping:
