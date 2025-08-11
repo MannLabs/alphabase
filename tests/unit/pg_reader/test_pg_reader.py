@@ -1,7 +1,7 @@
 """Unit tests for PGReaderBase class."""
 
 import os
-from typing import Any, Generator
+from typing import Any, Generator, Union
 from unittest.mock import Mock, patch
 
 import pandas as pd
@@ -16,8 +16,14 @@ class ExamplePGReader(PGReaderBase):
     _reader_type = "test_reader"
 
 
-@pytest.fixture
-def mock_yaml_data() -> dict[str, Any]:
+@pytest.fixture(
+    params=[
+        {"measurement_regex": None},
+        {"measurement_regex": {"lfq": "Sample_[0-9]+_LFQ"}},
+        {"measurement_regex": {"raw": "Sample_[0-9]+", "lfq": r"Sample_\d+_LFQ"}},
+    ]
+)
+def mock_yaml_data(request) -> dict[str, Any]:
     """Mock YAML configuration data."""
     return {
         "test_reader": {
@@ -26,7 +32,7 @@ def mock_yaml_data() -> dict[str, Any]:
                 "gene": "Gene Name",
                 "description": "Description",
             },
-            "measurement_regex": r"Sample_\d+_LFQ",
+            "measurement_regex": request.param["measurement_regex"],
         }
     }
 
@@ -108,10 +114,7 @@ class TestPGReaderBaseInit:
         reader = ExamplePGReader()
 
         assert reader.column_mapping == mock_yaml_data["test_reader"]["column_mapping"]
-        assert (
-            reader.measurement_regex
-            == mock_yaml_data["test_reader"]["measurement_regex"]
-        )
+        assert reader.measurement_regex is None
 
     @patch("alphabase.pg_reader.pg_reader.pg_reader_yaml")
     def test_init_with_custom_column_mapping(
@@ -124,10 +127,7 @@ class TestPGReaderBaseInit:
         reader = ExamplePGReader(column_mapping=custom_mapping)
 
         assert reader.column_mapping == custom_mapping
-        assert (
-            reader.measurement_regex
-            == mock_yaml_data["test_reader"]["measurement_regex"]
-        )
+        assert reader.measurement_regex is None
 
     @patch("alphabase.pg_reader.pg_reader.pg_reader_yaml")
     @pytest.mark.parametrize(("custom_regex",), [(r".*_intensity$",), ("_intensity",)])
@@ -169,6 +169,89 @@ class TestAddColumnMapping:
 
         assert reader.column_mapping["protein"] == "New Protein Col"
         assert reader.column_mapping["gene"] == "Gene Name"  # Unchanged
+
+
+class TestGetMeasurementRegex:
+    """Test `_get_measurement_regex` method"""
+
+    @pytest.fixture(
+        params=[
+            # argument is found in config -> retrieve value
+            {
+                "measurement_regex_argument": "lfq",
+                "config_measurement_regex_value": {"lfq": "Sample_[0-9]+_LFQ"},
+                "expected": "Sample_[0-9]+_LFQ",
+            },
+            {
+                "measurement_regex_argument": "lfq",
+                "config_measurement_regex_value": {
+                    "raw": "Sample_[0-9]+",
+                    "lfq": "Sample_[0-9]+_LFQ",
+                },
+                "expected": "Sample_[0-9]+_LFQ",
+            },
+            # argument is not found in config -> pass it through
+            {
+                "measurement_regex_argument": "no_match_in_config",
+                "config_measurement_regex_value": {"lfq": "Sample_[0-9]+_LFQ"},
+                "expected": "no_match_in_config",
+            },
+            # special case: config is None
+            {
+                "measurement_regex_argument": "regex",
+                "config_measurement_regex_value": None,
+                "expected": "regex",
+            },
+            # argument is None -> return argument (None)
+            {
+                "measurement_regex_argument": None,
+                "config_measurement_regex_value": {"lfq": "Sample_[0-9]+_LFQ"},
+                "expected": None,
+            },
+            {
+                "measurement_regex_argument": None,
+                "config_measurement_regex_value": {
+                    "raw": "Sample_[0-9]+",
+                    "lfq": r"Sample_\d+_LFQ",
+                },
+                "expected": None,
+            },
+            # special case: config is None
+            {
+                "measurement_regex_argument": None,
+                "config_measurement_regex_value": None,
+                "expected": None,
+            },
+        ]
+    )
+    def configuration_options(
+        self,
+        request,
+    ) -> tuple[Union[str, None], dict[str, Any], Union[str, None]]:
+        """Mock YAML configuration data and return expected output"""
+        measurement_regex_argument = request.param["measurement_regex_argument"]
+
+        reader_config = {
+            "column_mapping": {
+                "protein": "Protein ID",
+                "gene": "Gene Name",
+                "description": "Description",
+            },
+            "measurement_regex": request.param["config_measurement_regex_value"],
+        }
+
+        expected = request.param["expected"]
+
+        return measurement_regex_argument, reader_config, expected
+
+    @patch("alphabase.pg_reader.pg_reader.pg_reader_yaml")
+    def test_measurement_regex(self, mock_yaml, configuration_options) -> None:
+        measurement_regex_argument, reader_config, expected = configuration_options
+
+        mock_yaml.__getitem__.return_value = reader_config
+        reader = ExamplePGReader()
+
+        assert reader._get_measurement_regex(measurement_regex_argument) == expected
 
 
 class TestPreProcess:
