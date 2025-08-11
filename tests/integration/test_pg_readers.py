@@ -9,6 +9,7 @@ from alphabase.pg_reader import (
     DiannPGReader,
     FragPipePGReader,
     MaxQuantPGReader,
+    MZTabPGReader,
     SpectronautPGReader,
 )
 from alphabase.pg_reader.keys import PGCols
