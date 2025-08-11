@@ -36,6 +36,7 @@ Reader
    :maxdepth: 2
 
    modules_psm_reader
+   modules_pg_reader
 
 
 I/O
