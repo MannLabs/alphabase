@@ -87,3 +87,22 @@ spectronaut:
     # At the beginning (^) of the string, match open square bracket "\\[", any number of digits "[0-9]+", closed square bracket "\\]"
     # Square brackets are special characters -> need to be escaped with "\[". The backslash itself needs to be escaped -> "\\["
     "default": "^\\[[0-9]+\\]"
+
+
+# https://fragpipe.nesvilab.org/docs/tutorial_fragpipe_outputs.html#combined_proteintsv
+fragpipe:
+  reader_type: "fragpipe"
+  column_mapping:
+    "proteins": "Entry Name"
+    "uniprot_ids": "Protein ID"
+    "genes": "Gene Names"
+    "description": "Description"
+
+  measurement_regex:
+    "raw": "Intensity$"
+    "razor": "Razor Intensity$"
+    "unique": "Unique Intensity$"
+    "total": "Total Intensity$"
+    "lfq": "MaxLFQ Intensity$"
+    "lfq_unique": "MaxLFQ Unique Intensity$"
+    "lfq_total": "MaxLFQ Total Intensity$"
