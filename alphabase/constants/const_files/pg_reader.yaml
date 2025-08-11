@@ -72,3 +72,15 @@ maxquant:
     "raw": "^Intensity(?!\\s[LHM]\\s).+$" # Raw intensity-based quantification
     "lfq": "^LFQ intensity(?!\\s[LHM]\\s).+$" # LFQ intensity-based quantification
     "ibaq": "^iBAQ(?!\\s[LHM]\\s).+$" # Intensity-Based Absolute Quantification
+
+
+# Based on Spectronaut 20.0 Run Pivot Report (Page 80/81)
+# https://biognosys.com/content/uploads/2025/06/Spectronaut-20-Manual.pdf
+spectronaut:
+  reader_type: "spectronaut"
+  column_mapping:
+    "proteins": "PG.ProteinNames"
+    "genes": "PG.Genes"
+    "uniprot_ids": "PG.UniProtIds"
+  measurement_regex:
+    "raw": "^\\[[0-9]+\\]"
