@@ -218,3 +218,12 @@ def example_fragpipe_tsv(tmp_path) -> Path:
     reference = get_local_reference_data(test_case_name=TEST_FILE_NAME)
 
     return file_path, reference
+
+
+@pytest.fixture(scope="function")
+def example_mztab(tmp_path) -> Path:
+    """Get and parse real MZTab report"""
+    URL = "https://datashare.biochem.mpg.de/s/ayieQHU9zjY89cl"
+
+    download_path = DataShareDownloader(url=URL, output_dir=tmp_path).download()
+    return download_path

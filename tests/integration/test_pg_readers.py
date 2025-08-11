@@ -209,3 +209,18 @@ class TestFragPipePGReader:
         result_df = reader.import_file(file_path=file_path)
 
         pd.testing.assert_frame_equal(result_df, reference)
+
+
+class TestMZTabPGReader:
+    def test_import_real_file(self, example_mztab: str) -> None:
+        """Test import of real MZTab file"""
+        reader = MZTabPGReader()
+
+        result_df = reader.import_file(example_mztab)
+
+        assert result_df.shape == (1249, 4)
+        assert result_df.index.names == [
+            PGCols.UNIPROT_IDS,
+            PGCols.DESCRIPTION,
+            PGCols.SOURCE_DB,
+        ]
