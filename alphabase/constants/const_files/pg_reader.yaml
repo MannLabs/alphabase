@@ -49,4 +49,6 @@ alphapept:
   column_mapping: {}
   # Match raw intensities per default.
   # Match everything at the start but not a trailing LFQ
-  measurement_regex: "^.*(?<!_LFQ)$"
+  measurement_regex:
+    raw: "^.*(?<!_LFQ)$"
+    lfq: "_LFQ$"
