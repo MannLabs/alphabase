@@ -1,6 +1,7 @@
 """AlphaPept protein group reader."""
 
 import re
+from typing import Any, Literal, Optional, Union
 
 import pandas as pd
 
@@ -15,10 +16,14 @@ class AlphaPeptPGReader(PGReaderBase):
     suitable regular expression, it is also possible to extract LFQ corrected intensities from the
     reader.
 
-    Example:
-    -------
+    Notes:
+    -----
     AlphaPept protein group matrices contain both raw intensities and LFQ-corrected intensities.
     The LFQ-corrected intensities are marked by an `_LFQ` suffix.
+
+    Example:
+    -------
+    Get example data
 
     .. code-block:: python
 
@@ -28,14 +33,15 @@ class AlphaPeptPGReader(PGReaderBase):
         from alphabase.pg_reader import AlphaPeptPGReader
 
 
-        # Get example data
+        # Download to temporary directory
         URL = "https://datashare.biochem.mpg.de/s/6G6KHJqwcRPQiOO"
         download_dir = tempfile.mkdtemp()
 
         download_path = DataShareDownloader(url=URL, output_dir=download_dir).download()
 
 
-    Per default, the reader will return the raw intensities
+    Per default, the reader will return the raw intensities. Additional protein features are stored
+    in the dataframe index, samples are stored as columns.
 
     .. code-block:: python
 
@@ -47,12 +53,13 @@ class AlphaPeptPGReader(PGReaderBase):
         results.columns
         > Index(['A', 'B'], dtype='object')
 
-    To read the LFQ values, pass the regex `LFQ` to the reader
+    To read the LFQ values, pass the pre-configured key `lfq` to the reader, which represents a regular expression
+    that automatically extracts the `LFQ` columns from the protein group table.
 
     .. code-block:: python
 
         # Get raw intensities
-        reader = AlphaPeptPGReader(measurement_regex="LFQ")
+        reader = AlphaPeptPGReader(measurement_regex="lfq")
         results = reader.import_file(download_path)
         results.index.names
         > FrozenList(['proteins', 'uniprot_ids', 'ensembl_ids', 'source_db', 'is_decoy'])
@@ -60,7 +67,15 @@ class AlphaPeptPGReader(PGReaderBase):
         > Index(['A_LFQ', 'B_LFQ'], dtype='object')
 
 
-    To get all values via a custom regex, pass `.*` that matches any column name.
+    To checkout all preconfigured regular expressions, use the `get_preconfigured_regex` method:
+
+    .. code-block:: python
+
+        AlphaPeptPGReader.get_preconfigured_regex()
+        > {'raw': '^.*(?<!_LFQ)$', 'lfq': '_LFQ$'}
+
+
+    To get all columns (both raw or LFQ), pass a custom regular expression that matches any column name (e.g. `.*` )
 
     .. code-block:: python
 
@@ -68,6 +83,8 @@ class AlphaPeptPGReader(PGReaderBase):
         results.columns
         > Index(['A_LFQ', 'B_LFQ', 'A', 'B'], dtype='object')
 
+
+    If desired, remove the test data
 
     .. code-block:: python
 
@@ -90,6 +107,16 @@ class AlphaPeptPGReader(PGReaderBase):
     _ENSEMBL_REGEX: str = "^ENSEMBL:"
     # The expected length of fasta headers is 3 (sp|Uniprot ID|Uniprot Name)
     _FASTA_HEADER_DEFAULT_LENGTH: int = 3
+
+    def __init__(  # noqa: D107 from base class
+        self,
+        *,
+        column_mapping: Optional[dict[str, Any]] = None,
+        measurement_regex: Union[str, Literal["raw", "lfq"], None] = "raw",  # noqa: PYI051 raw and lfq are special casees and not equivalent to string
+    ):
+        super().__init__(
+            column_mapping=column_mapping, measurement_regex=measurement_regex
+        )
 
     def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
         """Preprocess of alphapept protein group report and return modified copy of the dataframe.
