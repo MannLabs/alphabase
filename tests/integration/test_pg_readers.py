@@ -7,6 +7,7 @@ from alphabase.pg_reader import (
     AlphaDiaPGReader,
     AlphaPeptPGReader,
     DiannPGReader,
+    FragPipePGReader,
     MaxQuantPGReader,
     SpectronautPGReader,
 )
@@ -195,3 +196,19 @@ class TestSpectronautPGReader:
         result_df = reader.import_file(file_path=file_path)
 
         pd.testing.assert_frame_equal(result_df, reference)
+
+
+class TestFragPipePGReader:
+    def test_import_real_file(self, example_fragpipe_tsv: str) -> None:
+        """Test import of real FragPipe file"""
+        reader = FragPipePGReader()
+
+        result_df = reader.import_file(example_fragpipe_tsv)
+
+        assert result_df.shape == (10, 20)
+        assert result_df.index.names == [
+            PGCols.PROTEINS,
+            PGCols.UNIPROT_IDS,
+            PGCols.GENES,
+            PGCols.DESCRIPTION,
+        ]
