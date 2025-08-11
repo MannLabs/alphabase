@@ -4,7 +4,7 @@ import re
 import warnings
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Dict, Iterable, Optional, Type
+from typing import Any, Dict, Iterable, Optional, Type, Union
 
 import pandas as pd
 
@@ -91,11 +91,7 @@ class PGReaderBase:
             else pg_reader_yaml[self._reader_type][_COLUMN_MAPPING]
         )
 
-        self.measurement_regex = (
-            measurement_regex
-            if measurement_regex is not None
-            else pg_reader_yaml[self._reader_type][_MEASUREMENT_REGEX]
-        )
+        self.measurement_regex = self._get_measurement_regex(regex=measurement_regex)
 
     def add_column_mapping(self, column_mapping: Dict) -> None:
         """Add additional column mappings for the search engine."""
@@ -217,6 +213,50 @@ class PGReaderBase:
             warnings.warn(f"regex {regex} did not match any columns in the dataframe")
 
         return df[regex_columns + extra_columns]
+
+    def _get_measurement_regex(self, regex: Optional[str]) -> Union[str, None]:
+        """Get the correct named measurement regex from the reader configuration.
+
+        The function tries to match the provided `regex` to the keys in `measurement_regex`. This
+        enables users to provide tangible names for the columns they want instead of abstract regular expressions.
+        If a match is found, it returns the associated value (the actual regex).
+        If this not possible, the function assumes that a regular expression was passed and
+        simply returns `regex` (special case: if `_MEASUREMENT_REGEX` does not contain any values, it also returns the `regex`)
+
+
+        Parameters
+        ----------
+        regex
+            None, Name of regular expression in reader configuration or a regular expression.
+
+
+        Returns
+        -------
+        str | None
+            Output depends on regex and the the key `measurement_regex` in reader configuration
+
+            - If `regex` is a key in the reader configuration `measurement_regex`, returns
+            the associated value
+            - If `regex` is not in the reader configuration, assumes that `regex` is an
+            actual regular expression and returns it as is (special case: if `regex` is `None`, returns `None`)
+            - If `measurement_regex` is not configured (`None`), returns `regex`.
+
+        """
+        reader_config = pg_reader_yaml[self._reader_type]
+        measurement_regex_config = reader_config.get(_MEASUREMENT_REGEX)
+
+        if measurement_regex_config is None:
+            return regex
+
+        config_regex = measurement_regex_config.get(regex)
+
+        return config_regex if config_regex is not None else regex
+
+    @classmethod
+    def get_preconfigured_regex(cls) -> dict[str, str]:
+        """Get all predefined regular expressions for this reader class as configured in `alphabase.constants.pg_reader_yaml`."""
+        available_regex = pg_reader_yaml[cls._reader_type][_MEASUREMENT_REGEX]
+        return available_regex if isinstance(available_regex, dict) else {}
 
 
 # TODO: Refactor and create base class for PG Reader provider and PSMReaderProvider
