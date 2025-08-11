@@ -80,6 +80,7 @@ class AlphaPeptPGReader(PGReaderBase):
     .. code-block:: python
 
         reader = AlphaPeptPGReader(measurement_regex=".*")
+        results = reader.import_file(download_path)
         results.columns
         > Index(['A_LFQ', 'B_LFQ', 'A', 'B'], dtype='object')
 
