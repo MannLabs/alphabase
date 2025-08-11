@@ -34,11 +34,15 @@ class TestAlphapeptPGReaderImportIntegration:
         ("measurement_regex", "expected_shape", "expected_colums"),
         [
             # Default
-            (None, (3781, 2), ["A", "B"]),
-            # LFQ
+            ("raw", (3781, 2), ["A", "B"]),
+            # Match lfq key in config
+            ("lfq", (3781, 2), ["A_LFQ", "B_LFQ"]),
+            # custom - match LFQ
             ("LFQ", (3781, 2), ["A_LFQ", "B_LFQ"]),
             # Get all
             (".*", (3781, 4), ["A_LFQ", "B_LFQ", "A", "B"]),
+            # Pass None
+            (None, (3781, 4), ["A_LFQ", "B_LFQ", "A", "B"]),
         ],
     )
     def test_import_csv_file(
@@ -70,11 +74,15 @@ class TestAlphapeptPGReaderImportIntegration:
         ("measurement_regex", "expected_shape", "expected_colums"),
         [
             # Default
-            (None, (3781, 2), ["A", "B"]),
-            # LFQ
+            ("raw", (3781, 2), ["A", "B"]),
+            # Match lfq key in config
+            ("lfq", (3781, 2), ["A_LFQ", "B_LFQ"]),
+            # custom - match LFQ
             ("LFQ", (3781, 2), ["A_LFQ", "B_LFQ"]),
             # Get all
             (".*", (3781, 4), ["A_LFQ", "B_LFQ", "A", "B"]),
+            # Pass None
+            (None, (3781, 4), ["A_LFQ", "B_LFQ", "A", "B"]),
         ],
     )
     def test_import_hdf_file(
