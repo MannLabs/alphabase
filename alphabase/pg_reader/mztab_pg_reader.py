@@ -1,6 +1,7 @@
 """FragPipe protein group reader."""
 
 from pathlib import Path
+from typing import Literal, Optional, Union
 
 import pandas as pd
 
@@ -43,6 +44,18 @@ class MZTabPGReader(PGReaderBase):
     _PROTEIN_ROW_INDICATOR: str = "PRT"
     _PROTEIN_HEADER_INDICATOR: str = "PRH"
     _SEPARATOR: str = "\t"
+
+    def __init__(  # noqa: D107 inherited from base class
+        self,
+        *,
+        column_mapping: Optional[dict[str, str]] = None,
+        measurement_regex: Union[
+            str, Literal["assay", "study_variable"], None  # noqa: PYI051 raw and lfq are special cases and not equivalent to string
+        ] = "assay",
+    ):
+        super().__init__(
+            column_mapping=column_mapping, measurement_regex=measurement_regex
+        )
 
     def _load_file(self, file_path: str) -> pd.DataFrame:
         """Load MZTab file and extract protein data section.
