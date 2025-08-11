@@ -83,4 +83,4 @@ spectronaut:
     "genes": "PG.Genes"
     "uniprot_ids": "PG.UniProtIds"
   measurement_regex:
-    "raw": "^\\[[0-9]+\\]"
+    "default": "^\\[[0-9]+\\]"
