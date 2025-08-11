@@ -3,7 +3,12 @@
 import pandas as pd
 import pytest
 
-from alphabase.pg_reader import AlphaDiaPGReader, AlphaPeptPGReader, DiannPGReader
+from alphabase.pg_reader import (
+    AlphaDiaPGReader,
+    AlphaPeptPGReader,
+    DiannPGReader,
+    MaxQuantPGReader,
+)
 from alphabase.pg_reader.keys import PGCols
 
 
@@ -135,5 +140,25 @@ class TestAlphapeptPGReaderImportIntegration:
             PGCols.UNIPROT_IDS,
             PGCols.ENSEMBL_IDS,
             PGCols.SOURCE_DB,
+            PGCols.DECOY_INDICATOR,
+        ]
+
+
+class TestMaxQuantPGReader:
+    # Do not test None as this returns far too many columns
+    @pytest.mark.parametrize(("measurement_regex",), [("raw",), ("lfq",)])
+    def test_import_real_file(
+        self, example_maxquant_tsv: str, measurement_regex: str
+    ) -> None:
+        """Test import of real MaxQuant file"""
+        reader = MaxQuantPGReader(measurement_regex=measurement_regex)
+
+        result_df = reader.import_file(example_maxquant_tsv)
+
+        assert result_df.shape == (2611, 312)
+        assert result_df.index.names == [
+            PGCols.PROTEINS,
+            PGCols.UNIPROT_IDS,
+            PGCols.GENES,
             PGCols.DECOY_INDICATOR,
         ]

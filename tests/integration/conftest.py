@@ -139,3 +139,12 @@ def example_alphapept_hdf(tmp_path) -> tuple[Path, pd.DataFrame]:
     REF_URL = "https://datashare.biochem.mpg.de/s/gVhEy0mjrEE9F5f"
 
     return get_remote_data_with_ref(url=URL, ref_url=REF_URL, directory=tmp_path)
+
+
+@pytest.fixture(scope="function")
+def example_maxquant_tsv(tmp_path) -> Path:
+    """Get and parse real alphapept protein group report matrix."""
+    URL = "https://datashare.biochem.mpg.de/s/KvToteOu0zzH17C"
+
+    download_path = DataShareDownloader(url=URL, output_dir=tmp_path).download()
+    return download_path
