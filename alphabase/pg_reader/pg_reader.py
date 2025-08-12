@@ -168,6 +168,8 @@ class PGReaderBase:
         """
         if Path(file_path).suffix == ".hdf":
             return pd.read_hdf(file_path)
+        if Path(file_path).suffix == ".parquet":
+            return pd.read_parquet(file_path)
 
         sep = _get_delimiter(file_path)
         return pd.read_csv(file_path, sep=sep, keep_default_na=False)
