@@ -162,3 +162,21 @@ def example_maxquant_tsv(tmp_path) -> tuple[Path, pd.DataFrame]:
     reference = get_local_reference_data(test_case_name=TEST_FILE_NAME)
 
     return file_path, reference
+
+
+@pytest.fixture(scope="function")
+def example_spectronaut_tsv(tmp_path) -> Path:
+    """Get and parse real spectronaut protein group report matrix (pivot report)."""
+    URL = "https://datashare.biochem.mpg.de/s/ot008eF6wwSISvk"
+
+    download_path = DataShareDownloader(url=URL, output_dir=tmp_path).download()
+    return download_path
+
+
+@pytest.fixture(scope="function")
+def example_spectronaut_parquet(tmp_path) -> Path:
+    """Get and parse real spectronaut protein group report matrix (pivot report) in parquet formata."""
+    URL = "https://datashare.biochem.mpg.de/s/W5ZgzVymP2qDSca"
+
+    download_path = DataShareDownloader(url=URL, output_dir=tmp_path).download()
+    return download_path

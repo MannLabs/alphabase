@@ -176,7 +176,7 @@ class TestMaxQuantPGReader:
 
 
 class TestSpectronautPGReader:
-    def test_import_real_file(self, example_spectronaut_tsv: str) -> None:
+    def test_import_real_file_tsv(self, example_spectronaut_tsv: str) -> None:
         """Test import of real spectronaut file"""
         reader = SpectronautPGReader()
 
@@ -187,4 +187,14 @@ class TestSpectronautPGReader:
             PGCols.PROTEINS,
             PGCols.GENES,
         ]
+        assert pd.api.types.is_numeric_dtype(result_df.values)
+
+    def test_import_real_file_parqet(self, example_spectronaut_parquet: str) -> None:
+        """Test import of real spectronaut file"""
+        reader = SpectronautPGReader()
+
+        result_df = reader.import_file(example_spectronaut_parquet)
+
+        assert result_df.shape == (7536, 35)
+        assert result_df.index.names == [None]
         assert pd.api.types.is_numeric_dtype(result_df.values)
