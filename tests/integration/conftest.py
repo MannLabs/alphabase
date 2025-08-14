@@ -41,18 +41,32 @@ def example_diann_tsv(tmp_path) -> tuple[Path, pd.DataFrame]:
 
 
 @pytest.fixture(scope="function")
-def example_alphapept_csv(tmp_path) -> Path:
+def example_alphapept_csv(tmp_path) -> tuple[Path, pd.DataFrame]:
     """Get and parse real alphapept protein group report matrix."""
     URL = "https://datashare.biochem.mpg.de/s/6G6KHJqwcRPQiOO"
+    REF_URL = "https://datashare.biochem.mpg.de/s/Re35ygdblh2T7si"
 
     download_path = DataShareDownloader(url=URL, output_dir=tmp_path).download()
-    return download_path
+    reference_download_path = DataShareDownloader(
+        url=REF_URL, output_dir=tmp_path
+    ).download()
+
+    reference = pd.read_parquet(reference_download_path)
+
+    return (download_path, reference)
 
 
 @pytest.fixture(scope="function")
-def example_alphapept_hdf(tmp_path) -> Path:
+def example_alphapept_hdf(tmp_path) -> tuple[Path, pd.DataFrame]:
     """Get and parse real alphapept protein group report matrix."""
     URL = "https://datashare.biochem.mpg.de/s/ZKwmZGssk9dHtic"
+    REF_URL = "https://datashare.biochem.mpg.de/s/gVhEy0mjrEE9F5f"
 
     download_path = DataShareDownloader(url=URL, output_dir=tmp_path).download()
-    return download_path
+    reference_download_path = DataShareDownloader(
+        url=REF_URL, output_dir=tmp_path
+    ).download()
+
+    reference = pd.read_parquet(reference_download_path)
+
+    return (download_path, reference)

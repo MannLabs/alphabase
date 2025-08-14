@@ -8,7 +8,9 @@ from alphabase.pg_reader import AlphaDiaPGReader, AlphaPeptPGReader, DiannPGRead
 
 
 class TestAlphaDiaPGReaderImportIntegration:
-    def test_import_real_file(self, example_alphadia_tsv: str) -> None:
+    def test_import_real_file(
+        self, example_alphadia_tsv: tuple[str, pd.DataFrame]
+    ) -> None:
         """Test import of real AlphaDIA file"""
         file_path, reference = example_alphadia_tsv
         reader = AlphaDiaPGReader()
@@ -30,6 +32,29 @@ class TestDiannPGReaderImportIntegration:
 
 
 class TestAlphapeptPGReaderImportIntegration:
+    def test_import_csv_file_equivalent(
+        self, example_alphapept_csv: tuple[str, pd.DataFrame]
+    ):
+        """Test that AlphaPeptPGReader default import is exactly equivalent to reference"""
+        file_path, reference = example_alphapept_csv
+        reader = AlphaPeptPGReader()
+
+        result_df = reader.import_file(file_path)
+
+        pd.testing.assert_frame_equal(result_df, reference)
+
+    def test_import_hdf_file_equivalent(
+        self, example_alphapept_hdf: tuple[str, pd.DataFrame]
+    ):
+        """Test that AlphaPeptPGReader default import is exactly equivalent to reference"""
+
+        file_path, reference = example_alphapept_hdf
+        reader = AlphaPeptPGReader()
+
+        result_df = reader.import_file(file_path)
+
+        pd.testing.assert_frame_equal(result_df, reference)
+
     @pytest.mark.parametrize(
         ("measurement_regex", "expected_shape", "expected_colums"),
         [
@@ -47,18 +72,20 @@ class TestAlphapeptPGReaderImportIntegration:
     )
     def test_import_csv_file(
         self,
-        example_alphapept_csv: str,
+        example_alphapept_csv: tuple[str, pd.DataFrame],
         measurement_regex: str,
         expected_shape: tuple[int, int],
         expected_colums: list[str],
     ) -> None:
-        """Test alphapept protein group reader import with real data from alphapept csv report.
+        """Test alphapept protein group reader import with real data from alphapept csv report and different parameter combinations.
 
         Tests whether the reader can import raw data (default), LFQ data, and all columns
         """
+        file_path, _ = example_alphapept_csv
+
         reader = AlphaPeptPGReader(measurement_regex=measurement_regex)
 
-        result_df = reader.import_file(example_alphapept_csv)
+        result_df = reader.import_file(file_path)
 
         assert result_df.shape == expected_shape
         assert list(result_df.columns) == expected_colums
@@ -87,18 +114,19 @@ class TestAlphapeptPGReaderImportIntegration:
     )
     def test_import_hdf_file(
         self,
-        example_alphapept_hdf: str,
+        example_alphapept_hdf: tuple[str, pd.DataFrame],
         measurement_regex: str,
         expected_shape: tuple[int, int],
         expected_colums: list[str],
     ) -> None:
-        """Test alphapept protein group reader import with real data from alphapept hdf report.
+        """Test alphapept protein group reader import with real data from alphapept hdf report and different parameter combinations.
 
         Tests whether the reader can import raw data (default), LFQ data, and all columns
         """
+        file_path, _ = example_alphapept_hdf
         reader = AlphaPeptPGReader(measurement_regex=measurement_regex)
 
-        result_df = reader.import_file(example_alphapept_hdf)
+        result_df = reader.import_file(file_path)
 
         assert result_df.shape == expected_shape
         assert list(result_df.columns) == expected_colums
