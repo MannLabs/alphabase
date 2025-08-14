@@ -67,30 +67,12 @@ class AlphaPeptPGReader(PGReaderBase):
         > Index(['A_LFQ', 'B_LFQ'], dtype='object')
 
 
-    To checkout all preconfigured regular expressions, use the `get_preconfigured_regex` method:
+    To check out all preconfigured regular expressions, use the `get_preconfigured_regex` method:
 
     .. code-block:: python
 
         AlphaPeptPGReader.get_preconfigured_regex()
         > {'raw': '^.*(?<!_LFQ)$', 'lfq': '_LFQ$'}
-
-
-    To get all columns (both raw or LFQ), pass a custom regular expression that matches any column name (e.g. `.*` )
-
-    .. code-block:: python
-
-        reader = AlphaPeptPGReader(measurement_regex=".*")
-        results = reader.import_file(download_path)
-        results.columns
-        > Index(['A_LFQ', 'B_LFQ', 'A', 'B'], dtype='object')
-
-
-    If desired, remove the test data
-
-    .. code-block:: python
-
-        # Clean up
-        os.rmdir(download_dir)
 
     """
 
@@ -109,12 +91,30 @@ class AlphaPeptPGReader(PGReaderBase):
     # The expected length of fasta headers is 3 (sp|Uniprot ID|Uniprot Name)
     _FASTA_HEADER_DEFAULT_LENGTH: int = 3
 
-    def __init__(  # noqa: D107 from base class
+    def __init__(
         self,
         *,
         column_mapping: Optional[dict[str, Any]] = None,
-        measurement_regex: Union[str, Literal["raw", "lfq"], None] = "raw",  # noqa: PYI051 raw and lfq are special casees and not equivalent to string
+        measurement_regex: Union[str, Literal["raw", "lfq"], None] = "raw",  # noqa: PYI051 raw and lfq are special cases and not equivalent to string
     ):
+        """Initialize AlphaPept protein group matrix reader.
+
+        Parameters
+        ----------
+        column_mapping
+            Dictionary mapping alphabase column names (keys) to AlphaPep column names (values).
+            If `None`, uses default mapping from configuration file.
+        measurement_regex
+            Pattern to select quantity columns
+
+                - "raw" (default): Raw intensities (excludes _LFQ columns)
+                - "lfq": LFQ-corrected intensities (_LFQ suffix)
+                - str: Custom regular expression pattern
+                - None: All quantity columns
+
+            See class documentation for usage examples and `get_preconfigured_regex()` for available patterns.
+
+        """
         super().__init__(
             column_mapping=column_mapping, measurement_regex=measurement_regex
         )
