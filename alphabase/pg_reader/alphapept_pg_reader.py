@@ -110,7 +110,7 @@ class AlphaPeptPGReader(PGReaderBase):
         Parameters
         ----------
         column_mapping
-            Dictionary mapping alphabase column names (keys) to AlphaPep column names (values).
+            Dictionary mapping alphabase column names (keys) to AlphaPept column names (values).
             If `None`, uses default mapping from configuration file.
         measurement_regex
             Pattern to select quantity columns
