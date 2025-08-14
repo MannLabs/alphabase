@@ -223,7 +223,7 @@ class PGReaderBase:
     def _get_measurement_regex(self, regex: Optional[str]) -> Union[str, None]:
         """Get the correct named measurement regex from the reader configuration.
 
-        The function tries to match the provided `regex` to the keys in `measurement_regex`. This
+        The function tries to match the provided `regex` to the keys in `measurement_regex` in the reader configuration. This
         enables users to provide tangible names for the columns they want instead of abstract regular expressions.
         If a match is found, it returns the associated value (the actual regex).
         If this not possible, the function assumes that a regular expression was passed and
