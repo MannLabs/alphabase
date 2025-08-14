@@ -39,9 +39,13 @@ diann:
 # Based on alphapept 0.5.6
 alphapept:
   reader_type: "alphapept"
-  # Column mapping is empty
   # Mapping is performed by _pre_process function, so the columns are already standardized
-  column_mapping: {}
+  column_mapping:
+    "proteins": "proteins"
+    "uniprot_ids": "uniprot_ids"
+    "ensembl_ids": "ensembl_ids"
+    "source_db": "source_db"
+    "is_decoy": "is_decoy"
   # Match raw intensities per default.
   # Match everything at the start but not a trailing LFQ
   measurement_regex:
