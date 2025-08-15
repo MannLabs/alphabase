@@ -31,6 +31,7 @@ Reader
 
    nbs/psm_readers
    nbs/library_reader
+   tutorials/tutorial_pg_reader
 
 
 Chemical structures
