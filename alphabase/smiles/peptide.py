@@ -33,11 +33,15 @@ class PeptideSmilesEncoder:
         dict
             Dictionary mapping position indices to modification strings, empty dict if no mods and mod_sites provided.
         """
+        mod_dict = {}
         if mods and mod_sites:
-            return {
-                int(m): mod for m, mod in zip(mod_sites.split(";"), mods.split(";"))
-            }
-        return {}
+            mod_list = mods.split(";")
+            site_list = mod_sites.split(";")
+            for site, mod in zip(site_list, mod_list):
+                if "^" in mod and site == "0":
+                    site = "1"
+                mod_dict[int(site)] = mod
+        return mod_dict
 
     def _get_terminal_placeholders(self):
         """
