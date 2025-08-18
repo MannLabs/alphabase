@@ -2799,7 +2799,6 @@ SATA@K	0.0	0.0	C(4)H(4)O(2)S(1)	0.0		User-added	0	CC(=O)SCC(=O)NCCCC[C@H](N([Fl]
 SATP@K	0.0	0.0	C(5)H(6)O(2)S(1)	0.0		User-added	0	CC(=O)SCCC(=O)NCCCC[C@H](N([Fl])([Fl]))C([Ts])=O	0.0
 Succinamide@K	0.0	0.0	C(4)H(5)N(1)O(3)	0.0		User-added	0	ONC(=O)CCC(=O)NCCCC[C@H](N([Fl])([Fl]))C([Ts])=O	0.0
 SATA-Glc@K	0.0	0.0	C(8)H(12)O(6)S(1)	0.0		User-added	0	[C@@H]1(O[C@H](CO)[C@@H](O)[C@H](O)[C@H]1O)SCC(=O)NCCCC[C@H](N([Fl])[Fl])C([Ts])=O	0.0
-GG@Any_N-term	0.0	0.0	C(4)H(6)N(2)O(2)	0.0		User-added	0	C(=O)CNC(=O)CN	0.0
 SATA@Any_N-term	0.0	0.0	C(4)H(4)O(2)S(1)	0.0		User-added	0	C(=O)CSC(=O)C	0.0
 SATA@Protein_N-term	0.0	0.0	C(4)H(4)O(2)S(1)	0.0		User-added	0	C(=O)CSC(=O)C	0.0
 SATP@Any_N-term	0.0	0.0	C(5)H(6)O(2)S(1)	0.0		User-added	0	C(=O)CCSC(=O)C	0.0
