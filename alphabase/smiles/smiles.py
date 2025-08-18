@@ -69,7 +69,7 @@ class AminoAcidModifier:
         """
         if self._n_term_modifications is None:
             self._n_term_modifications = self._get_modifications(
-                "Protein_N-term", "Any_N-term"
+                "@Protein_N-term", "@Any_N-term"
             )
         return self._n_term_modifications
 
@@ -85,7 +85,7 @@ class AminoAcidModifier:
         """
         if self._c_term_modifications is None:
             self._c_term_modifications = self._get_modifications(
-                "Protein_C-term", "Any_C-term"
+                "@Protein_C-term", "@Any_C-term"
             )
         return self._c_term_modifications
 
