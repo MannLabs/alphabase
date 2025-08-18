@@ -19,6 +19,7 @@ n_term_modifications = {
     "mTRAQ:13C(3)15N(1)@Any_N-term": "C(=O)[13C]([H])([H])[15N]1[13C]([H])([H])[13C]([H])([H])N(CC1)C",
     "mTRAQ:13C(6)15N(2)@Any_N-term": "C(=O)[13C]([H])([H])[15N]1[13C]([H])([H])[13C]([H])([H])[15N]([13C]([H])([H])[13C]1([H])([H]))[13C]([H])([H])([H])",
     "Acetyl@Any_N-term": "C(=O)C",
+    "Acetyl@Protein_N-term": "C(=O)C",
     "Propionyl@Any_N-term": "C(=O)CC",
     "Biotin@Any_N-term": "C(=O)CCCCC1SCC2NC(=O)NC21",
     "Carbamidomethyl@Any_N-term": "C(=O)NC",
@@ -30,6 +31,11 @@ n_term_modifications = {
     "Dimethyl:2H(6)13C(2)@Any_N-term": "[13C]([2H])([2H])([2H])",
     "Dimethyl:2H(4)@Any_N-term": "C([2H])([2H])([1H])",
     "Dimethyl:2H(4)13C(2)@Any_N-term": "[13C]([2H])([2H])([1H])",
+    "GG@Protein_N-term": "C(=O)CNC(=O)CN",
+    "SATA@Any_N-term": "C(=O)CSC(=O)C",
+    "SATP@Any_N-term": "C(=O)CCSC(=O)C",
+    "Succinamide@Any_N-term": "C(=O)CCC(=O)NO",
+    "SATA-Glc@Any_N-term": "C(=O)CS[C@H]1O[C@H](CO)[C@@H](O)[C@H](O)[C@H]1O",
 }
 
 
@@ -83,6 +89,15 @@ ptm_dict = {
     "Pro->(2S,3aS,7aS)-Octahydro-1H-indole-2-carboxylic_acid@P": "N1([Fl])[C@@H](C[C@@H]2CCCC[C@H]12)C(=O)[Ts]",
     "Pro->(DL)-5-trifluoromethylproline@P": "FC(C1CCC(N1([Fl]))C(=O)[Ts])(F)F",
     "hydroxyisobutyryl@K": "CC(C)(O)C(=O)NCCCCC(N([Fl])[Fl])C([Ts])=O",
+    "GG@K": "NCC(=O)NCC(=O)NCCCC[C@H](N([Fl])([Fl]))C([Ts])=O",
+    "Phospho@H": "O=P(O)(O)n1cc(nc1)C[C@@H](C(=O)[Ts])N([Fl])([Fl])",
+    "Phospho@D": "O=P(O)(O)OC(=O)C[C@@H](C(=O)[Ts])N([Fl])([Fl])",
+    "Cysteinyl@C": "N([Fl])([Fl])[C@@H](C(=O)[Ts])CSSC[C@@H](N)C(=O)O",
+    "SATA@K": "CC(=O)SCC(=O)NCCCC[C@H](N([Fl])([Fl]))C([Ts])=O",
+    "SATP@K": "CC(=O)SCCC(=O)NCCCC[C@H](N([Fl])([Fl]))C([Ts])=O",
+    "Succinamide@K": "ONC(=O)CCC(=O)NCCCC[C@H](N([Fl])([Fl]))C([Ts])=O",
+    "SATA-Glc@K": "[C@@H]1(O[C@H](CO)[C@@H](O)[C@H](O)[C@H]1O)SCC(=O)NCCCC[C@H](N([Fl])[Fl])C([Ts])=O",
+    "Methyl@H": "Cn1cc(nc1)C[C@@H](C(=O)[Ts])N([Fl])([Fl])",
 }
 
 for i in n_term_modifications:
@@ -175,5 +190,5 @@ orig_df = pd.read_csv(
     os.path.join(CONST_FILE_FOLDER, "modification.tsv"), sep="\t", index_col=0
 )
 MOD_DF[["mod_name", *orig_df.columns]].to_csv(
-    os.path.join(CONST_FILE_FOLDER, "modification2.tsv"), sep="\t", index=False
+    os.path.join(CONST_FILE_FOLDER, "modification.tsv"), sep="\t", index=False
 )
