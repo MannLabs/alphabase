@@ -22,6 +22,12 @@ class PGCols(metaclass=ConstantsClass):
         Individual entries are separated by a semicolon in the unified output.
     DESCRIPTION
         Long text description of one or more proteins in the respective protein group.
+    N_SEQUENCES
+        Number of distinct sequences identified from the data
+    PEPTIDE_COUNT
+        Number of peptides mapping to the specific protein group
+    PROTEOTYPIC_PEPTIDE_COUNT
+        Number of proteotypic, that is gene-specific, peptides mapping to the specific protein group
 
     """
 
@@ -31,3 +37,5 @@ class PGCols(metaclass=ConstantsClass):
     GENES = "genes"
     PROTEIN_CANDIDATES = "protein_candidates"
     DESCRIPTION = "description"
+    PEPTIDE_COUNT = "peptide_count"
+    PROTEOTYPIC_PEPTIDE_COUNT = "proteotypic_peptide_count"

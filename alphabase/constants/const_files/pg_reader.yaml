@@ -31,4 +31,6 @@ diann:
     "genes": "Genes" # see also psm_reader.yaml
     "protein_candidates": "Protein.Ids" # All proteins that possibly match the precursor before protein inference
     "description": "First.Protein.Description" # Full description of first protein in Protein.Group
+    "peptide_count": "N.Sequences" # DIANN 2.1
+    "proteotypic_peptide_count": "N.Proteotypic.Sequences" # DIANN 2.1
   measurement_regex: null
