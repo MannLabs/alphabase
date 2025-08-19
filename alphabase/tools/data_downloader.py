@@ -1,7 +1,7 @@
 """Download files from sharing links."""
 
 import base64
-import cgi
+import legacy_cgi
 import os
 import traceback
 import warnings
@@ -163,7 +163,7 @@ class FileDownloader(ABC):
             raise ValueError(f"Could not open {self._url} for reading filename") from e
 
         info = remotefile.info()["Content-Disposition"]
-        value, params = cgi.parse_header(info)
+        value, params = legacy_cgi.parse_header(info)
         return params["filename"]
 
     def _download_file(
