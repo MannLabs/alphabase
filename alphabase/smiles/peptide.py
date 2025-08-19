@@ -35,9 +35,8 @@ class PeptideSmilesEncoder:
         """
         mod_dict = {}
         if mods and mod_sites:
-            mod_list = mods.split(";")
-            site_list = mod_sites.split(";")
-            for site, mod in zip(site_list, mod_list):
+            for site, mod in zip(mod_sites.split(";"), mods.split(";"), strict=True):
+                # if the modification is techinically at the N-terminal, but changes the first amino acid
                 if "^" in mod and site == "0":
                     site = "1"
                 mod_dict[int(site)] = mod

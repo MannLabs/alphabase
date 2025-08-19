@@ -1,3 +1,23 @@
+"""
+This script defines and processes peptide modifications using SMILES representations.
+
+It initializes a set of common post-translational modifications (PTMs),
+N-terminal modifications, and C-terminal modifications with their corresponding SMILES strings.
+The script then validates the chemical composition of these modifications by comparing
+the SMILES representation of the modified amino acid to the unmodified one.
+
+The main functionalities include:
+- Defining modification dictionaries for PTMs, N-terminal, and C-terminal mods.
+- A generic `process_modifications` function to calculate chemical compositions from SMILES.
+- A `main` function that orchestrates the processing of all modification types and
+  updates the global modification DataFrame (`MOD_DF`).
+- Saving the updated modifications list to `modification.tsv`, effectively registering
+  these modifications for use in the AlphaBase library.
+
+This script is intended to be run to update the modification definitions when new
+modifications are added or existing ones are changed.
+"""
+
 import os
 
 import pandas as pd
@@ -9,10 +29,78 @@ from alphabase.constants.modification import MOD_DF, add_new_modifications
 from alphabase.smiles.smiles import AminoAcidModifier
 
 aa_modifier = AminoAcidModifier()
-modify_amino_acid = aa_modifier.modify_amino_acid
-n_term_modifications_smi = aa_modifier.n_term_modifications
-c_term_modifications_smi = aa_modifier.c_term_modifications
-ptm_dict_smi = aa_modifier.ptm_dict
+
+
+def process_modifications(
+    mods_dict, mod_type="ptm", get_suffixes=None, extract_mod_name=None
+):
+    """
+    Process various types of modifications (PTM, N-term, C-term) with a unified approach.
+
+    This function handles the common workflow for processing modifications:
+    calculating SMILES, determining formulas, and computing composition differences.
+
+    Parameters
+    ----------
+    mods_dict : dict
+        Dictionary mapping modification names to SMILES strings
+    mod_type : str, default="ptm"
+        Type of modification: "ptm", "n_term", or "c_term"
+
+    Returns
+    -------
+    dict
+        Dictionary of dictionaries with the following structure:
+        {
+            "mod_name": {
+                "composition": str,
+                "smiles": str
+            }
+        }
+
+    Examples
+    --------
+    >>> ptms = process_modifications(ptm_dict, mod_type="ptm")
+    >>> nterms = process_modifications(n_term_modifications,
+    ...                               mod_type="n_term",
+    ...                               get_suffixes=lambda: ["Any_N-term"])
+    """
+    to_add = {}
+
+    for ptm, smiles in mods_dict.items():
+        if mod_type == "ptm":
+            original_aa = ptm.split("@")[1].split("^")[0]
+            if original_aa.startswith("Any"):
+                original_aa = "A"
+        else:
+            original_aa = "A"
+
+        if mod_type == "ptm":
+            smi = aa_modifier.modify_amino_acid(smiles)
+        elif mod_type == "n_term":
+            smi = aa_modifier.modify_amino_acid(
+                aa_formula.loc["A", "smiles"], n_term_mod=ptm
+            )
+        else:  # c_term
+            smi = aa_modifier.modify_amino_acid(
+                aa_formula.loc["A", "smiles"], c_term_mod=ptm
+            )
+
+        ptm_formula = ChemicalCompositonFormula.from_smiles(smi)
+        original_aa_brutto_formula = aa_formula.loc[original_aa, "formula"]
+        composition = str(
+            ptm_formula
+            - ChemicalCompositonFormula(original_aa_brutto_formula)
+            - ChemicalCompositonFormula("H(2)O(1)")
+        )
+
+        to_add[ptm] = {
+            "composition": composition,
+            "smiles": smiles,
+        }
+
+    return to_add
+
 
 n_term_modifications = {
     "mTRAQ@Any_N-term": "C(=O)CN1CCN(CC1)C",
@@ -101,94 +189,54 @@ ptm_dict = {
 }
 
 for i in n_term_modifications:
-    n_term_modifications_smi[i] = n_term_modifications[i]
+    aa_modifier.n_term_modifications[i] = n_term_modifications[i]
 
 for i in c_term_modifications:
-    c_term_modifications_smi[i] = c_term_modifications[i]
+    aa_modifier.c_term_modifications[i] = c_term_modifications[i]
 
 for i in ptm_dict:
-    ptm_dict_smi[i] = ptm_dict[i]
+    aa_modifier.ptm_dict[i] = ptm_dict[i]
 
-for aa in aa_formula.index:
-    aa_row = aa_formula.loc[aa]
-    if pd.isna(aa_row["smiles"]):
-        continue
-    aa_smiles = modify_amino_acid(aa_row["smiles"])
-    chem_composition = ChemicalCompositonFormula.from_smiles(aa_smiles)
-    assert (
-        str(
-            chem_composition
-            - ChemicalCompositonFormula(aa_row["formula"])
-            - ChemicalCompositonFormula("H(2)O(1)")
+
+def main():
+    for aa in aa_formula.index:
+        aa_row = aa_formula.loc[aa]
+        if pd.isna(aa_row["smiles"]):
+            continue
+        aa_smiles = aa_modifier.modify_amino_acid(aa_row["smiles"])
+        chem_composition = ChemicalCompositonFormula.from_smiles(aa_smiles)
+        assert (
+            str(
+                chem_composition
+                - ChemicalCompositonFormula(aa_row["formula"])
+                - ChemicalCompositonFormula("H(2)O(1)")
+            )
+            == ""
         )
-        == ""
+
+    ptms_to_add = process_modifications(ptm_dict, mod_type="ptm")
+    add_new_modifications(ptms_to_add)
+
+    nterms_to_add = process_modifications(
+        n_term_modifications,
+        mod_type="n_term",
+    )
+    add_new_modifications(nterms_to_add)
+
+    cterms_to_add = process_modifications(
+        c_term_modifications,
+        mod_type="c_term",
+    )
+    add_new_modifications(cterms_to_add)
+
+    MOD_DF["unimod_id"] = MOD_DF["unimod_id"].astype(int)
+    orig_df = pd.read_csv(
+        os.path.join(CONST_FILE_FOLDER, "modification.tsv"), sep="	", index_col=0
+    )
+    MOD_DF[["mod_name", *orig_df.columns]].to_csv(
+        os.path.join(CONST_FILE_FOLDER, "modification.tsv"), sep="	", index=False
     )
 
-ptms_to_add = {}
 
-for ptm in ptm_dict:
-    smi = modify_amino_acid(ptm_dict[ptm])
-    ptm_formula = ChemicalCompositonFormula.from_smiles(smi)
-    original_aa = ptm.split("@")[1].split("^")[0]
-    if original_aa.startswith("Any"):
-        original_aa = "A"
-    original_aa_brutto_formula = aa_formula.loc[original_aa, "formula"]
-    ptms_to_add[ptm] = {
-        "composition": str(
-            ptm_formula
-            - ChemicalCompositonFormula(original_aa_brutto_formula)
-            - ChemicalCompositonFormula("H(2)O(1)")
-        ),
-        "smiles": ptm_dict[ptm],
-    }
-
-add_new_modifications(ptms_to_add)
-
-nterms_to_add = {}
-
-for ptm in n_term_modifications:
-    original_mod = ptm.split("@")[0]
-    smi = modify_amino_acid(aa_formula.loc["A", "smiles"], n_term_mod=ptm)
-    ptm_formula = ChemicalCompositonFormula.from_smiles(smi)
-    original_aa_brutto_formula = aa_formula.loc["A", "formula"]
-    suffixes = ["Any_N-term", "Protein_N-term"]
-    for suffix in suffixes:
-        nterms_to_add[original_mod + "@" + suffix] = {
-            "composition": str(
-                ptm_formula
-                - ChemicalCompositonFormula(original_aa_brutto_formula)
-                - ChemicalCompositonFormula("H(2)O(1)")
-            ),
-            "smiles": n_term_modifications[ptm],
-        }
-
-add_new_modifications(nterms_to_add)
-
-cterms_to_add = {}
-
-for ptm in c_term_modifications:
-    original_mod = ptm.split("@")[0]
-    smi = modify_amino_acid(aa_formula.loc["A", "smiles"], c_term_mod=ptm)
-    ptm_formula = ChemicalCompositonFormula.from_smiles(smi)
-    original_aa_brutto_formula = aa_formula.loc["A", "formula"]
-    suffixes = ["Any_C-term", "Protein_C-term"]
-    for suffix in suffixes:
-        composition = str(
-            ptm_formula
-            - ChemicalCompositonFormula(original_aa_brutto_formula)
-            - ChemicalCompositonFormula("H(2)O(1)")
-        )
-        cterms_to_add[original_mod + "@" + suffix] = {
-            "composition": composition,
-            "smiles": c_term_modifications[ptm],
-        }
-
-add_new_modifications(cterms_to_add)
-
-MOD_DF["unimod_id"] = MOD_DF["unimod_id"].astype(int)
-orig_df = pd.read_csv(
-    os.path.join(CONST_FILE_FOLDER, "modification.tsv"), sep="\t", index_col=0
-)
-MOD_DF[["mod_name", *orig_df.columns]].to_csv(
-    os.path.join(CONST_FILE_FOLDER, "modification.tsv"), sep="\t", index=False
-)
+if __name__ == "__main__":
+    main()
