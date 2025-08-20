@@ -7,6 +7,7 @@ Why SMILES?
 -----------
 AlphaBase uses SMILES strings to allow users to work with peptides as graphs.
 Defining your modifications in this way guarantees that the elemental composition is always consistent with the underlying chemistry.
+See `Wikipedia <https://en.wikipedia.org/wiki/Simplified_Molecular_Input_Line_Entry_System>`_ for more information.
 
 Overview of the workflow
 ------------------------
@@ -42,7 +43,7 @@ Internally the script leverages three public classes / functions:
 The full source code of the script is available at
 `alphabase/smiles/adding_smiles.py <https://github.com/MannLabs/alphabase/blob/main/alphabase/smiles/adding_smiles.py>`_
 
-Worked example
+Usage example
 --------------
 Below is a minimal snippet that adds a hypothetical modification called *Foo@K* ::
 

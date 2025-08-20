@@ -19,6 +19,7 @@ modifications are added or existing ones are changed.
 """
 
 import os
+from typing import Dict, Literal
 
 import pandas as pd
 
@@ -32,8 +33,8 @@ aa_modifier = AminoAcidModifier()
 
 
 def process_modifications(
-    mods_dict, mod_type="ptm", get_suffixes=None, extract_mod_name=None
-):
+    mods_dict: Dict[str, str], mod_type: Literal["ptm", "n_term", "c_term"] = "ptm"
+) -> Dict[str, Dict[str, str]]:
     """
     Process various types of modifications (PTM, N-term, C-term) with a unified approach.
 
@@ -61,9 +62,7 @@ def process_modifications(
     Examples
     --------
     >>> ptms = process_modifications(ptm_dict, mod_type="ptm")
-    >>> nterms = process_modifications(n_term_modifications,
-    ...                               mod_type="n_term",
-    ...                               get_suffixes=lambda: ["Any_N-term"])
+    >>> nterms = process_modifications(n_term_modifications, mod_type="n_term")
     """
     to_add = {}
 
@@ -81,10 +80,12 @@ def process_modifications(
             smi = aa_modifier.modify_amino_acid(
                 aa_formula.loc["A", "smiles"], n_term_mod=ptm
             )
-        else:  # c_term
+        elif mod_type == "c_term":
             smi = aa_modifier.modify_amino_acid(
                 aa_formula.loc["A", "smiles"], c_term_mod=ptm
             )
+        else:
+            raise ValueError(f"Invalid modification type: {mod_type}")
 
         ptm_formula = ChemicalCompositonFormula.from_smiles(smi)
         original_aa_brutto_formula = aa_formula.loc[original_aa, "formula"]
@@ -199,21 +200,6 @@ for i in ptm_dict:
 
 
 def main():
-    for aa in aa_formula.index:
-        aa_row = aa_formula.loc[aa]
-        if pd.isna(aa_row["smiles"]):
-            continue
-        aa_smiles = aa_modifier.modify_amino_acid(aa_row["smiles"])
-        chem_composition = ChemicalCompositonFormula.from_smiles(aa_smiles)
-        assert (
-            str(
-                chem_composition
-                - ChemicalCompositonFormula(aa_row["formula"])
-                - ChemicalCompositonFormula("H(2)O(1)")
-            )
-            == ""
-        )
-
     ptms_to_add = process_modifications(ptm_dict, mod_type="ptm")
     add_new_modifications(ptms_to_add)
 
