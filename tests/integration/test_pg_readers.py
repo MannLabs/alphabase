@@ -1,10 +1,10 @@
 """Integration tests for protein group reader."""
 
 import pandas as pd
-
 import pytest
 
 from alphabase.pg_reader import AlphaDiaPGReader, AlphaPeptPGReader, DiannPGReader
+from alphabase.pg_reader.keys import PGCols
 
 
 class TestAlphaDiaPGReaderImportIntegration:
