@@ -5,21 +5,8 @@ from pathlib import Path
 
 import pandas as pd
 import pytest
-import requests
 
 from alphabase.tools.data_downloader import DataShareDownloader
-
-
-def check_url(url: str, timeout: int = 5) -> None:
-    """Skip test if URL is not accessible."""
-    try:
-        response = requests.head(url, timeout=timeout)
-        if response.status_code != 200:
-            pytest.skip(
-                f"Skipping test: URL not reachable (status {response.status_code}) -> {url}"
-            )
-    except requests.RequestException as e:
-        pytest.skip(f"Skipping test: Cannot reach URL -> {url}. Error: {e}")
 
 
 def get_remote_data_with_ref(
@@ -150,8 +137,5 @@ def example_alphapept_hdf(tmp_path) -> tuple[Path, pd.DataFrame]:
     """Get and parse real alphapept protein group report matrix."""
     URL = "https://datashare.biochem.mpg.de/s/ZKwmZGssk9dHtic"
     REF_URL = "https://datashare.biochem.mpg.de/s/gVhEy0mjrEE9F5f"
-
-    check_url(URL, timeout=5)
-    check_url(REF_URL, timeout=5)
 
     return get_remote_data_with_ref(url=URL, ref_url=REF_URL, directory=tmp_path)
