@@ -83,13 +83,20 @@ class AlphaPeptPGReader(PGReaderBase):
     # alphapept does not set a name for the feature column, i.e. it is set to the pandas default
     _INDEX_COL: str = "Unnamed: 0"
 
+    # Default delimiter in fasta file headers
+    _ENTRY_DELIMITER: str = "|"
+
     # Feature settings
     # Decoys are prefixed with REV__ in alphapept
     _DECOY_REGEX: str = "^REV__"
     # Ensembl IDs are identified with a ENSEMBL prefix
     _ENSEMBL_REGEX: str = "^ENSEMBL:"
+    _ENSEMBL_NAME: str = "ENSEMBL"
+
     # The expected length of fasta headers is 3 (sp|Uniprot ID|Uniprot Name)
     _FASTA_HEADER_DEFAULT_LENGTH: int = 3
+    _NA_STR: str = "na"
+    _PG_DELIMITER: str = ";"
 
     def __init__(
         self,
@@ -168,10 +175,10 @@ class AlphaPeptPGReader(PGReaderBase):
         -------
         dict
             Dictionary with parsed components:
-            - proteins: str, semicolon-separated protein names or "na"
-            - uniprot_ids: str, semicolon-separated UniProt IDs or "na"
-            - ensembl_ids: str, semicolon-separated ENSEMBL IDs or "na"
-            - source_db: str, semicolon-separated data sources or "na"
+            - proteins: str, semicolon-separated protein names or self._NA_STR
+            - uniprot_ids: str, semicolon-separated UniProt IDs or self._NA_STR
+            - ensembl_ids: str, semicolon-separated ENSEMBL IDs or self._NA_STR
+            - source_db: str, semicolon-separated data sources or self._NA_STR
             - is_decoy: bool, True if any identifier in a protein group starts with "REV__"
 
         Examples
@@ -183,13 +190,13 @@ class AlphaPeptPGReader(PGReaderBase):
             {"source_db": "sp", "uniprot_ids": "Q9NQT4", "ensembl_ids": "na", "proteins": "EXOS5_HUMAN", "is_decoy": False}
 
             # Q0IIK2
-            {"source_db": "na", "uniprot_ids": "Q0IIK2", "ensembl_ids": "na", "proteins": "na", "is_decoy": False}
+            {"source_db": self._NA_STR, "uniprot_ids": "Q0IIK2", "ensembl_ids": "na", "proteins": self._NA_STR, "is_decoy": False}
 
             # "sp|Q9H2K8|TAOK3_HUMAN,sp|Q7L7X3|TAOK1_HUMAN"
             {"source_db": "sp;sp", "uniprot_ids": "Q9H2K8;Q7L7X3", "ensembl_ids": "na;na", "proteins": "TAOK3_HUMAN;TAOK1_HUMAN", "is_decoy": False}
 
             # ENSEMBL:ENSBTAP00000024146
-            {"source_db": "ENSEMBL", "uniprot_ids": "na", "ensembl_ids": "ENSBTAP00000024146", "proteins": "na", "is_decoy": False}
+            {"source_db": "ENSEMBL", "uniprot_ids": self._NA_STR, "ensembl_ids": "ENSBTAP00000024146", "proteins": self._NA_STR, "is_decoy": False}
 
             # ENSEMBL:ENSBTAP00000024146,sp|P35520|CBS_HUMAN
             {"source_db": "ENSEMBL;sp", "uniprot_ids": "P35520", "ensembl_ids": "ENSBTAP00000024146", "proteins": "CBS_HUMAN", "is_decoy": False}
@@ -218,11 +225,11 @@ class AlphaPeptPGReader(PGReaderBase):
 
             # Check for ENSEMBL format (ENSEMBL:IDENTIFIER)
             if re.search(ensembl_pattern, entry):
-                source_db.append("ENSEMBL")
+                source_db.append(self._ENSEMBL_NAME)
 
                 # Remove "ENSEMBL:" prefix
-                uniprot_ids.append("na")
-                proteins.append("na")
+                uniprot_ids.append(self._NA_STR)
+                proteins.append(self._NA_STR)
                 ensembl_ids.append(re.sub(ensembl_pattern, "", entry))
 
             # Check if entry contains pipe separators (UniProt format)
@@ -232,31 +239,37 @@ class AlphaPeptPGReader(PGReaderBase):
 
             # TODO: How to handle REV sequences here?
             # Currently they are only marked by the DECOY_INDICATOR flag, but should the individual identifiers be flagged as well?
-            elif "|" in entry:
-                parts = entry.split("|")
+            elif self._ENTRY_DELIMITER in entry:
+                parts = entry.split(self._ENTRY_DELIMITER)
                 if len(parts) == self._FASTA_HEADER_DEFAULT_LENGTH:
                     source_db.append(parts[0])
                     uniprot_ids.append(parts[1])
                     proteins.append(parts[2])
-                    ensembl_ids.append("na")
+                    ensembl_ids.append(self._NA_STR)
                 else:
                     # Handle unexpected format
-                    source_db.append("na")
-                    uniprot_ids.append("na")
+                    source_db.append(self._NA_STR)
+                    uniprot_ids.append(self._NA_STR)
                     proteins.append(entry)
-                    ensembl_ids.append("na")
+                    ensembl_ids.append(self._NA_STR)
             else:
                 # No pipes or ENSEMBL prefix, assume it's just a UniProt ID
                 uniprot_ids.append(entry)
-                source_db.append("na")
-                proteins.append("na")
-                ensembl_ids.append("na")
+                source_db.append(self._NA_STR)
+                proteins.append(self._NA_STR)
+                ensembl_ids.append(self._NA_STR)
 
-        # Join with semicolons or use "na" if empty
-        source_db_str = ";".join(source_db) if source_db else "na"
-        uniprot_ids_str = ";".join(uniprot_ids) if uniprot_ids else "na"
-        ensembl_ids_str = ";".join(ensembl_ids) if ensembl_ids else "na"
-        proteins_str = ";".join(proteins) if proteins else "na"
+        # Join with semicolons or use self._NA_STR if empty
+        source_db_str = (
+            self._PG_DELIMITER.join(source_db) if source_db else self._NA_STR
+        )
+        uniprot_ids_str = (
+            self._PG_DELIMITER.join(uniprot_ids) if uniprot_ids else self._NA_STR
+        )
+        ensembl_ids_str = (
+            self._PG_DELIMITER.join(ensembl_ids) if ensembl_ids else self._NA_STR
+        )
+        proteins_str = self._PG_DELIMITER.join(proteins) if proteins else self._NA_STR
         is_decoy = any(is_decoy)
 
         return {
