@@ -22,7 +22,7 @@ def mock_yaml_data() -> dict[str, Any]:
                 "gene": "Gene Name",
                 "description": "Description",
             },
-            "measurement_regex": r"Sample_\d+_LFQ",
+            "measurement_regex": {"lfq": "Sample_[0-9]+_LFQ"},
         }
     }
 

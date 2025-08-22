@@ -1,6 +1,11 @@
 """Integration tests for protein group reader provider."""
 
-from alphabase.pg_reader import AlphaDiaPGReader, DiannPGReader, pg_reader_provider
+from alphabase.pg_reader import (
+    AlphaDiaPGReader,
+    AlphaPeptPGReader,
+    DiannPGReader,
+    pg_reader_provider,
+)
 
 
 class TestAlphaDiaPGReaderProvider:
@@ -17,3 +22,11 @@ class TestDiannPGReaderProvider:
         reader = pg_reader_provider.get_reader("diann")
 
         assert isinstance(reader, DiannPGReader)
+
+
+class TestAlphapeptPGReaderProvider:
+    def test_reader_provider(self) -> None:
+        """Test whether reader provider initializes alphapept protein group reader correctly."""
+        reader = pg_reader_provider.get_reader("alphapept")
+
+        assert isinstance(reader, AlphaPeptPGReader)
