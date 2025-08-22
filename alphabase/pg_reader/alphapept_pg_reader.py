@@ -1,6 +1,7 @@
 """AlphaPept protein group reader."""
 
 import re
+import warnings
 from typing import Any, Literal, Optional, Union
 
 import pandas as pd
@@ -248,6 +249,10 @@ class AlphaPeptPGReader(PGReaderBase):
                     ensembl_ids.append(self._NA_STR)
                 else:
                     # Handle unexpected format
+                    warnings.warn(
+                        f"Encountered unexpected format. Set {entry} to proteins.",
+                        stacklevel=2,
+                    )
                     source_db.append(self._NA_STR)
                     uniprot_ids.append(self._NA_STR)
                     proteins.append(entry)
