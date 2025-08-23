@@ -178,23 +178,20 @@ class TestMaxQuantPGReader:
 class TestSpectronautPGReader:
     def test_import_real_file_tsv(self, example_spectronaut_tsv: str) -> None:
         """Test import of real spectronaut file"""
+        file_path, reference = example_spectronaut_tsv
+
         reader = SpectronautPGReader()
 
-        result_df = reader.import_file(example_spectronaut_tsv)
+        result_df = reader.import_file(file_path=file_path)
 
-        assert result_df.shape == (54863, 36)
-        assert result_df.index.names == [
-            PGCols.PROTEINS,
-            PGCols.GENES,
-        ]
-        assert pd.api.types.is_numeric_dtype(result_df.values)
+        pd.testing.assert_frame_equal(result_df, reference)
 
     def test_import_real_file_parqet(self, example_spectronaut_parquet: str) -> None:
         """Test import of real spectronaut file"""
+        file_path, reference = example_spectronaut_parquet
+
         reader = SpectronautPGReader()
 
-        result_df = reader.import_file(example_spectronaut_parquet)
+        result_df = reader.import_file(file_path=file_path)
 
-        assert result_df.shape == (7536, 35)
-        assert result_df.index.names == [None]
-        assert pd.api.types.is_numeric_dtype(result_df.values)
+        pd.testing.assert_frame_equal(result_df, reference)
