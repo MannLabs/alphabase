@@ -54,3 +54,21 @@ alphapept:
     raw: "^.*(?<!_LFQ)$"
     # Match "_LFQ" at the end of the name
     lfq: "_LFQ$"
+
+
+# Published June 27, 2024
+# https://cox-labs.github.io/coxdocs/output_tables.html#protein-groups
+maxquant:
+  reader_type: "maxquant"
+  column_mapping:
+    "proteins": "Protein names"
+    "uniprot_ids": "Protein IDs"
+    "genes": "Gene names"
+    "is_decoy": "Reverse"
+  measurement_regex:
+    # Match "Intensity <sample>"
+    # Do not match "Intensity" (sum across all samples)
+    # Do not match "Intensity L <sample>" (or M/H), from TMT experiments
+    "raw": "^Intensity(?!\\s[LHM]\\s).+$" # Raw intensity-based quantification
+    "lfq": "^LFQ intensity(?!\\s[LHM]\\s).+$" # LFQ intensity-based quantification
+    "ibaq": "^iBAQ(?!\\s[LHM]\\s).+$" # Intensity-Based Absolute Quantification

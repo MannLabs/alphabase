@@ -142,6 +142,8 @@ class PGReaderBase:
                 extra_columns=feature_columns,
             )
 
+        df = self._post_process(df)
+
         # Keep dataframe index as default if no features are specified in column mapping
         return df.set_index(feature_columns) if len(feature_columns) > 0 else df
 
@@ -213,6 +215,10 @@ class PGReaderBase:
             warnings.warn(f"regex {regex} did not match any columns in the dataframe")
 
         return df[regex_columns + extra_columns]
+
+    def _post_process(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Process dataframe after standardizing columns and return an updated copy."""
+        return df
 
     def _get_measurement_regex(self, regex: Optional[str]) -> Union[str, None]:
         """Get the correct named measurement regex from the reader configuration.

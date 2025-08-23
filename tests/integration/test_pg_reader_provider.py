@@ -4,6 +4,7 @@ from alphabase.pg_reader import (
     AlphaDiaPGReader,
     AlphaPeptPGReader,
     DiannPGReader,
+    MaxQuantPGReader,
     pg_reader_provider,
 )
 
@@ -30,3 +31,11 @@ class TestAlphapeptPGReaderProvider:
         reader = pg_reader_provider.get_reader("alphapept")
 
         assert isinstance(reader, AlphaPeptPGReader)
+
+
+class TestMaxQuantPGReaderProvider:
+    def test_reader_provider(self) -> None:
+        """Test whether reader provider initializes MaxQuant protein group reader correctly."""
+        reader = pg_reader_provider.get_reader("maxquant")
+
+        assert isinstance(reader, MaxQuantPGReader)
