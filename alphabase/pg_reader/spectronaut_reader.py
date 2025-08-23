@@ -61,12 +61,28 @@ class SpectronautPGReader(PGReaderBase):
 
     _to_nan_values: tuple[Any] = ("Filtered",)
 
-    def __init__(  # noqa: D107 inherited from base class
+    def __init__(
         self,
         *,
         column_mapping: Optional[dict[str, str]] = None,
-        measurement_regex: Union[str, Literal["default"], None] = "default",  # noqa: PYI051 raw and lfq are special cases and not equivalent to string
+        measurement_regex: Union[str, Literal["default"], None] = "default",  # noqa: PYI051 default are special cases and not equivalent to string
     ):
+        """Initialize Spectronaut protein group matrix reader.
+
+        Parameters
+        ----------
+        column_mapping
+            Dictionary mapping alphabase column names (keys) to Spectronaut column names (values).
+            If `None`, uses default mapping from configuration file.
+        measurement_regex
+            Pattern to select quantity columns
+
+                - "default" (default): Intensities exported by the user in the spectronaut report. Might depend on the specific report.
+                - custom: Any valid regular expression
+
+            See class documentation for usage examples and `get_preconfigured_regex()` for available patterns.
+
+        """
         super().__init__(
             column_mapping=column_mapping, measurement_regex=measurement_regex
         )
