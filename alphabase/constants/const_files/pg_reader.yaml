@@ -79,7 +79,7 @@ maxquant:
 spectronaut:
   reader_type: "spectronaut"
   column_mapping:
-    "proteins": "PG.ProteinNames"
+    "proteins": ["PG.ProteinNames", "PG_ProteinGroups"]
     "genes": "PG.Genes"
     "uniprot_ids": "PG.UniProtIds"
   measurement_regex:
