@@ -46,16 +46,7 @@ class MaxQuantPGReader(PGReaderBase):
         results.columns
         > Index([...], dtype='object', length=312)
 
-
-    To read the LFQ values, pass the pre-configured key `lfq` to the reader, which represents a regular expression
-    that automatically extracts the `LFQ` columns from the protein group table.
-
-    .. code-block:: python
-
-        # Get raw intensities
-        reader = MaxQuantPGReader(measurement_regex="lfq")
-        results = reader.import_file(download_path)
-
+    You can get other intensity types by passing a specific pattern to the `measurment_regex` parameter during class initialization.
     To checkout all preconfigured regular expressions that enable you to retrieve different intensity modalities,
     use the `get_preconfigured_regex` method:
 
@@ -76,14 +67,6 @@ class MaxQuantPGReader(PGReaderBase):
         reader = MaxQuantPGReader(measurement_regex="^Intensity H .+")
 
 
-    If desired, remove the test data
-
-    .. code-block:: python
-
-        # Clean up
-        os.rmdir(download_dir)
-
-
     References
     ----------
     - MaxQuant Documentation (Cox Lab, 2024-06-27): https://cox-labs.github.io/coxdocs/output_tables.html#protein-groups,
@@ -93,12 +76,30 @@ class MaxQuantPGReader(PGReaderBase):
 
     _reader_type = "maxquant"
 
-    def __init__(  # noqa: D107 inherited from base class
+    def __init__(
         self,
         *,
         column_mapping: Optional[dict[str, str]] = None,
-        measurement_regex: Union[str, Literal["raw", "lfq", "ibaq"], None] = "raw",  # noqa: PYI051 raw and lfq are special casees and not equivalent to string
+        measurement_regex: Union[str, Literal["raw", "lfq", "ibaq"], None] = "raw",  # noqa: PYI051 raw and lfq are special cases and not equivalent to string
     ):
+        """Initialize MaxQuant protein group matrix reader.
+
+        Parameters
+        ----------
+        column_mapping
+            Dictionary mapping alphabase column names (keys) to MaxQuant column names (values).
+            If `None`, uses default mapping from configuration file.
+        measurement_regex
+            Pattern to select quantity columns
+
+                - "raw" (default): Raw intensities
+                - "lfq": LFQ-corrected intensities
+                - "ibaq": Intensity-Based Absolute Quantification-corrected intensities
+                - custom: Any valid regular expression
+
+            See class documentation for usage examples and `get_preconfigured_regex()` for available patterns.
+
+        """
         super().__init__(
             column_mapping=column_mapping, measurement_regex=measurement_regex
         )

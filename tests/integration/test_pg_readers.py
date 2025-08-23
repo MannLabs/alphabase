@@ -8,6 +8,7 @@ from alphabase.pg_reader import (
     AlphaPeptPGReader,
     DiannPGReader,
     MaxQuantPGReader,
+    SpectronautPGReader,
 )
 from alphabase.pg_reader.keys import PGCols
 
@@ -172,3 +173,25 @@ class TestMaxQuantPGReader:
             PGCols.GENES,
             PGCols.DECOY_INDICATOR,
         ]
+
+
+class TestSpectronautPGReader:
+    def test_import_real_file_tsv(self, example_spectronaut_tsv: str) -> None:
+        """Test import of real spectronaut file"""
+        file_path, reference = example_spectronaut_tsv
+
+        reader = SpectronautPGReader()
+
+        result_df = reader.import_file(file_path=file_path)
+
+        pd.testing.assert_frame_equal(result_df, reference)
+
+    def test_import_real_file_parqet(self, example_spectronaut_parquet: str) -> None:
+        """Test import of real spectronaut file"""
+        file_path, reference = example_spectronaut_parquet
+
+        reader = SpectronautPGReader()
+
+        result_df = reader.import_file(file_path=file_path)
+
+        pd.testing.assert_frame_equal(result_df, reference)

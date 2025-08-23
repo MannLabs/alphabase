@@ -168,18 +168,20 @@ class PGReaderBase:
         """
         if Path(file_path).suffix == ".hdf":
             return pd.read_hdf(file_path)
+        if Path(file_path).suffix == ".parquet":
+            return pd.read_parquet(file_path)
 
         sep = _get_delimiter(file_path)
         return pd.read_csv(file_path, sep=sep, keep_default_na=False)
 
     def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Preprocess dataframe before standardizing columns and return an updated copy."""
+        """Preprocess dataframe before standardizing columns."""
         return df
 
     def _translate_columns(
         self, df: pd.DataFrame, column_mapping: dict[str, str]
     ) -> pd.DataFrame:
-        """Translate standardized columns in dataframe from other search engines to AlphaBase format and return an updated copy."""
+        """Translate standardized columns in dataframe from other search engines to AlphaBase format."""
         return df.rename(columns=column_mapping)
 
     def _filter_measurement(
@@ -188,7 +190,7 @@ class PGReaderBase:
         regex: str,
         extra_columns: Optional[Iterable[str]] = None,
     ) -> pd.DataFrame:
-        """Subset :class:`pd.DataFrame` to columns matching a regex plus optionally extra columns and return an updated copy.
+        """Subset :class:`pd.DataFrame` to columns matching a regex plus optionally extra columns.
 
         Parameters
         ----------
@@ -217,13 +219,13 @@ class PGReaderBase:
         return df[regex_columns + extra_columns]
 
     def _post_process(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Process dataframe after standardizing columns and return an updated copy."""
+        """Process dataframe after standardizing columns."""
         return df
 
     def _get_measurement_regex(self, regex: Optional[str]) -> Union[str, None]:
         """Get the correct named measurement regex from the reader configuration.
 
-        The function tries to match the provided `regex` to the keys in `measurement_regex`. This
+        The function tries to match the provided `regex` to the keys in `measurement_regex` in the reader configuration. This
         enables users to provide tangible names for the columns they want instead of abstract regular expressions.
         If a match is found, it returns the associated value (the actual regex).
         If this not possible, the function assumes that a regular expression was passed and
