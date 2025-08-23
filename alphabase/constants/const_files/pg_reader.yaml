@@ -97,7 +97,6 @@ fragpipe:
     "uniprot_ids": "Protein ID"
     "genes": "Gene Names"
     "description": "Description"
-
   measurement_regex:
     "raw": "Intensity$"
     "razor": "Razor Intensity$"
@@ -106,3 +105,16 @@ fragpipe:
     "lfq": "MaxLFQ Intensity$"
     "lfq_unique": "MaxLFQ Unique Intensity$"
     "lfq_total": "MaxLFQ Total Intensity$"
+
+
+# mzTab
+# version 2.0.0 (2019-03)
+mztab:
+  reader_type: "mztab"
+  column_mapping:
+    "uniprot_ids": "accession"
+    "description": "description"
+    "source_db": "database"
+  measurement_regex:
+    "assay": "^protein_abundance_assay\\[[0-9]+\\]" # The protein's abundance as measured in the given assay through whatever technique was employed
+    "study_variable": "^protein_abundance_study_variable\\[[0-9]+\\]" # The protein's abundance as measured in the given study variable (condition) through whatever technique was employed
