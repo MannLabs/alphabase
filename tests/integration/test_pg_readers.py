@@ -214,13 +214,20 @@ class TestFragPipePGReader:
 class TestMZTabPGReader:
     def test_import_real_file(self, example_mztab: str) -> None:
         """Test import of real MZTab file"""
+        file_path, reference = example_mztab
+
         reader = MZTabPGReader()
 
-        result_df = reader.import_file(example_mztab)
+        result_df = reader.import_file(file_path=file_path)
 
-        assert result_df.shape == (1249, 4)
-        assert result_df.index.names == [
-            PGCols.UNIPROT_IDS,
-            PGCols.DESCRIPTION,
-            PGCols.SOURCE_DB,
-        ]
+        pd.testing.assert_frame_equal(result_df, reference)
+
+    def test_import_minimal_example(self, example_mztab_minimal: str) -> None:
+        """Test import of minimal example MZTab file"""
+        file_path, reference = example_mztab_minimal
+
+        reader = MZTabPGReader()
+
+        result_df = reader.import_file(file_path=file_path)
+
+        pd.testing.assert_frame_equal(result_df, reference)

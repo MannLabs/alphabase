@@ -224,6 +224,26 @@ def example_fragpipe_tsv(tmp_path) -> Path:
 def example_mztab(tmp_path) -> Path:
     """Get and parse real MZTab report"""
     URL = "https://datashare.biochem.mpg.de/s/ayieQHU9zjY89cl"
+    REF_URL = "https://datashare.biochem.mpg.de/s/o7K2FEAmpmLUglS"
 
-    download_path = DataShareDownloader(url=URL, output_dir=tmp_path).download()
-    return download_path
+    return get_remote_data_with_ref(url=URL, ref_url=REF_URL, directory=tmp_path)
+
+
+@pytest.fixture(scope="function")
+def example_mztab_minimal(tmp_path) -> Path:
+    """Get and parse minimal MZTab report for local testing"""
+    TEST_FILE_NAME = "pg_mztab_minimal"
+    TEST_DATA = """COM	Only variable modifications can be reported when the original source is a PRIDE XML file
+
+PRH	accession	description	taxid	species	database	database_version	search_engine	best_search_engine_score[1]	search_engine_score[1]_ms_run[1]	num_psms_ms_run[1]	num_peptides_distinct_ms_run[1]	num_peptides_unique_ms_run[1]	ambiguity_members	modifications	protein_coverage	protein_abundance_assay[1]	protein_abundance_assay[2]	protein_abundance_assay[3]	protein_abundance_assay[4]
+PRT	223462890	Spna2 protein [Mus musculus]	10090	Mus musculus (Mouse)	NCBInr_2010_10	nr_101020.fasta	[MS, MS:1001207, Mascot, ]	6539.67	6539.67	157	92	null	null	null	0	1	0.853	0.864	0.791
+PRT	19855078	RecName: Full=Sodium/potassium-transporting ATPase subunit alpha-3; Short=Na(+)/K(+) ATPase alpha-3 subunit; AltName: Full=Na(+)/K(+) ATPase alpha(III) subunit; AltName: Full=Sodium pump subunit alpha-3	10090	Mus musculus (Mouse)	NCBInr_2010_10	nr_101020.fasta	[MS, MS:1001207, Mascot, ]	6331.91	6331.91	144	49	null	null	32-MOD:00425,525-MOD:00425,606-MOD:00425,725-MOD:00425,739-MOD:00425,940-MOD:00425	0	null	null	null	null
+PRT	21450277	sodium/potassium-transporting ATPase subunit alpha-1 precursor [Mus musculus]	10090	Mus musculus (Mouse)	NCBInr_2010_10	nr_101020.fasta	[MS, MS:1001207, Mascot, ]	4577.11	4577.11	112	39	null	null	42-MOD:00425,616-MOD:00425,749-MOD:00425,950-MOD:00425	0	1	0.776	0.819	0.687
+PRT	6978545	sodium/potassium-transporting ATPase subunit alpha-2 precursor [Rattus norvegicus]	10090	Mus musculus (Mouse)	NCBInr_2010_10	nr_101020.fasta	[MS, MS:1001207, Mascot, ]	4342.81	4342.81	108	42	null	null	40-MOD:00425,613-MOD:00425,746-MOD:00425,947-MOD:00425	0	1	0.784	0.848	0.693
+    """
+    file_path = write_test_data(
+        data=TEST_DATA, directory=tmp_path, test_case_name=TEST_FILE_NAME
+    )
+    reference = get_local_reference_data(test_case_name=TEST_FILE_NAME)
+
+    return file_path, reference
