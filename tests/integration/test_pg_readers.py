@@ -145,17 +145,27 @@ class TestAlphapeptPGReaderImportIntegration:
 
 
 class TestMaxQuantPGReader:
-    # Do not test None as this returns far too many columns
-    @pytest.mark.parametrize(("measurement_regex",), [("raw",), ("lfq",)])
-    def test_import_real_file(
-        self, example_maxquant_tsv: str, measurement_regex: str
-    ) -> None:
+    def test_import(self, example_maxquant_tsv: str) -> None:
         """Test import of real MaxQuant file"""
+        file_path, reference = example_maxquant_tsv
+
+        reader = MaxQuantPGReader()
+        result_df = reader.import_file(file_path=file_path)
+
+        pd.testing.assert_frame_equal(result_df, reference)
+
+    @pytest.mark.parametrize(("measurement_regex",), [("raw",), ("lfq",)])
+    def test_measurement_regex(
+        self, example_maxquant_tsv: tuple[str, pd.DataFrame], measurement_regex: str
+    ) -> None:
+        """Test import with different regular expressions"""
+        file_path, _ = example_maxquant_tsv
+
         reader = MaxQuantPGReader(measurement_regex=measurement_regex)
 
-        result_df = reader.import_file(example_maxquant_tsv)
+        result_df = reader.import_file(file_path=file_path)
 
-        assert result_df.shape == (2611, 312)
+        assert result_df.shape == (9, 312)
         assert result_df.index.names == [
             PGCols.PROTEINS,
             PGCols.UNIPROT_IDS,
