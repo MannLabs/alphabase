@@ -201,14 +201,10 @@ class TestSpectronautPGReader:
 class TestFragPipePGReader:
     def test_import_real_file(self, example_fragpipe_tsv: str) -> None:
         """Test import of real FragPipe file"""
+        file_path, reference = example_fragpipe_tsv
+
         reader = FragPipePGReader()
 
-        result_df = reader.import_file(example_fragpipe_tsv)
+        result_df = reader.import_file(file_path=file_path)
 
-        assert result_df.shape == (10, 20)
-        assert result_df.index.names == [
-            PGCols.PROTEINS,
-            PGCols.UNIPROT_IDS,
-            PGCols.GENES,
-            PGCols.DESCRIPTION,
-        ]
+        pd.testing.assert_frame_equal(result_df, reference)
