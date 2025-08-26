@@ -19,6 +19,7 @@ else
 fi
 
 # pytables has known issues on MacOS for pg-readers - install from conda
+# https://github.com/PyTables/PyTables/issues/219#issuecomment-24117053
 if [ "$OS" = "macOS-latest" ]; then
   conda install -n $ENV_NAME -c conda-forge pytables -y
 elif ["$OS" = "macos-latest-xlarge"]; then
