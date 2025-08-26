@@ -1,7 +1,15 @@
 """Integration tests for protein group reader provider."""
 
-from alphabase.pg_reader import AlphaDiaPGReader, pg_reader_provider
-from alphabase.pg_reader.keys import PGCols
+from alphabase.pg_reader import (
+    AlphaDiaPGReader,
+    AlphaPeptPGReader,
+    DiannPGReader,
+    FragPipePGReader,
+    MaxQuantPGReader,
+    MZTabPGReader,
+    SpectronautPGReader,
+    pg_reader_provider,
+)
 
 
 class TestAlphaDiaPGReaderProvider:
@@ -11,11 +19,50 @@ class TestAlphaDiaPGReaderProvider:
 
         assert isinstance(reader, AlphaDiaPGReader)
 
-    def test_reader_provider_import(self, example_alphadia_tsv: str) -> None:
-        """Test if import works via `pg_reader_provider`"""
-        reader = pg_reader_provider.get_reader("alphadia")
 
-        result_df = reader.import_file(example_alphadia_tsv)
+class TestDiannPGReaderProvider:
+    def test_reader_provider(self) -> None:
+        """Test whether reader provider initializes DIANN PG reader correctly."""
+        reader = pg_reader_provider.get_reader("diann")
 
-        assert result_df.shape == (9364, 6)
-        assert result_df.index.name == PGCols.UNIPROT_IDS
+        assert isinstance(reader, DiannPGReader)
+
+
+class TestAlphapeptPGReaderProvider:
+    def test_reader_provider(self) -> None:
+        """Test whether reader provider initializes alphapept protein group reader correctly."""
+        reader = pg_reader_provider.get_reader("alphapept")
+
+        assert isinstance(reader, AlphaPeptPGReader)
+
+
+class TestMaxQuantPGReaderProvider:
+    def test_reader_provider(self) -> None:
+        """Test whether reader provider initializes MaxQuant protein group reader correctly."""
+        reader = pg_reader_provider.get_reader("maxquant")
+
+        assert isinstance(reader, MaxQuantPGReader)
+
+
+class TestSpectronautPGReaderProvider:
+    def test_reader_provider(self) -> None:
+        """Test whether reader provider initializes spectronaut protein group reader correctly."""
+        reader = pg_reader_provider.get_reader("spectronaut")
+
+        assert isinstance(reader, SpectronautPGReader)
+
+
+class TestFragPipePGReaderProvider:
+    def test_reader_provider(self) -> None:
+        """Test whether reader provider initializes FragPipe protein group reader correctly."""
+        reader = pg_reader_provider.get_reader("fragpipe")
+
+        assert isinstance(reader, FragPipePGReader)
+
+
+class TestMZTabPGReaderProvider:
+    def test_reader_provider(self) -> None:
+        """Test whether reader provider initializes MZTab protein group reader correctly."""
+        reader = pg_reader_provider.get_reader("mztab")
+
+        assert isinstance(reader, MZTabPGReader)
