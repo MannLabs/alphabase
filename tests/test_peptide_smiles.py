@@ -33,7 +33,7 @@ def test_peptide_to_smiles_with_modifications(encoder):
     # Given
     sequence = "QMNPHIR"
     mods = "Gln->pyro-Glu@Q^Any_N-term;Oxidation@M"
-    mod_sites = "1;2"
+    mod_sites = "0;2"
     # When
     smiles = encoder.peptide_to_smiles(sequence, mods, mod_sites)
     mol = Chem.MolFromSmiles(smiles)
