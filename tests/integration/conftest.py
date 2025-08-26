@@ -162,3 +162,88 @@ def example_maxquant_tsv(tmp_path) -> tuple[Path, pd.DataFrame]:
     reference = get_local_reference_data(test_case_name=TEST_FILE_NAME)
 
     return file_path, reference
+
+
+@pytest.fixture(scope="function")
+def example_spectronaut_tsv(tmp_path) -> Path:
+    """Get and parse real spectronaut protein group report matrix (pivot report)."""
+    TEST_FILE_NAME = "pg_spectronaut_18.0.tsv"
+    TEST_DATA = """PG.Genes	PG.Organisms	PG.ProteinNames	PTM.CollapseKey	PTM.FlankingRegion	PTM.ModificationTitle	PTM.Multiplicity	PTM.ProteinId	PTM.SiteAA	PTM.SiteLocation	[1] 20180815_QE3_nLC3_AH_DIA_Honly_ind_01.raw.PTM.Quantity	[2] 20180815_QE3_nLC3_AH_DIA_Honly_ind_02.raw.PTM.Quantity	[3] 20180815_QE3_nLC3_AH_DIA_Honly_ind_03.raw.PTM.Quantity	[4] 20180815_QE3_nLC3_AH_DIA_Yonly_ind_01.raw.PTM.Quantity	[5] 20180815_QE3_nLC3_AH_DIA_Yonly_ind_02.raw.PTM.Quantity	[6] 20180815_QE3_nLC3_AH_DIA_Yonly_ind_03.raw.PTM.Quantity	[7] 20180816_QE3_nLC3_AH_DIA_H100_Y100_01.raw.PTM.Quantity	[8] 20180816_QE3_nLC3_AH_DIA_H100_Y100_02.raw.PTM.Quantity	[9] 20180816_QE3_nLC3_AH_DIA_H100_Y100_03.raw.PTM.Quantity	[10] 20180816_QE3_nLC3_AH_DIA_H100_Y100_04.raw.PTM.Quantity	[11] 20180816_QE3_nLC3_AH_DIA_H100_Y100_05.raw.PTM.Quantity	[12] 20180816_QE3_nLC3_AH_DIA_H100_Y100_06.raw.PTM.Quantity	[13] 20180816_QE3_nLC3_AH_DIA_H100_Y150_01.raw.PTM.Quantity	[14] 20180816_QE3_nLC3_AH_DIA_H100_Y150_02.raw.PTM.Quantity	[15] 20180816_QE3_nLC3_AH_DIA_H100_Y150_03.raw.PTM.Quantity	[16] 20180816_QE3_nLC3_AH_DIA_H100_Y150_04.raw.PTM.Quantity	[17] 20180816_QE3_nLC3_AH_DIA_H100_Y150_05.raw.PTM.Quantity	[18] 20180816_QE3_nLC3_AH_DIA_H100_Y150_06.raw.PTM.Quantity	[19] 20180816_QE3_nLC3_AH_DIA_H100_Y200_01.raw.PTM.Quantity	[20] 20180816_QE3_nLC3_AH_DIA_H100_Y200_02.raw.PTM.Quantity	[21] 20180816_QE3_nLC3_AH_DIA_H100_Y200_03.raw.PTM.Quantity	[22] 20180816_QE3_nLC3_AH_DIA_H100_Y200_04.raw.PTM.Quantity	[23] 20180816_QE3_nLC3_AH_DIA_H100_Y200_05.raw.PTM.Quantity	[24] 20180816_QE3_nLC3_AH_DIA_H100_Y200_06.raw.PTM.Quantity	[25] 20180816_QE3_nLC3_AH_DIA_H100_Y25_01.raw.PTM.Quantity	[26] 20180816_QE3_nLC3_AH_DIA_H100_Y25_02.raw.PTM.Quantity	[27] 20180816_QE3_nLC3_AH_DIA_H100_Y25_03.raw.PTM.Quantity	[28] 20180816_QE3_nLC3_AH_DIA_H100_Y25_04.raw.PTM.Quantity	[29] 20180816_QE3_nLC3_AH_DIA_H100_Y25_05.raw.PTM.Quantity	[30] 20180816_QE3_nLC3_AH_DIA_H100_Y25_06.raw.PTM.Quantity	[31] 20180816_QE3_nLC3_AH_DIA_H100_Y50_01.raw.PTM.Quantity	[32] 20180816_QE3_nLC3_AH_DIA_H100_Y50_02.raw.PTM.Quantity	[33] 20180816_QE3_nLC3_AH_DIA_H100_Y50_03.raw.PTM.Quantity	[34] 20180816_QE3_nLC3_AH_DIA_H100_Y50_04.raw.PTM.Quantity	[35] 20180816_QE3_nLC3_AH_DIA_H100_Y50_05.raw.PTM.Quantity	[36] 20180816_QE3_nLC3_AH_DIA_H100_Y50_06.raw.PTM.Quantity
+TRBV19;TRB	Homo sapiens	TVB19_HUMAN;TRBR1_HUMAN	A0A075B6N1_S86_M3	IAEGYSVSREKKESF	Phospho (STY)	3	A0A075B6N1	S	86	Filtered	Filtered	Filtered	Filtered	Filtered	Filtered	89374.65625	Filtered	90181.578125	96197.0703125	89868.4375	88778.9453125	75351.0234375	80948.8515625	80663.4296875	84789.296875	79565.1875	76369.9921875	76147.9609375	75591.015625	75025.4609375	73621.09375	70005.9140625	71209.375	111330.484375	89729.921875	69968.8359375	103632.6015625	90488.9296875	113429.859375	96970.2734375	61069.171875	99673.2734375	109199.875	112307.4765625	112374.84375
+TRBV19;TRB	Homo sapiens	TVB19_HUMAN;TRBR1_HUMAN	A0A075B6N1_S84_M3	GDIAEGYSVSREKKE	Phospho (STY)	3	A0A075B6N1	S	84	Filtered	Filtered	Filtered	Filtered	Filtered	Filtered	89374.65625	Filtered	90181.578125	96197.0703125	89868.4375	88778.9453125	75351.0234375	80948.8515625	80663.4296875	84789.296875	79565.1875	76369.9921875	76147.9609375	75591.015625	75025.4609375	73621.09375	70005.9140625	71209.375	111330.484375	89729.921875	69968.8359375	103632.6015625	90488.9296875	113429.859375	96970.2734375	61069.171875	99673.2734375	109199.875	112307.4765625	112374.84375
+TRBV19;TRB	Homo sapiens	TVB19_HUMAN;TRBR1_HUMAN	A0A075B6N1_Y83_M3	KGDIAEGYSVSREKK	Phospho (STY)	3	A0A075B6N1	Y	83	Filtered	Filtered	Filtered	Filtered	Filtered	Filtered	89374.65625	Filtered	90181.578125	96197.0703125	89868.4375	88778.9453125	75351.0234375	80948.8515625	80663.4296875	84789.296875	79565.1875	76369.9921875	76147.9609375	75591.015625	75025.4609375	73621.09375	70005.9140625	71209.375	111330.484375	89729.921875	69968.8359375	103632.6015625	90488.9296875	113429.859375	96970.2734375	61069.171875	99673.2734375	109199.875	112307.4765625	112374.84375
+TRBV19;TRB	Homo sapiens	TVB19_HUMAN;TRBR1_HUMAN	P0DSE2_S86_M3	IAEGYSVSREKKESF	Phospho (STY)	3	P0DSE2	S	86	Filtered	Filtered	Filtered	Filtered	Filtered	Filtered	89374.65625	Filtered	90181.578125	96197.0703125	89868.4375	88778.9453125	75351.0234375	80948.8515625	80663.4296875	84789.296875	79565.1875	76369.9921875	76147.9609375	75591.015625	75025.4609375	73621.09375	70005.9140625	71209.375	111330.484375	89729.921875	69968.8359375	103632.6015625	90488.9296875	113429.859375	96970.2734375	61069.171875	99673.2734375	109199.875	112307.4765625	112374.84375
+TRBV19;TRB	Homo sapiens	TVB19_HUMAN;TRBR1_HUMAN	P0DSE2_S84_M3	GDIAEGYSVSREKKE	Phospho (STY)	3	P0DSE2	S	84	Filtered	Filtered	Filtered	Filtered	Filtered	Filtered	89374.65625	Filtered	90181.578125	96197.0703125	89868.4375	88778.9453125	75351.0234375	80948.8515625	80663.4296875	84789.296875	79565.1875	76369.9921875	76147.9609375	75591.015625	75025.4609375	73621.09375	70005.9140625	71209.375	111330.484375	89729.921875	69968.8359375	103632.6015625	90488.9296875	113429.859375	96970.2734375	61069.171875	99673.2734375	109199.875	112307.4765625	112374.84375
+TRBV19;TRB	Homo sapiens	TVB19_HUMAN;TRBR1_HUMAN	P0DSE2_Y83_M3	KGDIAEGYSVSREKK	Phospho (STY)	3	P0DSE2	Y	83	Filtered	Filtered	Filtered	Filtered	Filtered	Filtered	89374.65625	Filtered	90181.578125	96197.0703125	89868.4375	88778.9453125	75351.0234375	80948.8515625	80663.4296875	84789.296875	79565.1875	76369.9921875	76147.9609375	75591.015625	75025.4609375	73621.09375	70005.9140625	71209.375	111330.484375	89729.921875	69968.8359375	103632.6015625	90488.9296875	113429.859375	96970.2734375	61069.171875	99673.2734375	109199.875	112307.4765625	112374.84375
+RAMACL;RAMAC	Homo sapiens	RMACL_HUMAN;RAMAC_HUMAN	A0A3B3IU46_S36_M1	YLKRPPESPPIVEEW	Phospho (STY)	1	A0A3B3IU46	S	36	Filtered	Filtered	Filtered	Filtered	Filtered	Filtered	1200.7196044921875	5300.68896484375	4638.056640625	4712.28076171875	3450.970703125	5380.7333984375	7731.48486328125	6493.57861328125	5718.142578125	6750.22802734375	6919.2783203125	6276.05029296875	5876.96875	8595.048828125	4630.2802734375	3050.944580078125	Filtered	7158.28369140625	Filtered	4104.6337890625	4239.0849609375	3748.393798828125	2717.6083984375	5581.71435546875	1382.2950439453125	7370.5205078125	5632.4931640625	5181.73046875	4633.93701171875	4836.95556640625
+RAMACL;RAMAC	Homo sapiens	RMACL_HUMAN;RAMAC_HUMAN	Q9BTL3_S36_M1	YLKRPPESPPIVEEW	Phospho (STY)	1	Q9BTL3	S	36	Filtered	Filtered	Filtered	Filtered	Filtered	Filtered	1200.7196044921875	5300.68896484375	4638.056640625	4712.28076171875	3450.970703125	5380.7333984375	7731.48486328125	6493.57861328125	5718.142578125	6750.22802734375	6919.2783203125	6276.05029296875	5876.96875	8595.048828125	4630.2802734375	3050.944580078125	Filtered	7158.28369140625	Filtered	4104.6337890625	4239.0849609375	3748.393798828125	2717.6083984375	5581.71435546875	1382.2950439453125	7370.5205078125	5632.4931640625	5181.73046875	4633.93701171875	4836.95556640625
+"""
+    file_path = write_test_data(
+        data=TEST_DATA, directory=tmp_path, test_case_name=TEST_FILE_NAME
+    )
+    reference = get_local_reference_data(test_case_name=TEST_FILE_NAME)
+
+    return file_path, reference
+
+
+@pytest.fixture(scope="function")
+def example_spectronaut_parquet(tmp_path) -> Path:
+    """Get and parse real spectronaut protein group report matrix (pivot report) in parquet format."""
+    URL = "https://datashare.biochem.mpg.de/s/W5ZgzVymP2qDSca"
+    REF_URL = "https://datashare.biochem.mpg.de/s/nhxU8NZXQt35BWw"
+
+    return get_remote_data_with_ref(url=URL, ref_url=REF_URL, directory=tmp_path)
+
+
+@pytest.fixture(scope="function")
+def example_fragpipe_tsv(tmp_path) -> Path:
+    """Get and parse real FragPipe protein group report matrix (protein.tsv)."""
+    TEST_FILE_NAME = "pg_fragpipe"
+    TEST_DATA = """Protein Group	SubGroup	Protein	Protein ID	Entry Name	Gene Names	Protein Length	Coverage	Organism	Protein Existence	Description	Protein Probability	Top Peptide Probability	Unique Stripped Peptides	Summarized Total Spectral Count	Summarized Unique Spectral Count	S1 Razor Intensity	S2 Razor Intensity	S3 Razor Intensity	S4 Razor Intensity	S5 Razor Intensity	S6 Razor Intensity	S7 Razor Intensity	S8 Razor Intensity	S9 Razor Intensity	S10 Razor Intensity	S11 Razor Intensity	S12 Razor Intensity	S13 Razor Intensity	S14 Razor Intensity	S15 Razor Intensity	S16 Razor Intensity	S17 Razor Intensity	S18 Razor Intensity	S19 Razor Intensity	S20 Razor Intensity
+679	a	sp|P02790|HEMO_HUMAN	P02790	HEMO_HUMAN	HPX	462	82.9	Homo sapiens OX=9606	1:Experimental evidence at protein level	Hemopexin	1.0	0.9990000000000001	95	25026	25025	2216637.5	2295583.8	1240315.4	106460.28	1019385.2	2596973.0	3091005.2	2327599.5	2323380.0	3109355.8	2113776.8	2301295.2	2451093.5	142603.97	946154.75	3126271.8	2970801.5	2399545.8	3020956.8	3691187.2
+680	a	sp|P02792|FRIL_HUMAN	P02792	FRIL_HUMAN	FTL	175	40.6	Homo sapiens OX=9606	1:Experimental evidence at protein level	Ferritin light chain	1.0	0.9990000000000001	18	69	67	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0
+681	a	sp|P02794|FRIH_HUMAN	P02794	FRIH_HUMAN	FTH1	183	53.6	Homo sapiens OX=9606	1:Experimental evidence at protein level	Ferritin heavy chain	1.0	0.9990000000000001	15	15	15	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0
+682	a	sp|P03951|FA11_HUMAN	P03951	FA11_HUMAN	F11	625	20.2	Homo sapiens OX=9606	1:Experimental evidence at protein level	Coagulation factor XI	1.0	0.9990000000000001	11	18	18	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0
+683	a	sp|P03952|KLKB1_HUMAN	P03952	KLKB1_HUMAN	KLKB1	638	41.7	Homo sapiens OX=9606	1:Experimental evidence at protein level	Plasma kallikrein	1.0	0.9990000000000001	23	1022	1022	0.0	85066.71	0.0	0.0	74640.38	118894.164	111398.06	59677.086	45627.31200000001	36386.727	38690.133	70755.9	70384.055	102087.5	106722.82	102985.125	99397.76	45197.56	54068.883	45319.242
+684	a	sp|P04003|C4BPA_HUMAN	P04003	C4BPA_HUMAN	C4BPA	597	40.2	Homo sapiens OX=9606	1:Experimental evidence at protein level	C4b-binding protein alpha chain	1.0	0.9990000000000001	26	1645	1645	0.0	0.0	0.0	0.0	0.0	112257.234	30634.523	112197.33	107021.34	95892.05	100655.766	77396.234	78481.19	0.0	0.0	0.0	55184.43	25498.191000000006	43999.35	32183.307
+685	a	sp|P04004|VTNC_HUMAN	P04004	VTNC_HUMAN	VTN	478	51.0	Homo sapiens OX=9606	1:Experimental evidence at protein level	Vitronectin	1.0	0.9990000000000001	41	10829	10812	426109.1	531158.4	280231.38	972440.7	925719.9	1446606.2	841194.25	850832.94	911400.2	461015.6	349032.28	877507.94	1113970.9	980389.94	1374961.0	1188514.5	870155.6	1299377.1	1360895.5	614073.56
+686	a	sp|P04040|CATA_HUMAN	P04040	CATA_HUMAN	CAT	527	43.8	Homo sapiens	1:Experimental evidence at protein level	Catalase	1.0	0.9990000000000001	18	23	23	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0
+687	a	sp|P04070|PROC_HUMAN	P04070	PROC_HUMAN	PROC	461	43.4	Homo sapiens OX=9606	1:Experimental evidence at protein level	Vitamin K-dependent protein C	1.0	0.9990000000000001	15	65	65	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0	39016.97	0.0	0.0	0.0
+688	a	sp|P04114|APOB_HUMAN	P04114	APOB_HUMAN	APOB	4563	75.5	Homo sapiens OX=9606	1:Experimental evidence at protein level	Apolipoprotein B-100	1.0	0.9990000000000001	573	103725	103716	603013.44	923688.06	591751.25	491850.03	397211.94	506224.94	319749.8	263752.28	390402.94	443494.1	498007.12	230024.48	265819.75	687710.9	762252.1	422017.75	1020169.75	196046.12	318726.28	480642.72
+"""
+
+    file_path = write_test_data(
+        data=TEST_DATA, directory=tmp_path, test_case_name=TEST_FILE_NAME
+    )
+    reference = get_local_reference_data(test_case_name=TEST_FILE_NAME)
+
+    return file_path, reference
+
+
+@pytest.fixture(scope="function")
+def example_mztab(tmp_path) -> Path:
+    """Get and parse real MZTab report"""
+    URL = "https://datashare.biochem.mpg.de/s/ayieQHU9zjY89cl"
+    REF_URL = "https://datashare.biochem.mpg.de/s/o7K2FEAmpmLUglS"
+
+    return get_remote_data_with_ref(url=URL, ref_url=REF_URL, directory=tmp_path)
+
+
+@pytest.fixture(scope="function")
+def example_mztab_minimal(tmp_path) -> Path:
+    """Get and parse minimal MZTab report for local testing"""
+    TEST_FILE_NAME = "pg_mztab_minimal"
+    TEST_DATA = """COM	Only variable modifications can be reported when the original source is a PRIDE XML file
+
+PRH	accession	description	taxid	species	database	database_version	search_engine	best_search_engine_score[1]	search_engine_score[1]_ms_run[1]	num_psms_ms_run[1]	num_peptides_distinct_ms_run[1]	num_peptides_unique_ms_run[1]	ambiguity_members	modifications	protein_coverage	protein_abundance_assay[1]	protein_abundance_assay[2]	protein_abundance_assay[3]	protein_abundance_assay[4]
+PRT	223462890	Spna2 protein [Mus musculus]	10090	Mus musculus (Mouse)	NCBInr_2010_10	nr_101020.fasta	[MS, MS:1001207, Mascot, ]	6539.67	6539.67	157	92	null	null	null	0	1	0.853	0.864	0.791
+PRT	19855078	RecName: Full=Sodium/potassium-transporting ATPase subunit alpha-3; Short=Na(+)/K(+) ATPase alpha-3 subunit; AltName: Full=Na(+)/K(+) ATPase alpha(III) subunit; AltName: Full=Sodium pump subunit alpha-3	10090	Mus musculus (Mouse)	NCBInr_2010_10	nr_101020.fasta	[MS, MS:1001207, Mascot, ]	6331.91	6331.91	144	49	null	null	32-MOD:00425,525-MOD:00425,606-MOD:00425,725-MOD:00425,739-MOD:00425,940-MOD:00425	0	null	null	null	null
+PRT	21450277	sodium/potassium-transporting ATPase subunit alpha-1 precursor [Mus musculus]	10090	Mus musculus (Mouse)	NCBInr_2010_10	nr_101020.fasta	[MS, MS:1001207, Mascot, ]	4577.11	4577.11	112	39	null	null	42-MOD:00425,616-MOD:00425,749-MOD:00425,950-MOD:00425	0	1	0.776	0.819	0.687
+PRT	6978545	sodium/potassium-transporting ATPase subunit alpha-2 precursor [Rattus norvegicus]	10090	Mus musculus (Mouse)	NCBInr_2010_10	nr_101020.fasta	[MS, MS:1001207, Mascot, ]	4342.81	4342.81	108	42	null	null	40-MOD:00425,613-MOD:00425,746-MOD:00425,947-MOD:00425	0	1	0.784	0.848	0.693
+    """
+    file_path = write_test_data(
+        data=TEST_DATA, directory=tmp_path, test_case_name=TEST_FILE_NAME
+    )
+    reference = get_local_reference_data(test_case_name=TEST_FILE_NAME)
+
+    return file_path, reference
