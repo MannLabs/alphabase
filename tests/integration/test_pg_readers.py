@@ -7,7 +7,9 @@ from alphabase.pg_reader import (
     AlphaDiaPGReader,
     AlphaPeptPGReader,
     DiannPGReader,
+    FragPipePGReader,
     MaxQuantPGReader,
+    MZTabPGReader,
     SpectronautPGReader,
 )
 from alphabase.pg_reader.keys import PGCols
@@ -191,6 +193,40 @@ class TestSpectronautPGReader:
         file_path, reference = example_spectronaut_parquet
 
         reader = SpectronautPGReader()
+
+        result_df = reader.import_file(file_path=file_path)
+
+        pd.testing.assert_frame_equal(result_df, reference)
+
+
+class TestFragPipePGReader:
+    def test_import_real_file(self, example_fragpipe_tsv: str) -> None:
+        """Test import of real FragPipe file"""
+        file_path, reference = example_fragpipe_tsv
+
+        reader = FragPipePGReader()
+
+        result_df = reader.import_file(file_path=file_path)
+
+        pd.testing.assert_frame_equal(result_df, reference)
+
+
+class TestMZTabPGReader:
+    def test_import_real_file(self, example_mztab: str) -> None:
+        """Test import of real MZTab file"""
+        file_path, reference = example_mztab
+
+        reader = MZTabPGReader()
+
+        result_df = reader.import_file(file_path=file_path)
+
+        pd.testing.assert_frame_equal(result_df, reference)
+
+    def test_import_minimal_example(self, example_mztab_minimal: str) -> None:
+        """Test import of minimal example MZTab file"""
+        file_path, reference = example_mztab_minimal
+
+        reader = MZTabPGReader()
 
         result_df = reader.import_file(file_path=file_path)
 
