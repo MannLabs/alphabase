@@ -22,16 +22,15 @@ jobs:
     with:
       os: ${{ matrix.os }}
       python-version: ${{ matrix.python-version }}
-      install-script: pip_install.sh stable,tests alphabase ${{ matrix.python-version }} ${{ matrix.os }}
+      install-script: pip_install.sh stable,tests
 
   loose_installation:
     name: Test loose pip installation on ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest, macos-latest-xlarge]
-        python-version: [3.9]
     uses: ./.github/workflows/_run_tests.yml
     with:
       os: ${{ matrix.os }}
       python-version: ${{ matrix.python-version }}
-      install-script: pip_install.sh tests alphabase ${{ matrix.python-version }} ${{ matrix.os }}
+      install-script: pip_install.sh tests
