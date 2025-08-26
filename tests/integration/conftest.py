@@ -9,7 +9,13 @@ import pytest
 
 from alphabase.tools.data_downloader import DataShareDownloader
 
-TABLES_PACKAGE_AVAILABLE = importlib.util.find_spec("tables") is not None
+TABLES_PACKAGE_UNAVAILABLE = importlib.util.find_spec("tables") is None
+
+
+pytest.mark.optional_pytables_dependency = pytest.mark.skipif(
+    TABLES_PACKAGE_UNAVAILABLE,
+    reason="pytables package not installed. Install with `pip install alphabase[hdf]`",
+)
 
 
 def get_remote_data_with_ref(
@@ -135,10 +141,7 @@ sp|P35221|CTNA1_HUMAN,225968334.02204236,234103031.64081344,221399683.34428945,2
     return file_path, reference
 
 
-@pytest.mark.skipif(
-    not TABLES_PACKAGE_AVAILABLE,
-    reason="pytables package not installed. Install with `pip install alphabase[hdf]`",
-)
+@pytest.mark.optional_pytables_dependency
 @pytest.fixture(scope="function")
 def example_alphapept_hdf(tmp_path) -> tuple[Path, pd.DataFrame]:
     """Get and parse real alphapept protein group report matrix."""
