@@ -102,7 +102,13 @@ AlphaBase like this. Also note the double quotes `"`.
 If you are using the `quant_reader` module, it is advisable to add the
 `dask-stable` or `dask` extras to speed up processing large files.
 
-**NOTE for macOS users**: Due to compilation issues with PyTables on macOS, you may encounter build errors when installing AlphaBase. If this happens, install PyTables via conda/mamba first:
+**NOTE for macOS users**: Due to compilation issues with PyTables on macOS, you may encounter build errors when installing AlphaBase.
+These may include
+
+- `ERROR:: Could not find a local HDF5 installation`
+- `ERROR: Failed building wheel for tables`
+
+If this happens, install PyTables via conda/mamba first:
 ```bash
 conda install -c conda-forge pytables
 # or
