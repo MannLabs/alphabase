@@ -22,6 +22,8 @@ class AlphaPeptPGReader(PGReaderBase):
     AlphaPept protein group matrices contain both raw intensities and LFQ-corrected intensities.
     The LFQ-corrected intensities are marked by an `_LFQ` suffix.
 
+    In order to read alphapept `.hdf` output, please install the `pytables` package.
+
     Example:
     -------
     Get example data
