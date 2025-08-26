@@ -1,0 +1,120 @@
+# ## Example configuration
+# example:
+#   # reader_type: str
+#   # (name as defined in the PGReader: alphabase.pg_reader.pg_reader.PGReaderBase attribute `_reader_type`)
+#   reader_type: "name"
+#   # column_mapping: dict[str, str]
+#   # Mapping between standardized columns and search engine-specific columns
+#   # Standardized columns must be defined in `alphabase.pg_reader.keys.PGCols`
+#   column_mapping:
+#     proteins: "pg"
+#   # measurement_regex: str | null
+#   # Default regular expression to match the sample columns (e.g. "LFQ$" to match `xxx_LFQ` but not `xxx`)
+#   # If null, selects all columns in the dataframe that are not values in `column_mapping`
+#   measurement_regex: null
+#   TODO: add drop_columns: list[str]
+
+# Based on version 1.10.4
+# https://alphadia.readthedocs.io/en/latest/methods/output-format.html#pg-matrix-tsv
+alphadia:
+  reader_type: "alphadia"
+  column_mapping:
+    uniprot_ids: "pg"
+  measurement_regex: null # all remaining columns are sample columns
+
+# Based on DIANN version 1.8.1
+diann:
+  reader_type: "diann"
+  column_mapping:
+    "proteins": "Protein.Names" # see also psm_reader.yaml * **Protein.Names** names (UniProt names) of the proteins in the Protein.Group after protein inference
+    "uniprot_ids": "Protein.Group" # Protein.Ids lists all sequence identifiers associated with the peptide. see also psm_reader.yaml
+    "genes": "Genes" # see also psm_reader.yaml
+    "protein_candidates": "Protein.Ids" # All proteins that possibly match the precursor before protein inference
+    "description": "First.Protein.Description" # Full description of first protein in Protein.Group
+    "peptide_count": "N.Sequences" # DIANN 2.1
+    "proteotypic_peptide_count": "N.Proteotypic.Sequences" # DIANN 2.1
+  measurement_regex: null
+
+
+# Based on alphapept 0.5.6
+alphapept:
+  reader_type: "alphapept"
+  # Mapping is performed by _pre_process function, so the columns are already standardized
+  column_mapping:
+    "proteins": "proteins"
+    "uniprot_ids": "uniprot_ids"
+    "ensembl_ids": "ensembl_ids"
+    "source_db": "source_db"
+    "is_decoy": "is_decoy"
+  # Match raw intensities per default.
+  # Match everything at the start but not a trailing LFQ
+  measurement_regex:
+    # Match anything at the start "^.*" but assure that it does not "(?<!...)" match "_LFQ" the end ($)
+    # _LFQ is the marker for LFQ runs in alphapept
+    raw: "^.*(?<!_LFQ)$"
+    # Match "_LFQ" at the end of the name
+    lfq: "_LFQ$"
+
+
+# Published June 27, 2024
+# https://cox-labs.github.io/coxdocs/output_tables.html#protein-groups
+maxquant:
+  reader_type: "maxquant"
+  column_mapping:
+    "proteins": "Protein names"
+    "uniprot_ids": "Protein IDs"
+    "genes": "Gene names"
+    "is_decoy": "Reverse"
+  measurement_regex:
+    # Match "Intensity <sample>"
+    # Do not match "Intensity" (sum across all samples)
+    # Do not match "Intensity L <sample>" (or M/H), from TMT experiments
+    "raw": "^Intensity(?!\\s[LHM]\\s).+$" # Raw intensity-based quantification
+    "lfq": "^LFQ intensity(?!\\s[LHM]\\s).+$" # LFQ intensity-based quantification
+    "ibaq": "^iBAQ(?!\\s[LHM]\\s).+$" # Intensity-Based Absolute Quantification
+
+
+# Based on Spectronaut 20.0 Run Pivot Report (Page 80/81)
+# https://biognosys.com/content/uploads/2025/06/Spectronaut-20-Manual.pdf
+spectronaut:
+  reader_type: "spectronaut"
+  column_mapping:
+    "proteins": ["PG.ProteinNames", "PG_ProteinGroups"]
+    "genes": "PG.Genes"
+    "uniprot_ids": "PG.UniProtIds"
+  measurement_regex:
+    # Spectronaut marks sample columns with "[number]..."
+    # At the beginning (^) of the string, match open square bracket "\\[", any number of digits "[0-9]+", closed square bracket "\\]"
+    # Square brackets are special characters -> need to be escaped with "\[". The backslash itself needs to be escaped -> "\\["
+    "default": "^\\[[0-9]+\\]"
+
+
+# https://fragpipe.nesvilab.org/docs/tutorial_fragpipe_outputs.html#proteintsv
+fragpipe:
+  reader_type: "fragpipe"
+  column_mapping:
+    "proteins": "Entry Name"
+    "uniprot_ids": "Protein ID"
+    "genes": "Gene Names"
+    "description": "Description"
+  measurement_regex:
+    "raw": "Intensity$"
+    "razor": "Razor Intensity$"
+    "unique": "Unique Intensity$"
+    "total": "Total Intensity$"
+    "lfq": "MaxLFQ Intensity$"
+    "lfq_unique": "MaxLFQ Unique Intensity$"
+    "lfq_total": "MaxLFQ Total Intensity$"
+
+
+# mzTab
+# version 2.0.0 (2019-03)
+mztab:
+  reader_type: "mztab"
+  column_mapping:
+    "uniprot_ids": "accession"
+    "description": "description"
+    "source_db": "database"
+  measurement_regex:
+    "assay": "^protein_abundance_assay\\[[0-9]+\\]" # The protein's abundance as measured in the given assay through whatever technique was employed
+    "study_variable": "^protein_abundance_study_variable\\[[0-9]+\\]" # The protein's abundance as measured in the given study variable (condition) through whatever technique was employed
