@@ -15,4 +15,3 @@ pyteomics
 pyyaml
 lxml
 rdkit
-tables
