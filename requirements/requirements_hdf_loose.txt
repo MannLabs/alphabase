@@ -1,4 +1,4 @@
-# Dependencies required for running the "loose" version of alphabase.
+# Dependencies required for running the "loose" version of alphabase with hdf support for the alphapept PG reader.
 # All dependencies that are also included in `requirements.txt` must be added also here (enforced by a test).
 numba
 numpy
