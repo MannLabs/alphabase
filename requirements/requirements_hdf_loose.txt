@@ -1,18 +1,2 @@
 # Dependencies required for running the "loose" version of alphabase with hdf support for the alphapept PG reader.
-# All dependencies that are also included in `requirements.txt` must be added also here (enforced by a test).
-numba
-numpy
-pandas
-h5py
-contextlib2
-xxhash
-biopython
-tqdm
-regex
-pyarrow
-pyahocorasick
-pyteomics
-pyyaml
-lxml
-rdkit
 tables
