@@ -6,3 +6,6 @@ nbsphinx
 jinja2
 contextfilter
 furo
+# scverse tutorial
+anndata==0.10.8 # latest version that is compatible with mudata==0.2.4
+mudata==0.2.4 # latest version compatible with python 3.9

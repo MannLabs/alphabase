@@ -41,4 +41,4 @@ Chemical structures
 
    nbs/tutorial_smiles
    nbs/peptide_smiles
-   nbs/adding_smiles
+   tutorials/adding_smiles
