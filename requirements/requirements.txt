@@ -17,4 +17,3 @@ pyteomics==4.7.5
 pyyaml==6.0.2
 lxml==5.3.0  # required by pyteomics
 rdkit==2024.3.3
-tables==3.9.2 # required to read HDF files, latest version compatible with 3.9
