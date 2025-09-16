@@ -81,14 +81,14 @@ class FileDownloader(ABC):
         self._output_dir = output_dir
         self._encoded_url = self._encode_url()
 
-        self._file_name = self._get_filename()
+        self._file_name, self._target_file_name = self._get_filename()
         self._is_archive = self._file_name.endswith(".zip")
 
         self._output_path = os.path.join(output_dir, self._file_name)
-        self._unzipped_output_path = (
-            self._output_path.replace(".zip", "")
-            if self._is_archive
-            else self._output_path
+
+        self._unzipped_output_path = os.path.join(
+            output_dir,
+            (self._target_file_name if self._target_file_name else self._output_path),
         )
 
     @abstractmethod
@@ -155,8 +155,13 @@ class FileDownloader(ABC):
             print(f"Could not get size of {self._unzipped_output_path}: {e}")
         return size
 
-    def _get_filename(self) -> str:  # pragma: no cover
-        """Get filename from url."""
+    def _get_filename(self) -> tuple[str, str | None]:  # pragma: no cover
+        """Get filename from url.
+
+        Returns a tuple of (downloaded filename, target filename).
+        The target filename is only not None if the zip file is expected to have exactly one file.
+        In the default implementation, the target filename is always None.
+        """
         try:
             remotefile = urlopen(self._encoded_url)
         except Exception as e:
@@ -165,7 +170,7 @@ class FileDownloader(ABC):
 
         info = remotefile.info()["Content-Disposition"]
         value, params = cgi.parse_header(info)
-        return params["filename"]
+        return params["filename"], None
 
     def _download_file(
         self, max_size_kb: Optional[int] = None
@@ -248,3 +253,25 @@ class DataShareDownloader(FileDownloader):
                     return f"{parsed_url.scheme}://{parsed_url.netloc}{parsed_url.path}?{new_query}"
 
         return self._url
+
+    def _get_filename(self) -> tuple[str, str | None]:  # pragma: no cover
+        """Get filename from url, extracting real filename when server returns 'download.zip'.
+
+        Returns a tuple of (downloaded filename, target filename).
+        The target filename is only not None if the zip file is expected to have exactly one file.
+        """
+        filename, _ = super()._get_filename()
+
+        # If server returns generic 'download.zip', extract real filename from URL
+        if filename == "download.zip":
+            parsed_url = urlparse(self._url)
+            if parsed_url.query:
+                query_params = parse_qs(parsed_url.query)
+                if "files" in query_params:
+                    files_param = query_params["files"][0].strip('"')
+                    resolved_files_param_list = files_param.split(",")
+
+                    if len(resolved_files_param_list) == 1:
+                        return filename, resolved_files_param_list[0]
+
+        return filename, None
