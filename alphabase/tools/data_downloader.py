@@ -3,11 +3,13 @@
 import base64
 import cgi
 import os
+import re
 import traceback
 import warnings
 import zipfile
 from abc import ABC, abstractmethod
 from typing import Optional
+from urllib.parse import parse_qs, urlparse
 from urllib.request import urlopen, urlretrieve
 
 try:
@@ -233,8 +235,6 @@ class DataShareDownloader(FileDownloader):
             # Extract share ID and filename from old format
             # Old: https://datashare.biochem.mpg.de/s/WTu3rFZHNeb3uG2/download?files=filename.raw
             # New: https://datashare.biochem.mpg.de/public.php/dav/files/WTu3rFZHNeb3uG2/filename.raw
-            import re
-            from urllib.parse import parse_qs, urlparse
 
             parsed_url = urlparse(self._url)
             share_match = re.search(r"/s/([^/]+)", parsed_url.path)
