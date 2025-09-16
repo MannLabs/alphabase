@@ -8,6 +8,7 @@ import warnings
 import zipfile
 from abc import ABC, abstractmethod
 from typing import Optional
+from urllib.parse import parse_qs, urlparse
 from urllib.request import urlopen, urlretrieve
 
 try:
@@ -231,5 +232,19 @@ class DataShareDownloader(FileDownloader):
         # this is the case if the url points to a folder
         if "/download?" not in self._url:
             return f"{self._url}/download"
+
+        # handle urls that point to specific files: 'files=file.txt' -> 'files="file.txt"'
+        parsed_url = urlparse(self._url)
+        if parsed_url.query:
+            query_params = parse_qs(parsed_url.query)
+            if "files" in query_params:
+                files_param = query_params["files"][0]
+                if not (files_param.startswith('"') and files_param.endswith('"')):
+                    # Reconstruct URL with quoted filename
+                    quoted_files = f'"{files_param}"'
+                    new_query = parsed_url.query.replace(
+                        f"files={files_param}", f"files={quoted_files}"
+                    )
+                    return f"{parsed_url.scheme}://{parsed_url.netloc}{parsed_url.path}?{new_query}"
 
         return self._url
