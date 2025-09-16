@@ -228,6 +228,24 @@ class DataShareDownloader(FileDownloader):
 
     def _encode_url(self) -> str:  # pragma: no cover
         """Encode datashare sharing link as url for downloading files."""
+        # Handle new API format: transform old URLs to new WebDAV format
+        if "/s/" in self._url and "/download?" in self._url:
+            # Extract share ID and filename from old format
+            # Old: https://datashare.biochem.mpg.de/s/WTu3rFZHNeb3uG2/download?files=filename.raw
+            # New: https://datashare.biochem.mpg.de/public.php/dav/files/WTu3rFZHNeb3uG2/filename.raw
+            import re
+            from urllib.parse import parse_qs, urlparse
+
+            parsed_url = urlparse(self._url)
+            share_match = re.search(r"/s/([^/]+)", parsed_url.path)
+            if share_match and parsed_url.query:
+                share_id = share_match.group(1)
+                query_params = parse_qs(parsed_url.query)
+                if "files" in query_params:
+                    filename = query_params["files"][0]
+                    base_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
+                    return f"{base_url}/public.php/dav/files/{share_id}/{filename}"
+
         # this is the case if the url points to a folder
         if "/download?" not in self._url:
             return f"{self._url}/download"
