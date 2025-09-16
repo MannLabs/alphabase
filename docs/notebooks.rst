@@ -31,6 +31,7 @@ Reader
 
    nbs/psm_readers
    nbs/library_reader
+   tutorials/tutorial_pg_reader
 
 
 Chemical structures
@@ -40,4 +41,4 @@ Chemical structures
 
    nbs/tutorial_smiles
    nbs/peptide_smiles
-   nbs/adding_smiles
+   tutorials/adding_smiles
