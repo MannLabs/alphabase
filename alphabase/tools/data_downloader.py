@@ -246,8 +246,8 @@ class DataShareDownloader(FileDownloader):
                     base_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
                     return f"{base_url}/public.php/dav/files/{share_id}/{filename}"
 
-        # this is the case if the url points to a folder
-        if "/download?" not in self._url:
+        # this is the case if the url points to a folder that opens as a HTML page
+        if "public.php/dav/files" not in self._url and "/download?" not in self._url:
             return f"{self._url}/download"
 
         return self._url
