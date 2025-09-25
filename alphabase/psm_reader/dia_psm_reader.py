@@ -1,16 +1,16 @@
 """Readers for Spectronaut's output library and reports, Swath data and DIANN data."""
 
+from pathlib import Path
 from typing import List, Optional
 
-from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from alphabase.constants._const import CONST_FILE_FOLDER, PSM_READER_YAML_FILE_NAME
 from alphabase.psm_reader.keys import PsmDfCols
 from alphabase.psm_reader.maxquant_reader import ModifiedSequenceReader
 from alphabase.psm_reader.psm_reader import psm_reader_provider
 
-from alphabase.constants._const import CONST_FILE_FOLDER, PSM_READER_YAML_FILE_NAME
 from alphabase.yaml_utils import load_yaml
 
 class SpectronautReader(ModifiedSequenceReader):
@@ -24,7 +24,9 @@ class SpectronautReader(ModifiedSequenceReader):
         """Spectronaut-specific preprocessing of output data."""
 
         # Obtain matching charge columns from the psm_reader.yaml
-        available_charge_columns = load_yaml(Path(CONST_FILE_FOLDER) / PSM_READER_YAML_FILE_NAME)[self._reader_type]["column_mapping"]["charge"]
+        available_charge_columns = load_yaml(
+            Path(CONST_FILE_FOLDER) / PSM_READER_YAML_FILE_NAME
+        )[self._reader_type]["column_mapping"]["charge"]
         
         self.precursor_charge_column = "PrecursorCharge" 
         for charge_col in available_charge_columns:
@@ -34,10 +36,13 @@ class SpectronautReader(ModifiedSequenceReader):
 
         if "ReferenceRun" in df.columns:
             df.drop_duplicates(
-                ["ReferenceRun", self.mod_seq_column, self.precursor_charge_column], inplace=True
+                ["ReferenceRun", self.mod_seq_column, self.precursor_charge_column], 
+                inplace=True
             )
         else:
-            df.drop_duplicates([self.mod_seq_column, self.precursor_charge_column], inplace=True)
+            df.drop_duplicates(
+                [self.mod_seq_column, self.precursor_charge_column], inplace=True
+            )
         df.reset_index(drop=True, inplace=True)
 
         return df
