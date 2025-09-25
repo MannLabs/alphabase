@@ -10,8 +10,8 @@ from alphabase.constants._const import CONST_FILE_FOLDER, PSM_READER_YAML_FILE_N
 from alphabase.psm_reader.keys import PsmDfCols
 from alphabase.psm_reader.maxquant_reader import ModifiedSequenceReader
 from alphabase.psm_reader.psm_reader import psm_reader_provider
-
 from alphabase.yaml_utils import load_yaml
+
 
 class SpectronautReader(ModifiedSequenceReader):
     """Reader for Spectronaut's output library TSV/CSV."""
@@ -22,13 +22,12 @@ class SpectronautReader(ModifiedSequenceReader):
 
     def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
         """Spectronaut-specific preprocessing of output data."""
-
         # Obtain matching charge columns from the psm_reader.yaml
         available_charge_columns = load_yaml(
             Path(CONST_FILE_FOLDER) / PSM_READER_YAML_FILE_NAME
         )[self._reader_type]["column_mapping"]["charge"]
-        
-        self.precursor_charge_column = "PrecursorCharge" 
+
+        self.precursor_charge_column = "PrecursorCharge"
         for charge_col in available_charge_columns:
             if charge_col in df.columns:
                 self.precursor_charge_column = charge_col
@@ -36,8 +35,8 @@ class SpectronautReader(ModifiedSequenceReader):
 
         if "ReferenceRun" in df.columns:
             df.drop_duplicates(
-                ["ReferenceRun", self.mod_seq_column, self.precursor_charge_column], 
-                inplace=True
+                ["ReferenceRun", self.mod_seq_column, self.precursor_charge_column],
+                inplace=True,
             )
         else:
             df.drop_duplicates(
