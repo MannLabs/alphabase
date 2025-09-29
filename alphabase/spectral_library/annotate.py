@@ -17,9 +17,6 @@ UNANNOTATED_TYPE = 255
 REQUIRED_PSM_COLUMNS = [
     "sequence",
     "charge",
-    "raw_name",
-    "score",
-    "proteins",
     "spec_idx",
     "mod_sites",
     "mods",
@@ -530,28 +527,23 @@ def add_dense_lib(
         The modified flatlib object
 
     """
-    outlib_flat = flatlib.copy()
 
     valid_charged_frag_types = filter_valid_charged_frag_types(charged_frag_types)
 
-    outlib_flat.charged_frag_types = valid_charged_frag_types
+    annotated_lib = flatlib.copy()
 
-    df_collection, frag_start_idx, frag_stop_idx = create_dense_matrices(
-        outlib_flat.precursor_df,
-        outlib_flat.fragment_df,
+    dense_dict, s_idx, e_idx = create_dense_matrices(
+        flatlib.precursor_df,
+        flatlib.fragment_df,
         valid_charged_frag_types,
-        flat_columns=["intensity", "error"],
+        flat_columns=["intensity"],
     )
 
-    outlib_flat._fragment_mz_df = df_collection["mz"]  # noqa: SLF001
-    outlib_flat._fragment_intensity_df = df_collection["intensity"]  # noqa: SLF001
+    original_lib = flatlib.copy()
+    _sequence_coverage_metric(original_lib)
+    print("before", original_lib.precursor_df["sequence_coverage"].sum())
 
-    outlib_flat.precursor_df["frag_start_idx"] = frag_start_idx
-    outlib_flat.precursor_df["frag_stop_idx"] = frag_stop_idx
-
-    _sequence_coverage_metric(outlib_flat)
-    _sequence_gini_metric(outlib_flat)
-    _normalized_count_metric(outlib_flat)
-    _mass_accuracy_metric(outlib_flat)
-
-    return outlib_flat
+    annotated_lib._fragment_intensity_df = dense_dict["intensity"]
+    _sequence_coverage_metric(annotated_lib)
+    print("after", annotated_lib.precursor_df["sequence_coverage"].sum())
+    return annotated_lib
