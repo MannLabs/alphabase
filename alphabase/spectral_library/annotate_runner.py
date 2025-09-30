@@ -5,12 +5,14 @@ from alphabase.peptide.fragment import get_charged_frag_types
 from alphabase.spectral_library.annotate import add_dense_lib
 from alphabase.spectral_library.flat import SpecLibFlat
 
+# ruff: noqa
+
 
 def main():
     """Main function to profile annotate_runner logic."""
     speclib_flat = SpecLibFlat()
     speclib_flat.load_hdf(
-        "/fs/gpfs41/lv03/fileset01/pool/pool-mann-borgwardt/alphanovo/metaptcm/v0.7/muller_2020_Bacillus_subtilis_evidence_txt_9_batch_0.hdf"
+        "/Users/mschwoerer/work/alphaX/alphabase/annotation_issue/muller_2020_Bacillus_subtilis_evidence_txt_9_batch_0.hdf"
     )
 
     speclib_flat.precursor_df["nAA"] = speclib_flat.precursor_df["nAA"].astype(int)
@@ -32,14 +34,31 @@ def main():
                 "y_H2O",
                 "c_lossH",
                 "z_addH",
+                "b_modloss",
+                "y_modloss",
+                # 'c_modloss',
+                # 'z_modloss'
             ],
             2,
         ),
     )
 
-    assert (
+    # Simple validation check
+    orig_coverage_sum = speclib_flat.precursor_df["sequence_coverage"].sum()
+    new_coverage_sum = new_speclib_flat.precursor_df["sequence_coverage"].sum()
+
+    diff = (
         new_speclib_flat.precursor_df["sequence_coverage"] == seq_coverage
-    ).sum() / len(seq_coverage) > 0.999
+    ).sum() / len(seq_coverage)
+
+    print(f"Original sequence coverage sum: {orig_coverage_sum:.6f}")
+    print(f"New sequence coverage sum: {new_coverage_sum:.6f}")
+    print(f"Difference: {new_coverage_sum - orig_coverage_sum:.6f}")
+
+    if diff < 0.999:
+        print(f"ERROR Sequence coverage changed! {diff}")
+    else:
+        print(f"SUCCESS: Sequence coverage preserved! {diff}")
 
 
 if __name__ == "__main__":

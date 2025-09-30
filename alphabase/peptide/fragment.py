@@ -231,6 +231,24 @@ FRAGMENT_TYPES = {
         loss_id=LOSS_MAPPING[Loss.MODLOSS],
         direction_id=DIRECTION_MAPPING[Direction.REVERSE],
     ),
+    # "z_modloss": FragmentType(
+    #     name="z_modloss",
+    #     ref_ion="z",
+    #     delta_formula="N(-1)H(-2)",
+    #     modloss=True,
+    #     series_id=SERIES_MAPPING[Series.Z],
+    #     loss_id=LOSS_MAPPING[Loss.MODLOSS],
+    #     direction_id=DIRECTION_MAPPING[Direction.REVERSE],
+    # ),
+    # "c_modloss": FragmentType(
+    #     name="c_modloss",
+    #     ref_ion="c",
+    #     delta_formula="N(-1)H(-2)",
+    #     modloss=True,
+    #     series_id=SERIES_MAPPING[Series.C],
+    #     loss_id=LOSS_MAPPING[Loss.MODLOSS],
+    #     direction_id=DIRECTION_MAPPING[Direction.REVERSE],
+    # ),
     "y_H2O": FragmentType(
         name="y_H2O",
         ref_ion="y",
@@ -1705,6 +1723,18 @@ def _calc_column_indices(
         + fragment_df["charge"].astype(str)
     )
 
+    # Handle unsupported fragment type combinations by mapping to supported alternatives
+    # c_modloss doesn't exist, so map it to b_modloss (same N-terminal side)
+    # z_modloss doesn't exist, so map it to y_modloss (same C-terminal side)
+    frag_type_list = frag_type_list.replace(
+        {
+            "c_modloss_z1": "b_modloss_z1",
+            "c_modloss_z2": "b_modloss_z2",
+            "z_modloss_z1": "y_modloss_z1",
+            "z_modloss_z2": "y_modloss_z2",
+        }
+    )
+
     # Convert to integer array, using -1 for any unmapped values
     return (
         frag_type_list.map(inverse_frag_type_mapping)
@@ -1947,7 +1977,7 @@ def create_dense_matrices(
             UserWarning,
         )
     for column_name in flat_columns:
-        matrix = np.zeros_like(fragment_mz_df.values, dtype=PEAK_INTENSITY_DTYPE)
+        matrix = np.zeros_like(fragment_mz_df.values, dtype="float64")
         matrix[row_indices, column_indices] = fragment_df[column_name].values[
             match_mask
         ]
