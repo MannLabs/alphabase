@@ -602,6 +602,7 @@ def update_sliced_fragment_dataframe(
     frag_slices = np.r_[tuple(frag_slice_list)]
     if charged_frag_types is None or len(charged_frag_types) == 0:
         fragment_df_vals[frag_slices, :] = values.astype(fragment_df_vals.dtype)
+        fragment_df.iloc[frag_slices, :] = values.astype(fragment_df_vals.dtype)
     else:
         charged_frag_idxes = [
             fragment_df.columns.get_loc(c) for c in charged_frag_types
