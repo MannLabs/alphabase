@@ -83,6 +83,8 @@ SERIES_MAPPING = {
 
 SERIES_MAPPING_INV = {v: k for k, v in SERIES_MAPPING.items()}
 
+UNANNOTATED_TYPE = 255
+
 
 @dataclass(frozen=True)
 class FragmentType:
