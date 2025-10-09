@@ -6,10 +6,10 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
+from alphabase.peptide.fragment import UNANNOTATED_TYPE
+
 if TYPE_CHECKING:
     from alphabase.spectral_library.flat import SpecLibFlat
-
-UNANNOTATED_TYPE = 255
 
 
 def calculate_pif(intensities: np.ndarray, types: np.ndarray) -> float:

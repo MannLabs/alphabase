@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 
 from alphabase.peptide.fragment import (
+    UNANNOTATED_TYPE,
     create_dense_matrices,
     create_fragment_mz_dataframe,
     filter_valid_charged_frag_types,
@@ -14,7 +15,7 @@ from alphabase.peptide.fragment import (
     init_fragment_by_precursor_dataframe,
 )
 from alphabase.spectral_library.flat import SpecLibFlat
-from alphabase.spectral_library.metrics import UNANNOTATED_TYPE, apply_precursor_metrics
+from alphabase.spectral_library.metrics import apply_precursor_metrics
 
 REQUIRED_PSM_COLUMNS = [
     "sequence",
