@@ -8,23 +8,20 @@ import pandas as pd
 
 from alphabase.peptide.fragment import (
     create_dense_matrices,
+    create_fragment_mz_dataframe,
     filter_valid_charged_frag_types,
+    flatten_fragments,
+    init_fragment_by_precursor_dataframe,
 )
 from alphabase.spectral_library.flat import SpecLibFlat
-
-UNANNOTATED_TYPE = 255
+from alphabase.spectral_library.metrics import UNANNOTATED_TYPE, apply_precursor_metrics
 
 REQUIRED_PSM_COLUMNS = [
     "sequence",
     "charge",
-    "raw_name",
-    "score",
-    "proteins",
     "spec_idx",
     "mod_sites",
     "mods",
-    "mod_seq_hash",
-    "mod_seq_charge_hash",
     "flat_frag_start_idx",
     "flat_frag_stop_idx",
     "precursor_mz",
@@ -140,11 +137,10 @@ def annotate_fragments_flat(
     raw_data_peak_df: pd.DataFrame,
     mass_error_ppm: float = 20,
 ) -> SpecLibFlat:
-    """Annotate a spectral library flat with raw data and calculate PIF.
+    """Annotate a spectral library flat with raw data.
 
-    This function matches observed spectrum peaks to theoretical fragments,
-    calculates the precursor ion fraction (PIF), and organizes the results
-    into DataFrames.
+    This function matches observed spectrum peaks to theoretical fragments
+    and organizes the results into DataFrames.
 
     Parameters
     ----------
@@ -171,7 +167,6 @@ def annotate_fragments_flat(
 
     fragment_df_list = []
     matched_precursor_df = speclib_flat.precursor_df.copy()
-    matched_precursor_df["pif"] = 0.0
 
     start_index = 0
     for i, (peak_start, peak_stop, flat_frag_start, flat_frag_stop) in enumerate(
@@ -203,7 +198,6 @@ def annotate_fragments_flat(
             mass_error_ppm=mass_error_ppm,
         )
 
-        matched_precursor_df.loc[i, "pif"] = calculate_pif(spectrum_peak_df)
         matched_precursor_df.loc[i, "flat_frag_start_idx"] = start_index
         matched_precursor_df.loc[i, "flat_frag_stop_idx"] = start_index + len(
             spectrum_peak_df
@@ -219,46 +213,6 @@ def annotate_fragments_flat(
     outlib_flat._fragment_df = pd.concat(fragment_df_list, ignore_index=True)  # noqa: SLF001
 
     return outlib_flat
-
-
-def calculate_pif(spectrum_peak_df: pd.DataFrame) -> float:
-    """Calculate the precursor ion fraction (PIF) of a spectrum.
-
-    This function computes the ratio of the sum of intensities for non-255 type
-    peaks to the sum of all intensities. It handles edge cases such as empty
-    DataFrames or arrays, and cases where all intensities are zero.
-
-    Parameters
-    ----------
-    spectrum_peak_df : pandas.DataFrame
-        A DataFrame containing at least two columns:
-        - 'intensity': numeric values representing peak intensities
-        - 'type': integer values where 255 represents a special peak type
-
-    Returns
-    -------
-    float
-        The calculated Peak Integral Fraction (PIF).
-        Returns 0 if the DataFrame is empty, if either 'intensity' or 'type'
-        arrays are empty, or if the sum of all intensities is zero.
-
-    """
-    if spectrum_peak_df.empty:
-        return 0
-
-    intensities = spectrum_peak_df["intensity"].to_numpy()
-    types = spectrum_peak_df["type"].to_numpy()
-
-    if len(intensities) == 0 or len(types) == 0:
-        return 0
-
-    numerator = np.sum(intensities[types != UNANNOTATED_TYPE])
-    denominator = np.sum(intensities)
-
-    if denominator == 0:
-        return 0
-
-    return numerator / denominator
 
 
 @nb.njit()
@@ -308,15 +262,16 @@ def annotate_spectrum(  # noqa: PLR0913
         6. Annotated mass errors in ppm
 
         Each array corresponds to the input spectrum peaks. Peaks without
-        a match are annotated with 255 (for integer arrays) or inf (for float array).
+        a match are annotated with ``UNANNOTATED_TYPE`` (for integer arrays)
+        or ``np.inf`` (for the float array).
 
     """
     n_peaks = len(spectrum_mz)
-    annotated_type = np.full(n_peaks, 255, dtype=np.uint8)
-    annotated_loss_type = np.full(n_peaks, 255, dtype=np.uint8)
-    annotated_charge = np.full(n_peaks, 255, dtype=np.uint8)
-    annotated_number = np.full(n_peaks, 255, dtype=np.uint8)
-    annotated_position = np.full(n_peaks, 255, dtype=np.uint8)
+    annotated_type = np.full(n_peaks, UNANNOTATED_TYPE, dtype=np.uint8)
+    annotated_loss_type = np.full(n_peaks, UNANNOTATED_TYPE, dtype=np.uint8)
+    annotated_charge = np.full(n_peaks, UNANNOTATED_TYPE, dtype=np.uint8)
+    annotated_number = np.full(n_peaks, UNANNOTATED_TYPE, dtype=np.uint8)
+    annotated_position = np.full(n_peaks, UNANNOTATED_TYPE, dtype=np.uint8)
     annotated_error = np.full(n_peaks, np.inf, dtype=np.float32)
 
     # Sort fragment arrays based on m/z values
@@ -372,143 +327,35 @@ def annotate_spectrum(  # noqa: PLR0913
     )
 
 
-def _sequence_coverage_metric(flatlib: SpecLibFlat) -> None:
-    """Calculate the sequence coverage metric for the precursors.
-
-    Important
-    ---------
-    This function operates in place and modifies the flatlib object
-
-    Parameters
-    ----------
-    flatlib : SpecLibFlat
-        The flatlib object to be modified
-
-    Returns
-    -------
-    None
-
-    """
-    fragment_coverage = (
-        (flatlib._fragment_intensity_df.sum(axis=1) > 0).astype(int).to_numpy()  # noqa: SLF001
+def _build_theoretical_flatlib(
+    template: SpecLibFlat, charged_frag_types: List[str]
+) -> SpecLibFlat:
+    """Generate a flat spectral library containing theoretical fragments."""
+    theoretical_flat = SpecLibFlat(
+        charged_frag_types=charged_frag_types,
     )
 
-    # Vectorized operation to calculate coverage for all precursors at once
-    start_indices = flatlib.precursor_df["frag_start_idx"].to_numpy()
-    stop_indices = flatlib.precursor_df["frag_stop_idx"].to_numpy()
-
-    flatlib.precursor_df["sequence_coverage"] = np.array(
-        [
-            fragment_coverage[start:stop].mean()
-            for start, stop in zip(start_indices, stop_indices)
-        ]
+    precursor_df = template.precursor_df.copy()
+    fragment_mz_df = init_fragment_by_precursor_dataframe(
+        precursor_df, charged_frag_types
+    )
+    fragment_mz_df = create_fragment_mz_dataframe(
+        precursor_df,
+        charged_frag_types,
+        reference_fragment_df=fragment_mz_df,
+        inplace_in_reference=True,
     )
 
-
-def _sequence_gini_metric(flatlib: SpecLibFlat) -> None:
-    """Calculate the sequence gini coefficient metric for the precursors.
-
-    Important
-    ---------
-    This function operates in place and modifies the flatlib object.
-    The Gini coefficient ranges from 0 (perfect equality) to 1 (perfect inequality).
-    For fragment intensities, a lower Gini coefficient indicates more evenly
-    distributed fragment intensities.
-
-    Parameters
-    ----------
-    flatlib : SpecLibFlat
-        The flatlib object to be modified
-
-    Returns
-    -------
-    None
-
-    """
-    # Vectorized operation to calculate Gini coefficient for all precursors
-    start_indices = flatlib.precursor_df["frag_start_idx"].to_numpy()
-    stop_indices = flatlib.precursor_df["frag_stop_idx"].to_numpy()
-
-    def gini(intensities: np.ndarray) -> float:
-        # Handle empty or zero cases
-        if len(intensities) == 0 or np.sum(intensities) == 0:
-            return 1.0
-
-        # Sort intensities in ascending order
-        sorted_intensities = np.sort(intensities)
-        n = len(sorted_intensities)
-        index = np.arange(1, n + 1)
-
-        # Create intermediate values to improve readability and reduce in-place operations
-        intensity_sum = np.sum(sorted_intensities)
-        weighted_sum = np.sum(index * sorted_intensities)
-
-        return (2 * weighted_sum) / (n * intensity_sum) - ((n + 1) / n)
-
-    flatlib.precursor_df["sequence_gini"] = np.array(
-        [
-            gini(flatlib._fragment_intensity_df.to_numpy()[start:stop].flatten())  # noqa: SLF001
-            for start, stop in zip(start_indices, stop_indices)
-        ]
+    precursor_df, fragment_df = flatten_fragments(
+        precursor_df,
+        fragment_mz_df,
+        pd.DataFrame(),
     )
 
+    theoretical_flat._precursor_df = precursor_df  # noqa: SLF001
+    theoretical_flat._fragment_df = fragment_df  # noqa: SLF001
 
-def _normalized_count_metric(flatlib: SpecLibFlat) -> None:
-    """Calculate the number of fragments per precursor normalized by the precursor length.
-
-    Important:
-    ---------
-    This function operates in place and modifies the flatlib object.
-
-    """
-    # Get all values at once to avoid repeated access
-    fragment_values = flatlib._fragment_intensity_df.to_numpy()  # noqa: SLF001
-    start_indices = flatlib.precursor_df["frag_start_idx"].to_numpy()
-    stop_indices = flatlib.precursor_df["frag_stop_idx"].to_numpy()
-
-    # Calculate lengths once
-    lengths = stop_indices - start_indices
-
-    # Calculate counts using vectorized operations
-    counts = np.array(
-        [
-            np.sum(fragment_values[start:stop].flatten() > 0) / length
-            for start, stop, length in zip(start_indices, stop_indices, lengths)
-        ]
-    )
-
-    flatlib.precursor_df["normalized_count"] = counts
-
-
-def _nan_median(series: np.ndarray) -> float:
-    """Calculate the median of a numpy array, ignoring NaNs and infs.
-
-    defaults to inf if there are no valid values
-    """
-    valid_values = series[~np.isnan(series) & ~np.isinf(series)]
-    if len(valid_values) == 0:
-        return np.inf
-    return np.median(valid_values)
-
-
-def _mass_accuracy_metric(flatlib: SpecLibFlat) -> None:
-    """Calculate the mass accuracy metric for the precursors.
-
-    Important:
-    ---------
-    This funmction operates in place and modifies the flatlib object
-
-    """
-    # Vectorized operation to calculate coverage for all precursors at once
-    start_indices = flatlib.precursor_df["frag_start_idx"].to_numpy()
-    stop_indices = flatlib.precursor_df["frag_stop_idx"].to_numpy()
-
-    flatlib.precursor_df["mass_accuracy"] = np.array(
-        [
-            _nan_median(flatlib._fragment_df["error"].to_numpy()[start:stop])  # noqa: SLF001
-            for start, stop in zip(start_indices, stop_indices)
-        ]
-    )
+    return theoretical_flat
 
 
 def add_dense_lib(
@@ -530,9 +377,26 @@ def add_dense_lib(
         The modified flatlib object
 
     """
-    outlib_flat = flatlib.copy()
+    flatlib.precursor_df["spec_idx"] = np.arange(len(flatlib.precursor_df))
+    flatlib.precursor_df["peak_start_idx"] = flatlib.precursor_df["flat_frag_start_idx"]
+    flatlib.precursor_df["peak_stop_idx"] = flatlib.precursor_df["flat_frag_stop_idx"]
 
     valid_charged_frag_types = filter_valid_charged_frag_types(charged_frag_types)
+
+    theoretical_flat = _build_theoretical_flatlib(flatlib, valid_charged_frag_types)
+    raw_precursor_df = flatlib.precursor_df.copy()
+    raw_fragment_df = flatlib.fragment_df.copy()
+
+    outlib_flat = annotate_precursors_flat(
+        theoretical_flat,
+        raw_precursor_df,
+        spec_idx_offset=0,
+    )
+    outlib_flat = annotate_fragments_flat(
+        outlib_flat,
+        raw_fragment_df,
+        mass_error_ppm=20,
+    )
 
     outlib_flat.charged_frag_types = valid_charged_frag_types
 
@@ -549,9 +413,6 @@ def add_dense_lib(
     outlib_flat.precursor_df["frag_start_idx"] = frag_start_idx
     outlib_flat.precursor_df["frag_stop_idx"] = frag_stop_idx
 
-    _sequence_coverage_metric(outlib_flat)
-    _sequence_gini_metric(outlib_flat)
-    _normalized_count_metric(outlib_flat)
-    _mass_accuracy_metric(outlib_flat)
+    apply_precursor_metrics(outlib_flat)
 
     return outlib_flat

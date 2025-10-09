@@ -5,14 +5,18 @@ import pandas as pd
 import pytest
 
 from alphabase.spectral_library.annotate import (
-    _mass_accuracy_metric,
     add_dense_lib,
     annotate_fragments_flat,
     annotate_precursors_flat,
     annotate_spectrum,
+)
+from alphabase.spectral_library.base import SpecLibBase
+from alphabase.spectral_library.flat import SpecLibFlat
+from alphabase.spectral_library.metrics import (
+    _mass_accuracy_metric,
+    _pif_metric,
     calculate_pif,
 )
-from alphabase.spectral_library.flat import SpecLibFlat
 
 
 @pytest.fixture
@@ -106,29 +110,63 @@ def sample_df():
 
 
 def test_calculate_pif_normal_case(sample_df):
-    result = calculate_pif(sample_df)
+    result = calculate_pif(
+        sample_df["intensity"].to_numpy(), sample_df["type"].to_numpy()
+    )
     expected = (100 + 200 + 400) / (100 + 200 + 300 + 400 + 500)
     assert np.isclose(result, expected)
 
 
 def test_calculate_pif_all_type_255():
-    df = pd.DataFrame({"intensity": [100, 200, 300], "type": [255, 255, 255]})
-    assert calculate_pif(df) == 0
+    intensities = np.array([100, 200, 300])
+    types = np.array([255, 255, 255], dtype=np.uint8)
+    assert calculate_pif(intensities, types) == 0
 
 
 def test_calculate_pif_no_type_255():
-    df = pd.DataFrame({"intensity": [100, 200, 300], "type": [1, 2, 3]})
-    assert calculate_pif(df) == 1
+    intensities = np.array([100, 200, 300])
+    types = np.array([1, 2, 3], dtype=np.uint8)
+    assert calculate_pif(intensities, types) == 1
 
 
-def test_calculate_pif_empty_dataframe():
-    df = pd.DataFrame({"intensity": [], "type": []})
-    assert calculate_pif(df) == 0
+def test_calculate_pif_empty_input():
+    intensities = np.array([], dtype=np.float64)
+    types = np.array([], dtype=np.uint8)
+    assert calculate_pif(intensities, types) == 0
 
 
 def test_calculate_pif_all_zero_intensity():
-    df = pd.DataFrame({"intensity": [0, 0, 0], "type": [1, 2, 3]})
-    assert calculate_pif(df) == 0
+    intensities = np.array([0, 0, 0])
+    types = np.array([1, 2, 3], dtype=np.uint8)
+    assert calculate_pif(intensities, types) == 0
+
+
+def test_pif_metric_updates_precursor_df(pif_speclib_flat):
+    _pif_metric(pif_speclib_flat)
+    expected = np.array([0.5, 4 / 9])
+    assert np.allclose(pif_speclib_flat.precursor_df["pif"], expected)
+
+
+@pytest.fixture
+def pif_speclib_flat():
+    flat = SpecLibFlat()
+    flat.precursor_df = pd.DataFrame(
+        {
+            "sequence": ["PEP", "PEPT"],
+            "mods": ["", ""],
+            "mod_sites": ["", ""],
+            "charge": [2, 2],
+            "flat_frag_start_idx": [0, 3],
+            "flat_frag_stop_idx": [3, 5],
+        }
+    )
+    flat._fragment_df = pd.DataFrame(
+        {
+            "intensity": [100.0, 200.0, 300.0, 400.0, 500.0],
+            "type": np.array([1, 2, 255, 3, 255], dtype=np.uint8),
+        }
+    )
+    return flat
 
 
 @pytest.fixture
@@ -245,14 +283,9 @@ def test_annotate_precursors_flat_precursor_mz_mismatch(
 
 def test_annotate_fragments_flat_success(mock_speclib_flat, mock_raw_data):
     mock_raw_data_spectrum_df, mock_raw_data_peak_df = mock_raw_data
-    with (
-        patch(
-            "alphabase.spectral_library.annotate.annotate_spectrum"
-        ) as mock_annotate_spectrum,
-        patch(
-            "alphabase.spectral_library.annotate.calculate_pif"
-        ) as mock_calculate_pif,
-    ):
+    with patch(
+        "alphabase.spectral_library.annotate.annotate_spectrum"
+    ) as mock_annotate_spectrum:
         mock_annotate_spectrum.return_value = (
             np.zeros(100, dtype=np.uint8),
             np.zeros(100, dtype=np.uint8),
@@ -261,7 +294,6 @@ def test_annotate_fragments_flat_success(mock_speclib_flat, mock_raw_data):
             np.zeros(100, dtype=np.uint8),
             np.zeros(100, dtype=np.float32),
         )
-        mock_calculate_pif.return_value = 0.8
 
         annotated_speclib = annotate_precursors_flat(
             mock_speclib_flat, mock_raw_data_spectrum_df
@@ -269,11 +301,8 @@ def test_annotate_fragments_flat_success(mock_speclib_flat, mock_raw_data):
         result = annotate_fragments_flat(annotated_speclib, mock_raw_data_peak_df)
 
         assert isinstance(result, SpecLibFlat)
-        assert "pif" in result.precursor_df.columns
         assert len(result._fragment_df) == 200  # 100 peaks per spectrum, 2 spectra
-        assert all(result.precursor_df["pif"] == 0.8)
         assert mock_annotate_spectrum.call_count == 2
-        assert mock_calculate_pif.call_count == 2
 
 
 def test_annotate_fragments_flat_missing_columns(mock_speclib_flat, mock_raw_data):
@@ -296,50 +325,39 @@ def test_annotate_fragments_flat_empty_spectra(mock_speclib_flat, mock_raw_data)
     )
     result = annotate_fragments_flat(annotated_speclib, mock_raw_data_peak_df)
     assert len(result._fragment_df) == 0
-    assert all(result.precursor_df["pif"] == 0)
-
-
-@pytest.fixture
-def mappings():
-    return {
-        "frag_type_mapping": {98: "b", 121: "y"},
-        "loss_type_mapping": {17: "NH3", 18: "H2O"},
-        "charge_type_mapping": {1: "z1", 2: "z2"},
-    }
 
 
 @pytest.fixture
 def mock_speclib_annotation_flat():
-    speclib_flat = SpecLibFlat()
-    speclib_flat.precursor_df = pd.DataFrame(
+    charged_frag_types = [
+        "b_z1",
+        "y_z1",
+        "b_NH3_z1",
+        "y_NH3_z1",
+        "b_H2O_z1",
+        "y_H2O_z1",
+    ]
+
+    speclib_base = SpecLibBase(charged_frag_types=charged_frag_types)
+    speclib_base.precursor_df = pd.DataFrame(
         {
             "sequence": ["PEPTI", "SEQUE"],
-            "charge": [2, 3],
-            "raw_name": ["file1.raw", "file2.raw"],
-            "score": [0.9, 0.8],
-            "proteins": ["ProtA", "ProtB"],
-            "fdr": [0.01, 0.02],
-            "spec_idx": [1, 2],
-            "mod_sites": ["", ""],
             "mods": ["", ""],
-            "mod_seq_hash": ["hash1", "hash2"],
-            "mod_seq_charge_hash": ["hash1_2", "hash2_3"],
-            "flat_frag_start_idx": [0, 4],
-            "flat_frag_stop_idx": [4, 8],
+            "mod_sites": ["", ""],
+            "charge": [2, 3],
+            "spec_idx": [1, 2],
+            "precursor_mz": [500.5, 600.6],
+            "rt": [10.0, 20.0],
+            "nce": [30.0, 32.0],
+            "activation": ["HCD", "HCD"],
         }
     )
-    speclib_flat._fragment_df = pd.DataFrame(
-        {
-            "mz": [100, 200, 300, 400, 500, 600, 700, 800],
-            "type": [98, 121, 98, 121, 98, 121, 98, 121],
-            "loss_type": [0, 0, 17, 17, 0, 0, 18, 18],
-            "charge": [1, 1, 1, 1, 1, 1, 1, 1],
-            "number": [1, 2, 3, 4, 5, 6, 7, 8],
-            "intensity": [100, 200, 300, 400, 500, 600, 700, 800],
-            "position": [0, 1, 2, 3, 0, 1, 2, 3],
-            "error": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
-        }
-    )
+    speclib_base.calc_fragment_mz_df()
+    speclib_base._fragment_intensity_df = speclib_base.fragment_mz_df.copy()
+
+    speclib_flat = SpecLibFlat(charged_frag_types=charged_frag_types)
+    speclib_flat.parse_base_library(speclib_base)
+
     return speclib_flat
 
 
@@ -356,10 +374,12 @@ def test_add_dense_lib(mock_speclib_annotation_flat):
         ],
     )
 
-    assert np.all(
-        outlib._fragment_intensity_df.sum(axis=1) == outlib.fragment_df["intensity"]
+    assert np.isclose(
+        outlib._fragment_intensity_df.values.sum(),
+        outlib.fragment_df["intensity"].sum(),
     )
     assert np.all(outlib.precursor_df["sequence_coverage"] == [1.0, 1.0])
+    assert np.allclose(outlib.precursor_df["pif"], 1.0)
 
 
 def test_mass_accuracy_metric_normal_case():
