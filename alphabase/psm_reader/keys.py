@@ -89,6 +89,14 @@ class PsmDfCols(metaclass=ConstantsClass):
         Empirical FDR cutoff for second pass spectral library precursor Q-Value.
     FDR2_SEARCH2
         Empirical FDR cutoff for second pass library protein group Q-Value.
+    PRECURSOR_ID
+        Unique identifier for each precursor, i.e. a physical ionized peptide species.
+    PRECURSOR_INTENSITY
+        Computed intensity value for a specific precursor, i.e. a physical ionized peptide species.
+    GENE_INTENSITY
+        Computed intensity value on a gene level.
+    PEPTIDE_INTENSITY
+        Computed intensity value on a peptide/sequence level.
 
     """
 
@@ -134,6 +142,13 @@ class PsmDfCols(metaclass=ConstantsClass):
     FDR2_SEARCH1 = "fdr2_search1"
     FDR1_SEARCH2 = "fdr1_search2"
     FDR2_SEARCH2 = "fdr2_search2"
+
+    PRECURSOR_ID = "precursor_id"
+    PRECURSOR_INTENSITY = "precursor_intensity"
+
+    GENE_INTENSITY = "gene_intensity"
+
+    PEPTIDE_INTENSITY = "peptide_intensity"
 
 
 class LibPsmDfCols(metaclass=ConstantsClass):
