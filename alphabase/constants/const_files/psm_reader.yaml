@@ -193,7 +193,7 @@ diann: # 1.8.1
     'rt_stop': 'RT.Stop'
     'ccs': 'CCS'
     'mobility': ['IM','IonMobility']
-    'proteins': 'Protein.Names'
+    'proteins': 'Protein.Group'
     'uniprot_ids': 'Protein.Ids'
     'genes': 'Genes'
     'scan_num': 'MS2.Scan'
