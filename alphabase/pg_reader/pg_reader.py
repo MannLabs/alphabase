@@ -172,7 +172,7 @@ class PGReaderBase:
             return pd.read_parquet(file_path)
 
         sep = _get_delimiter(file_path)
-        return pd.read_csv(file_path, sep=sep, keep_default_na=False)
+        return pd.read_csv(file_path, sep=sep, keep_default_na=True)
 
     def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
         """Preprocess dataframe before standardizing columns."""
