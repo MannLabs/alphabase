@@ -20,7 +20,47 @@ class ConstantsClass(type):
 
 
 class PsmDfCols(metaclass=ConstantsClass):
-    """Constants for accessing the columns of a PSM dataframe."""
+    """Constants for accessing the columns of a PSM dataframe.
+
+    Parameters
+    ----------
+    MOD_SITES
+    MODIFIED_SEQUENCE
+    SEQUENCE
+    DECOY
+    MODS
+    SCORE
+    TO_REMOVE
+    AA_MASS_DIFFS
+    AA_MASS_DIFF_SITES
+    RT
+    RT_START
+    RT_STOP
+    RT_NORM
+    SPEC_IDX
+    SCANNR
+    FDR
+    NAA
+    CCS
+    MOBILITY
+    PEPTIDE_FDR
+    PROTEIN_FDR
+    RAW_NAME
+    CHARGE
+    PROTEINS
+    INTENSITY
+    SCAN_NUM
+    PRECURSOR_MZ
+    DIANN_SPEC_INDEX
+    UNIPROT_IDS
+    GENES
+    QUERY_ID
+    FDR1_SEARCH1
+    FDR2_SEARCH1
+    FDR1_SEARCH2
+    FDR2_SEARCH2
+
+    """
 
     # TODO: these are used only in th psm_reader package and the spectral_library.reader module so far
     MOD_SITES = "mod_sites"
