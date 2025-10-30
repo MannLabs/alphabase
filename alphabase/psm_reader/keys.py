@@ -41,9 +41,9 @@ class PsmDfCols(metaclass=ConstantsClass):
     RT
         Retention time of the precursor (time when the precursor eluted during chromatography) in [UNIT].
     RT_START
-        Start of search window in retention time of the precursor (time when the precursor eluted during chromatography) in [UNIT]
+        Start of search window in retention time of the precursor (time when the precursor eluted during chromatography) in [UNIT].
     RT_STOP
-        End of search window in retention time of the precursor (time when the precursor eluted during chromatography) in [UNIT]
+        End of search window in retention time of the precursor (time when the precursor eluted during chromatography) in [UNIT].
     RT_NORM
         Normalized retention time of the precursor (time when the precursor eluted during chromatography) in [UNIT].
     SPEC_IDX
@@ -57,7 +57,7 @@ class PsmDfCols(metaclass=ConstantsClass):
     CCS
         Collision Cross Section (CCS) value for the ion in [UNIT].
     MOBILITY
-        Ion mobility value associated with the precursor when available in [UNIT]
+        Ion mobility value associated with the precursor when available in [UNIT].
     PEPTIDE_FDR
         FDR or q-value estimated at the peptide-sequence level.
     PROTEIN_FDR
@@ -68,7 +68,7 @@ class PsmDfCols(metaclass=ConstantsClass):
     CHARGE
         Charge state of precursor.
     PROTEINS
-        Protein names (human readable format) of the matching protein group
+        Protein names (human readable format) of the matching protein group.
     INTENSITY
         Intensity of the corresponding protein group.
     SCAN_NUM
@@ -76,15 +76,20 @@ class PsmDfCols(metaclass=ConstantsClass):
     PRECURSOR_MZ
         Measured precursor mass-to-charge ratio (m/z) for the MS/MS spectrum.
     DIANN_SPEC_INDEX
+        Precursor.Lib.Index index of the precursor in the internal representation used by DIA-NN for the spectral library.
     UNIPROT_IDS
         Uniprot identifiers of the corresponding protein group.
     GENES
         Gene names (typically in HGNC nomenclature) of the corresponding protein group.
     QUERY_ID
     FDR1_SEARCH1
+        Empirical FDR cutoff for first-pass Global precursor Q-Value.
     FDR2_SEARCH1
+        Empirical FDR cutoff for first-pass Global protein group Q-Value.
     FDR1_SEARCH2
+        Empirical FDR cutoff for second pass spectral library precursor Q-Value.
     FDR2_SEARCH2
+        Empirical FDR cutoff for second pass library protein group Q-Value.
 
     """
 
