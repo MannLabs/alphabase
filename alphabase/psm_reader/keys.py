@@ -97,14 +97,6 @@ class PsmDfCols(metaclass=ConstantsClass):
     PEPTIDE_INTENSITY
         Computed intensity value on a peptide/sequence level.
         Empirical FDR cutoff for second pass library protein group Q-Value.
-    PRECURSOR_ID
-        Unique identifier for each precursor, i.e. a physical ionized peptide species.
-    PRECURSOR_INTENSITY
-        Computed intensity value for a specific precursor, i.e. a physical ionized peptide species.
-    GENE_INTENSITY
-        Computed intensity value on a gene level.
-    PEPTIDE_INTENSITY
-        Computed intensity value on a peptide/sequence level.
 
     """
 
