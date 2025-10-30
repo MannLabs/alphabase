@@ -7,6 +7,7 @@ from alphabase.pg_reader import (
     AlphaDiaPGReader,
     AlphaPeptPGReader,
     DiannPGReader,
+    DirectLFQReader,
     FragPipePGReader,
     MaxQuantPGReader,
     MZTabPGReader,
@@ -229,6 +230,20 @@ class TestMZTabPGReader:
         file_path, reference = example_mztab_minimal
 
         reader = MZTabPGReader()
+
+        result_df = reader.import_file(file_path=file_path)
+
+        pd.testing.assert_frame_equal(result_df, reference)
+
+
+class TestDirectLFQReader:
+    """Test directLFQ reader"""
+
+    def test_import_minimal_example(self, example_directlfq_minimal: str) -> None:
+        """Test import of minimal example MZTab file"""
+        file_path, reference = example_directlfq_minimal
+
+        reader = DirectLFQReader()
 
         result_df = reader.import_file(file_path=file_path)
 

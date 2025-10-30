@@ -37,6 +37,8 @@ class PGCols(metaclass=ConstantsClass):
         Number of peptides mapping to the specific protein group
     PROTEOTYPIC_PEPTIDE_COUNT
         Number of proteotypic, that is gene-specific, peptides mapping to the specific protein group
+    PRECURSOR_ID
+        Unique identifier of a precursor that identifies the protein
 
     """
 
@@ -51,3 +53,4 @@ class PGCols(metaclass=ConstantsClass):
     DECOY_INDICATOR = "is_decoy"
     PEPTIDE_COUNT = "peptide_count"
     PROTEOTYPIC_PEPTIDE_COUNT = "proteotypic_peptide_count"
+    PRECURSOR_ID = "precursor_id"
