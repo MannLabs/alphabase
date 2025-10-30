@@ -118,3 +118,10 @@ mztab:
   measurement_regex:
     "assay": "^protein_abundance_assay\\[[0-9]+\\]" # The protein's abundance as measured in the given assay through whatever technique was employed
     "study_variable": "^protein_abundance_study_variable\\[[0-9]+\\]" # The protein's abundance as measured in the given study variable (condition) through whatever technique was employed
+
+
+directlfq:
+  reader_type: "directlfq"
+  column_mapping:
+    "uniprot_ids": "protein"
+    "precursor_id": "ion"
