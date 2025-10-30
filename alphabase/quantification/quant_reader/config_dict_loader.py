@@ -29,6 +29,10 @@ def get_input_type_and_config_dict(input_file, input_type_to_use=None):
         input_file, sep=sep
     )
 
+    missing_columns = []
+    available_columns = []
+    failed_input_type = None
+
     for input_type in type2relevant_columns:
         if (input_type_to_use is not None) and (input_type != input_type_to_use):
             continue
@@ -37,8 +41,32 @@ def get_input_type_and_config_dict(input_file, input_type_to_use=None):
         if set(relevant_columns).issubset(uploaded_data_columns):
             config_dict = all_config_dicts.get(input_type)
             return input_type, config_dict, sep
+        else:
+            if input_type_to_use is not None and input_type == input_type_to_use:
+                failed_input_type = input_type
+                missing_columns = list(
+                    set(relevant_columns) - set(uploaded_data_columns)
+                )
+                available_columns = list(
+                    set(relevant_columns) & set(uploaded_data_columns)
+                )
 
-    raise TypeError("format not specified in intable_config.yaml!")
+    if input_type_to_use is not None and failed_input_type is not None:
+        raise ValueError(
+            f"Input type '{input_type_to_use}' requires columns that are missing from your data file.\n"
+            f"Missing columns: {missing_columns}\n"
+            f"Available columns: {available_columns}\n"
+            f"Data file columns: {uploaded_data_columns}\n\n"
+            f"Please check your data file or try a different input_type_to_use."
+        )
+    else:
+        available_types = list(type2relevant_columns.keys())
+        raise ValueError(
+            f"No suitable input type found for the given data file.\n"
+            f"Data file columns: {uploaded_data_columns}\n"
+            f"Available input types: {available_types}\n\n"
+            f"Please check your data file or specify a different input_type_to_use."
+        )
 
 
 def _get_original_file_from_aq_reformat(input_file):
