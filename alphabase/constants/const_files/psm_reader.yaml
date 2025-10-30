@@ -200,6 +200,9 @@ diann: # 1.8.1
     'score': 'CScore'
     'fdr': 'Q.Value'
     'intensity': "PG.MaxLFQ"
+    "precursor_intensity": "Precursor.Normalised"
+    "precursor_id": "Precursor.Id"
+    "gene_intensity": "Genes.MaxLFQ"
     # extra columns for performing FDR cutoff
     'fdr1_search1': 'Global.Q.Value'  # first search
     'fdr2_search1': 'Global.PG.Q.Value'  # first search
