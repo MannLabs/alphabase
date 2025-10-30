@@ -24,8 +24,7 @@ class PsmDfCols(metaclass=ConstantsClass):
 
     Attributes
     ----------
-    MOD_SITES
-    MODIFIED_SEQUENCE
+    MOD_SITES, MODIFIED_SEQUENCE
         Peptide sequence annotated with modification locations and standardized modification labels.
     SEQUENCE
         Peptide amino-acid sequence without modification annotations (plain sequence of residues).
