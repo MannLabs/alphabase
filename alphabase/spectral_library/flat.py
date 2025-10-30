@@ -3,6 +3,7 @@ from typing import Union
 
 import pandas as pd
 
+from alphabase.constants.spectral_library import LOSS_NUMBER_TO_TYPE
 from alphabase.io.hdf import HDF_File
 from alphabase.peptide.fragment import (
     create_dense_matrices,
@@ -261,16 +262,16 @@ class SpecLibFlat(SpecLibBase):
         # Now if we have a fragment type that is a,b,c we should have the corresponding x,y,z
 
         corresponding = {"a": "x", "b": "y", "c": "z", "x": "a", "y": "b", "z": "c"}
-        loss_number_to_type = {0: "", 18: "_H2O", 17: "_NH3", 98: "_modloss"}
+
         for type, loss, max_charge in unique_charge_type_pairs.values:
             for possible_charge in range(1, max_charge + 1):
                 # Add the string for this pair
                 charged_frag_types.add(
-                    f"{self.frag_types_as_char[type]}{loss_number_to_type[loss]}_z{possible_charge}"
+                    f"{self.frag_types_as_char[type]}{LOSS_NUMBER_TO_TYPE[loss]}_z{possible_charge}"
                 )
                 # Add the string for the corresponding pair
                 charged_frag_types.add(
-                    f"{corresponding[self.frag_types_as_char[type]]}{loss_number_to_type[loss]}_z{possible_charge}"
+                    f"{corresponding[self.frag_types_as_char[type]]}{LOSS_NUMBER_TO_TYPE[loss]}_z{possible_charge}"
                 )
         return list(charged_frag_types)
 
