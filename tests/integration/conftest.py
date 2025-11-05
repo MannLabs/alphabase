@@ -257,3 +257,20 @@ PRT	6978545	sodium/potassium-transporting ATPase subunit alpha-2 precursor [Ratt
     reference = get_local_reference_data(test_case_name=TEST_FILE_NAME)
 
     return file_path, reference
+
+
+@pytest.fixture(scope="function")
+def example_directlfq_minimal(tmp_path) -> Path:
+    """Get and parse minimal directlfq report for local testing"""
+    TEST_FILE_NAME = "directlfq_0.3.2_tsv"
+    TEST_DATA = """protein	ion	sample1	sample2
+A0A024R1R8;Q9Y2S6	GPLATGGIK2	814313.8125	306877.15625
+A0A075B6H7;A0A0C4DH55;P01624	LLIYGASTR2	965542.65625	654499.15625
+A0A075B6I0	FSGSILGNK2	0.0	0.0
+    """
+    file_path = write_test_data(
+        data=TEST_DATA, directory=tmp_path, test_case_name=TEST_FILE_NAME
+    )
+    reference = get_local_reference_data(test_case_name=TEST_FILE_NAME)
+
+    return file_path, reference
