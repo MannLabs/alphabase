@@ -70,6 +70,11 @@ class TestDigestGetCutPositions:
                 "PEPTIDE",
                 np.array([0, 2, 7], dtype=np.int64),
             ),
+            (
+                "non-specific",
+                "PEPTIDE",
+                np.array([0, 1, 2, 3, 4, 5, 6, 7], dtype=np.int64),
+            ),
         ],
     )
     def test_get_cut_positions_with_various_proteases(
