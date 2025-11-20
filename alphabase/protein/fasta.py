@@ -215,7 +215,8 @@ class Digest:
     def get_cut_positions(self, sequence):
         cut_pos = [0]
         cut_pos.extend([m.start() + 1 for m in self.regex_pattern.finditer(sequence)])
-        cut_pos.append(len(sequence))
+        if len(sequence) not in cut_pos:
+            cut_pos.append(len(sequence))
         return np.array(cut_pos, dtype=np.int64)
 
     def cleave_sequence(
