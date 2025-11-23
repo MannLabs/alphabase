@@ -307,9 +307,6 @@ class MSFragger_PSM_TSV_Reader(PSMReaderBase):  # noqa: N801 name should use Cap
             mass_mapped_mods=self._mass_mapped_mods,
             mod_mass_tol=self._mod_mass_tol,
         )
-
-        # Parse modifications: self._psm_df[PsmDfCols.ASSIGNED_MODS] contains raw strings
-        # from "Assigned Modifications", and we parse them into 'mods' and 'mod_sites'
         self._psm_df = translator(self._psm_df)
 
 

@@ -61,8 +61,7 @@ class TestDataProcessing:
 
     def test_modification_loading_integration(self, reader):
         """Test modification loading produces complete correct results."""
-        # Set up _psm_df with raw "Assigned Modifications" strings in PsmDfCols.ASSIGNED_MODS column
-        # (this simulates what happens after _translate_columns() maps the column)
+        # Simulates what happens after _translate_columns() maps the column
         reader._psm_df = pd.DataFrame(
             {
                 "Peptide": ["PEPTIDE", "SEQUENCE", "TEST"],
@@ -79,7 +78,6 @@ class TestDataProcessing:
         assert PsmDfCols.MOD_SITES in reader._psm_df.columns
         assert len(reader._psm_df) == 3
 
-        # Verify complete modification results for all rows
         assert reader._psm_df[PsmDfCols.MODS].tolist() == [
             "Phospho@S",
             "",
@@ -91,7 +89,6 @@ class TestDataProcessing:
         """Test that spec_idx is correctly calculated as scan_num - 1 in full workflow."""
         import io
 
-        # Create a minimal MSFragger PSM TSV
         tsv_content = """Spectrum\tPeptide\tCharge\tRetention\tHyperscore\tProtein\tIs Decoy\tAssigned Modifications\tIntensity
 file1.01234.01234.3\tPEPTIDEK\t2\t10.5\t50.0\tP12345\tfalse\t\t1000.0
 file2.01235.01235.2\tSEQUENCER\t3\t15.2\t60.0\tP67890\tfalse\t\t2000.0
@@ -100,11 +97,9 @@ file3.00100.00100.2\tTESTK\t2\t5.0\t45.0\tP11111\tfalse\t\t500.0"""
         tsv_buffer = io.StringIO(tsv_content)
         result = reader.import_file(tsv_buffer)
 
-        # Verify both scan_num and spec_idx exist
         assert PsmDfCols.SCAN_NUM in result.columns
         assert PsmDfCols.SPEC_IDX in result.columns
 
-        # Verify spec_idx = scan_num - 1 for all rows
         assert len(result) == 3
         for _, row in result.iterrows():
             assert row[PsmDfCols.SPEC_IDX] == row[PsmDfCols.SCAN_NUM] - 1
