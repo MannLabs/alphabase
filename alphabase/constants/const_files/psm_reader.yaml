@@ -153,6 +153,35 @@ pfind:
     'decoy': ['Target/Decoy', 'Targe/Decoy']
   modification_mapping_type: null  # no mapping required
 
+msfragger_psm_tsv:
+  reader_type: msfragger_psm_tsv
+  rt_unit: second
+  column_mapping:
+    'sequence': 'Peptide'
+    'charge': 'Charge'
+    'rt': 'Retention'
+    'score': 'Hyperscore'
+    'proteins': 'Protein'
+    'decoy': 'Is Decoy'
+    'raw_name': 'raw_name'
+    'intensity': 'Intensity'
+  mass_mapped_mods:
+    - 'Oxidation@M'
+    - 'Carbamidomethyl@C'
+    - 'Phospho@S'
+    - 'Phospho@T'
+    - 'Phospho@Y'
+    - 'GlyGly@K'
+    - 'Acetyl@Any_N-term'
+    - 'Glu->pyro-Glu@E^Any_N-term'
+    - 'Gln->pyro-Glu@Q^Any_N-term'
+    - 'TMT6plex@K'
+    - 'TMT6plex@Any_N-term'
+    - 'TMTpro@K'
+    - 'TMTpro@Any_N-term'
+  mod_mass_tol: 0.1
+  modification_mapping_type: 'maxquant'
+
 msfragger_pepxml:
   reader_type: msfragger_pepxml
   rt_unit: second
