@@ -20,6 +20,7 @@ from alphabase.psm_reader import (
     AlphaDiaReaderTsv,
     DiannReader,
     MaxQuantReader,
+    MSFragger_PSM_TSV_Reader,
     SageReaderTSV,
     SpectronautReader,
     SpectronautReportReader,
@@ -191,6 +192,13 @@ _EVLHLLR_	2	21.775629	0.837	EVLHLLR	440.274169715862	A0AVF1	TTC26	b	479.26126	0.
 _EVLHLLR_	2	21.775629	0.837	EVLHLLR	440.274169715862	A0AVF1	TTC26	b	592.34534	0.06371137	1	5	noloss
 _EVLHLLR_	2	21.775629	0.837	EVLHLLR	440.274169715862	A0AVF1	TTC26	b	342.20236	0.030663786	1	3	noloss
 _EVLHLLR_	2	21.775629	0.837	EVLHLLR	440.274169715862	A0AVF1	TTC26	b	705.4294	0.02848413	1	6	noloss
+"""
+
+TEST_DATA_MSFRAGGER_PSM_TSV = """Spectrum	Spectrum File	Peptide	Modified Peptide	Extended Peptide	Prev AA	Next AA	Peptide Length	Charge	Retention	Observed Mass	Calibrated Observed Mass	Observed M/Z	Calibrated Observed M/Z	Calculated Peptide Mass	Calculated M/Z	Delta Mass	Expectation	Hyperscore	Nextscore	Probability	Qvalue	Number of Enzymatic Termini	Number of Missed Cleavages	Protein Start	Protein End	Intensity	Assigned Modifications	Observed Modifications	Purity	Is Decoy	Protein	Protein ID	Entry Name	Gene
+file1.01234.01234.3	interact-file1.pep.xml	LENPNNK	LENP[+80]NNK	K.LENPNNK.S	K	S	7	3	228.78	1438.80	1438.79	479.9420	479.9396	1438.79	479.9383	0.01	0.04	16.18	15.64	0.99	0.0001	2	0	93	104	1000.0	7K(304.2071), N-term(304.2071)	0.0	false	tr|Q06AA7|Q06AA7_PIG	Q06AA7	Q06AA7_PIG	TRA2B
+file1.01235.01235.2	interact-file1.pep.xml	PEPTIDE	PEPTIDE	R.PEPTIDE.K	R	K	7	2	120.50	750.35	750.34	375.6750	375.6700	750.34	375.6725	0.01	0.08	12.50	10.20	0.85	0.002	2	0	45	51	800.0		0.0	false	tr|P12345|P12345_HUMAN	P12345	P12345_HUMAN	GENE1
+file2.01236.01236.3	interact-file2.pep.xml	SEQUENCE	SEQUENCE	K.SEQUENCE.R	K	R	8	3	150.75	900.42	900.41	300.8067	300.8033	900.41	300.8050	0.01	0.02	18.90	16.50	0.99	0.0000	2	0	120	127	1500.0		0.0	false	sp|P98765|P98765_MOUSE	P98765	P98765_MOUSE	GENE2
+file2.01237.01237.2	interact-file2.pep.xml	TESTM	TESTM[+16]	R.TESTM.A	R	A	5	2	95.30	600.28	600.27	300.6383	300.6350	600.27	300.6375	0.01	0.10	10.20	8.50	0.75	0.005	2	0	88	92	500.0	5M(15.9949)	0.0	false	tr|Q11111|Q11111_RAT	Q11111	Q11111_RAT	GENE3
 """
 
 TEST_DATA_ALPHADIA = """base_width_mobility	base_width_rt	rt_observed	mobility_observed	mono_ms1_intensity	top_ms1_intensity	sum_ms1_intensity	weighted_ms1_intensity	weighted_mass_deviation	weighted_mass_error	mz_observed	mono_ms1_height	top_ms1_height	sum_ms1_height	weighted_ms1_height	isotope_intensity_correlation	isotope_height_correlation	n_observations	intensity_correlation	height_correlation	intensity_fraction	height_fraction	intensity_fraction_weighted	height_fraction_weighted	mean_observation_score	sum_b_ion_intensity	sum_y_ion_intensity	diff_b_y_ion_intensity	f_masked	fragment_scan_correlation	template_scan_correlation	fragment_frame_correlation	top3_frame_correlation	template_frame_correlation	top3_b_ion_correlation	n_b_ions	top3_y_ion_correlation	n_y_ions	cycle_fwhm	mobility_fwhm	delta_frame_peak	top_3_ms2_mass_error	mean_ms2_mass_error	n_overlapping	mean_overlapping_intensity	mean_overlapping_mass_error	precursor_idx	rank	scan_center	frame_start	elution_group_idx	frame_stop	frame_center	scan_stop	score	scan_start	i_3	genes	i_1	decoy	mods	channel	rt_library	mobility_library	i_0	flat_frag_start_idx	mod_sites	i_2	flat_frag_stop_idx	mz_library	rt_calibrated	charge	mz_calibrated	sequence	proteins	delta_rt	n_K	n_R	n_P	_decoy	proba	qval	_candidate_idx	valid	candidate_idx	run	mod_seq_hash	mod_seq_charge_hash	pg_master	pg	pg_qval	intensity
@@ -493,3 +501,13 @@ def test_msfragger_speclib_reader() -> None:
     reader.import_file(input_data)
 
     _assert_reference_df_equal(reader.psm_df, "msfragger_speclib")
+
+
+def test_msfragger_psm_tsv_reader() -> None:
+    """Test the MSFragger PSM TSV reader."""
+    input_data = StringIO(TEST_DATA_MSFRAGGER_PSM_TSV)
+
+    reader = MSFragger_PSM_TSV_Reader()
+    reader.import_file(input_data)
+
+    _assert_reference_df_equal(reader.psm_df, "msfragger_psm_tsv")

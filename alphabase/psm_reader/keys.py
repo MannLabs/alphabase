@@ -105,6 +105,7 @@ class PsmDfCols(metaclass=ConstantsClass):
     MODIFIED_SEQUENCE = "modified_sequence"
     SEQUENCE = "sequence"
     DECOY = "decoy"
+    ASSIGNED_MODS = "assigned_mods"
     MODS = "mods"
     SCORE = "score"
     TO_REMOVE = "to_remove"

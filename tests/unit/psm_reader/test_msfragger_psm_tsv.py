@@ -61,10 +61,12 @@ class TestDataProcessing:
 
     def test_modification_loading_integration(self, reader):
         """Test modification loading produces complete correct results."""
+        # Set up _psm_df with raw "Assigned Modifications" strings in PsmDfCols.ASSIGNED_MODS column
+        # (this simulates what happens after _translate_columns() maps the column)
         reader._psm_df = pd.DataFrame(
             {
                 "Peptide": ["PEPTIDE", "SEQUENCE", "TEST"],
-                "Assigned Modifications": [
+                PsmDfCols.ASSIGNED_MODS: [
                     "5S(79.9663)",
                     "",
                     "3M(15.9949), N-term(304.2071)",

@@ -44,12 +44,12 @@ class MSFraggerModificationTranslation:
         self.mod_mass_tol = mod_mass_tol
 
     def __call__(self, psm_df: pd.DataFrame) -> pd.DataFrame:
-        """Translate modifications from MSFragger Assigned Modifications column.
+        """Translate modifications from MSFragger assigned modifications.
 
         Parameters
         ----------
         psm_df : pd.DataFrame
-            DataFrame with 'Assigned Modifications' column
+            DataFrame with PsmDfCols.ASSIGNED_MODS column containing raw assigned modifications strings
 
         Returns
         -------
@@ -57,12 +57,11 @@ class MSFraggerModificationTranslation:
             The input DataFrame with 'mods' and 'mod_sites' columns added
 
         """
-        psm_df = psm_df.copy()
         mods_list = []
         sites_list = []
 
         for _, row in psm_df.iterrows():
-            assigned_mods = row.get("Assigned Modifications", "")
+            assigned_mods = row.get(PsmDfCols.ASSIGNED_MODS, "")
 
             if not assigned_mods:
                 mods_list.append("")
@@ -303,11 +302,14 @@ class MSFragger_PSM_TSV_Reader(PSMReaderBase):  # noqa: N801 name should use Cap
         """MSFragger Hyperscore is already in correct format (larger = better)."""
 
     def _load_modifications(self, origin_df: pd.DataFrame) -> None:  # noqa: ARG002
-        """Parse modifications from Assigned Modifications column."""
+        """Parse modifications from PsmDfCols.ASSIGNED_MODS column (mapped from 'Assigned Modifications')."""
         translator = MSFraggerModificationTranslation(
             mass_mapped_mods=self._mass_mapped_mods,
             mod_mass_tol=self._mod_mass_tol,
         )
+
+        # Parse modifications: self._psm_df[PsmDfCols.ASSIGNED_MODS] contains raw strings
+        # from "Assigned Modifications", and we parse them into 'mods' and 'mod_sites'
         self._psm_df = translator(self._psm_df)
 
 

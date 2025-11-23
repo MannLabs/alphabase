@@ -166,6 +166,7 @@ msfragger_psm_tsv:
     'raw_name': 'raw_name'
     'scan_num': 'scan_num'
     'precursor_mz': 'Observed M/Z'
+    'assigned_mods': 'Assigned Modifications'
     'intensity': 'Intensity'
   mass_mapped_mods:
     - 'Oxidation@M'
