@@ -36,7 +36,7 @@ class TestDataProcessing:
     """Tests for data processing and integration."""
 
     def test_preprocessing(self, reader):
-        """Test preprocessing extracts raw names, spec_idx, and fills NAs correctly."""
+        """Test preprocessing extracts raw names, scan_num, and fills NAs correctly."""
         df = pd.DataFrame(
             {
                 "Spectrum": ["file1.01234.01234.3", "file2.01235.01235.2"],
@@ -48,9 +48,9 @@ class TestDataProcessing:
 
         processed = reader._pre_process(df.copy())
         assert PsmDfCols.RAW_NAME in processed.columns
-        assert PsmDfCols.SPEC_IDX in processed.columns
+        assert PsmDfCols.SCAN_NUM in processed.columns
         assert processed[PsmDfCols.RAW_NAME].tolist() == ["file1", "file2"]
-        assert processed[PsmDfCols.SPEC_IDX].tolist() == [1234, 1235]
+        assert processed[PsmDfCols.SCAN_NUM].tolist() == [1234, 1235]
         assert processed["Peptide"].tolist() == ["PEPTIDE", ""]
 
     def test_decoy_translation(self, reader):
@@ -84,3 +84,25 @@ class TestDataProcessing:
             "Oxidation@M;TMTpro@Any_N-term",
         ]
         assert reader._psm_df[PsmDfCols.MOD_SITES].tolist() == ["5", "", "3;0"]
+
+    def test_spec_idx_from_scan_num(self, reader):
+        """Test that spec_idx is correctly calculated as scan_num - 1 in full workflow."""
+        import io
+
+        # Create a minimal MSFragger PSM TSV
+        tsv_content = """Spectrum\tPeptide\tCharge\tRetention\tHyperscore\tProtein\tIs Decoy\tAssigned Modifications\tIntensity
+file1.01234.01234.3\tPEPTIDEK\t2\t10.5\t50.0\tP12345\tfalse\t\t1000.0
+file2.01235.01235.2\tSEQUENCER\t3\t15.2\t60.0\tP67890\tfalse\t\t2000.0
+file3.00100.00100.2\tTESTK\t2\t5.0\t45.0\tP11111\tfalse\t\t500.0"""
+
+        tsv_buffer = io.StringIO(tsv_content)
+        result = reader.import_file(tsv_buffer)
+
+        # Verify both scan_num and spec_idx exist
+        assert PsmDfCols.SCAN_NUM in result.columns
+        assert PsmDfCols.SPEC_IDX in result.columns
+
+        # Verify spec_idx = scan_num - 1 for all rows
+        assert len(result) == 3
+        for _, row in result.iterrows():
+            assert row[PsmDfCols.SPEC_IDX] == row[PsmDfCols.SCAN_NUM] - 1

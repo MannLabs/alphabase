@@ -289,7 +289,7 @@ class MSFragger_PSM_TSV_Reader(PSMReaderBase):  # noqa: N801 name should use Cap
         """MSFragger PSM TSV preprocessing."""
         df.fillna("", inplace=True)
         df[PsmDfCols.RAW_NAME] = df["Spectrum"].str.split(".").apply(lambda x: x[0])
-        df[PsmDfCols.SPEC_IDX] = (
+        df[PsmDfCols.SCAN_NUM] = (
             df["Spectrum"].str.split(".").apply(lambda x: int(x[1]))
         )
         return df

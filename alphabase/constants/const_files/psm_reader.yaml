@@ -164,6 +164,8 @@ msfragger_psm_tsv:
     'proteins': 'Protein'
     'decoy': 'Is Decoy'
     'raw_name': 'raw_name'
+    'scan_num': 'scan_num'
+    'precursor_mz': 'Observed M/Z'
     'intensity': 'Intensity'
   mass_mapped_mods:
     - 'Oxidation@M'
