@@ -26,7 +26,7 @@ def test_psm_df():
     return pd.DataFrame(
         {
             "Peptide": ["PEPTIDE", "SEQUENCE", "ANOTHER"],
-            "Assigned Modifications": [
+            PsmDfCols.ASSIGNED_MODS: [
                 "5S(79.9663), N-term(304.2071)",
                 "",
                 "6M(15.9949)",
