@@ -278,7 +278,11 @@ class MSFragger_PSM_TSV_Reader(PSMReaderBase):  # noqa: N801 name should use Cap
         )
 
     def _translate_modifications(self) -> None:
-        pass
+        """No-op: modification translation is handled in _load_modifications.
+
+        This override prevents the base class implementation from running.
+        Modifications are translated via MSFraggerModificationTranslation.
+        """
 
     def _load_file(self, filename: str) -> pd.DataFrame:
         """Load MSFragger PSM TSV file."""
@@ -357,7 +361,11 @@ class MSFraggerPepXMLReader(PSMReaderBase):
         self._mod_mass_tol = psm_reader_yaml["msfragger_pepxml"]["mod_mass_tol"]
 
     def _translate_modifications(self) -> None:
-        pass
+        """No-op: modification translation is handled in _load_modifications.
+
+        This override prevents the base class implementation from running.
+        Modifications are translated via _get_mods_from_masses.
+        """
 
     def _load_file(self, filename: str) -> pd.DataFrame:
         """Load a MsFragger output file to a DataFrame."""
