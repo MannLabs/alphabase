@@ -36,7 +36,7 @@ alphadia:
     'mods':
       - 'mods'
       - 'precursor.mods' # v2.0.0
-    'precursor_id': 
+    'precursor_id':
       - 'precursor_idx'
       - 'precursor.idx' # v2.0.0
     'precursor_intensity':
@@ -45,7 +45,7 @@ alphadia:
       - 'peptide.intensity' # v2.0.0
     'intensity':
       - 'intensity'
-      - 'pg.intensity'
+      - 'pg.intensity' # v2.0.0
   modification_mapping_type: 'maxquant' # TODO: None?
 
 alphapept:
