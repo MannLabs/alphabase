@@ -1,25 +1,51 @@
+# alphaDIA output format documented at
+# https://alphadia.readthedocs.io/en/latest/methods/output-format.html
 alphadia:
   reader_type: alphadia
   rt_unit: minute
   fixed_C57: False
   column_mapping:
-    'raw_name': 'run'
-    'sequence': 'sequence'
-    'charge': 'charge'
-    'rt': 'rt_observed'
+    'raw_name':
+      - 'run' # < v2.0.0
+      - 'raw.name'
+    'sequence':
+      - 'sequence' # < v2.0.0
+      - 'precursor.sequence'
+    'charge':
+      - 'charge' # < v2.0.0
+      - 'precursor.charge'
+    'rt':
+      - 'rt_observed' # < v2.0.0
+      - 'precursor.rt.observed'
     'rt_start': 'rt_start'
     'rt_stop': 'rt_stop'
     'ccs': 'ccs'
     'mobility': 'mobility'
-    'proteins': 'proteins'
+    'proteins':
+      - 'proteins' # < v2.0.0
+      - 'pg.proteins'
     'uniprot_ids': 'uniprot_ids'
-    'genes': 'genes'
+    'genes':
+      - 'genes' # < v2.0.0
+      - 'pg.genes'
 #    'scan_num': '' ?
-    'score': 'score'
+    'score':
+      - 'score' # < v2.0.0
+      - 'precursor.score'
     'fdr': 'fdr'
-    'mods': 'mods'
-    'intensity': 'intensity'
-    'precursor_id': 'precursor_idx'
+    'mods':
+      - 'mods' # < v2.0.0
+      - 'precursor.mods'
+    'precursor_id':
+      - 'precursor_idx' # < v2.0.0
+      - 'precursor.idx'
+    'precursor_intensity':
+      - 'precursor.intensity' # added in v2.0.0
+    'peptide_intensity':
+      - 'peptide.intensity' # added in v2.0.0
+    'intensity':
+      - 'intensity' # < v2.0.0
+      - 'pg.intensity'
   modification_mapping_type: 'maxquant' # TODO: None?
 
 alphapept:
