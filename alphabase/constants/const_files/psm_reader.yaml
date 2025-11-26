@@ -19,6 +19,7 @@ alphadia:
     'fdr': 'fdr'
     'mods': 'mods'
     'intensity': 'intensity'
+    'precursor_id': 'precursor_idx'
   modification_mapping_type: 'maxquant' # TODO: None?
 
 alphapept:
