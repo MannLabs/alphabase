@@ -6,46 +6,46 @@ alphadia:
   fixed_C57: False
   column_mapping:
     'raw_name':
-      - 'run'
-      - 'raw.name' # v2.0.0
+      - 'run' # < v2.0.0
+      - 'raw.name'
     'sequence':
-      - 'sequence'
-      - 'precursor.sequence' # v2.0.0
+      - 'sequence' # < v2.0.0
+      - 'precursor.sequence'
     'charge':
-      - 'charge'
-      - 'precursor.charge' # v2.0.0
+      - 'charge' # < v2.0.0
+      - 'precursor.charge'
     'rt':
-      - 'rt_observed'
-      - 'precursor.rt.observed' # v2.0.0
+      - 'rt_observed' # < v2.0.0
+      - 'precursor.rt.observed'
     'rt_start': 'rt_start'
     'rt_stop': 'rt_stop'
     'ccs': 'ccs'
     'mobility': 'mobility'
     'proteins':
-      - 'proteins'
-      - 'pg.proteins' # v2.0.0
+      - 'proteins' # < v2.0.0
+      - 'pg.proteins'
     'uniprot_ids': 'uniprot_ids'
     'genes':
-      - 'genes'
-      - 'pg.genes' # v2.0.0
+      - 'genes' # < v2.0.0
+      - 'pg.genes'
 #    'scan_num': '' ?
     'score':
-      - 'score'
-      - 'precursor.score' # v2.0.0
+      - 'score' # < v2.0.0
+      - 'precursor.score'
     'fdr': 'fdr'
     'mods':
-      - 'mods'
-      - 'precursor.mods' # v2.0.0
+      - 'mods' # < v2.0.0
+      - 'precursor.mods'
     'precursor_id':
-      - 'precursor_idx'
-      - 'precursor.idx' # v2.0.0
+      - 'precursor_idx' # < v2.0.0
+      - 'precursor.idx'
     'precursor_intensity':
-      - 'precursor.intensity' # v2.0.0
+      - 'precursor.intensity' # added in v2.0.0
     'peptide_intensity':
-      - 'peptide.intensity' # v2.0.0
+      - 'peptide.intensity' # added in v2.0.0
     'intensity':
-      - 'intensity'
-      - 'pg.intensity' # v2.0.0
+      - 'intensity' # < v2.0.0
+      - 'pg.intensity'
   modification_mapping_type: 'maxquant' # TODO: None?
 
 alphapept:
