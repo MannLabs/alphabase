@@ -378,6 +378,7 @@ def add_dense_lib(
         The modified flatlib object
 
     """
+    original_spec_idx = flatlib.precursor_df["spec_idx"].copy()
     flatlib.precursor_df["spec_idx"] = np.arange(len(flatlib.precursor_df))
     flatlib.precursor_df["peak_start_idx"] = flatlib.precursor_df["flat_frag_start_idx"]
     flatlib.precursor_df["peak_stop_idx"] = flatlib.precursor_df["flat_frag_stop_idx"]
@@ -415,5 +416,9 @@ def add_dense_lib(
     outlib_flat.precursor_df["frag_stop_idx"] = frag_stop_idx
 
     apply_precursor_metrics(outlib_flat)
+
+    outlib_flat.precursor_df["spec_idx"] = original_spec_idx.iloc[
+        outlib_flat.precursor_df["spec_idx"].values
+    ].values
 
     return outlib_flat
