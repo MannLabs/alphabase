@@ -196,11 +196,11 @@ def _mass_accuracy_metric(flatlib: SpecLibFlat) -> None:
 
     Important:
     ---------
-    This funmction operates in place and modifies the flatlib object
+    This function operates in place and modifies the flatlib object
 
     """
-    start_indices = flatlib.precursor_df["frag_start_idx"].to_numpy()
-    stop_indices = flatlib.precursor_df["frag_stop_idx"].to_numpy()
+    start_indices = flatlib.precursor_df["flat_frag_start_idx"].to_numpy()
+    stop_indices = flatlib.precursor_df["flat_frag_stop_idx"].to_numpy()
 
     error_array = flatlib._fragment_df["error"].to_numpy()  # noqa: SLF001
 

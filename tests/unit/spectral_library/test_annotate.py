@@ -386,8 +386,8 @@ def test_mass_accuracy_metric_normal_case():
     speclib_flat = SpecLibFlat()
     speclib_flat.precursor_df = pd.DataFrame(
         {
-            "frag_start_idx": [0, 3, 6],
-            "frag_stop_idx": [3, 6, 9],
+            "flat_frag_start_idx": [0, 3, 6],
+            "flat_frag_stop_idx": [3, 6, 9],
             "sequence": ["PEP", "PEPT", "PEPTI"],
         }
     )
@@ -406,7 +406,6 @@ def test_mass_accuracy_metric_normal_case():
             ]  # Third precursor
         }
     )
-    print(speclib_flat.precursor_df)
 
     _mass_accuracy_metric(speclib_flat)
     expected = np.array([2.0, 5.0, 8.0])  # Medians for each group
@@ -417,8 +416,8 @@ def test_mass_accuracy_metric_with_nans():
     speclib_flat = SpecLibFlat()
     speclib_flat.precursor_df = pd.DataFrame(
         {
-            "frag_start_idx": [0, 3],
-            "frag_stop_idx": [3, 6],
+            "flat_frag_start_idx": [0, 3],
+            "flat_frag_stop_idx": [3, 6],
             "sequence": ["PEPTIDE", "SEQUENCE"],
         }
     )
@@ -446,8 +445,8 @@ def test_mass_accuracy_metric_with_infs():
     speclib_flat = SpecLibFlat()
     speclib_flat.precursor_df = pd.DataFrame(
         {
-            "frag_start_idx": [0, 3],
-            "frag_stop_idx": [3, 6],
+            "flat_frag_start_idx": [0, 3],
+            "flat_frag_stop_idx": [3, 6],
             "sequence": ["PEPTIDE", "SEQUENCE"],
         }
     )
@@ -475,8 +474,8 @@ def test_mass_accuracy_metric_empty_fragments():
     speclib_flat = SpecLibFlat()
     speclib_flat.precursor_df = pd.DataFrame(
         {
-            "frag_start_idx": [0, 0],
-            "frag_stop_idx": [0, 0],
+            "flat_frag_start_idx": [0, 0],
+            "flat_frag_stop_idx": [0, 0],
             "sequence": ["PEPTIDE", "SEQUENCE"],
         }
     )
@@ -486,4 +485,37 @@ def test_mass_accuracy_metric_empty_fragments():
     expected = np.array([np.inf, np.inf])  # inf for empty fragments
     assert np.allclose(
         speclib_flat.precursor_df["mass_accuracy"], expected, equal_nan=True
+    )
+
+
+def test_mass_accuracy_metric_index_mismatch():
+    """Verify that mass_accuracy uses correct indices (flat vs dense).
+
+    This test creates a scenario where flat and dense indices differ significantly.
+    If _mass_accuracy_metric incorrectly uses dense indices (frag_start_idx) to
+    slice the flat _fragment_df, the results will be wrong.
+    """
+    speclib_flat = SpecLibFlat()
+    speclib_flat.precursor_df = pd.DataFrame(
+        {
+            "frag_start_idx": [0, 4],
+            "frag_stop_idx": [4, 8],
+            "flat_frag_start_idx": [0, 100],
+            "flat_frag_stop_idx": [100, 200],
+            "sequence": ["PEPTIDE", "SEQUENCE"],
+        }
+    )
+
+    # Flat fragment_df has 200 rows total
+    # First 100 (precursor 0's peaks) have error=1.0
+    # Next 100 (precursor 1's peaks) have error=2.0
+    speclib_flat._fragment_df = pd.DataFrame({"error": [1.0] * 100 + [2.0] * 100})
+
+    _mass_accuracy_metric(speclib_flat)
+
+    expected = np.array([1.0, 2.0])
+    actual = speclib_flat.precursor_df["mass_accuracy"].to_numpy()
+    assert np.allclose(actual, expected), (
+        f"mass_accuracy uses wrong indices! Expected {expected}, got {actual}. "
+        "Should use flat_frag_start_idx/flat_frag_stop_idx, not frag_start_idx/frag_stop_idx."
     )
