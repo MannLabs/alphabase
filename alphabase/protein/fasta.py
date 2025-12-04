@@ -212,10 +212,16 @@ class Digest:
         else:
             self.regex_pattern = re.compile(protease)
 
-    def get_cut_positions(self, sequence):
+    def get_cut_positions(self, sequence: str) -> np.ndarray:
+        """Get cut positions for a given sequence."""
+
         cut_pos = [0]
-        cut_pos.extend([m.start() + 1 for m in self.regex_pattern.finditer(sequence)])
-        cut_pos.append(len(sequence))
+        positions = [m.start() + 1 for m in self.regex_pattern.finditer(sequence)]
+        cut_pos.extend([p for p in positions if p <= len(sequence)])
+
+        if cut_pos[-1] != len(sequence):
+            cut_pos.append(len(sequence))
+
         return np.array(cut_pos, dtype=np.int64)
 
     def cleave_sequence(
