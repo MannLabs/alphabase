@@ -418,7 +418,7 @@ def add_dense_lib(
     apply_precursor_metrics(outlib_flat)
 
     outlib_flat.precursor_df["spec_idx"] = original_spec_idx.iloc[
-        outlib_flat.precursor_df["spec_idx"].values
-    ].values
+        outlib_flat.precursor_df["spec_idx"].to_numpy()
+    ].to_numpy()
 
     return outlib_flat
