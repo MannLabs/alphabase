@@ -219,7 +219,7 @@ class Digest:
         positions = [m.start() + 1 for m in self.regex_pattern.finditer(sequence)]
         cut_pos.extend([p for p in positions if p <= len(sequence)])
 
-        if len(sequence) not in cut_pos:
+        if cut_pos[-1] != len(sequence):
             cut_pos.append(len(sequence))
 
         return np.array(cut_pos, dtype=np.int64)
