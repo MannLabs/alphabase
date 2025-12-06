@@ -115,7 +115,7 @@ def test_unknown_modification_raises(translator, mass, aa):
 
 def test_dataframe_translation(translator, test_psm_df):
     """Test end-to-end translation preserves original columns and adds complete mods."""
-    result_df = translator(test_psm_df)
+    result_df = translator.translate(test_psm_df)
 
     # Check original columns preserved with exact values
     assert result_df["Peptide"].tolist() == ["PEPTIDE", "SEQUENCE", "ANOTHER"]

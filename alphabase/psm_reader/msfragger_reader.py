@@ -119,7 +119,7 @@ class MSFraggerModificationTranslation:
         self._mod_mass_tol = mod_mass_tol
         self._rev_mod_mapping = rev_mod_mapping
 
-    def __call__(self, psm_df: pd.DataFrame) -> pd.DataFrame:
+    def translate(self, psm_df: pd.DataFrame) -> pd.DataFrame:
         """Translate modifications from MSFragger assigned modifications.
 
         Parameters
@@ -391,7 +391,7 @@ class MSFraggerPsmTsvReader(PSMReaderBase):
             mod_mass_tol=self._mod_mass_tol,
             rev_mod_mapping=self._modification_mapper.rev_mod_mapping or {},
         )
-        self._psm_df = translator(self._psm_df)
+        self._psm_df = translator.translate(self._psm_df)
 
 
 class MSFraggerPepXMLReader(PSMReaderBase):
