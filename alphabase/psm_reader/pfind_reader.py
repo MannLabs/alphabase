@@ -7,6 +7,18 @@ import pandas as pd
 from pandas._libs.missing import NAType
 
 import alphabase.constants.modification as ap_mod
+from alphabase.constants.modification import (
+    ANY_C_TERM,
+    ANY_C_TERM_SPECIFIC,
+    ANY_N_TERM,
+    ANY_N_TERM_SPECIFIC,
+    MOD_SITE_SEPARATOR,
+    PROTEIN_C_TERM,
+    PROTEIN_C_TERM_SPECIFIC,
+    PROTEIN_N_TERM,
+    PROTEIN_N_TERM_SPECIFIC,
+    SEPARATOR,
+)
 from alphabase.psm_reader.keys import PsmDfCols
 from alphabase.psm_reader.psm_reader import (
     PSMReaderBase,
@@ -26,23 +38,23 @@ def _convert_one_pfind_mod(mod: str) -> Optional[str]:  # noqa:  C901 too comple
         site = mod[(idx + 1) : -1]
 
     if len(site) == 1:
-        return_value = name + "@" + site
+        return_value = name + MOD_SITE_SEPARATOR + site
     elif site == "AnyN-term":
-        return_value = name + "@" + "Any_N-term"
+        return_value = name + MOD_SITE_SEPARATOR + ANY_N_TERM
     elif site == "ProteinN-term":
-        return_value = name + "@" + "Protein_N-term"
+        return_value = name + MOD_SITE_SEPARATOR + PROTEIN_N_TERM
     elif site.startswith("AnyN-term"):
-        return_value = name + "@" + site[-1] + "^Any_N-term"
+        return_value = name + MOD_SITE_SEPARATOR + site[-1] + ANY_N_TERM_SPECIFIC
     elif site.startswith("ProteinN-term"):
-        return_value = name + "@" + site[-1] + "^Protein_N-term"
+        return_value = name + MOD_SITE_SEPARATOR + site[-1] + PROTEIN_N_TERM_SPECIFIC
     elif site == "AnyC-term":
-        return_value = name + "@" + "Any_C-term"
+        return_value = name + MOD_SITE_SEPARATOR + ANY_C_TERM
     elif site == "ProteinC-term":
-        return_value = name + "@" + "Protein_C-term"
+        return_value = name + MOD_SITE_SEPARATOR + PROTEIN_C_TERM
     elif site.startswith("AnyC-term"):
-        return_value = name + "@" + site[-1] + "^Any_C-term"
+        return_value = name + MOD_SITE_SEPARATOR + site[-1] + ANY_C_TERM_SPECIFIC
     elif site.startswith("ProteinC-term"):
-        return_value = name + "@" + site[-1] + "^Protein_C-term"
+        return_value = name + MOD_SITE_SEPARATOR + site[-1] + PROTEIN_C_TERM_SPECIFIC
     else:
         return_value = None
 
@@ -54,12 +66,12 @@ def translate_pFind_mod(mod_str: str) -> Union[str, NAType]:  # noqa: N802 name 
     if not mod_str:
         return ""
     ret_mods = []
-    for mod_ in mod_str.split(";"):
+    for mod_ in mod_str.split(SEPARATOR):
         mod = _convert_one_pfind_mod(mod_)
         if not mod or mod not in ap_mod.MOD_INFO_DICT:
             return pd.NA
         ret_mods.append(mod)
-    return ";".join(ret_mods)
+    return SEPARATOR.join(ret_mods)
 
 
 def get_pFind_mods(pfind_mod_str: str) -> Tuple[str, str]:  # noqa: N802 name `get_pFind_mods` should be lowercase TODO: used by peptdeep
@@ -68,7 +80,7 @@ def get_pFind_mods(pfind_mod_str: str) -> Tuple[str, str]:  # noqa: N802 name `g
     if not pfind_mod_str:
         return "", ""
 
-    items = [item.split(",", 3) for item in pfind_mod_str.split(";")]
+    items = [item.split(",", 3) for item in pfind_mod_str.split(SEPARATOR)]
 
     items = [
         ("-1", mod)
@@ -78,13 +90,13 @@ def get_pFind_mods(pfind_mod_str: str) -> Tuple[str, str]:  # noqa: N802 name `g
         for site, mod in items
     ]
     items = list(zip(*items))
-    return ";".join(items[1]), ";".join(items[0])
+    return SEPARATOR.join(items[1]), SEPARATOR.join(items[0])
 
 
 def parse_pfind_protein(protein: str, *, keep_reverse: bool = True) -> str:
     """Parse pFind protein string."""
     proteins = protein.strip("/").split("/")
-    return ";".join(
+    return SEPARATOR.join(
         [
             protein
             for protein in proteins

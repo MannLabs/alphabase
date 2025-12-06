@@ -9,7 +9,13 @@ from pyteomics import pepxml
 
 from alphabase.constants.aa import AA_ASCII_MASS
 from alphabase.constants.atom import MASS_H, MASS_O
-from alphabase.constants.modification import MOD_MASS
+from alphabase.constants.modification import (
+    ANY_C_TERM,
+    ANY_N_TERM,
+    MOD_MASS,
+    MOD_SITE_SEPARATOR,
+    SEPARATOR,
+)
 from alphabase.psm_reader.keys import PsmDfCols
 from alphabase.psm_reader.psm_reader import (
     PSMReaderBase,
@@ -117,7 +123,7 @@ class MSFraggerModificationTranslation:
                         MsFraggerTokens.MOD_STOP
                     )
                 )
-                mod_name = self._match_mod_by_mass(mass_shift, "Any_N-term")
+                mod_name = self._match_mod_by_mass(mass_shift, ANY_N_TERM)
                 mods.append(mod_name)
                 sites.append("0")
             elif entry.startswith(MsFraggerTokens.C_TERM):
@@ -126,7 +132,7 @@ class MSFraggerModificationTranslation:
                         MsFraggerTokens.MOD_STOP
                     )
                 )
-                mod_name = self._match_mod_by_mass(mass_shift, "Any_C-term")
+                mod_name = self._match_mod_by_mass(mass_shift, ANY_C_TERM)
                 mods.append(mod_name)
                 sites.append("-1")
             else:
@@ -150,7 +156,7 @@ class MSFraggerModificationTranslation:
                     mods.append(mod_name)
                     sites.append(position)
 
-        return ";".join(mods), ";".join(sites)
+        return SEPARATOR.join(mods), SEPARATOR.join(sites)
 
     def _match_mod_by_mass(self, mass_shift: float, aa_or_term: str) -> str:
         """Match mass shift to modification name.
@@ -180,9 +186,9 @@ class MSFraggerModificationTranslation:
             mod_mass = MOD_MASS[mod_name]
 
             if abs(mass_shift - mod_mass) < self._mod_mass_tol:
-                mod_base, mod_site = mod_name.split("@")
+                mod_base, mod_site = mod_name.split(MOD_SITE_SEPARATOR)
 
-                if aa_or_term in ["Any_N-term", "Any_C-term"]:
+                if aa_or_term in [ANY_N_TERM, ANY_C_TERM]:
                     if mod_site == aa_or_term or mod_site.endswith(aa_or_term):
                         return mod_name
                 else:
@@ -209,7 +215,7 @@ def _get_mods_from_masses(  # noqa: PLR0912, C901 too many branches, too complex
     aa_mass_diffs = []
     aa_mass_diff_sites = []
     for mod in msf_aa_mods:
-        _mass_str, site_str = mod.split("@")
+        _mass_str, site_str = mod.split(MOD_SITE_SEPARATOR)
         mod_mass = float(_mass_str)
         site = int(site_str)
         cterm_position = len(sequence) + 1
@@ -225,23 +231,37 @@ def _get_mods_from_masses(  # noqa: PLR0912, C901 too many branches, too complex
         for mod_name in mass_mapped_mods:
             if abs(mod_mass - MOD_MASS[mod_name]) < mod_mass_tol:
                 if site == 0:
-                    _mod = mod_name.split("@")[0] + "@Any_N-term"
+                    _mod = (
+                        mod_name.split(MOD_SITE_SEPARATOR)[0]
+                        + MOD_SITE_SEPARATOR
+                        + ANY_N_TERM
+                    )
                 elif site == 1:
                     if mod_name.endswith("^Any_N-term"):
                         _mod = mod_name
                         site_str = "0"
                     else:
-                        _mod = mod_name.split("@")[0] + "@" + sequence[0]
+                        _mod = (
+                            mod_name.split(MOD_SITE_SEPARATOR)[0]
+                            + MOD_SITE_SEPARATOR
+                            + sequence[0]
+                        )
                 elif site == cterm_position:
                     if mod_name.endswith("C-term"):
                         _mod = mod_name
                     else:
                         _mod = (
-                            mod_name.split("@")[0] + "@Any_C-term"
+                            mod_name.split(MOD_SITE_SEPARATOR)[0]
+                            + MOD_SITE_SEPARATOR
+                            + ANY_C_TERM
                         )  # what if only Protein C-term is listed?
                     site_str = "-1"
                 else:
-                    _mod = mod_name.split("@")[0] + "@" + sequence[site - 1]
+                    _mod = (
+                        mod_name.split(MOD_SITE_SEPARATOR)[0]
+                        + MOD_SITE_SEPARATOR
+                        + sequence[site - 1]
+                    )
                 if _mod in MOD_MASS:
                     mods.append(_mod)
                     mod_sites.append(site_str)
@@ -251,10 +271,10 @@ def _get_mods_from_masses(  # noqa: PLR0912, C901 too many branches, too complex
             aa_mass_diffs.append(f"{mod_mass:.5f}")
             aa_mass_diff_sites.append(site_str)
     return (
-        ";".join(mods),
-        ";".join(mod_sites),
-        ";".join(aa_mass_diffs),
-        ";".join(aa_mass_diff_sites),
+        SEPARATOR.join(mods),
+        SEPARATOR.join(mod_sites),
+        SEPARATOR.join(aa_mass_diffs),
+        SEPARATOR.join(aa_mass_diff_sites),
     )
 
 
@@ -394,7 +414,7 @@ class MSFraggerPepXMLReader(PSMReaderBase):
         )
 
         self._psm_df[PsmDfCols.PROTEINS] = self._psm_df[PsmDfCols.PROTEINS].apply(
-            lambda x: ";".join(x)
+            lambda x: SEPARATOR.join(x)
         )
         if not self._keep_decoy:
             self._psm_df[PsmDfCols.TO_REMOVE] += self._psm_df[PsmDfCols.DECOY] > 0

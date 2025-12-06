@@ -4,6 +4,7 @@ import copy
 from collections import defaultdict
 from typing import Dict, Optional
 
+from alphabase.constants.modification import PROTEIN_N_TERM
 from alphabase.psm_reader.utils import MOD_TO_UNIMOD_DICT, get_extended_modifications
 
 
@@ -155,7 +156,7 @@ class ModificationMapper:
                 for mod_other_format_ in mod_other_format:
                     if (
                         mod_other_format_ in rev_mod_mapping
-                        and mod_alphabase_format.endswith("Protein_N-term")
+                        and mod_alphabase_format.endswith(PROTEIN_N_TERM)
                     ):
                         continue
 
