@@ -22,6 +22,76 @@ def _is_fragger_decoy(proteins: List[str]) -> bool:
     return all(prot.lower().startswith("rev_") for prot in proteins)
 
 
+def _extract_position(entry: str) -> Tuple[str, str]:
+    """Extract leading position digits from modification entry.
+
+    Parameters
+    ----------
+    entry : str
+        Modification entry like '5S(79.9663)'
+
+    Returns
+    -------
+    tuple
+        (position, remainder) e.g. ('5', 'S(79.9663)')
+
+    Raises
+    ------
+    ValueError
+        If entry has no leading position digits
+
+    """
+    position = ""
+    for char in entry:
+        if char.isdigit():
+            position += char
+        else:
+            break
+
+    if not position:
+        raise ValueError(
+            f"Invalid modification entry '{entry}': expected format "
+            f"'<position><AA>(<mass>)' (e.g., '5S(79.9663)'), "
+            f"'N-term(<mass>)', or 'C-term(<mass>)'."
+        )
+
+    return position, entry[len(position) :]
+
+
+def _extract_mass_shift(entry: str) -> float:
+    """Extract mass shift from entry like 'N-term(304.2071)' or 'S(79.9663)'."""
+    return float(
+        entry.split(MsFraggerTokens.MOD_START)[1].rstrip(MsFraggerTokens.MOD_STOP)
+    )
+
+
+def _parse_lookup_key(lookup_key: str, entry: str) -> Tuple[str, float]:
+    """Parse lookup key into amino acid and mass shift.
+
+    Parameters
+    ----------
+    lookup_key : str
+        Lookup key like 'S(79.9663)'
+    entry : str
+        Original entry for error messages
+
+    Returns
+    -------
+    tuple
+        (amino_acid, mass_shift)
+
+    """
+    parts = lookup_key.split(MsFraggerTokens.MOD_START)
+    if len(parts) != 2:  # noqa: PLR2004
+        raise ValueError(
+            f"Invalid modification entry '{entry}': "
+            f"could not parse amino acid and mass."
+        )
+    amino_acid = parts[0]
+    mass_shift = float(parts[1].rstrip(MsFraggerTokens.MOD_STOP))
+    return amino_acid, mass_shift
+
+
 class MSFraggerModificationTranslation:
     """Translate MSFragger PSM.TSV modifications to alphabase format."""
 
@@ -111,67 +181,27 @@ class MSFraggerModificationTranslation:
         return ";".join(mods), ";".join(sites)
 
     def _parse_single_modification(self, entry: str) -> Tuple[str, str]:
-        """Parse a single modification entry.
-
-        Parameters
-        ----------
-        entry : str
-            Single modification entry, e.g. "5S(79.9663)", "N-term(304.2071)"
-
-        Returns
-        -------
-        tuple
-            (mod_name, site) where mod_name is alphabase format and site is position string
-
-        """
+        """Parse a single modification entry."""
         if entry.startswith(MsFraggerTokens.N_TERM):
-            return self._resolve_mod_name(entry, "Any_N-term"), "0"
+            return self._resolve_terminal_mod(entry, "Any_N-term"), "0"
         if entry.startswith(MsFraggerTokens.C_TERM):
-            return self._resolve_mod_name(entry, "Any_C-term"), "-1"
-        return self._parse_positional_modification(entry)
+            return self._resolve_terminal_mod(entry, "Any_C-term"), "-1"
 
-    def _parse_positional_modification(self, entry: str) -> Tuple[str, str]:
-        """Parse a positional modification entry like '5S(79.9663)'."""
-        position = ""
-        for char in entry:
-            if char.isdigit():
-                position += char
-            else:
-                break
-
-        if not position:
-            raise ValueError(
-                f"Invalid modification entry '{entry}': expected format "
-                f"'<position><AA>(<mass>)' (e.g., '5S(79.9663)'), "
-                f"'N-term(<mass>)', or 'C-term(<mass>)'."
-            )
-
-        lookup_key = entry[len(position) :]
-        mod_name = self._resolve_mod_name_from_lookup_key(lookup_key, entry)
+        position, lookup_key = _extract_position(entry)
+        mod_name = self._resolve_positional_mod(lookup_key, entry)
         return mod_name, position
 
-    def _resolve_mod_name(self, entry: str, aa_or_term: str) -> str:
-        """Resolve modification name from entry, checking rev_mod_mapping first."""
+    def _resolve_terminal_mod(self, entry: str, aa_or_term: str) -> str:
+        """Resolve terminal modification name, checking rev_mod_mapping first."""
         if entry in self._rev_mod_mapping:
             return self._rev_mod_mapping[entry]
-        mass_shift = float(
-            entry.split(MsFraggerTokens.MOD_START)[1].rstrip(MsFraggerTokens.MOD_STOP)
-        )
-        return self._match_mod_by_mass(mass_shift, aa_or_term)
+        return self._match_mod_by_mass(_extract_mass_shift(entry), aa_or_term)
 
-    def _resolve_mod_name_from_lookup_key(self, lookup_key: str, entry: str) -> str:
-        """Resolve modification name from lookup key like 'S(79.9663)'."""
+    def _resolve_positional_mod(self, lookup_key: str, entry: str) -> str:
+        """Resolve positional modification name from lookup key like 'S(79.9663)'."""
         if lookup_key in self._rev_mod_mapping:
             return self._rev_mod_mapping[lookup_key]
-
-        parts = lookup_key.split(MsFraggerTokens.MOD_START)
-        if len(parts) != 2:  # noqa: PLR2004
-            raise ValueError(
-                f"Invalid modification entry '{entry}': "
-                f"could not parse amino acid and mass."
-            )
-        amino_acid = parts[0]
-        mass_shift = float(parts[1].rstrip(MsFraggerTokens.MOD_STOP))
+        amino_acid, mass_shift = _parse_lookup_key(lookup_key, entry)
         return self._match_mod_by_mass(mass_shift, amino_acid)
 
     def _match_mod_by_mass(self, mass_shift: float, aa_or_term: str) -> str:
