@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import tqdm
 
-from alphabase.constants.modification import MOD_DF
+from alphabase.constants.modification import MOD_DF, SEPARATOR
 from alphabase.spectral_library.base import SpecLibBase
 from alphabase.utils import explode_multiple_columns
 
@@ -39,8 +39,8 @@ def create_modified_sequence(
     """
     mod_seq, mods, mod_sites = seq_mods_sites
     if mods:
-        mods = mods.split(";")
-        mod_sites = [int(i) for i in mod_sites.split(";")]
+        mods = mods.split(SEPARATOR)
+        mod_sites = [int(i) for i in mod_sites.split(SEPARATOR)]
         rev_order = np.argsort(mod_sites)[::-1]
         mod_sites = [mod_sites[rev_order[i]] for i in range(len(mod_sites))]
         mods = [mods[rev_order[i]] for i in range(len(mods))]

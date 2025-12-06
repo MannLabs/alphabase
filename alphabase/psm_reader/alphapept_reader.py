@@ -8,6 +8,7 @@ import numba
 import numpy as np
 import pandas as pd
 
+from alphabase.constants.modification import SEPARATOR
 from alphabase.psm_reader.keys import PsmDfCols
 from alphabase.psm_reader.psm_reader import (
     PSMReaderBase,
@@ -45,7 +46,7 @@ def parse_ap(precursor: str) -> Tuple[str, str, str, str, int]:
                 mods.append(string)
             string = ""
 
-    return "".join(parsed), ";".join(mods), ";".join(sites), charge, decoy
+    return "".join(parsed), SEPARATOR.join(mods), SEPARATOR.join(sites), charge, decoy
 
 
 class AlphaPeptReader(PSMReaderBase):

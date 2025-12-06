@@ -2,6 +2,7 @@ from typing import Optional
 
 from rdkit import Chem
 
+from alphabase.constants.modification import SEPARATOR
 from alphabase.smiles.smiles import AminoAcidModifier
 
 
@@ -35,7 +36,7 @@ class PeptideSmilesEncoder:
         """
         mod_dict = {}
         if mods and mod_sites:
-            for site, mod in zip(mod_sites.split(";"), mods.split(";")):
+            for site, mod in zip(mod_sites.split(SEPARATOR), mods.split(SEPARATOR)):
                 # if the modification is techinically at the N-terminal, but changes the first amino acid
                 if "^" in mod and site == "0":
                     site = "1"

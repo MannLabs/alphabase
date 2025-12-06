@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from alphabase.constants.modification import MOD_DF
+from alphabase.constants.modification import MOD_DF, SEPARATOR
 from alphabase.psm_reader.keys import PsmDfCols
 from alphabase.psm_reader.psm_reader import (
     PSMReaderBase,
@@ -411,7 +411,7 @@ def _translate_modifications(
         mod_sites.append(mod_site)
         mod_names.append(matched_mod_name)
 
-    return ";".join(mod_sites), ";".join(mod_names)
+    return SEPARATOR.join(mod_sites), SEPARATOR.join(mod_names)
 
 
 def _apply_translate_modifications(

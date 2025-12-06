@@ -11,7 +11,7 @@ from alphabase.constants.atom import (
     MASS_PROTON,
     calc_mass_from_formula,
 )
-from alphabase.constants.modification import calc_modloss_mass
+from alphabase.constants.modification import SEPARATOR, calc_modloss_mass
 from alphabase.peptide.mass_calc import calc_b_y_and_peptide_masses_for_same_len_seqs
 from alphabase.peptide.precursor import (
     is_precursor_refined,
@@ -699,24 +699,24 @@ def calc_fragment_mz_values_for_same_nAA(
     df_group: pd.DataFrame, nAA: int, charged_frag_types: list
 ):
     mod_list = (
-        df_group.mods.str.split(";")
+        df_group.mods.str.split(SEPARATOR)
         .apply(lambda x: [m for m in x if len(m) > 0])
         .values
     )
     site_list = (
-        df_group.mod_sites.str.split(";")
+        df_group.mod_sites.str.split(SEPARATOR)
         .apply(lambda x: [int(s) for s in x if len(s) > 0])
         .values
     )
 
     if "aa_mass_diffs" in df_group.columns:
         mod_diff_list = (
-            df_group.aa_mass_diffs.str.split(";")
+            df_group.aa_mass_diffs.str.split(SEPARATOR)
             .apply(lambda x: [float(m) for m in x if len(m) > 0])
             .values
         )
         mod_diff_site_list = (
-            df_group.aa_mass_diff_sites.str.split(";")
+            df_group.aa_mass_diff_sites.str.split(SEPARATOR)
             .apply(lambda x: [int(s) for s in x if len(s) > 0])
             .values
         )

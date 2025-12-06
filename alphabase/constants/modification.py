@@ -11,6 +11,28 @@ from alphabase.constants.atom import (
     parse_formula,
 )
 
+# Modification format constants
+#: Separator between multiple values (e.g., "Phospho@S;Oxidation@M", "prot1;prot2")
+SEPARATOR: str = ";"
+#: Separator between modification name and site (e.g., "Phospho@S")
+MOD_SITE_SEPARATOR: str = "@"
+#: Any N-terminal modification site
+ANY_N_TERM: str = "Any_N-term"
+#: Any C-terminal modification site
+ANY_C_TERM: str = "Any_C-term"
+#: Protein N-terminal modification site
+PROTEIN_N_TERM: str = "Protein_N-term"
+#: Protein C-terminal modification site
+PROTEIN_C_TERM: str = "Protein_C-term"
+#: AA-specific Any N-terminal (e.g., "Q^Any_N-term" for Q at N-terminus)
+ANY_N_TERM_SPECIFIC: str = "^Any_N-term"
+#: AA-specific Any C-terminal (e.g., "M^Any_C-term" for M at C-terminus)
+ANY_C_TERM_SPECIFIC: str = "^Any_C-term"
+#: AA-specific Protein N-terminal (e.g., "M^Protein_N-term")
+PROTEIN_N_TERM_SPECIFIC: str = "^Protein_N-term"
+#: AA-specific Protein C-terminal (e.g., "K^Protein_C-term")
+PROTEIN_C_TERM_SPECIFIC: str = "^Protein_C-term"
+
 #: Main entry of modification infomation (DataFrame fotmat).
 MOD_DF: pd.DataFrame = pd.DataFrame()
 

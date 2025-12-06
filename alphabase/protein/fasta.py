@@ -13,6 +13,7 @@ from Bio import SeqIO
 from tqdm import tqdm
 
 from alphabase.constants._const import CONST_FILE_FOLDER
+from alphabase.constants.modification import SEPARATOR
 from alphabase.io.hdf import HDF_File
 from alphabase.spectral_library.base import SpecLibBase
 from alphabase.utils import explode_multiple_columns
@@ -275,7 +276,7 @@ def get_fix_mods(sequence: str, fix_mod_aas: str, fix_mod_dict: dict) -> tuple:
         if aa in fix_mod_aas:
             mod_sites.append(i + 1)
             mods.append(fix_mod_dict[aa])
-    return ";".join(mods), ";".join(str(i) for i in mod_sites)
+    return SEPARATOR.join(mods), SEPARATOR.join(str(i) for i in mod_sites)
 
 
 def get_candidate_sites(sequence: str, target_mod_aas: str) -> list:
@@ -409,7 +410,7 @@ def get_var_mods(
     ret_sites_list = []
     for mod_sites in mod_sites_list:
         _mods = get_var_mods_per_sites(sequence, mod_sites, mod_dict)
-        mod_sites_str = ";".join([str(i) for i in mod_sites])
+        mod_sites_str = SEPARATOR.join([str(i) for i in mod_sites])
         ret_mods.extend(_mods)
         ret_sites_list.extend([mod_sites_str] * len(_mods))
     if min_var_mod == 0:
@@ -438,7 +439,7 @@ def add_single_peptide_labeling(
     add_nterm_label = bool(nterm_label_mod)
     add_cterm_label = bool(cterm_label_mod)
     if mod_sites:
-        _sites = mod_sites.split(";")
+        _sites = mod_sites.split(SEPARATOR)
         if "0" in _sites:
             add_nterm_label = False
         if "-1" in _sites:
@@ -458,7 +459,7 @@ def add_single_peptide_labeling(
     if aa_labels:
         mod_list.append(aa_labels)
         mod_site_list.append(aa_label_sites)
-    return ";".join(mod_list), ";".join(mod_site_list)
+    return SEPARATOR.join(mod_list), SEPARATOR.join(mod_site_list)
 
 
 def parse_labels(labels: list):
@@ -503,9 +504,9 @@ def create_labeling_peptide_df(
 def protein_idxes_to_names(protein_idxes: str, protein_names: list):
     if len(protein_idxes) == 0:
         return ""
-    proteins = [protein_names[int(i)] for i in protein_idxes.split(";")]
+    proteins = [protein_names[int(i)] for i in protein_idxes.split(SEPARATOR)]
     proteins = [protein for protein in proteins if protein]
-    return ";".join(proteins)
+    return SEPARATOR.join(proteins)
 
 
 def append_special_modifications(
@@ -610,10 +611,10 @@ def append_special_modifications(
         df.drop(df[df.mods_app.apply(lambda x: len(x) == 0)].index, inplace=True)
         df = explode_multiple_columns(df, ["mods_app", "mod_sites_app"])
     df["mods"] = df[["mods", "mods_app"]].apply(
-        lambda x: ";".join(i for i in x if i), axis=1
+        lambda x: SEPARATOR.join(i for i in x if i), axis=1
     )
     df["mod_sites"] = df[["mod_sites", "mod_sites_app"]].apply(
-        lambda x: ";".join(i for i in x if i), axis=1
+        lambda x: SEPARATOR.join(i for i in x if i), axis=1
     )
     df.drop(columns=["mods_app", "mod_sites_app"], inplace=True)
     df.reset_index(drop=True, inplace=True)
@@ -1158,11 +1159,11 @@ class SpecLibFasta(SpecLibBase):
 
         return (
             list(
-                ";".join([i for i in items if i])
+                SEPARATOR.join([i for i in items if i])
                 for items in itertools.product(nterm_var_mods, var_mods_list)
             ),
             list(
-                ";".join([i for i in items if i])
+                SEPARATOR.join([i for i in items if i])
                 for items in itertools.product(nterm_var_mod_sites, var_mod_sites_list)
             ),
         )
@@ -1361,8 +1362,8 @@ def annotate_precursor_df(
                 genes[i].append(protein_entry["gene_org"])
                 proteins[i].append(protein_entry["protein_id"])
 
-    peptide_df["genes"] = [";".join(g) for g in genes]
-    peptide_df["proteins"] = [";".join(g) for g in proteins]
+    peptide_df["genes"] = [SEPARATOR.join(g) for g in genes]
+    peptide_df["proteins"] = [SEPARATOR.join(g) for g in proteins]
     peptide_df["cardinality"] = [len(g) for g in genes]
 
     if "genes" in precursor_df.columns:

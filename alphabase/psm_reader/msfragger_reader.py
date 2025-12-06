@@ -9,7 +9,7 @@ from pyteomics import pepxml
 
 from alphabase.constants.aa import AA_ASCII_MASS
 from alphabase.constants.atom import MASS_H, MASS_O
-from alphabase.constants.modification import MOD_MASS
+from alphabase.constants.modification import MOD_MASS, SEPARATOR
 from alphabase.psm_reader.keys import PsmDfCols
 from alphabase.psm_reader.psm_reader import (
     PSMReaderBase,
@@ -150,7 +150,7 @@ class MSFraggerModificationTranslation:
                     mods.append(mod_name)
                     sites.append(position)
 
-        return ";".join(mods), ";".join(sites)
+        return SEPARATOR.join(mods), SEPARATOR.join(sites)
 
     def _match_mod_by_mass(self, mass_shift: float, aa_or_term: str) -> str:
         """Match mass shift to modification name.
@@ -251,10 +251,10 @@ def _get_mods_from_masses(  # noqa: PLR0912, C901 too many branches, too complex
             aa_mass_diffs.append(f"{mod_mass:.5f}")
             aa_mass_diff_sites.append(site_str)
     return (
-        ";".join(mods),
-        ";".join(mod_sites),
-        ";".join(aa_mass_diffs),
-        ";".join(aa_mass_diff_sites),
+        SEPARATOR.join(mods),
+        SEPARATOR.join(mod_sites),
+        SEPARATOR.join(aa_mass_diffs),
+        SEPARATOR.join(aa_mass_diff_sites),
     )
 
 
@@ -394,7 +394,7 @@ class MSFraggerPepXMLReader(PSMReaderBase):
         )
 
         self._psm_df[PsmDfCols.PROTEINS] = self._psm_df[PsmDfCols.PROTEINS].apply(
-            lambda x: ";".join(x)
+            lambda x: SEPARATOR.join(x)
         )
         if not self._keep_decoy:
             self._psm_df[PsmDfCols.TO_REMOVE] += self._psm_df[PsmDfCols.DECOY] > 0

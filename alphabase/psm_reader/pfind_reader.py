@@ -7,6 +7,7 @@ import pandas as pd
 from pandas._libs.missing import NAType
 
 import alphabase.constants.modification as ap_mod
+from alphabase.constants.modification import SEPARATOR
 from alphabase.psm_reader.keys import PsmDfCols
 from alphabase.psm_reader.psm_reader import (
     PSMReaderBase,
@@ -54,12 +55,12 @@ def translate_pFind_mod(mod_str: str) -> Union[str, NAType]:  # noqa: N802 name 
     if not mod_str:
         return ""
     ret_mods = []
-    for mod_ in mod_str.split(";"):
+    for mod_ in mod_str.split(SEPARATOR):
         mod = _convert_one_pfind_mod(mod_)
         if not mod or mod not in ap_mod.MOD_INFO_DICT:
             return pd.NA
         ret_mods.append(mod)
-    return ";".join(ret_mods)
+    return SEPARATOR.join(ret_mods)
 
 
 def get_pFind_mods(pfind_mod_str: str) -> Tuple[str, str]:  # noqa: N802 name `get_pFind_mods` should be lowercase TODO: used by peptdeep
@@ -68,7 +69,7 @@ def get_pFind_mods(pfind_mod_str: str) -> Tuple[str, str]:  # noqa: N802 name `g
     if not pfind_mod_str:
         return "", ""
 
-    items = [item.split(",", 3) for item in pfind_mod_str.split(";")]
+    items = [item.split(",", 3) for item in pfind_mod_str.split(SEPARATOR)]
 
     items = [
         ("-1", mod)
@@ -78,13 +79,13 @@ def get_pFind_mods(pfind_mod_str: str) -> Tuple[str, str]:  # noqa: N802 name `g
         for site, mod in items
     ]
     items = list(zip(*items))
-    return ";".join(items[1]), ";".join(items[0])
+    return SEPARATOR.join(items[1]), SEPARATOR.join(items[0])
 
 
 def parse_pfind_protein(protein: str, *, keep_reverse: bool = True) -> str:
     """Parse pFind protein string."""
     proteins = protein.strip("/").split("/")
-    return ";".join(
+    return SEPARATOR.join(
         [
             protein
             for protein in proteins
