@@ -8,7 +8,7 @@ __all__ = [
     "SwathReader",
     "SpectronautReportReader",
     "MaxQuantReader",
-    "MSFragger_PSM_TSV_Reader",
+    "MSFraggerPsmTsvReader",
     "pFindReader",
     "MSFraggerPepXML",
     "MSFraggerPepXMLReader",
@@ -47,9 +47,9 @@ from alphabase.psm_reader.maxquant_reader import (
     register_readers as register_mq_readers,
 )
 from alphabase.psm_reader.msfragger_reader import (
-    MSFragger_PSM_TSV_Reader,
     MSFraggerPepXML,
     MSFraggerPepXMLReader,
+    MSFraggerPsmTsvReader,
 )
 from alphabase.psm_reader.msfragger_reader import (
     register_readers as register_fragger_readers,

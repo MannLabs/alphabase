@@ -30,6 +30,10 @@ class PsmDfCols(metaclass=ConstantsClass):
         Peptide amino-acid sequence without modification annotations (plain sequence of residues).
     DECOY
         Label indicating whether the matched sequence is a decoy (reverse/shuffled) entry used for FDR estimation.
+    TMP_MODS
+        Intermediate column containing raw modification strings from search engines (e.g., MSFragger's
+        "Assigned Modifications" format: "5S(79.9663), N-term(304.2071)"). This is translated into
+        the standardized MODS and MOD_SITES columns during processing and is not present in the final output.
     MODS
         List of modifications on the peptide in unimod standardization
     SCORE
@@ -105,6 +109,7 @@ class PsmDfCols(metaclass=ConstantsClass):
     MODIFIED_SEQUENCE = "modified_sequence"
     SEQUENCE = "sequence"
     DECOY = "decoy"
+    TMP_MODS = "_tmp_mods"
     MODS = "mods"
     SCORE = "score"
     TO_REMOVE = "to_remove"

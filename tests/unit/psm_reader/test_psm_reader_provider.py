@@ -10,6 +10,8 @@ from alphabase.psm_reader import PSMReaderBase, psm_reader_provider
         "alphapept",
         "maxquant",
         "pfind",
+        "msfragger_psm_tsv",
+        "msfragger",
         "msfragger_pepxml",
         "diann",
         "spectronaut_report",
