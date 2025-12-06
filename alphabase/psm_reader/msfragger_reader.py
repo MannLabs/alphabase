@@ -1,7 +1,7 @@
 """MSFragger reader."""
 
 import warnings
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -10,22 +10,12 @@ from pyteomics import pepxml
 from alphabase.constants.aa import AA_ASCII_MASS
 from alphabase.constants.atom import MASS_H, MASS_O
 from alphabase.constants.modification import MOD_MASS
-from alphabase.psm_reader.keys import PsmDfCols
+from alphabase.psm_reader.keys import MsFraggerTokens, PsmDfCols
 from alphabase.psm_reader.psm_reader import (
     PSMReaderBase,
     psm_reader_provider,
     psm_reader_yaml,
 )
-
-
-class MsFraggerTokens:
-    """String tokens used in MSFragger output formats."""
-
-    MOD_START = "("
-    MOD_STOP = ")"
-    MOD_SEPARATOR = ","
-    N_TERM = "N-term"
-    C_TERM = "C-term"
 
 
 def _is_fragger_decoy(proteins: List[str]) -> bool:
@@ -38,7 +28,8 @@ class MSFraggerModificationTranslation:
     def __init__(
         self,
         mass_mapped_mods: List[str],
-        mod_mass_tol: float = 0.1,
+        mod_mass_tol: float,
+        rev_mod_mapping: Dict[str, str],
     ):
         """Initialize MSFragger modification translator.
 
@@ -47,11 +38,16 @@ class MSFraggerModificationTranslation:
         mass_mapped_mods : List[str]
             List of modification names to match against (e.g., ['Phospho@S', 'Oxidation@M'])
         mod_mass_tol : float
-            Mass tolerance for matching modifications in Daltons. Default: 0.1
+            Mass tolerance for matching modifications in Daltons.
+        rev_mod_mapping : Dict[str, str]
+            Reverse mapping from MSFragger format to alphabase format.
+            Keys use MSFragger's native format: 'AA(mass)' or 'N-term(mass)'.
+            Values use alphabase format: 'Mod@AA'.
 
         """
         self._mass_mapped_mods = mass_mapped_mods
         self._mod_mass_tol = mod_mass_tol
+        self._rev_mod_mapping = rev_mod_mapping
 
     def __call__(self, psm_df: pd.DataFrame) -> pd.DataFrame:
         """Translate modifications from MSFragger assigned modifications.
@@ -81,10 +77,11 @@ class MSFraggerModificationTranslation:
 
         return psm_df
 
-    def _parse_assigned_modifications(self, assigned_mods: str) -> Tuple[str, str]:
+    def _parse_assigned_modifications(self, assigned_mods: str) -> Tuple[str, str]:  # noqa: C901, PLR0912
         """Parse MSFragger Assigned Modifications string.
 
         Directly maps mass shifts to modification names without conversion.
+        Custom mappings are checked first, then falls back to mass-based matching.
 
         Parameters
         ----------
@@ -112,43 +109,59 @@ class MSFraggerModificationTranslation:
                 continue
 
             if entry.startswith(MsFraggerTokens.N_TERM):
-                mass_shift = float(
-                    entry.split(MsFraggerTokens.MOD_START)[1].rstrip(
-                        MsFraggerTokens.MOD_STOP
+                if entry in self._rev_mod_mapping:
+                    mod_name = self._rev_mod_mapping[entry]
+                else:
+                    mass_shift = float(
+                        entry.split(MsFraggerTokens.MOD_START)[1].rstrip(
+                            MsFraggerTokens.MOD_STOP
+                        )
                     )
-                )
-                mod_name = self._match_mod_by_mass(mass_shift, "Any_N-term")
+                    mod_name = self._match_mod_by_mass(mass_shift, "Any_N-term")
                 mods.append(mod_name)
                 sites.append("0")
             elif entry.startswith(MsFraggerTokens.C_TERM):
-                mass_shift = float(
-                    entry.split(MsFraggerTokens.MOD_START)[1].rstrip(
-                        MsFraggerTokens.MOD_STOP
+                if entry in self._rev_mod_mapping:
+                    mod_name = self._rev_mod_mapping[entry]
+                else:
+                    mass_shift = float(
+                        entry.split(MsFraggerTokens.MOD_START)[1].rstrip(
+                            MsFraggerTokens.MOD_STOP
+                        )
                     )
-                )
-                mod_name = self._match_mod_by_mass(mass_shift, "Any_C-term")
+                    mod_name = self._match_mod_by_mass(mass_shift, "Any_C-term")
                 mods.append(mod_name)
                 sites.append("-1")
             else:
-                parts = entry.split(MsFraggerTokens.MOD_START)
-                if len(parts) != 2:  # noqa: PLR2004
-                    continue
-
-                position_and_amino_acid, mass_string = parts
-                mass_shift = float(mass_string.rstrip(MsFraggerTokens.MOD_STOP))
-
                 position = ""
-                amino_acid = ""
-                for char in position_and_amino_acid:
+                for char in entry:
                     if char.isdigit():
                         position += char
                     else:
-                        amino_acid += char
+                        break
 
-                if position and amino_acid:
+                if not position:
+                    raise ValueError(
+                        f"Invalid modification entry '{entry}': expected format "
+                        f"'<position><AA>(<mass>)' (e.g., '5S(79.9663)'), "
+                        f"'N-term(<mass>)', or 'C-term(<mass>)'."
+                    )
+
+                lookup_key = entry[len(position) :]
+                if lookup_key in self._rev_mod_mapping:
+                    mod_name = self._rev_mod_mapping[lookup_key]
+                else:
+                    parts = lookup_key.split(MsFraggerTokens.MOD_START)
+                    if len(parts) != 2:  # noqa: PLR2004
+                        raise ValueError(
+                            f"Invalid modification entry '{entry}': "
+                            f"could not parse amino acid and mass."
+                        )
+                    amino_acid = parts[0]
+                    mass_shift = float(parts[1].rstrip(MsFraggerTokens.MOD_STOP))
                     mod_name = self._match_mod_by_mass(mass_shift, amino_acid)
-                    mods.append(mod_name)
-                    sites.append(position)
+                mods.append(mod_name)
+                sites.append(position)
 
         return ";".join(mods), ";".join(sites)
 
@@ -275,7 +288,23 @@ class MSFraggerPsmTsvReader(PSMReaderBase):
     ):
         """Initialize MSFragger PSM TSV reader.
 
-        See PSMReaderBase documentation for parameters.
+        Parameters
+        ----------
+        column_mapping : Optional[dict]
+            Custom column name mapping.
+        modification_mapping : Optional[dict]
+            Custom modification mapping from alphabase format to MSFragger format.
+            Keys use alphabase format: 'Mod@AA'.
+            Values use MSFragger's native format: 'AA(mass)' or 'N-term(mass)' or 'C-term(mass)'.
+            Example: {'Phospho@S': 'S(79.9663)', 'TMTpro@Any_N-term': 'N-term(304.2071)'}
+        fdr : float
+            False discovery rate threshold. Default: 0.01
+        keep_decoy : bool
+            Whether to keep decoy hits. Default: False
+        rt_unit : Optional[str]
+            Retention time unit.
+        **kwargs
+            Additional arguments passed to PSMReaderBase.
 
         """
         super().__init__(
@@ -321,6 +350,7 @@ class MSFraggerPsmTsvReader(PSMReaderBase):
         translator = MSFraggerModificationTranslation(
             mass_mapped_mods=self._mass_mapped_mods,
             mod_mass_tol=self._mod_mass_tol,
+            rev_mod_mapping=self._modification_mapper.rev_mod_mapping or {},
         )
         self._psm_df = translator(self._psm_df)
 
