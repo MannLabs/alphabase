@@ -386,12 +386,12 @@ class MSFraggerPsmTsvReader(PSMReaderBase):
 
     def _load_modifications(self, origin_df: pd.DataFrame) -> None:  # noqa: ARG002
         """Parse modifications from PsmDfCols.TMP_MODS column (mapped from 'Assigned Modifications')."""
-        translator = MSFraggerModificationTranslation(
+        modification_translation = MSFraggerModificationTranslation(
             mass_mapped_mods=self._mass_mapped_mods,
             mod_mass_tol=self._mod_mass_tol,
             rev_mod_mapping=self._modification_mapper.rev_mod_mapping or {},
         )
-        self._psm_df = translator.translate(self._psm_df)
+        self._psm_df = modification_translation.translate(self._psm_df)
 
 
 class MSFraggerPepXMLReader(PSMReaderBase):

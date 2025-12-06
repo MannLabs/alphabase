@@ -636,11 +636,11 @@ class SageReaderBase(PSMReaderBase, ABC):
         )
 
     def _translate_modifications(self) -> None:
-        sage_translation = SageModificationTranslation(
+        modification_translation = SageModificationTranslation(
             custom_translation_df=self.custom_translation_df,
             mp_process_num=self.mp_process_num,
         )
-        self._psm_df = sage_translation.translate(self._psm_df)
+        self._psm_df = modification_translation.translate(self._psm_df)
 
         # drop modified_sequence
         self._psm_df.drop(columns=[PsmDfCols.MODIFIED_SEQUENCE], inplace=True)
