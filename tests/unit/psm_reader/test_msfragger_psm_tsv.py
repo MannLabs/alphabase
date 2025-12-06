@@ -33,6 +33,13 @@ class TestReaderBasics:
         reader = psm_reader_provider.get_reader("msfragger_psm_tsv", keep_decoy=True)
         assert reader._keep_decoy is True
 
+    def test_modification_mapping_parameter(self):
+        """Test reader accepts modification_mapping parameter and creates rev_mod_mapping."""
+        custom_mapping = {"Phospho@S": "S(79.9663)"}
+        reader = MSFraggerPsmTsvReader(modification_mapping=custom_mapping)
+        assert "S(79.9663)" in reader._modification_mapper.rev_mod_mapping
+        assert reader._modification_mapper.rev_mod_mapping["S(79.9663)"] == "Phospho@S"
+
 
 class TestDataProcessing:
     """Tests for data processing and integration."""
