@@ -60,13 +60,6 @@ class SageModificationTranslation:
                     "Custom translation df must have columns 'modification' and 'matched_mod_name'."
                 )
 
-    def __call__(self, psm_df: pd.DataFrame) -> pd.DataFrame:
-        """Translate modifications in the PSMs to alphabase style modifications.
-
-        Alias for `translate` method.
-        """
-        return self.translate(psm_df)
-
     def translate(self, psm_df: pd.DataFrame) -> pd.DataFrame:
         """Translate modifications in the PSMs to alphabase style modifications.
 
