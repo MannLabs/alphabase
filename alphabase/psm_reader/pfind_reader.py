@@ -7,7 +7,18 @@ import pandas as pd
 from pandas._libs.missing import NAType
 
 import alphabase.constants.modification as ap_mod
-from alphabase.constants.modification import SEPARATOR
+from alphabase.constants.modification import (
+    ANY_C_TERM,
+    ANY_C_TERM_SPECIFIC,
+    ANY_N_TERM,
+    ANY_N_TERM_SPECIFIC,
+    MOD_SITE_SEPARATOR,
+    PROTEIN_C_TERM,
+    PROTEIN_C_TERM_SPECIFIC,
+    PROTEIN_N_TERM,
+    PROTEIN_N_TERM_SPECIFIC,
+    SEPARATOR,
+)
 from alphabase.psm_reader.keys import PsmDfCols
 from alphabase.psm_reader.psm_reader import (
     PSMReaderBase,
@@ -27,23 +38,23 @@ def _convert_one_pfind_mod(mod: str) -> Optional[str]:  # noqa:  C901 too comple
         site = mod[(idx + 1) : -1]
 
     if len(site) == 1:
-        return_value = name + "@" + site
+        return_value = name + MOD_SITE_SEPARATOR + site
     elif site == "AnyN-term":
-        return_value = name + "@" + "Any_N-term"
+        return_value = name + MOD_SITE_SEPARATOR + ANY_N_TERM
     elif site == "ProteinN-term":
-        return_value = name + "@" + "Protein_N-term"
+        return_value = name + MOD_SITE_SEPARATOR + PROTEIN_N_TERM
     elif site.startswith("AnyN-term"):
-        return_value = name + "@" + site[-1] + "^Any_N-term"
+        return_value = name + MOD_SITE_SEPARATOR + site[-1] + ANY_N_TERM_SPECIFIC
     elif site.startswith("ProteinN-term"):
-        return_value = name + "@" + site[-1] + "^Protein_N-term"
+        return_value = name + MOD_SITE_SEPARATOR + site[-1] + PROTEIN_N_TERM_SPECIFIC
     elif site == "AnyC-term":
-        return_value = name + "@" + "Any_C-term"
+        return_value = name + MOD_SITE_SEPARATOR + ANY_C_TERM
     elif site == "ProteinC-term":
-        return_value = name + "@" + "Protein_C-term"
+        return_value = name + MOD_SITE_SEPARATOR + PROTEIN_C_TERM
     elif site.startswith("AnyC-term"):
-        return_value = name + "@" + site[-1] + "^Any_C-term"
+        return_value = name + MOD_SITE_SEPARATOR + site[-1] + ANY_C_TERM_SPECIFIC
     elif site.startswith("ProteinC-term"):
-        return_value = name + "@" + site[-1] + "^Protein_C-term"
+        return_value = name + MOD_SITE_SEPARATOR + site[-1] + PROTEIN_C_TERM_SPECIFIC
     else:
         return_value = None
 

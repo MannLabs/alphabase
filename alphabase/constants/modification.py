@@ -16,6 +16,8 @@ from alphabase.constants.atom import (
 SEPARATOR: str = ";"
 #: Separator between modification name and site (e.g., "Phospho@S")
 MOD_SITE_SEPARATOR: str = "@"
+#: Separator for AA-specific terminal mods (e.g., "Q^Any_N-term")
+MOD_TERM_SEPARATOR: str = "^"
 #: Any N-terminal modification site
 ANY_N_TERM: str = "Any_N-term"
 #: Any C-terminal modification site
@@ -81,12 +83,12 @@ def add_modifications_for_lower_case_AA():
     lower_case_df = MOD_DF.copy()
 
     def _mod_lower_case(modname):
-        modname, site = modname.split("@")
+        modname, site = modname.split(MOD_SITE_SEPARATOR)
         if len(site) == 1:
-            return modname + "@" + site.lower()
+            return modname + MOD_SITE_SEPARATOR + site.lower()
         elif "^" in site:
             site = site[0].lower() + site[1:]
-            return modname + "@" + site
+            return modname + MOD_SITE_SEPARATOR + site
         else:
             return ""
 

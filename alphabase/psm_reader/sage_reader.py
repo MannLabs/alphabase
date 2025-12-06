@@ -11,7 +11,12 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from alphabase.constants.modification import MOD_DF, SEPARATOR
+from alphabase.constants.modification import (
+    MOD_DF,
+    MOD_SITE_SEPARATOR,
+    MOD_TERM_SEPARATOR,
+    SEPARATOR,
+)
 from alphabase.psm_reader.keys import PsmDfCols
 from alphabase.psm_reader.psm_reader import (
     PSMReaderBase,
@@ -523,7 +528,11 @@ def _get_annotated_mod_df() -> pd.DataFrame:
     mod_annotated_df = MOD_DF.copy()
 
     mod_annotated_df["previous_aa"] = (
-        mod_annotated_df["mod_name"].str.split("@").str[1].str.split("^").str[0]
+        mod_annotated_df["mod_name"]
+        .str.split(MOD_SITE_SEPARATOR)
+        .str[1]
+        .str.split(MOD_TERM_SEPARATOR)
+        .str[0]
     )
 
     # we use the length of the localizer "K", "Any_N-term", "Protein_N-term" as rank to prioritize Any N-term over Protein N-term

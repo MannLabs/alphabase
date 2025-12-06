@@ -5,14 +5,14 @@ from typing import Dict, List, Tuple, Union
 import pandas as pd
 from pandas._libs.missing import NAType
 
-from alphabase.constants.modification import MOD_DF, SEPARATOR
+from alphabase.constants.modification import MOD_DF, MOD_SITE_SEPARATOR, SEPARATOR
 
 MOD_TO_UNIMOD_DICT = {}
 for mod_name, unimod_id_ in MOD_DF[["mod_name", "unimod_id"]].to_numpy():
     unimod_id = int(unimod_id_)
     if unimod_id in (-1, "-1"):
         continue
-    if mod_name[-2] == "@":
+    if mod_name[-2] == MOD_SITE_SEPARATOR:
         MOD_TO_UNIMOD_DICT[mod_name] = f"{mod_name[-1]}(UniMod:{unimod_id})"
     else:
         MOD_TO_UNIMOD_DICT[mod_name] = f"_(UniMod:{unimod_id})"

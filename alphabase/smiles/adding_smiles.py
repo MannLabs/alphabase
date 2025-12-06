@@ -26,7 +26,12 @@ import pandas as pd
 from alphabase.constants._const import CONST_FILE_FOLDER
 from alphabase.constants.aa import aa_formula
 from alphabase.constants.atom import ChemicalCompositonFormula
-from alphabase.constants.modification import MOD_DF, add_new_modifications
+from alphabase.constants.modification import (
+    MOD_DF,
+    MOD_SITE_SEPARATOR,
+    MOD_TERM_SEPARATOR,
+    add_new_modifications,
+)
 from alphabase.smiles.smiles import AminoAcidModifier
 
 aa_modifier = AminoAcidModifier()
@@ -68,7 +73,7 @@ def process_modifications(
 
     for ptm, smiles in mods_dict.items():
         if mod_type == "ptm":
-            original_aa = ptm.split("@")[1].split("^")[0]
+            original_aa = ptm.split(MOD_SITE_SEPARATOR)[1].split(MOD_TERM_SEPARATOR)[0]
             if original_aa.startswith("Any"):
                 original_aa = "A"
         else:

@@ -13,7 +13,14 @@ from Bio import SeqIO
 from tqdm import tqdm
 
 from alphabase.constants._const import CONST_FILE_FOLDER
-from alphabase.constants.modification import SEPARATOR
+from alphabase.constants.modification import (
+    ANY_C_TERM,
+    ANY_N_TERM,
+    MOD_SITE_SEPARATOR,
+    PROTEIN_C_TERM,
+    PROTEIN_N_TERM,
+    SEPARATOR,
+)
 from alphabase.io.hdf import HDF_File
 from alphabase.spectral_library.base import SpecLibBase
 from alphabase.utils import explode_multiple_columns
@@ -420,7 +427,7 @@ def get_var_mods(
 
 
 def parse_term_mod(term_mod_name: str):
-    _mod, term = term_mod_name.split("@")
+    _mod, term = term_mod_name.split(MOD_SITE_SEPARATOR)
     if "^" in term:
         return tuple(term.split("^"))
     else:
@@ -468,13 +475,13 @@ def parse_labels(labels: list):
     nterm_label_mod = ""
     cterm_label_mod = ""
     for label in labels:
-        _, aa = label.split("@")
+        _, aa = label.split(MOD_SITE_SEPARATOR)
         if len(aa) == 1:
             label_aas += aa
             label_mod_dict[aa] = label
-        elif aa == "Any_N-term":
+        elif aa == ANY_N_TERM:
             nterm_label_mod = label
-        elif aa == "Any_C-term":
+        elif aa == ANY_C_TERM:
             cterm_label_mod = label
     return label_aas, label_mod_dict, nterm_label_mod, cterm_label_mod
 
@@ -571,7 +578,7 @@ def append_special_modifications(
     mod_dict = {}
     if _check_if_multi_mods_on_aa(var_mods):
         for mod in var_mods:
-            if mod.find("@") + 2 == len(mod):
+            if mod.find(MOD_SITE_SEPARATOR) + 2 == len(mod):
                 # if mod[-1] in self.fix_mod_dict: continue
                 if mod[-1] in mod_dict:
                     mod_dict[mod[-1]].append(mod)
@@ -581,7 +588,7 @@ def append_special_modifications(
         get_var_mods_per_sites = get_var_mods_per_sites_multi_mods_on_aa
     else:
         for mod in var_mods:
-            if mod.find("@") + 2 == len(mod):
+            if mod.find(MOD_SITE_SEPARATOR) + 2 == len(mod):
                 # if mod[-1] in self.fix_mod_dict: continue
                 var_mod_aas += mod[-1]
                 mod_dict[mod[-1]] = mod
@@ -816,13 +823,13 @@ class SpecLibFasta(SpecLibBase):
                     term_dict[site] = term_mod
 
             site, term = parse_term_mod(term_mod)
-            if term == "Any_N-term":
+            if term == ANY_N_TERM:
                 _set_dict(pep_nterm, site, term_mod, allow_conflicts)
-            elif term == "Protein_N-term":
+            elif term == PROTEIN_N_TERM:
                 _set_dict(prot_nterm, site, term_mod, allow_conflicts)
-            elif term == "Any_C-term":
+            elif term == ANY_C_TERM:
                 _set_dict(pep_cterm, site, term_mod, allow_conflicts)
-            elif term == "Protein_C-term":
+            elif term == PROTEIN_C_TERM:
                 _set_dict(prot_cterm, site, term_mod, allow_conflicts)
 
         # for mod in self.fix_mods:
@@ -849,7 +856,7 @@ class SpecLibFasta(SpecLibBase):
         global get_var_mods_per_sites
         if _check_if_multi_mods_on_aa(self.var_mods):
             for mod in self.var_mods:
-                if mod.find("@") + 2 == len(mod):
+                if mod.find(MOD_SITE_SEPARATOR) + 2 == len(mod):
                     # if mod[-1] in self.fix_mod_dict: continue
                     if mod[-1] in self.var_mod_dict:
                         self.var_mod_dict[mod[-1]].append(mod)
@@ -859,14 +866,14 @@ class SpecLibFasta(SpecLibBase):
             get_var_mods_per_sites = get_var_mods_per_sites_multi_mods_on_aa
         else:
             for mod in self.var_mods:
-                if mod.find("@") + 2 == len(mod):
+                if mod.find(MOD_SITE_SEPARATOR) + 2 == len(mod):
                     # if mod[-1] in self.fix_mod_dict: continue
                     self.var_mod_aas += mod[-1]
                     self.var_mod_dict[mod[-1]] = mod
             get_var_mods_per_sites = get_var_mods_per_sites_single_mod_on_aa
 
         for mod in self.var_mods:
-            if mod.find("@") + 2 < len(mod):
+            if mod.find(MOD_SITE_SEPARATOR) + 2 < len(mod):
                 _set_term_mod(
                     mod,
                     self.var_mod_prot_nterm_dict,
@@ -1388,7 +1395,7 @@ def annotate_precursor_df(
 def _check_if_multi_mods_on_aa(var_mods):
     mod_set = set()
     for mod in var_mods:
-        if mod.find("@") + 2 == len(mod):
+        if mod.find(MOD_SITE_SEPARATOR) + 2 == len(mod):
             if mod[-1] in mod_set:
                 return True
             mod_set.add(mod[-1])

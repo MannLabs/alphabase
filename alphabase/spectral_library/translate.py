@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import tqdm
 
-from alphabase.constants.modification import MOD_DF, SEPARATOR
+from alphabase.constants.modification import MOD_DF, MOD_SITE_SEPARATOR, SEPARATOR
 from alphabase.spectral_library.base import SpecLibBase
 from alphabase.utils import explode_multiple_columns
 
@@ -45,7 +45,7 @@ def create_modified_sequence(
         mod_sites = [mod_sites[rev_order[i]] for i in range(len(mod_sites))]
         mods = [mods[rev_order[i]] for i in range(len(mods))]
         if translate_mod_dict is None:
-            mods = [mod[: mod.find("@")] for mod in mods]
+            mods = [mod[: mod.find(MOD_SITE_SEPARATOR)] for mod in mods]
         else:
             mods = [translate_mod_dict[mod] for mod in mods]
         for _site, mod in zip(mod_sites, mods):
