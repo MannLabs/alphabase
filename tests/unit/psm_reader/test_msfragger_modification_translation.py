@@ -5,7 +5,7 @@ import pytest
 
 from alphabase.constants.modification import MOD_MASS
 from alphabase.psm_reader.keys import PsmDfCols
-from alphabase.psm_reader.msfragger_reader import MSFraggerModificationTranslation
+from alphabase.psm_reader.msfragger_reader import MSFraggerModificationTranslator
 from alphabase.psm_reader.psm_reader import psm_reader_yaml
 
 
@@ -15,7 +15,7 @@ def translator():
     mass_mapped_mods = psm_reader_yaml.get("msfragger_psm_tsv", {}).get(
         "mass_mapped_mods", []
     )
-    return MSFraggerModificationTranslation(
+    return MSFraggerModificationTranslator(
         mass_mapped_mods=mass_mapped_mods,
         mod_mass_tol=0.1,
         rev_mod_mapping={},
@@ -49,7 +49,7 @@ def test_translator_initialization(
     mass_mapped_mods, mod_mass_tol, expected_mods, expected_tol
 ):
     """Test translator initialization with various parameters."""
-    translator = MSFraggerModificationTranslation(
+    translator = MSFraggerModificationTranslator(
         mass_mapped_mods=mass_mapped_mods,
         mod_mass_tol=mod_mass_tol,
         rev_mod_mapping={},
@@ -150,7 +150,7 @@ class TestRevModMapping:
 
     def test_rev_mapping_used_over_mass_matching(self):
         """Test that rev_mod_mapping takes precedence over mass-based matching."""
-        translator = MSFraggerModificationTranslation(
+        translator = MSFraggerModificationTranslator(
             mass_mapped_mods=["Phospho@S", "Oxidation@M"],
             mod_mass_tol=0.1,
             rev_mod_mapping={"S(79.9663)": "Phospho@S"},
@@ -161,7 +161,7 @@ class TestRevModMapping:
 
     def test_rev_mapping_n_term(self):
         """Test rev_mod_mapping for N-terminal modifications."""
-        translator = MSFraggerModificationTranslation(
+        translator = MSFraggerModificationTranslator(
             mass_mapped_mods=[],
             mod_mass_tol=0.1,
             rev_mod_mapping={"N-term(304.2071)": "TMTpro@Any_N-term"},
@@ -172,7 +172,7 @@ class TestRevModMapping:
 
     def test_rev_mapping_c_term(self):
         """Test rev_mod_mapping for C-terminal modifications."""
-        translator = MSFraggerModificationTranslation(
+        translator = MSFraggerModificationTranslator(
             mass_mapped_mods=[],
             mod_mass_tol=0.1,
             rev_mod_mapping={"C-term(17.0265)": "Amidated@Any_C-term"},
@@ -183,7 +183,7 @@ class TestRevModMapping:
 
     def test_rev_mapping_multiple_mods(self):
         """Test rev_mod_mapping with multiple modifications in one entry."""
-        translator = MSFraggerModificationTranslation(
+        translator = MSFraggerModificationTranslator(
             mass_mapped_mods=["Oxidation@M"],
             mod_mass_tol=0.1,
             rev_mod_mapping={
@@ -199,7 +199,7 @@ class TestRevModMapping:
 
     def test_rev_mapping_fallback_to_mass_matching(self):
         """Test that unmapped mods fall back to mass-based matching."""
-        translator = MSFraggerModificationTranslation(
+        translator = MSFraggerModificationTranslator(
             mass_mapped_mods=["Oxidation@M"],
             mod_mass_tol=0.1,
             rev_mod_mapping={"S(79.9663)": "Phospho@S"},
@@ -210,7 +210,7 @@ class TestRevModMapping:
 
     def test_empty_rev_mapping(self):
         """Test that empty rev_mod_mapping works correctly."""
-        translator = MSFraggerModificationTranslation(
+        translator = MSFraggerModificationTranslator(
             mass_mapped_mods=["Phospho@S"],
             mod_mass_tol=0.1,
             rev_mod_mapping={},

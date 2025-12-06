@@ -19,7 +19,7 @@ from alphabase.psm_reader.psm_reader import (
 )
 
 
-class SageModificationTranslation:
+class SageModificationTranslator:
     """Translate Sage style modifications to alphabase style modifications."""
 
     def __init__(
@@ -636,11 +636,11 @@ class SageReaderBase(PSMReaderBase, ABC):
         )
 
     def _translate_modifications(self) -> None:
-        modification_translation = SageModificationTranslation(
+        modification_translator = SageModificationTranslator(
             custom_translation_df=self.custom_translation_df,
             mp_process_num=self.mp_process_num,
         )
-        self._psm_df = modification_translation.translate(self._psm_df)
+        self._psm_df = modification_translator.translate(self._psm_df)
 
         # drop modified_sequence
         self._psm_df.drop(columns=[PsmDfCols.MODIFIED_SEQUENCE], inplace=True)
