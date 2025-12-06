@@ -18,6 +18,16 @@ from alphabase.psm_reader.psm_reader import (
 )
 
 
+class MsFraggerTokens:
+    """String tokens used in MSFragger output formats."""
+
+    MOD_START = "("
+    MOD_STOP = ")"
+    MOD_SEPARATOR = ","
+    N_TERM = "N-term"
+    C_TERM = "C-term"
+
+
 def _is_fragger_decoy(proteins: List[str]) -> bool:
     return all(prot.lower().startswith("rev_") for prot in proteins)
 
@@ -40,8 +50,8 @@ class MSFraggerModificationTranslation:
             Mass tolerance for matching modifications in Daltons. Default: 0.1
 
         """
-        self.mass_mapped_mods = mass_mapped_mods
-        self.mod_mass_tol = mod_mass_tol
+        self._mass_mapped_mods = mass_mapped_mods
+        self._mod_mass_tol = mod_mass_tol
 
     def __call__(self, psm_df: pd.DataFrame) -> pd.DataFrame:
         """Translate modifications from MSFragger assigned modifications.
@@ -49,7 +59,7 @@ class MSFraggerModificationTranslation:
         Parameters
         ----------
         psm_df : pd.DataFrame
-            DataFrame with PsmDfCols.ASSIGNED_MODS column containing raw assigned modifications strings
+            DataFrame with PsmDfCols.TMP_MODS column containing raw assigned modifications strings
 
         Returns
         -------
@@ -61,13 +71,7 @@ class MSFraggerModificationTranslation:
         sites_list = []
 
         for _, row in psm_df.iterrows():
-            assigned_mods = row.get(PsmDfCols.ASSIGNED_MODS, "")
-
-            if not assigned_mods:
-                mods_list.append("")
-                sites_list.append("")
-                continue
-
+            assigned_mods = row.get(PsmDfCols.TMP_MODS, "")
             mods, sites = self._parse_assigned_modifications(assigned_mods)
             mods_list.append(mods)
             sites_list.append(sites)
@@ -90,13 +94,16 @@ class MSFraggerModificationTranslation:
         Returns
         -------
         tuple
-            (mods_str, sites_str) where mods and sites are semicolon-separated
+            (mods_str, sites_str) where mods and sites are semicolon-separated.
+            Example: ("Phospho@S;Phospho@S;TMT@Any_N-term", "5;7;0")
 
         """
         if not assigned_mods:
             return "", ""
 
-        mod_entries = [m.strip() for m in assigned_mods.split(",")]
+        mod_entries = [
+            m.strip() for m in assigned_mods.split(MsFraggerTokens.MOD_SEPARATOR)
+        ]
         mods = []
         sites = []
 
@@ -104,37 +111,44 @@ class MSFraggerModificationTranslation:
             if not entry:
                 continue
 
-            if entry.startswith("N-term"):
-                mass_shift = float(entry.split("(")[1].rstrip(")"))
+            if entry.startswith(MsFraggerTokens.N_TERM):
+                mass_shift = float(
+                    entry.split(MsFraggerTokens.MOD_START)[1].rstrip(
+                        MsFraggerTokens.MOD_STOP
+                    )
+                )
                 mod_name = self._match_mod_by_mass(mass_shift, "Any_N-term")
                 mods.append(mod_name)
                 sites.append("0")
-            elif entry.startswith("C-term"):
-                mass_shift = float(entry.split("(")[1].rstrip(")"))
+            elif entry.startswith(MsFraggerTokens.C_TERM):
+                mass_shift = float(
+                    entry.split(MsFraggerTokens.MOD_START)[1].rstrip(
+                        MsFraggerTokens.MOD_STOP
+                    )
+                )
                 mod_name = self._match_mod_by_mass(mass_shift, "Any_C-term")
                 mods.append(mod_name)
                 sites.append("-1")
             else:
-                parts = entry.split("(")
+                parts = entry.split(MsFraggerTokens.MOD_START)
                 if len(parts) != 2:  # noqa: PLR2004
                     continue
 
-                pos_aa_str, mass_str = parts
-                mass_shift = float(mass_str.rstrip(")"))
+                position_and_amino_acid, mass_string = parts
+                mass_shift = float(mass_string.rstrip(MsFraggerTokens.MOD_STOP))
 
-                pos_str = ""
-                aa = ""
-                for char in pos_aa_str:
+                position = ""
+                amino_acid = ""
+                for char in position_and_amino_acid:
                     if char.isdigit():
-                        pos_str += char
+                        position += char
                     else:
-                        aa += char
+                        amino_acid += char
 
-                if pos_str and aa:
-                    pos = int(pos_str)
-                    mod_name = self._match_mod_by_mass(mass_shift, aa)
+                if position and amino_acid:
+                    mod_name = self._match_mod_by_mass(mass_shift, amino_acid)
                     mods.append(mod_name)
-                    sites.append(str(pos))
+                    sites.append(position)
 
         return ";".join(mods), ";".join(sites)
 
@@ -159,13 +173,13 @@ class MSFraggerModificationTranslation:
             If no matching modification is found
 
         """
-        for mod_name in self.mass_mapped_mods:
+        for mod_name in self._mass_mapped_mods:
             if mod_name not in MOD_MASS:
                 continue
 
             mod_mass = MOD_MASS[mod_name]
 
-            if abs(mass_shift - mod_mass) < self.mod_mass_tol:
+            if abs(mass_shift - mod_mass) < self._mod_mass_tol:
                 mod_base, mod_site = mod_name.split("@")
 
                 if aa_or_term in ["Any_N-term", "Any_C-term"]:
@@ -178,7 +192,9 @@ class MSFraggerModificationTranslation:
                         return f"{mod_base}@{aa_or_term}"
 
         raise ValueError(
-            f"Unknown modification: mass_shift={mass_shift:.4f} at {aa_or_term}"
+            f"Unknown modification: mass_shift={mass_shift:.4f} at {aa_or_term}. "
+            f"Add the modification to 'mass_mapped_mods' in psm_reader.yaml or extend "
+            f"the reader's _mass_mapped_mods list before importing."
         )
 
 
@@ -242,7 +258,7 @@ def _get_mods_from_masses(  # noqa: PLR0912, C901 too many branches, too complex
     )
 
 
-class MSFragger_PSM_TSV_Reader(PSMReaderBase):  # noqa: N801 name should use CapWords convention TODO: refactor
+class MSFraggerPsmTsvReader(PSMReaderBase):
     """Reader for MSFragger's psm.tsv file."""
 
     _reader_type = "msfragger_psm_tsv"
@@ -278,11 +294,7 @@ class MSFragger_PSM_TSV_Reader(PSMReaderBase):  # noqa: N801 name should use Cap
         )
 
     def _translate_modifications(self) -> None:
-        """No-op: modification translation is handled in _load_modifications.
-
-        This override prevents the base class implementation from running.
-        Modifications are translated via MSFraggerModificationTranslation.
-        """
+        """No-op: modification translation is handled in _load_modifications."""
 
     def _load_file(self, filename: str) -> pd.DataFrame:
         """Load MSFragger PSM TSV file."""
@@ -291,9 +303,8 @@ class MSFragger_PSM_TSV_Reader(PSMReaderBase):  # noqa: N801 name should use Cap
     def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
         """MSFragger PSM TSV preprocessing."""
         df.fillna("", inplace=True)
-        df[PsmDfCols.RAW_NAME] = df["Spectrum"].str.split(".").apply(lambda x: x[0])
-        df[PsmDfCols.SCAN_NUM] = (
-            df["Spectrum"].str.split(".").apply(lambda x: int(x[1]))
+        df[[PsmDfCols.RAW_NAME, PsmDfCols.SCAN_NUM]] = (
+            df["Spectrum"].str.split(".").apply(lambda x: pd.Series([x[0], int(x[1])]))
         )
         return df
 
@@ -306,7 +317,7 @@ class MSFragger_PSM_TSV_Reader(PSMReaderBase):  # noqa: N801 name should use Cap
         """MSFragger Hyperscore is already in correct format (larger = better)."""
 
     def _load_modifications(self, origin_df: pd.DataFrame) -> None:  # noqa: ARG002
-        """Parse modifications from PsmDfCols.ASSIGNED_MODS column (mapped from 'Assigned Modifications')."""
+        """Parse modifications from PsmDfCols.TMP_MODS column (mapped from 'Assigned Modifications')."""
         translator = MSFraggerModificationTranslation(
             mass_mapped_mods=self._mass_mapped_mods,
             mod_mass_tol=self._mod_mass_tol,
@@ -361,11 +372,7 @@ class MSFraggerPepXMLReader(PSMReaderBase):
         self._mod_mass_tol = psm_reader_yaml["msfragger_pepxml"]["mod_mass_tol"]
 
     def _translate_modifications(self) -> None:
-        """No-op: modification translation is handled in _load_modifications.
-
-        This override prevents the base class implementation from running.
-        Modifications are translated via _get_mods_from_masses.
-        """
+        """No-op: modification translation is handled in _load_modifications."""
 
     def _load_file(self, filename: str) -> pd.DataFrame:
         """Load a MsFragger output file to a DataFrame."""
@@ -446,6 +453,6 @@ class MSFraggerPepXML(MSFraggerPepXMLReader):
 
 def register_readers() -> None:
     """Register MSFragger readers."""
-    psm_reader_provider.register_reader("msfragger_psm_tsv", MSFragger_PSM_TSV_Reader)
-    psm_reader_provider.register_reader("msfragger", MSFragger_PSM_TSV_Reader)
+    psm_reader_provider.register_reader("msfragger_psm_tsv", MSFraggerPsmTsvReader)
+    psm_reader_provider.register_reader("msfragger", MSFraggerPsmTsvReader)
     psm_reader_provider.register_reader("msfragger_pepxml", MSFraggerPepXMLReader)

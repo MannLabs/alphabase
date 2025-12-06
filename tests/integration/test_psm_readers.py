@@ -20,7 +20,7 @@ from alphabase.psm_reader import (
     AlphaDiaReaderTsv,
     DiannReader,
     MaxQuantReader,
-    MSFragger_PSM_TSV_Reader,
+    MSFraggerPsmTsvReader,
     SageReaderTSV,
     SpectronautReader,
     SpectronautReportReader,
@@ -507,7 +507,7 @@ def test_msfragger_psm_tsv_reader() -> None:
     """Test the MSFragger PSM TSV reader."""
     input_data = StringIO(TEST_DATA_MSFRAGGER_PSM_TSV)
 
-    reader = MSFragger_PSM_TSV_Reader()
+    reader = MSFraggerPsmTsvReader()
     reader.import_file(input_data)
 
     _assert_reference_df_equal(reader.psm_df, "msfragger_psm_tsv")

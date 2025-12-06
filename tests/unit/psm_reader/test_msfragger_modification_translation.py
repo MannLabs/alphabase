@@ -26,7 +26,7 @@ def test_psm_df():
     return pd.DataFrame(
         {
             "Peptide": ["PEPTIDE", "SEQUENCE", "ANOTHER"],
-            PsmDfCols.ASSIGNED_MODS: [
+            PsmDfCols.TMP_MODS: [
                 "5S(79.9663), N-term(304.2071)",
                 "",
                 "6M(15.9949)",
@@ -50,8 +50,8 @@ def test_translator_initialization(
     translator = MSFraggerModificationTranslation(
         mass_mapped_mods=mass_mapped_mods, mod_mass_tol=mod_mass_tol
     )
-    assert translator.mass_mapped_mods == expected_mods
-    assert translator.mod_mass_tol == expected_tol
+    assert translator._mass_mapped_mods == expected_mods
+    assert translator._mod_mass_tol == expected_tol
 
 
 @pytest.mark.parametrize(
@@ -121,7 +121,7 @@ def test_dataframe_translation(translator, test_psm_df):
 
 def test_database_integration(translator):
     """Test configured modifications exist in database."""
-    for mod_name in translator.mass_mapped_mods:
+    for mod_name in translator._mass_mapped_mods:
         assert mod_name in MOD_MASS
         mod_mass = MOD_MASS[mod_name]
         aa = mod_name.split("@")[1]

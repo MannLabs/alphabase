@@ -3,9 +3,9 @@
 import pandas as pd
 import pytest
 
-from alphabase.psm_reader import psm_reader_provider
+from alphabase.psm_reader import psm_reader_provider, psm_reader_yaml
 from alphabase.psm_reader.keys import PsmDfCols
-from alphabase.psm_reader.msfragger_reader import MSFragger_PSM_TSV_Reader
+from alphabase.psm_reader.msfragger_reader import MSFraggerPsmTsvReader
 
 
 @pytest.fixture
@@ -19,10 +19,12 @@ class TestReaderBasics:
 
     def test_reader_initialization(self, reader):
         """Test reader is properly initialized with correct configuration."""
-        assert isinstance(reader, MSFragger_PSM_TSV_Reader)
+        assert isinstance(reader, MSFraggerPsmTsvReader)
         assert reader._reader_type == "msfragger_psm_tsv"
         assert len(reader._mass_mapped_mods) > 0
-        assert reader._mod_mass_tol == 0.1
+        assert (
+            reader._mod_mass_tol == psm_reader_yaml["msfragger_psm_tsv"]["mod_mass_tol"]
+        )
         assert isinstance(reader.column_mapping, dict)
         assert PsmDfCols.SEQUENCE in reader.column_mapping
 
@@ -65,7 +67,7 @@ class TestDataProcessing:
         reader._psm_df = pd.DataFrame(
             {
                 "Peptide": ["PEPTIDE", "SEQUENCE", "TEST"],
-                PsmDfCols.ASSIGNED_MODS: [
+                PsmDfCols.TMP_MODS: [
                     "5S(79.9663)",
                     "",
                     "3M(15.9949), N-term(304.2071)",
