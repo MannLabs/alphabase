@@ -77,11 +77,8 @@ class MSFraggerModificationTranslation:
 
         return psm_df
 
-    def _parse_assigned_modifications(self, assigned_mods: str) -> Tuple[str, str]:  # noqa: C901, PLR0912
+    def _parse_assigned_modifications(self, assigned_mods: str) -> Tuple[str, str]:
         """Parse MSFragger Assigned Modifications string.
-
-        Directly maps mass shifts to modification names without conversion.
-        Custom mappings are checked first, then falls back to mass-based matching.
 
         Parameters
         ----------
@@ -107,63 +104,75 @@ class MSFraggerModificationTranslation:
         for entry in mod_entries:
             if not entry:
                 continue
-
-            if entry.startswith(MsFraggerTokens.N_TERM):
-                if entry in self._rev_mod_mapping:
-                    mod_name = self._rev_mod_mapping[entry]
-                else:
-                    mass_shift = float(
-                        entry.split(MsFraggerTokens.MOD_START)[1].rstrip(
-                            MsFraggerTokens.MOD_STOP
-                        )
-                    )
-                    mod_name = self._match_mod_by_mass(mass_shift, "Any_N-term")
-                mods.append(mod_name)
-                sites.append("0")
-            elif entry.startswith(MsFraggerTokens.C_TERM):
-                if entry in self._rev_mod_mapping:
-                    mod_name = self._rev_mod_mapping[entry]
-                else:
-                    mass_shift = float(
-                        entry.split(MsFraggerTokens.MOD_START)[1].rstrip(
-                            MsFraggerTokens.MOD_STOP
-                        )
-                    )
-                    mod_name = self._match_mod_by_mass(mass_shift, "Any_C-term")
-                mods.append(mod_name)
-                sites.append("-1")
-            else:
-                position = ""
-                for char in entry:
-                    if char.isdigit():
-                        position += char
-                    else:
-                        break
-
-                if not position:
-                    raise ValueError(
-                        f"Invalid modification entry '{entry}': expected format "
-                        f"'<position><AA>(<mass>)' (e.g., '5S(79.9663)'), "
-                        f"'N-term(<mass>)', or 'C-term(<mass>)'."
-                    )
-
-                lookup_key = entry[len(position) :]
-                if lookup_key in self._rev_mod_mapping:
-                    mod_name = self._rev_mod_mapping[lookup_key]
-                else:
-                    parts = lookup_key.split(MsFraggerTokens.MOD_START)
-                    if len(parts) != 2:  # noqa: PLR2004
-                        raise ValueError(
-                            f"Invalid modification entry '{entry}': "
-                            f"could not parse amino acid and mass."
-                        )
-                    amino_acid = parts[0]
-                    mass_shift = float(parts[1].rstrip(MsFraggerTokens.MOD_STOP))
-                    mod_name = self._match_mod_by_mass(mass_shift, amino_acid)
-                mods.append(mod_name)
-                sites.append(position)
+            mod_name, site = self._parse_single_modification(entry)
+            mods.append(mod_name)
+            sites.append(site)
 
         return ";".join(mods), ";".join(sites)
+
+    def _parse_single_modification(self, entry: str) -> Tuple[str, str]:
+        """Parse a single modification entry.
+
+        Parameters
+        ----------
+        entry : str
+            Single modification entry, e.g. "5S(79.9663)", "N-term(304.2071)"
+
+        Returns
+        -------
+        tuple
+            (mod_name, site) where mod_name is alphabase format and site is position string
+
+        """
+        if entry.startswith(MsFraggerTokens.N_TERM):
+            return self._resolve_mod_name(entry, "Any_N-term"), "0"
+        if entry.startswith(MsFraggerTokens.C_TERM):
+            return self._resolve_mod_name(entry, "Any_C-term"), "-1"
+        return self._parse_positional_modification(entry)
+
+    def _parse_positional_modification(self, entry: str) -> Tuple[str, str]:
+        """Parse a positional modification entry like '5S(79.9663)'."""
+        position = ""
+        for char in entry:
+            if char.isdigit():
+                position += char
+            else:
+                break
+
+        if not position:
+            raise ValueError(
+                f"Invalid modification entry '{entry}': expected format "
+                f"'<position><AA>(<mass>)' (e.g., '5S(79.9663)'), "
+                f"'N-term(<mass>)', or 'C-term(<mass>)'."
+            )
+
+        lookup_key = entry[len(position) :]
+        mod_name = self._resolve_mod_name_from_lookup_key(lookup_key, entry)
+        return mod_name, position
+
+    def _resolve_mod_name(self, entry: str, aa_or_term: str) -> str:
+        """Resolve modification name from entry, checking rev_mod_mapping first."""
+        if entry in self._rev_mod_mapping:
+            return self._rev_mod_mapping[entry]
+        mass_shift = float(
+            entry.split(MsFraggerTokens.MOD_START)[1].rstrip(MsFraggerTokens.MOD_STOP)
+        )
+        return self._match_mod_by_mass(mass_shift, aa_or_term)
+
+    def _resolve_mod_name_from_lookup_key(self, lookup_key: str, entry: str) -> str:
+        """Resolve modification name from lookup key like 'S(79.9663)'."""
+        if lookup_key in self._rev_mod_mapping:
+            return self._rev_mod_mapping[lookup_key]
+
+        parts = lookup_key.split(MsFraggerTokens.MOD_START)
+        if len(parts) != 2:  # noqa: PLR2004
+            raise ValueError(
+                f"Invalid modification entry '{entry}': "
+                f"could not parse amino acid and mass."
+            )
+        amino_acid = parts[0]
+        mass_shift = float(parts[1].rstrip(MsFraggerTokens.MOD_STOP))
+        return self._match_mod_by_mass(mass_shift, amino_acid)
 
     def _match_mod_by_mass(self, mass_shift: float, aa_or_term: str) -> str:
         """Match mass shift to modification name.
