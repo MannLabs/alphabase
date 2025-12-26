@@ -127,3 +127,32 @@ def test_database_integration(translator):
         aa = mod_name.split("@")[1]
         if aa not in ["Any_N-term", "Any_C-term"] and len(aa) == 1:
             assert translator._match_mod_by_mass(mod_mass, aa) == mod_name
+
+
+class TestModificationMapping:
+    """Tests for modification_mapping (rev_mod_mapping) feature."""
+
+    def test_mapping_takes_priority_over_mass_matching(self):
+        """Test rev_mod_mapping is used before falling back to mass matching."""
+        translator = MSFraggerModificationTranslation(
+            mass_mapped_mods=["Oxidation@M"],
+            rev_mod_mapping={"K(42.0106)": "Acetyl@K"},
+        )
+
+        # Uses mapping for Acetyl@K, falls back to mass for Oxidation@M
+        mods, sites = translator._parse_assigned_modifications(
+            "6K(42.0106), 3M(15.9949)"
+        )
+        assert mods == "Acetyl@K;Oxidation@M"
+        assert sites == "6;3"
+
+    def test_nterm_modification_mapping(self):
+        """Test N-terminal modification mapping."""
+        translator = MSFraggerModificationTranslation(
+            mass_mapped_mods=[],
+            rev_mod_mapping={"N-term(42.0106)": "Acetyl@Any_N-term"},
+        )
+
+        mods, sites = translator._parse_assigned_modifications("N-term(42.0106)")
+        assert mods == "Acetyl@Any_N-term"
+        assert sites == "0"

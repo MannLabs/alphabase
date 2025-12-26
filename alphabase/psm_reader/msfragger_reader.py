@@ -39,6 +39,7 @@ class MSFraggerModificationTranslation:
         self,
         mass_mapped_mods: List[str],
         mod_mass_tol: float = 0.1,
+        rev_mod_mapping: Optional[dict] = None,
     ):
         """Initialize MSFragger modification translator.
 
@@ -48,10 +49,14 @@ class MSFraggerModificationTranslation:
             List of modification names to match against (e.g., ['Phospho@S', 'Oxidation@M'])
         mod_mass_tol : float
             Mass tolerance for matching modifications in Daltons. Default: 0.1
+        rev_mod_mapping : dict, optional
+            Reverse modification mapping from patterns like 'K(115.9932)' to alphabase
+            mod names like 'SATA@K'. Checked before mass-based matching.
 
         """
         self._mass_mapped_mods = mass_mapped_mods
         self._mod_mass_tol = mod_mass_tol
+        self._rev_mod_mapping = rev_mod_mapping or {}
 
     def __call__(self, psm_df: pd.DataFrame) -> pd.DataFrame:
         """Translate modifications from MSFragger assigned modifications.
@@ -112,21 +117,25 @@ class MSFraggerModificationTranslation:
                 continue
 
             if entry.startswith(MsFraggerTokens.N_TERM):
-                mass_shift = float(
-                    entry.split(MsFraggerTokens.MOD_START)[1].rstrip(
-                        MsFraggerTokens.MOD_STOP
-                    )
+                mass_str = entry.split(MsFraggerTokens.MOD_START)[1].rstrip(
+                    MsFraggerTokens.MOD_STOP
                 )
-                mod_name = self._match_mod_by_mass(mass_shift, "Any_N-term")
+                mod_name = self._match_modification(
+                    f"{MsFraggerTokens.N_TERM}({mass_str})",
+                    float(mass_str),
+                    "Any_N-term",
+                )
                 mods.append(mod_name)
                 sites.append("0")
             elif entry.startswith(MsFraggerTokens.C_TERM):
-                mass_shift = float(
-                    entry.split(MsFraggerTokens.MOD_START)[1].rstrip(
-                        MsFraggerTokens.MOD_STOP
-                    )
+                mass_str = entry.split(MsFraggerTokens.MOD_START)[1].rstrip(
+                    MsFraggerTokens.MOD_STOP
                 )
-                mod_name = self._match_mod_by_mass(mass_shift, "Any_C-term")
+                mod_name = self._match_modification(
+                    f"{MsFraggerTokens.C_TERM}({mass_str})",
+                    float(mass_str),
+                    "Any_C-term",
+                )
                 mods.append(mod_name)
                 sites.append("-1")
             else:
@@ -135,7 +144,7 @@ class MSFraggerModificationTranslation:
                     continue
 
                 position_and_amino_acid, mass_string = parts
-                mass_shift = float(mass_string.rstrip(MsFraggerTokens.MOD_STOP))
+                mass_str = mass_string.rstrip(MsFraggerTokens.MOD_STOP)
 
                 position = ""
                 amino_acid = ""
@@ -146,11 +155,38 @@ class MSFraggerModificationTranslation:
                         amino_acid += char
 
                 if position and amino_acid:
-                    mod_name = self._match_mod_by_mass(mass_shift, amino_acid)
+                    mod_pattern = f"{amino_acid}({mass_str})"
+                    mod_name = self._match_modification(
+                        mod_pattern, float(mass_str), amino_acid
+                    )
                     mods.append(mod_name)
                     sites.append(position)
 
         return ";".join(mods), ";".join(sites)
+
+    def _match_modification(
+        self, mod_pattern: str, mass_shift: float, aa_or_term: str
+    ) -> str:
+        """Match modification using rev_mod_mapping first, then fall back to mass matching.
+
+        Parameters
+        ----------
+        mod_pattern : str
+            The modification pattern from MSFragger (e.g., 'K(115.9932)', 'N-term(42.0106)')
+        mass_shift : float
+            Mass shift in Daltons
+        aa_or_term : str
+            Amino acid single letter code or terminal (Any_N-term, Any_C-term)
+
+        Returns
+        -------
+        str
+            Modification name in alphabase format (e.g., 'SATA@K')
+
+        """
+        if mod_pattern in self._rev_mod_mapping:
+            return self._rev_mod_mapping[mod_pattern]
+        return self._match_mod_by_mass(mass_shift, aa_or_term)
 
     def _match_mod_by_mass(self, mass_shift: float, aa_or_term: str) -> str:
         """Match mass shift to modification name.
@@ -321,6 +357,7 @@ class MSFraggerPsmTsvReader(PSMReaderBase):
         translator = MSFraggerModificationTranslation(
             mass_mapped_mods=self._mass_mapped_mods,
             mod_mass_tol=self._mod_mass_tol,
+            rev_mod_mapping=self._modification_mapper.rev_mod_mapping,
         )
         self._psm_df = translator(self._psm_df)
 
