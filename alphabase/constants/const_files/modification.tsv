@@ -2697,8 +2697,8 @@ TMTpro@T	304.207146	304.3127	H(25)C(8)13C(7)N(1)15N(2)O(3)	0.0		Isotopic label	2
 TMTpro@S	304.207146	304.3127	H(25)C(8)13C(7)N(1)15N(2)O(3)	0.0		Isotopic label	2016		0.0
 TMTpro@H	304.207146	304.3127	H(25)C(8)13C(7)N(1)15N(2)O(3)	0.0		Isotopic label	2016		0.0
 TMTpro@Protein_N-term	304.207146	304.3127	H(25)C(8)13C(7)N(1)15N(2)O(3)	0.0		Isotopic label	2016		0.0
-TMTpro@Any_N-term	304.207146	304.3127	H(25)C(8)13C(7)N(1)15N(2)O(3)	0.0		Isotopic label	2016		0.0
-TMTpro@K	304.207146	304.3127	H(25)C(8)13C(7)N(1)15N(2)O(3)	0.0		Isotopic label	2016		0.0
+TMTpro@Any_N-term	304.207146	304.3127	H(25)C(8)13C(7)N(1)15N(2)O(3)	0.0		Isotopic label	2016	CC(CN1C(C(NCCC(NCCC(N)=O)=O)=O)CCC1)C	0.0
+TMTpro@K	304.207146	304.3127	H(25)C(8)13C(7)N(1)15N(2)O(3)	0.0		Isotopic label	2016	CC(CN1C(C(NCCC(NCCC(NCCCC[C@H](N)C(=O)O)=O)=O)=O)CCC1)C	0.0
 TMTpro_zero@S	295.189592	295.3773	H(25)C(15)N(3)O(3)	0.0		Chemical derivative	2017		0.0
 TMTpro_zero@H	295.189592	295.3773	H(25)C(15)N(3)O(3)	0.0		Chemical derivative	2017		0.0
 TMTpro_zero@Protein_N-term	295.189592	295.3773	H(25)C(15)N(3)O(3)	0.0		Chemical derivative	2017		0.0
