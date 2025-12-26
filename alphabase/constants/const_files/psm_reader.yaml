@@ -181,6 +181,18 @@ modification_mappings:
       - 'N-term(261.0307)'
     'Acetyl@K':
       - 'K(42.0105)'
+    'mTRAQ@K':
+      - 'K(140.0949)'
+    'mTRAQ@Any_N-term':
+      - 'N-term(140.0949)'
+    'mTRAQ:13C(3)15N(1)@K':
+      - 'K(144.1020)'
+    'mTRAQ:13C(3)15N(1)@Any_N-term':
+      - 'N-term(144.1020)'
+    'mTRAQ:13C(6)15N(2)@K':
+      - 'K(148.1091)'
+    'mTRAQ:13C(6)15N(2)@Any_N-term':
+      - 'N-term(148.1091)'
 
 pfind:
   reader_type: pfind
