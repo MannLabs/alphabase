@@ -1648,18 +1648,18 @@ EHD-diphenylpentanone@C	266.13068	266.3343	H(18)C(18)O(2)	0.0		Chemical derivati
 benzylguanidine@K	132.068748	132.1625	H(8)C(8)N(2)	0.0		Chemical derivative	1349		0.0
 CarboxymethylDMAP@Any_N-term	162.079313	162.1885	H(10)C(9)N(2)O(1)	0.0		Chemical derivative	1350		0.0
 Biotin:Thermo-21901+2H2O@C	561.246849	561.6489	H(39)C(23)N(5)O(9)S(1)	0.0		Chemical derivative	1320		0.0
-DiLeu4plex115@K	145.12	145.1966	H(15)C(7)13C(1)15N(1)18O(1)	0.0		Isotopic label	1321		0.0
-DiLeu4plex115@Any_N-term	145.12	145.1966	H(15)C(7)13C(1)15N(1)18O(1)	0.0		Isotopic label	1321		0.0
-DiLeu4plex115@Y	145.12	145.1966	H(15)C(7)13C(1)15N(1)18O(1)	0.0		Isotopic label	1321		0.0
-DiLeu4plex@Any_N-term	145.132163	145.2229	H(13)2H(2)C(8)N(1)18O(1)	0.0		Isotopic label	1322		0.0
-DiLeu4plex@K	145.132163	145.2229	H(13)2H(2)C(8)N(1)18O(1)	0.0		Isotopic label	1322		0.0
-DiLeu4plex@Y	145.132163	145.2229	H(13)2H(2)C(8)N(1)18O(1)	0.0		Isotopic label	1322		0.0
-DiLeu4plex117@K	145.128307	145.2092	H(13)2H(2)C(7)13C(1)15N(1)O(1)	0.0		Isotopic label	1323		0.0
-DiLeu4plex117@Any_N-term	145.128307	145.2092	H(13)2H(2)C(7)13C(1)15N(1)O(1)	0.0		Isotopic label	1323		0.0
-DiLeu4plex117@Y	145.128307	145.2092	H(13)2H(2)C(7)13C(1)15N(1)O(1)	0.0		Isotopic label	1323		0.0
-DiLeu4plex118@K	145.140471	145.2354	H(11)2H(4)C(8)N(1)O(1)	0.0		Isotopic label	1324		0.0
-DiLeu4plex118@Any_N-term	145.140471	145.2354	H(11)2H(4)C(8)N(1)O(1)	0.0		Isotopic label	1324		0.0
-DiLeu4plex118@Y	145.140471	145.2354	H(11)2H(4)C(8)N(1)O(1)	0.0		Isotopic label	1324		0.0
+DiLeu4plex115@K	145.12	145.1966	H(15)C(7)13C(1)15N(1)18O(1)	0.0		Isotopic label	1321	[H]N(CCCC[C@H](N([Fl])([Fl]))C(=O)[Ts])[13C](=[18O])C(CC(C)C)[15N](C)C	0.0
+DiLeu4plex115@Any_N-term	145.12	145.1966	H(15)C(7)13C(1)15N(1)18O(1)	0.0		Isotopic label	1321	[13C](=[18O])C(CC(C)C)[15N](C)C	0.0
+DiLeu4plex115@Y	145.12	145.1966	H(15)C(7)13C(1)15N(1)18O(1)	0.0		Isotopic label	1321	CC(C)CC([15N](C)C)[13C](=[18O])Oc1ccc(C[C@@H](C(=O)[Ts])N([Fl])([Fl]))cc1	0.0
+DiLeu4plex@Any_N-term	145.132163	145.2229	H(13)2H(2)C(8)N(1)18O(1)	0.0		Isotopic label	1322	C(=[18O])C(CC(C)C)N(C([2H])([2H]))C	0.0
+DiLeu4plex@K	145.132163	145.2229	H(13)2H(2)C(8)N(1)18O(1)	0.0		Isotopic label	1322	[H]N(CCCC[C@H](N([Fl])([Fl]))C(=O)[Ts])C(=[18O])C(CC(C)C)N(C([2H])([2H]))C	0.0
+DiLeu4plex@Y	145.132163	145.2229	H(13)2H(2)C(8)N(1)18O(1)	0.0		Isotopic label	1322	CC(C)CC(N(C([2H])([2H]))C)C(=[18O])Oc1ccc(C[C@@H](C(=O)[Ts])N([Fl])([Fl]))cc1	0.0
+DiLeu4plex117@K	145.128307	145.2092	H(13)2H(2)C(7)13C(1)15N(1)O(1)	0.0		Isotopic label	1323	[H]N(CCCC[C@H](N([Fl])([Fl]))C(=O)[Ts])[13C](=O)C(CC(C)C)[15N](C([2H])([2H]))C	0.0
+DiLeu4plex117@Any_N-term	145.128307	145.2092	H(13)2H(2)C(7)13C(1)15N(1)O(1)	0.0		Isotopic label	1323	[13C](=O)C(CC(C)C)[15N](C([2H])([2H]))C	0.0
+DiLeu4plex117@Y	145.128307	145.2092	H(13)2H(2)C(7)13C(1)15N(1)O(1)	0.0		Isotopic label	1323	CC(C)CC([15N](C([2H])([2H]))C)[13C](=O)Oc1ccc(C[C@@H](C(=O)[Ts])N([Fl])([Fl]))cc1	0.0
+DiLeu4plex118@K	145.140471	145.2354	H(11)2H(4)C(8)N(1)O(1)	0.0		Isotopic label	1324	[H]N(CCCC[C@H](N([Fl])([Fl]))C(=O)[Ts])C(=O)C(CC(C)C)N(C([2H])([2H]))C([2H])([2H])	0.0
+DiLeu4plex118@Any_N-term	145.140471	145.2354	H(11)2H(4)C(8)N(1)O(1)	0.0		Isotopic label	1324	C(=O)C(CC(C)C)N(C([2H])([2H]))C([2H])([2H])	0.0
+DiLeu4plex118@Y	145.140471	145.2354	H(11)2H(4)C(8)N(1)O(1)	0.0		Isotopic label	1324	CC(C)CC(N(C([2H])([2H]))C([2H])([2H]))C(=O)Oc1ccc(C[C@@H](C(=O)[Ts])N([Fl])([Fl]))cc1	0.0
 Xlink:BuUrBu[213]@Protein_N-term	213.111341	213.2337	H(15)C(9)N(3)O(3)	0.0		Chemical derivative	1887		0.0
 Xlink:BuUrBu[213]@S	213.111341	213.2337	H(15)C(9)N(3)O(3)	0.0		Chemical derivative	1887		0.0
 Xlink:BuUrBu[213]@K	213.111341	213.2337	H(15)C(9)N(3)O(3)	0.0		Chemical derivative	1887		0.0
