@@ -111,6 +111,21 @@ def test_dimethyl_n_term_modification(alanine_smiles):
     )
 
 
+def test_dimethyl_uses_placeholder():
+    """Test that Dimethyl@Any_N-term uses the placeholder-based approach with multi-neighbor [Ts]."""
+    # Verify the SMILES contains the placeholder
+    dimethyl_smiles = n_term_modifications["Dimethyl@Any_N-term"]
+    assert "[Ts]" in dimethyl_smiles, "Dimethyl should use [Ts] placeholder"
+    assert aa_modifier._has_n_term_mod_placeholder(dimethyl_smiles)
+
+    # Verify it produces correct output (N bonded to two methyls)
+    result = modify_amino_acid(aa_smiles["A"], n_term_mod="Dimethyl@Any_N-term")
+    expected = "CN(C)[C@@H](C)C(=O)O"
+    assert Chem.MolToSmiles(Chem.MolFromSmiles(result)) == Chem.MolToSmiles(
+        Chem.MolFromSmiles(expected)
+    )
+
+
 @pytest.mark.parametrize("aa, smiles", aa_smiles.items())
 def test_all_amino_acids(aa, smiles):
     result = modify_amino_acid(smiles)

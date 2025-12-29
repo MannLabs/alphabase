@@ -116,7 +116,7 @@ n_term_modifications = {
     "Propionamide@Any_N-term": "CCC(N)=O",
     "Pyridylacetyl@Any_N-term": "C(=O)Cc1ccccn1",
     "Methyl@Any_N-term": "C",
-    "Dimethyl@Any_N-term": "C",
+    "Dimethyl@Any_N-term": "C[Ts]C",
     "Dimethyl:2H(6)13C(2)@Any_N-term": "[13C]([2H])([2H])([2H])",
     "Dimethyl:2H(4)@Any_N-term": "C([2H])([2H])([1H])",
     "Dimethyl:2H(4)13C(2)@Any_N-term": "[13C]([2H])([2H])([1H])",
