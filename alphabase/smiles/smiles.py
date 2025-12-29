@@ -227,7 +227,7 @@ class AminoAcidModifier:
         return self.MOD_N_TERM_PLACEHOLDER in mod_smiles
 
     def _apply_n_term_mod_with_placeholder(
-        self, mol: Chem.Mol, n_term_placeholder_mol: Chem.Mol, n_mod_smiles: str
+        self, mol: Chem.Mol, n_mod_smiles: str
     ) -> Chem.Mol:
         """
         Apply N-terminal modification where [Ts] represents the N-terminal amine.
@@ -244,8 +244,6 @@ class AminoAcidModifier:
         ----------
         mol : Chem.Mol
             The amino acid molecule with [Fl] N-terminal placeholders.
-        n_term_placeholder_mol : Chem.Mol
-            The N-terminal placeholder molecule [Fl].
         n_mod_smiles : str
             The modification SMILES with [Ts] representing the N-terminal amine.
 
@@ -256,18 +254,19 @@ class AminoAcidModifier:
         """
         n_mod_mol = Chem.MolFromSmiles(n_mod_smiles)
 
-        # Find [Ts] in modification and all its neighbors
+        # Find modification placeholder and all its neighbors
+        mod_placeholder_symbol = self.MOD_N_TERM_PLACEHOLDER[1:-1]  # Strip brackets
         ts_idx = None
         ts_neighbor_indices = []
         for atom in n_mod_mol.GetAtoms():
-            if atom.GetSymbol() == "Ts":
+            if atom.GetSymbol() == mod_placeholder_symbol:
                 ts_idx = atom.GetIdx()
                 ts_neighbor_indices = [n.GetIdx() for n in atom.GetNeighbors()]
                 break
 
         if ts_idx is None:
             raise ValueError(
-                f"Modification SMILES '{n_mod_smiles}' does not contain placeholder [Ts]"
+                f"Modification SMILES '{n_mod_smiles}' does not contain placeholder {self.MOD_N_TERM_PLACEHOLDER}"
             )
 
         # Find N in amino acid (the atom bonded to [Fl] placeholders)
@@ -306,6 +305,9 @@ class AminoAcidModifier:
 
         # Replace any remaining [Fl] with hydrogen
         result_mol = rw_mol.GetMol()
+        n_term_placeholder_mol = Chem.MolFromSmiles(
+            self.N_TERM_PLACEHOLDER, sanitize=False
+        )
         return ReplaceSubstructs(
             result_mol,
             n_term_placeholder_mol,
@@ -338,9 +340,7 @@ class AminoAcidModifier:
 
             # Branch: use placeholder-based or index-based modification
             if self._has_n_term_mod_placeholder(n_mod_smiles):
-                return self._apply_n_term_mod_with_placeholder(
-                    mol, n_term_placeholder_mol, n_mod_smiles
-                )
+                return self._apply_n_term_mod_with_placeholder(mol, n_mod_smiles)
             else:
                 # Legacy: index-based connection (first atom connects to N)
                 n_mod_mol = Chem.MolFromSmiles(n_mod_smiles)
