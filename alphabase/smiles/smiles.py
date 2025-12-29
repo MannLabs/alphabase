@@ -269,7 +269,7 @@ class AminoAcidModifier:
                 f"Modification does not contain placeholder {self.MOD_N_TERM_PLACEHOLDER}"
             )
 
-        # Find N in amino acid (the atom bonded to [Fl] placeholders)
+        # Find N in amino acid (the atom bonded to [Fl] placeholders) and collect [Fl] indices
         n_idx = None
         fl_indices = []
         for atom in mol.GetAtoms():
@@ -303,21 +303,18 @@ class AminoAcidModifier:
         for neighbor_idx in mod_neighbor_indices_combined:
             rw_mol.AddBond(n_idx, neighbor_idx, Chem.rdchem.BondType.SINGLE)
 
-        # Determine which [Fl] to remove (as many as there are modification neighbors)
+        # Remove [Ts] and corresponding [Fl] atoms (one [Fl] per new bond)
         fl_to_remove = fl_indices[: len(mod_placeholder_neighbor_indices)]
-
-        # Remove placeholder atoms (highest index first to avoid index shifting)
         to_remove = sorted([mod_placeholder_idx_combined] + fl_to_remove, reverse=True)
         for idx in to_remove:
             rw_mol.RemoveAtom(idx)
 
         # Replace any remaining [Fl] with hydrogen
-        result_mol = rw_mol.GetMol()
         n_term_placeholder_mol = Chem.MolFromSmiles(
             self.N_TERM_PLACEHOLDER, sanitize=False
         )
         return ReplaceSubstructs(
-            result_mol,
+            rw_mol.GetMol(),
             n_term_placeholder_mol,
             Chem.MolFromSmiles("[H]", sanitize=False),
             replaceAll=True,
