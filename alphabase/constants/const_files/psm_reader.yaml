@@ -193,6 +193,10 @@ modification_mappings:
       - 'K(148.1091)'
     'mTRAQ:13C(6)15N(2)@Any_N-term':
       - 'N-term(148.1091)'
+    'TMTpro@K':
+      - 'K(304.2071)'
+    'TMTpro@Any_N-term':
+      - 'N-term(304.2071)'
 
 pfind:
   reader_type: pfind

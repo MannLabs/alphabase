@@ -1032,6 +1032,12 @@ TMT6plex@H	229.162932	229.2634	H(20)C(8)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label
 TMT6plex@Protein_N-term	229.162932	229.2634	H(20)C(8)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	737		0.0
 TMT6plex@Any_N-term	229.162932	229.2634	H(20)C(8)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	737		0.0
 TMT6plex@K	229.162932	229.2634	H(20)C(8)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	737		0.0
+TMT10plex@T	229.162932	229.2634	H(20)C(8)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	737		0.0
+TMT10plex@S	229.162932	229.2634	H(20)C(8)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	737		0.0
+TMT10plex@H	229.162932	229.2634	H(20)C(8)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	737		0.0
+TMT10plex@Protein_N-term	229.162932	229.2634	H(20)C(8)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	737		0.0
+TMT10plex@Any_N-term	229.162932	229.2634	H(20)C(8)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	737	C(=O)CCNC(=O)CN1C(C)CCCC1C	0.0
+TMT10plex@K	229.162932	229.2634	H(20)C(8)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	737	CC1N(CC(NCCC(NCCCC[C@H](N([Fl])([Fl]))C(=O)[Ts])=O)=O)C(C)CCC1	0.0
 BEMAD_C@C	120.0245	120.1701	H(8)C(4)O(2)S(1)	0.0		Chemical derivative	736		0.0
 TMT2plex@H	225.155833	225.2921	H(20)C(11)13C(1)N(2)O(2)	0.0		Isotopic label	738		0.0
 TMT2plex@S	225.155833	225.2921	H(20)C(11)13C(1)N(2)O(2)	0.0		Isotopic label	738		0.0
@@ -2697,8 +2703,8 @@ TMTpro@T	304.207146	304.3127	H(25)C(8)13C(7)N(1)15N(2)O(3)	0.0		Isotopic label	2
 TMTpro@S	304.207146	304.3127	H(25)C(8)13C(7)N(1)15N(2)O(3)	0.0		Isotopic label	2016		0.0
 TMTpro@H	304.207146	304.3127	H(25)C(8)13C(7)N(1)15N(2)O(3)	0.0		Isotopic label	2016		0.0
 TMTpro@Protein_N-term	304.207146	304.3127	H(25)C(8)13C(7)N(1)15N(2)O(3)	0.0		Isotopic label	2016		0.0
-TMTpro@Any_N-term	304.207146	304.3127	H(25)C(8)13C(7)N(1)15N(2)O(3)	0.0		Isotopic label	2016		0.0
-TMTpro@K	304.207146	304.3127	H(25)C(8)13C(7)N(1)15N(2)O(3)	0.0		Isotopic label	2016		0.0
+TMTpro@Any_N-term	304.207146	304.3127	H(25)C(8)13C(7)N(1)15N(2)O(3)	0.0		Isotopic label	2016	C(=O)CCCNC(=O)CCCNC(=O)C1N(CC(C)C)CCC1	0.0
+TMTpro@K	304.207146	304.3127	H(25)C(8)13C(7)N(1)15N(2)O(3)	0.0		Isotopic label	2016	CC(CN1C(C(NCCC(NCCC(NCCCC[C@H](N([Fl])([Fl]))C(=O)[Ts])=O)=O)=O)CCC1)C	0.0
 TMTpro_zero@S	295.189592	295.3773	H(25)C(15)N(3)O(3)	0.0		Chemical derivative	2017		0.0
 TMTpro_zero@H	295.189592	295.3773	H(25)C(15)N(3)O(3)	0.0		Chemical derivative	2017		0.0
 TMTpro_zero@Protein_N-term	295.189592	295.3773	H(25)C(15)N(3)O(3)	0.0		Chemical derivative	2017		0.0
