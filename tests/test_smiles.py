@@ -155,7 +155,9 @@ class TestNTermModWithPlaceholder:
 
         # When/Then: calling placeholder method raises ValueError
         with pytest.raises(ValueError, match="does not contain placeholder"):
-            aa_modifier._apply_n_term_mod_with_placeholder(aa_mol, mod_without_placeholder)
+            aa_modifier._apply_n_term_mod_with_placeholder(
+                aa_mol, mod_without_placeholder
+            )
 
     def test_error_when_aa_missing_fl_placeholder(self):
         """Raises error when amino acid lacks [Fl] placeholder."""
@@ -173,14 +175,16 @@ class TestNTermModWithPlaceholder:
         """Raises error when [Fl] has more than one neighbor."""
         # Given: programmatically create molecule where [Fl] has two neighbors
         # (can't do this via SMILES as RDKit enforces valence)
-        from rdkit.Chem import RWMol, Atom
+        from rdkit.Chem import Atom, RWMol
 
         rw_mol = RWMol()
         c_idx = rw_mol.AddAtom(Atom(6))  # Carbon
         fl_idx = rw_mol.AddAtom(Atom(114))  # Flerovium [Fl]
         n_idx = rw_mol.AddAtom(Atom(7))  # Nitrogen
         rw_mol.AddBond(c_idx, fl_idx, Chem.rdchem.BondType.SINGLE)
-        rw_mol.AddBond(n_idx, fl_idx, Chem.rdchem.BondType.SINGLE)  # [Fl] now has 2 neighbors
+        rw_mol.AddBond(
+            n_idx, fl_idx, Chem.rdchem.BondType.SINGLE
+        )  # [Fl] now has 2 neighbors
         malformed_mol = rw_mol.GetMol()
 
         mod_mol = Chem.MolFromSmiles("CC(=O)[Ts]")

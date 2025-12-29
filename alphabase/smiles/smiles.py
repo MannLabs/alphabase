@@ -261,7 +261,9 @@ class AminoAcidModifier:
         for atom in n_mod_mol.GetAtoms():
             if atom.GetSymbol() == self.MOD_N_TERM_PLACEHOLDER_ATOM:
                 mod_placeholder_idx = atom.GetIdx()
-                mod_placeholder_neighbor_indices = [n.GetIdx() for n in atom.GetNeighbors()]
+                mod_placeholder_neighbor_indices = [
+                    n.GetIdx() for n in atom.GetNeighbors()
+                ]
                 break
 
         if mod_placeholder_idx is None:
