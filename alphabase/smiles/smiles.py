@@ -13,10 +13,13 @@ class AminoAcidModifier:
     A class for modifying amino acids with N-terminal and C-terminal modifications.
     """
 
-    N_TERM_PLACEHOLDER = "[Fl]"
-    C_TERM_PLACEHOLDER = "[Ts]"
-    # Placeholder atom in N-terminal modification SMILES to mark the attachment point
-    MOD_N_TERM_PLACEHOLDER = "[Ts]"
+    N_TERM_PLACEHOLDER_ATOM = "Fl"
+    N_TERM_PLACEHOLDER = f"[{N_TERM_PLACEHOLDER_ATOM}]"
+    C_TERM_PLACEHOLDER_ATOM = "Ts"
+    C_TERM_PLACEHOLDER = f"[{C_TERM_PLACEHOLDER_ATOM}]"
+    # Placeholder atom in N-terminal modification SMILES representing the N-terminal amine
+    MOD_N_TERM_PLACEHOLDER_ATOM = "Ts"
+    MOD_N_TERM_PLACEHOLDER = f"[{MOD_N_TERM_PLACEHOLDER_ATOM}]"
 
     def __init__(self):
         self._aa_smiles = None
@@ -227,7 +230,7 @@ class AminoAcidModifier:
         return self.MOD_N_TERM_PLACEHOLDER in mod_smiles
 
     def _apply_n_term_mod_with_placeholder(
-        self, mol: Chem.Mol, n_mod_smiles: str
+        self, mol: Chem.Mol, n_mod_mol: Chem.Mol
     ) -> Chem.Mol:
         """
         Apply N-terminal modification where [Ts] represents the N-terminal amine.
@@ -244,43 +247,42 @@ class AminoAcidModifier:
         ----------
         mol : Chem.Mol
             The amino acid molecule with [Fl] N-terminal placeholders.
-        n_mod_smiles : str
-            The modification SMILES with [Ts] representing the N-terminal amine.
+        n_mod_mol : Chem.Mol
+            The modification molecule with [Ts] representing the N-terminal amine.
 
         Returns
         -------
         Chem.Mol
             The modified molecule with [Fl] placeholders replaced.
         """
-        n_mod_mol = Chem.MolFromSmiles(n_mod_smiles)
-
         # Find modification placeholder and all its neighbors
-        mod_placeholder_symbol = self.MOD_N_TERM_PLACEHOLDER[1:-1]  # Strip brackets
-        ts_idx = None
-        ts_neighbor_indices = []
+        mod_placeholder_idx = None
+        mod_placeholder_neighbor_indices = []
         for atom in n_mod_mol.GetAtoms():
-            if atom.GetSymbol() == mod_placeholder_symbol:
-                ts_idx = atom.GetIdx()
-                ts_neighbor_indices = [n.GetIdx() for n in atom.GetNeighbors()]
+            if atom.GetSymbol() == self.MOD_N_TERM_PLACEHOLDER_ATOM:
+                mod_placeholder_idx = atom.GetIdx()
+                mod_placeholder_neighbor_indices = [n.GetIdx() for n in atom.GetNeighbors()]
                 break
 
-        if ts_idx is None:
+        if mod_placeholder_idx is None:
             raise ValueError(
-                f"Modification SMILES '{n_mod_smiles}' does not contain placeholder {self.MOD_N_TERM_PLACEHOLDER}"
+                f"Modification does not contain placeholder {self.MOD_N_TERM_PLACEHOLDER}"
             )
 
         # Find N in amino acid (the atom bonded to [Fl] placeholders)
         n_idx = None
         fl_indices = []
         for atom in mol.GetAtoms():
-            if atom.GetSymbol() == "Fl":
+            if atom.GetSymbol() == self.N_TERM_PLACEHOLDER_ATOM:
                 neighbors = atom.GetNeighbors()
                 if len(neighbors) == 1:
                     n_idx = neighbors[0].GetIdx()
                     fl_indices.append(atom.GetIdx())
 
         if n_idx is None:
-            raise ValueError("Amino acid does not contain N-terminal placeholder [Fl]")
+            raise ValueError(
+                f"Amino acid does not contain N-terminal placeholder {self.N_TERM_PLACEHOLDER}"
+            )
 
         # Combine molecules
         combined = Chem.CombineMols(mol, n_mod_mol)
@@ -288,18 +290,20 @@ class AminoAcidModifier:
 
         # Adjust indices for combined molecule
         mol_num_atoms = mol.GetNumAtoms()
-        ts_idx_combined = ts_idx + mol_num_atoms
-        ts_neighbor_indices_combined = [i + mol_num_atoms for i in ts_neighbor_indices]
+        mod_placeholder_idx_combined = mod_placeholder_idx + mol_num_atoms
+        mod_neighbor_indices_combined = [
+            i + mol_num_atoms for i in mod_placeholder_neighbor_indices
+        ]
 
-        # Create bonds from each [Ts] neighbor to the nitrogen
-        for neighbor_idx in ts_neighbor_indices_combined:
+        # Create bonds from each modification neighbor to the nitrogen
+        for neighbor_idx in mod_neighbor_indices_combined:
             rw_mol.AddBond(n_idx, neighbor_idx, Chem.rdchem.BondType.SINGLE)
 
-        # Determine which [Fl] to remove (as many as there are [Ts] neighbors)
-        fl_to_remove = fl_indices[: len(ts_neighbor_indices)]
+        # Determine which [Fl] to remove (as many as there are modification neighbors)
+        fl_to_remove = fl_indices[: len(mod_placeholder_neighbor_indices)]
 
         # Remove placeholder atoms (highest index first to avoid index shifting)
-        to_remove = sorted([ts_idx_combined] + fl_to_remove, reverse=True)
+        to_remove = sorted([mod_placeholder_idx_combined] + fl_to_remove, reverse=True)
         for idx in to_remove:
             rw_mol.RemoveAtom(idx)
 
@@ -337,13 +341,13 @@ class AminoAcidModifier:
         """
         if n_term_mod:
             n_mod_smiles = self.n_term_modifications[n_term_mod]
+            n_mod_mol = Chem.MolFromSmiles(n_mod_smiles)
 
             # Branch: use placeholder-based or index-based modification
             if self._has_n_term_mod_placeholder(n_mod_smiles):
-                return self._apply_n_term_mod_with_placeholder(mol, n_mod_smiles)
+                return self._apply_n_term_mod_with_placeholder(mol, n_mod_mol)
             else:
                 # Legacy: index-based connection (first atom connects to N)
-                n_mod_mol = Chem.MolFromSmiles(n_mod_smiles)
                 mol = ReplaceSubstructs(mol, n_term_placeholder_mol, n_mod_mol)[0]
 
                 if "Dimethyl" in n_term_mod:
