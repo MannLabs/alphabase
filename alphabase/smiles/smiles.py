@@ -275,9 +275,13 @@ class AminoAcidModifier:
         for atom in mol.GetAtoms():
             if atom.GetSymbol() == self.N_TERM_PLACEHOLDER_ATOM:
                 neighbors = atom.GetNeighbors()
-                if len(neighbors) == 1:
-                    n_idx = neighbors[0].GetIdx()
-                    fl_indices.append(atom.GetIdx())
+                if len(neighbors) != 1:
+                    raise ValueError(
+                        f"N-terminal placeholder {self.N_TERM_PLACEHOLDER} should have exactly one neighbor, "
+                        f"found {len(neighbors)}"
+                    )
+                n_idx = neighbors[0].GetIdx()
+                fl_indices.append(atom.GetIdx())
 
         if n_idx is None:
             raise ValueError(
