@@ -197,6 +197,16 @@ modification_mappings:
       - 'K(304.2071)'
     'TMTpro@Any_N-term':
       - 'N-term(304.2071)'
+    'DiLeu4plex@K':
+      - 'K(145.1321)'
+    'DiLeu4plex@Any_N-term':
+      - 'N-term(145.1321)'
+    'DiLeu4plex@Y':
+      - 'Y(145.1321)'
+    'DiLeu4plex@S':
+      - 'S(145.1321)'
+    'DiLeu4plex@T':
+      - 'T(145.1321)'
 
 pfind:
   reader_type: pfind
