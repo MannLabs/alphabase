@@ -424,11 +424,6 @@ class AminoAcidModifier:
                 # Legacy: index-based connection (first atom connects to N)
                 aa_mol = ReplaceSubstructs(aa_mol, n_term_placeholder_mol, n_mod_mol)[0]
 
-                if "Dimethyl" in n_term_mod:
-                    return ReplaceSubstructs(aa_mol, n_term_placeholder_mol, n_mod_mol)[
-                        0
-                    ]
-
         # replacing all leftover N-terminal placeholders with hydrogen atoms
         return ReplaceSubstructs(
             aa_mol,
