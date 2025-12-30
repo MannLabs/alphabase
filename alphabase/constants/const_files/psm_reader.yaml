@@ -203,6 +203,10 @@ modification_mappings:
       - 'N-term(145.1321)'
     'DiLeu4plex@Y':
       - 'Y(145.1321)'
+    'DiLeu4plex@S':
+      - 'S(145.1321)'
+    'DiLeu4plex@T':
+      - 'T(145.1321)'
 
 pfind:
   reader_type: pfind
