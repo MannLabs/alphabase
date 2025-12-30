@@ -266,7 +266,8 @@ def _assert_reference_df_equal(
         # TODO find out why some results differ in order on the github runner
         if loose_check:
             # check that the data is the same, but ignore the order
-            columns_to_sort_by = ["rt", "raw_name"]
+            # include sequence to ensure deterministic ordering when rt and raw_name have ties
+            columns_to_sort_by = ["rt", "raw_name", "sequence"]
             psm_df = psm_df.sort_values(by=columns_to_sort_by).reset_index(drop=True)
             expected_df = expected_df.sort_values(by=columns_to_sort_by).reset_index(
                 drop=True
