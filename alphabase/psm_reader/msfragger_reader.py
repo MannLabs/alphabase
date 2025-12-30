@@ -18,11 +18,26 @@ from alphabase.psm_reader.psm_reader import (
 )
 
 
-def _is_fragger_decoy(proteins: List[str]) -> bool:
-    return all(prot.lower().startswith("rev_") for prot in proteins)
+def _is_all_fragger_decoy(proteins: List[str]) -> bool:
+    """Check if all proteins are MSFragger decoy entries.
+
+    Parameters
+    ----------
+    proteins : List[str]
+        List of protein identifiers
+
+    Returns
+    -------
+    bool
+        True if all proteins start with 'rev_' (case-insensitive)
+
+    """
+    return all(
+        prot.lower().startswith(MsFraggerTokens.DECOY_PREFIX) for prot in proteins
+    )
 
 
-def _extract_position(entry: str) -> Tuple[str, str]:
+def _extract_position(entry: str) -> Tuple[int, str]:
     """Extract leading position digits from modification entry.
 
     Parameters
@@ -33,7 +48,7 @@ def _extract_position(entry: str) -> Tuple[str, str]:
     Returns
     -------
     tuple
-        (position, remainder) e.g. ('5', 'S(79.9663)')
+        (position, remainder) e.g. (5, 'S(79.9663)')
 
     Raises
     ------
@@ -55,7 +70,7 @@ def _extract_position(entry: str) -> Tuple[str, str]:
             f"'N-term(<mass>)', or 'C-term(<mass>)'."
         )
 
-    return position, entry[len(position) :]
+    return int(position), entry[len(position) :]
 
 
 def _extract_mass_shift(entry: str) -> float:
@@ -81,14 +96,13 @@ def _parse_lookup_key(lookup_key: str, entry: str) -> Tuple[str, float]:
         (amino_acid, mass_shift)
 
     """
-    parts = lookup_key.split(MsFraggerTokens.MOD_START)
-    if len(parts) != 2:  # noqa: PLR2004
+    if MsFraggerTokens.MOD_START not in lookup_key:
         raise ValueError(
             f"Invalid modification entry '{entry}': "
             f"could not parse amino acid and mass."
         )
-    amino_acid = parts[0]
-    mass_shift = float(parts[1].rstrip(MsFraggerTokens.MOD_STOP))
+    amino_acid = lookup_key.split(MsFraggerTokens.MOD_START)[0]
+    mass_shift = _extract_mass_shift(lookup_key)
     return amino_acid, mass_shift
 
 
@@ -189,7 +203,7 @@ class MSFraggerModificationTranslator:
 
         position, lookup_key = _extract_position(entry)
         mod_name = self._resolve_positional_mod(lookup_key, entry)
-        return mod_name, position
+        return mod_name, str(position)
 
     def _resolve_terminal_mod(self, entry: str, aa_or_term: str) -> str:
         """Resolve terminal modification name, checking rev_mod_mapping first."""
@@ -459,7 +473,9 @@ class MSFraggerPepXMLReader(PSMReaderBase):
 
     def _translate_decoy(self) -> None:
         self._psm_df[PsmDfCols.DECOY] = (
-            self._psm_df[PsmDfCols.PROTEINS].apply(_is_fragger_decoy).astype(np.int8)
+            self._psm_df[PsmDfCols.PROTEINS]
+            .apply(_is_all_fragger_decoy)
+            .astype(np.int8)
         )
 
         self._psm_df[PsmDfCols.PROTEINS] = self._psm_df[PsmDfCols.PROTEINS].apply(
