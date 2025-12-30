@@ -1,9 +1,9 @@
 mod_name	unimod_mass	unimod_avge_mass	composition	unimod_modloss	modloss_composition	classification	unimod_id	smiles	modloss_importance
 Acetyl@T	42.010565	42.0367	H(2)C(2)O(1)	0.0		Post-translational	1		0.0
-Acetyl@Protein_N-term	42.010565	42.0367	H(2)C(2)O(1)	0.0		Post-translational	1	C(=O)C	0.0
+Acetyl@Protein_N-term	42.010565	42.0367	H(2)C(2)O(1)	0.0		Post-translational	1	CC(=O)[Ts]	0.0
 Acetyl@S	42.010565	42.0367	H(2)C(2)O(1)	0.0		Post-translational	1		0.0
 Acetyl@C	42.010565	42.0367	H(2)C(2)O(1)	0.0		Post-translational	1		0.0
-Acetyl@Any_N-term	42.010565	42.0367	H(2)C(2)O(1)	0.0		Multiple	1	C(=O)C	0.0
+Acetyl@Any_N-term	42.010565	42.0367	H(2)C(2)O(1)	0.0		Multiple	1	CC(=O)[Ts]	0.0
 Acetyl@K	42.010565	42.0367	H(2)C(2)O(1)	0.0		Multiple	1	CC(=O)NCCCC[C@H](N([Fl])([Fl]))C(=O)[Ts]	0.0
 Acetyl@Y	42.010565	42.0367	H(2)C(2)O(1)	0.0		Chemical derivative	1		0.0
 Acetyl@H	42.010565	42.0367	H(2)C(2)O(1)	0.0		Chemical derivative	1		0.0
@@ -120,10 +120,10 @@ Oxidation@P	15.994915	15.9994	O(1)	0.0		Post-translational	35		0.0
 Oxidation@N	15.994915	15.9994	O(1)	0.0		Post-translational	35		0.0
 Oxidation@K	15.994915	15.9994	O(1)	0.0		Post-translational	35		0.0
 Oxidation@D	15.994915	15.9994	O(1)	0.0		Post-translational	35		0.0
-Dimethyl@Protein_N-term	28.0313	28.0532	H(4)C(2)	0.0		Isotopic label	36	C	0.0
+Dimethyl@Protein_N-term	28.0313	28.0532	H(4)C(2)	0.0		Isotopic label	36	C[Ts]C	0.0
 Dimethyl@P^Protein_N-term	28.0313	28.0532	H(4)C(2)	0.0		Post-translational	36		0.0
 Dimethyl@N	28.0313	28.0532	H(4)C(2)	0.0		Post-translational	36		0.0
-Dimethyl@Any_N-term	28.0313	28.0532	H(4)C(2)	0.0		Isotopic label	36	C	0.0
+Dimethyl@Any_N-term	28.0313	28.0532	H(4)C(2)	0.0		Isotopic label	36	C[Ts]C	0.0
 Dimethyl@K	28.0313	28.0532	H(4)C(2)	0.0		Multiple	36	CN(C)CCCC[C@H](N([Fl])([Fl]))C(=O)[Ts]	0.0
 Dimethyl@R	28.0313	28.0532	H(4)C(2)	0.0		Post-translational	36		0.0
 Trimethyl@A^Protein_N-term	42.04695	42.0797	H(6)C(3)	0.0		Post-translational	37		0.0
@@ -406,14 +406,14 @@ ADP-Ribosyl@N	541.06111	541.3005	H(21)C(15)N(5)O(13)P(2)	541.06111	H(21)C(15)N(5
 ADP-Ribosyl@R	541.06111	541.3005	H(21)C(15)N(5)O(13)P(2)	0.0		Other glycosylation	213		0.0
 NEIAA@Y	85.052764	85.1045	H(7)C(4)N(1)O(1)	0.0		Isotopic label	211		0.0
 NEIAA@C	85.052764	85.1045	H(7)C(4)N(1)O(1)	0.0		Isotopic label	211		0.0
-iTRAQ4plex@C	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	214		0.0
-iTRAQ4plex@T	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	214		0.0
-iTRAQ4plex@Protein_N-term	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	214		0.0
-iTRAQ4plex@S	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	214		0.0
-iTRAQ4plex@H	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	214		0.0
-iTRAQ4plex@Y	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	214		0.0
-iTRAQ4plex@Any_N-term	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	214		0.0
-iTRAQ4plex@K	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	214		0.0
+iTRAQ4plex@C	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	214	C[15N]1[13CH2]CN(CC1)[13CH2][13C](=O)SC[C@@H](C(=O)[Ts])N([Fl])([Fl])	0.0
+iTRAQ4plex@T	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	214	C[15N]1[13CH2]CN(CC1)[13CH2][13C](=O)O[C@H](C)[C@@H](C(=O)[Ts])N([Fl])([Fl])	0.0
+iTRAQ4plex@Protein_N-term	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	214	[13C](=O)[13CH2][15N]1[13CH2]CN(CC1)C	0.0
+iTRAQ4plex@S	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	214	C[15N]1[13CH2]CN(CC1)[13CH2][13C](=O)OC[C@@H](C(=O)[Ts])N([Fl])([Fl])	0.0
+iTRAQ4plex@H	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	214	C[15N]1[13CH2]CN(CC1)[13CH2][13C](=O)n2cnc(C[C@@H](C(=O)[Ts])N([Fl])([Fl]))c2	0.0
+iTRAQ4plex@Y	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	214	C[15N]1[13CH2]CN(CC1)[13CH2][13C](=O)Oc1ccc(C[C@@H](C(=O)[Ts])N([Fl])([Fl]))cc1	0.0
+iTRAQ4plex@Any_N-term	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	214	[13C](=O)[13CH2][15N]1[13CH2]CN(CC1)C	0.0
+iTRAQ4plex@K	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	214	[H]N(CCCC[C@H](N([Fl])([Fl]))C(=O)[Ts])[13C](=O)[13CH2][15N]1[13CH2]CN(C)CC1	0.0
 Crotonaldehyde@K	70.041865	70.0898	H(6)C(4)O(1)	0.0		Other	253		0.0
 Crotonaldehyde@H	70.041865	70.0898	H(6)C(4)O(1)	0.0		Other	253		0.0
 Crotonaldehyde@C	70.041865	70.0898	H(6)C(4)O(1)	0.0		Other	253		0.0
@@ -785,14 +785,14 @@ Sulfo-NHS-LC-LC-Biotin@K	452.245726	452.6106	H(36)C(22)N(4)O(4)S(1)	0.0		Chemica
 FNEM@C	427.069202	427.3625	H(13)C(24)N(1)O(7)	0.0		Chemical derivative	515		0.0
 PropylNAGthiazoline@C	232.064354	232.2768	H(14)C(9)N(1)O(4)S(1)	0.0		Chemical derivative	514		0.0
 Dethiomethyl@M	-48.003371	-48.1075	H(-4)C(-1)S(-1)	0.0		Artefact	526		0.0
-iTRAQ4plex114@Y	144.105918	144.168	H(12)C(5)13C(2)N(2)18O(1)	0.0		Isotopic label	532		0.0
-iTRAQ4plex114@Any_N-term	144.105918	144.168	H(12)C(5)13C(2)N(2)18O(1)	0.0		Isotopic label	532		0.0
-iTRAQ4plex114@K	144.105918	144.168	H(12)C(5)13C(2)N(2)18O(1)	0.0		Isotopic label	532		0.0
-iTRAQ4plex114@C	144.105918	144.168	H(12)C(5)13C(2)N(2)18O(1)	0.0		Isotopic label	532		0.0
-iTRAQ4plex115@Y	144.099599	144.1688	H(12)C(6)13C(1)N(1)15N(1)18O(1)	0.0		Isotopic label	533		0.0
-iTRAQ4plex115@Any_N-term	144.099599	144.1688	H(12)C(6)13C(1)N(1)15N(1)18O(1)	0.0		Isotopic label	533		0.0
-iTRAQ4plex115@K	144.099599	144.1688	H(12)C(6)13C(1)N(1)15N(1)18O(1)	0.0		Isotopic label	533		0.0
-iTRAQ4plex115@C	144.099599	144.1688	H(12)C(6)13C(1)N(1)15N(1)18O(1)	0.0		Isotopic label	533		0.0
+iTRAQ4plex114@Y	144.105918	144.168	H(12)C(5)13C(2)N(2)18O(1)	0.0		Isotopic label	532	CN1CCN(CC1)[13CH2][13C](=[18O])Oc1ccc(C[C@@H](C(=O)[Ts])N([Fl])([Fl]))cc1	0.0
+iTRAQ4plex114@Any_N-term	144.105918	144.168	H(12)C(5)13C(2)N(2)18O(1)	0.0		Isotopic label	532	[13C](=[18O])[13CH2]N1CCN(CC1)C	0.0
+iTRAQ4plex114@K	144.105918	144.168	H(12)C(5)13C(2)N(2)18O(1)	0.0		Isotopic label	532	[H]N(CCCC[C@H](N([Fl])([Fl]))C(=O)[Ts])[13C](=[18O])[13CH2]N1CCN(C)CC1	0.0
+iTRAQ4plex114@C	144.105918	144.168	H(12)C(5)13C(2)N(2)18O(1)	0.0		Isotopic label	532	CN1CCN(CC1)[13CH2][13C](=[18O])SC[C@@H](C(=O)[Ts])N([Fl])([Fl])	0.0
+iTRAQ4plex115@Y	144.099599	144.1688	H(12)C(6)13C(1)N(1)15N(1)18O(1)	0.0		Isotopic label	533	C[15N]1CCN(CC1)[13CH2]C(=[18O])Oc1ccc(C[C@@H](C(=O)[Ts])N([Fl])([Fl]))cc1	0.0
+iTRAQ4plex115@Any_N-term	144.099599	144.1688	H(12)C(6)13C(1)N(1)15N(1)18O(1)	0.0		Isotopic label	533	C(=[18O])[13CH2][15N]1CCN(CC1)C	0.0
+iTRAQ4plex115@K	144.099599	144.1688	H(12)C(6)13C(1)N(1)15N(1)18O(1)	0.0		Isotopic label	533	[H]N(CCCC[C@H](N([Fl])([Fl]))C(=O)[Ts])C(=[18O])[13CH2][15N]1CCN(C)CC1	0.0
+iTRAQ4plex115@C	144.099599	144.1688	H(12)C(6)13C(1)N(1)15N(1)18O(1)	0.0		Isotopic label	533	C[15N]1CCN(CC1)[13CH2]C(=[18O])SC[C@@H](C(=O)[Ts])N([Fl])([Fl])	0.0
 Dibromo@Y	155.821022	157.7921	H(-2)Br(2)	0.0		Chemical derivative	534		0.0
 LRGG@K	383.228103	383.446	H(29)C(16)N(7)O(4)	0.0		Chemical derivative	535		0.0
 CLIP_TRAQ_3@Y	271.148736	271.2976	H(20)C(11)13C(1)N(3)O(4)	0.0		Isotopic label	536		0.0
@@ -1032,6 +1032,12 @@ TMT6plex@H	229.162932	229.2634	H(20)C(8)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label
 TMT6plex@Protein_N-term	229.162932	229.2634	H(20)C(8)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	737		0.0
 TMT6plex@Any_N-term	229.162932	229.2634	H(20)C(8)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	737		0.0
 TMT6plex@K	229.162932	229.2634	H(20)C(8)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	737		0.0
+TMT10plex@T	229.162932	229.2634	H(20)C(8)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	737		0.0
+TMT10plex@S	229.162932	229.2634	H(20)C(8)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	737		0.0
+TMT10plex@H	229.162932	229.2634	H(20)C(8)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	737		0.0
+TMT10plex@Protein_N-term	229.162932	229.2634	H(20)C(8)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	737		0.0
+TMT10plex@Any_N-term	229.162932	229.2634	H(20)C(8)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	737	C(=O)CCNC(=O)CN1C(C)CCCC1C	0.0
+TMT10plex@K	229.162932	229.2634	H(20)C(8)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	737	CC1N(CC(NCCC(NCCCC[C@H](N([Fl])([Fl]))C(=O)[Ts])=O)=O)C(C)CCC1	0.0
 BEMAD_C@C	120.0245	120.1701	H(8)C(4)O(2)S(1)	0.0		Chemical derivative	736		0.0
 TMT2plex@H	225.155833	225.2921	H(20)C(11)13C(1)N(2)O(2)	0.0		Isotopic label	738		0.0
 TMT2plex@S	225.155833	225.2921	H(20)C(11)13C(1)N(2)O(2)	0.0		Isotopic label	738		0.0
@@ -1106,12 +1112,12 @@ cGMP@S	343.031785	343.1895	H(10)C(10)N(5)O(7)P(1)	0.0		Post-translational	849		0
 cGMP@C	343.031785	343.1895	H(10)C(10)N(5)O(7)P(1)	0.0		Post-translational	849		0.0
 cGMP+RMP-loss@C	150.041585	150.1182	H(4)C(5)N(5)O(1)	0.0		Post-translational	851		0.0
 cGMP+RMP-loss@S	150.041585	150.1182	H(4)C(5)N(5)O(1)	0.0		Post-translational	851		0.0
-mTRAQ@Y	140.094963	140.183	H(12)C(7)N(2)O(1)	0.0		Isotopic label	888		0.0
+mTRAQ@Y	140.094963	140.183	H(12)C(7)N(2)O(1)	0.0		Isotopic label	888	CN1CCN(CC1)CC(=O)Oc1ccc(C[C@@H](C(=O)[Ts])N([Fl])([Fl]))cc1	0.0
 mTRAQ@Any_N-term	140.094963	140.183	H(12)C(7)N(2)O(1)	0.0		Isotopic label	888	C(=O)CN1CCN(CC1)C	0.0
 mTRAQ@K	140.094963	140.183	H(12)C(7)N(2)O(1)	0.0		Isotopic label	888	[H]N(CCCC[C@H](N([Fl])([Fl]))C(=O)[Ts])C(=O)CN1CCN(C)CC1	0.0
-mTRAQ@H	140.094963	140.183	H(12)C(7)N(2)O(1)	0.0		Isotopic label	888		0.0
-mTRAQ@S	140.094963	140.183	H(12)C(7)N(2)O(1)	0.0		Isotopic label	888		0.0
-mTRAQ@T	140.094963	140.183	H(12)C(7)N(2)O(1)	0.0		Isotopic label	888		0.0
+mTRAQ@H	140.094963	140.183	H(12)C(7)N(2)O(1)	0.0		Isotopic label	888	CN1CCN(CC1)CC(=O)n2cnc(C[C@@H](C(=O)[Ts])N([Fl])([Fl]))c2	0.0
+mTRAQ@S	140.094963	140.183	H(12)C(7)N(2)O(1)	0.0		Isotopic label	888	CN1CCN(CC1)CC(=O)OC[C@@H](C(=O)[Ts])N([Fl])([Fl])	0.0
+mTRAQ@T	140.094963	140.183	H(12)C(7)N(2)O(1)	0.0		Isotopic label	888	CN1CCN(CC1)CC(=O)O[C@H](C)[C@@H](C(=O)[Ts])N([Fl])([Fl])	0.0
 Arg2PG@R	266.057909	266.2482	H(10)C(16)O(4)	0.0		Chemical derivative	848		0.0
 Label:2H(4)+GG@K	118.068034	118.1273	H(2)2H(4)C(4)N(2)O(2)	0.0		Post-translational	853		0.0
 spermine@Q	185.189198	185.3097	H(23)C(10)N(3)	0.0		Chemical derivative	1420		0.0
@@ -1125,10 +1131,10 @@ ICPL:13C(6)2H(4)@Any_N-term	115.0667	115.0747	H(-1)2H(4)13C(6)N(1)O(1)	0.0		Isot
 ICPL:13C(6)2H(4)@K	115.0667	115.0747	H(-1)2H(4)13C(6)N(1)O(1)	0.0		Isotopic label	866		0.0
 ICPL:13C(6)2H(4)@Protein_N-term	115.0667	115.0747	H(-1)2H(4)13C(6)N(1)O(1)	0.0		Isotopic label	866		0.0
 DyLight-maleimide@C	940.1999	941.0762	H(48)C(39)N(4)O(15)S(4)	0.0		Chemical derivative	890		0.0
-mTRAQ:13C(3)15N(1)@S	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	889		0.0
-mTRAQ:13C(3)15N(1)@T	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	889		0.0
-mTRAQ:13C(3)15N(1)@H	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	889		0.0
-mTRAQ:13C(3)15N(1)@Y	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	889		0.0
+mTRAQ:13C(3)15N(1)@S	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	889	CN1CC[15N]([13CH2][13CH2]1)[13CH2]C(=O)OC[C@@H](C(=O)[Ts])N([Fl])([Fl])	0.0
+mTRAQ:13C(3)15N(1)@T	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	889	CN1CC[15N]([13CH2][13CH2]1)[13CH2]C(=O)O[C@H](C)[C@@H](C(=O)[Ts])N([Fl])([Fl])	0.0
+mTRAQ:13C(3)15N(1)@H	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	889	CN1CC[15N]([13CH2][13CH2]1)[13CH2]C(=O)n2cnc(C[C@@H](C(=O)[Ts])N([Fl])([Fl]))c2	0.0
+mTRAQ:13C(3)15N(1)@Y	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	889	CN1CC[15N]([13CH2][13CH2]1)[13CH2]C(=O)Oc1ccc(C[C@@H](C(=O)[Ts])N([Fl])([Fl]))cc1	0.0
 mTRAQ:13C(3)15N(1)@Any_N-term	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	889	C(=O)[13C]([H])([H])[15N]1[13C]([H])([H])[13C]([H])([H])N(CC1)C	0.0
 mTRAQ:13C(3)15N(1)@K	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	889	[H]N(CCCC[C@H](N([Fl])([Fl]))C(=O)[Ts])C(=O)[13CH2][15N]1CCN(C)[13CH2][13CH2]1	0.0
 Methyl-PEO12-Maleimide@C	710.383719	710.8073	H(58)C(32)N(2)O(15)	0.0		Chemical derivative	891		0.0
@@ -1597,10 +1603,10 @@ Label:2H(4)13C(1)@R	5.028462	5.0173	H(-4)2H(4)C(-1)13C(1)	0.0		Isotopic label	13
 Lys@Any_N-term	128.094963	128.1723	H(12)C(6)N(2)O(1)	0.0		Other	1301		0.0
 mTRAQ:13C(6)15N(2)@K	148.109162	148.1257	H(12)C(1)13C(6)15N(2)O(1)	0.0		Isotopic label	1302	[H]N(CCCC[C@H](N([Fl])([Fl]))C(=O)[Ts])C(=O)[13CH2][15N]1[13CH2][13CH2][15N]([13CH3])[13CH2][13CH2]1	0.0
 mTRAQ:13C(6)15N(2)@Any_N-term	148.109162	148.1257	H(12)C(1)13C(6)15N(2)O(1)	0.0		Isotopic label	1302	C(=O)[13C]([H])([H])[15N]1[13C]([H])([H])[13C]([H])([H])[15N]([13C]([H])([H])[13C]1([H])([H]))[13C]([H])([H])([H])	0.0
-mTRAQ:13C(6)15N(2)@Y	148.109162	148.1257	H(12)C(1)13C(6)15N(2)O(1)	0.0		Isotopic label	1302		0.0
-mTRAQ:13C(6)15N(2)@H	148.109162	148.1257	H(12)C(1)13C(6)15N(2)O(1)	0.0		Isotopic label	1302		0.0
-mTRAQ:13C(6)15N(2)@S	148.109162	148.1257	H(12)C(1)13C(6)15N(2)O(1)	0.0		Isotopic label	1302		0.0
-mTRAQ:13C(6)15N(2)@T	148.109162	148.1257	H(12)C(1)13C(6)15N(2)O(1)	0.0		Isotopic label	1302		0.0
+mTRAQ:13C(6)15N(2)@Y	148.109162	148.1257	H(12)C(1)13C(6)15N(2)O(1)	0.0		Isotopic label	1302	[13CH3][15N]1[13CH2][13CH2][15N]([13CH2]C(=O)Oc2ccc(C[C@@H](C(=O)[Ts])N([Fl])([Fl]))cc2)[13CH2][13CH2]1	0.0
+mTRAQ:13C(6)15N(2)@H	148.109162	148.1257	H(12)C(1)13C(6)15N(2)O(1)	0.0		Isotopic label	1302	[13CH3][15N]1[13CH2][13CH2][15N]([13CH2]C(=O)n2cnc(C[C@@H](C(=O)[Ts])N([Fl])([Fl]))c2)[13CH2][13CH2]1	0.0
+mTRAQ:13C(6)15N(2)@S	148.109162	148.1257	H(12)C(1)13C(6)15N(2)O(1)	0.0		Isotopic label	1302	[13CH3][15N]1[13CH2][13CH2][15N]([13CH2]C(=O)OC[C@@H](C(=O)[Ts])N([Fl])([Fl]))[13CH2][13CH2]1	0.0
+mTRAQ:13C(6)15N(2)@T	148.109162	148.1257	H(12)C(1)13C(6)15N(2)O(1)	0.0		Isotopic label	1302	[13CH3][15N]1[13CH2][13CH2][15N]([13CH2]C(=O)O[C@H](C)[C@@H](C(=O)[Ts])N([Fl])([Fl]))[13CH2][13CH2]1	0.0
 NeuAc@T	291.095417	291.2546	H(17)C(11)N(1)O(8)	291.095417	H(17)C(11)N(1)O(8)	O-linked glycosylation	1303		0.5
 NeuAc@S	291.095417	291.2546	H(17)C(11)N(1)O(8)	291.095417	H(17)C(11)N(1)O(8)	O-linked glycosylation	1303		0.5
 NeuAc@N	291.095417	291.2546	H(17)C(11)N(1)O(8)	291.095417	H(17)C(11)N(1)O(8)	N-linked glycosylation	1303		0.5
@@ -1642,18 +1648,26 @@ EHD-diphenylpentanone@C	266.13068	266.3343	H(18)C(18)O(2)	0.0		Chemical derivati
 benzylguanidine@K	132.068748	132.1625	H(8)C(8)N(2)	0.0		Chemical derivative	1349		0.0
 CarboxymethylDMAP@Any_N-term	162.079313	162.1885	H(10)C(9)N(2)O(1)	0.0		Chemical derivative	1350		0.0
 Biotin:Thermo-21901+2H2O@C	561.246849	561.6489	H(39)C(23)N(5)O(9)S(1)	0.0		Chemical derivative	1320		0.0
-DiLeu4plex115@K	145.12	145.1966	H(15)C(7)13C(1)15N(1)18O(1)	0.0		Isotopic label	1321		0.0
-DiLeu4plex115@Any_N-term	145.12	145.1966	H(15)C(7)13C(1)15N(1)18O(1)	0.0		Isotopic label	1321		0.0
-DiLeu4plex115@Y	145.12	145.1966	H(15)C(7)13C(1)15N(1)18O(1)	0.0		Isotopic label	1321		0.0
-DiLeu4plex@Any_N-term	145.132163	145.2229	H(13)2H(2)C(8)N(1)18O(1)	0.0		Isotopic label	1322		0.0
-DiLeu4plex@K	145.132163	145.2229	H(13)2H(2)C(8)N(1)18O(1)	0.0		Isotopic label	1322		0.0
-DiLeu4plex@Y	145.132163	145.2229	H(13)2H(2)C(8)N(1)18O(1)	0.0		Isotopic label	1322		0.0
-DiLeu4plex117@K	145.128307	145.2092	H(13)2H(2)C(7)13C(1)15N(1)O(1)	0.0		Isotopic label	1323		0.0
-DiLeu4plex117@Any_N-term	145.128307	145.2092	H(13)2H(2)C(7)13C(1)15N(1)O(1)	0.0		Isotopic label	1323		0.0
-DiLeu4plex117@Y	145.128307	145.2092	H(13)2H(2)C(7)13C(1)15N(1)O(1)	0.0		Isotopic label	1323		0.0
-DiLeu4plex118@K	145.140471	145.2354	H(11)2H(4)C(8)N(1)O(1)	0.0		Isotopic label	1324		0.0
-DiLeu4plex118@Any_N-term	145.140471	145.2354	H(11)2H(4)C(8)N(1)O(1)	0.0		Isotopic label	1324		0.0
-DiLeu4plex118@Y	145.140471	145.2354	H(11)2H(4)C(8)N(1)O(1)	0.0		Isotopic label	1324		0.0
+DiLeu4plex115@K	145.12	145.1966	H(15)C(7)13C(1)15N(1)18O(1)	0.0		Isotopic label	1321	[H]N(CCCC[C@H](N([Fl])([Fl]))C(=O)[Ts])[13C](=[18O])C(CC(C)C)[15N](C)C	0.0
+DiLeu4plex115@Any_N-term	145.12	145.1966	H(15)C(7)13C(1)15N(1)18O(1)	0.0		Isotopic label	1321	[13C](=[18O])C(CC(C)C)[15N](C)C	0.0
+DiLeu4plex115@Y	145.12	145.1966	H(15)C(7)13C(1)15N(1)18O(1)	0.0		Isotopic label	1321	CC(C)CC([15N](C)C)[13C](=[18O])Oc1ccc(C[C@@H](C(=O)[Ts])N([Fl])([Fl]))cc1	0.0
+DiLeu4plex115@S	145.12	145.1966	H(15)C(7)13C(1)15N(1)18O(1)	0.0		Isotopic label	1321	CC(C)CC([15N](C)C)[13C](=[18O])OC[C@@H](C(=O)[Ts])N([Fl])([Fl])	0.0
+DiLeu4plex115@T	145.12	145.1966	H(15)C(7)13C(1)15N(1)18O(1)	0.0		Isotopic label	1321	CC(C)CC([15N](C)C)[13C](=[18O])O[C@H](C)[C@@H](C(=O)[Ts])N([Fl])([Fl])	0.0
+DiLeu4plex@Any_N-term	145.132163	145.2229	H(13)2H(2)C(8)N(1)18O(1)	0.0		Isotopic label	1322	C(=[18O])C(CC(C)C)N(C[2H])C[2H]	0.0
+DiLeu4plex@K	145.132163	145.2229	H(13)2H(2)C(8)N(1)18O(1)	0.0		Isotopic label	1322	[H]N(CCCC[C@H](N([Fl])([Fl]))C(=O)[Ts])C(=[18O])C(CC(C)C)N(C[2H])C[2H]	0.0
+DiLeu4plex@Y	145.132163	145.2229	H(13)2H(2)C(8)N(1)18O(1)	0.0		Isotopic label	1322	CC(C)CC(N(C[2H])C[2H])C(=[18O])Oc1ccc(C[C@@H](C(=O)[Ts])N([Fl])([Fl]))cc1	0.0
+DiLeu4plex@S	145.132163	145.2229	H(13)2H(2)C(8)N(1)18O(1)	0.0		Isotopic label	1322	CC(C)CC(N(C[2H])C[2H])C(=[18O])OC[C@@H](C(=O)[Ts])N([Fl])([Fl])	0.0
+DiLeu4plex@T	145.132163	145.2229	H(13)2H(2)C(8)N(1)18O(1)	0.0		Isotopic label	1322	CC(C)CC(N(C[2H])C[2H])C(=[18O])O[C@H](C)[C@@H](C(=O)[Ts])N([Fl])([Fl])	0.0
+DiLeu4plex117@K	145.128307	145.2092	H(13)2H(2)C(7)13C(1)15N(1)O(1)	0.0		Isotopic label	1323	[H]N(CCCC[C@H](N([Fl])([Fl]))C(=O)[Ts])[13C](=O)C(CC(C)C)[15N](C[2H])C[2H]	0.0
+DiLeu4plex117@Any_N-term	145.128307	145.2092	H(13)2H(2)C(7)13C(1)15N(1)O(1)	0.0		Isotopic label	1323	[13C](=O)C(CC(C)C)[15N](C[2H])C[2H]	0.0
+DiLeu4plex117@Y	145.128307	145.2092	H(13)2H(2)C(7)13C(1)15N(1)O(1)	0.0		Isotopic label	1323	CC(C)CC([15N](C[2H])C[2H])[13C](=O)Oc1ccc(C[C@@H](C(=O)[Ts])N([Fl])([Fl]))cc1	0.0
+DiLeu4plex117@S	145.128307	145.2092	H(13)2H(2)C(7)13C(1)15N(1)O(1)	0.0		Isotopic label	1323	CC(C)CC([15N](C[2H])C[2H])[13C](=O)OC[C@@H](C(=O)[Ts])N([Fl])([Fl])	0.0
+DiLeu4plex117@T	145.128307	145.2092	H(13)2H(2)C(7)13C(1)15N(1)O(1)	0.0		Isotopic label	1323	CC(C)CC([15N](C[2H])C[2H])[13C](=O)O[C@H](C)[C@@H](C(=O)[Ts])N([Fl])([Fl])	0.0
+DiLeu4plex118@K	145.140471	145.2354	H(11)2H(4)C(8)N(1)O(1)	0.0		Isotopic label	1324	[H]N(CCCC[C@H](N([Fl])([Fl]))C(=O)[Ts])C(=O)C(CC(C)C)N(C([2H])([2H]))C([2H])([2H])	0.0
+DiLeu4plex118@Any_N-term	145.140471	145.2354	H(11)2H(4)C(8)N(1)O(1)	0.0		Isotopic label	1324	C(=O)C(CC(C)C)N(C([2H])([2H]))C([2H])([2H])	0.0
+DiLeu4plex118@Y	145.140471	145.2354	H(11)2H(4)C(8)N(1)O(1)	0.0		Isotopic label	1324	CC(C)CC(N(C([2H])([2H]))C([2H])([2H]))C(=O)Oc1ccc(C[C@@H](C(=O)[Ts])N([Fl])([Fl]))cc1	0.0
+DiLeu4plex118@S	145.140471	145.2354	H(11)2H(4)C(8)N(1)O(1)	0.0		Isotopic label	1324	CC(C)CC(N(C([2H])([2H]))C([2H])([2H]))C(=O)OC[C@@H](C(=O)[Ts])N([Fl])([Fl])	0.0
+DiLeu4plex118@T	145.140471	145.2354	H(11)2H(4)C(8)N(1)O(1)	0.0		Isotopic label	1324	CC(C)CC(N(C([2H])([2H]))C([2H])([2H]))C(=O)O[C@H](C)[C@@H](C(=O)[Ts])N([Fl])([Fl])	0.0
 Xlink:BuUrBu[213]@Protein_N-term	213.111341	213.2337	H(15)C(9)N(3)O(3)	0.0		Chemical derivative	1887		0.0
 Xlink:BuUrBu[213]@S	213.111341	213.2337	H(15)C(9)N(3)O(3)	0.0		Chemical derivative	1887		0.0
 Xlink:BuUrBu[213]@K	213.111341	213.2337	H(15)C(9)N(3)O(3)	0.0		Chemical derivative	1887		0.0
@@ -2697,8 +2711,8 @@ TMTpro@T	304.207146	304.3127	H(25)C(8)13C(7)N(1)15N(2)O(3)	0.0		Isotopic label	2
 TMTpro@S	304.207146	304.3127	H(25)C(8)13C(7)N(1)15N(2)O(3)	0.0		Isotopic label	2016		0.0
 TMTpro@H	304.207146	304.3127	H(25)C(8)13C(7)N(1)15N(2)O(3)	0.0		Isotopic label	2016		0.0
 TMTpro@Protein_N-term	304.207146	304.3127	H(25)C(8)13C(7)N(1)15N(2)O(3)	0.0		Isotopic label	2016		0.0
-TMTpro@Any_N-term	304.207146	304.3127	H(25)C(8)13C(7)N(1)15N(2)O(3)	0.0		Isotopic label	2016		0.0
-TMTpro@K	304.207146	304.3127	H(25)C(8)13C(7)N(1)15N(2)O(3)	0.0		Isotopic label	2016		0.0
+TMTpro@Any_N-term	304.207146	304.3127	H(25)C(8)13C(7)N(1)15N(2)O(3)	0.0		Isotopic label	2016	C(=O)CCCNC(=O)CCCNC(=O)C1N(CC(C)C)CCC1	0.0
+TMTpro@K	304.207146	304.3127	H(25)C(8)13C(7)N(1)15N(2)O(3)	0.0		Isotopic label	2016	CC(CN1C(C(NCCC(NCCC(NCCCC[C@H](N([Fl])([Fl]))C(=O)[Ts])=O)=O)=O)CCC1)C	0.0
 TMTpro_zero@S	295.189592	295.3773	H(25)C(15)N(3)O(3)	0.0		Chemical derivative	2017		0.0
 TMTpro_zero@H	295.189592	295.3773	H(25)C(15)N(3)O(3)	0.0		Chemical derivative	2017		0.0
 TMTpro_zero@Protein_N-term	295.189592	295.3773	H(25)C(15)N(3)O(3)	0.0		Chemical derivative	2017		0.0
@@ -2798,12 +2812,36 @@ Cation:Li@Protein_C-term	0.0	0.0	H(-1)Li(1)	0.0		User-added	0	O[Li]	0.0
 SATA@K	0.0	0.0	C(4)H(4)O(2)S(1)	0.0		User-added	0	CC(=O)SCC(=O)NCCCC[C@H](N([Fl])([Fl]))C([Ts])=O	0.0
 SATP@K	0.0	0.0	C(5)H(6)O(2)S(1)	0.0		User-added	0	CC(=O)SCCC(=O)NCCCC[C@H](N([Fl])([Fl]))C([Ts])=O	0.0
 Succinamide@K	0.0	0.0	C(4)H(5)N(1)O(3)	0.0		User-added	0	ONC(=O)CCC(=O)NCCCC[C@H](N([Fl])([Fl]))C([Ts])=O	0.0
-SATA-Glc@K	0.0	0.0	C(8)H(12)O(6)S(1)	0.0		User-added	0	[C@@H]1(O[C@H](CO)[C@@H](O)[C@H](O)[C@H]1O)SCC(=O)NCCCC[C@H](N([Fl])[Fl])C([Ts])=O	0.0
 SATA@Any_N-term	0.0	0.0	C(4)H(4)O(2)S(1)	0.0		User-added	0	C(=O)CSC(=O)C	0.0
-SATA@Protein_N-term	0.0	0.0	C(4)H(4)O(2)S(1)	0.0		User-added	0	C(=O)CSC(=O)C	0.0
 SATP@Any_N-term	0.0	0.0	C(5)H(6)O(2)S(1)	0.0		User-added	0	C(=O)CCSC(=O)C	0.0
-SATP@Protein_N-term	0.0	0.0	C(5)H(6)O(2)S(1)	0.0		User-added	0	C(=O)CCSC(=O)C	0.0
 Succinamide@Any_N-term	0.0	0.0	C(4)H(5)N(1)O(3)	0.0		User-added	0	C(=O)CCC(=O)NO	0.0
-Succinamide@Protein_N-term	0.0	0.0	C(4)H(5)N(1)O(3)	0.0		User-added	0	C(=O)CCC(=O)NO	0.0
-SATA-Glc@Any_N-term	0.0	0.0	C(8)H(12)O(6)S(1)	0.0		User-added	0	C(=O)CS[C@H]1O[C@H](CO)[C@@H](O)[C@H](O)[C@H]1O	0.0
-SATA-Glc@Protein_N-term	0.0	0.0	C(8)H(12)O(6)S(1)	0.0		User-added	0	C(=O)CS[C@H]1O[C@H](CO)[C@@H](O)[C@H](O)[C@H]1O	0.0
+SATA-Succinamide@K	0.0	0.0	C(8)H(9)N(1)O(6)S(1)	0.0		User-added	0	CC(=O)SCC(=O)ONC(=O)CCC(=O)NCCCC[C@H](N([Fl])([Fl]))C([Ts])=O	0.0
+SATA-Succinamide@Any_N-term	0.0	0.0	C(8)H(9)N(1)O(6)S(1)	0.0		User-added	0	CC(=O)SCC(=O)ONC(=O)CCC(=O)O	0.0
+SATP-Succinamide@K	0.0	0.0	C(9)H(11)N(1)O(6)S(1)	0.0		User-added	0	CC(=O)SCCC(=O)ONC(=O)CCC(=O)NCCCC[C@H](N([Fl])([Fl]))C([Ts])=O	0.0
+SATP-Succinamide@Any_N-term	0.0	0.0	C(9)H(11)N(1)O(6)S(1)	0.0		User-added	0	CC(=O)SCCC(=O)ONC(=O)CCC(=O)O	0.0
+Benzyl-TA@K	0.0	0.0	C(9)H(8)O(1)S(1)	0.0		User-added	0	c1ccccc1CSCC(=O)NCCCC[C@H](N([Fl])([Fl]))C([Ts])=O	0.0
+Benzyl-TA@Any_N-term	0.0	0.0	C(9)H(8)O(1)S(1)	0.0		User-added	0	c1ccccc1CSCC=O	0.0
+Benzyl-TA-Succinamide@K	0.0	0.0	C(13)H(13)N(1)O(5)S(1)	0.0		User-added	0	c1ccccc1CSCC(=O)ONC(=O)CCC(=O)NCCCC[C@H](N([Fl])([Fl]))C([Ts])=O	0.0
+Benzyl-TA-Succinamide@Any_N-term	0.0	0.0	C(13)H(13)N(1)O(5)S(1)	0.0		User-added	0	c1ccccc1CSCC(=O)ONC(=O)CCC(=O)O	0.0
+Benzyl@K	0.0	0.0	C(7)H(6)	0.0		User-added	0	c1ccccc1CNCCCC[C@H](N([Fl])([Fl]))C([Ts])=O	0.0
+Benzyl@Any_N-term	0.0	0.0	C(7)H(6)	0.0		User-added	0	c1ccccc1C	0.0
+Glc-TA@K	0.0	0.0	C(8)H(12)O(6)S(1)	0.0		User-added	0	[C@@H]1(O[C@H](CO)[C@@H](O)[C@H](O)[C@H]1O)SCC(=O)NCCCC[C@H](N([Fl])([Fl]))C([Ts])=O	0.0
+Glc-TA@Any_N-term	0.0	0.0	C(8)H(12)O(6)S(1)	0.0		User-added	0	C(=O)CS[C@@H]1O[C@H](CO)[C@@H](O)[C@H](O)[C@H]1O	0.0
+Glc-TA-Succinamide@K	0.0	0.0	C(12)H(17)N(1)O(9)S(1)	0.0		User-added	0	[C@@H]1(O[C@H](CO)[C@@H](O)[C@H](O)[C@H]1O)SCC(=O)ONC(=O)CCC(=O)NCCCC[C@H](N([Fl])([Fl]))C([Ts])=O	0.0
+Glc-TA-Succinamide@Any_N-term	0.0	0.0	C(12)H(17)N(1)O(9)S(1)	0.0		User-added	0	OC(=O)CCC(=O)NOC(=O)CS[C@@H]1O[C@H](CO)[C@@H](O)[C@H](O)[C@H]1O	0.0
+Gal-b14-Glc-TA@K	0.0	0.0	C(14)H(22)O(11)S(1)	0.0		User-added	0	[C@@H]1(O[C@H](CO)[C@@H](O[C@@H]2O[C@H](CO)[C@H](O)[C@H](O)[C@H]2O)[C@H](O)[C@H]1O)SCC(=O)NCCCC[C@H](N([Fl])([Fl]))C([Ts])=O	0.0
+Gal-b14-Glc-TA@Any_N-term	0.0	0.0	C(14)H(22)O(11)S(1)	0.0		User-added	0	C(=O)CS[C@@H]1O[C@H](CO)[C@@H](O[C@@H]2O[C@H](CO)[C@H](O)[C@H](O)[C@H]2O)[C@H](O)[C@H]1O	0.0
+Gal-b14-Glc-TA-Succinamide@K	0.0	0.0	C(18)H(27)N(1)O(14)S(1)	0.0		User-added	0	[C@@H]1(O[C@H](CO)[C@@H](O[C@@H]2O[C@H](CO)[C@H](O)[C@H](O)[C@H]2O)[C@H](O)[C@H]1O)SCC(=O)ONC(=O)CCC(=O)NCCCC[C@H](N([Fl])([Fl]))C([Ts])=O	0.0
+Gal-b14-Glc-TA-Succinamide@Any_N-term	0.0	0.0	C(18)H(27)N(1)O(14)S(1)	0.0		User-added	0	OC(=O)CCC(=O)NOC(=O)CS[C@@H]1O[C@H](CO)[C@@H](O[C@@H]2O[C@H](CO)[C@H](O)[C@H](O)[C@H]2O)[C@H](O)[C@H]1O	0.0
+Sia-a23-Gal-b14-Glc-TA@K	0.0	0.0	C(25)H(39)N(1)O(19)S(1)	0.0		User-added	0	[C@@H]1(O[C@H](CO)[C@@H](O[C@@H]2O[C@H](CO)[C@H](O)[C@H](O[C@@]3(C(=O)O)C[C@H](O)[C@@H](NC(=O)C)[C@H](O3)[C@H](O)[C@H](O)CO)[C@H]2O)[C@H](O)[C@H]1O)SCC(=O)NCCCC[C@H](N([Fl])([Fl]))C([Ts])=O	0.0
+Sia-a23-Gal-b14-Glc-TA@Any_N-term	0.0	0.0	C(25)H(39)N(1)O(19)S(1)	0.0		User-added	0	C(=O)CS[C@@H]1O[C@H](CO)[C@@H](O[C@@H]2O[C@H](CO)[C@H](O)[C@H](O[C@@]3(C(=O)O)C[C@H](O)[C@@H](NC(=O)C)[C@H](O3)[C@H](O)[C@H](O)CO)[C@H]2O)[C@H](O)[C@H]1O	0.0
+Sia-a23-Gal-b14-Glc-TA-Succinamide@K	0.0	0.0	C(29)H(44)N(2)O(23)S(1)	0.0		User-added	0	[C@@H]1(O[C@H](CO)[C@@H](O[C@@H]2O[C@H](CO)[C@H](O)[C@H](O[C@@]3(C(=O)O)C[C@H](O)[C@@H](NC(=O)C)[C@H](O3)[C@H](O)[C@H](O)CO)[C@H]2O)[C@H](O)[C@H]1O)SCC(=O)ONC(=O)CCC(=O)NCCCC[C@H](N([Fl])([Fl]))C([Ts])=O	0.0
+Sia-a23-Gal-b14-Glc-TA-Succinamide@Any_N-term	0.0	0.0	C(29)H(44)N(2)O(23)S(1)	0.0		User-added	0	OC(=O)CCC(=O)NOC(=O)CS[C@@H]1O[C@H](CO)[C@@H](O[C@@H]2O[C@H](CO)[C@H](O)[C@H](O[C@@]3(C(=O)O)C[C@H](O)[C@@H](NC(=O)C)[C@H](O3)[C@H](O)[C@H](O)CO)[C@H]2O)[C@H](O)[C@H]1O	0.0
+iTRAQ4plex116@Y	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	0	C[15N]1[13CH2]CN(CC1)[13CH2][13C](=O)Oc1ccc(C[C@@H](C(=O)[Ts])N([Fl])([Fl]))cc1	0.0
+iTRAQ4plex116@Any_N-term	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	0	[13C](=O)[13CH2][15N]1[13CH2]CN(CC1)C	0.0
+iTRAQ4plex116@K	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	0	[H]N(CCCC[C@H](N([Fl])([Fl]))C(=O)[Ts])[13C](=O)[13CH2][15N]1[13CH2]CN(C)CC1	0.0
+iTRAQ4plex116@C	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	0	C[15N]1[13CH2]CN(CC1)[13CH2][13C](=O)SC[C@@H](C(=O)[Ts])N([Fl])([Fl])	0.0
+iTRAQ4plex117@Y	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	0	C[15N]1[13CH2][13CH2]N(CC1)[13CH2]C(=O)Oc1ccc(C[C@@H](C(=O)[Ts])N([Fl])([Fl]))cc1	0.0
+iTRAQ4plex117@Any_N-term	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	0	C(=O)[13CH2][15N]1[13CH2][13CH2]N(CC1)C	0.0
+iTRAQ4plex117@K	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	0	[H]N(CCCC[C@H](N([Fl])([Fl]))C(=O)[Ts])C(=O)[13CH2][15N]1[13CH2][13CH2]N(C)CC1	0.0
+iTRAQ4plex117@C	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	0	C[15N]1[13CH2][13CH2]N(CC1)[13CH2]C(=O)SC[C@@H](C(=O)[Ts])N([Fl])([Fl])	0.0
