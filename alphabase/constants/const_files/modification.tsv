@@ -351,10 +351,10 @@ NBS:13C(6)@W	159.008578	159.1144	H(3)13C(6)N(1)O(2)S(1)	0.0		Chemical derivative
 Methyl:2H(3)13C(1)@K	18.037835	18.0377	H(-1)2H(3)13C(1)	0.0		Isotopic label	329		0.0
 Methyl:2H(3)13C(1)@R	18.037835	18.0377	H(-1)2H(3)13C(1)	0.0		Isotopic label	329		0.0
 Methyl:2H(3)13C(1)@Any_N-term	18.037835	18.0377	H(-1)2H(3)13C(1)	0.0		Isotopic label	329		0.0
-Dimethyl:2H(6)13C(2)@Protein_N-term	36.07567	36.0754	H(-2)2H(6)13C(2)	0.0		Isotopic label	330	[13C]([2H])([2H])([2H])	0.0
-Dimethyl:2H(6)13C(2)@Any_N-term	36.07567	36.0754	H(-2)2H(6)13C(2)	0.0		Isotopic label	330	[13C]([2H])([2H])([2H])	0.0
+Dimethyl:2H(6)13C(2)@Protein_N-term	36.07567	36.0754	H(-2)2H(6)13C(2)	0.0		Isotopic label	330	[13C]([2H])([2H])([2H])[Ts][13C]([2H])([2H])([2H])	0.0
+Dimethyl:2H(6)13C(2)@Any_N-term	36.07567	36.0754	H(-2)2H(6)13C(2)	0.0		Isotopic label	330	[13C]([2H])([2H])([2H])[Ts][13C]([2H])([2H])([2H])	0.0
 Dimethyl:2H(6)13C(2)@R	36.07567	36.0754	H(-2)2H(6)13C(2)	0.0		Isotopic label	330		0.0
-Dimethyl:2H(6)13C(2)@K	36.07567	36.0754	H(-2)2H(6)13C(2)	0.0		Isotopic label	330		0.0
+Dimethyl:2H(6)13C(2)@K	36.07567	36.0754	H(-2)2H(6)13C(2)	0.0		Isotopic label	330	[13C]([2H])([2H])([2H])N([13C]([2H])([2H])([2H]))CCCC[C@H](N([Fl])([Fl]))C(=O)[Ts]	0.0
 NBS@W	152.988449	153.1585	H(3)C(6)N(1)O(2)S(1)	0.0		Chemical derivative	172		0.0
 Delta:H(-1)N(-1)18O(1)@N	2.988261	2.9845	H(-1)N(-1)18O(1)	0.0		Isotopic label	170		0.0
 QAT@C	171.149738	171.26	H(19)C(9)N(2)O(1)	0.0		Chemical derivative	195		0.0
@@ -378,9 +378,9 @@ QAT:2H(3)@C	174.168569	174.2784	H(16)2H(3)C(9)N(2)O(1)	0.0		Isotopic label	196		
 Label:18O(2)@Any_C-term	4.008491	3.9995	O(-2)18O(2)	0.0		Isotopic label	193		0.0
 AccQTag@Any_N-term	170.048013	170.1674	H(6)C(10)N(2)O(1)	0.0		Chemical derivative	194		0.0
 AccQTag@K	170.048013	170.1674	H(6)C(10)N(2)O(1)	0.0		Chemical derivative	194		0.0
-Dimethyl:2H(4)@Protein_N-term	32.056407	32.0778	2H(4)C(2)	0.0		Isotopic label	199	C([2H])([2H])([1H])	0.0
-Dimethyl:2H(4)@Any_N-term	32.056407	32.0778	2H(4)C(2)	0.0		Isotopic label	199	C([2H])([2H])([1H])	0.0
-Dimethyl:2H(4)@K	32.056407	32.0778	2H(4)C(2)	0.0		Isotopic label	199		0.0
+Dimethyl:2H(4)@Protein_N-term	32.056407	32.0778	2H(4)C(2)	0.0		Isotopic label	199	C([2H])([2H])[Ts]C([2H])([2H])	0.0
+Dimethyl:2H(4)@Any_N-term	32.056407	32.0778	2H(4)C(2)	0.0		Isotopic label	199	C([2H])([2H])[Ts]C([2H])([2H])	0.0
+Dimethyl:2H(4)@K	32.056407	32.0778	2H(4)C(2)	0.0		Isotopic label	199	C([2H])([2H])N(C([2H])([2H]))CCCC[C@H](N([Fl])([Fl]))C(=O)[Ts]	0.0
 Dimethyl:2H(4)@R	32.056407	32.0778	2H(4)C(2)	0.0		Isotopic label	199		0.0
 EQAT@C	184.157563	184.2786	H(20)C(10)N(2)O(1)	0.0		Chemical derivative	197		0.0
 EQAT:2H(5)@C	189.188947	189.3094	H(15)2H(5)C(10)N(2)O(1)	0.0		Isotopic label	198		0.0
@@ -761,10 +761,10 @@ Diethyl@Any_N-term	56.0626	56.1063	H(8)C(4)	0.0		Chemical derivative	518		0.0
 Diethyl@K	56.0626	56.1063	H(8)C(4)	0.0		Chemical derivative	518		0.0
 LG-Hlactam-K@Protein_N-term	348.193674	348.4333	H(28)C(20)O(5)	0.0		Post-translational	504		0.0
 LG-Hlactam-K@K	348.193674	348.4333	H(28)C(20)O(5)	0.0		Post-translational	504		0.0
-Dimethyl:2H(4)13C(2)@Protein_N-term	34.063117	34.0631	2H(4)13C(2)	0.0		Isotopic label	510	[13C]([2H])([2H])([1H])	0.0
+Dimethyl:2H(4)13C(2)@Protein_N-term	34.063117	34.0631	2H(4)13C(2)	0.0		Isotopic label	510	[13C]([2H])([2H])([1H])[Ts][13C]([2H])([2H])([1H])	0.0
 Dimethyl:2H(4)13C(2)@R	34.063117	34.0631	2H(4)13C(2)	0.0		Isotopic label	510		0.0
-Dimethyl:2H(4)13C(2)@K	34.063117	34.0631	2H(4)13C(2)	0.0		Isotopic label	510		0.0
-Dimethyl:2H(4)13C(2)@Any_N-term	34.063117	34.0631	2H(4)13C(2)	0.0		Isotopic label	510	[13C]([2H])([2H])([1H])	0.0
+Dimethyl:2H(4)13C(2)@K	34.063117	34.0631	2H(4)13C(2)	0.0		Isotopic label	510	[13C]([2H])([2H])([1H])N([13C]([2H])([2H])([1H]))CCCC[C@H](N([Fl])([Fl]))C(=O)[Ts]	0.0
+Dimethyl:2H(4)13C(2)@Any_N-term	34.063117	34.0631	2H(4)13C(2)	0.0		Isotopic label	510	[13C]([2H])([2H])([1H])[Ts][13C]([2H])([2H])([1H])	0.0
 C8-QAT@Any_N-term	227.224915	227.3862	H(29)C(14)N(1)O(1)	0.0		Chemical derivative	513		0.0
 C8-QAT@K	227.224915	227.3862	H(29)C(14)N(1)O(1)	0.0		Chemical derivative	513		0.0
 Hex(2)@R	324.105647	324.2812	H(20)C(12)O(10)	0.0		Other glycosylation	512		0.0
@@ -1589,8 +1589,8 @@ Dicarbamidomethyl@H	114.042927	114.1026	H(6)C(4)N(2)O(2)	0.0		Artefact	1290		0.0
 Dicarbamidomethyl@C	114.042927	114.1026	H(6)C(4)N(2)O(2)	0.0		Artefact	1290		0.0
 Dicarbamidomethyl@R	114.042927	114.1026	H(6)C(4)N(2)O(2)	0.0		Artefact	1290		0.0
 Dicarbamidomethyl@Any_N-term	114.042927	114.1026	H(6)C(4)N(2)O(2)	0.0		Artefact	1290		0.0
-Dimethyl:2H(6)@K	34.068961	34.0901	H(-2)2H(6)C(2)	0.0		Isotopic label	1291		0.0
-Dimethyl:2H(6)@Any_N-term	34.068961	34.0901	H(-2)2H(6)C(2)	0.0		Isotopic label	1291		0.0
+Dimethyl:2H(6)@K	34.068961	34.0901	H(-2)2H(6)C(2)	0.0		Isotopic label	1291	C([2H])([2H])([2H])N(C([2H])([2H])([2H]))CCCC[C@H](N([Fl])([Fl]))C(=O)[Ts]	0.0
+Dimethyl:2H(6)@Any_N-term	34.068961	34.0901	H(-2)2H(6)C(2)	0.0		Isotopic label	1291	C([2H])([2H])([2H])[Ts]C([2H])([2H])([2H])	0.0
 Dimethyl:2H(6)@R	34.068961	34.0901	H(-2)2H(6)C(2)	0.0		Isotopic label	1291		0.0
 GGQ@K	242.101505	242.2319	H(14)C(9)N(4)O(4)	0.0		Other	1292		0.0
 QTGG@K	343.149184	343.3357	H(21)C(13)N(5)O(6)	0.0		Other	1293		0.0
