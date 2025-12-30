@@ -35,8 +35,10 @@ class TestModificationMapper:
             mapping_type="maxquant",
             add_unimod_to_mod_mapping=False,
         )
-        assert "Oxidation@M" in mapper.modification_mapping
-        assert "Phospho@S" in mapper.modification_mapping
+        assert mapper.modification_mapping == {
+            "Oxidation@M": ["M(Oxidation)"],
+            "Phospho@S": ["S(Phospho)"],
+        }
 
     def test_with_custom_mapping(self):
         """Test initialization with custom modification mapping."""
@@ -46,8 +48,7 @@ class TestModificationMapper:
             mapping_type=None,
             add_unimod_to_mod_mapping=False,
         )
-        assert "Acetyl@K" in mapper.modification_mapping
-        assert mapper.modification_mapping["Acetyl@K"] == ["K(Acetyl)"]
+        assert mapper.modification_mapping == {"Acetyl@K": ["K(Acetyl)"]}
 
     def test_rev_mapping_created(self):
         """Test that reverse mapping is created correctly."""
@@ -57,7 +58,7 @@ class TestModificationMapper:
             mapping_type=None,
             add_unimod_to_mod_mapping=False,
         )
-        assert mapper.rev_mod_mapping["S(Phospho)"] == "Phospho@S"
+        assert mapper.rev_mod_mapping == {"S(Phospho)": "Phospho@S"}
 
     def test_rev_mapping_with_list(self):
         """Test reverse mapping with multiple search engine formats."""
@@ -69,9 +70,11 @@ class TestModificationMapper:
             mapping_type=None,
             add_unimod_to_mod_mapping=False,
         )
-        assert mapper.rev_mod_mapping["S(Phospho)"] == "Phospho@S"
-        assert mapper.rev_mod_mapping["pS"] == "Phospho@S"
-        assert mapper.rev_mod_mapping["S(79.9663)"] == "Phospho@S"
+        assert mapper.rev_mod_mapping == {
+            "S(Phospho)": "Phospho@S",
+            "pS": "Phospho@S",
+            "S(79.9663)": "Phospho@S",
+        }
 
     def test_add_single_mapping(self):
         """Test adding a single modification mapping."""
@@ -82,8 +85,8 @@ class TestModificationMapper:
             add_unimod_to_mod_mapping=False,
         )
         mapper.add_modification_mapping({"Oxidation@M": "M(ox)"})
-        assert "Oxidation@M" in mapper.modification_mapping
-        assert "M(ox)" in mapper.rev_mod_mapping
+        assert mapper.modification_mapping == {"Oxidation@M": ["M(ox)"]}
+        assert mapper.rev_mod_mapping == {"M(ox)": "Oxidation@M"}
 
     def test_add_none_mapping(self):
         """Test adding None does not raise."""
@@ -105,8 +108,11 @@ class TestModificationMapper:
             add_unimod_to_mod_mapping=False,
         )
         mapper.add_modification_mapping({"Acetyl@K": "K(ac)"})
-        assert "Oxidation@M" in mapper.modification_mapping
-        assert "Acetyl@K" in mapper.modification_mapping
+        assert mapper.modification_mapping == {
+            "Oxidation@M": ["M(Oxidation)"],
+            "Phospho@S": ["S(Phospho)"],
+            "Acetyl@K": ["K(ac)"],
+        }
 
     def test_unimod_disabled(self):
         """Test that UniMod extensions are not added when disabled."""
@@ -116,7 +122,7 @@ class TestModificationMapper:
             mapping_type=None,
             add_unimod_to_mod_mapping=False,
         )
-        assert mapper.modification_mapping["Phospho@S"] == ["S(Phospho)"]
+        assert mapper.modification_mapping == {"Phospho@S": ["S(Phospho)"]}
 
     def test_unimod_enabled_extends_mapping(self):
         """Test that UniMod extensions are added when enabled."""
@@ -140,8 +146,10 @@ class TestModificationMapper:
 
         mapper.set_modification_mapping("maxquant")
 
-        assert "Oxidation@M" in mapper.modification_mapping
-        assert "Phospho@S" in mapper.modification_mapping
+        assert mapper.modification_mapping == {
+            "Oxidation@M": ["M(Oxidation)"],
+            "Phospho@S": ["S(Phospho)"],
+        }
 
     def test_rev_mapping_protein_n_term_conflict(self):
         """Test that Any_N-term takes precedence over Protein_N-term in reverse mapping."""
@@ -168,9 +176,8 @@ class TestModificationMapper:
             {"Phospho@S": "S(Phospho)", "Acetyl@K": "K(ac)"}
         )
 
-        # new key is added
-        assert "Acetyl@K" in mapper.modification_mapping
-        # existing key is preserved
-        assert "Oxidation@M" in mapper.modification_mapping
-        # existing key value is overwritten, not extended
-        assert mapper.modification_mapping["Phospho@S"] == ["S(Phospho)"]
+        assert mapper.modification_mapping == {
+            "Phospho@S": ["S(Phospho)"],  # overwritten, not extended
+            "Oxidation@M": ["M(ox)"],  # preserved
+            "Acetyl@K": ["K(ac)"],  # added
+        }
