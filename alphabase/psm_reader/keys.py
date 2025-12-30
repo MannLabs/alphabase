@@ -179,3 +179,4 @@ class MsFraggerTokens(metaclass=ConstantsClass):
     MOD_SEPARATOR = ","
     N_TERM = "N-term"
     C_TERM = "C-term"
+    DECOY_PREFIX = "rev_"
