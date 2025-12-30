@@ -231,6 +231,7 @@ msfragger_psm_tsv:
     'precursor_mz': 'Observed M/Z'
     '_tmp_mods': 'Assigned Modifications'
     'intensity': 'Intensity'
+    'mobility': 'Ion Mobility'
   mass_mapped_mods:
     - 'Oxidation@M'
     - 'Carbamidomethyl@C'
