@@ -11,12 +11,7 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from alphabase.constants.modification import (
-    MOD_DF,
-    MOD_SITE_SEPARATOR,
-    MOD_TERM_SEPARATOR,
-    SEPARATOR,
-)
+from alphabase.constants.modification import MOD_DF, ModificationKeys
 from alphabase.psm_reader.keys import PsmDfCols
 from alphabase.psm_reader.psm_reader import (
     PSMReaderBase,
@@ -416,7 +411,9 @@ def _translate_modifications(
         mod_sites.append(mod_site)
         mod_names.append(matched_mod_name)
 
-    return SEPARATOR.join(mod_sites), SEPARATOR.join(mod_names)
+    return ModificationKeys.SEPARATOR.join(mod_sites), ModificationKeys.SEPARATOR.join(
+        mod_names
+    )
 
 
 def _apply_translate_modifications(
@@ -529,9 +526,9 @@ def _get_annotated_mod_df() -> pd.DataFrame:
 
     mod_annotated_df["previous_aa"] = (
         mod_annotated_df["mod_name"]
-        .str.split(MOD_SITE_SEPARATOR)
+        .str.split(ModificationKeys.SITE_SEPARATOR)
         .str[1]
-        .str.split(MOD_TERM_SEPARATOR)
+        .str.split(ModificationKeys.TERM_SEPARATOR)
         .str[0]
     )
 

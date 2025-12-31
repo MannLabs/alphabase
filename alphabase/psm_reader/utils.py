@@ -5,14 +5,14 @@ from typing import Dict, List, Tuple, Union
 import pandas as pd
 from pandas._libs.missing import NAType
 
-from alphabase.constants.modification import MOD_DF, MOD_SITE_SEPARATOR, SEPARATOR
+from alphabase.constants.modification import MOD_DF, ModificationKeys
 
 MOD_TO_UNIMOD_DICT = {}
 for mod_name, unimod_id_ in MOD_DF[["mod_name", "unimod_id"]].to_numpy():
     unimod_id = int(unimod_id_)
     if unimod_id in (-1, "-1"):
         continue
-    if mod_name[-2] == MOD_SITE_SEPARATOR:
+    if mod_name[-2] == ModificationKeys.SITE_SEPARATOR:
         MOD_TO_UNIMOD_DICT[mod_name] = f"{mod_name[-1]}(UniMod:{unimod_id})"
     else:
         MOD_TO_UNIMOD_DICT[mod_name] = f"_(UniMod:{unimod_id})"
@@ -46,7 +46,7 @@ def translate_modifications(
     ret_mods = []
     unknown_mods = []
 
-    for mod in mod_str.split(SEPARATOR):
+    for mod in mod_str.split(ModificationKeys.SEPARATOR):
         if mod in mod_dict:
             ret_mods.append(mod_dict[mod])
         else:
@@ -55,7 +55,7 @@ def translate_modifications(
     if len(unknown_mods) > 0:
         return pd.NA, unknown_mods
 
-    return SEPARATOR.join(ret_mods), []
+    return ModificationKeys.SEPARATOR.join(ret_mods), []
 
 
 def keep_modifications(mod_str: str, mod_set: set) -> Union[str, NAType]:
@@ -78,7 +78,7 @@ def keep_modifications(mod_str: str, mod_set: set) -> Union[str, NAType]:
     """
     if not mod_str:
         return ""
-    for mod in mod_str.split(SEPARATOR):
+    for mod in mod_str.split(ModificationKeys.SEPARATOR):
         if mod not in mod_set:
             return pd.NA
     return mod_str

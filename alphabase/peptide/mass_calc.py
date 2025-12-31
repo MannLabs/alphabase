@@ -9,7 +9,7 @@ from alphabase.constants.aa import (
 )
 from alphabase.constants.atom import MASS_H2O
 from alphabase.constants.modification import (
-    SEPARATOR,
+    ModificationKeys,
     calc_mod_masses_for_same_len_seqs,
     calc_modification_mass,
     calc_modification_mass_sum,
@@ -154,12 +154,17 @@ def calc_peptide_masses_for_same_len_seqs(
     mod_masses = np.zeros_like(seq_masses)
     for i, mods in enumerate(mod_list):
         if len(mods) > 0:
-            mod_masses[i] = calc_modification_mass_sum(mods.split(SEPARATOR))
+            mod_masses[i] = calc_modification_mass_sum(
+                mods.split(ModificationKeys.SEPARATOR)
+            )
     if mod_diff_list is not None:
         for i, mass_diffs in enumerate(mod_diff_list):
             if len(mass_diffs) > 0:
                 mod_masses[i] += np.sum(
-                    [float(mass) for mass in mass_diffs.split(SEPARATOR)]
+                    [
+                        float(mass)
+                        for mass in mass_diffs.split(ModificationKeys.SEPARATOR)
+                    ]
                 )
     return seq_masses + mod_masses
 
