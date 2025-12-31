@@ -53,9 +53,10 @@ class ModificationMapper:
         self.add_modification_mapping(custom_modification_mapping)
 
     def add_modification_mapping(self, custom_modification_mapping: dict) -> None:
-        """Append additional modification mappings for the search engine.
+        """Add modification mappings for the search engine.
 
-        Also creates a reverse mapping from the modification format used by the search engine to the AlphaBase format.
+        New keys are added to the mapping. Existing keys are overwritten, not extended.
+        Also updates the reverse mapping.
 
         Parameters
         ----------

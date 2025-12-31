@@ -3,7 +3,11 @@ from typing import Optional
 from rdkit import Chem
 
 from alphabase.constants.modification import SEPARATOR
-from alphabase.smiles.smiles import AminoAcidModifier
+from alphabase.smiles.smiles import (
+    C_TERM_PLACEHOLDER_ATOM,
+    N_TERM_PLACEHOLDER_ATOM,
+    AminoAcidModifier,
+)
 
 
 class PeptideSmilesEncoder:
@@ -53,10 +57,10 @@ class PeptideSmilesEncoder:
             (n_term_placeholder_mol, c_term_placeholder_mol)
         """
         n_term_placeholder_mol = Chem.MolFromSmiles(
-            self.amino_acid_modifier.N_TERM_PLACEHOLDER, sanitize=False
+            f"[{N_TERM_PLACEHOLDER_ATOM}]", sanitize=False
         )
         c_term_placeholder_mol = Chem.MolFromSmiles(
-            self.amino_acid_modifier.C_TERM_PLACEHOLDER, sanitize=False
+            f"[{C_TERM_PLACEHOLDER_ATOM}]", sanitize=False
         )
         return n_term_placeholder_mol, c_term_placeholder_mol
 
@@ -379,8 +383,8 @@ class PeptideSmilesEncoder:
         mol1_num_atoms = mol1.GetNumAtoms()
 
         # Find the placeholder hydrogens and their neighboring atoms
-        c_term_placeholder = self.amino_acid_modifier.C_TERM_PLACEHOLDER.strip("[]")
-        n_term_placeholder = self.amino_acid_modifier.N_TERM_PLACEHOLDER.strip("[]")
+        c_term_placeholder = C_TERM_PLACEHOLDER_ATOM
+        n_term_placeholder = N_TERM_PLACEHOLDER_ATOM
 
         c_term_h_idx = None
         c_atom_idx = None

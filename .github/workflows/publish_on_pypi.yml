@@ -19,5 +19,5 @@ jobs:
       python_version: 3.9
       test_stable: true
     secrets:
-      test_pypi_api_token: ${{ secrets.TEST_PYPI_ALPHABASE_API_TOKEN }}
-      pypi_api_token: ${{ secrets.PYPI_ALPHABASE_API_TOKEN }}
+      test_pypi_api_token: ${{ secrets.TEST_PYPI_API_TOKEN }}
+      pypi_api_token: ${{ secrets.PYPI_API_TOKEN }}

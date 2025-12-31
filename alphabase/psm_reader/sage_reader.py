@@ -24,7 +24,7 @@ from alphabase.psm_reader.psm_reader import (
 )
 
 
-class SageModificationTranslation:
+class SageModificationTranslator:
     """Translate Sage style modifications to alphabase style modifications."""
 
     def __init__(
@@ -65,7 +65,7 @@ class SageModificationTranslation:
                     "Custom translation df must have columns 'modification' and 'matched_mod_name'."
                 )
 
-    def __call__(self, psm_df: pd.DataFrame) -> pd.DataFrame:
+    def translate(self, psm_df: pd.DataFrame) -> pd.DataFrame:
         """Translate modifications in the PSMs to alphabase style modifications.
 
         1. Discover all modifications in the PSMs.
@@ -645,11 +645,11 @@ class SageReaderBase(PSMReaderBase, ABC):
         )
 
     def _translate_modifications(self) -> None:
-        sage_translation = SageModificationTranslation(
+        modification_translator = SageModificationTranslator(
             custom_translation_df=self.custom_translation_df,
             mp_process_num=self.mp_process_num,
         )
-        self._psm_df = sage_translation(self._psm_df)
+        self._psm_df = modification_translator.translate(self._psm_df)
 
         # drop modified_sequence
         self._psm_df.drop(columns=[PsmDfCols.MODIFIED_SEQUENCE], inplace=True)

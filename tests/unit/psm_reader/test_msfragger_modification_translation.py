@@ -5,7 +5,7 @@ import pytest
 
 from alphabase.constants.modification import MOD_MASS
 from alphabase.psm_reader.keys import PsmDfCols
-from alphabase.psm_reader.msfragger_reader import MSFraggerModificationTranslation
+from alphabase.psm_reader.msfragger_reader import MSFraggerModificationTranslator
 from alphabase.psm_reader.psm_reader import psm_reader_yaml
 
 
@@ -15,8 +15,10 @@ def translator():
     mass_mapped_mods = psm_reader_yaml.get("msfragger_psm_tsv", {}).get(
         "mass_mapped_mods", []
     )
-    return MSFraggerModificationTranslation(
-        mass_mapped_mods=mass_mapped_mods, mod_mass_tol=0.1
+    return MSFraggerModificationTranslator(
+        mass_mapped_mods=mass_mapped_mods,
+        mod_mass_tol=0.1,
+        rev_mod_mapping={},
     )
 
 
@@ -47,8 +49,10 @@ def test_translator_initialization(
     mass_mapped_mods, mod_mass_tol, expected_mods, expected_tol
 ):
     """Test translator initialization with various parameters."""
-    translator = MSFraggerModificationTranslation(
-        mass_mapped_mods=mass_mapped_mods, mod_mass_tol=mod_mass_tol
+    translator = MSFraggerModificationTranslator(
+        mass_mapped_mods=mass_mapped_mods,
+        mod_mass_tol=mod_mass_tol,
+        rev_mod_mapping={},
     )
     assert translator._mass_mapped_mods == expected_mods
     assert translator._mod_mass_tol == expected_tol
@@ -61,7 +65,6 @@ def test_translator_initialization(
         ("5S(79.9663)", "Phospho@S", "5"),
         ("6M(15.9949)", "Oxidation@M", "6"),
         ("N-term(304.2071)", "TMTpro@Any_N-term", "0"),
-        ("5S79.9663", "", ""),  # Malformed
         (
             "5S(79.9663), 7T(79.9663), 9M(15.9949)",
             "Phospho@S;Phospho@T;Oxidation@M",
@@ -74,6 +77,19 @@ def test_parse_modifications(translator, assigned_mods, expected_mods, expected_
     mods, sites = translator._parse_assigned_modifications(assigned_mods)
     assert mods == expected_mods
     assert sites == expected_sites
+
+
+@pytest.mark.parametrize(
+    "malformed_entry,error_match",
+    [
+        ("5S79.9663", "could not parse amino acid and mass"),  # Missing parentheses
+        ("S(79.9663)", "expected format"),  # Missing position
+    ],
+)
+def test_malformed_modification_raises(translator, malformed_entry, error_match):
+    """Test that malformed modification entries raise ValueError."""
+    with pytest.raises(ValueError, match=error_match):
+        translator._parse_assigned_modifications(malformed_entry)
 
 
 @pytest.mark.parametrize(
@@ -99,7 +115,7 @@ def test_unknown_modification_raises(translator, mass, aa):
 
 def test_dataframe_translation(translator, test_psm_df):
     """Test end-to-end translation preserves original columns and adds complete mods."""
-    result_df = translator(test_psm_df)
+    result_df = translator.translate(test_psm_df)
 
     # Check original columns preserved with exact values
     assert result_df["Peptide"].tolist() == ["PEPTIDE", "SEQUENCE", "ANOTHER"]
@@ -127,3 +143,78 @@ def test_database_integration(translator):
         aa = mod_name.split("@")[1]
         if aa not in ["Any_N-term", "Any_C-term"] and len(aa) == 1:
             assert translator._match_mod_by_mass(mod_mass, aa) == mod_name
+
+
+class TestRevModMapping:
+    """Tests for rev_mod_mapping functionality."""
+
+    def test_rev_mapping_used_over_mass_matching(self):
+        """Test that rev_mod_mapping takes precedence over mass-based matching."""
+        translator = MSFraggerModificationTranslator(
+            mass_mapped_mods=["Phospho@S", "Oxidation@M"],
+            mod_mass_tol=0.1,
+            rev_mod_mapping={"S(79.9663)": "Phospho@S"},
+        )
+        mods, sites = translator._parse_assigned_modifications("5S(79.9663)")
+        assert mods == "Phospho@S"
+        assert sites == "5"
+
+    def test_rev_mapping_n_term(self):
+        """Test rev_mod_mapping for N-terminal modifications."""
+        translator = MSFraggerModificationTranslator(
+            mass_mapped_mods=[],
+            mod_mass_tol=0.1,
+            rev_mod_mapping={"N-term(304.2071)": "TMTpro@Any_N-term"},
+        )
+        mods, sites = translator._parse_assigned_modifications("N-term(304.2071)")
+        assert mods == "TMTpro@Any_N-term"
+        assert sites == "0"
+
+    def test_rev_mapping_c_term(self):
+        """Test rev_mod_mapping for C-terminal modifications."""
+        translator = MSFraggerModificationTranslator(
+            mass_mapped_mods=[],
+            mod_mass_tol=0.1,
+            rev_mod_mapping={"C-term(17.0265)": "Amidated@Any_C-term"},
+        )
+        mods, sites = translator._parse_assigned_modifications("C-term(17.0265)")
+        assert mods == "Amidated@Any_C-term"
+        assert sites == "-1"
+
+    def test_rev_mapping_multiple_mods(self):
+        """Test rev_mod_mapping with multiple modifications in one entry."""
+        translator = MSFraggerModificationTranslator(
+            mass_mapped_mods=["Oxidation@M"],
+            mod_mass_tol=0.1,
+            rev_mod_mapping={
+                "S(79.9663)": "Phospho@S",
+                "N-term(304.2071)": "TMTpro@Any_N-term",
+            },
+        )
+        mods, sites = translator._parse_assigned_modifications(
+            "5S(79.9663), N-term(304.2071), 8M(15.9949)"
+        )
+        assert mods == "Phospho@S;TMTpro@Any_N-term;Oxidation@M"
+        assert sites == "5;0;8"
+
+    def test_rev_mapping_fallback_to_mass_matching(self):
+        """Test that unmapped mods fall back to mass-based matching."""
+        translator = MSFraggerModificationTranslator(
+            mass_mapped_mods=["Oxidation@M"],
+            mod_mass_tol=0.1,
+            rev_mod_mapping={"S(79.9663)": "Phospho@S"},
+        )
+        mods, sites = translator._parse_assigned_modifications("6M(15.9949)")
+        assert mods == "Oxidation@M"
+        assert sites == "6"
+
+    def test_empty_rev_mapping(self):
+        """Test that empty rev_mod_mapping works correctly."""
+        translator = MSFraggerModificationTranslator(
+            mass_mapped_mods=["Phospho@S"],
+            mod_mass_tol=0.1,
+            rev_mod_mapping={},
+        )
+        mods, sites = translator._parse_assigned_modifications("5S(79.9663)")
+        assert mods == "Phospho@S"
+        assert sites == "5"
