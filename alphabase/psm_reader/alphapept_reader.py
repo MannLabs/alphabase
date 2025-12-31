@@ -8,11 +8,15 @@ import numba
 import numpy as np
 import pandas as pd
 
+from alphabase.constants.modification import ModificationKeys
 from alphabase.psm_reader.keys import PsmDfCols
 from alphabase.psm_reader.psm_reader import (
     PSMReaderBase,
     psm_reader_provider,
 )
+
+# Module-level constant for use in numba-compiled functions
+_SEPARATOR = ModificationKeys.SEPARATOR
 
 
 @numba.njit
@@ -45,7 +49,13 @@ def parse_ap(precursor: str) -> Tuple[str, str, str, str, int]:
                 mods.append(string)
             string = ""
 
-    return "".join(parsed), ";".join(mods), ";".join(sites), charge, decoy
+    return (
+        "".join(parsed),
+        _SEPARATOR.join(mods),
+        _SEPARATOR.join(sites),
+        charge,
+        decoy,
+    )
 
 
 class AlphaPeptReader(PSMReaderBase):
