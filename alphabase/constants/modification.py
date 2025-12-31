@@ -126,7 +126,7 @@ def add_modifications_for_lower_case_AA():
         modname, site = modname.split(ModificationKeys.SITE_SEPARATOR)
         if len(site) == 1:
             return modname + ModificationKeys.SITE_SEPARATOR + site.lower()
-        elif "^" in site:
+        elif ModificationKeys.TERM_SEPARATOR in site:
             site = site[0].lower() + site[1:]
             return modname + ModificationKeys.SITE_SEPARATOR + site
         else:

@@ -93,7 +93,7 @@ def translate_pFind_mod(mod_str: str) -> Union[str, NAType]:  # noqa: N802 name 
 
 def get_pFind_mods(pfind_mod_str: str) -> Tuple[str, str]:  # noqa: N802 name `get_pFind_mods` should be lowercase TODO: used by peptdeep
     """Parse pFind modification string."""
-    pfind_mod_str = pfind_mod_str.strip(";")
+    pfind_mod_str = pfind_mod_str.strip(ModificationKeys.SEPARATOR)
     if not pfind_mod_str:
         return "", ""
 

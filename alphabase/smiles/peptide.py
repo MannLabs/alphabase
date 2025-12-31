@@ -44,8 +44,8 @@ class PeptideSmilesEncoder:
                 mod_sites.split(ModificationKeys.SEPARATOR),
                 mods.split(ModificationKeys.SEPARATOR),
             ):
-                # if the modification is techinically at the N-terminal, but changes the first amino acid
-                if "^" in mod and site == "0":
+                # if the modification is technically at the N-terminal, but changes the first amino acid
+                if ModificationKeys.TERM_SEPARATOR in mod and site == "0":
                     site = "1"
                 mod_dict[int(site)] = mod
         return mod_dict

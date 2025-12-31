@@ -364,13 +364,15 @@ def get_var_mods_per_sites_multi_mods_on_aa(
     for i, site in enumerate(mod_sites):
         if len(var_mod_dict[sequence[site - 1]]) == 1:
             for i in range(len(mods_str_list)):
-                mods_str_list[i] += var_mod_dict[sequence[site - 1]][0] + ";"
+                mods_str_list[i] += (
+                    var_mod_dict[sequence[site - 1]][0] + ModificationKeys.SEPARATOR
+                )
         else:
             _new_list = []
             for mod in var_mod_dict[sequence[site - 1]]:
                 _lst = copy.deepcopy(mods_str_list)
                 for i in range(len(_lst)):
-                    _lst[i] += mod + ";"
+                    _lst[i] += mod + ModificationKeys.SEPARATOR
                 _new_list.extend(_lst)
             mods_str_list = _new_list
     return [mod[:-1] for mod in mods_str_list]
@@ -386,7 +388,7 @@ def get_var_mods_per_sites_single_mod_on_aa(
     """
     mod_str = ""
     for site in mod_sites:
-        mod_str += var_mod_dict[sequence[site - 1]] + ";"
+        mod_str += var_mod_dict[sequence[site - 1]] + ModificationKeys.SEPARATOR
     return [mod_str[:-1]]
 
 
@@ -423,8 +425,8 @@ def get_var_mods(
 
 def parse_term_mod(term_mod_name: str):
     _mod, term = term_mod_name.split(ModificationKeys.SITE_SEPARATOR)
-    if "^" in term:
-        return tuple(term.split("^"))
+    if ModificationKeys.TERM_SEPARATOR in term:
+        return tuple(term.split(ModificationKeys.TERM_SEPARATOR))
     else:
         return "", term
 
@@ -1054,7 +1056,7 @@ class SpecLibFasta(SpecLibBase):
                 prot_id = str(i)
                 if seq in pep_dict:
                     if not pep_dict[seq][0].endswith(prot_id):
-                        pep_dict[seq][0] += ";" + prot_id
+                        pep_dict[seq][0] += ModificationKeys.SEPARATOR + prot_id
                     if nterm:
                         pep_dict[seq][2] = nterm
                     if cterm:
