@@ -106,7 +106,7 @@ def _parse_lookup_key(lookup_key: str, entry: str) -> Tuple[str, float]:
     return amino_acid, mass_shift
 
 
-class MSFraggerModificationTranslation:
+class MSFraggerModificationTranslator:
     """Translate MSFragger PSM.TSV modifications to alphabase format."""
 
     def __init__(
@@ -133,7 +133,7 @@ class MSFraggerModificationTranslation:
         self._mod_mass_tol = mod_mass_tol
         self._rev_mod_mapping = rev_mod_mapping
 
-    def __call__(self, psm_df: pd.DataFrame) -> pd.DataFrame:
+    def translate(self, psm_df: pd.DataFrame) -> pd.DataFrame:
         """Translate modifications from MSFragger assigned modifications.
 
         Parameters
@@ -400,12 +400,12 @@ class MSFraggerPsmTsvReader(PSMReaderBase):
 
     def _load_modifications(self, origin_df: pd.DataFrame) -> None:  # noqa: ARG002
         """Parse modifications from PsmDfCols.TMP_MODS column (mapped from 'Assigned Modifications')."""
-        translator = MSFraggerModificationTranslation(
+        modification_translator = MSFraggerModificationTranslator(
             mass_mapped_mods=self._mass_mapped_mods,
             mod_mass_tol=self._mod_mass_tol,
             rev_mod_mapping=self._modification_mapper.rev_mod_mapping or {},
         )
-        self._psm_df = translator(self._psm_df)
+        self._psm_df = modification_translator.translate(self._psm_df)
 
 
 class MSFraggerPepXMLReader(PSMReaderBase):
