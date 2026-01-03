@@ -221,6 +221,10 @@ modification_mappings:
       - 'K(72.0211)'
     'Lactyl@Any_N-term':
       - 'N-term(72.0211)'
+    'YnLactyl@K':
+      - 'K(239.1270)'
+    'YnLactyl@Any_N-term':
+      - 'N-term(239.1270)'
     'Formyl@K':
       - 'K(27.9949)'
     'Formyl@Any_N-term':
@@ -270,6 +274,8 @@ msfragger_psm_tsv:
     - 'Acetyl@Any_N-term'
     - 'Lactyl@K'
     - 'Lactyl@Any_N-term'
+    - 'YnLactyl@K'
+    - 'YnLactyl@Any_N-term'
     - 'Formyl@K'
     - 'Formyl@Any_N-term'
     - 'Glu->pyro-Glu@E^Any_N-term'
