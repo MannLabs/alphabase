@@ -169,3 +169,14 @@ class LibPsmDfCols(metaclass=ConstantsClass):
     FRAGMENT_CHARGE = "fragment_charge"
     FRAGMENT_SERIES = "fragment_series"
     FRAGMENT_LOSS_TYPE = "fragment_loss_type"
+
+
+class MsFraggerTokens(metaclass=ConstantsClass):
+    """String tokens used in MSFragger output formats."""
+
+    MOD_START = "("
+    MOD_STOP = ")"
+    MOD_SEPARATOR = ","
+    N_TERM = "N-term"
+    C_TERM = "C-term"
+    DECOY_PREFIX = "rev_"
