@@ -241,6 +241,10 @@ class MSFraggerModificationTranslator:
             If no matching modification is found
 
         """
+        is_terminal = aa_or_term in [
+            ModificationKeys.ANY_N_TERM,
+            ModificationKeys.ANY_C_TERM,
+        ]
         best_match = None
         best_mass_diff = float("inf")
 
@@ -248,25 +252,16 @@ class MSFraggerModificationTranslator:
             if mod_name not in MOD_MASS:
                 continue
 
-            mod_mass = MOD_MASS[mod_name]
-            mass_diff = abs(mass_shift - mod_mass)
+            mass_diff = abs(mass_shift - MOD_MASS[mod_name])
+            if mass_diff >= self._mod_mass_tol or mass_diff >= best_mass_diff:
+                continue
 
-            if mass_diff < self._mod_mass_tol and mass_diff < best_mass_diff:
-                mod_base, mod_site = mod_name.split(ModificationKeys.SITE_SEPARATOR)
-
-                if aa_or_term in [
-                    ModificationKeys.ANY_N_TERM,
-                    ModificationKeys.ANY_C_TERM,
-                ]:
-                    if mod_site == aa_or_term or mod_site.endswith(aa_or_term):
-                        best_match = mod_name
-                        best_mass_diff = mass_diff
-                elif mod_site == aa_or_term:
-                    best_match = mod_name
-                    best_mass_diff = mass_diff
-                elif mod_site in ["X", "Any"]:
-                    best_match = f"{mod_base}@{aa_or_term}"
-                    best_mass_diff = mass_diff
+            mod_site = mod_name.split(ModificationKeys.SITE_SEPARATOR)[1]
+            exact_match = mod_site == aa_or_term
+            term_match = is_terminal and mod_site.endswith(aa_or_term)
+            if exact_match or term_match:
+                best_match = mod_name
+                best_mass_diff = mass_diff
 
         if best_match is not None:
             return best_match
