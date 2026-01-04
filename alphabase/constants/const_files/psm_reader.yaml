@@ -231,6 +231,10 @@ modification_mappings:
       - 'N-term(27.9949)'
     'Nethylmaleimide@C':
       - 'C(125.0477)'
+    'GlyGly@K':
+      - 'K(114.0429)'
+    'GlyGly@Any_N-term':
+      - 'N-term(114.0429)'
 
 pfind:
   reader_type: pfind
@@ -272,6 +276,7 @@ msfragger_psm_tsv:
     - 'Phospho@T'
     - 'Phospho@Y'
     - 'GlyGly@K'
+    - 'GlyGly@Any_N-term'
     - 'Acetyl@K'
     - 'Acetyl@Any_N-term'
     - 'Lactyl@K'

@@ -2777,6 +2777,7 @@ DVFQQQTGG@K	960.43011	960.9865	H(60)C(41)N(12)O(15)	0.0		Other	2085		0.0
 iST-NHS_specific_cysteine_modification@C	113.084064	113.1576	H(11)C(6)N(1)O(1)	0.0		Chemical derivative	2086		0.0
 Label:13C(2)15N(1)@G	3.003745	2.9787	C(-2)13C(2)N(-1)15N(1)	0.0		Isotopic label	2088		0.0
 GlyGly@K	114.042927	114.1026	H(6)C(4)N(2)O(2)	0.0		Multiple	121	NCC(=O)NCC(=O)NCCCC[C@H](N([Fl])([Fl]))C([Ts])=O	1000000.0
+GlyGly@Any_N-term	114.042927	114.1026	H(6)C(4)N(2)O(2)	0.0		Multiple	121	NCC(=O)NCC(=O)[Ts]	0.0
 Pro->(2S,4R)-4-fluoroproline@P	0.0	0.0	F(1)H(-1)	0.0		User-added	0	F[C@@H]1C[C@H](N([Fl])C1)C(=O)[Ts]	0.0
 Pro->(2S,4S)-4fluoroproline@P	0.0	0.0	F(1)H(-1)	0.0		User-added	0	F[C@H]1C[C@H](N([Fl])C1)C(=O)[Ts]	0.0
 Pro->(2S)-1,3-thiazolidine-2-carboxylic_acid@P	0.0	0.0	C(-1)H(-2)S(1)	0.0		User-added	0	S1[C@H](N([Fl])CC1)C(=O)[Ts]	0.0
