@@ -214,9 +214,9 @@ modification_mappings:
     'Dimethyl:2H(4)13C(2)@Any_N-term':
       - 'N-term(34.0631)'
     'Dimethyl:2H(6)@K':
-      - 'K(34.0690)'
+      - 'K(34.0689)'
     'Dimethyl:2H(6)@Any_N-term':
-      - 'N-term(34.0690)'
+      - 'N-term(34.0689)'
     'Lactyl@K':
       - 'K(72.0211)'
     'Lactyl@Any_N-term':
@@ -231,6 +231,16 @@ modification_mappings:
       - 'N-term(27.9949)'
     'Nethylmaleimide@C':
       - 'C(125.0477)'
+    'DiLeu4plex@K':
+      - 'K(145.1321)'
+    'DiLeu4plex@Any_N-term':
+      - 'N-term(145.1321)'
+    'DiLeu4plex@Y':
+      - 'Y(145.1321)'
+    'DiLeu4plex@S':
+      - 'S(145.1321)'
+    'DiLeu4plex@T':
+      - 'T(145.1321)'
 
 pfind:
   reader_type: pfind
@@ -265,6 +275,7 @@ msfragger_psm_tsv:
     'precursor_mz': 'Observed M/Z'
     '_tmp_mods': 'Assigned Modifications'
     'intensity': 'Intensity'
+    'mobility': 'Ion Mobility'
   mass_mapped_mods:
     - 'Oxidation@M'
     - 'Carbamidomethyl@C'

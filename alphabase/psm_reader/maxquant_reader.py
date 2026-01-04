@@ -8,6 +8,7 @@ import numba
 import numpy as np
 import pandas as pd
 
+from alphabase.constants.modification import ModificationKeys
 from alphabase.psm_reader.keys import PsmDfCols
 from alphabase.psm_reader.psm_reader import (
     PSMReaderBase,
@@ -15,6 +16,9 @@ from alphabase.psm_reader.psm_reader import (
     psm_reader_yaml,
 )
 from alphabase.psm_reader.utils import get_column_mapping_for_df
+
+# Module-level constant for use in numba-compiled functions
+_SEPARATOR = ModificationKeys.SEPARATOR
 
 # make sure all warnings are shown
 warnings.filterwarnings("always")
@@ -119,8 +123,8 @@ def parse_mod_seq(
     n_aa = len(sequence)
     return (
         sequence,
-        ";".join(mod_list),
-        ";".join([str(i) if i <= n_aa else "-1" for i in site_list]),
+        _SEPARATOR.join(mod_list),
+        _SEPARATOR.join([str(i) if i <= n_aa else "-1" for i in site_list]),
     )
 
 

@@ -13,6 +13,7 @@ from Bio import SeqIO
 from tqdm import tqdm
 
 from alphabase.constants._const import CONST_FILE_FOLDER
+from alphabase.constants.modification import ModificationKeys
 from alphabase.io.hdf import HDF_File
 from alphabase.spectral_library.base import SpecLibBase
 from alphabase.utils import explode_multiple_columns
@@ -275,7 +276,9 @@ def get_fix_mods(sequence: str, fix_mod_aas: str, fix_mod_dict: dict) -> tuple:
         if aa in fix_mod_aas:
             mod_sites.append(i + 1)
             mods.append(fix_mod_dict[aa])
-    return ";".join(mods), ";".join(str(i) for i in mod_sites)
+    return ModificationKeys.SEPARATOR.join(mods), ModificationKeys.SEPARATOR.join(
+        str(i) for i in mod_sites
+    )
 
 
 def get_candidate_sites(sequence: str, target_mod_aas: str) -> list:
@@ -361,13 +364,15 @@ def get_var_mods_per_sites_multi_mods_on_aa(
     for i, site in enumerate(mod_sites):
         if len(var_mod_dict[sequence[site - 1]]) == 1:
             for i in range(len(mods_str_list)):
-                mods_str_list[i] += var_mod_dict[sequence[site - 1]][0] + ";"
+                mods_str_list[i] += (
+                    var_mod_dict[sequence[site - 1]][0] + ModificationKeys.SEPARATOR
+                )
         else:
             _new_list = []
             for mod in var_mod_dict[sequence[site - 1]]:
                 _lst = copy.deepcopy(mods_str_list)
                 for i in range(len(_lst)):
-                    _lst[i] += mod + ";"
+                    _lst[i] += mod + ModificationKeys.SEPARATOR
                 _new_list.extend(_lst)
             mods_str_list = _new_list
     return [mod[:-1] for mod in mods_str_list]
@@ -383,7 +388,7 @@ def get_var_mods_per_sites_single_mod_on_aa(
     """
     mod_str = ""
     for site in mod_sites:
-        mod_str += var_mod_dict[sequence[site - 1]] + ";"
+        mod_str += var_mod_dict[sequence[site - 1]] + ModificationKeys.SEPARATOR
     return [mod_str[:-1]]
 
 
@@ -409,7 +414,7 @@ def get_var_mods(
     ret_sites_list = []
     for mod_sites in mod_sites_list:
         _mods = get_var_mods_per_sites(sequence, mod_sites, mod_dict)
-        mod_sites_str = ";".join([str(i) for i in mod_sites])
+        mod_sites_str = ModificationKeys.SEPARATOR.join([str(i) for i in mod_sites])
         ret_mods.extend(_mods)
         ret_sites_list.extend([mod_sites_str] * len(_mods))
     if min_var_mod == 0:
@@ -419,9 +424,9 @@ def get_var_mods(
 
 
 def parse_term_mod(term_mod_name: str):
-    _mod, term = term_mod_name.split("@")
-    if "^" in term:
-        return tuple(term.split("^"))
+    _mod, term = term_mod_name.split(ModificationKeys.SITE_SEPARATOR)
+    if ModificationKeys.TERM_SEPARATOR in term:
+        return tuple(term.split(ModificationKeys.TERM_SEPARATOR))
     else:
         return "", term
 
@@ -438,7 +443,7 @@ def add_single_peptide_labeling(
     add_nterm_label = bool(nterm_label_mod)
     add_cterm_label = bool(cterm_label_mod)
     if mod_sites:
-        _sites = mod_sites.split(";")
+        _sites = mod_sites.split(ModificationKeys.SEPARATOR)
         if "0" in _sites:
             add_nterm_label = False
         if "-1" in _sites:
@@ -458,7 +463,9 @@ def add_single_peptide_labeling(
     if aa_labels:
         mod_list.append(aa_labels)
         mod_site_list.append(aa_label_sites)
-    return ";".join(mod_list), ";".join(mod_site_list)
+    return ModificationKeys.SEPARATOR.join(mod_list), ModificationKeys.SEPARATOR.join(
+        mod_site_list
+    )
 
 
 def parse_labels(labels: list):
@@ -467,13 +474,13 @@ def parse_labels(labels: list):
     nterm_label_mod = ""
     cterm_label_mod = ""
     for label in labels:
-        _, aa = label.split("@")
+        _, aa = label.split(ModificationKeys.SITE_SEPARATOR)
         if len(aa) == 1:
             label_aas += aa
             label_mod_dict[aa] = label
-        elif aa == "Any_N-term":
+        elif aa == ModificationKeys.ANY_N_TERM:
             nterm_label_mod = label
-        elif aa == "Any_C-term":
+        elif aa == ModificationKeys.ANY_C_TERM:
             cterm_label_mod = label
     return label_aas, label_mod_dict, nterm_label_mod, cterm_label_mod
 
@@ -503,9 +510,11 @@ def create_labeling_peptide_df(
 def protein_idxes_to_names(protein_idxes: str, protein_names: list):
     if len(protein_idxes) == 0:
         return ""
-    proteins = [protein_names[int(i)] for i in protein_idxes.split(";")]
+    proteins = [
+        protein_names[int(i)] for i in protein_idxes.split(ModificationKeys.SEPARATOR)
+    ]
     proteins = [protein for protein in proteins if protein]
-    return ";".join(proteins)
+    return ModificationKeys.SEPARATOR.join(proteins)
 
 
 def append_special_modifications(
@@ -570,7 +579,7 @@ def append_special_modifications(
     mod_dict = {}
     if _check_if_multi_mods_on_aa(var_mods):
         for mod in var_mods:
-            if mod.find("@") + 2 == len(mod):
+            if mod.find(ModificationKeys.SITE_SEPARATOR) + 2 == len(mod):
                 # if mod[-1] in self.fix_mod_dict: continue
                 if mod[-1] in mod_dict:
                     mod_dict[mod[-1]].append(mod)
@@ -580,7 +589,7 @@ def append_special_modifications(
         get_var_mods_per_sites = get_var_mods_per_sites_multi_mods_on_aa
     else:
         for mod in var_mods:
-            if mod.find("@") + 2 == len(mod):
+            if mod.find(ModificationKeys.SITE_SEPARATOR) + 2 == len(mod):
                 # if mod[-1] in self.fix_mod_dict: continue
                 var_mod_aas += mod[-1]
                 mod_dict[mod[-1]] = mod
@@ -610,10 +619,10 @@ def append_special_modifications(
         df.drop(df[df.mods_app.apply(lambda x: len(x) == 0)].index, inplace=True)
         df = explode_multiple_columns(df, ["mods_app", "mod_sites_app"])
     df["mods"] = df[["mods", "mods_app"]].apply(
-        lambda x: ";".join(i for i in x if i), axis=1
+        lambda x: ModificationKeys.SEPARATOR.join(i for i in x if i), axis=1
     )
     df["mod_sites"] = df[["mod_sites", "mod_sites_app"]].apply(
-        lambda x: ";".join(i for i in x if i), axis=1
+        lambda x: ModificationKeys.SEPARATOR.join(i for i in x if i), axis=1
     )
     df.drop(columns=["mods_app", "mod_sites_app"], inplace=True)
     df.reset_index(drop=True, inplace=True)
@@ -815,13 +824,13 @@ class SpecLibFasta(SpecLibBase):
                     term_dict[site] = term_mod
 
             site, term = parse_term_mod(term_mod)
-            if term == "Any_N-term":
+            if term == ModificationKeys.ANY_N_TERM:
                 _set_dict(pep_nterm, site, term_mod, allow_conflicts)
-            elif term == "Protein_N-term":
+            elif term == ModificationKeys.PROTEIN_N_TERM:
                 _set_dict(prot_nterm, site, term_mod, allow_conflicts)
-            elif term == "Any_C-term":
+            elif term == ModificationKeys.ANY_C_TERM:
                 _set_dict(pep_cterm, site, term_mod, allow_conflicts)
-            elif term == "Protein_C-term":
+            elif term == ModificationKeys.PROTEIN_C_TERM:
                 _set_dict(prot_cterm, site, term_mod, allow_conflicts)
 
         # for mod in self.fix_mods:
@@ -848,7 +857,7 @@ class SpecLibFasta(SpecLibBase):
         global get_var_mods_per_sites
         if _check_if_multi_mods_on_aa(self.var_mods):
             for mod in self.var_mods:
-                if mod.find("@") + 2 == len(mod):
+                if mod.find(ModificationKeys.SITE_SEPARATOR) + 2 == len(mod):
                     # if mod[-1] in self.fix_mod_dict: continue
                     if mod[-1] in self.var_mod_dict:
                         self.var_mod_dict[mod[-1]].append(mod)
@@ -858,14 +867,14 @@ class SpecLibFasta(SpecLibBase):
             get_var_mods_per_sites = get_var_mods_per_sites_multi_mods_on_aa
         else:
             for mod in self.var_mods:
-                if mod.find("@") + 2 == len(mod):
+                if mod.find(ModificationKeys.SITE_SEPARATOR) + 2 == len(mod):
                     # if mod[-1] in self.fix_mod_dict: continue
                     self.var_mod_aas += mod[-1]
                     self.var_mod_dict[mod[-1]] = mod
             get_var_mods_per_sites = get_var_mods_per_sites_single_mod_on_aa
 
         for mod in self.var_mods:
-            if mod.find("@") + 2 < len(mod):
+            if mod.find(ModificationKeys.SITE_SEPARATOR) + 2 < len(mod):
                 _set_term_mod(
                     mod,
                     self.var_mod_prot_nterm_dict,
@@ -1047,7 +1056,7 @@ class SpecLibFasta(SpecLibBase):
                 prot_id = str(i)
                 if seq in pep_dict:
                     if not pep_dict[seq][0].endswith(prot_id):
-                        pep_dict[seq][0] += ";" + prot_id
+                        pep_dict[seq][0] += ModificationKeys.SEPARATOR + prot_id
                     if nterm:
                         pep_dict[seq][2] = nterm
                     if cterm:
@@ -1158,11 +1167,11 @@ class SpecLibFasta(SpecLibBase):
 
         return (
             list(
-                ";".join([i for i in items if i])
+                ModificationKeys.SEPARATOR.join([i for i in items if i])
                 for items in itertools.product(nterm_var_mods, var_mods_list)
             ),
             list(
-                ";".join([i for i in items if i])
+                ModificationKeys.SEPARATOR.join([i for i in items if i])
                 for items in itertools.product(nterm_var_mod_sites, var_mod_sites_list)
             ),
         )
@@ -1361,8 +1370,8 @@ def annotate_precursor_df(
                 genes[i].append(protein_entry["gene_org"])
                 proteins[i].append(protein_entry["protein_id"])
 
-    peptide_df["genes"] = [";".join(g) for g in genes]
-    peptide_df["proteins"] = [";".join(g) for g in proteins]
+    peptide_df["genes"] = [ModificationKeys.SEPARATOR.join(g) for g in genes]
+    peptide_df["proteins"] = [ModificationKeys.SEPARATOR.join(g) for g in proteins]
     peptide_df["cardinality"] = [len(g) for g in genes]
 
     if "genes" in precursor_df.columns:
@@ -1387,7 +1396,7 @@ def annotate_precursor_df(
 def _check_if_multi_mods_on_aa(var_mods):
     mod_set = set()
     for mod in var_mods:
-        if mod.find("@") + 2 == len(mod):
+        if mod.find(ModificationKeys.SITE_SEPARATOR) + 2 == len(mod):
             if mod[-1] in mod_set:
                 return True
             mod_set.add(mod[-1])

@@ -11,6 +11,70 @@ from alphabase.constants.atom import (
     parse_formula,
 )
 
+
+class _ConstantsClass(type):
+    """A metaclass for classes that should only contain string constants."""
+
+    def __setattr__(cls, name, value):
+        raise TypeError("Constants class cannot be modified")
+
+
+class ModificationKeys(metaclass=_ConstantsClass):
+    """Constants for modification format strings and terminal sites.
+
+    Modification names in AlphaBase follow the pattern: `ModName@Site`
+    For example: `Phospho@S`, `Oxidation@M`, `Acetyl@Protein_N-term`
+
+    Multiple modifications are joined with SEPARATOR:
+        `Phospho@S;Oxidation@M` for mods, `5;7` for sites
+
+    Terminal modifications use special site identifiers:
+        - `Any_N-term`: Any peptide N-terminus (e.g., `Acetyl@Any_N-term`)
+        - `Protein_N-term`: Protein N-terminus only
+        - AA-specific terminals: `Q^Any_N-term` for Gln-specific N-term mod
+
+    Examples
+    --------
+    >>> mods = "Phospho@S;Oxidation@M"
+    >>> mod_list = mods.split(ModificationKeys.SEPARATOR)  # ['Phospho@S', 'Oxidation@M']
+    >>> mod_name, site = mod_list[0].split(ModificationKeys.SITE_SEPARATOR)  # 'Phospho', 'S'
+
+    """
+
+    #: Separator for multiple values: "Phospho@S;Oxidation@M" or "5;7" for sites
+    SEPARATOR: str = ";"
+
+    #: Separator between mod name and site: "Phospho@S" -> "Phospho" + "@" + "S"
+    SITE_SEPARATOR: str = "@"
+
+    #: Separator for AA-specific terminal mods: "Q^Any_N-term" -> "Q" + "^" + "Any_N-term"
+    TERM_SEPARATOR: str = "^"
+
+    #: Any peptide N-terminus: "Acetyl@Any_N-term"
+    ANY_N_TERM: str = "Any_N-term"
+
+    #: Any peptide C-terminus: "Amidated@Any_C-term"
+    ANY_C_TERM: str = "Any_C-term"
+
+    #: Protein N-terminus only: "Acetyl@Protein_N-term"
+    PROTEIN_N_TERM: str = "Protein_N-term"
+
+    #: Protein C-terminus only
+    PROTEIN_C_TERM: str = "Protein_C-term"
+
+    #: AA-specific N-term suffix: "Gln->pyro-Glu@Q^Any_N-term" (Q at any N-term)
+    ANY_N_TERM_SPECIFIC: str = "^Any_N-term"
+
+    #: AA-specific C-term suffix
+    ANY_C_TERM_SPECIFIC: str = "^Any_C-term"
+
+    #: AA-specific Protein N-term suffix: "Met-loss@M^Protein_N-term"
+    PROTEIN_N_TERM_SPECIFIC: str = "^Protein_N-term"
+
+    #: AA-specific Protein C-term suffix
+    PROTEIN_C_TERM_SPECIFIC: str = "^Protein_C-term"
+
+
 #: Main entry of modification infomation (DataFrame fotmat).
 MOD_DF: pd.DataFrame = pd.DataFrame()
 
@@ -59,12 +123,12 @@ def add_modifications_for_lower_case_AA():
     lower_case_df = MOD_DF.copy()
 
     def _mod_lower_case(modname):
-        modname, site = modname.split("@")
+        modname, site = modname.split(ModificationKeys.SITE_SEPARATOR)
         if len(site) == 1:
-            return modname + "@" + site.lower()
-        elif "^" in site:
+            return modname + ModificationKeys.SITE_SEPARATOR + site.lower()
+        elif ModificationKeys.TERM_SEPARATOR in site:
             site = site[0].lower() + site[1:]
-            return modname + "@" + site
+            return modname + ModificationKeys.SITE_SEPARATOR + site
         else:
             return ""
 

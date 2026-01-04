@@ -11,7 +11,7 @@ from xxhash import xxh64_intdigest
 from alphabase.constants.aa import AA_Composition
 from alphabase.constants.atom import MASS_ISOTOPE, MASS_PROTON
 from alphabase.constants.isotope import IsotopeDistribution
-from alphabase.constants.modification import MOD_Composition
+from alphabase.constants.modification import MOD_Composition, ModificationKeys
 from alphabase.peptide.mass_calc import calc_peptide_masses_for_same_len_seqs
 
 
@@ -304,7 +304,7 @@ def get_mod_seq_formula(seq: str, mods: str) -> list:
             else:
                 formula[chem] = n
     if len(mods) > 0:
-        for mod in mods.split(";"):
+        for mod in mods.split(ModificationKeys.SEPARATOR):
             for chem, n in MOD_Composition[mod].items():
                 if chem in formula:
                     formula[chem] += n

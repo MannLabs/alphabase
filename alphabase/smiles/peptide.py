@@ -2,7 +2,12 @@ from typing import Optional
 
 from rdkit import Chem
 
-from alphabase.smiles.smiles import AminoAcidModifier
+from alphabase.constants.modification import ModificationKeys
+from alphabase.smiles.smiles import (
+    C_TERM_PLACEHOLDER_ATOM,
+    N_TERM_PLACEHOLDER_ATOM,
+    AminoAcidModifier,
+)
 
 
 class PeptideSmilesEncoder:
@@ -35,9 +40,12 @@ class PeptideSmilesEncoder:
         """
         mod_dict = {}
         if mods and mod_sites:
-            for site, mod in zip(mod_sites.split(";"), mods.split(";")):
-                # if the modification is techinically at the N-terminal, but changes the first amino acid
-                if "^" in mod and site == "0":
+            for site, mod in zip(
+                mod_sites.split(ModificationKeys.SEPARATOR),
+                mods.split(ModificationKeys.SEPARATOR),
+            ):
+                # if the modification is technically at the N-terminal, but changes the first amino acid
+                if ModificationKeys.TERM_SEPARATOR in mod and site == "0":
                     site = "1"
                 mod_dict[int(site)] = mod
         return mod_dict
@@ -52,10 +60,10 @@ class PeptideSmilesEncoder:
             (n_term_placeholder_mol, c_term_placeholder_mol)
         """
         n_term_placeholder_mol = Chem.MolFromSmiles(
-            self.amino_acid_modifier.N_TERM_PLACEHOLDER, sanitize=False
+            f"[{N_TERM_PLACEHOLDER_ATOM}]", sanitize=False
         )
         c_term_placeholder_mol = Chem.MolFromSmiles(
-            self.amino_acid_modifier.C_TERM_PLACEHOLDER, sanitize=False
+            f"[{C_TERM_PLACEHOLDER_ATOM}]", sanitize=False
         )
         return n_term_placeholder_mol, c_term_placeholder_mol
 
@@ -378,8 +386,8 @@ class PeptideSmilesEncoder:
         mol1_num_atoms = mol1.GetNumAtoms()
 
         # Find the placeholder hydrogens and their neighboring atoms
-        c_term_placeholder = self.amino_acid_modifier.C_TERM_PLACEHOLDER.strip("[]")
-        n_term_placeholder = self.amino_acid_modifier.N_TERM_PLACEHOLDER.strip("[]")
+        c_term_placeholder = C_TERM_PLACEHOLDER_ATOM
+        n_term_placeholder = N_TERM_PLACEHOLDER_ATOM
 
         c_term_h_idx = None
         c_atom_idx = None
