@@ -261,9 +261,9 @@ OxArgBiotin@R	310.135113	310.4118	H(22)C(15)N(2)O(3)S(1)	0.0		Chemical derivativ
 OxArgBiotinRed@R	312.150763	312.4277	H(24)C(15)N(2)O(3)S(1)	0.0		Chemical derivative	117		0.0
 EDT-iodoacetyl-PEO-biotin@T	490.174218	490.7034	H(34)C(20)N(4)O(4)S(3)	0.0		Chemical derivative	118		0.0
 EDT-iodoacetyl-PEO-biotin@S	490.174218	490.7034	H(34)C(20)N(4)O(4)S(3)	0.0		Chemical derivative	118		0.0
-GG@C	114.042927	114.1026	H(6)C(4)N(2)O(2)	0.0		Other	121		0.0
-GG@T	114.042927	114.1026	H(6)C(4)N(2)O(2)	0.0		Other	121		0.0
-GG@S	114.042927	114.1026	H(6)C(4)N(2)O(2)	0.0		Other	121		0.0
+GG@C	114.042927	114.1026	H(6)C(4)N(2)O(2)	0.0		Other	121	NCC(=O)NCC(=O)SC[C@H](N([Fl])([Fl]))C([Ts])=O	0.0
+GG@T	114.042927	114.1026	H(6)C(4)N(2)O(2)	0.0		Other	121	NCC(=O)NCC(=O)O[C@H](C)[C@@H](C(=O)[Ts])N([Fl])([Fl])	0.0
+GG@S	114.042927	114.1026	H(6)C(4)N(2)O(2)	0.0		Other	121	NCC(=O)NCC(=O)OC[C@@H](C(=O)[Ts])N([Fl])([Fl])	0.0
 GG@K	114.042927	114.1026	H(6)C(4)N(2)O(2)	0.0		Other	121	NCC(=O)NCC(=O)NCCCC[C@H](N([Fl])([Fl]))C([Ts])=O	1000000.0
 GG@Protein_N-term	114.042927	114.1026	H(6)C(4)N(2)O(2)	0.0		Post-translational	121	C(=O)CNC(=O)CN	0.0
 GG@Any_N-term	114.042927	114.1026	H(6)C(4)N(2)O(2)	0.0		Multiple	121	NCC(=O)NCC(=O)[Ts]	0.0
