@@ -159,6 +159,18 @@ class TestNTermModWithPlaceholder:
                 aa_mol, mod_without_placeholder
             )
 
+    def test_error_when_mod_has_multiple_placeholders(self):
+        """Raises error when modification mol has multiple [Ts] placeholders."""
+        # Given: amino acid mol and modification mol with multiple [Ts] placeholders
+        aa_mol = Chem.MolFromSmiles(aa_smiles["A"])
+        mod_with_multiple_placeholders = Chem.MolFromSmiles("[Ts]CC(=O)[Ts]")
+
+        # When/Then: calling placeholder method raises ValueError
+        with pytest.raises(ValueError, match="expected exactly 1"):
+            aa_modifier._apply_n_term_mod_with_placeholder(
+                aa_mol, mod_with_multiple_placeholders
+            )
+
     def test_error_when_aa_missing_fl_placeholder(self):
         """Raises error when amino acid lacks [Fl] placeholder."""
         # Given: molecule WITHOUT [Fl] placeholder and modification WITH [Ts]

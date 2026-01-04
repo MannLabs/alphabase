@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from alphabase.constants.modification import MOD_DF
+from alphabase.constants.modification import MOD_DF, ModificationKeys
 from alphabase.psm_reader.keys import PsmDfCols
 from alphabase.psm_reader.psm_reader import (
     PSMReaderBase,
@@ -19,7 +19,7 @@ from alphabase.psm_reader.psm_reader import (
 )
 
 
-class SageModificationTranslation:
+class SageModificationTranslator:
     """Translate Sage style modifications to alphabase style modifications."""
 
     def __init__(
@@ -60,7 +60,7 @@ class SageModificationTranslation:
                     "Custom translation df must have columns 'modification' and 'matched_mod_name'."
                 )
 
-    def __call__(self, psm_df: pd.DataFrame) -> pd.DataFrame:
+    def translate(self, psm_df: pd.DataFrame) -> pd.DataFrame:
         """Translate modifications in the PSMs to alphabase style modifications.
 
         1. Discover all modifications in the PSMs.
@@ -411,7 +411,9 @@ def _translate_modifications(
         mod_sites.append(mod_site)
         mod_names.append(matched_mod_name)
 
-    return ";".join(mod_sites), ";".join(mod_names)
+    return ModificationKeys.SEPARATOR.join(mod_sites), ModificationKeys.SEPARATOR.join(
+        mod_names
+    )
 
 
 def _apply_translate_modifications(
@@ -523,7 +525,11 @@ def _get_annotated_mod_df() -> pd.DataFrame:
     mod_annotated_df = MOD_DF.copy()
 
     mod_annotated_df["previous_aa"] = (
-        mod_annotated_df["mod_name"].str.split("@").str[1].str.split("^").str[0]
+        mod_annotated_df["mod_name"]
+        .str.split(ModificationKeys.SITE_SEPARATOR)
+        .str[1]
+        .str.split(ModificationKeys.TERM_SEPARATOR)
+        .str[0]
     )
 
     # we use the length of the localizer "K", "Any_N-term", "Protein_N-term" as rank to prioritize Any N-term over Protein N-term
@@ -636,11 +642,11 @@ class SageReaderBase(PSMReaderBase, ABC):
         )
 
     def _translate_modifications(self) -> None:
-        sage_translation = SageModificationTranslation(
+        modification_translator = SageModificationTranslator(
             custom_translation_df=self.custom_translation_df,
             mp_process_num=self.mp_process_num,
         )
-        self._psm_df = sage_translation(self._psm_df)
+        self._psm_df = modification_translator.translate(self._psm_df)
 
         # drop modified_sequence
         self._psm_df.drop(columns=[PsmDfCols.MODIFIED_SEQUENCE], inplace=True)

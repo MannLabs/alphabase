@@ -217,6 +217,16 @@ modification_mappings:
       - 'K(34.0689)'
     'Dimethyl:2H(6)@Any_N-term':
       - 'N-term(34.0689)'
+    'DiLeu4plex@K':
+      - 'K(145.1321)'
+    'DiLeu4plex@Any_N-term':
+      - 'N-term(145.1321)'
+    'DiLeu4plex@Y':
+      - 'Y(145.1321)'
+    'DiLeu4plex@S':
+      - 'S(145.1321)'
+    'DiLeu4plex@T':
+      - 'T(145.1321)'
 
 pfind:
   reader_type: pfind
@@ -251,6 +261,7 @@ msfragger_psm_tsv:
     'precursor_mz': 'Observed M/Z'
     '_tmp_mods': 'Assigned Modifications'
     'intensity': 'Intensity'
+    'mobility': 'Ion Mobility'
   mass_mapped_mods:
     - 'Oxidation@M'
     - 'Carbamidomethyl@C'

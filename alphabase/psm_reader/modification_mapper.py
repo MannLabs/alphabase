@@ -4,6 +4,7 @@ import copy
 from collections import defaultdict
 from typing import Dict, Optional
 
+from alphabase.constants.modification import ModificationKeys
 from alphabase.psm_reader.utils import MOD_TO_UNIMOD_DICT, get_extended_modifications
 
 
@@ -52,9 +53,10 @@ class ModificationMapper:
         self.add_modification_mapping(custom_modification_mapping)
 
     def add_modification_mapping(self, custom_modification_mapping: dict) -> None:
-        """Append additional modification mappings for the search engine.
+        """Add modification mappings for the search engine.
 
-        Also creates a reverse mapping from the modification format used by the search engine to the AlphaBase format.
+        New keys are added to the mapping. Existing keys are overwritten, not extended.
+        Also updates the reverse mapping.
 
         Parameters
         ----------
@@ -155,7 +157,9 @@ class ModificationMapper:
                 for mod_other_format_ in mod_other_format:
                     if (
                         mod_other_format_ in rev_mod_mapping
-                        and mod_alphabase_format.endswith("Protein_N-term")
+                        and mod_alphabase_format.endswith(
+                            ModificationKeys.PROTEIN_N_TERM
+                        )
                     ):
                         continue
 

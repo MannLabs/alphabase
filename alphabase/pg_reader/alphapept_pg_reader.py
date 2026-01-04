@@ -6,6 +6,8 @@ from typing import Any, Literal, Optional, Union
 
 import pandas as pd
 
+from alphabase.constants.modification import ModificationKeys
+
 from .keys import PGCols
 from .pg_reader import PGReaderBase, pg_reader_provider
 
@@ -100,7 +102,7 @@ class AlphaPeptPGReader(PGReaderBase):
     # The expected length of fasta headers is 3 (sp|Uniprot ID|Uniprot Name)
     _FASTA_HEADER_DEFAULT_LENGTH: int = 3
     _NA_STR: str = "na"
-    _PG_DELIMITER: str = ";"
+    _PG_DELIMITER: str = ModificationKeys.SEPARATOR
 
     def __init__(
         self,
