@@ -104,11 +104,11 @@ def test_invalid_amino_acid_smiles():
 
 
 class TestNTermModWithPlaceholder:
-    """Tests for N-terminal modification using [Ts] placeholder representing the amine."""
+    """Tests for N-terminal modification using [Lv] placeholder representing the amine."""
 
     def test_single_neighbor_placeholder_acetyl(self, alanine_smiles):
-        """Acetyl has one neighbor to [Ts], creating one bond to N."""
-        # Given: alanine with [Fl] placeholders and Acetyl modification with [Ts]
+        """Acetyl has one neighbor to [Lv], creating one bond to N."""
+        # Given: alanine with [Fl] placeholders and Acetyl modification with [Lv]
         acetyl_smiles = n_term_modifications["Acetyl@Any_N-term"]
         assert aa_modifier._has_n_term_mod_placeholder(acetyl_smiles)
 
@@ -122,11 +122,11 @@ class TestNTermModWithPlaceholder:
         )
 
     def test_multi_neighbor_placeholder_dimethyl(self, alanine_smiles):
-        """Dimethyl has two neighbors to [Ts], creating two bonds to N."""
-        # Given: alanine with [Fl] placeholders and Dimethyl modification with [Ts]
+        """Dimethyl has two neighbors to [Lv], creating two bonds to N."""
+        # Given: alanine with [Fl] placeholders and Dimethyl modification with [Lv]
         dimethyl_smiles = n_term_modifications["Dimethyl@Any_N-term"]
         assert aa_modifier._has_n_term_mod_placeholder(dimethyl_smiles)
-        assert dimethyl_smiles == "C[Ts]C"
+        assert dimethyl_smiles == "C[Lv]C"
 
         # When: applying Dimethyl modification
         result = modify_amino_acid(alanine_smiles, n_term_mod="Dimethyl@Any_N-term")
@@ -140,7 +140,7 @@ class TestNTermModWithPlaceholder:
     def test_placeholder_detection(self):
         """_has_n_term_mod_placeholder correctly identifies placeholder presence."""
         # Given: SMILES with and without placeholder
-        with_placeholder = "CC(=O)[Ts]"
+        with_placeholder = "CC(=O)[Lv]"
         without_placeholder = "C(=O)C"
 
         # When/Then: detection returns correct result
@@ -148,8 +148,8 @@ class TestNTermModWithPlaceholder:
         assert aa_modifier._has_n_term_mod_placeholder(without_placeholder) is False
 
     def test_error_when_mod_missing_placeholder(self):
-        """Raises error when modification mol lacks [Ts] but placeholder method is called."""
-        # Given: amino acid mol and modification mol WITHOUT [Ts] placeholder
+        """Raises error when modification mol lacks [Lv] but placeholder method is called."""
+        # Given: amino acid mol and modification mol WITHOUT [Lv] placeholder
         aa_mol = Chem.MolFromSmiles(aa_smiles["A"])
         mod_without_placeholder = Chem.MolFromSmiles("C(=O)C")
 
@@ -160,10 +160,10 @@ class TestNTermModWithPlaceholder:
             )
 
     def test_error_when_mod_has_multiple_placeholders(self):
-        """Raises error when modification mol has multiple [Ts] placeholders."""
-        # Given: amino acid mol and modification mol with multiple [Ts] placeholders
+        """Raises error when modification mol has multiple [Lv] placeholders."""
+        # Given: amino acid mol and modification mol with multiple [Lv] placeholders
         aa_mol = Chem.MolFromSmiles(aa_smiles["A"])
-        mod_with_multiple_placeholders = Chem.MolFromSmiles("[Ts]CC(=O)[Ts]")
+        mod_with_multiple_placeholders = Chem.MolFromSmiles("[Lv]CC(=O)[Lv]")
 
         # When/Then: calling placeholder method raises ValueError
         with pytest.raises(ValueError, match="expected exactly 1"):
@@ -173,9 +173,9 @@ class TestNTermModWithPlaceholder:
 
     def test_error_when_aa_missing_fl_placeholder(self):
         """Raises error when amino acid lacks [Fl] placeholder."""
-        # Given: molecule WITHOUT [Fl] placeholder and modification WITH [Ts]
+        # Given: molecule WITHOUT [Fl] placeholder and modification WITH [Lv]
         mol_without_fl = Chem.MolFromSmiles("NCC(=O)O")  # Glycine without placeholders
-        mod_with_placeholder = Chem.MolFromSmiles("CC(=O)[Ts]")
+        mod_with_placeholder = Chem.MolFromSmiles("CC(=O)[Lv]")
 
         # When/Then: calling placeholder method raises ValueError
         with pytest.raises(ValueError, match="does not contain N-terminal placeholder"):
@@ -199,7 +199,7 @@ class TestNTermModWithPlaceholder:
         )  # [Fl] now has 2 neighbors
         malformed_mol = rw_mol.GetMol()
 
-        mod_mol = Chem.MolFromSmiles("CC(=O)[Ts]")
+        mod_mol = Chem.MolFromSmiles("CC(=O)[Lv]")
 
         # When/Then: raises error about wrong neighbor count
         with pytest.raises(ValueError, match="should have exactly one neighbor"):

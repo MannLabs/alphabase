@@ -9,8 +9,8 @@ from alphabase.constants.modification import MOD_DF
 
 N_TERM_PLACEHOLDER_ATOM = "Fl"
 C_TERM_PLACEHOLDER_ATOM = "Ts"
-# Placeholder atom in N-terminal modification SMILES representing the N-terminal amine
-MOD_N_TERM_PLACEHOLDER_ATOM = "Ts"
+# Placeholder in N-terminal modification SMILES representing the N-terminal amine
+MOD_N_TERM_PLACEHOLDER_ATOM = "Lv"
 
 
 def _find_mod_placeholder(n_mod_mol: Chem.Mol) -> tuple[int, list[int]]:
@@ -344,22 +344,22 @@ class AminoAcidModifier:
         self, aa_mol: Chem.Mol, n_mod_mol: Chem.Mol
     ) -> Chem.Mol:
         """
-        Apply N-terminal modification where [Ts] represents the N-terminal amine.
+        Apply N-terminal modification where [Lv] represents the N-terminal amine.
 
-        The modification SMILES contains a [Ts] placeholder that represents the
-        N-terminal nitrogen itself. All neighbors of [Ts] in the modification
+        The modification SMILES contains a [Lv] placeholder that represents the
+        N-terminal nitrogen itself. All neighbors of [Lv] in the modification
         become bonded to the actual nitrogen, replacing the [Fl] placeholders.
 
-        This allows modifications like Dimethyl where [Ts] has multiple neighbors:
-        - Acetyl: CC(=O)[Ts] - one neighbor (carbonyl C) bonds to N
-        - Dimethyl: C[Ts]C - two neighbors (both methyl C) bond to N
+        This allows modifications like Dimethyl where [Lv] has multiple neighbors:
+        - Acetyl: CC(=O)[Lv] - one neighbor (carbonyl C) bonds to N
+        - Dimethyl: C[Lv]C - two neighbors (both methyl C) bond to N
 
         Parameters
         ----------
         aa_mol : Chem.Mol
             The amino acid molecule with [Fl] N-terminal placeholders.
         n_mod_mol : Chem.Mol
-            The modification molecule with [Ts] representing the N-terminal amine.
+            The modification molecule with [Lv] representing the N-terminal amine.
 
         Returns
         -------
@@ -382,7 +382,7 @@ class AminoAcidModifier:
         for neighbor_idx in mod_neighbor_indices_combined:
             rw_mol.AddBond(n_idx, neighbor_idx, Chem.rdchem.BondType.SINGLE)
 
-        # Remove [Ts] and corresponding [Fl] atoms (one [Fl] per new bond)
+        # Remove [Lv] and corresponding [Fl] atoms (one [Fl] per new bond)
         fl_to_remove = fl_indices[: len(mod_neighbor_indices)]
         to_remove = sorted([mod_placeholder_idx_combined] + fl_to_remove, reverse=True)
         for idx in to_remove:
