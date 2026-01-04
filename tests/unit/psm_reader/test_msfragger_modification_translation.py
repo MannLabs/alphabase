@@ -113,6 +113,24 @@ def test_unknown_modification_raises(translator, mass, aa):
         translator._match_mod_by_mass(mass, aa)
 
 
+def test_closest_mass_match():
+    """Test that closest mass match is returned when multiple mods are within tolerance."""
+    # Formyl@K: 27.9949, Dimethyl@K: 28.0313 - both within 0.1 Da of each other
+    translator = MSFraggerModificationTranslator(
+        mass_mapped_mods=["Formyl@K", "Dimethyl@K"],
+        mod_mass_tol=0.1,
+        rev_mod_mapping={},
+    )
+    # Exact Formyl mass should return Formyl
+    assert translator._match_mod_by_mass(27.9949, "K") == "Formyl@K"
+    # Exact Dimethyl mass should return Dimethyl
+    assert translator._match_mod_by_mass(28.0313, "K") == "Dimethyl@K"
+    # Mass closer to Formyl should return Formyl
+    assert translator._match_mod_by_mass(28.00, "K") == "Formyl@K"
+    # Mass closer to Dimethyl should return Dimethyl
+    assert translator._match_mod_by_mass(28.02, "K") == "Dimethyl@K"
+
+
 def test_dataframe_translation(translator, test_psm_df):
     """Test end-to-end translation preserves original columns and adds complete mods."""
     result_df = translator.translate(test_psm_df)
