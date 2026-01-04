@@ -131,6 +131,17 @@ def test_closest_mass_match():
     assert translator._match_mod_by_mass(28.02, "K") == "Dimethyl@K"
 
 
+def test_exact_mass_match_not_skipped():
+    """Test that exact mass match (mass_diff=0) is not skipped."""
+    translator = MSFraggerModificationTranslator(
+        mass_mapped_mods=["Phospho@S"],
+        mod_mass_tol=0.1,
+        rev_mod_mapping={},
+    )
+    exact_mass = MOD_MASS["Phospho@S"]
+    assert translator._match_mod_by_mass(exact_mass, "S") == "Phospho@S"
+
+
 def test_dataframe_translation(translator, test_psm_df):
     """Test end-to-end translation preserves original columns and adds complete mods."""
     result_df = translator.translate(test_psm_df)
