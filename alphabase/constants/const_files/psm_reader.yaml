@@ -197,6 +197,26 @@ modification_mappings:
       - 'K(304.2071)'
     'TMTpro@Any_N-term':
       - 'N-term(304.2071)'
+    'Dimethyl@K':
+      - 'K(28.0313)'
+    'Dimethyl@Any_N-term':
+      - 'N-term(28.0313)'
+    'Dimethyl:2H(4)@K':
+      - 'K(32.0564)'
+    'Dimethyl:2H(4)@Any_N-term':
+      - 'N-term(32.0564)'
+    'Dimethyl:2H(6)13C(2)@K':
+      - 'K(36.0757)'
+    'Dimethyl:2H(6)13C(2)@Any_N-term':
+      - 'N-term(36.0757)'
+    'Dimethyl:2H(4)13C(2)@K':
+      - 'K(34.0631)'
+    'Dimethyl:2H(4)13C(2)@Any_N-term':
+      - 'N-term(34.0631)'
+    'Dimethyl:2H(6)@K':
+      - 'K(34.0689)'
+    'Dimethyl:2H(6)@Any_N-term':
+      - 'N-term(34.0689)'
     'DiLeu4plex@K':
       - 'K(145.1321)'
     'DiLeu4plex@Any_N-term':
