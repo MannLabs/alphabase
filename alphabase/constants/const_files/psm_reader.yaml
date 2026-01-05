@@ -153,7 +153,7 @@ modification_mappings:
       - 'K(su)'
     'Deamidated@N': ['N(Deamidation (NQ))','N(de)']
     'Deamidated@Q': ['Q(Deamidation (NQ))','Q(de)']
-    'GlyGly@K': ['K(GlyGly (K))', 'K(gl)']
+    'GG@K': ['K(GlyGly (K))', 'K(gl)']
     'hydroxyisobutyryl@K': 'K(2-)'
   alphapept:
     'Carbamidomethyl@C': 'cC'
@@ -231,6 +231,10 @@ modification_mappings:
       - 'N-term(27.9949)'
     'Nethylmaleimide@C':
       - 'C(125.0476)'
+    'GG@K':
+      - 'K(114.0429)'
+    'GG@Any_N-term':
+      - 'N-term(114.0429)'
     'DiLeu4plex@K':
       - 'K(145.1321)'
     'DiLeu4plex@Any_N-term':
@@ -282,7 +286,8 @@ msfragger_psm_tsv:
     - 'Phospho@S'
     - 'Phospho@T'
     - 'Phospho@Y'
-    - 'GlyGly@K'
+    - 'GG@K'
+    - 'GG@Any_N-term'
     - 'Acetyl@K'
     - 'Acetyl@Any_N-term'
     - 'Lactyl@K'
@@ -326,7 +331,7 @@ msfragger_pepxml:
     - 'Oxidation@M' #other Oxidation@X are not needed here
     - 'Carbamidomethyl@C'
     - 'Phospho@S' #TY are not needed here
-    - 'GlyGly@K'
+    - 'GG@K'
     - 'Cysteinyl@C'
     - 'Acetyl@Any_N-term'
     - 'Glu->pyro-Glu@E^Any_N-term'

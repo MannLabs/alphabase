@@ -261,11 +261,12 @@ OxArgBiotin@R	310.135113	310.4118	H(22)C(15)N(2)O(3)S(1)	0.0		Chemical derivativ
 OxArgBiotinRed@R	312.150763	312.4277	H(24)C(15)N(2)O(3)S(1)	0.0		Chemical derivative	117		0.0
 EDT-iodoacetyl-PEO-biotin@T	490.174218	490.7034	H(34)C(20)N(4)O(4)S(3)	0.0		Chemical derivative	118		0.0
 EDT-iodoacetyl-PEO-biotin@S	490.174218	490.7034	H(34)C(20)N(4)O(4)S(3)	0.0		Chemical derivative	118		0.0
-GG@C	114.042927	114.1026	H(6)C(4)N(2)O(2)	0.0		Other	121		0.0
-GG@T	114.042927	114.1026	H(6)C(4)N(2)O(2)	0.0		Other	121		0.0
-GG@S	114.042927	114.1026	H(6)C(4)N(2)O(2)	0.0		Other	121		0.0
+GG@C	114.042927	114.1026	H(6)C(4)N(2)O(2)	0.0		Other	121	NCC(=O)NCC(=O)SC[C@H](N([Fl])([Fl]))C([Ts])=O	0.0
+GG@T	114.042927	114.1026	H(6)C(4)N(2)O(2)	0.0		Other	121	NCC(=O)NCC(=O)O[C@H](C)[C@@H](C(=O)[Ts])N([Fl])([Fl])	0.0
+GG@S	114.042927	114.1026	H(6)C(4)N(2)O(2)	0.0		Other	121	NCC(=O)NCC(=O)OC[C@@H](C(=O)[Ts])N([Fl])([Fl])	0.0
 GG@K	114.042927	114.1026	H(6)C(4)N(2)O(2)	0.0		Other	121	NCC(=O)NCC(=O)NCCCC[C@H](N([Fl])([Fl]))C([Ts])=O	1000000.0
-GG@Protein_N-term	114.042927	114.1026	H(6)C(4)N(2)O(2)	0.0		Post-translational	121	C(=O)CNC(=O)CN	0.0
+GG@Protein_N-term	114.042927	114.1026	H(6)C(4)N(2)O(2)	0.0		Post-translational	121	NCC(=O)NCC(=O)[Ts]	0.0
+GG@Any_N-term	114.042927	114.1026	H(6)C(4)N(2)O(2)	0.0		Multiple	121	NCC(=O)NCC(=O)[Ts]	0.0
 Formyl@Protein_N-term	27.994915	28.0101	C(1)O(1)	0.0		Post-translational	122	O=C[Ts]	0.0
 Formyl@T	27.994915	28.0101	C(1)O(1)	0.0		Artefact	122		0.0
 Formyl@K	27.994915	28.0101	C(1)O(1)	0.0		Artefact	122	O=CNCCCC[C@H](N([Fl])([Fl]))C(=O)[Ts]	0.0
@@ -2784,7 +2785,6 @@ NQTGG@K	457.192111	457.4384	H(27)C(17)N(7)O(8)	0.0		Other	2084		0.0
 DVFQQQTGG@K	960.43011	960.9865	H(60)C(41)N(12)O(15)	0.0		Other	2085		0.0
 iST-NHS_specific_cysteine_modification@C	113.084064	113.1576	H(11)C(6)N(1)O(1)	0.0		Chemical derivative	2086		0.0
 Label:13C(2)15N(1)@G	3.003745	2.9787	C(-2)13C(2)N(-1)15N(1)	0.0		Isotopic label	2088		0.0
-GlyGly@K	114.042927	114.1026	H(6)C(4)N(2)O(2)	0.0		Multiple	121	NCC(=O)NCC(=O)NCCCC[C@H](N([Fl])([Fl]))C([Ts])=O	1000000.0
 Pro->(2S,4R)-4-fluoroproline@P	0.0	0.0	F(1)H(-1)	0.0		User-added	0	F[C@@H]1C[C@H](N([Fl])C1)C(=O)[Ts]	0.0
 Pro->(2S,4S)-4fluoroproline@P	0.0	0.0	F(1)H(-1)	0.0		User-added	0	F[C@H]1C[C@H](N([Fl])C1)C(=O)[Ts]	0.0
 Pro->(2S)-1,3-thiazolidine-2-carboxylic_acid@P	0.0	0.0	C(-1)H(-2)S(1)	0.0		User-added	0	S1[C@H](N([Fl])CC1)C(=O)[Ts]	0.0
