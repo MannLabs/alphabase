@@ -266,10 +266,10 @@ GG@T	114.042927	114.1026	H(6)C(4)N(2)O(2)	0.0		Other	121		0.0
 GG@S	114.042927	114.1026	H(6)C(4)N(2)O(2)	0.0		Other	121		0.0
 GG@K	114.042927	114.1026	H(6)C(4)N(2)O(2)	0.0		Other	121	NCC(=O)NCC(=O)NCCCC[C@H](N([Fl])([Fl]))C([Ts])=O	1000000.0
 GG@Protein_N-term	114.042927	114.1026	H(6)C(4)N(2)O(2)	0.0		Post-translational	121	C(=O)CNC(=O)CN	0.0
-Formyl@Protein_N-term	27.994915	28.0101	C(1)O(1)	0.0		Post-translational	122		0.0
+Formyl@Protein_N-term	27.994915	28.0101	C(1)O(1)	0.0		Post-translational	122	O=C[Ts]	0.0
 Formyl@T	27.994915	28.0101	C(1)O(1)	0.0		Artefact	122		0.0
-Formyl@K	27.994915	28.0101	C(1)O(1)	0.0		Artefact	122		0.0
-Formyl@Any_N-term	27.994915	28.0101	C(1)O(1)	0.0		Artefact	122		0.0
+Formyl@K	27.994915	28.0101	C(1)O(1)	0.0		Artefact	122	O=CNCCCC[C@H](N([Fl])([Fl]))C(=O)[Ts]	0.0
+Formyl@Any_N-term	27.994915	28.0101	C(1)O(1)	0.0		Artefact	122	O=C[Ts]	0.0
 Formyl@S	27.994915	28.0101	C(1)O(1)	0.0		Artefact	122		0.0
 ICAT-H@C	345.097915	345.7754	H(20)C(15)N(1)O(6)Cl(1)	0.0		Isotopic label	123		0.0
 ICAT-H:13C(6)@C	351.118044	351.7313	H(20)C(9)13C(6)N(1)O(6)Cl(1)	0.0		Isotopic label	124		0.0
@@ -2845,3 +2845,9 @@ iTRAQ4plex117@Y	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic 
 iTRAQ4plex117@Any_N-term	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	0	C(=O)[13CH2][15N]1[13CH2][13CH2]N(CC1)C	0.0
 iTRAQ4plex117@K	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	0	[H]N(CCCC[C@H](N([Fl])([Fl]))C(=O)[Ts])C(=O)[13CH2][15N]1[13CH2][13CH2]N(C)CC1	0.0
 iTRAQ4plex117@C	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	0	C[15N]1[13CH2][13CH2]N(CC1)[13CH2]C(=O)SC[C@@H](C(=O)[Ts])N([Fl])([Fl])	0.0
+Lactyl@K	72.021129	72.0627	H(4)C(3)O(2)	0.0		Post-translational	0	C[C@@H](O)C(=O)NCCCC[C@H](N([Fl])([Fl]))C(=O)[Ts]	0.0
+Lactyl@Any_N-term	72.021129	72.0627	H(4)C(3)O(2)	0.0		Post-translational	0	C[C@@H](O)C(=O)[Ts]	0.0
+Lactyl@Protein_N-term	72.021129	72.0627	H(4)C(3)O(2)	0.0		Post-translational	0	C[C@@H](O)C(=O)[Ts]	0.0
+YnLactyl@K	239.126991	239.2941	H(17)C(11)N(3)O(3)	0.0		Post-translational	0	OCCCCCCN1C=C(C[C@@H](O)C(=O)NCCCC[C@H](N([Fl])([Fl]))C(=O)[Ts])N=N1	0.0
+YnLactyl@Any_N-term	239.126991	239.2941	H(17)C(11)N(3)O(3)	0.0		Post-translational	0	OCCCCCCN1C=C(C[C@@H](O)C(=O)[Ts])N=N1	0.0
+YnLactyl@Protein_N-term	239.126991	239.2941	H(17)C(11)N(3)O(3)	0.0		Post-translational	0	OCCCCCCN1C=C(C[C@@H](O)C(=O)[Ts])N=N1	0.0

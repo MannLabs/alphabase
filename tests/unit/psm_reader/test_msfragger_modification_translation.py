@@ -5,7 +5,9 @@ import pytest
 
 from alphabase.constants.modification import MOD_MASS
 from alphabase.psm_reader.keys import PsmDfCols
-from alphabase.psm_reader.msfragger_reader import MSFraggerModificationTranslator
+from alphabase.psm_reader.msfragger_reader import (
+    MSFraggerModificationTranslator,
+)
 from alphabase.psm_reader.psm_reader import psm_reader_yaml
 
 
@@ -113,6 +115,35 @@ def test_unknown_modification_raises(translator, mass, aa):
         translator._match_mod_by_mass(mass, aa)
 
 
+def test_closest_mass_match():
+    """Test that closest mass match is returned when multiple mods are within tolerance."""
+    # Formyl@K: 27.9949, Dimethyl@K: 28.0313 - both within 0.1 Da of each other
+    translator = MSFraggerModificationTranslator(
+        mass_mapped_mods=["Formyl@K", "Dimethyl@K"],
+        mod_mass_tol=0.1,
+        rev_mod_mapping={},
+    )
+    # Exact Formyl mass should return Formyl
+    assert translator._match_mod_by_mass(27.9949, "K") == "Formyl@K"
+    # Exact Dimethyl mass should return Dimethyl
+    assert translator._match_mod_by_mass(28.0313, "K") == "Dimethyl@K"
+    # Mass closer to Formyl should return Formyl
+    assert translator._match_mod_by_mass(28.00, "K") == "Formyl@K"
+    # Mass closer to Dimethyl should return Dimethyl
+    assert translator._match_mod_by_mass(28.02, "K") == "Dimethyl@K"
+
+
+def test_exact_mass_match_not_skipped():
+    """Test that exact mass match (mass_diff=0) is not skipped."""
+    translator = MSFraggerModificationTranslator(
+        mass_mapped_mods=["Phospho@S"],
+        mod_mass_tol=0.1,
+        rev_mod_mapping={},
+    )
+    exact_mass = MOD_MASS["Phospho@S"]
+    assert translator._match_mod_by_mass(exact_mass, "S") == "Phospho@S"
+
+
 def test_dataframe_translation(translator, test_psm_df):
     """Test end-to-end translation preserves original columns and adds complete mods."""
     result_df = translator.translate(test_psm_df)
@@ -218,3 +249,30 @@ class TestRevModMapping:
         mods, sites = translator._parse_assigned_modifications("5S(79.9663)")
         assert mods == "Phospho@S"
         assert sites == "5"
+
+
+def test_msfragger_mod_masses_truncated_to_four_decimals():
+    """Test that all MSFragger modification masses are truncated to exactly 4 decimal places."""
+    import math
+    import re
+
+    msfragger_mods = psm_reader_yaml["modification_mappings"]["msfragger"]
+    mass_pattern = re.compile(r"\((\d+\.\d+)\)")
+
+    for mod_name, mappings in msfragger_mods.items():
+        for mapping in mappings if isinstance(mappings, list) else [mappings]:
+            match = mass_pattern.search(mapping)
+            mass_str = match.group(1)
+            decimal_part = mass_str.split(".")[1]
+            assert (
+                len(decimal_part) == 4
+            ), f"{mod_name}: mass '{mass_str}' has {len(decimal_part)} decimals, expected 4"
+
+            if mod_name in MOD_MASS and MOD_MASS[mod_name] != 0.0:
+                db_mass = MOD_MASS[mod_name]
+                expected_truncated = math.trunc(db_mass * 10000) / 10000
+                yaml_mass = float(mass_str)
+                assert abs(yaml_mass - expected_truncated) < 1e-9, (
+                    f"{mod_name}: mass should be truncated to {expected_truncated:.4f}, "
+                    f"got {yaml_mass} (db: {db_mass})"
+                )
