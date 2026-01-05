@@ -1,9 +1,9 @@
 mod_name	unimod_mass	unimod_avge_mass	composition	unimod_modloss	modloss_composition	classification	unimod_id	smiles	modloss_importance
 Acetyl@T	42.010565	42.0367	H(2)C(2)O(1)	0.0		Post-translational	1		0.0
-Acetyl@Protein_N-term	42.010565	42.0367	H(2)C(2)O(1)	0.0		Post-translational	1	CC(=O)[Ts]	0.0
+Acetyl@Protein_N-term	42.010565	42.0367	H(2)C(2)O(1)	0.0		Post-translational	1	CC(=O)[Lv]	0.0
 Acetyl@S	42.010565	42.0367	H(2)C(2)O(1)	0.0		Post-translational	1		0.0
 Acetyl@C	42.010565	42.0367	H(2)C(2)O(1)	0.0		Post-translational	1		0.0
-Acetyl@Any_N-term	42.010565	42.0367	H(2)C(2)O(1)	0.0		Multiple	1	CC(=O)[Ts]	0.0
+Acetyl@Any_N-term	42.010565	42.0367	H(2)C(2)O(1)	0.0		Multiple	1	CC(=O)[Lv]	0.0
 Acetyl@K	42.010565	42.0367	H(2)C(2)O(1)	0.0		Multiple	1	CC(=O)NCCCC[C@H](N([Fl])([Fl]))C(=O)[Ts]	0.0
 Acetyl@Y	42.010565	42.0367	H(2)C(2)O(1)	0.0		Chemical derivative	1		0.0
 Acetyl@H	42.010565	42.0367	H(2)C(2)O(1)	0.0		Chemical derivative	1		0.0
@@ -120,10 +120,10 @@ Oxidation@P	15.994915	15.9994	O(1)	0.0		Post-translational	35		0.0
 Oxidation@N	15.994915	15.9994	O(1)	0.0		Post-translational	35		0.0
 Oxidation@K	15.994915	15.9994	O(1)	0.0		Post-translational	35		0.0
 Oxidation@D	15.994915	15.9994	O(1)	0.0		Post-translational	35		0.0
-Dimethyl@Protein_N-term	28.0313	28.0532	H(4)C(2)	0.0		Isotopic label	36	C[Ts]C	0.0
+Dimethyl@Protein_N-term	28.0313	28.0532	H(4)C(2)	0.0		Isotopic label	36	C[Lv]C	0.0
 Dimethyl@P^Protein_N-term	28.0313	28.0532	H(4)C(2)	0.0		Post-translational	36		0.0
 Dimethyl@N	28.0313	28.0532	H(4)C(2)	0.0		Post-translational	36		0.0
-Dimethyl@Any_N-term	28.0313	28.0532	H(4)C(2)	0.0		Isotopic label	36	C[Ts]C	0.0
+Dimethyl@Any_N-term	28.0313	28.0532	H(4)C(2)	0.0		Isotopic label	36	C[Lv]C	0.0
 Dimethyl@K	28.0313	28.0532	H(4)C(2)	0.0		Multiple	36	CN(C)CCCC[C@H](N([Fl])([Fl]))C(=O)[Ts]	0.0
 Dimethyl@R	28.0313	28.0532	H(4)C(2)	0.0		Post-translational	36		0.0
 Trimethyl@A^Protein_N-term	42.04695	42.0797	H(6)C(3)	0.0		Post-translational	37		0.0
