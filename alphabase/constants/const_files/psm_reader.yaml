@@ -367,6 +367,30 @@ modification_mappings:
       - 'K(308.1160)'
     'PSMtag@Any_N-term':
       - 'N-term(308.1160)'
+    'Glc-TA@K':
+      - 'K(236.0354)'
+    'Glc-TA@Any_N-term':
+      - 'N-term(236.0354)'
+    'Glc-TA-Succinamide@K':
+      - 'K(351.0624)'
+    'Glc-TA-Succinamide@Any_N-term':
+      - 'N-term(351.0624)'
+    'Gal-b14-Glc-TA@K':
+      - 'K(398.0882)'
+    'Gal-b14-Glc-TA@Any_N-term':
+      - 'N-term(398.0882)'
+    'Gal-b14-Glc-TA-Succinamide@K':
+      - 'K(513.1152)'
+    'Gal-b14-Glc-TA-Succinamide@Any_N-term':
+      - 'N-term(513.1152)'
+    'Sia-a23-Gal-b14-Glc-TA@K':
+      - 'K(689.1836)'
+    'Sia-a23-Gal-b14-Glc-TA@Any_N-term':
+      - 'N-term(689.1836)'
+    'Sia-a23-Gal-b14-Glc-TA-Succinamide@K':
+      - 'K(820.2055)'
+    'Sia-a23-Gal-b14-Glc-TA-Succinamide@Any_N-term':
+      - 'N-term(820.2055)'
 
 pfind:
   reader_type: pfind
@@ -494,6 +518,18 @@ msfragger_psm_tsv:
     - 'DiLeu4plex117@Any_N-term'
     - 'DiLeu4plex118@K'
     - 'DiLeu4plex118@Any_N-term'
+    - 'Glc-TA@K'
+    - 'Glc-TA@Any_N-term'
+    - 'Glc-TA-Succinamide@K'
+    - 'Glc-TA-Succinamide@Any_N-term'
+    - 'Gal-b14-Glc-TA@K'
+    - 'Gal-b14-Glc-TA@Any_N-term'
+    - 'Gal-b14-Glc-TA-Succinamide@K'
+    - 'Gal-b14-Glc-TA-Succinamide@Any_N-term'
+    - 'Sia-a23-Gal-b14-Glc-TA@K'
+    - 'Sia-a23-Gal-b14-Glc-TA@Any_N-term'
+    - 'Sia-a23-Gal-b14-Glc-TA-Succinamide@K'
+    - 'Sia-a23-Gal-b14-Glc-TA-Succinamide@Any_N-term'
   mod_mass_tol: 0.1
   modification_mapping_type: 'msfragger'
 
