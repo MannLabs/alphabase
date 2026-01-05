@@ -230,7 +230,7 @@ modification_mappings:
     'Formyl@Any_N-term':
       - 'N-term(27.9949)'
     'Nethylmaleimide@C':
-      - 'C(125.0477)'
+      - 'C(125.0476)'
     'DiLeu4plex@K':
       - 'K(145.1321)'
     'DiLeu4plex@Any_N-term':
