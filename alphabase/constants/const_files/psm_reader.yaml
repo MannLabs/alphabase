@@ -311,6 +311,12 @@ modification_mappings:
       - 'K(229.1629)'
     'TMT6plex@Any_N-term':
       - 'N-term(229.1629)'
+    'TMT6plex@S':
+      - 'S(229.1629)'
+    'TMT6plex@T':
+      - 'T(229.1629)'
+    'TMT6plex@H':
+      - 'H(229.1629)'
     'iTRAQ4plex@K':
       - 'K(144.102)'
     'iTRAQ4plex@Any_N-term':
@@ -454,6 +460,9 @@ msfragger_psm_tsv:
     - 'Gln->pyro-Glu@Q^Any_N-term'
     - 'TMT6plex@K'
     - 'TMT6plex@Any_N-term'
+    - 'TMT6plex@S'
+    - 'TMT6plex@T'
+    - 'TMT6plex@H'
     - 'TMTpro@K'
     - 'TMTpro@Any_N-term'
     - 'PSMtag@K'
