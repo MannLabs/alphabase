@@ -206,9 +206,9 @@ modification_mappings:
     'Dimethyl:2H(4)@Any_N-term':
       - 'N-term(32.0564)'
     'Dimethyl:2H(6)13C(2)@K':
-      - 'K(36.0757)'
+      - 'K(36.0756)'
     'Dimethyl:2H(6)13C(2)@Any_N-term':
-      - 'N-term(36.0757)'
+      - 'N-term(36.0756)'
     'Dimethyl:2H(4)13C(2)@K':
       - 'K(34.0631)'
     'Dimethyl:2H(4)13C(2)@Any_N-term':
@@ -222,15 +222,15 @@ modification_mappings:
     'Lactyl@Any_N-term':
       - 'N-term(72.0211)'
     'YnLactyl@K':
-      - 'K(239.1270)'
+      - 'K(239.1269)'
     'YnLactyl@Any_N-term':
-      - 'N-term(239.1270)'
+      - 'N-term(239.1269)'
     'Formyl@K':
       - 'K(27.9949)'
     'Formyl@Any_N-term':
       - 'N-term(27.9949)'
     'Nethylmaleimide@C':
-      - 'C(125.0477)'
+      - 'C(125.0476)'
     'GG@K':
       - 'K(114.0429)'
     'GG@Any_N-term':
