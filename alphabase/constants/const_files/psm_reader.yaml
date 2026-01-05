@@ -269,6 +269,8 @@ modification_mappings:
       - 'E(-18.0105)'
     'Gln->pyro-Glu@Q^Any_N-term':
       - 'Q(-17.0265)'
+    'Ammonia-loss@C^Any_N-term':
+      - 'C(-17.0265)'
     'Deamidated@N':
       - 'N(0.984)'
     'Deamidated@Q':
@@ -460,6 +462,7 @@ msfragger_psm_tsv:
     - 'Formyl@S'
     - 'Glu->pyro-Glu@E^Any_N-term'
     - 'Gln->pyro-Glu@Q^Any_N-term'
+    - 'Ammonia-loss@C^Any_N-term'
     - 'TMT6plex@K'
     - 'TMT6plex@Any_N-term'
     - 'TMT6plex@S'
