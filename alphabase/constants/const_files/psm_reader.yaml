@@ -229,6 +229,8 @@ modification_mappings:
       - 'K(27.9949)'
     'Formyl@Any_N-term':
       - 'N-term(27.9949)'
+    'Nethylmaleimide@C':
+      - 'C(125.0476)'
     'DiLeu4plex@K':
       - 'K(145.1321)'
     'DiLeu4plex@Any_N-term':
@@ -303,6 +305,7 @@ msfragger_psm_tsv:
     - 'Dimethyl:2H(4)13C(2)@Any_N-term'
     - 'Dimethyl:2H(6)13C(2)@K'
     - 'Dimethyl:2H(6)13C(2)@Any_N-term'
+    - 'Nethylmaleimide@C'
   mod_mass_tol: 0.1
   modification_mapping_type: 'msfragger'
 
