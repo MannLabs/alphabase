@@ -245,6 +245,10 @@ modification_mappings:
       - 'S(145.1321)'
     'DiLeu4plex@T':
       - 'T(145.1321)'
+    'PSMtag@K':
+      - 'K(308.1160)'
+    'PSMtag@Any_N-term':
+      - 'N-term(308.1160)'
 
 pfind:
   reader_type: pfind
@@ -302,6 +306,8 @@ msfragger_psm_tsv:
     - 'TMT6plex@Any_N-term'
     - 'TMTpro@K'
     - 'TMTpro@Any_N-term'
+    - 'PSMtag@K'
+    - 'PSMtag@Any_N-term'
     - 'Dimethyl@K'
     - 'Dimethyl@Any_N-term'
     - 'Dimethyl:2H(4)@K'
