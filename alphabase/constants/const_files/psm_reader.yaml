@@ -206,9 +206,9 @@ modification_mappings:
     'Dimethyl:2H(4)@Any_N-term':
       - 'N-term(32.0564)'
     'Dimethyl:2H(6)13C(2)@K':
-      - 'K(36.0757)'
+      - 'K(36.0756)'
     'Dimethyl:2H(6)13C(2)@Any_N-term':
-      - 'N-term(36.0757)'
+      - 'N-term(36.0756)'
     'Dimethyl:2H(4)13C(2)@K':
       - 'K(34.0631)'
     'Dimethyl:2H(4)13C(2)@Any_N-term':
@@ -222,9 +222,9 @@ modification_mappings:
     'Lactyl@Any_N-term':
       - 'N-term(72.0211)'
     'YnLactyl@K':
-      - 'K(239.1270)'
+      - 'K(239.1269)'
     'YnLactyl@Any_N-term':
-      - 'N-term(239.1270)'
+      - 'N-term(239.1269)'
     'Formyl@K':
       - 'K(27.9949)'
     'Formyl@Any_N-term':
@@ -270,9 +270,9 @@ modification_mappings:
     'Gln->pyro-Glu@Q^Any_N-term':
       - 'Q(-17.0265)'
     'Deamidated@N':
-      - 'N(0.984)'
+      - 'N(0.9840)'
     'Deamidated@Q':
-      - 'Q(0.984)'
+      - 'Q(0.9840)'
     'Methyl@H':
       - 'H(14.0156)'
     'Methyl@Any_N-term':
@@ -288,15 +288,15 @@ modification_mappings:
     'Crotonyl@K':
       - 'K(68.0262)'
     'Succinyl@K':
-      - 'K(100.016)'
+      - 'K(100.0160)'
     'Malonyl@K':
       - 'K(86.0003)'
     'hydroxyisobutyryl@K':
       - 'K(86.0367)'
     'Nitro@Y':
-      - 'Y(44.985)'
+      - 'Y(44.9850)'
     'Cysteinyl@C':
-      - 'C(119.004)'
+      - 'C(119.0040)'
     'Pyridylethyl@C':
       - 'C(105.0578)'
     'Carbamyl@Any_N-term':
@@ -304,7 +304,7 @@ modification_mappings:
     'Biotin@Any_N-term':
       - 'N-term(226.0775)'
     'Amidated@Any_C-term':
-      - 'C-term(-0.984)'
+      - 'C-term(-0.9840)'
     'Met->Hse@M^Any_C-term':
       - 'M(-29.9928)'
     'TMT6plex@K':
@@ -320,19 +320,19 @@ modification_mappings:
     'TMT6plex@Y':
       - 'Y(229.1629)'
     'iTRAQ4plex@K':
-      - 'K(144.102)'
+      - 'K(144.1020)'
     'iTRAQ4plex@Any_N-term':
-      - 'N-term(144.102)'
+      - 'N-term(144.1020)'
     'iTRAQ4plex@Y':
-      - 'Y(144.102)'
+      - 'Y(144.1020)'
     'iTRAQ4plex@C':
-      - 'C(144.102)'
+      - 'C(144.1020)'
     'iTRAQ4plex@S':
-      - 'S(144.102)'
+      - 'S(144.1020)'
     'iTRAQ4plex@T':
-      - 'T(144.102)'
+      - 'T(144.1020)'
     'iTRAQ4plex@H':
-      - 'H(144.102)'
+      - 'H(144.1020)'
     'mTRAQ@Y':
       - 'Y(140.0949)'
     'mTRAQ@H':
@@ -399,6 +399,36 @@ modification_mappings:
       - 'K(820.2055)'
     'Sia-a23-Gal-b14-Glc-TA-Succinamide@Any_N-term':
       - 'N-term(820.2055)'
+    'Benzyl-TA-Succinamide@K':
+      - 'K(295.0514)'
+    'Benzyl-TA-Succinamide@Any_N-term':
+      - 'N-term(295.0514)'
+    'Benzyl-TA@K':
+      - 'K(164.0295)'
+    'Benzyl-TA@Any_N-term':
+      - 'N-term(164.0295)'
+    'Benzyl@Any_N-term':
+      - 'N-term(90.0469)'
+    'Benzyl@K':
+      - 'K(90.0469)'
+    'DiLeu4plex115@S':
+      - 'S(145.1199)'
+    'DiLeu4plex115@T':
+      - 'T(145.1199)'
+    'DiLeu4plex115@Y':
+      - 'Y(145.1199)'
+    'DiLeu4plex117@S':
+      - 'S(145.1283)'
+    'DiLeu4plex117@T':
+      - 'T(145.1283)'
+    'DiLeu4plex117@Y':
+      - 'Y(145.1283)'
+    'DiLeu4plex118@S':
+      - 'S(145.1404)'
+    'DiLeu4plex118@T':
+      - 'T(145.1404)'
+    'DiLeu4plex118@Y':
+      - 'Y(145.1404)'
 
 pfind:
   reader_type: pfind
@@ -542,6 +572,21 @@ msfragger_psm_tsv:
     - 'Sia-a23-Gal-b14-Glc-TA@Any_N-term'
     - 'Sia-a23-Gal-b14-Glc-TA-Succinamide@K'
     - 'Sia-a23-Gal-b14-Glc-TA-Succinamide@Any_N-term'
+    - 'Benzyl-TA-Succinamide@K'
+    - 'Benzyl-TA-Succinamide@Any_N-term'
+    - 'Benzyl-TA@K'
+    - 'Benzyl-TA@Any_N-term'
+    - 'Benzyl@Any_N-term'
+    - 'Benzyl@K'
+    - 'DiLeu4plex115@S'
+    - 'DiLeu4plex115@T'
+    - 'DiLeu4plex115@Y'
+    - 'DiLeu4plex117@S'
+    - 'DiLeu4plex117@T'
+    - 'DiLeu4plex117@Y'
+    - 'DiLeu4plex118@S'
+    - 'DiLeu4plex118@T'
+    - 'DiLeu4plex118@Y'
   mod_mass_tol: 0.1
   modification_mapping_type: 'msfragger'
 
