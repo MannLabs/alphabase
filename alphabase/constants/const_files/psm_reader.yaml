@@ -153,7 +153,7 @@ modification_mappings:
       - 'K(su)'
     'Deamidated@N': ['N(Deamidation (NQ))','N(de)']
     'Deamidated@Q': ['Q(Deamidation (NQ))','Q(de)']
-    'GlyGly@K': ['K(GlyGly (K))', 'K(gl)']
+    'GG@K': ['K(GlyGly (K))', 'K(gl)']
     'hydroxyisobutyryl@K': 'K(2-)'
   alphapept:
     'Carbamidomethyl@C': 'cC'
@@ -197,6 +197,44 @@ modification_mappings:
       - 'K(304.2071)'
     'TMTpro@Any_N-term':
       - 'N-term(304.2071)'
+    'Dimethyl@K':
+      - 'K(28.0313)'
+    'Dimethyl@Any_N-term':
+      - 'N-term(28.0313)'
+    'Dimethyl:2H(4)@K':
+      - 'K(32.0564)'
+    'Dimethyl:2H(4)@Any_N-term':
+      - 'N-term(32.0564)'
+    'Dimethyl:2H(6)13C(2)@K':
+      - 'K(36.0756)'
+    'Dimethyl:2H(6)13C(2)@Any_N-term':
+      - 'N-term(36.0756)'
+    'Dimethyl:2H(4)13C(2)@K':
+      - 'K(34.0631)'
+    'Dimethyl:2H(4)13C(2)@Any_N-term':
+      - 'N-term(34.0631)'
+    'Dimethyl:2H(6)@K':
+      - 'K(34.0689)'
+    'Dimethyl:2H(6)@Any_N-term':
+      - 'N-term(34.0689)'
+    'Lactyl@K':
+      - 'K(72.0211)'
+    'Lactyl@Any_N-term':
+      - 'N-term(72.0211)'
+    'YnLactyl@K':
+      - 'K(239.1269)'
+    'YnLactyl@Any_N-term':
+      - 'N-term(239.1269)'
+    'Formyl@K':
+      - 'K(27.9949)'
+    'Formyl@Any_N-term':
+      - 'N-term(27.9949)'
+    'Nethylmaleimide@C':
+      - 'C(125.0476)'
+    'GG@K':
+      - 'K(114.0429)'
+    'GG@Any_N-term':
+      - 'N-term(114.0429)'
     'DiLeu4plex@K':
       - 'K(145.1321)'
     'DiLeu4plex@Any_N-term':
@@ -252,8 +290,16 @@ msfragger_psm_tsv:
     - 'Phospho@S'
     - 'Phospho@T'
     - 'Phospho@Y'
-    - 'GlyGly@K'
+    - 'GG@K'
+    - 'GG@Any_N-term'
+    - 'Acetyl@K'
     - 'Acetyl@Any_N-term'
+    - 'Lactyl@K'
+    - 'Lactyl@Any_N-term'
+    - 'YnLactyl@K'
+    - 'YnLactyl@Any_N-term'
+    - 'Formyl@K'
+    - 'Formyl@Any_N-term'
     - 'Glu->pyro-Glu@E^Any_N-term'
     - 'Gln->pyro-Glu@Q^Any_N-term'
     - 'TMT6plex@K'
@@ -262,6 +308,15 @@ msfragger_psm_tsv:
     - 'TMTpro@Any_N-term'
     - 'PSMtag@K'
     - 'PSMtag@Any_N-term'
+    - 'Dimethyl@K'
+    - 'Dimethyl@Any_N-term'
+    - 'Dimethyl:2H(4)@K'
+    - 'Dimethyl:2H(4)@Any_N-term'
+    - 'Dimethyl:2H(4)13C(2)@K'
+    - 'Dimethyl:2H(4)13C(2)@Any_N-term'
+    - 'Dimethyl:2H(6)13C(2)@K'
+    - 'Dimethyl:2H(6)13C(2)@Any_N-term'
+    - 'Nethylmaleimide@C'
   mod_mass_tol: 0.1
   modification_mapping_type: 'msfragger'
 
@@ -282,7 +337,7 @@ msfragger_pepxml:
     - 'Oxidation@M' #other Oxidation@X are not needed here
     - 'Carbamidomethyl@C'
     - 'Phospho@S' #TY are not needed here
-    - 'GlyGly@K'
+    - 'GG@K'
     - 'Cysteinyl@C'
     - 'Acetyl@Any_N-term'
     - 'Glu->pyro-Glu@E^Any_N-term'
