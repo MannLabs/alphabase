@@ -149,7 +149,6 @@ c_term_modifications = {
 ptm_dict = {
     "Carbamidomethyl@C": "C(C(C(=O)[Ts])N([Fl])([Fl]))SCC(=O)N",
     "Oxidation@M": "O=C([Ts])C(N([Fl])([Fl]))CCS(=O)C",
-    "GlyGly@K": "NCC(=O)NCC(=O)NCCCC[C@H](N([Fl])([Fl]))C([Ts])=O",
     "Deamidated@N": "C([C@@H](C(=O)[Ts])N([Fl])([Fl]))C(=O)O",
     "Propionyl@K": "CCC(=O)NCCCCC(C(=O)[Ts])N([Fl])([Fl])",
     "Deamidated@Q": "C(CC(=O)O)[C@@H](C(=O)[Ts])N([Fl])([Fl])",

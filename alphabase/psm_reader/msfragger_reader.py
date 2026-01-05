@@ -221,7 +221,7 @@ class MSFraggerModificationTranslator:
         return self._match_mod_by_mass(mass_shift, amino_acid)
 
     def _match_mod_by_mass(self, mass_shift: float, aa_or_term: str) -> str:
-        """Match mass shift to modification name.
+        """Match mass shift to modification name by finding the closest mass match.
 
         Parameters
         ----------
@@ -241,26 +241,30 @@ class MSFraggerModificationTranslator:
             If no matching modification is found
 
         """
+        is_terminal = aa_or_term in [
+            ModificationKeys.ANY_N_TERM,
+            ModificationKeys.ANY_C_TERM,
+        ]
+        best_match = None
+        best_mass_diff = float("inf")
+
         for mod_name in self._mass_mapped_mods:
             if mod_name not in MOD_MASS:
                 continue
 
-            mod_mass = MOD_MASS[mod_name]
+            mass_diff = abs(mass_shift - MOD_MASS[mod_name])
+            if mass_diff >= self._mod_mass_tol or mass_diff >= best_mass_diff:
+                continue
 
-            if abs(mass_shift - mod_mass) < self._mod_mass_tol:
-                mod_base, mod_site = mod_name.split(ModificationKeys.SITE_SEPARATOR)
+            mod_site = mod_name.split(ModificationKeys.SITE_SEPARATOR)[1]
+            exact_match = mod_site == aa_or_term
+            term_match = is_terminal and mod_site.endswith(aa_or_term)
+            if exact_match or term_match:
+                best_match = mod_name
+                best_mass_diff = mass_diff
 
-                if aa_or_term in [
-                    ModificationKeys.ANY_N_TERM,
-                    ModificationKeys.ANY_C_TERM,
-                ]:
-                    if mod_site == aa_or_term or mod_site.endswith(aa_or_term):
-                        return mod_name
-                else:
-                    if mod_site == aa_or_term:
-                        return mod_name
-                    if mod_site in ["X", "Any"]:
-                        return f"{mod_base}@{aa_or_term}"
+        if best_match is not None:
+            return best_match
 
         raise ValueError(
             f"Unknown modification: mass_shift={mass_shift:.4f} at {aa_or_term}. "
