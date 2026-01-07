@@ -317,8 +317,6 @@ modification_mappings:
       - 'T(229.1629)'
     'TMT6plex@H':
       - 'H(229.1629)'
-    'TMT6plex@Y':
-      - 'Y(229.1629)'
     'iTRAQ4plex@K':
       - 'K(144.1020)'
     'iTRAQ4plex@Any_N-term':
@@ -495,7 +493,6 @@ msfragger_psm_tsv:
     - 'TMT6plex@S'
     - 'TMT6plex@T'
     - 'TMT6plex@H'
-    - 'TMT6plex@Y'
     - 'TMTpro@K'
     - 'TMTpro@Any_N-term'
     - 'PSMtag@K'

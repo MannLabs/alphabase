@@ -257,7 +257,7 @@ def test_msfragger_mod_masses_truncated_to_four_decimals():
     import re
 
     msfragger_mods = psm_reader_yaml["modification_mappings"]["msfragger"]
-    mass_pattern = re.compile(r"\((\d+\.\d+)\)")
+    mass_pattern = re.compile(r"\((-?\d+\.\d+)\)")
 
     for mod_name, mappings in msfragger_mods.items():
         for mapping in mappings if isinstance(mappings, list) else [mappings]:
