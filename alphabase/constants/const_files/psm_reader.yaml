@@ -229,12 +229,124 @@ modification_mappings:
       - 'K(27.9949)'
     'Formyl@Any_N-term':
       - 'N-term(27.9949)'
+    'Formyl@T':
+      - 'T(27.9949)'
+    'Formyl@S':
+      - 'S(27.9949)'
     'Nethylmaleimide@C':
       - 'C(125.0476)'
     'GG@K':
       - 'K(114.0429)'
     'GG@Any_N-term':
       - 'N-term(114.0429)'
+    'GG@C':
+      - 'C(114.0429)'
+    'GG@S':
+      - 'S(114.0429)'
+    'GG@T':
+      - 'T(114.0429)'
+    'Oxidation@M':
+      - 'M(15.9949)'
+    'Carbamidomethyl@C':
+      - 'C(57.0214)'
+    'Carbamidomethyl@M':
+      - 'M(57.0214)'
+    'Phospho@S':
+      - 'S(79.9663)'
+    'Phospho@T':
+      - 'T(79.9663)'
+    'Phospho@Y':
+      - 'Y(79.9663)'
+    'Phospho@H':
+      - 'H(79.9663)'
+    'Phospho@D':
+      - 'D(79.9663)'
+    'Acetyl@Any_N-term':
+      - 'N-term(42.0105)'
+    'Acetyl@Protein_N-term':
+      - 'N-term(42.0105)'
+    'Glu->pyro-Glu@E^Any_N-term':
+      - 'E(-18.0105)'
+    'Gln->pyro-Glu@Q^Any_N-term':
+      - 'Q(-17.0265)'
+    'Deamidated@N':
+      - 'N(0.9840)'
+    'Deamidated@Q':
+      - 'Q(0.9840)'
+    'Methyl@H':
+      - 'H(14.0156)'
+    'Methyl@Any_N-term':
+      - 'N-term(14.0156)'
+    'Methylthio@C':
+      - 'C(45.9877)'
+    'Propionyl@K':
+      - 'K(56.0262)'
+    'Propionyl@Any_N-term':
+      - 'N-term(56.0262)'
+    'Butyryl@K':
+      - 'K(70.0418)'
+    'Crotonyl@K':
+      - 'K(68.0262)'
+    'Succinyl@K':
+      - 'K(100.0160)'
+    'Malonyl@K':
+      - 'K(86.0003)'
+    'hydroxyisobutyryl@K':
+      - 'K(86.0367)'
+    'Nitro@Y':
+      - 'Y(44.9850)'
+    'Cysteinyl@C':
+      - 'C(119.0040)'
+    'Pyridylethyl@C':
+      - 'C(105.0578)'
+    'Carbamyl@Any_N-term':
+      - 'N-term(43.0058)'
+    'Biotin@Any_N-term':
+      - 'N-term(226.0775)'
+    'Amidated@Any_C-term':
+      - 'C-term(-0.9840)'
+    'Met->Hse@M^Any_C-term':
+      - 'M(-29.9928)'
+    'TMT6plex@K':
+      - 'K(229.1629)'
+    'TMT6plex@Any_N-term':
+      - 'N-term(229.1629)'
+    'TMT6plex@S':
+      - 'S(229.1629)'
+    'TMT6plex@T':
+      - 'T(229.1629)'
+    'TMT6plex@H':
+      - 'H(229.1629)'
+    'iTRAQ4plex@K':
+      - 'K(144.1020)'
+    'iTRAQ4plex@Any_N-term':
+      - 'N-term(144.1020)'
+    'iTRAQ4plex@Y':
+      - 'Y(144.1020)'
+    'iTRAQ4plex@C':
+      - 'C(144.1020)'
+    'iTRAQ4plex@S':
+      - 'S(144.1020)'
+    'iTRAQ4plex@T':
+      - 'T(144.1020)'
+    'iTRAQ4plex@H':
+      - 'H(144.1020)'
+    'mTRAQ@Y':
+      - 'Y(140.0949)'
+    'mTRAQ@H':
+      - 'H(140.0949)'
+    'mTRAQ@S':
+      - 'S(140.0949)'
+    'mTRAQ@T':
+      - 'T(140.0949)'
+    'mTRAQ:13C(6)15N(2)@Y':
+      - 'Y(148.1091)'
+    'mTRAQ:13C(6)15N(2)@H':
+      - 'H(148.1091)'
+    'mTRAQ:13C(6)15N(2)@S':
+      - 'S(148.1091)'
+    'mTRAQ:13C(6)15N(2)@T':
+      - 'T(148.1091)'
     'DiLeu4plex@K':
       - 'K(145.1321)'
     'DiLeu4plex@Any_N-term':
@@ -245,10 +357,76 @@ modification_mappings:
       - 'S(145.1321)'
     'DiLeu4plex@T':
       - 'T(145.1321)'
+    'DiLeu4plex115@K':
+      - 'K(145.1199)'
+    'DiLeu4plex115@Any_N-term':
+      - 'N-term(145.1199)'
+    'DiLeu4plex117@K':
+      - 'K(145.1283)'
+    'DiLeu4plex117@Any_N-term':
+      - 'N-term(145.1283)'
+    'DiLeu4plex118@K':
+      - 'K(145.1404)'
+    'DiLeu4plex118@Any_N-term':
+      - 'N-term(145.1404)'
     'PSMtag@K':
       - 'K(308.1160)'
     'PSMtag@Any_N-term':
       - 'N-term(308.1160)'
+    'Glc-TA@K':
+      - 'K(236.0354)'
+    'Glc-TA@Any_N-term':
+      - 'N-term(236.0354)'
+    'Glc-TA-Succinamide@K':
+      - 'K(351.0624)'
+    'Glc-TA-Succinamide@Any_N-term':
+      - 'N-term(351.0624)'
+    'Gal-b14-Glc-TA@K':
+      - 'K(398.0882)'
+    'Gal-b14-Glc-TA@Any_N-term':
+      - 'N-term(398.0882)'
+    'Gal-b14-Glc-TA-Succinamide@K':
+      - 'K(513.1152)'
+    'Gal-b14-Glc-TA-Succinamide@Any_N-term':
+      - 'N-term(513.1152)'
+    'Sia-a23-Gal-b14-Glc-TA@K':
+      - 'K(689.1836)'
+    'Sia-a23-Gal-b14-Glc-TA@Any_N-term':
+      - 'N-term(689.1836)'
+    'Sia-a23-Gal-b14-Glc-TA-Succinamide@K':
+      - 'K(820.2055)'
+    'Sia-a23-Gal-b14-Glc-TA-Succinamide@Any_N-term':
+      - 'N-term(820.2055)'
+    'Benzyl-TA-Succinamide@K':
+      - 'K(295.0514)'
+    'Benzyl-TA-Succinamide@Any_N-term':
+      - 'N-term(295.0514)'
+    'Benzyl-TA@K':
+      - 'K(164.0295)'
+    'Benzyl-TA@Any_N-term':
+      - 'N-term(164.0295)'
+    'Benzyl@Any_N-term':
+      - 'N-term(90.0469)'
+    'Benzyl@K':
+      - 'K(90.0469)'
+    'DiLeu4plex115@S':
+      - 'S(145.1199)'
+    'DiLeu4plex115@T':
+      - 'T(145.1199)'
+    'DiLeu4plex115@Y':
+      - 'Y(145.1199)'
+    'DiLeu4plex117@S':
+      - 'S(145.1283)'
+    'DiLeu4plex117@T':
+      - 'T(145.1283)'
+    'DiLeu4plex117@Y':
+      - 'Y(145.1283)'
+    'DiLeu4plex118@S':
+      - 'S(145.1404)'
+    'DiLeu4plex118@T':
+      - 'T(145.1404)'
+    'DiLeu4plex118@Y':
+      - 'Y(145.1404)'
 
 pfind:
   reader_type: pfind
@@ -287,11 +465,17 @@ msfragger_psm_tsv:
   mass_mapped_mods:
     - 'Oxidation@M'
     - 'Carbamidomethyl@C'
+    - 'Carbamidomethyl@M'
     - 'Phospho@S'
     - 'Phospho@T'
     - 'Phospho@Y'
+    - 'Phospho@H'
+    - 'Phospho@D'
     - 'GG@K'
     - 'GG@Any_N-term'
+    - 'GG@C'
+    - 'GG@S'
+    - 'GG@T'
     - 'Acetyl@K'
     - 'Acetyl@Any_N-term'
     - 'Lactyl@K'
@@ -300,10 +484,15 @@ msfragger_psm_tsv:
     - 'YnLactyl@Any_N-term'
     - 'Formyl@K'
     - 'Formyl@Any_N-term'
+    - 'Formyl@T'
+    - 'Formyl@S'
     - 'Glu->pyro-Glu@E^Any_N-term'
     - 'Gln->pyro-Glu@Q^Any_N-term'
     - 'TMT6plex@K'
     - 'TMT6plex@Any_N-term'
+    - 'TMT6plex@S'
+    - 'TMT6plex@T'
+    - 'TMT6plex@H'
     - 'TMTpro@K'
     - 'TMTpro@Any_N-term'
     - 'PSMtag@K'
@@ -316,7 +505,85 @@ msfragger_psm_tsv:
     - 'Dimethyl:2H(4)13C(2)@Any_N-term'
     - 'Dimethyl:2H(6)13C(2)@K'
     - 'Dimethyl:2H(6)13C(2)@Any_N-term'
+    - 'Dimethyl:2H(6)@K'
+    - 'Dimethyl:2H(6)@Any_N-term'
     - 'Nethylmaleimide@C'
+    - 'Deamidated@N'
+    - 'Deamidated@Q'
+    - 'Methyl@H'
+    - 'Methyl@Any_N-term'
+    - 'Methylthio@C'
+    - 'Propionyl@K'
+    - 'Propionyl@Any_N-term'
+    - 'Butyryl@K'
+    - 'Crotonyl@K'
+    - 'Succinyl@K'
+    - 'Malonyl@K'
+    - 'hydroxyisobutyryl@K'
+    - 'Nitro@Y'
+    - 'Cysteinyl@C'
+    - 'Pyridylethyl@C'
+    - 'Carbamyl@Any_N-term'
+    - 'Biotin@Any_N-term'
+    - 'Amidated@Any_C-term'
+    - 'Met->Hse@M^Any_C-term'
+    - 'iTRAQ4plex@K'
+    - 'iTRAQ4plex@Any_N-term'
+    - 'iTRAQ4plex@Y'
+    - 'iTRAQ4plex@C'
+    - 'iTRAQ4plex@S'
+    - 'iTRAQ4plex@T'
+    - 'iTRAQ4plex@H'
+    - 'mTRAQ@K'
+    - 'mTRAQ@Any_N-term'
+    - 'mTRAQ@Y'
+    - 'mTRAQ@H'
+    - 'mTRAQ@S'
+    - 'mTRAQ@T'
+    - 'mTRAQ:13C(6)15N(2)@K'
+    - 'mTRAQ:13C(6)15N(2)@Any_N-term'
+    - 'mTRAQ:13C(6)15N(2)@Y'
+    - 'mTRAQ:13C(6)15N(2)@H'
+    - 'mTRAQ:13C(6)15N(2)@S'
+    - 'mTRAQ:13C(6)15N(2)@T'
+    - 'DiLeu4plex@K'
+    - 'DiLeu4plex@Any_N-term'
+    - 'DiLeu4plex@Y'
+    - 'DiLeu4plex@S'
+    - 'DiLeu4plex@T'
+    - 'DiLeu4plex115@K'
+    - 'DiLeu4plex115@Any_N-term'
+    - 'DiLeu4plex117@K'
+    - 'DiLeu4plex117@Any_N-term'
+    - 'DiLeu4plex118@K'
+    - 'DiLeu4plex118@Any_N-term'
+    - 'Glc-TA@K'
+    - 'Glc-TA@Any_N-term'
+    - 'Glc-TA-Succinamide@K'
+    - 'Glc-TA-Succinamide@Any_N-term'
+    - 'Gal-b14-Glc-TA@K'
+    - 'Gal-b14-Glc-TA@Any_N-term'
+    - 'Gal-b14-Glc-TA-Succinamide@K'
+    - 'Gal-b14-Glc-TA-Succinamide@Any_N-term'
+    - 'Sia-a23-Gal-b14-Glc-TA@K'
+    - 'Sia-a23-Gal-b14-Glc-TA@Any_N-term'
+    - 'Sia-a23-Gal-b14-Glc-TA-Succinamide@K'
+    - 'Sia-a23-Gal-b14-Glc-TA-Succinamide@Any_N-term'
+    - 'Benzyl-TA-Succinamide@K'
+    - 'Benzyl-TA-Succinamide@Any_N-term'
+    - 'Benzyl-TA@K'
+    - 'Benzyl-TA@Any_N-term'
+    - 'Benzyl@Any_N-term'
+    - 'Benzyl@K'
+    - 'DiLeu4plex115@S'
+    - 'DiLeu4plex115@T'
+    - 'DiLeu4plex115@Y'
+    - 'DiLeu4plex117@S'
+    - 'DiLeu4plex117@T'
+    - 'DiLeu4plex117@Y'
+    - 'DiLeu4plex118@S'
+    - 'DiLeu4plex118@T'
+    - 'DiLeu4plex118@Y'
   mod_mass_tol: 0.1
   modification_mapping_type: 'msfragger'
 
