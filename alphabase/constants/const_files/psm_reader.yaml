@@ -162,7 +162,7 @@ modification_mappings:
     'Phospho@T': 'pT'
     'Phospho@Y': 'pY'
     'Acetyl@Protein_N-term': 'a'
-  # MSFragger modification masses are truncated (not rounded) to 4 decimal places (e.g., 79.9663 not 79.9664)
+  # MSFragger modification masses are truncated (not rounded) to 4 decimal places with explicit zeros
   msfragger:
     'SATA@K':
       - 'K(115.9932)'
