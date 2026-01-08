@@ -604,7 +604,7 @@ Hypusine@K	87.068414	87.1204	H(9)C(4)N(1)O(1)	0.0		Post-translational	379		0.0
 Retinylidene@K	266.203451	266.4204	H(26)C(20)	0.0		Post-translational	380		0.0
 Lys->AminoadipicAcid@K	14.96328	14.9683	H(-3)N(-1)O(2)	0.0		Post-translational	381		0.0
 Cys->PyruvicAcid@C^Protein_N-term	-33.003705	-33.0961	H(-3)N(-1)O(1)S(-1)	0.0		Post-translational	382		0.0
-Ammonia-loss@C^Any_N-term	-17.026549	-17.0305	H(-3)N(-1)	0.0		Artefact	385		0.0
+Ammonia-loss@C^Any_N-term	-17.026549	-17.0305	H(-3)N(-1)	0.0		Artefact	385	O=C1CSC[C@@H](C(=O)[Ts])N1[Fl]	0.0
 Ammonia-loss@S^Protein_N-term	-17.026549	-17.0305	H(-3)N(-1)	0.0		Post-translational	385		0.0
 Ammonia-loss@T^Protein_N-term	-17.026549	-17.0305	H(-3)N(-1)	0.0		Post-translational	385		0.0
 Ammonia-loss@N	-17.026549	-17.0305	H(-3)N(-1)	0.0		Chemical derivative	385		0.0
