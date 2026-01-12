@@ -1,3 +1,0 @@
-# Dependencies required for running the "loose dask" version of alphabase.
-dask
-dask_expr
