@@ -288,13 +288,15 @@ spectronaut_report:
     'uniprot_ids': 'PG.UniProtIds'
     'genes': ['PG.Genes', 'PG.ProteinNames']
     'fdr': 'EG.Qvalue'
-    'intensity': 'PG.Quantity'
-    'precursor_id': 'EG.PrecursorId'
+    'intensity': 'EG.TotalQuantity (Settings)'
     'precursor_intensity': 'EG.TotalQuantity (Settings)'
 
   mod_seq_columns:
     - 'ModifiedSequence'
+    - 'EG.PrecursorId'
   modification_mapping_type: 'maxquant'
+  precursor_id_columns:
+    - "EG.PrecursorId"
 
 spectronaut:
   reader_type: spectronaut
@@ -311,7 +313,6 @@ spectronaut:
     'precursor_mz': 'PrecursorMz'
     'uniprot_ids': ['UniProtIds','UniProtID','UniprotId']
     'genes': ['Genes','Gene','GeneName','GeneNames']
-    'precursor_id': "EG.PrecursorId"
 
   mod_seq_columns:
     - 'ModifiedPeptide'
@@ -321,6 +322,8 @@ spectronaut:
     - 'LabeledSequence'
     - 'FullUniModPeptideName'
   modification_mapping_type: 'maxquant'
+  precursor_id_columns:
+    - "EG.PrecursorId"
 
 library_reader_base:
   reader_type: library_reader_base
