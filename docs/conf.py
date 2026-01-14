@@ -24,7 +24,7 @@ project = "alphabase"
 copyright = "2022, Mann Labs, MPIB"
 author = "Mann Labs, MPIB"
 
-release = "1.8.0"
+release = "1.8.1-dev0"
 
 # -- General configuration ---------------------------------------------------
 
