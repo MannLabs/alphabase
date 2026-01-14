@@ -162,41 +162,6 @@ modification_mappings:
     'Phospho@T': 'pT'
     'Phospho@Y': 'pY'
     'Acetyl@Protein_N-term': 'a'
-  msfragger:
-    'SATA@K':
-      - 'K(115.9932)'
-    'SATA@Any_N-term':
-      - 'N-term(115.9932)'
-    'SATA-Succinamide@K':
-      - 'K(247.0150)'
-    'SATA-Succinamide@Any_N-term':
-      - 'N-term(247.0150)'
-    'SATP@K':
-      - 'K(130.0088)'
-    'SATP@Any_N-term':
-      - 'N-term(130.0088)'
-    'SATP-Succinamide@K':
-      - 'K(261.0307)'
-    'SATP-Succinamide@Any_N-term':
-      - 'N-term(261.0307)'
-    'Acetyl@K':
-      - 'K(42.0105)'
-    'mTRAQ@K':
-      - 'K(140.0949)'
-    'mTRAQ@Any_N-term':
-      - 'N-term(140.0949)'
-    'mTRAQ:13C(3)15N(1)@K':
-      - 'K(144.1020)'
-    'mTRAQ:13C(3)15N(1)@Any_N-term':
-      - 'N-term(144.1020)'
-    'mTRAQ:13C(6)15N(2)@K':
-      - 'K(148.1091)'
-    'mTRAQ:13C(6)15N(2)@Any_N-term':
-      - 'N-term(148.1091)'
-    'TMTpro@K':
-      - 'K(304.2071)'
-    'TMTpro@Any_N-term':
-      - 'N-term(304.2071)'
 
 pfind:
   reader_type: pfind
@@ -246,7 +211,7 @@ msfragger_psm_tsv:
     - 'TMTpro@K'
     - 'TMTpro@Any_N-term'
   mod_mass_tol: 0.1
-  modification_mapping_type: 'msfragger'
+  modification_mapping_type: 'maxquant'
 
 msfragger_pepxml:
   reader_type: msfragger_pepxml
@@ -314,16 +279,21 @@ spectronaut_report:
   fixed_C57: False
   column_mapping:
     'raw_name': 'R.FileName'
+    'sequence': 'PEP.StrippedSequence'
+    'charge': ['charge', 'FG.Charge']
     'rt': ['EG.ApexRT','EG.MeanApexRT']
-    'mobility': ['FG.ApexIonMobility']
-    'proteins': ['PG.ProteinNames','PG.ProteinGroups']
-    'genes': 'PG.Genes'
+    'mobility': 'FG.ApexIonMobility'
+    'proteins': ['PG.ProteinNames','PG.ProteinGroups', 'PG.ProteinAccessions']
+    'precursor_mz': 'FG.PrecMz'
     'uniprot_ids': 'PG.UniProtIds'
-    'charge': 'charge'
+    'genes': ['PG.Genes', 'PG.ProteinNames']
+    'fdr': 'EG.Qvalue'
+    'intensity': 'PG.Quantity'
+    'precursor_id': 'EG.PrecursorId'
+    'precursor_intensity': 'EG.TotalQuantity (Settings)'
+
   mod_seq_columns:
     - 'ModifiedSequence'
-  precursor_id_columns:
-    - "EG.PrecursorId"
   modification_mapping_type: 'maxquant'
 
 spectronaut:
@@ -335,12 +305,14 @@ spectronaut:
     'sequence': ['StrippedPeptide','PeptideSequence']
     'charge': 'PrecursorCharge'
     'rt': ['RT','iRT','Tr_recalibrated','RetentionTime','NormalizedRetentionTime']
-    'ccs': 'CCS'
-    'precursor_mz': 'PrecursorMz'
     'mobility': ['Mobility','IonMobility','PrecursorIonMobility']
     'proteins': ['Protein Name','ProteinId','ProteinID','ProteinName','ProteinGroup','ProteinGroups']
+    'ccs': 'CCS'
+    'precursor_mz': 'PrecursorMz'
     'uniprot_ids': ['UniProtIds','UniProtID','UniprotId']
     'genes': ['Genes','Gene','GeneName','GeneNames']
+    'precursor_id': "EG.PrecursorId"
+
   mod_seq_columns:
     - 'ModifiedPeptide'
     - 'ModifiedSequence'
@@ -348,8 +320,6 @@ spectronaut:
     - 'ModifiedPeptideSequence'
     - 'LabeledSequence'
     - 'FullUniModPeptideName'
-  precursor_id_columns:
-    - "EG.PrecursorId"
   modification_mapping_type: 'maxquant'
 
 library_reader_base:
