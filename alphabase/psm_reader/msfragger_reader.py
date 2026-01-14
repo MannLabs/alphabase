@@ -204,7 +204,7 @@ class MSFraggerModificationTranslator:
             return self._resolve_terminal_mod(entry, "Any_C-term"), "-1"
 
         position, lookup_key = _extract_position(entry)
-        mod_name = self._resolve_positional_mod(lookup_key, entry)
+        mod_name = self._resolve_positional_mod(lookup_key, entry, position)
         return mod_name, str(position)
 
     def _resolve_terminal_mod(self, entry: str, aa_or_term: str) -> str:
@@ -213,14 +213,18 @@ class MSFraggerModificationTranslator:
             return self._rev_mod_mapping[entry]
         return self._match_mod_by_mass(_extract_mass_shift(entry), aa_or_term)
 
-    def _resolve_positional_mod(self, lookup_key: str, entry: str) -> str:
+    def _resolve_positional_mod(
+        self, lookup_key: str, entry: str, position: int
+    ) -> str:
         """Resolve positional modification name from lookup key like 'S(79.9663)'."""
         if lookup_key in self._rev_mod_mapping:
             return self._rev_mod_mapping[lookup_key]
         amino_acid, mass_shift = _parse_lookup_key(lookup_key, entry)
-        return self._match_mod_by_mass(mass_shift, amino_acid)
+        return self._match_mod_by_mass(mass_shift, amino_acid, position)
 
-    def _match_mod_by_mass(self, mass_shift: float, aa_or_term: str) -> str:
+    def _match_mod_by_mass(
+        self, mass_shift: float, aa_or_term: str, position: Optional[int] = None
+    ) -> str:
         """Match mass shift to modification name by finding the closest mass match.
 
         Parameters
@@ -229,6 +233,8 @@ class MSFraggerModificationTranslator:
             Mass shift in Daltons (e.g., 79.9663 for phosphorylation)
         aa_or_term : str
             Amino acid single letter code or terminal (Any_N-term, Any_C-term)
+        position : Optional[int]
+            Position in peptide (1-indexed). Used to match AA^Any_N-term mods at position 1.
 
         Returns
         -------
@@ -257,9 +263,15 @@ class MSFraggerModificationTranslator:
                 continue
 
             mod_site = mod_name.split(ModificationKeys.SITE_SEPARATOR)[1]
-            exact_match = mod_site == aa_or_term
-            term_match = is_terminal and mod_site.endswith(aa_or_term)
-            if exact_match or term_match:
+            is_exact_match = mod_site == aa_or_term
+            is_term_match = is_terminal and mod_site.endswith(aa_or_term)
+            # Match AA^Any_N-term mods (e.g., Ammonia-loss@C^Any_N-term) at position 1
+            is_nterm_aa_match = (
+                position == 1
+                and mod_site.startswith(aa_or_term)
+                and mod_site.endswith(ModificationKeys.ANY_N_TERM)
+            )
+            if is_exact_match or is_term_match or is_nterm_aa_match:
                 best_match = mod_name
                 best_mass_diff = mass_diff
 
