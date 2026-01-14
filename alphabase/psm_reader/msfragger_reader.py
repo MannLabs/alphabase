@@ -263,15 +263,15 @@ class MSFraggerModificationTranslator:
                 continue
 
             mod_site = mod_name.split(ModificationKeys.SITE_SEPARATOR)[1]
-            exact_match = mod_site == aa_or_term
-            term_match = is_terminal and mod_site.endswith(aa_or_term)
+            is_exact_match = mod_site == aa_or_term
+            is_term_match = is_terminal and mod_site.endswith(aa_or_term)
             # Match AA^Any_N-term mods (e.g., Ammonia-loss@C^Any_N-term) at position 1
-            nterm_aa_match = (
+            is_nterm_aa_match = (
                 position == 1
                 and mod_site.startswith(aa_or_term)
                 and mod_site.endswith(ModificationKeys.ANY_N_TERM)
             )
-            if exact_match or term_match or nterm_aa_match:
+            if is_exact_match or is_term_match or is_nterm_aa_match:
                 best_match = mod_name
                 best_mass_diff = mass_diff
 
