@@ -280,8 +280,8 @@ spectronaut_report:
   column_mapping:
     'raw_name': 'R.FileName'
     'sequence': 'PEP.StrippedSequence'
-    'charge': ['charge', 'FG.Charge']
     'rt': ['EG.ApexRT','EG.MeanApexRT']
+    'charge': ['charge', 'FG.Charge']
     'mobility': 'FG.ApexIonMobility'
     'proteins': ['PG.ProteinNames','PG.ProteinGroups', 'PG.ProteinAccessions']
     'precursor_mz': 'FG.PrecMz'
@@ -307,10 +307,10 @@ spectronaut:
     'sequence': ['StrippedPeptide','PeptideSequence']
     'charge': 'PrecursorCharge'
     'rt': ['RT','iRT','Tr_recalibrated','RetentionTime','NormalizedRetentionTime']
+    'precursor_mz': 'PrecursorMz'
     'mobility': ['Mobility','IonMobility','PrecursorIonMobility']
     'proteins': ['Protein Name','ProteinId','ProteinID','ProteinName','ProteinGroup','ProteinGroups']
     'ccs': 'CCS'
-    'precursor_mz': 'PrecursorMz'
     'uniprot_ids': ['UniProtIds','UniProtID','UniprotId']
     'genes': ['Genes','Gene','GeneName','GeneNames']
 
