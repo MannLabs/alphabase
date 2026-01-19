@@ -77,20 +77,19 @@ maxquant:
 peaks_peptides:
   reader_type: "peaks_peptides"
   column_mapping:
-    "proteins": "protein" # this column is added through preprocessing
+    "proteins": "proteins" # this column is added through preprocessing
     "peptides": "Peptide"
-    "uniprot_ids": "protein"
-    "genes": "gene" # this column is added through preprocessing
+    "genes": "genes" # this column is added through preprocessing
   measurement_regex:
     "lfq": "^Area Sample \\d+$"  # PEAKS LFQ columns are named e.g. "Area Sample 1", "Area Sample 2", ...
 
 peaks_proteins:
   reader_type: "peaks_proteins"
   column_mapping:
-    "proteins": "protein" # this column is added through preprocessing
-    "genes": "Gene"
+    "proteins": "proteins" # this column is added through preprocessing
+    "genes": "genes" # this column is added through preprocessing
   measurement_regex:
-    "lfq": "^Sample \\d+ Area$"  # PEAKS LFQ columns are named e.g. "Area Sample 1", "Area Sample 2", ...
+    "lfq": "^Sample \\d+ Area$"  # PEAKS LFQ columns are named e.g. "Sample 1 Area", "Sample 2 Area", ...
 
 # Based on Spectronaut 20.0 Run Pivot Report (Page 80/81)
 # https://biognosys.com/content/uploads/2025/06/Spectronaut-20-Manual.pdf

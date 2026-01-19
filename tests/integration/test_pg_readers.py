@@ -11,6 +11,8 @@ from alphabase.pg_reader import (
     FragPipePGReader,
     MaxQuantPGReader,
     MZTabPGReader,
+    PeaksPeptidesReader,
+    PeaksPGReader,
     SpectronautPGReader,
 )
 from alphabase.pg_reader.keys import PGCols
@@ -248,3 +250,93 @@ class TestDirectLFQReader:
         result_df = reader.import_file(file_path=file_path)
 
         pd.testing.assert_frame_equal(result_df, reference)
+
+
+class TestPeaksPGReader:
+    """Test PEAKS protein group reader"""
+
+    def test_import_peaks_proteins(
+        self, example_peaks_proteins_tsv: tuple[str, pd.DataFrame]
+    ) -> None:
+        """Test import of PEAKS protein group file"""
+        file_path, reference = example_peaks_proteins_tsv
+
+        reader = PeaksPGReader()
+
+        result_df = reader.import_file(file_path=file_path)
+
+        pd.testing.assert_frame_equal(result_df, reference)
+
+    def test_protein_gene_splitting(
+        self, example_peaks_proteins_tsv: tuple[str, pd.DataFrame]
+    ) -> None:
+        """Test that protein|gene pairs are correctly split and grouped"""
+        file_path, _ = example_peaks_proteins_tsv
+
+        reader = PeaksPGReader()
+        result_df = reader.import_file(file_path=file_path)
+
+        # Check that index has correct columns
+        assert result_df.index.names == [PGCols.PROTEINS, PGCols.GENES]
+
+        # Check shape: 5 proteins x 4 samples
+        assert result_df.shape == (5, 4)
+
+        # Check that multi-protein groups are correctly assembled
+        assert "P11111;Q22222" in result_df.index.get_level_values(PGCols.PROTEINS)
+        assert "GENE3;GENE4" in result_df.index.get_level_values(PGCols.GENES)
+
+        # Check triple protein group
+        assert "R33333;S44444;T55555" in result_df.index.get_level_values(
+            PGCols.PROTEINS
+        )
+        assert "GENE5;GENE6;GENE7" in result_df.index.get_level_values(PGCols.GENES)
+
+
+class TestPeaksPeptidesReader:
+    """Test PEAKS peptide reader"""
+
+    def test_import_peaks_peptides(
+        self, example_peaks_peptides_tsv: tuple[str, pd.DataFrame]
+    ) -> None:
+        """Test import of PEAKS peptide file"""
+        file_path, reference = example_peaks_peptides_tsv
+
+        reader = PeaksPeptidesReader()
+
+        result_df = reader.import_file(file_path=file_path)
+
+        pd.testing.assert_frame_equal(result_df, reference)
+
+    def test_peptide_protein_gene_splitting(
+        self, example_peaks_peptides_tsv: tuple[str, pd.DataFrame]
+    ) -> None:
+        """Test that protein|gene pairs are correctly split and grouped in peptide data"""
+        file_path, _ = example_peaks_peptides_tsv
+
+        reader = PeaksPeptidesReader()
+        result_df = reader.import_file(file_path=file_path)
+
+        # Check that index has correct columns
+        assert result_df.index.names == [
+            PGCols.PROTEINS,
+            PGCols.PEPTIDES,
+            PGCols.GENES,
+        ]
+
+        # Check shape: 5 peptides x 4 samples
+        assert result_df.shape == (5, 4)
+
+        # Check that multi-protein groups are correctly assembled
+        assert "P11111;Q22222" in result_df.index.get_level_values(PGCols.PROTEINS)
+        assert "GENE3;GENE4" in result_df.index.get_level_values(PGCols.GENES)
+
+        # Check peptide sequences are present
+        assert "PEPTIDEAAA" in result_df.index.get_level_values(PGCols.PEPTIDES)
+        assert "PEPTIDECCC" in result_df.index.get_level_values(PGCols.PEPTIDES)
+
+        # Check triple protein group
+        assert "R33333;S44444;T55555" in result_df.index.get_level_values(
+            PGCols.PROTEINS
+        )
+        assert "GENE5;GENE6;GENE7" in result_df.index.get_level_values(PGCols.GENES)

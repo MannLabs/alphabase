@@ -274,3 +274,44 @@ A0A075B6I0	FSGSILGNK2	0.0	0.0
     reference = get_local_reference_data(test_case_name=TEST_FILE_NAME)
 
     return file_path, reference
+
+
+@pytest.fixture(scope="function")
+def example_peaks_proteins_tsv(tmp_path) -> tuple[Path, pd.DataFrame]:
+    """Get and parse PEAKS protein group report for local testing."""
+    TEST_FILE_NAME = "pg_peaks_proteins.tsv"
+    # Note: Accession format is "protein|gene" and can have multiple pairs separated by ":"
+    TEST_DATA = """Accession	Gene	Sample 1 Area	Sample 2 Area	Sample 3 Area	Sample 4 Area
+P12345|GENE1	GENE1	1000000.5	1200000.3	1100000.7	1050000.2
+Q67890|GENE2	GENE2	500000.1	520000.9	510000.4	505000.8
+P11111|GENE3:Q22222|GENE4	GENE3	2000000.0	2100000.5	2050000.2	2020000.1
+R33333|GENE5:S44444|GENE6:T55555|GENE7	GENE5	750000.3	780000.1	760000.9	770000.5
+P99999|GENE8	GENE8	300000.0	0.0	310000.5	305000.2
+    """
+    file_path = write_test_data(
+        data=TEST_DATA, directory=tmp_path, test_case_name=TEST_FILE_NAME
+    )
+    reference = get_local_reference_data(test_case_name=TEST_FILE_NAME)
+
+    return file_path, reference
+
+
+@pytest.fixture(scope="function")
+def example_peaks_peptides_tsv(tmp_path) -> tuple[Path, pd.DataFrame]:
+    """Get and parse PEAKS peptide report for local testing."""
+    TEST_FILE_NAME = "pg_peaks_peptides.tsv"
+    # Note: Accession format is "protein|gene" and can have multiple pairs separated by ":"
+    # Column naming differs from protein table: "Area Sample 1" not "Sample 1 Area"
+    TEST_DATA = """Accession	Peptide	Area Sample 1	Area Sample 2	Area Sample 3	Area Sample 4
+P12345|GENE1	PEPTIDEAAA	50000.5	52000.3	51000.7	50500.2
+Q67890|GENE2	PEPTIDEBBB	25000.1	26000.9	25500.4	25250.8
+P11111|GENE3:Q22222|GENE4	PEPTIDECCC	100000.0	105000.5	102500.2	101000.1
+R33333|GENE5:S44444|GENE6:T55555|GENE7	PEPTIDEDDD	37500.3	39000.1	38000.9	38500.5
+P99999|GENE8	PEPTIDEEEE	15000.0	0.0	15500.5	15250.2
+    """
+    file_path = write_test_data(
+        data=TEST_DATA, directory=tmp_path, test_case_name=TEST_FILE_NAME
+    )
+    reference = get_local_reference_data(test_case_name=TEST_FILE_NAME)
+
+    return file_path, reference
