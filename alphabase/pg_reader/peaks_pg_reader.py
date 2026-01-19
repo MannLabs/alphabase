@@ -94,6 +94,48 @@ def _split_peaks_identifiers(df: pd.DataFrame) -> pd.DataFrame:
     return df_copy
 
 
+def _reformat_observation_indices(
+    df: pd.DataFrame,
+    modality: Literal["peptide", "protein"],
+) -> pd.DataFrame:
+    """Parse PEAKS sample column names to standardized format.
+
+    The peptide table contains sample names like Area Sample 1, Area Sample 2, etc.
+    The protein table contains sample names like Sample 1 Area, Sample 2 Area, etc.
+
+    We parse both to appropriate sample names like sample_1, sample_2, etc.
+
+    Parameters
+    ----------
+    df
+        DataFrame with PEAKS sample columns.
+    modality
+        Type of PEAKS table ("peptide" or "protein") to determine parsing strategy.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with standardized column names.
+
+    """
+    if modality == "peptide":
+        # Only rename columns that match "Area Sample X" pattern
+        def parser(col_name: str) -> str:
+            if col_name.startswith("Area Sample"):
+                return col_name.lower().replace("area ", "").replace(" ", "_")
+            return col_name
+    elif modality == "protein":
+        # Only rename columns that match "Sample X Area" pattern
+        def parser(col_name: str) -> str:
+            if col_name.startswith("Sample") and col_name.endswith("Area"):
+                return col_name.lower().replace(" area", "").replace(" ", "_")
+            return col_name
+    else:
+        raise ValueError(f"Unknown modality: {modality}")
+
+    return df.rename(columns=parser)
+
+
 class PeaksPGReader(PGReaderBase):
     """Reader for protein group matrices created by PEAKS."""
 
@@ -130,8 +172,14 @@ class PeaksPGReader(PGReaderBase):
         The 'Accession' column contains both the protein and gene identifiers separated by
         a pipe character. This method splits these identifiers into a 'protein' and a 'gene' column.
 
+        Additionally, parse the sample names to a better format.
+
         """
-        return _split_peaks_identifiers(df)
+        df_processed = _split_peaks_identifiers(df)
+        return _reformat_observation_indices(
+            df_processed,
+            modality="protein",
+        )
 
 
 pg_reader_provider.register_reader("peaks_proteins", reader_class=PeaksPGReader)
@@ -173,8 +221,14 @@ class PeaksPeptidesReader(PGReaderBase):
         The 'Accession' column contains both the protein and gene identifiers separated by
         a pipe character. This method splits these identifiers into a 'protein' and a 'gene' column.
 
+        Additionally, parse the sample names to a better format.
+
         """
-        return _split_peaks_identifiers(df)
+        df_processed = _split_peaks_identifiers(df)
+        return _reformat_observation_indices(
+            df_processed,
+            modality="peptide",
+        )
 
 
 pg_reader_provider.register_reader("peaks_peptides", reader_class=PeaksPeptidesReader)

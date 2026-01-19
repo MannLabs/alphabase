@@ -292,6 +292,25 @@ class TestPeaksPGReader:
         )
         assert "GENE5;GENE6;GENE7" in result_df.index.get_level_values(PGCols.GENES)
 
+    def test_column_renaming(
+        self, example_peaks_proteins_csv: tuple[str, pd.DataFrame]
+    ) -> None:
+        """Test that column names are standardized from PEAKS format"""
+        file_path, _ = example_peaks_proteins_csv
+
+        reader = PeaksPGReader()
+        result_df = reader.import_file(file_path=file_path)
+
+        # Check standardized column names
+        assert "sample_1" in result_df.columns
+        assert "sample_2" in result_df.columns
+        assert "sample_3" in result_df.columns
+        assert "sample_4" in result_df.columns
+
+        # Ensure original names are gone
+        assert "Sample 1 Area" not in result_df.columns
+        assert "Sample 2 Area" not in result_df.columns
+
 
 class TestPeaksPeptidesReader:
     """Test PEAKS peptide reader"""
@@ -340,3 +359,22 @@ class TestPeaksPeptidesReader:
             PGCols.PROTEINS
         )
         assert "GENE5;GENE6;GENE7" in result_df.index.get_level_values(PGCols.GENES)
+
+    def test_column_renaming(
+        self, example_peaks_peptides_csv: tuple[str, pd.DataFrame]
+    ) -> None:
+        """Test that column names are standardized from PEAKS peptide format"""
+        file_path, _ = example_peaks_peptides_csv
+
+        reader = PeaksPeptidesReader()
+        result_df = reader.import_file(file_path=file_path)
+
+        # Check standardized column names
+        assert "sample_1" in result_df.columns
+        assert "sample_2" in result_df.columns
+        assert "sample_3" in result_df.columns
+        assert "sample_4" in result_df.columns
+
+        # Ensure original names are gone
+        assert "Area Sample 1" not in result_df.columns
+        assert "Area Sample 2" not in result_df.columns

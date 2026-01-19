@@ -81,7 +81,7 @@ peaks_peptides:
     "proteins": "proteins" # this column is added through preprocessing
     "genes": "genes" # this column is added through preprocessing
   measurement_regex:
-    "lfq": "^Area Sample \\d+$"  # PEAKS LFQ columns are named e.g. "Area Sample 1", "Area Sample 2", ...
+    "lfq": "^sample_\\d+$"  # PEAKS columns renamed from "Area Sample 1" to "sample_1" during preprocessing
 
 peaks_proteins:
   reader_type: "peaks_proteins"
@@ -89,7 +89,7 @@ peaks_proteins:
     "proteins": "proteins" # this column is added through preprocessing
     "genes": "genes" # this column is added through preprocessing
   measurement_regex:
-    "lfq": "^Sample \\d+ Area$"  # PEAKS LFQ columns are named e.g. "Sample 1 Area", "Sample 2 Area", ...
+    "lfq": "^sample_\\d+$"  # PEAKS columns renamed from "Sample 1 Area" to "sample_1" during preprocessing
 
 # Based on Spectronaut 20.0 Run Pivot Report (Page 80/81)
 # https://biognosys.com/content/uploads/2025/06/Spectronaut-20-Manual.pdf
