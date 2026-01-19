@@ -256,10 +256,10 @@ class TestPeaksPGReader:
     """Test PEAKS protein group reader"""
 
     def test_import_peaks_proteins(
-        self, example_peaks_proteins_tsv: tuple[str, pd.DataFrame]
+        self, example_peaks_proteins_csv: tuple[str, pd.DataFrame]
     ) -> None:
         """Test import of PEAKS protein group file"""
-        file_path, reference = example_peaks_proteins_tsv
+        file_path, reference = example_peaks_proteins_csv
 
         reader = PeaksPGReader()
 
@@ -268,10 +268,10 @@ class TestPeaksPGReader:
         pd.testing.assert_frame_equal(result_df, reference)
 
     def test_protein_gene_splitting(
-        self, example_peaks_proteins_tsv: tuple[str, pd.DataFrame]
+        self, example_peaks_proteins_csv: tuple[str, pd.DataFrame]
     ) -> None:
         """Test that protein|gene pairs are correctly split and grouped"""
-        file_path, _ = example_peaks_proteins_tsv
+        file_path, _ = example_peaks_proteins_csv
 
         reader = PeaksPGReader()
         result_df = reader.import_file(file_path=file_path)
@@ -297,10 +297,10 @@ class TestPeaksPeptidesReader:
     """Test PEAKS peptide reader"""
 
     def test_import_peaks_peptides(
-        self, example_peaks_peptides_tsv: tuple[str, pd.DataFrame]
+        self, example_peaks_peptides_csv: tuple[str, pd.DataFrame]
     ) -> None:
         """Test import of PEAKS peptide file"""
-        file_path, reference = example_peaks_peptides_tsv
+        file_path, reference = example_peaks_peptides_csv
 
         reader = PeaksPeptidesReader()
 
@@ -309,10 +309,10 @@ class TestPeaksPeptidesReader:
         pd.testing.assert_frame_equal(result_df, reference)
 
     def test_peptide_protein_gene_splitting(
-        self, example_peaks_peptides_tsv: tuple[str, pd.DataFrame]
+        self, example_peaks_peptides_csv: tuple[str, pd.DataFrame]
     ) -> None:
         """Test that protein|gene pairs are correctly split and grouped in peptide data"""
-        file_path, _ = example_peaks_peptides_tsv
+        file_path, _ = example_peaks_peptides_csv
 
         reader = PeaksPeptidesReader()
         result_df = reader.import_file(file_path=file_path)
