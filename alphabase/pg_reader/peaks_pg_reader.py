@@ -168,7 +168,7 @@ class PeaksPeptidesReader(PGReaderBase):
         )
 
     def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Preprocess PEAKS protein group report and return modified copy of the dataframe.
+        """Preprocess PEAKS peptide report and return modified copy of the dataframe.
 
         The 'Accession' column contains both the protein and gene identifiers separated by
         a pipe character. This method splits these identifiers into a 'protein' and a 'gene' column.

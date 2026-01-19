@@ -317,10 +317,10 @@ class TestPeaksPeptidesReader:
         reader = PeaksPeptidesReader()
         result_df = reader.import_file(file_path=file_path)
 
-        # Check that index has correct columns
+        # Check that index has correct columns (peptides first per YAML config)
         assert result_df.index.names == [
-            PGCols.PROTEINS,
             PGCols.PEPTIDES,
+            PGCols.PROTEINS,
             PGCols.GENES,
         ]
 

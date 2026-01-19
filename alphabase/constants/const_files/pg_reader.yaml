@@ -77,8 +77,8 @@ maxquant:
 peaks_peptides:
   reader_type: "peaks_peptides"
   column_mapping:
-    "proteins": "proteins" # this column is added through preprocessing
     "peptides": "Peptide"
+    "proteins": "proteins" # this column is added through preprocessing
     "genes": "genes" # this column is added through preprocessing
   measurement_regex:
     "lfq": "^Area Sample \\d+$"  # PEAKS LFQ columns are named e.g. "Area Sample 1", "Area Sample 2", ...

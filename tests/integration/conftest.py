@@ -279,7 +279,7 @@ A0A075B6I0	FSGSILGNK2	0.0	0.0
 @pytest.fixture(scope="function")
 def example_peaks_proteins_csv(tmp_path) -> tuple[Path, pd.DataFrame]:
     """Get and parse PEAKS protein group report for local testing."""
-    TEST_FILE_NAME = "lfq.dia.proteins.csv"
+    TEST_FILE_NAME = "pg_peaks_proteins.tsv"
     # Note: Accession format is "protein|gene" and can have multiple pairs separated by ":"
     TEST_DATA = """Accession,Gene,Sample 1 Area,Sample 2 Area,Sample 3 Area,Sample 4 Area
 P12345|GENE1,GENE1,1000000.5,1200000.3,1100000.7,1050000.2
@@ -299,7 +299,7 @@ P99999|GENE8,GENE8,300000.0,0.0,310000.5,305000.2
 @pytest.fixture(scope="function")
 def example_peaks_peptides_csv(tmp_path) -> tuple[Path, pd.DataFrame]:
     """Get and parse PEAKS peptide report for local testing."""
-    TEST_FILE_NAME = "lfq.dia.peptides.csv"
+    TEST_FILE_NAME = "pg_peaks_peptides.tsv"
     # Note: Accession format is "protein|gene" and can have multiple pairs separated by ":"
     # Column naming differs from protein table: "Area Sample 1" not "Sample 1 Area"
     TEST_DATA = """Accession,Peptide,Area Sample 1,Area Sample 2,Area Sample 3,Area Sample 4
