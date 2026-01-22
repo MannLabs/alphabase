@@ -1029,6 +1029,7 @@ Ethanolamine@E	43.042199	43.0678	H(5)C(2)N(1)	0.0		Chemical derivative	734		0.0
 Ethanolamine@C	43.042199	43.0678	H(5)C(2)N(1)	0.0		Chemical derivative	734		0.0
 TMT6plex@T	229.162932	229.2634	H(20)C(8)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	737		0.0
 TMT6plex@S	229.162932	229.2634	H(20)C(8)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	737		0.0
+TMT6plex@Y	229.162932	229.2634	H(20)C(8)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	737		0.0
 TMT6plex@H	229.162932	229.2634	H(20)C(8)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	737		0.0
 TMT6plex@Protein_N-term	229.162932	229.2634	H(20)C(8)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	737		0.0
 TMT6plex@Any_N-term	229.162932	229.2634	H(20)C(8)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	737		0.0

@@ -320,6 +320,8 @@ modification_mappings:
       - 'T(229.1629)'
     'TMT6plex@H':
       - 'H(229.1629)'
+    'TMT6plex@Y':
+      - 'Y(229.1629)'
     'iTRAQ4plex@K':
       - 'K(144.1020)'
     'iTRAQ4plex@Any_N-term':
