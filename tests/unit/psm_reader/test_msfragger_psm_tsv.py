@@ -68,6 +68,13 @@ class TestDataProcessing:
         reader._translate_decoy()
         assert reader._psm_df[PsmDfCols.DECOY].tolist() == [1, 0]
 
+    def test_decoy_translation_no_column(self, reader):
+        """Test decoy translation when decoy column is missing."""
+        reader._psm_df = pd.DataFrame({"Peptide": ["PEPTIDE", "SEQUENCE"]})
+        reader._translate_decoy()
+        assert PsmDfCols.DECOY in reader._psm_df.columns
+        assert reader._psm_df[PsmDfCols.DECOY].tolist() == [0, 0]
+
     def test_modification_loading_integration(self, reader):
         """Test modification loading produces complete correct results."""
         # Simulates what happens after _translate_columns() maps the column

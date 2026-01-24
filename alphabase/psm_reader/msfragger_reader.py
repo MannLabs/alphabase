@@ -426,9 +426,12 @@ class MSFraggerPsmTsvReader(PSMReaderBase):
         return df
 
     def _translate_decoy(self) -> None:
+        # if the decoy column deosnt exist we assume all entries are target
         self._psm_df[PsmDfCols.DECOY] = (
-            self._psm_df[PsmDfCols.DECOY] == "true"
-        ).astype(np.int8)
+            0
+            if PsmDfCols.DECOY not in self._psm_df.columns
+            else (self._psm_df[PsmDfCols.DECOY] == "true").astype(np.int8)
+        )
 
     def _translate_score(self) -> None:
         """MSFragger Hyperscore is already in correct format (larger = better)."""
