@@ -1033,7 +1033,7 @@ TMT6plex@H	229.162932	229.2634	H(20)C(8)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label
 TMT6plex@Protein_N-term	229.162932	229.2634	H(20)C(8)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	737		0.0
 TMT6plex@Any_N-term	229.162932	229.2634	H(20)C(8)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	737		0.0
 TMT6plex@K	229.162932	229.2634	H(20)C(8)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	737		0.0
-TMT6plex@Y	229.162932	229.2634	H(20)C(8)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	737		0.0
+TMT6plex@Y	229.162932	229.2634	H(20)C(8)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	737	CC1N(CC(NCCC(=O)Oc2ccc(C[C@@H](C(=O)[Ts])N([Fl])([Fl]))cc2)=O)C(C)CCC1	0.0
 TMT10plex@T	229.162932	229.2634	H(20)C(8)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	737		0.0
 TMT10plex@S	229.162932	229.2634	H(20)C(8)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	737		0.0
 TMT10plex@H	229.162932	229.2634	H(20)C(8)13C(4)N(1)15N(1)O(2)	0.0		Isotopic label	737		0.0
