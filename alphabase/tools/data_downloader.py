@@ -1,13 +1,13 @@
 """Download files from sharing links."""
 
 import base64
-import cgi
 import os
 import re
 import traceback
 import warnings
 import zipfile
 from abc import ABC, abstractmethod
+from email.message import EmailMessage
 from typing import Optional
 from urllib.parse import parse_qs, urlparse
 from urllib.request import urlopen, urlretrieve
@@ -164,9 +164,20 @@ class FileDownloader(ABC):
             print(f"Could not open {self._url} for reading filename: {e}")
             raise ValueError(f"Could not open {self._url} for reading filename") from e
 
-        info = remotefile.info()["Content-Disposition"]
-        value, params = cgi.parse_header(info)
-        return params["filename"]
+        # Parse remotefile info (recommended by PEP594)
+        msg = EmailMessage()
+        content_disp = remotefile.info().get("content-disposition")
+        if content_disp is None:
+            raise KeyError(
+                "Content-Disposition header not found, which is necessary to extract the filename."
+            )
+        msg["content-disposition"] = content_disp
+
+        filename = msg["content-disposition"].params.get("filename")
+        if filename is None:
+            raise KeyError("Could not extract filename from remote file.")
+
+        return filename
 
     def _download_file(
         self, max_size_kb: Optional[int] = None
@@ -221,7 +232,7 @@ class OnedriveDownloader(FileDownloader):
     def _encode_url(self) -> str:  # pragma: no cover
         """Encode onedrive sharing link as url for downloading files."""
         b64_string = base64.urlsafe_b64encode(str.encode(self._url)).decode("utf-8")
-        encoded_url = f'https://api.onedrive.com/v1.0/shares/u!{b64_string.replace("=", "")}/root/content'
+        encoded_url = f"https://api.onedrive.com/v1.0/shares/u!{b64_string.replace('=', '')}/root/content"
         return encoded_url
 
 
