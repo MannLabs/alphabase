@@ -85,6 +85,16 @@ from within a Jupyter notebook by prepending it with a `!`*:
 pip install alphabase
 ```
 
+Note that this installs only a subset of alphabase functionality, as it misses `numba`.
+If you encounter a respectove warning, you need to install the `full` extra option
+``` bash
+pip install "alphabase[full]"
+```
+(note the double quotes `"`).
+
+You need to install the `hdf` extra option of the package to be able to read alphapept protein group matrices in hdf format.
+
+#### Optional: Stable dependencies
 Installing AlphaBase like this avoids conflicts when integrating it in
 other tools, as this does not enforce strict versioning of dependencies.
 However, if new versions of dependencies are released, they are not
@@ -96,19 +106,12 @@ be compatible with:
 ``` bash
 pip install "alphabase[stable]"
 ```
-
-NOTE: You might need to run `pip install -U pip` before installing
-AlphaBase like this. Also note the double quotes `"`.
-
-You need to install the `hdf` extra option of the package to be able to read alphapept protein group matrices in hdf format.
-
-For those who are really adventurous, it is also possible to directly
-install any branch (e.g. `@main`) with any extras
-(e.g. `#egg=alphabase[stable,development]`) from GitHub with e.g.
-
+or
 ``` bash
-pip install "git+https://github.com/MannLabs/alphabase.git@main#egg=alphabase[stable,development]"
+pip install "alphabase[stable,full-stable]"
 ```
+
+
 
 ### Developer
 
