@@ -6,11 +6,11 @@ pandas==2.2.3
 h5py==3.12.1
 contextlib2==21.6.0
 xxhash==3.5.0
-biopython==1.84
+biopython==1.84  # imported as "Bio"
 tqdm==4.67.0
 regex==2024.11.6
 # pydivsufsort  # TODO this is used by lcp_digest.py?
-pyarrow==19.0.1
+pyarrow==19.0.1 #  transparent dependency -> required by pandas for parquet file handling
 pyahocorasick==2.1.0
 pyteomics==4.7.5
 pyyaml==6.0.2
