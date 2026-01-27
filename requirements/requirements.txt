@@ -4,7 +4,6 @@
 numpy<2.0 # test: tolerate_version  # rdkit==2024.3.3 is not compatible with numpy >= 2.0
 pandas==2.2.3
 h5py==3.12.1
-contextlib2==21.6.0
 xxhash==3.5.0
 biopython==1.84  # imported as "Bio"
 tqdm==4.67.0
