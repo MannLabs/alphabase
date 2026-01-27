@@ -1,7 +1,7 @@
 """Compatibility module for optional numba dependency.
 
 This module provides fallback implementations when numba is not installed.
-When numba is unavailable, decorated functions will raise NotImplementedError.
+When numba is unavailable, decorators become no-ops (identity functions).
 """
 
 from __future__ import annotations
@@ -9,20 +9,23 @@ from __future__ import annotations
 import warnings
 from typing import Any, Callable
 
+import numpy as np
+
 try:
     import numba
     from numba import jit, njit, prange, vectorize
 
     HAS_NUMBA = True
 
-    NumbaTypedDict = numba.typed.Dict
-    numba_types = numba.types
+    nb_ = numba
 
     numba_jit = jit
     numba_njit = njit
     numba_vectorize = vectorize
     numba_prange = prange
-    nb_ = numba
+
+    NumbaTypedDict = numba.typed.Dict
+    numba_types = numba.types
 
 except ImportError:
     HAS_NUMBA = False
@@ -34,14 +37,14 @@ except ImportError:
         if not _NUMBA_WARNING_SHOWN:
             warnings.warn(
                 "numba is not installed. "
-                "Install with `pip install alphabase[numba]` for full functionality.",
+                "Install with `pip install alphabase[full]` for full functionality.",
                 UserWarning,
                 stacklevel=3,
             )
             _NUMBA_WARNING_SHOWN = True
 
-    def _make_stub_decorator(decorator_name: str) -> Callable:
-        """Create a stub decorator that raises NotImplementedError when called."""
+    def _make_identity_decorator(decorator_name: str) -> Callable:
+        """Create a stub decorator that returns the function as-is."""
 
         def decorator(
             *args: Any,  # noqa: ANN401
@@ -49,33 +52,35 @@ except ImportError:
         ) -> Callable:
             _show_numba_warning()
 
-            def make_wrapper(func: Callable) -> Callable:
-                def wrapper(
-                    *args_: Any,  # noqa: ANN401
-                    **kwargs_: Any,  # noqa: ANN401
-                ) -> None:
-                    raise NotImplementedError(
-                        f"Function '{func.__name__}' requires numba. "
-                        "Install with `pip install alphabase[numba]`."
-                    )
-
-                wrapper.__name__ = func.__name__
-                return wrapper
-
             # @decorator without parentheses: args[0] is the function
             if args and callable(args[0]):
-                return make_wrapper(args[0])
+                return args[0]
 
-            # @decorator() or @decorator(option=value): return the wrapper maker
-            return make_wrapper
+            # @decorator() or @decorator(option=value): return identity function
+            def identity(func: Callable) -> Callable:
+                return func
+
+            return identity
 
         decorator.__name__ = decorator_name
         return decorator
 
-    numba_njit = _make_stub_decorator("njit")
-    numba_jit = _make_stub_decorator("jit")
-    numba_vectorize = _make_stub_decorator("vectorize")
-    numba_prange = range
+    def _numba_vectorize(
+        *args: Any,  # noqa: ANN401
+        **kwargs: Any,  # noqa: ANN401, ARG001
+    ) -> Callable:
+        """Fallback for numba.vectorize using numpy.vectorize."""
+        _show_numba_warning()
+
+        def wrap_with_numpy_vectorize(func: Callable) -> Callable:
+            return np.vectorize(func)
+
+        # @numba_vectorize without parentheses: args[0] is the function
+        if args and callable(args[0]):
+            return np.vectorize(args[0])
+
+        # @numba_vectorize([signatures], target=...) - ignore signatures, return wrapper
+        return wrap_with_numpy_vectorize
 
     class _TypedDictFallback(dict):
         """Fallback for numba.typed.Dict that uses a regular dict."""
@@ -86,8 +91,6 @@ except ImportError:
             **kwargs: Any,  # noqa: ANN401, ARG004
         ) -> dict:
             return {}
-
-    NumbaTypedDict = _TypedDictFallback
 
     class _RecursiveStubClass:
         """Fallback stub class. Returns self for any access."""
@@ -106,4 +109,11 @@ except ImportError:
             return self
 
     nb_ = _RecursiveStubClass()
+
+    numba_jit = _make_identity_decorator("jit")
+    numba_njit = _make_identity_decorator("njit")
+    numba_vectorize = _numba_vectorize
+    numba_prange = range
+
+    NumbaTypedDict = _TypedDictFallback
     numba_types = _RecursiveStubClass()
