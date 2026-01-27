@@ -2,7 +2,6 @@ import multiprocessing as mp
 import typing
 from functools import partial
 
-import numba
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
@@ -12,6 +11,7 @@ from alphabase.constants.aa import AA_Composition
 from alphabase.constants.atom import MASS_ISOTOPE, MASS_PROTON
 from alphabase.constants.isotope import IsotopeDistribution
 from alphabase.constants.modification import MOD_Composition, ModificationKeys
+from alphabase.numba_wrapper import numba_njit
 from alphabase.peptide.mass_calc import calc_peptide_masses_for_same_len_seqs
 
 
@@ -313,7 +313,7 @@ def get_mod_seq_formula(seq: str, mods: str) -> list:
     return list(formula.items())
 
 
-@numba.njit
+@numba_njit
 def get_right_most_isotope_offset(
     intensities: np.ndarray,
     apex_idx: int,

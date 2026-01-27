@@ -3,12 +3,12 @@ import re
 import typing
 from collections import defaultdict
 
-import numba
 import numpy as np
 from rdkit import Chem
 from rdkit.Chem import rdMolDescriptors
 
 from alphabase.constants._const import CONST_FILE_FOLDER, common_const_dict
+from alphabase.numba_wrapper import NumbaTypedDict, numba_types
 from alphabase.yaml_utils import load_yaml
 
 MASS_PROTON: float = common_const_dict["MASS_PROTON"]
@@ -76,13 +76,13 @@ CHEM_INFO_DICT = {}
 CHEM_MONO_MASS = {}
 
 #: {element: np.ndarray of abundance distribution}
-CHEM_ISOTOPE_DIST: numba.typed.Dict = numba.typed.Dict.empty(
-    key_type=numba.types.unicode_type, value_type=numba.types.float64[:]
+CHEM_ISOTOPE_DIST = NumbaTypedDict.empty(
+    key_type=numba_types.unicode_type, value_type=numba_types.float64[:]
 )
 
 #: {element: int (mono position)}
-CHEM_MONO_IDX: numba.typed.Dict = numba.typed.Dict.empty(
-    key_type=numba.types.unicode_type, value_type=numba.types.int64
+CHEM_MONO_IDX = NumbaTypedDict.empty(
+    key_type=numba_types.unicode_type, value_type=numba_types.int64
 )
 
 MASS_H: int = None
@@ -170,12 +170,12 @@ def load_elem_yaml(yaml_file: str):
     CHEM_INFO_DICT = load_yaml(yaml_file)
 
     CHEM_MONO_MASS = {}
-    CHEM_ISOTOPE_DIST = numba.typed.Dict.empty(
-        key_type=numba.types.unicode_type, value_type=numba.types.float64[:]
+    CHEM_ISOTOPE_DIST = NumbaTypedDict.empty(
+        key_type=numba_types.unicode_type, value_type=numba_types.float64[:]
     )
 
-    CHEM_MONO_IDX = numba.typed.Dict.empty(
-        key_type=numba.types.unicode_type, value_type=numba.types.int64
+    CHEM_MONO_IDX = NumbaTypedDict.empty(
+        key_type=numba_types.unicode_type, value_type=numba_types.int64
     )
 
     reset_elements()

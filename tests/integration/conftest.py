@@ -10,11 +10,17 @@ import pytest
 from alphabase.tools.data_downloader import DataShareDownloader
 
 TABLES_PACKAGE_UNAVAILABLE = importlib.util.find_spec("tables") is None
+NUMBA_UNAVAILABLE = importlib.util.find_spec("numba") is None
 
 
 pytest.mark.optional_pytables_dependency = pytest.mark.skipif(
     TABLES_PACKAGE_UNAVAILABLE,
     reason="pytables package not installed. Install with `pip install alphabase[hdf]`",
+)
+
+pytest.mark.requires_numba = pytest.mark.skipif(
+    NUMBA_UNAVAILABLE,
+    reason="numba package not installed. Install with `pip install alphabase[numba]`",
 )
 
 
