@@ -19,7 +19,6 @@ EMPTY_DIST: np.ndarray = np.zeros(MAX_ISOTOPE_LEN)
 EMPTY_DIST[0] = 1
 
 
-@numba.njit
 def truncate_isotope(isotopes: np.ndarray, mono_idx: int) -> tuple:
     """
     For a given isotope distribution (intensity patterns),
