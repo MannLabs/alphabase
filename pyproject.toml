@@ -52,8 +52,6 @@ optional-dependencies.stable = { file = ["requirements/requirements.txt" ] }
 optional-dependencies.full = { file = ["requirements/requirements_full_loose.txt" ] }
 optional-dependencies.full-stable = { file = ["requirements/requirements_full.txt" ] }
 optional-dependencies.hdf = { file = ["requirements/requirements_hdf_loose.txt" ] }
-optional-dependencies.smiles = { file = ["requirements/requirements_smiles_loose.txt"] }
-optional-dependencies.smiles-stable = { file = ["requirements/requirements_smiles.txt"] }
 optional-dependencies.tests = { file = ["requirements/requirements_tests.txt" ] }
 optional-dependencies.development = { file = [
     "requirements/requirements_development.txt",
