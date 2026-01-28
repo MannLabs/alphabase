@@ -18,6 +18,8 @@ from alphabase.constants.modification import (
     update_all_by_MOD_DF,
 )
 
+pytestmark = pytest.mark.requires_numba
+
 # Store original modification state for restoration at the end of all tests
 ORIGINAL_MOD_DF = MOD_DF.copy()
 

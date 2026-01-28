@@ -2,7 +2,6 @@ import warnings
 from dataclasses import dataclass, field
 from typing import Dict, List, Tuple, Union
 
-import numba as nb
 import numpy as np
 import pandas as pd
 
@@ -12,6 +11,7 @@ from alphabase.constants.atom import (
     calc_mass_from_formula,
 )
 from alphabase.constants.modification import ModificationKeys, calc_modloss_mass
+from alphabase.numba_wrapper import nb_, numba_njit, numba_prange, numba_vectorize
 from alphabase.peptide.mass_calc import calc_b_y_and_peptide_masses_for_same_len_seqs
 from alphabase.peptide.precursor import (
     is_precursor_refined,
@@ -801,7 +801,7 @@ def mask_fragments_for_charge_greater_than_precursor_charge(
     return fragment_df
 
 
-@nb.njit(parallel=True)
+@numba_njit(parallel=True)
 def fill_in_indices(
     frag_start_idxes: np.ndarray,
     frag_stop_idxes: np.ndarray,
@@ -853,7 +853,7 @@ def fill_in_indices(
     ones = np.ones(max_frag_per_peptide).reshape(-1, 1)
     length = len(frag_start_idxes)
 
-    for i in nb.prange(length):
+    for i in numba_prange(length):
         frag_start = frag_start_idxes[i]
         frag_end = frag_stop_idxes[i]
         max_index = frag_end - frag_start
@@ -874,7 +874,9 @@ def fill_in_indices(
         ] = _excl
 
 
-@nb.vectorize([nb.uint32(nb.int8, nb.uint32, nb.uint32, nb.uint32)], target="parallel")
+@numba_vectorize(
+    [nb_.uint32(nb_.int8, nb_.uint32, nb_.uint32, nb_.uint32)], target="parallel"
+)
 def calculate_fragment_numbers(
     frag_direction: np.int8,
     frag_number: np.uint32,
@@ -1130,7 +1132,7 @@ def flatten_fragments(
     return precursor_df, frag_df
 
 
-@nb.njit()
+@numba_njit
 def compress_fragment_indices(frag_idx):
     """
     recalculates fragment indices to remove unused fragments. Can be used to compress a fragment library.
@@ -1406,7 +1408,7 @@ def create_fragment_mz_dataframe(
     )
 
 
-@nb.njit(nogil=True)
+@numba_njit(nogil=True)
 def join_left(left: np.ndarray, right: np.ndarray):
     """joins all values in the left array to the values in the right array.
     The index to the element in the right array is returned.
@@ -1579,7 +1581,7 @@ def calc_fragment_cardinality(
     fragment_mz = fragment_mz_df.values
     fragment_cardinality = np.ones(fragment_mz.shape, dtype=np.uint8)
 
-    @nb.njit
+    @numba_njit
     def _calc_fragment_cardinality(
         elution_group_idx,
         start_idx,

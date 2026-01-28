@@ -1,6 +1,7 @@
-import numba
 import numpy as np
 from pydivsufsort import divsufsort, kasai
+
+from alphabase.numba_wrapper import numba_njit
 
 
 def get_lcp_array(cat_prot: str):
@@ -10,7 +11,7 @@ def get_lcp_array(cat_prot: str):
     return lcp_array[np.argsort(suffix_array)]
 
 
-@numba.njit
+@numba_njit
 def get_next_stop_char(seq, stop_char="$"):
     next_stop_indices = np.zeros(len(seq), dtype=np.uint32)
     curr_next_stop = len(seq) - 1
@@ -22,7 +23,7 @@ def get_next_stop_char(seq, stop_char="$"):
     return next_stop_indices
 
 
-@numba.njit
+@numba_njit
 def get_all_substring_indices_from_lcp(
     cat_prot, lcp_array, min_len, max_len, stop_char="$"
 ):

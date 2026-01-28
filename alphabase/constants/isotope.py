@@ -1,6 +1,5 @@
 import typing
 
-import numba
 import numpy as np
 
 from alphabase.constants.atom import (
@@ -11,9 +10,10 @@ from alphabase.constants.atom import (
     parse_formula,
     truncate_isotope,
 )
+from alphabase.numba_wrapper import NumbaTypedDict, numba_njit
 
 
-@numba.njit
+@numba_njit
 def abundance_convolution(
     d1: np.ndarray,
     mono1: int,
@@ -54,12 +54,12 @@ def abundance_convolution(
     return ret[start:end], mono_idx
 
 
-@numba.njit
+@numba_njit
 def one_element_dist(
     elem: str,
     n: int,
-    chem_isotope_dist: numba.typed.Dict,
-    chem_mono_idx: numba.typed.Dict,
+    chem_isotope_dist: NumbaTypedDict,
+    chem_mono_idx: NumbaTypedDict,
 ) -> typing.Tuple[np.ndarray, int]:
     """
     Calculate the isotope distribution for
@@ -73,10 +73,10 @@ def one_element_dist(
     n : int
         element number.
 
-    chem_isotope_dist : numba.typed.Dict
+    chem_isotope_dist : NumbaTypedDict
         use `CHEM_ISOTOPE_DIST` as parameter.
 
-    chem_mono_idx : numba.typed.Dict
+    chem_mono_idx : NumbaTypedDict
         use `CHEM_MONO_IDX` as parameter.
 
     Returns

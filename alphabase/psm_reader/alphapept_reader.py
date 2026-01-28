@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import Tuple
 
 import h5py
-import numba
 import numpy as np
 import pandas as pd
 
@@ -15,11 +14,9 @@ from alphabase.psm_reader.psm_reader import (
     psm_reader_provider,
 )
 
-# Module-level constant for use in numba-compiled functions
 _SEPARATOR = ModificationKeys.SEPARATOR
 
 
-@numba.njit
 def parse_ap(precursor: str) -> Tuple[str, str, str, str, int]:
     """Parser to parse peptide strings."""
     items = precursor.split("_")

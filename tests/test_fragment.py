@@ -16,6 +16,8 @@ from alphabase.peptide.fragment import (
 from alphabase.spectral_library.base import SpecLibBase
 from alphabase.spectral_library.flat import SpecLibFlat
 
+pytestmark = pytest.mark.requires_numba
+
 
 def test_calc_column_indices_unmapped_fragments():
     """Test handling of fragments that don't map to any charged_frag_types"""
