@@ -1,15 +1,13 @@
 """Compatibility module for optional numba dependency.
 
 This module provides fallback implementations when numba is not installed.
-When numba is unavailable, decorators become no-ops (identity functions).
+When numba is unavailable, decorated functions raise ImportError when called.
 """
 
 from __future__ import annotations
 
 import warnings
 from typing import Any, Callable
-
-import numpy as np
 
 try:
     import numba
@@ -43,8 +41,9 @@ except ImportError:
             )
             _NUMBA_WARNING_SHOWN = True
 
-    def _make_identity_decorator(decorator_name: str) -> Callable:
-        """Create a stub decorator that returns the function as-is."""
+    def _make_raising_decorator(decorator_name: str) -> Callable:
+        """Create a decorator that raises ImportError when the decorated function is called."""
+        import functools
 
         def decorator(
             *args: Any,  # noqa: ANN401
@@ -52,35 +51,57 @@ except ImportError:
         ) -> Callable:
             _show_numba_warning()
 
+            def make_wrapper(func: Callable) -> Callable:
+                @functools.wraps(func)
+                def wrapper(
+                    *a: Any,  # noqa: ANN401, ARG001
+                    **kw: Any,  # noqa: ANN401, ARG001
+                ) -> Any:  # noqa: ANN401
+                    raise ImportError(
+                        f"numba is required to call '{func.__name__}'. "
+                        "Install with `pip install alphabase[numba]`"
+                    )
+
+                return wrapper
+
             # @decorator without parentheses: args[0] is the function
             if args and callable(args[0]):
-                return args[0]
+                return make_wrapper(args[0])
 
-            # @decorator() or @decorator(option=value): return identity function
-            def identity(func: Callable) -> Callable:
-                return func
-
-            return identity
+            # @decorator() or @decorator(option=value): return actual decorator
+            return make_wrapper
 
         decorator.__name__ = decorator_name
         return decorator
 
-    def _numba_vectorize(
+    def _numba_vectorize_raising(
         *args: Any,  # noqa: ANN401
         **kwargs: Any,  # noqa: ANN401, ARG001
     ) -> Callable:
-        """Fallback for numba.vectorize using numpy.vectorize."""
+        """Fallback for numba.vectorize that raises when called."""
+        import functools
+
         _show_numba_warning()
 
-        def wrap_with_numpy_vectorize(func: Callable) -> Callable:
-            return np.vectorize(func)
+        def make_wrapper(func: Callable) -> Callable:
+            @functools.wraps(func)
+            def wrapper(
+                *a: Any,  # noqa: ANN401, ARG001
+                **kw: Any,  # noqa: ANN401, ARG001
+            ) -> Any:  # noqa: ANN401
+                raise ImportError(
+                    f"numba is required to call '{func.__name__}'. "
+                    "Install with `pip install alphabase[numba]`"
+                )
+
+            return wrapper
 
         # @numba_vectorize without parentheses: args[0] is the function
         if args and callable(args[0]):
-            return np.vectorize(args[0])
+            return make_wrapper(args[0])
 
-        # @numba_vectorize([signatures], target=...) - ignore signatures, return wrapper
-        return wrap_with_numpy_vectorize
+        # @numba_vectorize([signatures], target=...) - return wrapper
+        return make_wrapper
 
     class _TypedDictFallback(dict):
         """Fallback for numba.typed.Dict that uses a regular dict."""
@@ -110,9 +131,9 @@ except ImportError:
 
     nb_ = _RecursiveStubClass()
 
-    numba_jit = _make_identity_decorator("jit")
-    numba_njit = _make_identity_decorator("njit")
-    numba_vectorize = _numba_vectorize
+    numba_jit = _make_raising_decorator("jit")
+    numba_njit = _make_raising_decorator("njit")
+    numba_vectorize = _numba_vectorize_raising
     numba_prange = range
 
     NumbaTypedDict = _TypedDictFallback
