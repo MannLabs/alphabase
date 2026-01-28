@@ -265,7 +265,7 @@ class ChemicalCompositonFormula:
         if not _HAS_RDKIT:
             raise ImportError(
                 "rdkit is required for SMILES functionality. "
-                "Install it with: pip install alphabase[full]"
+                "Install it through pip or install alphabase with the 'full'/'full-stable' extra."
             )
 
         mol = Chem.MolFromSmiles(smiles)
