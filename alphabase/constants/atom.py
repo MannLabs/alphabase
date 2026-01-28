@@ -4,8 +4,6 @@ import typing
 from collections import defaultdict
 
 import numpy as np
-from rdkit import Chem
-from rdkit.Chem import rdMolDescriptors
 
 from alphabase.constants._const import CONST_FILE_FOLDER, common_const_dict
 from alphabase.numba_wrapper import NumbaTypedDict, numba_njit_optional, numba_types
@@ -252,7 +250,18 @@ class ChemicalCompositonFormula:
         ------
         ValueError
             If the SMILES string is invalid and can't be converted to an RDKit molecule.
+        ImportError
+            If rdkit is not installed.
         """
+        try:
+            from rdkit import Chem
+            from rdkit.Chem import rdMolDescriptors
+        except ImportError as e:
+            raise ImportError(
+                "rdkit is required for SMILES functionality. "
+                "Install it with: pip install alphabase[smiles]"
+            ) from e
+
         mol = Chem.MolFromSmiles(smiles)
         if not mol:
             raise ValueError(f"Invalid RDKit molecule: {smiles}")

@@ -1,10 +1,13 @@
 from collections import defaultdict
 
 import pytest
-from rdkit import Chem
 
-from alphabase.constants.atom import ChemicalCompositonFormula
-from alphabase.smiles.smiles import AminoAcidModifier
+pytest.importorskip("rdkit", reason="rdkit not installed, skipping smiles tests")
+
+from rdkit import Chem  # noqa: E402
+
+from alphabase.constants.atom import ChemicalCompositonFormula  # noqa: E402
+from alphabase.smiles.smiles import AminoAcidModifier  # noqa: E402
 
 aa_modifier = AminoAcidModifier()
 modify_amino_acid = aa_modifier.modify_amino_acid

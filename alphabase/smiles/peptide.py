@@ -1,6 +1,12 @@
 from typing import Optional
 
-from rdkit import Chem
+try:
+    from rdkit import Chem
+except ImportError as e:
+    raise ImportError(
+        "rdkit is required for the smiles module. "
+        "Install it with: pip install alphabase[smiles]"
+    ) from e
 
 from alphabase.constants.modification import ModificationKeys
 from alphabase.smiles.smiles import (

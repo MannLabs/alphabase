@@ -12,4 +12,3 @@ pyahocorasick
 pyteomics
 pyyaml
 lxml
-rdkit
