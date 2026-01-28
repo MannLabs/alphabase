@@ -74,35 +74,6 @@ except ImportError:
         decorator.__name__ = decorator_name
         return decorator
 
-    def _numba_vectorize_raising(
-        *args: Any,  # noqa: ANN401
-        **kwargs: Any,  # noqa: ANN401, ARG001
-    ) -> Callable:
-        """Fallback for numba.vectorize that raises when called."""
-        import functools
-
-        _show_numba_warning()
-
-        def make_wrapper(func: Callable) -> Callable:
-            @functools.wraps(func)
-            def wrapper(
-                *a: Any,  # noqa: ANN401, ARG001
-                **kw: Any,  # noqa: ANN401, ARG001
-            ) -> Any:  # noqa: ANN401
-                raise ImportError(
-                    f"numba is required to call '{func.__name__}'. "
-                    "Install with `pip install alphabase[numba]`"
-                )
-
-            return wrapper
-
-        # @numba_vectorize without parentheses: args[0] is the function
-        if args and callable(args[0]):
-            return make_wrapper(args[0])
-
-        # @numba_vectorize([signatures], target=...) - return wrapper
-        return make_wrapper
-
     class _TypedDictFallback(dict):
         """Fallback for numba.typed.Dict that uses a regular dict."""
 
@@ -133,7 +104,7 @@ except ImportError:
 
     numba_jit = _make_raising_decorator("jit")
     numba_njit = _make_raising_decorator("njit")
-    numba_vectorize = _numba_vectorize_raising
+    numba_vectorize = _make_raising_decorator("vectorize")
     numba_prange = range
 
     NumbaTypedDict = _TypedDictFallback
