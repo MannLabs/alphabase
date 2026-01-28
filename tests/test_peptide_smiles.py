@@ -1,10 +1,15 @@
 import numpy as np
 import pytest
-from rdkit import Chem
-from rdkit.Chem import Descriptors
 
-from alphabase.constants.atom import MASS_H2O
-from alphabase.smiles.peptide import PeptideSmilesEncoder
+pytest.importorskip(
+    "rdkit", reason="rdkit not installed, skipping peptide smiles tests"
+)
+
+from rdkit import Chem  # noqa: E402
+from rdkit.Chem import Descriptors  # noqa: E402
+
+from alphabase.constants.atom import MASS_H2O  # noqa: E402
+from alphabase.smiles.peptide import PeptideSmilesEncoder  # noqa: E402
 
 
 @pytest.fixture
