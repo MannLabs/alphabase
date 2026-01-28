@@ -5,7 +5,7 @@ try:
 except ImportError as e:
     raise ImportError(
         "rdkit is required for the smiles module. "
-        "Install it with: pip install alphabase[smiles]"
+        "Install it with: pip install alphabase[full]"
     ) from e
 
 from alphabase.constants.modification import ModificationKeys
