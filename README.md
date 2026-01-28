@@ -86,7 +86,7 @@ pip install alphabase
 ```
 
 Note that this installs only a subset of alphabase functionality, as it misses `numba`.
-If you encounter a respectove warning, you need to install the `full` extra option
+If you encounter a respective warning, you need to install the `full` extra option
 ``` bash
 pip install "alphabase[full]"
 ```

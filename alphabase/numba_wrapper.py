@@ -59,7 +59,7 @@ except ImportError:
                 ) -> Any:  # noqa: ANN401
                     raise ImportError(
                         f"numba is required to call '{func.__name__}'. "
-                        "Install with `pip install alphabase[numba]`"
+                        "Install with `pip install alphabase[full]`"
                     )
 
                 return wrapper
