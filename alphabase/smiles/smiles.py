@@ -8,7 +8,7 @@ try:
 except ImportError as e:
     raise ImportError(
         "rdkit is required for the smiles module. "
-        "Install it with: pip install alphabase[full]"
+        "Install it through pip or install alphabase with the 'full'/'full-stable' extra."
     ) from e
 
 from alphabase.constants.aa import aa_formula

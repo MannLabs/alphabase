@@ -15,9 +15,7 @@ def pytest_collection_modifyitems(
     if not NUMBA_UNAVAILABLE:
         return
 
-    skip_numba = pytest.mark.skip(
-        reason="numba package not installed. Install with `pip install alphabase[full]`"
-    )
+    skip_numba = pytest.mark.skip(reason="numba package not installed")
     for item in items:
         if item.fspath.ext == ".ipynb":
             item.add_marker(skip_numba)
