@@ -1,8 +1,15 @@
 from typing import Dict, Optional
 
 import pandas as pd
-from rdkit import Chem
-from rdkit.Chem.rdmolops import ReplaceSubstructs, SanitizeMol
+
+try:
+    from rdkit import Chem
+    from rdkit.Chem.rdmolops import ReplaceSubstructs, SanitizeMol
+except ImportError as e:
+    raise ImportError(
+        "rdkit is required for the smiles module. "
+        "Install it through pip or install alphabase with the 'full'/'full-stable' extra."
+    ) from e
 
 from alphabase.constants.aa import aa_formula
 from alphabase.constants.modification import MOD_DF

@@ -20,7 +20,7 @@ pytest.mark.optional_pytables_dependency = pytest.mark.skipif(
 
 pytest.mark.requires_numba = pytest.mark.skipif(
     NUMBA_UNAVAILABLE,
-    reason="numba package not installed. Install with `pip install alphabase[full]`",
+    reason="numba package not installed",
 )
 
 
