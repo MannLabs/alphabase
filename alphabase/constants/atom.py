@@ -6,6 +6,15 @@ from collections import defaultdict
 import numpy as np
 
 from alphabase.constants._const import CONST_FILE_FOLDER, common_const_dict
+
+try:
+    from rdkit import Chem
+    from rdkit.Chem import rdMolDescriptors
+
+    _HAS_RDKIT = True
+except ImportError:
+    _HAS_RDKIT = False
+
 from alphabase.numba_wrapper import NumbaTypedDict, numba_njit_optional, numba_types
 from alphabase.yaml_utils import load_yaml
 
@@ -253,14 +262,11 @@ class ChemicalCompositonFormula:
         ImportError
             If rdkit is not installed.
         """
-        try:
-            from rdkit import Chem
-            from rdkit.Chem import rdMolDescriptors
-        except ImportError as e:
+        if not _HAS_RDKIT:
             raise ImportError(
                 "rdkit is required for SMILES functionality. "
-                "Install it with: pip install alphabase[smiles]"
-            ) from e
+                "Install it with: pip install alphabase[full]"
+            )
 
         mol = Chem.MolFromSmiles(smiles)
         if not mol:
