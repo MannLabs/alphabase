@@ -19,6 +19,7 @@ try:
 
     numba_jit = jit
     numba_njit = njit
+    numba_njit_optional = njit
     numba_vectorize = vectorize
     numba_prange = prange
 
@@ -74,6 +75,32 @@ except ImportError:
         decorator.__name__ = decorator_name
         return decorator
 
+    def _make_identity_decorator(decorator_name: str) -> Callable:
+        """Create a decorator that returns the function unchanged (no-op).
+
+        Use only on methods that need to be called even when numba is not installed.
+        Caveat: numba changes behavior of some functionality (e.g. in-place array handling). Use with caution.
+        """
+
+        def decorator(
+            *args: Any,  # noqa: ANN401
+            **kwargs: Any,  # noqa: ANN401, ARG001
+        ) -> Callable:
+            _show_numba_warning()
+
+            # @decorator without parentheses: args[0] is the function
+            if args and callable(args[0]):
+                return args[0]
+
+            # @decorator() or @decorator(option=value): return identity
+            def identity(func: Callable) -> Callable:
+                return func
+
+            return identity
+
+        decorator.__name__ = decorator_name
+        return decorator
+
     class _TypedDictFallback(dict):
         """Fallback for numba.typed.Dict that uses a regular dict."""
 
@@ -104,6 +131,7 @@ except ImportError:
 
     numba_jit = _make_raising_decorator("jit")
     numba_njit = _make_raising_decorator("njit")
+    numba_njit_optional = _make_identity_decorator("njit")
     numba_vectorize = _make_raising_decorator("vectorize")
     numba_prange = range
 
