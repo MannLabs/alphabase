@@ -704,26 +704,27 @@ library_reader_base:
   fixed_C57: False
   column_mapping:
     'raw_name': 'ReferenceRun'
-    'sequence': ['PeptideSequence', 'StrippedPeptide']
-    'modified_sequence': ['ModifiedPeptideSequence','ModifiedPeptide']
-    'charge': 'PrecursorCharge'
+    'sequence': ['PeptideSequence', 'StrippedPeptide', 'Stripped.Sequence']
+    'modified_sequence': ['ModifiedPeptideSequence','ModifiedPeptide', 'Modified.Sequence']
+    'charge': ['PrecursorCharge', 'Precursor.Charge']
     'rt': ['RT','iRT','Tr_recalibrated','RetentionTime','NormalizedRetentionTime']
     'ccs': 'CCS'
-    'precursor_mz': 'PrecursorMz'
-    'mobility': ['Mobility','IonMobility','PrecursorIonMobility']
+    'precursor_mz': ['PrecursorMz', 'Precursor.Mz']
+    'mobility': ['Mobility','IonMobility','PrecursorIonMobility', 'IM']
     'proteins': ['ProteinId','ProteinID','ProteinName','Protein Name',]
     'uniprot_ids': ['UniProtIds','UniProtID','UniprotId']
     'genes': ['GeneName','Genes','Gene',]
-    'fragment_intensity': ['LibraryIntensity','RelativeIntensity', 'RelativeFragmentIntensity', 'RelativeFragmentIonIntensity']
-    'fragment_mz': ['ProductMz']
-    'fragment_type': ['FragmentType', 'FragmentIonType', 'ProductType', 'ProductIonType']
-    'fragment_charge' : ['FragmentCharge', 'FragmentIonCharge', 'ProductCharge', 'ProductIonCharge']
-    'fragment_series': ['FragmentSeriesNumber','FragmentNumber']
+    'fragment_intensity': ['LibraryIntensity','RelativeIntensity', 'RelativeFragmentIntensity', 'RelativeFragmentIonIntensity', 'Relative.Intensity']
+    'fragment_mz': ['ProductMz', 'Product.Mz']
+    'fragment_type': ['FragmentType', 'FragmentIonType', 'ProductType', 'ProductIonType', 'Fragment.Type']
+    'fragment_charge' : ['FragmentCharge', 'FragmentIonCharge', 'ProductCharge', 'ProductIonCharge', 'Fragment.Charge']
+    'fragment_series': ['FragmentSeriesNumber','FragmentNumber', 'Fragment.Series.Number']
     'fragment_loss_type': ['FragmentLossType', 'FragmentIonLossType', 'ProductLossType', 'ProductIonLossType']
   mod_seq_columns:
     - 'ModifiedPeptideSequence'
     - 'ModifiedPeptide'
     - 'ModifiedSequence'
+    - 'Modified.Sequence'
     - 'FullUniModPeptideName'
     - 'LabeledSequence'
     - 'FullUniModPeptideName'
