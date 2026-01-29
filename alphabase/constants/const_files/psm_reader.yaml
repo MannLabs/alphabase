@@ -711,15 +711,15 @@ library_reader_base:
     'ccs': 'CCS'
     'precursor_mz': ['PrecursorMz', 'Precursor.Mz']
     'mobility': ['Mobility','IonMobility','PrecursorIonMobility', 'IM']
-    'proteins': ['ProteinId','ProteinID','ProteinName','Protein Name',]
-    'uniprot_ids': ['UniProtIds','UniProtID','UniprotId']
-    'genes': ['GeneName','Genes','Gene',]
+    'proteins': ['ProteinId','ProteinID','ProteinName','Protein Name','Protein.Names']
+    'uniprot_ids': ['UniProtIds','UniProtID','UniprotId','Protein.Group']
+    'genes': ['GeneName','Genes','Gene']
     'fragment_intensity': ['LibraryIntensity','RelativeIntensity', 'RelativeFragmentIntensity', 'RelativeFragmentIonIntensity', 'Relative.Intensity']
     'fragment_mz': ['ProductMz', 'Product.Mz']
     'fragment_type': ['FragmentType', 'FragmentIonType', 'ProductType', 'ProductIonType', 'Fragment.Type']
     'fragment_charge' : ['FragmentCharge', 'FragmentIonCharge', 'ProductCharge', 'ProductIonCharge', 'Fragment.Charge']
     'fragment_series': ['FragmentSeriesNumber','FragmentNumber', 'Fragment.Series.Number']
-    'fragment_loss_type': ['FragmentLossType', 'FragmentIonLossType', 'ProductLossType', 'ProductIonLossType']
+    'fragment_loss_type': ['FragmentLossType', 'FragmentIonLossType', 'ProductLossType', 'ProductIonLossType', 'Fragment.Loss.Type']
   mod_seq_columns:
     - 'ModifiedPeptideSequence'
     - 'ModifiedPeptide'
