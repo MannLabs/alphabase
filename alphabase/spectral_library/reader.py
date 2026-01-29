@@ -243,7 +243,11 @@ class LibraryReaderBase(ModifiedSequenceReader, SpecLibBase):
         return df
 
     def _load_file(self, filename: str) -> pd.DataFrame:
-        """Load the spectral library from a csv file."""
+        """Load the spectral library from a csv file or a parquet file."""
+
+        if filename.endswith(".parquet"):
+            return pd.read_parquet(filename)
+
         csv_sep = _get_delimiter(filename)
 
         return pd.read_csv(
@@ -304,13 +308,3 @@ class LibraryReaderBase(ModifiedSequenceReader, SpecLibBase):
 
 # legacy
 SWATHLibraryReader = LibraryReaderBase
-
-# Add support for DIANN .parquet libraries
-class LibraryReaderParquet(LibraryReaderBase):
-    """Class for reading spectral libraries from DIANN .parquet files."""
-
-    _reader_type = "library_reader_parquet"
-
-    def _load_file(self, filename: str) -> pd.DataFrame:
-        """Load the spectral library from a parquet file."""
-        return pd.read_parquet(filename)
