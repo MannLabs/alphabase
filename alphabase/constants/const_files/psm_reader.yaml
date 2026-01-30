@@ -679,17 +679,23 @@ spectronaut_report:
   fixed_C57: False
   column_mapping:
     'raw_name': 'R.FileName'
+    'sequence': 'PEP.StrippedSequence'
     'rt': ['EG.ApexRT','EG.MeanApexRT']
-    'mobility': ['FG.ApexIonMobility']
-    'proteins': ['PG.ProteinNames','PG.ProteinGroups']
-    'genes': 'PG.Genes'
+    'charge': ['charge', 'FG.Charge']
+    'mobility': 'FG.ApexIonMobility'
+    'proteins': ['PG.ProteinNames','PG.ProteinGroups', 'PG.ProteinAccessions']
+    'precursor_mz': 'FG.PrecMz'
     'uniprot_ids': 'PG.UniProtIds'
-    'charge': 'charge'
+    'genes': ['PG.Genes', 'PG.ProteinNames']
+    'fdr': 'EG.Qvalue'
+    'intensity': 'EG.TotalQuantity (Settings)'
+    'precursor_intensity': 'EG.TotalQuantity (Settings)'
   mod_seq_columns:
     - 'ModifiedSequence'
+    - 'EG.PrecursorId'
+  modification_mapping_type: 'maxquant'
   precursor_id_columns:
     - "EG.PrecursorId"
-  modification_mapping_type: 'maxquant'
 
 spectronaut:
   reader_type: spectronaut
