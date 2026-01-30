@@ -18,6 +18,8 @@ from alphabase.spectral_library.metrics import (
     calculate_pif,
 )
 
+pytestmark = pytest.mark.requires_numba
+
 
 @pytest.fixture
 def sample_data():

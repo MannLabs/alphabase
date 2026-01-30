@@ -1,12 +1,12 @@
 import multiprocessing as mp
 import typing
 
-import numba
 import numpy as np
 import pandas as pd
 import tqdm
 
 from alphabase.constants.modification import MOD_DF, ModificationKeys
+from alphabase.numba_wrapper import numba_njit
 from alphabase.spectral_library.base import SpecLibBase
 from alphabase.utils import explode_multiple_columns
 
@@ -64,7 +64,7 @@ def create_modified_sequence(
     return nterm + mod_seq + cterm
 
 
-@numba.njit
+@numba_njit
 def _get_frag_info_from_column_name(column: str):
     """
     Only used when converting alphabase libraries into other libraries

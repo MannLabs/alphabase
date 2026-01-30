@@ -1,19 +1,17 @@
 # Dependencies required for running the "stable" version of alphabase.
 # Only usage of fixed versions is allowed, and all dependencies listed here must also be
 # included in `requirements_loose.txt` (enforced by a test).
-numba==0.60.0
 numpy<2.0 # test: tolerate_version  # rdkit==2024.3.3 is not compatible with numpy >= 2.0
 pandas==2.2.3
 h5py==3.12.1
-contextlib2==21.6.0
 xxhash==3.5.0
-biopython==1.84
+biopython==1.84  # required for fasta functionality, imported as "Bio"
 tqdm==4.67.0
 regex==2024.11.6
 # pydivsufsort  # TODO this is used by lcp_digest.py?
-pyarrow==19.0.1
-pyahocorasick==2.1.0
-pyteomics==4.7.5
+pyarrow==19.0.1 #  transparent dependency -> required by pandas for parquet file handling
+pyahocorasick==2.1.0 # required for fasta functionality, imported as "ahocorasick"
+pyteomics==4.7.5 # required for msfragger reader
 pyyaml==6.0.2
-lxml==5.3.0  # required by pyteomics
-rdkit==2024.3.3
+lxml==5.3.0  # required by pyteomics (-> msfragger reader)
+rdkit==2024.3.3 # smiles

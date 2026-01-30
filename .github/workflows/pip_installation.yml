@@ -13,7 +13,7 @@ name: Pip installation and tests
 
 jobs:
   stable_installation:
-    name: Test stable pip installation on ${{ matrix.os }}
+    name: Test stable, full, ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest, macos-latest-xlarge]
@@ -22,13 +22,36 @@ jobs:
     with:
       os: ${{ matrix.os }}
       python-version: ${{ matrix.python-version }}
-      install-script: pip_install.sh stable,tests
+      install-script: pip_install.sh stable,full-stable,tests
 
   loose_installation:
-    name: Test loose pip installation on ${{ matrix.os }}
+    name: Test loose, full, ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest, macos-latest-xlarge]
+    uses: ./.github/workflows/_run_tests.yml
+    with:
+      os: ${{ matrix.os }}
+      python-version: ${{ matrix.python-version }}
+      install-script: pip_install.sh full,tests
+
+  stable_installation_notfull:
+    name: Test stable, not full, ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        python-version : [3.9]
+    uses: ./.github/workflows/_run_tests.yml
+    with:
+      os: ${{ matrix.os }}
+      python-version: ${{ matrix.python-version }}
+      install-script: pip_install.sh stable,tests
+
+  loose_installation_notfull:
+    name: Test loose, not full, ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
     uses: ./.github/workflows/_run_tests.yml
     with:
       os: ${{ matrix.os }}

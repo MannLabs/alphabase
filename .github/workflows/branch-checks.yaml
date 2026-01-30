@@ -12,9 +12,23 @@ jobs:
     - uses: actions/checkout@v3
     - uses: actions/setup-python@v3
     - uses: pre-commit/action@v3.0.1
+
   # For feature branches, we don't test the full matrix (os x [stable, loose]) in order to save time & resources.
-  run-tests-stable:
-    name: Test stable pip installation on ubuntu-latest
+  run-tests-stable-full:
+    name: Test stable, full, ${{ matrix.os }}
+    needs: pre-commit
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        python-version: [3.9]
+    uses: ./.github/workflows/_run_tests.yml
+    with:
+      python-version: ${{ matrix.python-version }}
+      os: ${{ matrix.os }}
+      install-script: pip_install.sh stable,full-stable,tests
+
+  run-tests-stable-notfull:
+    name: Test stable, not full, ${{ matrix.os }}
     needs: pre-commit
     strategy:
       matrix:
@@ -25,11 +39,3 @@ jobs:
       python-version: ${{ matrix.python-version }}
       os: ${{ matrix.os }}
       install-script: pip_install.sh stable,tests
-  get-code-review-input:
-    runs-on: ubuntu-latest
-    #if: contains(github.event.pull_request.labels.*.name, 'code-review')
-    steps:
-      - uses: MannLabs/alphashared/actions/get-code-review-input@v1
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_NUMBER: ${{ github.event.number }}

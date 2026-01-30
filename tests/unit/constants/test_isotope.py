@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from alphabase.constants.atom import (
     CHEM_ISOTOPE_DIST,
@@ -12,6 +13,8 @@ from alphabase.constants.isotope import (
     formula_dist,
     one_element_dist,
 )
+
+pytestmark = pytest.mark.requires_numba
 
 
 def test_one_element_dist():
