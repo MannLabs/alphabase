@@ -432,6 +432,16 @@ modification_mappings:
       - 'T(145.1404)'
     'DiLeu4plex118@Y':
       - 'Y(145.1404)'
+    'Pro->3,4-Dehydro-L-proline@P':
+      - 'P(-2.0156)'
+    'Pro->(2S,4R)-4-hydroxyproline@P':
+      - 'P(15.9949)'
+    'Pro->(DL)-pipecolic_acid@P':
+      - 'P(14.0156)'
+    'Pro->(2S,3aS,7aS)-Octahydro-1H-indole-2-carboxylic_acid@P':
+      - 'P(54.0469)'
+    'Pro->(DL)-5-trifluoromethylproline@P':
+      - 'P(67.9873)'
 
 pfind:
   reader_type: pfind
