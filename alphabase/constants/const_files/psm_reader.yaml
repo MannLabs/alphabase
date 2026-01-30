@@ -684,7 +684,7 @@ spectronaut_report:
     'proteins': ['PG.ProteinNames','PG.ProteinGroups']
     'genes': 'PG.Genes'
     'uniprot_ids': 'PG.UniProtIds'
-    'charge': 'charge'
+    'charge': ['charge']
   mod_seq_columns:
     - 'ModifiedSequence'
   precursor_id_columns:
@@ -696,14 +696,14 @@ spectronaut:
   rt_unit: irt
   fixed_C57: False
   column_mapping:
-    'raw_name': 'ReferenceRun'
+    'raw_name': ['ReferenceRun', 'R.Label']
     'sequence': ['StrippedPeptide','PeptideSequence']
-    'charge': 'PrecursorCharge'
+    'charge': ['PrecursorCharge', 'FG.Charge']
     'rt': ['RT','iRT','Tr_recalibrated','RetentionTime','NormalizedRetentionTime']
     'ccs': 'CCS'
     'precursor_mz': 'PrecursorMz'
     'mobility': ['Mobility','IonMobility','PrecursorIonMobility']
-    'proteins': ['Protein Name','ProteinId','ProteinID','ProteinName','ProteinGroup','ProteinGroups']
+    'proteins': ['Protein Name','ProteinId','ProteinID','ProteinName','ProteinGroup','ProteinGroups','PG.ProteinGroups']
     'uniprot_ids': ['UniProtIds','UniProtID','UniprotId']
     'genes': ['Genes','Gene','GeneName','GeneNames']
   mod_seq_columns:
@@ -712,7 +712,7 @@ spectronaut:
     - 'FullUniModPeptideName'
     - 'ModifiedPeptideSequence'
     - 'LabeledSequence'
-    - 'FullUniModPeptideName'
+    - "EG.ModifiedSequence"
   precursor_id_columns:
     - "EG.PrecursorId"
   modification_mapping_type: 'maxquant'
