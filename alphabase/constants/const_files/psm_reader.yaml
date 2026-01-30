@@ -378,6 +378,10 @@ modification_mappings:
       - 'K(308.1160)'
     'PSMtag@S':
       - 'S(308.1160)'
+    'PSMtag@T':
+      - 'T(308.1160)'
+    'PSMtag@Y':
+      - 'Y(308.1160)'
     'PSMtag@Any_N-term':
       - 'N-term(308.1160)'
     'Glc-TA@K':
@@ -506,6 +510,8 @@ msfragger_psm_tsv:
     - 'TMTpro@Any_N-term'
     - 'PSMtag@K'
     - 'PSMtag@S'
+    - 'PSMtag@T'
+    - 'PSMtag@Y'
     - 'PSMtag@Any_N-term'
     - 'Dimethyl@K'
     - 'Dimethyl@Any_N-term'

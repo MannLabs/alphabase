@@ -2849,6 +2849,8 @@ iTRAQ4plex117@K	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic 
 iTRAQ4plex117@C	144.102063	144.1544	H(12)C(4)13C(3)N(1)15N(1)O(1)	0.0		Isotopic label	0	C[15N]1[13CH2][13CH2]N(CC1)[13CH2]C(=O)SC[C@@H](C(=O)[Ts])N([Fl])([Fl])	0.0
 PSMtag@K	308.116092	308.3359	C(18)H(16)N(2)O(3)	0.0		Chemical derivative	0	COC1N=CC(C2C=C3C(CN(C(C)=O)C3=CC=2)CC(=O)NCCCC[C@H](N([Fl])([Fl]))C(=O)[Ts])=CC=1	0.0
 PSMtag@S	308.116092	308.3359	C(18)H(16)N(2)O(3)	0.0		Chemical derivative	0	COC1N=CC(C2C=C3C(CN(C(C)=O)C3=CC=2)CC(=O)OC[C@H](N([Fl])([Fl]))C(=O)[Ts])=CC=1	0.0
+PSMtag@T	308.116092	308.3359	C(18)H(16)N(2)O(3)	0.0		Chemical derivative	0	COC1N=CC(C2C=C3C(CN(C(C)=O)C3=CC=2)CC(=O)O[C@H](C)[C@@H](N([Fl])([Fl]))C(=O)[Ts])=CC=1	0.0
+PSMtag@Y	308.116092	308.3359	C(18)H(16)N(2)O(3)	0.0		Chemical derivative	0	COC1N=CC(C2C=C3C(CN(C(C)=O)C3=CC=2)CC(=O)Oc4ccc(C[C@@H](C(=O)[Ts])N([Fl])([Fl]))cc4)=CC=1	0.0
 PSMtag@Any_N-term	308.116092	308.3359	C(18)H(16)N(2)O(3)	0.0		Chemical derivative	0	COC1N=CC(C2C=C3C(CN(C(C)=O)C3=CC=2)CC(=O)[Lv])=CC=1	0.0
 Lactyl@K	72.021129	72.0627	H(4)C(3)O(2)	0.0		Post-translational	0	C[C@@H](O)C(=O)NCCCC[C@H](N([Fl])([Fl]))C(=O)[Ts]	0.0
 Lactyl@Any_N-term	72.021129	72.0627	H(4)C(3)O(2)	0.0		Post-translational	0	C[C@@H](O)C(=O)[Lv]	0.0
