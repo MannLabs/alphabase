@@ -1,5 +1,7 @@
 """Proteome Discoverer protein group reader."""
 
+from typing import Any
+
 from .pg_reader import PGReaderBase, pg_reader_provider
 
 
@@ -16,6 +18,48 @@ class ProteomeDiscovererReader(PGReaderBase):
     """
 
     _reader_type = "proteome_discoverer"
+
+    def __init__(
+        self,
+        *,
+        column_mapping: dict[str, Any] | None = None,
+        measurement_regex: str | None = "abundances_grouped",
+    ) -> None:
+        """Read protein group (PG) matrices into the standardized alphabase format.
+
+        Parameters
+        ----------
+        column_mapping
+            A dictionary of mapping alphabase columns (keys) to the corresponding columns in the other
+            search engine (values). If `None` will be loaded from the `column_mapping` key of the respective
+            search engine in `pg_reader.yaml`
+        measurement_regex
+            Regular expression that identifies correct measurement type. Only relevant if PG matrix contains multiple
+            measurement types. For example, alphapept returns the raw protein intensity per sample in column `A` and the
+            LFQ corrected value in `A_LFQ`. If `None` uses all columns.
+
+
+        Attributes
+        ----------
+        column_mapping
+            Dictionary structure mapping alphabase columns (keys) to the corresponding columns in the other
+            search engine (values), see parameters.
+        measurement_regex
+            Regular expression that matches quantity of interest for all samples
+
+        Notes
+        -----
+        Standardizes protein group reports to a protein group dataframe (features x samples) in wide format. Contains at least
+            - sample (run) identifier: :att:`pg_reader.keys.PGCols.SAMPLE_NAME` as column index
+            - protein group identifier: :att:`pg_reader.keys.PGCols.protein` as index
+            - protein group intensity: :att:`pg_reader.keys.PGCols.INTENSITY` as values
+
+        Additional feature-level metadata might be available in the index.
+
+        """
+        super().__init__(
+            column_mapping=column_mapping, measurement_regex=measurement_regex
+        )
 
 
 pg_reader_provider.register_reader(
