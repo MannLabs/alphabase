@@ -4,7 +4,16 @@ from .pg_reader import PGReaderBase, pg_reader_provider
 
 
 class ProteomeDiscovererReader(PGReaderBase):
-    """Reader for protein group matrices from the proteome discoverer search engine."""
+    """Reader for protein group matrices from the proteome discoverer search engine.
+
+    Reads output from the proteome discoverer search engine by Thermo Fisher Scientific.
+    Reads files with the `__Proteins.txt` suffix.
+
+    References
+    ----------
+    - Orsburn BC. Proteome Discoverer-A Community Enhanced Data Processing Suite for Protein Informatics. Proteomes. 2021 Mar 23;9(1):15. doi: 10.3390/proteomes9010015. PMID: 33806881; PMCID: PMC8006021.
+
+    """
 
     _reader_type = "proteome_discoverer"
 
