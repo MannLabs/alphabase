@@ -119,9 +119,26 @@ mztab:
     "assay": "^protein_abundance_assay\\[[0-9]+\\]" # The protein's abundance as measured in the given assay through whatever technique was employed
     "study_variable": "^protein_abundance_study_variable\\[[0-9]+\\]" # The protein's abundance as measured in the given study variable (condition) through whatever technique was employed
 
-
+# directlfq
 directlfq:
   reader_type: "directlfq"
   column_mapping:
     "uniprot_ids": "protein"
     "precursor_id": "ion"
+
+# Proteome Discoverer 3.1 User Guide
+# https://docs.thermofisher.com/r/Proteome-Discoverer-3.1-User-Guide/en-US1519222795v1
+# See section: 7.3.1 Protein Groups page columns
+proteome_discoverer:
+  reader_type: "proteome_discoverer"
+  column_mapping:
+      uniprot_ids: ["Accession", "Protein Group IDs"]
+      peptide_count: "Number of Peptides"
+      proteotypic_peptide_count: "Number of Protein Unique Peptides"
+      description: "Description"
+      ensembl_ids: "Ensembl Gene ID"
+      genes: "Gene Symbol"
+
+  measurement_regex:
+    abundances_ratio: "Abundance Ratio"
+    abundances_grouped: "Abundances Grouped \\S+$" # abundance value is calculated as the arithmetic mean of all the replicate abundance values within a sample group.
