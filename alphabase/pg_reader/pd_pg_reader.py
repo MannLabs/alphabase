@@ -1,6 +1,6 @@
 """Proteome Discoverer protein group reader."""
 
-from typing import Any
+from typing import Any, Optional
 
 from .pg_reader import PGReaderBase, pg_reader_provider
 
@@ -22,8 +22,8 @@ class ProteomeDiscovererReader(PGReaderBase):
     def __init__(
         self,
         *,
-        column_mapping: dict[str, Any] | None = None,
-        measurement_regex: str | None = "abundances_grouped",
+        column_mapping: Optional[dict[str, Any]] = None,
+        measurement_regex: Optional[str] = "abundances_grouped",
     ) -> None:
         """Read protein group (PG) matrices into the standardized alphabase format.
 
