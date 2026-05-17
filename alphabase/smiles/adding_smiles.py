@@ -192,6 +192,7 @@ ptm_dict = {
     "Succinamide@K": "ONC(=O)CCC(=O)NCCCC[C@H](N([Fl])([Fl]))C([Ts])=O",
     "SATA-Glc@K": "[C@@H]1(O[C@H](CO)[C@@H](O)[C@H](O)[C@H]1O)SCC(=O)NCCCC[C@H](N([Fl])[Fl])C([Ts])=O",
     "Methyl@H": "Cn1cc(nc1)C[C@@H](C(=O)[Ts])N([Fl])([Fl])",
+    "Oxidation@P": "O[C@@H]1C[C@H](N([Fl])C1)C(=O)[Ts]",
 }
 
 for i in n_term_modifications:

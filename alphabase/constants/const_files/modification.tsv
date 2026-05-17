@@ -116,7 +116,7 @@ Oxidation@R	15.994915	15.9994	O(1)	0.0		Post-translational	35		0.0
 Oxidation@M	15.994915	15.9994	O(1)	63.998285	H(4)C(1)O(1)S(1)	Artefact	35	O=C([Ts])C(N([Fl])([Fl]))CCS(=O)C	0.5
 Oxidation@Y	15.994915	15.9994	O(1)	0.0		Post-translational	35		0.0
 Oxidation@F	15.994915	15.9994	O(1)	0.0		Artefact	35		0.0
-Oxidation@P	15.994915	15.9994	O(1)	0.0		Post-translational	35		0.0
+Oxidation@P	15.994915	15.9994	O(1)	0.0		Post-translational	35	O[C@@H]1C[C@H](N([Fl])C1)C(=O)[Ts]	0.0
 Oxidation@N	15.994915	15.9994	O(1)	0.0		Post-translational	35		0.0
 Oxidation@K	15.994915	15.9994	O(1)	0.0		Post-translational	35		0.0
 Oxidation@D	15.994915	15.9994	O(1)	0.0		Post-translational	35		0.0
