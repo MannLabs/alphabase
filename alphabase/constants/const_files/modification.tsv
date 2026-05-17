@@ -38,7 +38,7 @@ Carboxymethyl@C	58.005479	58.0361	H(2)C(2)O(2)	0.0		Chemical derivative	6		0.0
 Carboxymethyl@W	58.005479	58.0361	H(2)C(2)O(2)	0.0		Chemical derivative	6		0.0
 Carboxymethyl@U	58.005479	58.0361	H(2)C(2)O(2)	0.0		Chemical derivative	6		0.0
 Deamidated@Q	0.984016	0.9848	H(-1)N(-1)O(1)	0.0		Artefact	7	C(CC(=O)O)[C@@H](C(=O)[Ts])N([Fl])([Fl])	0.0
-Deamidated@R	0.984016	0.9848	H(-1)N(-1)O(1)	43.005814	H(1)C(1)N(1)O(1)	Post-translational	7	NC(=O)NCCCC[C@H](N([Fl])([Fl]))C(=O)[Ts]	0.5
+Deamidated@R	0.984016	0.9848	H(-1)N(-1)O(1)	43.005814	H(1)C(1)N(1)O(1)	Post-translational	7	NC(=O)NCCC[C@H](N([Fl])([Fl]))C(=O)[Ts]	0.5
 Deamidated@N	0.984016	0.9848	H(-1)N(-1)O(1)	0.0		Artefact	7	C([C@@H](C(=O)[Ts])N([Fl])([Fl]))C(=O)O	0.0
 Deamidated@F^Protein_N-term	0.984016	0.9848	H(-1)N(-1)O(1)	0.0		Post-translational	7		0.0
 ICAT-G@C	486.251206	486.6253	H(38)C(22)N(4)O(6)S(1)	0.0		Isotopic label	8		0.0
@@ -91,7 +91,7 @@ Methyl@Any_C-term	14.01565	14.0266	H(2)C(1)	0.0		Multiple	34	OC	0.0
 Methyl@Protein_N-term	14.01565	14.0266	H(2)C(1)	0.0		Post-translational	34	C	0.0
 Methyl@L	14.01565	14.0266	H(2)C(1)	0.0		Post-translational	34		0.0
 Methyl@I	14.01565	14.0266	H(2)C(1)	0.0		Post-translational	34		0.0
-Methyl@R	14.01565	14.0266	H(2)C(1)	0.0		Post-translational	34	CNC(=N)NCCCC[C@H](N([Fl])([Fl]))C(=O)[Ts]	0.0
+Methyl@R	14.01565	14.0266	H(2)C(1)	0.0		Post-translational	34	CNC(=N)NCCC[C@H](N([Fl])([Fl]))C(=O)[Ts]	0.0
 Methyl@Q	14.01565	14.0266	H(2)C(1)	0.0		Post-translational	34		0.0
 Methyl@Any_N-term	14.01565	14.0266	H(2)C(1)	0.0		Chemical derivative	34	C	0.0
 Methyl@N	14.01565	14.0266	H(2)C(1)	0.0		Post-translational	34		0.0
@@ -125,7 +125,7 @@ Dimethyl@P^Protein_N-term	28.0313	28.0532	H(4)C(2)	0.0		Post-translational	36		0
 Dimethyl@N	28.0313	28.0532	H(4)C(2)	0.0		Post-translational	36		0.0
 Dimethyl@Any_N-term	28.0313	28.0532	H(4)C(2)	0.0		Isotopic label	36	C[Lv]C	0.0
 Dimethyl@K	28.0313	28.0532	H(4)C(2)	0.0		Multiple	36	CN(C)CCCC[C@H](N([Fl])([Fl]))C(=O)[Ts]	0.0
-Dimethyl@R	28.0313	28.0532	H(4)C(2)	0.0		Post-translational	36	CN(C)C(=N)NCCCC[C@H](N([Fl])([Fl]))C(=O)[Ts]	0.0
+Dimethyl@R	28.0313	28.0532	H(4)C(2)	0.0		Post-translational	36	CN(C)C(=N)NCCC[C@H](N([Fl])([Fl]))C(=O)[Ts]	0.0
 Trimethyl@A^Protein_N-term	42.04695	42.0797	H(6)C(3)	0.0		Post-translational	37		0.0
 Trimethyl@R	42.04695	42.0797	H(6)C(3)	0.0		Chemical derivative	37		0.0
 Trimethyl@K	42.04695	42.0797	H(6)C(3)	59.073499	H(9)C(3)N(1)	Post-translational	37	C[N+](C)(C)CCCC[C@H](N([Fl])([Fl]))C(=O)[Ts]	0.5
