@@ -73,6 +73,23 @@ maxquant:
     "lfq": "^LFQ intensity(?!\\s[LHM]\\s).+$" # LFQ intensity-based quantification
     "ibaq": "^iBAQ(?!\\s[LHM]\\s).+$" # Intensity-Based Absolute Quantification
 
+# Based on PEAKS
+peaks_peptides:
+  reader_type: "peaks_peptides"
+  column_mapping:
+    "peptides": "Peptide"
+    "proteins": "proteins" # this column is added through preprocessing
+    "genes": "genes" # this column is added through preprocessing
+  measurement_regex:
+    "lfq": "^sample_\\d+$"  # PEAKS columns renamed from "Area Sample 1" to "sample_1" during preprocessing
+
+peaks_proteins:
+  reader_type: "peaks_proteins"
+  column_mapping:
+    "proteins": "proteins" # this column is added through preprocessing
+    "genes": "genes" # this column is added through preprocessing
+  measurement_regex:
+    "lfq": "^sample_\\d+$"  # PEAKS columns renamed from "Sample 1 Area" to "sample_1" during preprocessing
 
 # Based on Spectronaut 20.0 Run Pivot Report (Page 80/81)
 # https://biognosys.com/content/uploads/2025/06/Spectronaut-20-Manual.pdf

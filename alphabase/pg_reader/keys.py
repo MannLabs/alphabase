@@ -11,6 +11,11 @@ class PGCols(metaclass=ConstantsClass):
     PROTEINS
         Uniprot names of proteins in the respective protein group.
         Individual entries are separated by a semicolon in the unified output.
+    PEPTIDES
+        Peptide sequence without modifications. This is specified in the PG-reader
+        context since conceptually, proteins and peptides are just different levels of
+        aggregating the fundamental unit of measurement in bottom-up proteomics,
+        which are precursors.
     UNIPROT_IDS
         Uniprot IDs of all proteins in the respective protein group.
         Individual entries are separated by a semicolon in the unified output.
@@ -44,6 +49,7 @@ class PGCols(metaclass=ConstantsClass):
 
     # Minimal columns
     PROTEINS = "proteins"
+    PEPTIDES = "peptides"
     UNIPROT_IDS = "uniprot_ids"
     ENSEMBL_IDS = "ensembl_ids"
     GENES = "genes"

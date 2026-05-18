@@ -5,6 +5,7 @@ from .directlfq_pg_reader import DirectLFQReader
 from .fragpipe_pg_reader import FragPipePGReader
 from .maxquant_pg_reader import MaxQuantPGReader
 from .mztab_pg_reader import MZTabPGReader
+from .peaks_pg_reader import PeaksPeptidesReader, PeaksPGReader
 from .pg_reader import pg_reader_provider
 from .spectronaut_reader import SpectronautPGReader
 
@@ -18,4 +19,6 @@ __all__ = [
     "SpectronautPGReader",
     "FragPipePGReader",
     "MZTabPGReader",
+    "PeaksPGReader",
+    "PeaksPeptidesReader",
 ]

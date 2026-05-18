@@ -7,6 +7,8 @@ from alphabase.pg_reader import (
     FragPipePGReader,
     MaxQuantPGReader,
     MZTabPGReader,
+    PeaksPeptidesReader,
+    PeaksPGReader,
     SpectronautPGReader,
     pg_reader_provider,
 )
@@ -66,3 +68,17 @@ class TestMZTabPGReaderProvider:
         reader = pg_reader_provider.get_reader("mztab")
 
         assert isinstance(reader, MZTabPGReader)
+
+
+class TestPeaksPGReaderProvider:
+    def test_reader_provider(self) -> None:
+        """Test whether reader provider initializes PEAKS protein group reader correctly."""
+        reader = pg_reader_provider.get_reader("peaks_proteins")
+
+        assert isinstance(reader, PeaksPGReader)
+
+    def test_peptides_reader_provider(self) -> None:
+        """Test whether reader provider initializes PEAKS peptides reader correctly."""
+        reader = pg_reader_provider.get_reader("peaks_peptides")
+
+        assert isinstance(reader, PeaksPeptidesReader)
