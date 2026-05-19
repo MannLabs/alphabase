@@ -140,5 +140,7 @@ proteome_discoverer:
       genes: "Gene Symbol"
 
   measurement_regex:
-    abundances_ratio: "Abundance Ratio"
+    abundance: "^Abundance (?!Ratio).+" # should match "Abundance ABCD" BUT NOT "Abundance Ratio ABCD"/"Abundance Ratio log2 ABCD"
+    abundances_normalized: "^Abundances Normalized"
+    abundances_scaled: "^Abundances Scaled"
     abundances_grouped: "Abundances Grouped \\S+$" # abundance value is calculated as the arithmetic mean of all the replicate abundance values within a sample group.

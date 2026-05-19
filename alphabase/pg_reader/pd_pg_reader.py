@@ -23,7 +23,7 @@ class ProteomeDiscovererReader(PGReaderBase):
         self,
         *,
         column_mapping: Optional[dict[str, Any]] = None,
-        measurement_regex: Optional[str] = "abundances_grouped",
+        measurement_regex: Optional[str] = "abundances",
     ) -> None:
         """Read protein group (PG) matrices into the standardized alphabase format.
 
