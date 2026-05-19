@@ -272,7 +272,7 @@ class TestProteomeDiscovererReader:
         """Test import of minimal example MZTab file"""
         file_path, reference = example_proteome_discoverer_minimal
 
-        reader = ProteomeDiscovererReader()
+        reader = ProteomeDiscovererReader(measurement_regex="abundances_grouped")
 
         result_df = reader.import_file(file_path=file_path)
 
