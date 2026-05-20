@@ -27,6 +27,21 @@ class ProteomeDiscovererReader(PGReaderBase):
     ) -> None:
         """Read protein group (PG) matrices from the proteome discoverer search engine into the standardized alphabase format.
 
+        Parameters
+        ----------
+        column_mapping
+            Dictionary mapping alphabase column names (keys) to Proteome Discoverer column names (values).
+            If `None`, uses default mapping from configuration file.
+        measurement_regex
+            Pattern to select quantity columns from Proteome Discoverer output
+
+                - `abundance` (default): Raw intensities per sample
+                - `abundances_normalized`: Normalized intensities per sample
+                - `abundances_scaled`: Scaled intensities per sample
+                - `abundances_grouped`: Aggregated abundance values of a user-defined sample group.
+
+            See :meth:`alphabase.pg_reader.ProteomeDiscovererReader.get_preconfigured_regex()` for all available patterns.
+
         See Also
         --------
         :class:`alphabase.pg_reader.pg_reader.PGReaderBase`
