@@ -25,36 +25,11 @@ class ProteomeDiscovererReader(PGReaderBase):
         column_mapping: Optional[dict[str, Any]] = None,
         measurement_regex: Optional[str] = "abundances",
     ) -> None:
-        """Read protein group (PG) matrices into the standardized alphabase format.
+        """Read protein group (PG) matrices from the proteome discoverer search engine into the standardized alphabase format.
 
-        Parameters
-        ----------
-        column_mapping
-            A dictionary of mapping alphabase columns (keys) to the corresponding columns in the other
-            search engine (values). If `None` will be loaded from the `column_mapping` key of the respective
-            search engine in `pg_reader.yaml`
-        measurement_regex
-            Regular expression that identifies correct measurement type. Only relevant if PG matrix contains multiple
-            measurement types. For example, alphapept returns the raw protein intensity per sample in column `A` and the
-            LFQ corrected value in `A_LFQ`. If `None` uses all columns.
-
-
-        Attributes
-        ----------
-        column_mapping
-            Dictionary structure mapping alphabase columns (keys) to the corresponding columns in the other
-            search engine (values), see parameters.
-        measurement_regex
-            Regular expression that matches quantity of interest for all samples
-
-        Notes
-        -----
-        Standardizes protein group reports to a protein group dataframe (features x samples) in wide format. Contains at least
-            - sample (run) identifier: :att:`pg_reader.keys.PGCols.SAMPLE_NAME` as column index
-            - protein group identifier: :att:`pg_reader.keys.PGCols.protein` as index
-            - protein group intensity: :att:`pg_reader.keys.PGCols.INTENSITY` as values
-
-        Additional feature-level metadata might be available in the index.
+        See Also
+        --------
+        :class:`alphabase.pg_reader.pg_reader.PGReaderBase`
 
         """
         super().__init__(
