@@ -3,6 +3,7 @@
 import base64
 import os
 import re
+import ssl
 import traceback
 import warnings
 import zipfile
@@ -10,7 +11,9 @@ from abc import ABC, abstractmethod
 from email.message import EmailMessage
 from typing import Optional
 from urllib.parse import parse_qs, urlparse
-from urllib.request import urlopen, urlretrieve
+from urllib.request import urlopen
+
+import certifi
 
 try:
     import progressbar  # noqa: F401
@@ -22,6 +25,15 @@ except ModuleNotFoundError:
         ImportWarning,
     )
     _HAS_PROGRESSBAR = False
+
+
+def _create_ssl_context() -> ssl.SSLContext:
+    """Build an SSL context that verifies against certifi's CA bundle.
+
+    Avoids Python's default context, which on Windows enumerates the OS certificate
+    store and can crash with [ASN1: NOT_ENOUGH_DATA] on a malformed store entry.
+    """
+    return ssl.create_default_context(cafile=certifi.where())
 
 
 class Progress:  # pragma: no cover
@@ -159,7 +171,7 @@ class FileDownloader(ABC):
     def _get_filename(self) -> str:  # pragma: no cover
         """Get filename from url."""
         try:
-            remotefile = urlopen(self._encoded_url)
+            remotefile = urlopen(self._encoded_url, context=_create_ssl_context())
         except Exception as e:
             print(f"Could not open {self._url} for reading filename: {e}")
             raise ValueError(f"Could not open {self._url} for reading filename") from e
@@ -192,9 +204,9 @@ class FileDownloader(ABC):
         """
         try:
             if max_size_kb:
-                with urlopen(self._encoded_url) as response, open(
-                    self._output_path, "wb"
-                ) as out_file:
+                with urlopen(
+                    self._encoded_url, context=_create_ssl_context()
+                ) as response, open(self._output_path, "wb") as out_file:
                     out_file.write(response.read(max_size_kb * 1024))
                 print(f"Truncating file to max. {max_size_kb} bytes ..")
 
@@ -202,7 +214,20 @@ class FileDownloader(ABC):
                 self._truncate_file(self._output_path)
 
             else:
-                path, _ = urlretrieve(self._encoded_url, self._output_path, Progress())
+                with urlopen(
+                    self._encoded_url, context=_create_ssl_context()
+                ) as response, open(self._output_path, "wb") as out_file:
+                    total_size = int(response.headers.get("Content-Length", -1))
+                    progress = Progress()
+                    block_num = 0
+                    block_size = 8192
+                    while True:
+                        chunk = response.read(block_size)
+                        if not chunk:
+                            break
+                        out_file.write(chunk)
+                        block_num += 1
+                        progress(block_num, block_size, total_size)
 
         except Exception as e:
             print(f"{e} {traceback.print_exc()}")
