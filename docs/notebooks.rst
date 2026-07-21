@@ -22,6 +22,7 @@ Spectral libraries
 
    tutorials/tutorial_spectral_libraries
    nbs/library_from_fasta
+   nbs/diann_parquet_library
 
 
 Reader

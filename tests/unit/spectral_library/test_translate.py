@@ -46,14 +46,14 @@ def _build_speclib() -> SpecLibBase:
 
 
 def test_speclib_to_diann_df_columns_and_mod_format() -> None:
-    """The DIA-NN dataframe matches DIA-NN 2.0's schema, dtypes and (UniMod:N) sequences."""
+    """The DIA-NN dataframe matches DIA-NN's schema, dtypes and (UniMod:N) sequences."""
     speclib = _build_speclib()
 
     df = speclib_to_diann_df(
         speclib, min_frag_mz=0, max_frag_mz=0, min_frag_intensity=0.0, verbose=False
     )
 
-    # exact DIA-NN 2.0 column set/order, and `Signature` must NOT be present
+    # exact DIA-NN column set/order, and `Signature` must NOT be present
     assert list(df.columns) == DIANN_PARQUET_COLUMN_ORDER
     assert "Signature" not in df.columns
     assert "Protein.Ids" in df.columns
