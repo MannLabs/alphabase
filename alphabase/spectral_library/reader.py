@@ -1,5 +1,6 @@
 """Module for reading spectral libraries."""
 
+from pathlib import Path
 from typing import List, Optional
 
 import numpy as np
@@ -243,7 +244,16 @@ class LibraryReaderBase(ModifiedSequenceReader, SpecLibBase):
         return df
 
     def _load_file(self, filename: str) -> pd.DataFrame:
-        """Load the spectral library from a csv file."""
+        """Load the spectral library from a csv/tsv or parquet file.
+
+        DIA-NN 2.0 exports its spectral libraries as parquet (``report-lib.parquet``),
+        while older DIA-NN/OpenSWATH/Spectronaut libraries are csv/tsv. Both are supported:
+        parquet files (identified by the ``.parquet`` suffix) are read with
+        :func:`pandas.read_parquet`, everything else is read as delimited text.
+        """
+        if isinstance(filename, (str, Path)) and str(filename).endswith(".parquet"):
+            return pd.read_parquet(filename)
+
         csv_sep = _get_delimiter(filename)
 
         return pd.read_csv(
