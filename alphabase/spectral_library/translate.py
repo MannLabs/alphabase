@@ -8,6 +8,7 @@ import pandas as pd
 import tqdm
 
 from alphabase.constants.modification import MOD_DF, ModificationKeys
+from alphabase.psm_reader.keys import LibPsmDfCols, PsmDfCols
 from alphabase.spectral_library.base import SpecLibBase
 from alphabase.utils import explode_multiple_columns
 
@@ -388,42 +389,51 @@ DIANN_PARQUET_FRAG_HEADS = {
     "frag_loss_head": "Fragment.Loss.Type",
 }
 
-# DIA-NN 2.0 `.parquet` library schema as ordered `(column, dtype)` pairs (dtype is
-# "int"=INT64, "float"=float32, "str"). Drives column order, dtype casting and the pyarrow
-# schema. `Signature` is omitted, as DIA-NN requires for third-party libraries.
+# dtype tokens for DIANN_PARQUET_SCHEMA (INT64 / FLOAT=float32 / str)
+DIANN_DTYPE_INT = "int"
+DIANN_DTYPE_FLOAT = "float"
+DIANN_DTYPE_STR = "str"
+
+# DIA-NN 1.9.1+ `.parquet` library schema as ordered `(column, dtype)` pairs. Drives column
+# order, dtype casting and the pyarrow schema. `Signature` is omitted, as DIA-NN requires
+# for third-party libraries.
 DIANN_PARQUET_SCHEMA = [
-    ("Precursor.Id", "str"),
-    ("Modified.Sequence", "str"),
-    ("Stripped.Sequence", "str"),
-    ("Precursor.Charge", "int"),
-    ("Proteotypic", "int"),
-    ("Decoy", "int"),
-    ("N.Term", "int"),
-    ("C.Term", "int"),
-    ("RT", "float"),
-    ("IM", "float"),
-    ("Q.Value", "float"),
-    ("Peptidoform.Q.Value", "float"),
-    ("PTM.Site.Confidence", "float"),
-    ("PG.Q.Value", "float"),
-    ("Precursor.Mz", "float"),
-    ("Product.Mz", "float"),
-    ("Relative.Intensity", "float"),
-    ("Fragment.Type", "str"),
-    ("Fragment.Charge", "int"),
-    ("Fragment.Series.Number", "int"),
-    ("Fragment.Loss.Type", "str"),
-    ("Fragment.Score", "float"),
-    ("Exclude.From.Quant", "int"),
-    ("Protein.Ids", "str"),
-    ("Protein.Group", "str"),
-    ("Protein.Names", "str"),
-    ("Genes", "str"),
-    ("Flags", "int"),
-    ("Source.Id", "str"),
+    ("Precursor.Id", DIANN_DTYPE_STR),
+    ("Modified.Sequence", DIANN_DTYPE_STR),
+    ("Stripped.Sequence", DIANN_DTYPE_STR),
+    ("Precursor.Charge", DIANN_DTYPE_INT),
+    ("Proteotypic", DIANN_DTYPE_INT),
+    ("Decoy", DIANN_DTYPE_INT),
+    ("N.Term", DIANN_DTYPE_INT),
+    ("C.Term", DIANN_DTYPE_INT),
+    ("RT", DIANN_DTYPE_FLOAT),
+    ("IM", DIANN_DTYPE_FLOAT),
+    ("Q.Value", DIANN_DTYPE_FLOAT),
+    ("Peptidoform.Q.Value", DIANN_DTYPE_FLOAT),
+    ("PTM.Site.Confidence", DIANN_DTYPE_FLOAT),
+    ("PG.Q.Value", DIANN_DTYPE_FLOAT),
+    ("Precursor.Mz", DIANN_DTYPE_FLOAT),
+    ("Product.Mz", DIANN_DTYPE_FLOAT),
+    ("Relative.Intensity", DIANN_DTYPE_FLOAT),
+    ("Fragment.Type", DIANN_DTYPE_STR),
+    ("Fragment.Charge", DIANN_DTYPE_INT),
+    ("Fragment.Series.Number", DIANN_DTYPE_INT),
+    ("Fragment.Loss.Type", DIANN_DTYPE_STR),
+    ("Fragment.Score", DIANN_DTYPE_FLOAT),
+    ("Exclude.From.Quant", DIANN_DTYPE_INT),
+    ("Protein.Ids", DIANN_DTYPE_STR),
+    ("Protein.Group", DIANN_DTYPE_STR),
+    ("Protein.Names", DIANN_DTYPE_STR),
+    ("Genes", DIANN_DTYPE_STR),
+    ("Flags", DIANN_DTYPE_INT),
+    ("Source.Id", DIANN_DTYPE_STR),
 ]
 DIANN_PARQUET_COLUMN_ORDER = [name for name, _ in DIANN_PARQUET_SCHEMA]
-_DIANN_PANDAS_DTYPE = {"int": "int64", "float": "float32", "str": "str"}
+_DIANN_TO_PANDAS_DTYPE = {
+    DIANN_DTYPE_INT: "int64",
+    DIANN_DTYPE_FLOAT: "float32",
+    DIANN_DTYPE_STR: "str",
+}
 
 # `Flags` bitfield: bit 0 on every fragment, bit 4 on each precursor's base peak.
 _DIANN_FLAG_BASE = 1 << 0
@@ -450,10 +460,10 @@ def speclib_to_diann_df(
     modloss: str = "H3PO4",
     verbose: bool = True,
 ) -> pd.DataFrame:
-    """Convert an alphabase library to a DIA-NN 2.0 parquet-format dataframe.
+    """Convert an alphabase library to a DIA-NN 1.9.1+ parquet-format dataframe.
 
     Emits DIA-NN's report-style dot-notation columns (see ``DIANN_PARQUET_SCHEMA``) and
-    ``(UniMod:N)`` modified sequences, importable by DIA-NN 2.0 and readable back with
+    ``(UniMod:N)`` modified sequences, importable by DIA-NN 1.9.1+ and readable back with
     :class:`alphabase.spectral_library.reader.LibraryReaderBase`. Columns a ``SpecLibBase``
     has no value for are filled with defaults matching a DIA-NN predicted library (q-values
     and scores 0, ``PTM.Site.Confidence`` 1, ``Source.Id`` empty).
@@ -478,13 +488,15 @@ def speclib_to_diann_df(
     if translate_mod_dict is None:
         translate_mod_dict = mod_to_unimod_dict
 
-    if "precursor_mz" not in speclib._precursor_df.columns:
+    if PsmDfCols.PRECURSOR_MZ not in speclib._precursor_df.columns:
         speclib.calc_precursor_mz()
     precursor_df = speclib._precursor_df
 
     df = pd.DataFrame(index=precursor_df.index)
 
-    df["Modified.Sequence"] = precursor_df[["sequence", "mods", "mod_sites"]].apply(
+    df["Modified.Sequence"] = precursor_df[
+        [PsmDfCols.SEQUENCE, PsmDfCols.MODS, PsmDfCols.MOD_SITES]
+    ].apply(
         create_modified_sequence,
         axis=1,
         translate_mod_dict=translate_mod_dict,
@@ -492,22 +504,28 @@ def speclib_to_diann_df(
         nterm="",
         cterm="",
     )
-    df["Stripped.Sequence"] = precursor_df["sequence"]
-    df["Precursor.Charge"] = precursor_df["charge"]
+    df["Stripped.Sequence"] = precursor_df[PsmDfCols.SEQUENCE]
+    df["Precursor.Charge"] = precursor_df[PsmDfCols.CHARGE]
     df["Precursor.Id"] = df["Modified.Sequence"] + df["Precursor.Charge"].astype(str)
-    df["Precursor.Mz"] = precursor_df["precursor_mz"]
+    df["Precursor.Mz"] = precursor_df[PsmDfCols.PRECURSOR_MZ]
 
-    rt = _first_present(precursor_df, ["irt_pred", "rt_pred", "rt", "irt", "rt_norm"])
+    rt = _first_present(
+        precursor_df, ["irt_pred", "rt_pred", PsmDfCols.RT, "irt", PsmDfCols.RT_NORM]
+    )
     if rt is None:
         raise ValueError("precursor_df must contain a retention time column")
     df["RT"] = rt
-    df["IM"] = _first_present(precursor_df, ["mobility_pred", "mobility"], 0.0)
+    df["IM"] = _first_present(precursor_df, ["mobility_pred", PsmDfCols.MOBILITY], 0.0)
 
-    df["Protein.Group"] = _first_present(precursor_df, ["proteins", "uniprot_ids"], "")
-    df["Protein.Ids"] = _first_present(precursor_df, ["uniprot_ids", "proteins"], "")
+    df["Protein.Group"] = _first_present(
+        precursor_df, [PsmDfCols.PROTEINS, PsmDfCols.UNIPROT_IDS], ""
+    )
+    df["Protein.Ids"] = _first_present(
+        precursor_df, [PsmDfCols.UNIPROT_IDS, PsmDfCols.PROTEINS], ""
+    )
     df["Protein.Names"] = _first_present(precursor_df, ["protein_names"], "")
-    df["Genes"] = _first_present(precursor_df, ["genes"], "")
-    df["Decoy"] = _first_present(precursor_df, ["decoy"], 0)
+    df["Genes"] = _first_present(precursor_df, [PsmDfCols.GENES], "")
+    df["Decoy"] = _first_present(precursor_df, [PsmDfCols.DECOY], 0)
 
     # N.Term/C.Term mark peptides at the protein N-/C-terminus (from FASTA digestion)
     df["N.Term"] = _first_present(precursor_df, ["is_prot_nterm"], 0)
@@ -527,8 +545,8 @@ def speclib_to_diann_df(
     df["Exclude.From.Quant"] = 0
     df["Source.Id"] = ""
 
-    df["frag_start_idx"] = precursor_df["frag_start_idx"]
-    df["frag_stop_idx"] = precursor_df["frag_stop_idx"]
+    df[LibPsmDfCols.FRAG_START_IDX] = precursor_df[LibPsmDfCols.FRAG_START_IDX]
+    df[LibPsmDfCols.FRAG_STOP_IDX] = precursor_df[LibPsmDfCols.FRAG_STOP_IDX]
 
     if min_frag_mz > 0 or max_frag_mz > 0:
         mask_fragment_intensity_by_mz_(
@@ -564,13 +582,13 @@ def speclib_to_diann_df(
         ].idxmax()
         df.loc[base_peak_idx, "Flags"] |= _DIANN_FLAG_FIRST_FRAGMENT
 
-    df = df.drop(["frag_start_idx", "frag_stop_idx"], axis=1)
+    df = df.drop([LibPsmDfCols.FRAG_START_IDX, LibPsmDfCols.FRAG_STOP_IDX], axis=1)
 
     for name, dtype in DIANN_PARQUET_SCHEMA:
         if dtype == "str":
             df[name] = df[name].fillna("").astype(str)
         else:
-            df[name] = df[name].astype(_DIANN_PANDAS_DTYPE[dtype])
+            df[name] = df[name].astype(_DIANN_TO_PANDAS_DTYPE[dtype])
     return df[DIANN_PARQUET_COLUMN_ORDER]
 
 
@@ -586,7 +604,7 @@ def translate_to_parquet(
     batch_size: int = 100000,
     translate_mod_dict: dict = None,
 ) -> None:
-    """Translate an alphabase library into a DIA-NN 2.0 parquet spectral library.
+    """Translate an alphabase library into a DIA-NN 1.9.1+ parquet spectral library.
 
     The written parquet uses DIA-NN's report-style column schema (see
     :func:`speclib_to_diann_df`) and can be imported by DIA-NN or read back with
@@ -613,7 +631,11 @@ def translate_to_parquet(
     import pyarrow as pa
     import pyarrow.parquet as pq
 
-    arrow_type = {"int": pa.int64, "float": pa.float32, "str": pa.string}
+    arrow_type = {
+        DIANN_DTYPE_INT: pa.int64,
+        DIANN_DTYPE_FLOAT: pa.float32,
+        DIANN_DTYPE_STR: pa.string,
+    }
     schema = pa.schema(
         [(name, arrow_type[dtype]()) for name, dtype in DIANN_PARQUET_SCHEMA]
     )

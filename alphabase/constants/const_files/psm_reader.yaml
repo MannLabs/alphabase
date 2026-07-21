@@ -721,6 +721,7 @@ library_reader_base:
   reader_type: library_reader_base
   rt_unit: irt
   fixed_C57: False
+  # in each list below, the last (dot-notation) entry supports DIA-NN 1.9.1+ parquet libraries
   column_mapping:
     'raw_name': 'ReferenceRun'
     'sequence': ['PeptideSequence', 'StrippedPeptide', 'Stripped.Sequence']
