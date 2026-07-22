@@ -1,0 +1,2 @@
+m/z	z	rt (seconds)	Activation Mode	Sequence (backbone)	Modifications	Peaks Count	Peaks List	Engine
+"300.0"	"1"	"55.0"	"CID, CAD(y and b ions)"	"GAVLI"	""	"1"	"999.0:1.0:y10"	"DB_SEARCH"

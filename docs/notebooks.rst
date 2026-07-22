@@ -31,6 +31,7 @@ Reader
 
    nbs/psm_readers
    nbs/library_reader
+   nbs/peaks_library_reader
    tutorials/tutorial_pg_reader
    tutorials/tutorial_scverse_compatibility
 

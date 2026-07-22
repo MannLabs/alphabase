@@ -448,6 +448,21 @@ modification_mappings:
       - 'P(54.0469)'
     'Pro->(DL)-5-trifluoromethylproline@P':
       - 'P(67.9873)'
+  peaks:
+    # PEAKS reports modifications as "<0-based position>-<name>-(<mass>)",
+    # e.g. "10-Carboxymethyl-(58.01)". Only these 3 (name, mass) combinations
+    # were observed across the MPIB example library (52,672 rows, 8,094
+    # modification occurrences) - cross-checked against modification.tsv:
+    #   Carboxymethyl@C        58.005479  (NOT Carbamidomethyl@C, 57.021464)
+    #   Oxidation@M            15.994915
+    #   Acetyl@Protein_N-term  42.010565
+    # Extend as new PEAKS libraries with other modifications are encountered.
+    'Carboxymethyl@C':
+      - 'Carboxymethyl'
+    'Oxidation@M':
+      - 'Oxidation (M)'
+    'Acetyl@Protein_N-term':
+      - 'Acetylation (Protein N-term)'
 
 pfind:
   reader_type: pfind
@@ -766,3 +781,13 @@ sage:
     'protein_fdr': 'protein_q'
     'decoy': 'is_decoy'
   modification_mapping_type: null # custom mapping in code
+
+peaks:
+  reader_type: peaks
+  rt_unit: second
+  column_mapping:
+    'sequence': 'Sequence (backbone)'
+    'charge': 'z'
+    'precursor_mz': 'm/z'
+    'rt': 'rt (seconds)'
+  modification_mapping_type: 'peaks'
