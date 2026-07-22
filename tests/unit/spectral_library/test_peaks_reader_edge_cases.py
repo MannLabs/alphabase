@@ -25,7 +25,7 @@ from alphabase.spectral_library.peaks_reader import PEAKSLibraryReader
 _DATA_DIR = Path(__file__).parent / "input_data"
 
 
-def _frags_for(speclib: SpecLibFlat, precursor_mz: float):
+def _frags_for(speclib: PEAKSLibraryReader, precursor_mz: float):
     row = speclib.precursor_df[
         speclib.precursor_df["precursor_mz"] == precursor_mz
     ].iloc[0]
@@ -35,9 +35,16 @@ def _frags_for(speclib: SpecLibFlat, precursor_mz: float):
 
 
 @pytest.fixture(scope="module")
-def edge_case_speclib() -> SpecLibFlat:
+def edge_case_speclib() -> PEAKSLibraryReader:
+    """Returns the reader itself: `PEAKSLibraryReader` subclasses `SpecLibFlat`
+    now, so `import_file()` populates `precursor_df`/`fragment_df` directly on
+    the reader instance rather than returning a separate library object -
+    same convention as `alphabase.spectral_library.reader.LibraryReaderBase`.
+    """
+    reader = PEAKSLibraryReader()
     with pytest.warns(UserWarning, match="unmapped modifications"):
-        return PEAKSLibraryReader().import_file(str(_DATA_DIR / "peaks_edge_cases.tsv"))
+        reader.import_file(str(_DATA_DIR / "peaks_edge_cases.tsv"))
+    return reader
 
 
 @pytest.fixture(scope="module")
@@ -147,10 +154,9 @@ def test_unmapped_modification_drops_precursor_with_warning():
     """Covered by the module-scoped fixture's pytest.warns - this test just
     confirms the specific precursor (m/z 290.0) is actually gone.
     """
+    speclib = PEAKSLibraryReader()
     with pytest.warns(UserWarning, match="unmapped modifications"):
-        speclib = PEAKSLibraryReader().import_file(
-            str(_DATA_DIR / "peaks_edge_cases.tsv")
-        )
+        speclib.import_file(str(_DATA_DIR / "peaks_edge_cases.tsv"))
     assert (speclib.precursor_df["precursor_mz"] == 290.0).sum() == 0
 
 
@@ -161,10 +167,9 @@ def test_unmapped_modification_logs_once_not_per_precursor(caplog):
     here share the identical unmapped "TotallyBogusMod" - must produce
     exactly 1 log record, not 3, while still dropping all 3 precursors.
     """
+    speclib = PEAKSLibraryReader()
     with caplog.at_level(logging.WARNING), pytest.warns(UserWarning):
-        speclib = PEAKSLibraryReader().import_file(
-            str(_DATA_DIR / "peaks_repeated_unmapped_mod.tsv")
-        )
+        speclib.import_file(str(_DATA_DIR / "peaks_repeated_unmapped_mod.tsv"))
 
     assert len(speclib.precursor_df) == 0
     unmapped_mod_records = [r for r in caplog.records if "TotallyBogusMod" in r.message]
@@ -204,10 +209,9 @@ def test_modification_with_mismatched_mass_is_dropped_with_warning():
     way "Carboxymethyl" (58.01) and "Carbamidomethyl" (57.02) are only
     distinguishable by mass, per the module docstring in peaks_reader.py.
     """
+    speclib = PEAKSLibraryReader()
     with pytest.warns(UserWarning, match="unmapped modifications"):
-        speclib = PEAKSLibraryReader().import_file(
-            str(_DATA_DIR / "peaks_edge_cases.tsv")
-        )
+        speclib.import_file(str(_DATA_DIR / "peaks_edge_cases.tsv"))
     assert (speclib.precursor_df["precursor_mz"] == 296.0).sum() == 0
 
 
@@ -229,10 +233,9 @@ def test_invalid_sequence_characters_are_dropped_with_warning(caplog):
     """Lowercase letters and digits can't come from a real PEAKS export -
     dropped (with a logged warning), not silently kept to produce garbage downstream.
     """
+    speclib = PEAKSLibraryReader()
     with pytest.warns(UserWarning, match="unmapped modifications"):
-        speclib = PEAKSLibraryReader().import_file(
-            str(_DATA_DIR / "peaks_edge_cases.tsv")
-        )
+        speclib.import_file(str(_DATA_DIR / "peaks_edge_cases.tsv"))
     sequences = set(speclib.precursor_df["sequence"])
     assert "ACdEFGH" not in sequences  # lowercase 'd'
     assert "AC3EFGH" not in sequences  # digit
@@ -367,14 +370,18 @@ def test_exact_duplicate_rows_are_both_kept(edge_case_precursor_df):
 
 
 def test_missing_precursor_mz_raises_informative_error():
-    with pytest.raises(ValueError, match="precursor_mz"):
+    """The error names the raw PEAKS column ('m/z'), not the AlphaBase name
+    ('precursor_mz') - the validation runs in `_pre_process`, before column
+    translation, against whatever the user's actual TSV header says.
+    """
+    with pytest.raises(ValueError, match="m/z"):
         PEAKSLibraryReader().import_file(
             str(_DATA_DIR / "peaks_missing_precursor_mz.tsv")
         )
 
 
 def test_missing_charge_raises_informative_error():
-    with pytest.raises(ValueError, match="charge"):
+    with pytest.raises(ValueError, match="'z'"):
         PEAKSLibraryReader().import_file(str(_DATA_DIR / "peaks_missing_charge.tsv"))
 
 
@@ -388,9 +395,8 @@ def test_missing_rt_raises_informative_error():
 
 
 def test_empty_library_returns_valid_empty_speclib():
-    speclib = PEAKSLibraryReader().import_file(
-        str(_DATA_DIR / "peaks_empty_library.tsv")
-    )
+    speclib = PEAKSLibraryReader()
+    speclib.import_file(str(_DATA_DIR / "peaks_empty_library.tsv"))
     assert isinstance(speclib, SpecLibFlat)
     assert len(speclib.precursor_df) == 0
     assert len(speclib.fragment_df) == 0

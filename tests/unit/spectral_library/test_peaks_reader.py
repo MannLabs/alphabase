@@ -75,19 +75,22 @@ def peaks_reader() -> PEAKSLibraryReader:
     return PEAKSLibraryReader()
 
 
-def test_import_file_returns_speclib_flat(peaks_reader):
-    """import_file() should return a SpecLibFlat with non-empty precursor_df/fragment_df."""
-    speclib = peaks_reader.import_file(_make_library_tsv(_ROW_NO_MOD))
+def test_reader_is_a_speclib_flat_with_populated_dfs(peaks_reader):
+    """PEAKSLibraryReader subclasses SpecLibFlat, so after import_file() the
+    reader instance itself (not a separate return value) exposes non-empty
+    precursor_df/fragment_df.
+    """
+    peaks_reader.import_file(_make_library_tsv(_ROW_NO_MOD))
 
-    assert isinstance(speclib, SpecLibFlat)
-    assert len(speclib.precursor_df) == 1
-    assert len(speclib.fragment_df) == 16
+    assert isinstance(peaks_reader, SpecLibFlat)
+    assert len(peaks_reader.precursor_df) == 1
+    assert len(peaks_reader.fragment_df) == 16
 
 
 def test_precursor_columns_are_harmonized(peaks_reader):
     """sequence/charge/precursor_mz/rt should be read and renamed correctly."""
-    speclib = peaks_reader.import_file(_make_library_tsv(_ROW_NO_MOD))
-    row = speclib.precursor_df.iloc[0]
+    peaks_reader.import_file(_make_library_tsv(_ROW_NO_MOD))
+    row = peaks_reader.precursor_df.iloc[0]
 
     assert row["sequence"] == "AAAAAAALQAK"
     assert row["charge"] == 2
@@ -98,8 +101,8 @@ def test_precursor_columns_are_harmonized(peaks_reader):
 
 
 def test_unmodified_peptide_has_empty_mods(peaks_reader):
-    speclib = peaks_reader.import_file(_make_library_tsv(_ROW_NO_MOD))
-    row = speclib.precursor_df.iloc[0]
+    peaks_reader.import_file(_make_library_tsv(_ROW_NO_MOD))
+    row = peaks_reader.precursor_df.iloc[0]
 
     assert row["mods"] == ""
     assert row["mod_sites"] == ""
@@ -110,8 +113,8 @@ def test_single_modification_harmonized_to_unimod(peaks_reader):
     "Carboxymethyl@C" at 1-based site 11 (PEAKS 0-based index 10 -> AlphaBase
     1-based site 10 + 1), matching the 'C' at that position in the sequence.
     """
-    speclib = peaks_reader.import_file(_make_library_tsv(_ROW_ONE_MOD))
-    row = speclib.precursor_df.iloc[0]
+    peaks_reader.import_file(_make_library_tsv(_ROW_ONE_MOD))
+    row = peaks_reader.precursor_df.iloc[0]
 
     assert row["sequence"][10] == "C"  # sanity check on the fixture itself
     assert row["mods"] == "Carboxymethyl@C"
@@ -123,8 +126,8 @@ def test_multiple_modifications_preserve_order(peaks_reader):
     in the same order, with the N-terminal mod mapped to the fixed site "0"
     rather than position + 1.
     """
-    speclib = peaks_reader.import_file(_make_library_tsv(_ROW_MULTI_MOD))
-    row = speclib.precursor_df.iloc[0]
+    peaks_reader.import_file(_make_library_tsv(_ROW_MULTI_MOD))
+    row = peaks_reader.precursor_df.iloc[0]
 
     assert row["mods"] == "Acetyl@Protein_N-term;Carboxymethyl@C"
     assert row["mod_sites"] == "0;5"
@@ -138,9 +141,9 @@ def test_unknown_modification_drops_precursor(peaks_reader):
     row_with_unknown_mod = _ROW_ONE_MOD.replace("Carboxymethyl", "TotallyMadeUpMod")
 
     with pytest.warns(UserWarning, match="unmapped modifications"):
-        speclib = peaks_reader.import_file(_make_library_tsv(row_with_unknown_mod))
+        peaks_reader.import_file(_make_library_tsv(row_with_unknown_mod))
 
-    assert len(speclib.precursor_df) == 0
+    assert len(peaks_reader.precursor_df) == 0
 
 
 def test_fragments_are_exploded_one_row_per_ion(peaks_reader):
@@ -149,12 +152,12 @@ def test_fragments_are_exploded_one_row_per_ion(peaks_reader):
     with 'position' following the N-term-to-C-term 0-based convention used by
     alphabase.peptide.fragment.flatten_fragments.
     """
-    speclib = peaks_reader.import_file(_make_library_tsv(_ROW_ONE_MOD))
-    precursor = speclib.precursor_df.iloc[0]
+    peaks_reader.import_file(_make_library_tsv(_ROW_ONE_MOD))
+    precursor = peaks_reader.precursor_df.iloc[0]
 
     assert precursor["flat_frag_stop_idx"] - precursor["flat_frag_start_idx"] == 20
 
-    fragments = speclib.fragment_df.iloc[
+    fragments = peaks_reader.fragment_df.iloc[
         precursor["flat_frag_start_idx"] : precursor["flat_frag_stop_idx"]
     ].reset_index(drop=True)
 
@@ -178,8 +181,8 @@ def test_fragment_charge_from_bracket_suffix(peaks_reader):
     """ "b4[2+]" should get fragment charge 2; a plain "b3" (no suffix) should
     default to charge 1.
     """
-    speclib = peaks_reader.import_file(_make_library_tsv(_ROW_CHARGED_FRAGMENT))
-    fragments = speclib.fragment_df
+    peaks_reader.import_file(_make_library_tsv(_ROW_CHARGED_FRAGMENT))
+    fragments = peaks_reader.fragment_df
 
     assert fragments.iloc[0]["charge"] == 1  # "b3"
     assert fragments.iloc[1]["charge"] == 2  # "b4[2+]"
@@ -192,8 +195,8 @@ def test_neutral_loss_fragments_get_loss_type(peaks_reader):
     """
     from alphabase.peptide.fragment import LOSS_MAPPING
 
-    speclib = peaks_reader.import_file(_make_library_tsv(_ROW_ONE_MOD))
-    fragments = speclib.fragment_df.reset_index(drop=True)
+    peaks_reader.import_file(_make_library_tsv(_ROW_ONE_MOD))
+    fragments = peaks_reader.fragment_df.reset_index(drop=True)
 
     assert fragments.iloc[0]["loss_type"] == LOSS_MAPPING[""]  # "b3", no loss
     assert fragments.iloc[10]["loss_type"] == LOSS_MAPPING["NH3"]  # "b8-NH3"
