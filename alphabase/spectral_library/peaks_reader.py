@@ -1,5 +1,6 @@
 """Reader for spectral libraries exported by PEAKS Studio."""
 
+import logging
 import re
 import warnings
 from typing import Dict, List, Optional, Tuple
@@ -7,11 +8,28 @@ from typing import Dict, List, Optional, Tuple
 import numpy as np
 import pandas as pd
 
+from alphabase.constants.aa import aa_formula
 from alphabase.constants.modification import MOD_MASS
 from alphabase.peptide.fragment import LOSS_MAPPING, SERIES_MAPPING
 from alphabase.psm_reader.keys import PsmDfCols
 from alphabase.psm_reader.psm_reader import PSMReaderBase
+from alphabase.psm_reader.utils import get_column_mapping_for_df
 from alphabase.spectral_library.flat import SpecLibFlat
+
+logger = logging.getLogger(__name__)
+
+# The set of single-letter codes AlphaBase itself recognizes (standard 20 AAs
+# plus extended codes it defines on purpose, e.g. U=selenocysteine,
+# O=pyrrolysine, X/B/J/Z=ambiguous/unknown placeholders with a disabling mass
+# - see alphabase/constants/const_files/amino_acid.tsv). Anything *outside*
+# this set (lowercase, digits, punctuation) cannot come from a real PEAKS export.
+_VALID_SEQUENCE_CHARS = frozenset(aa_formula.index)
+_REQUIRED_COLUMNS = (
+    PsmDfCols.SEQUENCE,
+    PsmDfCols.CHARGE,
+    PsmDfCols.PRECURSOR_MZ,
+    PsmDfCols.RT,
+)
 
 # Column mapping and modification mapping live in psm_reader.yaml under the
 # "peaks" key, like every other reader (see `alphabase/constants/const_files/
@@ -58,9 +76,6 @@ _PEAKS_MOD_TOKEN_RE = re.compile(
     r"(?P<position>\d+)-(?P<name>.+?)-\((?P<mass>[\d.]+)\)"
 )
 
-_PROTEIN_N_TERM_SITE = "0"
-_C_TERM_SITE = "-1"
-
 # Matches one fragment token in PEAKS' "Peaks List" column, e.g.
 #   "214.11861:0.5882:b6[2+]" -> mz, intensity, ion_type='b', ion_number=6, charge=2
 #   "218.11353:0.5980:y2"                        -> ... charge defaults to 1
@@ -74,28 +89,31 @@ _PEAKS_FRAGMENT_TOKEN_RE = re.compile(
     r"(?:\[(?P<frag_charge>\d+)\+\])?$"
 )
 
+_PROTEIN_N_TERM_SITE = "0"
+_C_TERM_SITE = "-1"
+
 
 class PEAKSLibraryReader(PSMReaderBase, SpecLibFlat):
     """Reader for spectral libraries exported by PEAKS Studio (DB search / DIA-DB export).
 
-    Subclasses `PSMReaderBase` like every other reader in `alphabase.psm_reader`
-    (rather than parsing the file standalone) so that this reader follows the
-    same `import_file` -> `_pre_process` -> `_translate_columns` ->
+    Converts a PEAKS library TSV (one row per precursor, with all fragment
+    ions packed into a single "Peaks List" string column) into an AlphaBase
+    :class:`~alphabase.spectral_library.flat.SpecLibFlat`. Subclasses
+    `PSMReaderBase` like every other reader in `alphabase.psm_reader`
+    (rather than parsing the file standalone) so that this reader follows
+    the same `import_file` -> `_pre_process` -> `_translate_columns` ->
     `_load_modifications` -> `_post_process` pipeline as the rest of the
     codebase - see `alphabase.psm_reader.sage_reader.SageReaderBase` for the
     closest precedent (modifications reported as position + observed mass,
-    not an embedded modified-sequence string).
+    not an embedded modified-sequence string) and
+    `alphabase.spectral_library.reader.LibraryReaderBase` for the precedent
+    of a reader that is *also* a `SpecLibBase`/`SpecLibFlat`.
 
-    Slice 3 of this reader's implementation: fragment assembly. `_post_process`
-    now overrides the inherited hook (own work, then `super()._post_process()`,
-    same style as `alphabase.psm_reader.sage_reader.SageReaderBase`) to build
-    `fragment_df` from the packed "Peaks List" column and bridge the result
-    into the `SpecLibFlat` surface (`self.precursor_df`/`self.fragment_df`) -
-    unlike `LibraryReaderBase`, this never calls `calc_fragment_mz_df()`:
-    PEAKS fragments already carry *observed* m/z and intensity, so there's
-    nothing to calculate. Sequence-character validation and the remaining
-    hard-raise/warn-drop error handling are still not implemented (next
-    slice).
+    Unlike `LibraryReaderBase`, this reader never calls
+    `calc_fragment_mz_df()`: PEAKS fragments already carry *observed* m/z and
+    intensity (this is a results export, not an in-silico library), so
+    there's nothing to calculate - `_post_process` builds `fragment_df`
+    directly from the "Peaks List" column instead.
 
     Example:
     -------
@@ -106,6 +124,10 @@ class PEAKSLibraryReader(PSMReaderBase, SpecLibFlat):
     """
 
     _reader_type = "peaks"
+    #: Also add every AlphaBase modification's generic UniMod-ID alias to the
+    #: mapping (harmless no-op for PEAKS' flat naming style - see
+    #: `alphabase.psm_reader.modification_mapper.ModificationMapper._extend_mod_brackets`)
+    #: matching `LibraryReaderBase`'s choice for the same reason.
     _add_unimod_to_mod_mapping = True
 
     def __init__(
@@ -156,6 +178,35 @@ class PEAKSLibraryReader(PSMReaderBase, SpecLibFlat):
             **kwargs,
         )
 
+    def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Hard-validate that every required column is present and fully populated.
+
+        Runs before `_translate_columns` so a blank value raises immediately
+        (naming the offending raw PEAKS column) rather than surfacing as a
+        cryptic dtype-cast error later in the pipeline.
+        """
+        column_mapping_for_df = get_column_mapping_for_df(self.column_mapping, df)
+        for alphabase_col in _REQUIRED_COLUMNS:
+            raw_col = column_mapping_for_df.get(alphabase_col)
+            if raw_col is None:
+                raise ValueError(
+                    f"Required column for {alphabase_col!r} not found in input file."
+                )
+
+            is_blank = df[raw_col].astype(str).str.strip() == ""
+            if is_blank.any():
+                bad_rows = df.index[is_blank].tolist()
+                raise ValueError(
+                    f"Missing required value(s) in column {raw_col!r} at row(s) "
+                    f"{bad_rows}. Every precursor must have a sequence, charge, "
+                    "precursor m/z and rt."
+                )
+        return df
+
+    @staticmethod
+    def _is_valid_sequence(sequence: str) -> bool:
+        return len(sequence) > 0 and set(sequence) <= _VALID_SEQUENCE_CHARS
+
     def _load_modifications(self, origin_df: pd.DataFrame) -> None:
         """Parse PEAKS "Modifications" strings into AlphaBase `mods`/`mod_sites`.
 
@@ -178,23 +229,34 @@ class PEAKSLibraryReader(PSMReaderBase, SpecLibFlat):
         PEAKS position 0 and are mapped to AlphaBase's fixed N-term site "0"
         directly (not position + 1).
 
-        Soft-drops (`mods`/`mod_sites` set to `None` here, actually removed
-        later once `_post_process` is implemented) precursors with an
-        unmapped/mass-mismatched modification. Sequence-character validation
-        is added in a later slice.
+        Also soft-drops (`mods`/`mod_sites` set to `None` here, actually
+        removed later by the inherited `_post_process`'s `mods.isna()`
+        filter) precursors with a non-standard sequence character or an
+        unmapped/mass-mismatched modification - unlike the required-field
+        check in `_pre_process`, a single bad row shouldn't abort the whole
+        file.
         """
         mods_list = []
         mod_sites_list = []
         # Collected across the whole file and logged once at the end (not
-        # per-row): a single unmapped/mismatched modification is often
-        # shared by many precursors, and warning on every one of them would
-        # be far noisier than useful.
+        # per-row): a single unmapped/mismatched modification or malformed
+        # sequence is often shared by many precursors, and warning on every
+        # one of them would be far noisier than useful.
         all_unknown_reasons = set()
+        bad_sequences = set()
+        n_bad_sequence = 0
         n_unmapped_mod = 0
 
         for mods_cell, sequence in zip(
             origin_df["Modifications"], self._psm_df[PsmDfCols.SEQUENCE]
         ):
+            if not self._is_valid_sequence(sequence):
+                bad_sequences.add(sequence)
+                n_bad_sequence += 1
+                mods_list.append(None)
+                mod_sites_list.append(None)
+                continue
+
             if mods_cell == "":
                 mods_list.append("")
                 mod_sites_list.append("")
@@ -211,11 +273,19 @@ class PEAKSLibraryReader(PSMReaderBase, SpecLibFlat):
             mods_list.append(";".join(names))
             mod_sites_list.append(";".join(sites))
 
+        if n_bad_sequence:
+            logger.warning(
+                f"Dropped {n_bad_sequence} precursor(s) with non-standard "
+                f"sequence characters: {sorted(bad_sequences)}"
+            )
+
         if n_unmapped_mod:
-            warnings.warn(
+            logger.warning(
                 f"Unknown or mass-mismatched PEAKS modification(s): "
                 f"{all_unknown_reasons}. Add a mapping via `modification_mapping` "
-                "to keep affected precursors.\n"
+                "to keep affected precursors."
+            )
+            warnings.warn(
                 f"Dropped {n_unmapped_mod} precursor(s) with unmapped modifications.",
                 stacklevel=2,
             )
@@ -386,6 +456,8 @@ class PEAKSLibraryReader(PSMReaderBase, SpecLibFlat):
         frag_start_idx = np.empty(n_rows, dtype=np.int64)
         frag_stop_idx = np.empty(n_rows, dtype=np.int64)
         running_idx = 0
+        # Collected across the whole file and logged once at the end, not
+        # per-token - see the same reasoning for unmapped modifications above.
         all_unparseable_tokens = []
 
         for row_i, (peaks_list, sequence) in enumerate(
@@ -436,10 +508,9 @@ class PEAKSLibraryReader(PSMReaderBase, SpecLibFlat):
             frag_stop_idx[row_i] = running_idx
 
         if all_unparseable_tokens:
-            warnings.warn(
+            logger.warning(
                 f"Skipped {len(all_unparseable_tokens)} unparseable PEAKS fragment "
-                f"token(s) (row, token): {all_unparseable_tokens}.",
-                stacklevel=2,
+                f"token(s) (row, token): {all_unparseable_tokens}."
             )
 
         fragment_df = pd.DataFrame(
