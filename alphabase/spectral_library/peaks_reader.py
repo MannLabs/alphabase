@@ -4,9 +4,11 @@ import re
 import warnings
 from typing import Dict, List, Optional, Tuple
 
+import numpy as np
 import pandas as pd
 
 from alphabase.constants.modification import MOD_MASS
+from alphabase.peptide.fragment import LOSS_MAPPING, SERIES_MAPPING
 from alphabase.psm_reader.keys import PsmDfCols
 from alphabase.psm_reader.psm_reader import PSMReaderBase
 from alphabase.spectral_library.flat import SpecLibFlat
@@ -59,6 +61,19 @@ _PEAKS_MOD_TOKEN_RE = re.compile(
 _PROTEIN_N_TERM_SITE = "0"
 _C_TERM_SITE = "-1"
 
+# Matches one fragment token in PEAKS' "Peaks List" column, e.g.
+#   "214.11861:0.5882:b6[2+]" -> mz, intensity, ion_type='b', ion_number=6, charge=2
+#   "218.11353:0.5980:y2"                        -> ... charge defaults to 1
+#   "775.32904:0.0500:y7-H2O" / "716.28815:0.0500:b8-NH3" -> neutral losses
+# Verified against all 897,272 fragment tokens in the example file: only 'b'
+# and 'y' ion types occur, and only H2O/NH3 neutral losses - 0 unparseable tokens.
+_PEAKS_FRAGMENT_TOKEN_RE = re.compile(
+    r"^(?P<mz>[\d.]+):(?P<intensity>[\d.]+):"
+    r"(?P<ion_type>[by])(?P<ion_number>\d+)"
+    r"(?P<neutral_loss>-(?:H2O|NH3))?"
+    r"(?:\[(?P<frag_charge>\d+)\+\])?$"
+)
+
 
 class PEAKSLibraryReader(PSMReaderBase, SpecLibFlat):
     """Reader for spectral libraries exported by PEAKS Studio (DB search / DIA-DB export).
@@ -71,21 +86,22 @@ class PEAKSLibraryReader(PSMReaderBase, SpecLibFlat):
     closest precedent (modifications reported as position + observed mass,
     not an embedded modified-sequence string).
 
-    Slice 2 of this reader's implementation: real modification parsing.
-    `_load_modifications` now translates PEAKS' "pos-Name-(mass)" tokens into
-    AlphaBase's `mods`/`mod_sites` (Unimod-name mapping via `psm_reader.yaml`,
-    residue-ambiguous name resolution, a mass sanity check, and the PEAKS
-    0-based -> AlphaBase 1-based position offset). Sequence validation and
-    fragments are still not implemented (later slices), and `_post_process`
-    is still un-overridden, so the SpecLibFlat surface
-    (`precursor_df`/`fragment_df`) isn't wired up yet either - see
-    `import_file()`'s return value / `self.psm_df` for this slice's result.
+    Slice 3 of this reader's implementation: fragment assembly. `_post_process`
+    now overrides the inherited hook (own work, then `super()._post_process()`,
+    same style as `alphabase.psm_reader.sage_reader.SageReaderBase`) to build
+    `fragment_df` from the packed "Peaks List" column and bridge the result
+    into the `SpecLibFlat` surface (`self.precursor_df`/`self.fragment_df`) -
+    unlike `LibraryReaderBase`, this never calls `calc_fragment_mz_df()`:
+    PEAKS fragments already carry *observed* m/z and intensity, so there's
+    nothing to calculate. Sequence-character validation and the remaining
+    hard-raise/warn-drop error handling are still not implemented (next
+    slice).
 
     Example:
     -------
     >>> reader = PEAKSLibraryReader()
     >>> reader.import_file("lib.tsv")
-    >>> reader.psm_df.head()
+    >>> reader.precursor_df.head()
 
     """
 
@@ -278,3 +294,164 @@ class PEAKSLibraryReader(PSMReaderBase, SpecLibFlat):
 
     def _translate_modifications(self) -> None:
         """No-op: modification translation is handled in `_load_modifications`."""
+
+    def _post_process(self, origin_df: pd.DataFrame) -> None:
+        """Build `fragment_df`, then defer to the inherited pipeline, then publish.
+
+        Fragment assembly must run *before* `super()._post_process()`, since
+        it needs `origin_df["Peaks List"]` lined up row-for-row against
+        `self._psm_df` - true right now (nothing has dropped or reordered
+        rows yet), but no longer true once `super()._post_process()` drops
+        unmapped-mod/bad-sequence rows and sorts by nAA.
+
+        It must also *only* build fragments for rows that will survive that
+        drop: `super()._post_process()`'s `mods.isna()` filter (the same
+        `keep_mask` computed here) removes precursors, but does nothing to
+        `fragment_df` itself, so fragments belonging to a dropped precursor
+        would otherwise linger in `fragment_df` unreferenced by any
+        surviving `flat_frag_start_idx`/`flat_frag_stop_idx` pointer -
+        exactly the rows `_load_modifications` already flagged by setting
+        `mods` to `None`.
+
+        nAA is computed locally from `sequence` (b/y ion number ->
+        backbone position) rather than waiting for `super()._post_process()`
+        to set the real `nAA` column, since that only happens afterwards.
+        """
+        keep_mask = (~self._psm_df[PsmDfCols.MODS].isna()).to_numpy()
+
+        kept_start_idx, kept_stop_idx, self._fragment_df = self._parse_fragments(
+            origin_df.loc[keep_mask, "Peaks List"],
+            self._psm_df.loc[keep_mask, PsmDfCols.SEQUENCE],
+        )
+
+        # -1 placeholder for dropped rows: never surfaces in the final
+        # output (those rows are removed by super()._post_process() below),
+        # just keeps the column int64 instead of upcasting to float64 via a
+        # partial (NaN-backed) assignment.
+        frag_start_idx = np.full(len(self._psm_df), -1, dtype=np.int64)
+        frag_stop_idx = np.full(len(self._psm_df), -1, dtype=np.int64)
+        frag_start_idx[keep_mask] = kept_start_idx
+        frag_stop_idx[keep_mask] = kept_stop_idx
+        self._psm_df["flat_frag_start_idx"] = frag_start_idx
+        self._psm_df["flat_frag_stop_idx"] = frag_stop_idx
+
+        super()._post_process(origin_df)
+
+        # precursor_mz is kept as PEAKS' observed "m/z" value as-is (unlike
+        # readers that recalculate it from sequence+mods+charge), so the
+        # inherited `_post_process` above never overwrites it - PEAKS
+        # already reports the measured value directly.
+        self.precursor_df = self._psm_df
+
+    def _parse_fragments(
+        self, peaks_list_col: pd.Series, sequence_col: pd.Series
+    ) -> Tuple[np.ndarray, np.ndarray, pd.DataFrame]:
+        """Explode the packed "Peaks List" column into a flat fragment_df.
+
+        `peaks_list_col`/`sequence_col` must already be filtered down to and
+        aligned with exactly the rows that will survive
+        `super()._post_process()`'s mods-drop filter (see `_post_process`).
+        Returns `flat_frag_start_idx`/`flat_frag_stop_idx` arrays (one entry
+        per row of `peaks_list_col`, in the same order) plus the flat
+        `fragment_df` itself - the contract `SpecLibFlat` relies on.
+
+        `position` follows `alphabase.peptide.fragment.flatten_fragments`'
+        convention: 0-based, left-to-right (N-term to C-term) backbone
+        cleavage position - same formula used in
+        `alphabase/spectral_library/reader.py::LibraryReaderBase._get_fragment_intensity`.
+        `type` and `loss_type` are stored as the integer codes AlphaBase
+        uses internally (`SERIES_MAPPING`/`LOSS_MAPPING`), not as strings.
+
+        A fragment token that doesn't match `_PEAKS_FRAGMENT_TOKEN_RE` at all
+        (garbled ion label) is logged and skipped - the rest of that
+        precursor's fragments, and the precursor itself, are kept. A token
+        that *does* parse but reports an ion number that's chemically
+        impossible for the peptide's length (e.g. "y10" on a 5-residue
+        peptide, which would compute a negative backbone position) raises
+        instead: unlike a garbled label, this can only mean the position math
+        above disagrees with the input in a way that silently produces a
+        wrong-but-plausible-looking number (`position` is unsigned, so a
+        negative value would otherwise wrap around to a huge one) - worth
+        failing loudly rather than writing bad data.
+        """
+        mz_col = []
+        intensity_col = []
+        type_col = []
+        number_col = []
+        position_col = []
+        charge_col = []
+        loss_type_col = []
+
+        n_rows = len(peaks_list_col)
+        frag_start_idx = np.empty(n_rows, dtype=np.int64)
+        frag_stop_idx = np.empty(n_rows, dtype=np.int64)
+        running_idx = 0
+        all_unparseable_tokens = []
+
+        for row_i, (peaks_list, sequence) in enumerate(
+            zip(peaks_list_col, sequence_col)
+        ):
+            n_aa = len(sequence)
+            frag_start_idx[row_i] = running_idx
+
+            # An empty "Peaks List" (Peaks Count == 0) means zero fragments,
+            # not one token: "".split(";") would otherwise yield [""], which
+            # doesn't match the fragment regex and would be treated as a
+            # (spuriously) unparseable token.
+            tokens = peaks_list.split(";") if peaks_list else []
+
+            for token in tokens:
+                match = _PEAKS_FRAGMENT_TOKEN_RE.match(token)
+                if match is None:
+                    all_unparseable_tokens.append((row_i, token))
+                    continue
+
+                ion_type = match.group("ion_type")
+                ion_number = int(match.group("ion_number"))
+                neutral_loss = match.group("neutral_loss") or ""
+                frag_charge = int(match.group("frag_charge") or 1)
+
+                position = (
+                    ion_number - 1
+                    if ion_type == "b"
+                    else n_aa - ion_number - 1  # ion_type == "y"
+                )
+                if not (0 <= position <= n_aa - 2):
+                    raise ValueError(
+                        f"Fragment {token!r} (row {row_i}) is not chemically possible "
+                        f"for a {n_aa}-residue peptide: ion number {ion_number} implies "
+                        f"backbone position {position}, expected 0..{n_aa - 2}."
+                    )
+
+                mz_col.append(float(match.group("mz")))
+                intensity_col.append(float(match.group("intensity")))
+                type_col.append(SERIES_MAPPING[ion_type])
+                number_col.append(ion_number)
+                position_col.append(position)
+                charge_col.append(frag_charge)
+                loss_type_col.append(LOSS_MAPPING[neutral_loss.lstrip("-") or ""])
+
+                running_idx += 1
+
+            frag_stop_idx[row_i] = running_idx
+
+        if all_unparseable_tokens:
+            warnings.warn(
+                f"Skipped {len(all_unparseable_tokens)} unparseable PEAKS fragment "
+                f"token(s) (row, token): {all_unparseable_tokens}.",
+                stacklevel=2,
+            )
+
+        fragment_df = pd.DataFrame(
+            {
+                "mz": mz_col,
+                "intensity": intensity_col,
+                "type": np.array(type_col, dtype=np.uint8),
+                "number": np.array(number_col, dtype=np.uint32),
+                "position": np.array(position_col, dtype=np.uint32),
+                "charge": np.array(charge_col, dtype=np.uint8),
+                "loss_type": np.array(loss_type_col, dtype=np.int16),
+            }
+        )
+
+        return frag_start_idx, frag_stop_idx, fragment_df
