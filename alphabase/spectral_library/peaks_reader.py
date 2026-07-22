@@ -49,7 +49,9 @@ _REQUIRED_COLUMNS = (PsmDfCols.SEQUENCE, PsmDfCols.CHARGE, PsmDfCols.PRECURSOR_M
 # this pattern is applied with `finditer` (not `split`), so it finds every
 # token regardless of what separator (if any) sits between them - verified
 # against all 8,094 modification occurrences in the example file, 0 mismatches.
-_PEAKS_MOD_TOKEN_RE = re.compile(r"(?P<position>\d+)-(?P<name>.+?)-\((?P<mass>[\d.]+)\)")
+_PEAKS_MOD_TOKEN_RE = re.compile(
+    r"(?P<position>\d+)-(?P<name>.+?)-\((?P<mass>[\d.]+)\)"
+)
 
 # Matches one fragment token in PEAKS' "Peaks List" column, e.g.
 #   "214.11861:0.5882:b6[2+]" -> mz, intensity, ion_type='b', ion_number=6, charge=2
@@ -97,11 +99,12 @@ class PEAKSLibraryReader:
       inherited, since the base class's `import_file` template method
       assumes the wrong input shape - see above).
 
-    Example
+    Example:
     -------
     >>> reader = PEAKSLibraryReader()
     >>> speclib = reader.import_file("lib.tsv")
     >>> speclib.precursor_df.head()
+
     """
 
     #: Key into `psm_reader.yaml`, same convention as `PSMReaderBase._reader_type`.
@@ -118,7 +121,8 @@ class PEAKSLibraryReader:
         rt_unit: Optional[str] = None,
         column_mapping: Optional[Dict[str, str]] = None,
     ):
-        """
+        """Initialize the reader.
+
         Parameters
         ----------
         modification_mapping : dict, optional
@@ -135,9 +139,12 @@ class PEAKSLibraryReader:
         column_mapping : dict, optional
             PEAKS column name -> AlphaBase column name.
             Defaults to `psm_reader_yaml["peaks"]["column_mapping"]`.
+
         """
         self._rt_unit = (
-            rt_unit if rt_unit is not None else psm_reader_yaml[self._reader_type]["rt_unit"]
+            rt_unit
+            if rt_unit is not None
+            else psm_reader_yaml[self._reader_type]["rt_unit"]
         )
         if self._rt_unit != "second":
             # TODO: implement "minute"/"irt" if/when a PEAKS export using them shows up.
@@ -148,7 +155,9 @@ class PEAKSLibraryReader:
         self._modification_mapper = ModificationMapper(
             modification_mapping,
             reader_yaml=copy.deepcopy(psm_reader_yaml),
-            mapping_type=psm_reader_yaml[self._reader_type]["modification_mapping_type"],
+            mapping_type=psm_reader_yaml[self._reader_type][
+                "modification_mapping_type"
+            ],
             add_unimod_to_mod_mapping=self._add_unimod_to_mod_mapping,
         )
 
@@ -173,6 +182,7 @@ class PEAKSLibraryReader:
             Library with `precursor_df` (one row per precursor) and
             `fragment_df` (one row per fragment ion), linked via the
             `flat_frag_start_idx` / `flat_frag_stop_idx` columns.
+
         """
         raw_df = self._load_file(filename)
 
@@ -214,9 +224,7 @@ class PEAKSLibraryReader:
 
         self._validate_required_columns(precursor_df)
 
-        precursor_df[PsmDfCols.CHARGE] = precursor_df[PsmDfCols.CHARGE].astype(
-            np.int8
-        )
+        precursor_df[PsmDfCols.CHARGE] = precursor_df[PsmDfCols.CHARGE].astype(np.int8)
         precursor_df[PsmDfCols.PRECURSOR_MZ] = precursor_df[
             PsmDfCols.PRECURSOR_MZ
         ].astype(np.float64)
@@ -307,7 +315,9 @@ class PEAKSLibraryReader:
             unknown = []
             for match in _PEAKS_MOD_TOKEN_RE.finditer(mods_cell):
                 peaks_name = match.group("name")
-                alphabase_name = self._modification_mapper.rev_mod_mapping.get(peaks_name)
+                alphabase_name = self._modification_mapper.rev_mod_mapping.get(
+                    peaks_name
+                )
                 if alphabase_name is None:
                     unknown.append(peaks_name)
                     continue

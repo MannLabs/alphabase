@@ -29,8 +29,8 @@ _HEADER = (
 _ROW_NO_MOD = (
     '"478.77979"\t"2"\t"58.2"\t"CID, CAD(y and b ions)"\t"AAAAAAALQAK"\t""\t"16"\t'
     '"214.11861:1.0000:b3;218.14990:0.1106:y2;285.15570:0.6207:b4;346.20847:0.1872:y3;'
-    '356.19281:0.4090:b5;427.22992:0.1952:b6;459.29254:0.2122:y4;498.26703:0.1207:b7;'
-    '530.32965:0.3947:y5;601.36676:0.7234:y6;611.35107:0.0564:b8;672.40387:0.9511:y7;'
+    "356.19281:0.4090:b5;427.22992:0.1952:b6;459.29254:0.2122:y4;498.26703:0.1207:b7;"
+    "530.32965:0.3947:y5;601.36676:0.7234:y6;611.35107:0.0564:b8;672.40387:0.9511:y7;"
     '739.40967:0.0261:b9;743.44098:0.4926:y8;814.47809:0.3936:y9;885.51520:0.0250:y10"\t'
     '"DB_SEARCH"'
 )
@@ -40,9 +40,9 @@ _ROW_ONE_MOD = (
     '"763.32721"\t"2"\t"65.5"\t"CID, CAD(y and b ions)"\t"AAAGEFADDPCSSVK"\t'
     '"10-Carboxymethyl-(58.01)"\t"20"\t'
     '"214.11861:0.4500:b3;246.18120:0.0999:y2;271.14005:0.4500:b4;333.21323:0.1499:y3;'
-    '400.18265:0.4498:b5;420.24524:0.1000:y4;547.25104:0.0500:b6;581.25995:0.1499:y5;'
-    '618.28815:0.2998:b7;678.31268:0.7499:y6;716.28815:0.0500:b8-NH3;775.32904:0.0500:y7-H2O;'
-    '776.31262:0.0500:y7-NH3;848.34204:0.1000:b9;908.36658:0.4000:y8;979.40369:1.0000:y9;'
+    "400.18265:0.4498:b5;420.24524:0.1000:y4;547.25104:0.0500:b6;581.25995:0.1499:y5;"
+    "618.28815:0.2998:b7;678.31268:0.7499:y6;716.28815:0.0500:b8-NH3;775.32904:0.0500:y7-H2O;"
+    "776.31262:0.0500:y7-NH3;848.34204:0.1000:b9;908.36658:0.4000:y8;979.40369:1.0000:y9;"
     '1126.47205:0.9001:y10;1237.50415:0.0500:y11-H2O;1312.53613:0.3999:y12;1383.57324:0.0500:y13"\t'
     '"DB_SEARCH"'
 )
@@ -106,7 +106,7 @@ def test_unmodified_peptide_has_empty_mods(peaks_reader):
 
 
 def test_single_modification_harmonized_to_unimod(peaks_reader):
-    """"10-Carboxymethyl-(58.01)" on "AAAGEFADDPCSSVK" should become
+    """ "10-Carboxymethyl-(58.01)" on "AAAGEFADDPCSSVK" should become
     "Carboxymethyl@C" at 1-based site 11 (PEAKS 0-based index 10 -> AlphaBase
     1-based site 10 + 1), matching the 'C' at that position in the sequence.
     """
@@ -175,7 +175,7 @@ def test_fragments_are_exploded_one_row_per_ion(peaks_reader):
 
 
 def test_fragment_charge_from_bracket_suffix(peaks_reader):
-    """"b4[2+]" should get fragment charge 2; a plain "b3" (no suffix) should
+    """ "b4[2+]" should get fragment charge 2; a plain "b3" (no suffix) should
     default to charge 1.
     """
     speclib = peaks_reader.import_file(_make_library_tsv(_ROW_CHARGED_FRAGMENT))
@@ -186,7 +186,7 @@ def test_fragment_charge_from_bracket_suffix(peaks_reader):
 
 
 def test_neutral_loss_fragments_get_loss_type(peaks_reader):
-    """"b8-NH3" / "y7-H2O" style ion labels (present in _ROW_ONE_MOD, tokens
+    """ "b8-NH3" / "y7-H2O" style ion labels (present in _ROW_ONE_MOD, tokens
     11 and 12) should set fragment_df's integer loss_type using AlphaBase's
     LOSS_MAPPING (NH3=17, H2O=18, none=0) - see alphabase.peptide.fragment.
     """
