@@ -48,8 +48,9 @@ def edge_case_precursor_df(edge_case_speclib):
 
 
 def test_edge_case_file_drops_only_expected_rows(edge_case_precursor_df):
-    """28 rows in; 3 are expected soft-drops (2 bad sequences, 1 unmapped mod)."""
-    assert len(edge_case_precursor_df) == 28 - 3
+    """31 rows in; 4 are expected soft-drops (2 bad sequences, 1 unmapped mod
+    name, 1 known mod name with a mass that doesn't match)."""
+    assert len(edge_case_precursor_df) == 31 - 4
 
 
 def test_full_standard_aa_alphabet_is_covered(edge_case_precursor_df):
@@ -150,6 +151,46 @@ def test_unmapped_modification_drops_precursor_with_warning():
             str(_DATA_DIR / "peaks_edge_cases.tsv")
         )
     assert (speclib.precursor_df["precursor_mz"] == 290.0).sum() == 0
+
+
+def test_residue_ambiguous_deamidation_resolves_to_n(edge_case_precursor_df):
+    """ "Deamidation (NQ)" (0.98 Da) is PEAKS' shared name for what AlphaBase
+    splits into residue-specific "Deamidated@N"/"Deamidated@Q". At position 1
+    (0-based) on "ANQKTVL" the residue is 'N', so it must resolve to
+    Deamidated@N, not get flagged unknown (see modification.tsv lines 40-42).
+    """
+    row = edge_case_precursor_df[edge_case_precursor_df["precursor_mz"] == 294.0].iloc[
+        0
+    ]
+    assert row["sequence"][1] == "N"
+    assert row["mods"] == "Deamidated@N"
+    assert row["mod_sites"] == "2"
+
+
+def test_residue_ambiguous_deamidation_resolves_to_q(edge_case_precursor_df):
+    """Same "Deamidation (NQ)" name, but at position 2 on "ANQKTVL" the
+    residue is 'Q' - must resolve to Deamidated@Q instead.
+    """
+    row = edge_case_precursor_df[edge_case_precursor_df["precursor_mz"] == 295.0].iloc[
+        0
+    ]
+    assert row["sequence"][2] == "Q"
+    assert row["mods"] == "Deamidated@Q"
+    assert row["mod_sites"] == "3"
+
+
+def test_modification_with_mismatched_mass_is_dropped_with_warning():
+    """A known PEAKS name ("Carboxymethyl") whose reported mass (99.99) doesn't
+    match the expected AlphaBase mass (58.005479, i.e. "58.01" rounded) must
+    still be dropped - the name alone isn't enough of a guarantee, the same
+    way "Carboxymethyl" (58.01) and "Carbamidomethyl" (57.02) are only
+    distinguishable by mass, per the module docstring in peaks_reader.py.
+    """
+    with pytest.warns(UserWarning, match="unmapped modifications"):
+        speclib = PEAKSLibraryReader().import_file(
+            str(_DATA_DIR / "peaks_edge_cases.tsv")
+        )
+    assert (speclib.precursor_df["precursor_mz"] == 296.0).sum() == 0
 
 
 # --- Sequence ---
@@ -350,8 +391,11 @@ def test_frag_start_stop_idx_line_up_for_zero_one_and_many_fragments(edge_case_s
         many_frag["flat_frag_stop_idx"] - many_frag["flat_frag_start_idx"] == 58
     )  # 30-mer: 29 b + 29 y
 
-    # global invariant: ranges are sorted, non-overlapping, and exactly cover fragment_df
-    sorted_pdf = pdf.sort_values("flat_frag_start_idx")
+    # global invariant: ranges are sorted, non-overlapping, and exactly cover
+    # fragment_df. Sorted on both columns (not just start_idx) so that
+    # zero-fragment precursors (start_idx == stop_idx) sort deterministically
+    # before/adjacent to their neighbor regardless of quicksort tie-breaking.
+    sorted_pdf = pdf.sort_values(["flat_frag_start_idx", "flat_frag_stop_idx"])
     assert (
         sorted_pdf["flat_frag_start_idx"].to_numpy()[1:]
         == sorted_pdf["flat_frag_stop_idx"].to_numpy()[:-1]

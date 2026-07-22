@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 
 from alphabase.constants.aa import aa_formula
+from alphabase.constants.modification import MOD_MASS
 from alphabase.peptide.fragment import LOSS_MAPPING, SERIES_MAPPING
 from alphabase.psm_reader.keys import PsmDfCols
 from alphabase.psm_reader.modification_mapper import ModificationMapper
@@ -41,6 +42,27 @@ _REQUIRED_COLUMNS = (PsmDfCols.SEQUENCE, PsmDfCols.CHARGE, PsmDfCols.PRECURSOR_M
 # entry as new modifications are encountered (an unmapped modification warns
 # and drops the affected precursor rather than crashing - see
 # `_harmonize_modifications`).
+#
+# Some PEAKS modification names are inherently residue-ambiguous: PEAKS names
+# a modification once per *shared delta mass*, but AlphaBase/UniMod names are
+# always residue-specific, e.g. "Deamidation (NQ)" (0.98 Da) covers both
+# "Deamidated@N" and "Deamidated@Q" - see modification.tsv lines 40-42, both
+# 0.984016 Da (Deamidated@R too, but PEAKS' own "(NQ)" name never applies to
+# R). The yaml string mapping above can't express this (one PEAKS name -> one
+# AlphaBase name), so these are resolved separately in
+# `_harmonize_modifications` by checking which of the candidate residues is
+# actually present at the reported sequence position.
+_RESIDUE_AMBIGUOUS_PEAKS_MODS: Dict[str, Dict[str, str]] = {
+    "Deamidation (NQ)": {"N": "Deamidated@N", "Q": "Deamidated@Q"},
+}
+
+# PEAKS rounds the mass it prints in the "Modifications" column to 2 decimal
+# places (e.g. "58.01" for a true Carboxymethyl@C delta of 58.005479 Da), so
+# an exact match is never expected. This tolerance only needs to be tight
+# enough to catch a *wrong* mapping - e.g. Carboxymethyl (58.01) vs
+# Carbamidomethyl (57.02), ~1 Da apart, see the module docstring above - not
+# to validate instrument accuracy.
+_MASS_SANITY_TOLERANCE_DA = 0.01
 
 # Matches one modification token in PEAKS' "Modifications" column, e.g.
 #   "10-Carboxymethyl-(58.01)" -> position="10", name="Carboxymethyl", mass="58.01"
@@ -303,7 +325,9 @@ class PEAKSLibraryReader:
         mod_sites_list = []
         keep_mask = []
 
-        for mods_cell in raw_df["Modifications"]:
+        for mods_cell, sequence in zip(
+            raw_df["Modifications"], precursor_df[PsmDfCols.SEQUENCE]
+        ):
             if mods_cell == "":
                 mods_list.append("")
                 mod_sites_list.append("")
@@ -315,14 +339,30 @@ class PEAKSLibraryReader:
             unknown = []
             for match in _PEAKS_MOD_TOKEN_RE.finditer(mods_cell):
                 peaks_name = match.group("name")
+                peaks_position = int(match.group("position"))
+                peaks_mass = float(match.group("mass"))
+
                 alphabase_name = self._modification_mapper.rev_mod_mapping.get(
                     peaks_name
+                ) or self._resolve_residue_ambiguous_mod(
+                    peaks_name, sequence, peaks_position
                 )
                 if alphabase_name is None:
                     unknown.append(peaks_name)
                     continue
 
-                peaks_position = int(match.group("position"))
+                expected_mass = MOD_MASS.get(alphabase_name)
+                if expected_mass is not None and (
+                    abs(expected_mass - peaks_mass) > _MASS_SANITY_TOLERANCE_DA
+                ):
+                    unknown.append(
+                        f"{peaks_name} (would map to {alphabase_name}, but reported "
+                        f"mass {peaks_mass} is not within "
+                        f"{_MASS_SANITY_TOLERANCE_DA} Da of the expected "
+                        f"{expected_mass:.4f})"
+                    )
+                    continue
+
                 site = self._mod_site(alphabase_name, peaks_position)
 
                 names.append(alphabase_name)
@@ -330,7 +370,7 @@ class PEAKSLibraryReader:
 
             if unknown:
                 logger.warning(
-                    f"Unknown PEAKS modification(s) {set(unknown)} in {mods_cell!r}. "
+                    f"Unknown or mass-mismatched PEAKS modification(s) {set(unknown)} in {mods_cell!r}. "
                     "Dropping this precursor. Add a mapping via `modification_mapping` to keep it."
                 )
                 mods_list.append(None)
@@ -358,6 +398,22 @@ class PEAKSLibraryReader:
             precursor_df.loc[keep_mask].reset_index(drop=True),
             raw_df.loc[keep_mask].reset_index(drop=True),
         )
+
+    @staticmethod
+    def _resolve_residue_ambiguous_mod(
+        peaks_name: str, sequence: str, peaks_position: int
+    ) -> Optional[str]:
+        """Resolve a residue-ambiguous PEAKS mod name (e.g. "Deamidation (NQ)") via the sequence.
+
+        Returns None if `peaks_name` isn't a known residue-ambiguous name, or
+        if the residue actually at `peaks_position` isn't one of its
+        candidates (e.g. a corrupt/mismatched position) - both are treated as
+        "unknown" by the caller, same as a plain unmapped name.
+        """
+        residue_options = _RESIDUE_AMBIGUOUS_PEAKS_MODS.get(peaks_name)
+        if residue_options is None or not (0 <= peaks_position < len(sequence)):
+            return None
+        return residue_options.get(sequence[peaks_position])
 
     @staticmethod
     def _mod_site(alphabase_mod_name: str, peaks_position: int) -> str:
