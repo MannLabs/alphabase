@@ -24,10 +24,14 @@ logger = logging.getLogger(__name__)
 # plus extended codes it defines on purpose, e.g. U=selenocysteine,
 # O=pyrrolysine, X/B/J/Z=ambiguous/unknown placeholders with a disabling mass
 # - see alphabase/constants/const_files/amino_acid.tsv). Anything *outside*
-# this set (lowercase, digits, punctuation) cannot come from a real PEAKS
-# export and is rejected rather than silently passed through.
+# this set (lowercase, digits, punctuation) cannot come from a real PEAKS export.
 _VALID_SEQUENCE_CHARS = frozenset(aa_formula.index)
-_REQUIRED_COLUMNS = (PsmDfCols.SEQUENCE, PsmDfCols.CHARGE, PsmDfCols.PRECURSOR_MZ)
+_REQUIRED_COLUMNS = (
+    PsmDfCols.SEQUENCE,
+    PsmDfCols.CHARGE,
+    PsmDfCols.PRECURSOR_MZ,
+    PsmDfCols.RT,
+)
 
 # Column mapping and modification mapping live in psm_reader.yaml under the
 # "peaks" key, like every other reader (see `alphabase/constants/const_files/
@@ -67,10 +71,9 @@ _MASS_SANITY_TOLERANCE_DA = 0.01
 # Matches one modification token in PEAKS' "Modifications" column, e.g.
 #   "10-Carboxymethyl-(58.01)" -> position="10", name="Carboxymethyl", mass="58.01"
 #   "0-Acetylation (Protein N-term)-(42.01)" -> position="0", name="Acetylation (Protein N-term)"
-# Multiple modifications are concatenated with ';' in the source column, but
-# this pattern is applied with `finditer` (not `split`), so it finds every
-# token regardless of what separator (if any) sits between them - verified
-# against all 8,094 modification occurrences in the example file, 0 mismatches.
+# Multiple modifications are concatenated with ';' in the source column -
+# verified against all 8,094 modification occurrences in the example file,
+# 0 mismatches.
 _PEAKS_MOD_TOKEN_RE = re.compile(
     r"(?P<position>\d+)-(?P<name>.+?)-\((?P<mass>[\d.]+)\)"
 )
@@ -92,34 +95,38 @@ _PROTEIN_N_TERM_SITE = "0"
 _C_TERM_SITE = "-1"
 
 
+# Design notes / precedent in this codebase (dev-facing - not part of the
+# public docstring below, since these are implementation rationale, not
+# usage documentation):
+# - `alphabase.spectral_library.reader.LibraryReaderBase` is the existing
+#   spectral library reader, but it expects "long format" input (one row
+#   per *fragment*, like Spectronaut exports). PEAKS' format is the
+#   opposite shape (one row per *precursor*), so this class does not
+#   subclass it - it builds `precursor_df`/`fragment_df` directly instead.
+#   NOTE (open question, discussed in person, not yet resolved): reviewer
+#   feedback on PR #419 asked to reconsider subclassing `PSMReaderBase`
+#   instead, to avoid this reader drifting from the rest of `psm_reader`'s
+#   readers - see that PR thread before changing this.
+# - `alphabase.psm_reader.sage_reader.SageReaderBase` is the closest
+#   precedent for the modification-harmonization step: Sage also reports
+#   modifications as (position, observed mass) rather than an embedded
+#   modified-sequence string.
+# - PEAKS fragments already carry *observed* m/z and intensity (this is a
+#   results export, not an in-silico library), so unlike
+#   `LibraryReaderBase` this reader never calls `calc_fragment_mz_df()` -
+#   there is nothing to calculate.
+# - Column mapping and modification mapping are still sourced from
+#   `psm_reader.yaml` / `ModificationMapper`, exactly like every reader in
+#   `alphabase.psm_reader` does, even though this class doesn't subclass
+#   `PSMReaderBase` (constructed directly in `__init__` instead of
+#   inherited, since the base class's `import_file` template method
+#   assumes the wrong input shape - see above).
 class PEAKSLibraryReader:
     """Reader for spectral libraries exported by PEAKS Studio (DB search / DIA-DB export).
 
     Converts a PEAKS library TSV (one row per precursor, with all fragment
     ions packed into a single "Peaks List" string column) into an AlphaBase
     :class:`~alphabase.spectral_library.flat.SpecLibFlat`.
-
-    Design notes / precedent in this codebase
-    -------------------------------------------
-    - `alphabase.spectral_library.reader.LibraryReaderBase` is the existing
-      spectral library reader, but it expects "long format" input (one row
-      per *fragment*, like Spectronaut exports). PEAKS' format is the
-      opposite shape (one row per *precursor*), so this class does not
-      subclass it - it builds `precursor_df`/`fragment_df` directly instead.
-    - `alphabase.psm_reader.sage_reader.SageReaderBase` is the closest
-      precedent for the modification-harmonization step: Sage also reports
-      modifications as (position, observed mass) rather than an embedded
-      modified-sequence string.
-    - PEAKS fragments already carry *observed* m/z and intensity (this is a
-      results export, not an in-silico library), so unlike
-      `LibraryReaderBase` this reader never calls `calc_fragment_mz_df()` -
-      there is nothing to calculate.
-    - Column mapping and modification mapping are still sourced from
-      `psm_reader.yaml` / `ModificationMapper`, exactly like every reader in
-      `alphabase.psm_reader` does, even though this class doesn't subclass
-      `PSMReaderBase` (constructed directly in `__init__` instead of
-      inherited, since the base class's `import_file` template method
-      assumes the wrong input shape - see above).
 
     Example:
     -------
@@ -156,7 +163,7 @@ class PEAKSLibraryReader:
         rt_unit : str, optional
             Unit of the retention time column. Defaults to
             `psm_reader_yaml["peaks"]["rt_unit"]` ("second" - the only
-            convention observed in PEAKS exports so far).
+            convention observed across the available PEAKS exports).
 
         column_mapping : dict, optional
             PEAKS column name -> AlphaBase column name.
@@ -228,11 +235,10 @@ class PEAKSLibraryReader:
         """Build the precursor-level columns: sequence, charge, precursor_mz, rt, nAA.
 
         Also validates the input:
-        - `sequence`, `charge`, `precursor_mz` are required for every row - a
-          blank value in any of them means the row can't be identified at
-          all, which is treated as corrupt input and raises immediately
-          (informatively, naming the offending rows) rather than surfacing a
-          cryptic dtype-cast error later on.
+        - `sequence`, `charge`, `precursor_mz`, `rt` are required for every
+          row (see `_REQUIRED_COLUMNS`) - a blank value in any of them raises
+          immediately (informatively, naming the offending rows) rather than
+          surfacing a cryptic dtype-cast error later on.
         - `sequence` characters must be in AlphaBase's recognized AA alphabet
           (`_VALID_SEQUENCE_CHARS`). Unlike the required-field check, this is
           treated as a soft per-row problem: the row is dropped with a
@@ -267,17 +273,13 @@ class PEAKSLibraryReader:
 
         # AlphaBase's internal `rt` convention is minutes (mirrors
         # PSMReaderBase._normalize_rt's handling of rt_unit == "second"). RT
-        # is not a required field (unlike sequence/charge/precursor_mz): a
-        # blank/unparseable value becomes NaN rather than raising, since RT
-        # isn't needed to identify a precursor.
-        precursor_df[PsmDfCols.RT] = (
-            pd.to_numeric(precursor_df[PsmDfCols.RT], errors="coerce") / 60
-        )
+        # is a required field like sequence/charge/precursor_mz: a
+        # non-numeric value raises (via .astype, same as charge/precursor_mz
+        # above) rather than being silently coerced to NaN.
+        precursor_df[PsmDfCols.RT] = precursor_df[PsmDfCols.RT].astype(np.float64) / 60
         max_rt = precursor_df[PsmDfCols.RT].max()
         precursor_df[PsmDfCols.RT_NORM] = (
-            (precursor_df[PsmDfCols.RT] / max_rt).clip(0, 1)
-            if pd.notna(max_rt) and max_rt > 0
-            else 0.0
+            (precursor_df[PsmDfCols.RT] / max_rt).clip(0, 1) if max_rt > 0 else 0.0
         )
 
         return precursor_df, raw_df
@@ -291,7 +293,7 @@ class PEAKSLibraryReader:
                 bad_rows = precursor_df.index[is_blank].tolist()
                 raise ValueError(
                     f"Missing required value(s) in column {col!r} at row(s) {bad_rows}. "
-                    "Every precursor must have a sequence, charge and precursor m/z."
+                    "Every precursor must have a sequence, charge, precursor m/z and rt."
                 )
 
     @staticmethod
@@ -324,6 +326,11 @@ class PEAKSLibraryReader:
         mods_list = []
         mod_sites_list = []
         keep_mask = []
+        # Collected across the whole file and logged once at the end (not
+        # per-row): a single unmapped/mismatched modification is often
+        # shared by many precursors, and warning on every one of them would
+        # be far noisier than useful.
+        all_unknown_reasons = set()
 
         for mods_cell, sequence in zip(
             raw_df["Modifications"], precursor_df[PsmDfCols.SEQUENCE]
@@ -363,16 +370,13 @@ class PEAKSLibraryReader:
                     )
                     continue
 
-                site = self._mod_site(alphabase_name, peaks_position)
+                site = self._convert_mod_site(alphabase_name, peaks_position)
 
                 names.append(alphabase_name)
                 sites.append(site)
 
             if unknown:
-                logger.warning(
-                    f"Unknown or mass-mismatched PEAKS modification(s) {set(unknown)} in {mods_cell!r}. "
-                    "Dropping this precursor. Add a mapping via `modification_mapping` to keep it."
-                )
+                all_unknown_reasons.update(unknown)
                 mods_list.append(None)
                 mod_sites_list.append(None)
                 keep_mask.append(False)
@@ -389,6 +393,10 @@ class PEAKSLibraryReader:
         keep_mask = pd.Series(keep_mask, index=precursor_df.index)
         n_dropped = (~keep_mask).sum()
         if n_dropped:
+            logger.warning(
+                f"Unknown or mass-mismatched PEAKS modification(s): {all_unknown_reasons}. "
+                "Add a mapping via `modification_mapping` to keep affected precursors."
+            )
             warnings.warn(
                 f"Dropped {n_dropped} precursor(s) with unmapped modifications.",
                 stacklevel=2,
@@ -416,7 +424,7 @@ class PEAKSLibraryReader:
         return residue_options.get(sequence[peaks_position])
 
     @staticmethod
-    def _mod_site(alphabase_mod_name: str, peaks_position: int) -> str:
+    def _convert_mod_site(alphabase_mod_name: str, peaks_position: int) -> str:
         """Convert a PEAKS 0-based position to an AlphaBase `mod_sites` token."""
         mod_site_token = alphabase_mod_name.split("@", 1)[1]
         if "N-term" in mod_site_token:
@@ -464,6 +472,9 @@ class PEAKSLibraryReader:
         frag_start_idx = np.empty(len(precursor_df), dtype=np.int64)
         frag_stop_idx = np.empty(len(precursor_df), dtype=np.int64)
         running_idx = 0
+        # Collected across the whole file and logged once at the end, not
+        # per-token - see the same reasoning for unmapped modifications above.
+        all_unparseable_tokens = []
 
         for row_i, (peaks_list, n_aa) in enumerate(
             zip(raw_df["Peaks List"], precursor_df[PsmDfCols.NAA])
@@ -479,9 +490,7 @@ class PEAKSLibraryReader:
             for token in tokens:
                 match = _PEAKS_FRAGMENT_TOKEN_RE.match(token)
                 if match is None:
-                    logger.warning(
-                        f"Skipping unparseable PEAKS fragment token {token!r} (row {row_i})."
-                    )
+                    all_unparseable_tokens.append((row_i, token))
                     continue
 
                 ion_type = match.group("ion_type")
@@ -512,6 +521,12 @@ class PEAKSLibraryReader:
                 running_idx += 1
 
             frag_stop_idx[row_i] = running_idx
+
+        if all_unparseable_tokens:
+            logger.warning(
+                f"Skipped {len(all_unparseable_tokens)} unparseable PEAKS fragment "
+                f"token(s) (row, token): {all_unparseable_tokens}."
+            )
 
         precursor_df = precursor_df.copy()
         precursor_df["flat_frag_start_idx"] = frag_start_idx

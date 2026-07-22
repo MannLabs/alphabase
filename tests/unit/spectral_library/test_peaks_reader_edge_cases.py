@@ -13,6 +13,7 @@ can't coexist with a successful import in the same file (hard errors, or a
 header-only file).
 """
 
+import logging
 from pathlib import Path
 
 import pandas as pd
@@ -151,6 +152,23 @@ def test_unmapped_modification_drops_precursor_with_warning():
             str(_DATA_DIR / "peaks_edge_cases.tsv")
         )
     assert (speclib.precursor_df["precursor_mz"] == 290.0).sum() == 0
+
+
+def test_unmapped_modification_logs_once_not_per_precursor(caplog):
+    """Reviewer feedback on PR #419: logging a warning on every precursor
+    that shares the same unmapped modification would be very noisy for a
+    real library (one bad name can affect thousands of rows). 3 precursors
+    here share the identical unmapped "TotallyBogusMod" - must produce
+    exactly 1 log record, not 3, while still dropping all 3 precursors.
+    """
+    with caplog.at_level(logging.WARNING), pytest.warns(UserWarning):
+        speclib = PEAKSLibraryReader().import_file(
+            str(_DATA_DIR / "peaks_repeated_unmapped_mod.tsv")
+        )
+
+    assert len(speclib.precursor_df) == 0
+    unmapped_mod_records = [r for r in caplog.records if "TotallyBogusMod" in r.message]
+    assert len(unmapped_mod_records) == 1
 
 
 def test_residue_ambiguous_deamidation_resolves_to_n(edge_case_precursor_df):
@@ -358,6 +376,15 @@ def test_missing_precursor_mz_raises_informative_error():
 def test_missing_charge_raises_informative_error():
     with pytest.raises(ValueError, match="charge"):
         PEAKSLibraryReader().import_file(str(_DATA_DIR / "peaks_missing_charge.tsv"))
+
+
+def test_missing_rt_raises_informative_error():
+    """rt is a required field, same as sequence/charge/precursor_mz - reviewer
+    feedback on PR #419 pointed out the original implementation treated it as
+    optional (silently NaN) while the other three were hard-required.
+    """
+    with pytest.raises(ValueError, match="rt"):
+        PEAKSLibraryReader().import_file(str(_DATA_DIR / "peaks_missing_rt.tsv"))
 
 
 def test_empty_library_returns_valid_empty_speclib():
