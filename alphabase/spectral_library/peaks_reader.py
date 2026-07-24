@@ -154,8 +154,12 @@ class PEAKSLibraryReader(PSMReaderBase, SpecLibFlat):
         rt_unit : str, optional
             Unit of the retention time column, one of "minute", "second" or
             "irt". Defaults to `psm_reader_yaml["peaks"]["rt_unit"]`
-            ("second" - the only convention observed across the available
-            PEAKS exports so far).
+            ("second", matching the standard PEAKS export column name "rt
+            (seconds)"). If a PEAKS export reports RT in a different unit,
+            pass the matching `rt_unit` explicitly and, if needed, point
+            `column_mapping["rt"]` at the differently-named raw column -
+            `_pre_process` raises immediately if the expected column isn't
+            found, rather than silently misinterpreting the values.
 
         **kwargs : dict
             Passed through to `PSMReaderBase.__init__` (e.g. `fdr`).
