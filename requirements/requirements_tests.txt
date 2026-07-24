@@ -1,4 +1,5 @@
 # Dependencies required for running tests
+rdkit==2024.3.3  # optional 'rdkit' extra, required to test SMILES functionality
 pre-commit==3.7.0
 nbmake==1.5.3
 matplotlib
