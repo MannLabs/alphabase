@@ -9,3 +9,4 @@ alphabase.spectral_library
    spectral_library/decoy
    spectral_library/reader
    spectral_library/translate
+   spectral_library/translate_diann

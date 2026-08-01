@@ -6,7 +6,7 @@ import pandas as pd
 from alphabase.peptide.fragment import get_charged_frag_types
 from alphabase.spectral_library.base import SpecLibBase
 from alphabase.spectral_library.reader import LibraryReaderBase
-from alphabase.spectral_library.translate import (
+from alphabase.spectral_library.translate_diann import (
     DIANN_PARQUET_COLUMN_ORDER,
     DIANN_PARQUET_SCHEMA,
     speclib_to_diann_df,
