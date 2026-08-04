@@ -763,7 +763,6 @@ peaks_library:
     'precursor_mz': 'm/z'
     'rt': 'rt (seconds)'
     '_tmp_mods': 'Modifications'   # raw mod column, parsed in code (like MSFragger)
-    'peaks_list': 'Peaks List'     # packed fragment column, exploded in _load_file
     'fragment_mz': 'FragmentMz'
     'fragment_intensity': 'FragmentIntensity'
     'fragment_type': 'FragmentType'
@@ -772,6 +771,8 @@ peaks_library:
     'fragment_loss_type': 'FragmentLossType'
   mod_seq_columns:
     - 'Sequence (backbone)'
+  # packed per-precursor fragment column.
+  peaks_list_column: 'Peaks List'
   modification_mapping_type: null  # modifications resolved in code using mass and residue/terminus, not by name
   mod_mass_tol: 0.1
   # alphabase mod names the PEAKS "Modifications" column resolves to (matched by

@@ -306,6 +306,8 @@ class PeaksLibraryReader(LibraryReaderBase):
             reader_config["mass_mapped_mods"],
             reader_config.get("mod_mass_tol", 0.1),
         )
+        # raw fragment column read directly
+        self._peaks_list_column = reader_config["peaks_list_column"]
 
     def _load_file(self, filename: str) -> pd.DataFrame:
         """Load the wide PEAKS export and explode it into long (per-fragment) format."""
@@ -317,7 +319,8 @@ class PeaksLibraryReader(LibraryReaderBase):
     def _explode_peaks_list(self, wide_df: pd.DataFrame) -> pd.DataFrame:
         """Explode the packed ``Peaks List`` column into one row per fragment.
 
-        Source and synthesized column names both come from the yaml ``column_mapping``.
+        Precursor and synthesized fragment column names come from the yaml
+        ``column_mapping``; the packed source column comes from ``peaks_list_column``.
         Fragment tokens that cannot be parsed are skipped and reported in a warning.
 
         Parameters
@@ -338,7 +341,7 @@ class PeaksLibraryReader(LibraryReaderBase):
         precursor_mz_col = cm[PsmDfCols.PRECURSOR_MZ]
         rt_col = cm[PsmDfCols.RT]
         mod_col = cm[PsmDfCols.TMP_MODS]  # raw 'Modifications' column, parsed later
-        peaks_col = cm["peaks_list"]
+        peaks_col = self._peaks_list_column
 
         frag_mz_col = cm[LibPsmDfCols.FRAGMENT_MZ]
         frag_intensity_col = cm[LibPsmDfCols.FRAGMENT_INTENSITY]
