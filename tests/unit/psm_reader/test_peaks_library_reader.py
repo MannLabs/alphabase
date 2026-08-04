@@ -6,13 +6,14 @@ there is no committed data-file dependency.
 """
 
 import numpy as np
+import pandas as pd
 import pytest
 
 from alphabase.psm_reader.keys import PsmDfCols
 from alphabase.spectral_library.peaks_reader import (
     DEFAULT_PEAKS_CHARGED_FRAG_TYPES,
     PeaksLibraryReader,
-    _match_mod_by_mass,
+    PeaksModificationTranslator,
     _parse_fragment_annotation,
 )
 
@@ -127,28 +128,30 @@ class TestFragmentAnnotationParsing:
 
 
 class TestModificationMatching:
-    """Tests for _match_mod_by_mass (mass + residue -> alphabase mod name)."""
+    """Tests for PeaksModificationTranslator._match_mod_by_mass (mass + residue -> name)."""
 
     _CANDIDATES = ["Carboxymethyl@C", "Oxidation@M", "Acetyl@Protein_N-term"]
 
-    def test_positional_match_uses_residue(self):
-        assert _match_mod_by_mass(15.99, "M", self._CANDIDATES, 0.1) == "Oxidation@M"
-        assert (
-            _match_mod_by_mass(58.01, "C", self._CANDIDATES, 0.1) == "Carboxymethyl@C"
-        )
+    @pytest.fixture
+    def translator(self):
+        return PeaksModificationTranslator(self._CANDIDATES, mod_mass_tol=0.1)
 
-    def test_terminal_match(self):
+    def test_positional_match_uses_residue(self, translator):
+        assert translator._match_mod_by_mass(15.99, "M") == "Oxidation@M"
+        assert translator._match_mod_by_mass(58.01, "C") == "Carboxymethyl@C"
+
+    def test_terminal_match(self, translator):
         assert (
-            _match_mod_by_mass(42.01, "Any_N-term", self._CANDIDATES, 0.1)
+            translator._match_mod_by_mass(42.01, "Any_N-term")
             == "Acetyl@Protein_N-term"
         )
 
-    def test_unknown_mass_returns_none(self):
-        assert _match_mod_by_mass(79.97, "S", self._CANDIDATES, 0.1) is None
+    def test_unknown_mass_returns_none(self, translator):
+        assert translator._match_mod_by_mass(79.97, "S") is None
 
-    def test_wrong_residue_returns_none(self):
+    def test_wrong_residue_returns_none(self, translator):
         # 58.01 exists as Carboxymethyl@C but not on residue 'A'
-        assert _match_mod_by_mass(58.01, "A", self._CANDIDATES, 0.1) is None
+        assert translator._match_mod_by_mass(58.01, "A") is None
 
 
 class TestReaderBasics:
@@ -158,8 +161,8 @@ class TestReaderBasics:
         reader = PeaksLibraryReader()
         assert reader._reader_type == "peaks_library"
         assert reader.charged_frag_types == DEFAULT_PEAKS_CHARGED_FRAG_TYPES
-        assert "Oxidation@M" in reader._mass_mapped_mods
-        assert reader._mod_mass_tol == 0.1
+        assert "Oxidation@M" in reader._mod_translator._mass_mapped_mods
+        assert reader._mod_translator._mod_mass_tol == 0.1
         assert reader.column_mapping[PsmDfCols.SEQUENCE] == "Sequence (backbone)"
 
 
@@ -170,22 +173,24 @@ class TestEndToEnd:
         reader = PeaksLibraryReader()
         reader.import_file(sample_library)
 
-        precursor_df = reader.precursor_df.set_index("sequence")
-        assert len(precursor_df) == 3
-
-        # unmodified precursor -> empty mods/sites
-        assert precursor_df.loc["PEPTIDEK", "mods"] == ""
-        assert precursor_df.loc["PEPTIDEK", "mod_sites"] == ""
-
-        # N-terminal acetyl (site 0) + Met oxidation (PEAKS 0-based pos 1 -> site 2)
-        assert (
-            precursor_df.loc["AMPEPTK", "mods"] == "Acetyl@Protein_N-term;Oxidation@M"
+        # sequence/mods/mod_sites/charge for every precursor, in one comparison.
+        # - PEPTIDEK: unmodified -> empty mods/sites
+        # - AMPEPTK:  N-terminal acetyl (site 0) + Met oxidation (0-based pos 1 -> site 2)
+        # - ACPEPTK:  Carboxymethyl on Cys (0-based pos 1 -> site 2)
+        expected = pd.DataFrame(
+            {
+                "sequence": ["ACPEPTK", "AMPEPTK", "PEPTIDEK"],
+                "mods": ["Carboxymethyl@C", "Acetyl@Protein_N-term;Oxidation@M", ""],
+                "mod_sites": ["2", "0;2", ""],
+                "charge": np.array(
+                    [2, 2, 2], dtype=reader.precursor_df["charge"].dtype
+                ),
+            }
         )
-        assert precursor_df.loc["AMPEPTK", "mod_sites"] == "0;2"
-
-        # Carboxymethyl on Cys (PEAKS 0-based pos 1 -> site 2)
-        assert precursor_df.loc["ACPEPTK", "mods"] == "Carboxymethyl@C"
-        assert precursor_df.loc["ACPEPTK", "mod_sites"] == "2"
+        actual = reader.precursor_df.sort_values("sequence").reset_index(drop=True)[
+            expected.columns
+        ]
+        pd.testing.assert_frame_equal(actual, expected)
 
     def test_fragment_tables(self, sample_library):
         reader = PeaksLibraryReader()

@@ -762,6 +762,8 @@ peaks_library:
     'charge': 'z'
     'precursor_mz': 'm/z'
     'rt': 'rt (seconds)'
+    '_tmp_mods': 'Modifications'   # raw mod column, parsed in code (like MSFragger)
+    'peaks_list': 'Peaks List'     # packed fragment column, exploded in _load_file
     'fragment_mz': 'FragmentMz'
     'fragment_intensity': 'FragmentIntensity'
     'fragment_type': 'FragmentType'
