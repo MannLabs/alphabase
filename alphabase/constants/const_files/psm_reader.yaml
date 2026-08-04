@@ -751,6 +751,7 @@ library_reader_base:
 # PEAKS Studio DIA library export (wide format: one row per precursor, all
 # fragments packed into a single "Peaks List" cell). PeaksLibraryReader explodes
 # it into the long format below before the standard library pipeline runs, and converts it to the dense SpeclibBase format.
+# Columns tested against PEAKS Studio 13.5.
 
 peaks_library:
   reader_type: peaks_library
