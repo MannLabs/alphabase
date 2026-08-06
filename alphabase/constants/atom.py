@@ -5,22 +5,11 @@ from collections import defaultdict
 
 import numba
 import numpy as np
+from rdkit import Chem
+from rdkit.Chem import rdMolDescriptors
 
 from alphabase.constants._const import CONST_FILE_FOLDER, common_const_dict
 from alphabase.yaml_utils import load_yaml
-
-try:
-    from rdkit import Chem
-    from rdkit.Chem import rdMolDescriptors
-
-    HAS_RDKIT = True
-except ModuleNotFoundError:
-    HAS_RDKIT = False
-
-RDKIT_IMPORT_ERROR_MSG = (
-    "Dependency 'rdkit' is not installed but is required for SMILES functionality. "
-    'Install it via the "rdkit" extra, e.g. pip install "alphabase[rdkit]".'
-)
 
 MASS_PROTON: float = common_const_dict["MASS_PROTON"]
 MASS_ISOTOPE: float = common_const_dict["MASS_ISOTOPE"]
@@ -263,9 +252,6 @@ class ChemicalCompositonFormula:
         ValueError
             If the SMILES string is invalid and can't be converted to an RDKit molecule.
         """
-        if not HAS_RDKIT:
-            raise ImportError(RDKIT_IMPORT_ERROR_MSG)
-
         mol = Chem.MolFromSmiles(smiles)
         if not mol:
             raise ValueError(f"Invalid RDKit molecule: {smiles}")
