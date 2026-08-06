@@ -102,12 +102,6 @@ AlphaBase like this. Also note the double quotes `"`.
 
 You need to install the `hdf` extra option of the package to be able to read alphapept protein group matrices in hdf format.
 
-You need to install the `rdkit` extra option of the package to be able to use the SMILES functionality (e.g. `alphabase.smiles` and `ChemicalCompositonFormula.from_smiles`):
-
-``` bash
-pip install "alphabase[rdkit]"
-```
-
 For those who are really adventurous, it is also possible to directly
 install any branch (e.g. `@main`) with any extras
 (e.g. `#egg=alphabase[stable,development]`) from GitHub with e.g.

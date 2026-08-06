@@ -1,16 +1,11 @@
 from typing import Dict, Optional
 
 import pandas as pd
+from rdkit import Chem
+from rdkit.Chem.rdmolops import ReplaceSubstructs, SanitizeMol
 
 from alphabase.constants.aa import aa_formula
-from alphabase.constants.atom import RDKIT_IMPORT_ERROR_MSG
 from alphabase.constants.modification import MOD_DF
-
-try:
-    from rdkit import Chem
-    from rdkit.Chem.rdmolops import ReplaceSubstructs, SanitizeMol
-except ModuleNotFoundError as e:
-    raise ImportError(RDKIT_IMPORT_ERROR_MSG) from e
 
 N_TERM_PLACEHOLDER_ATOM = "Fl"
 C_TERM_PLACEHOLDER_ATOM = "Ts"

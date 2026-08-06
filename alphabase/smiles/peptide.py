@@ -1,17 +1,13 @@
 from typing import Optional
 
-from alphabase.constants.atom import RDKIT_IMPORT_ERROR_MSG
+from rdkit import Chem
+
 from alphabase.constants.modification import ModificationKeys
 from alphabase.smiles.smiles import (
     C_TERM_PLACEHOLDER_ATOM,
     N_TERM_PLACEHOLDER_ATOM,
     AminoAcidModifier,
 )
-
-try:
-    from rdkit import Chem
-except ModuleNotFoundError as e:
-    raise ImportError(RDKIT_IMPORT_ERROR_MSG) from e
 
 
 class PeptideSmilesEncoder:

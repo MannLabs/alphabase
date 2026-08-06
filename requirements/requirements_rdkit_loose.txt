@@ -1,3 +1,0 @@
-# Dependencies for the "loose" version of the optional "rdkit" extra, enabling SMILES functionality.
-# All dependencies that are also included in `requirements_rdkit.txt` must be added also here (enforced by a test).
-rdkit
