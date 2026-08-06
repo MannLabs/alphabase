@@ -22,6 +22,12 @@ To enforce stringent dependencies (recommended), you can install the stable vers
 
     pip install "alphabase[stable]"
 
+The SMILES functionality (e.g. ``alphabase.smiles`` and ``ChemicalCompositonFormula.from_smiles``) requires the optional ``rdkit`` extra
+
+::
+
+    pip install "alphabase[rdkit]"
+
 Development version
 -------------------
 For development, clone the latest version from GitHub to an appropriate location on your personal device and install an editable version:

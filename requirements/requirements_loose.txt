@@ -4,7 +4,6 @@ numba
 numpy
 pandas
 h5py
-contextlib2
 xxhash
 biopython
 tqdm
@@ -14,5 +13,4 @@ pyahocorasick
 pyteomics
 pyyaml
 lxml
-rdkit
 certifi
