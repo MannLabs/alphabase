@@ -15,3 +15,4 @@ pyteomics==4.7.5 # required for msfragger reader
 pyyaml==6.0.2
 lxml==5.3.0  # required by pyteomics (-> msfragger reader)
 rdkit==2024.3.3 # smiles
+certifi==2025.11.12

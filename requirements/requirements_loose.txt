@@ -13,3 +13,4 @@ pyteomics
 pyyaml
 lxml
 rdkit
+certifi

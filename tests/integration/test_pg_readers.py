@@ -11,6 +11,7 @@ from alphabase.pg_reader import (
     FragPipePGReader,
     MaxQuantPGReader,
     MZTabPGReader,
+    ProteomeDiscovererReader,
     SpectronautPGReader,
 )
 from alphabase.pg_reader.keys import PGCols
@@ -151,7 +152,7 @@ class TestAlphapeptPGReaderImportIntegration:
 
 
 class TestMaxQuantPGReader:
-    def test_import(self, example_maxquant_tsv: str) -> None:
+    def test_import(self, example_maxquant_tsv: tuple[str, pd.DataFrame]) -> None:
         """Test import of real MaxQuant file"""
         file_path, reference = example_maxquant_tsv
 
@@ -162,7 +163,9 @@ class TestMaxQuantPGReader:
 
     @pytest.mark.parametrize(("measurement_regex",), [("raw",), ("lfq",)])
     def test_measurement_regex(
-        self, example_maxquant_tsv: tuple[str, pd.DataFrame], measurement_regex: str
+        self,
+        example_maxquant_tsv: tuple[str, pd.DataFrame],
+        measurement_regex: tuple[str, str],
     ) -> None:
         """Test import with different regular expressions"""
         file_path, _ = example_maxquant_tsv
@@ -181,7 +184,9 @@ class TestMaxQuantPGReader:
 
 
 class TestSpectronautPGReader:
-    def test_import_real_file_tsv(self, example_spectronaut_tsv: str) -> None:
+    def test_import_real_file_tsv(
+        self, example_spectronaut_tsv: tuple[str, pd.DataFrame]
+    ) -> None:
         """Test import of real spectronaut file"""
         file_path, reference = example_spectronaut_tsv
 
@@ -191,7 +196,9 @@ class TestSpectronautPGReader:
 
         pd.testing.assert_frame_equal(result_df, reference)
 
-    def test_import_real_file_parqet(self, example_spectronaut_parquet: str) -> None:
+    def test_import_real_file_parqet(
+        self, example_spectronaut_parquet: tuple[str, pd.DataFrame]
+    ) -> None:
         """Test import of real spectronaut file"""
         file_path, reference = example_spectronaut_parquet
 
@@ -203,7 +210,9 @@ class TestSpectronautPGReader:
 
 
 class TestFragPipePGReader:
-    def test_import_real_file(self, example_fragpipe_tsv: str) -> None:
+    def test_import_real_file(
+        self, example_fragpipe_tsv: tuple[str, pd.DataFrame]
+    ) -> None:
         """Test import of real FragPipe file"""
         file_path, reference = example_fragpipe_tsv
 
@@ -215,7 +224,7 @@ class TestFragPipePGReader:
 
 
 class TestMZTabPGReader:
-    def test_import_real_file(self, example_mztab: str) -> None:
+    def test_import_real_file(self, example_mztab: tuple[str, pd.DataFrame]) -> None:
         """Test import of real MZTab file"""
         file_path, reference = example_mztab
 
@@ -225,7 +234,9 @@ class TestMZTabPGReader:
 
         pd.testing.assert_frame_equal(result_df, reference)
 
-    def test_import_minimal_example(self, example_mztab_minimal: str) -> None:
+    def test_import_minimal_example(
+        self, example_mztab_minimal: tuple[str, str]
+    ) -> None:
         """Test import of minimal example MZTab file"""
         file_path, reference = example_mztab_minimal
 
@@ -239,11 +250,29 @@ class TestMZTabPGReader:
 class TestDirectLFQReader:
     """Test directLFQ reader"""
 
-    def test_import_minimal_example(self, example_directlfq_minimal: str) -> None:
+    def test_import_minimal_example(
+        self, example_directlfq_minimal: tuple[str, pd.DataFrame]
+    ) -> None:
         """Test import of minimal example MZTab file"""
         file_path, reference = example_directlfq_minimal
 
         reader = DirectLFQReader()
+
+        result_df = reader.import_file(file_path=file_path)
+
+        pd.testing.assert_frame_equal(result_df, reference)
+
+
+class TestProteomeDiscovererReader:
+    """Test proteome discoverer reader"""
+
+    def test_import_minimal_example(
+        self, example_proteome_discoverer_minimal: tuple[str, pd.DataFrame]
+    ) -> None:
+        """Test import of minimal example MZTab file"""
+        file_path, reference = example_proteome_discoverer_minimal
+
+        reader = ProteomeDiscovererReader(measurement_regex="abundances_grouped")
 
         result_df = reader.import_file(file_path=file_path)
 
