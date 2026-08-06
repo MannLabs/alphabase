@@ -2,6 +2,18 @@
 
 This module provides fallback implementations when numba is not installed.
 When numba is unavailable, decorated functions raise ImportError when called.
+
+Public fields:
+    HAS_NUMBA: whether numba is installed.
+    nb_: the `numba` module; a stub returning itself on any access as fallback.
+    numba_jit: `numba.jit`; raising decorator as fallback.
+    numba_njit: `numba.njit`; raising decorator as fallback.
+    numba_njit_optional: `numba.njit`; no-op decorator as fallback, i.e. the
+        decorated function stays callable as pure Python.
+    numba_vectorize: `numba.vectorize`; raising decorator as fallback.
+    numba_prange: `numba.prange`; builtin `range` as fallback.
+    NumbaTypedDict: `numba.typed.Dict`; a `dict` subclass as fallback.
+    numba_types: `numba.types`; a stub returning itself on any access as fallback.
 """
 
 from __future__ import annotations
