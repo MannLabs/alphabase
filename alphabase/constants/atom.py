@@ -15,7 +15,7 @@ try:
 except ImportError:
     _HAS_RDKIT = False
 
-from alphabase.numba_wrapper import NumbaTypedDict, numba_njit_optional, numba_types
+from alphabase.numba_wrapper import NumbaTypedDict, numba_njit_or_python, numba_types
 from alphabase.yaml_utils import load_yaml
 
 MASS_PROTON: float = common_const_dict["MASS_PROTON"]
@@ -26,8 +26,8 @@ EMPTY_DIST: np.ndarray = np.zeros(MAX_ISOTOPE_LEN)
 EMPTY_DIST[0] = 1
 
 
-# we need an optional decorator here as this code is called from both numba-decorated and undecorated code
-@numba_njit_optional
+# numba must stay optional here as this code is called from both numba-decorated and undecorated code
+@numba_njit_or_python
 def truncate_isotope(isotopes: np.ndarray, mono_idx: int) -> tuple:
     """
     For a given isotope distribution (intensity patterns),

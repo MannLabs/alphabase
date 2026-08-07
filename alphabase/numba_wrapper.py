@@ -8,7 +8,7 @@ Public fields:
     nb_: the `numba` module; a stub returning itself on any access as fallback.
     numba_jit: `numba.jit`; raising decorator as fallback.
     numba_njit: `numba.njit`; raising decorator as fallback.
-    numba_njit_optional: `numba.njit`; no-op decorator as fallback, i.e. the
+    numba_njit_or_python: `numba.njit`; no-op decorator as fallback, i.e. the
         decorated function stays callable as pure Python.
     numba_vectorize: `numba.vectorize`; raising decorator as fallback.
     numba_prange: `numba.prange`; builtin `range` as fallback.
@@ -31,7 +31,7 @@ try:
 
     numba_jit = jit
     numba_njit = njit
-    numba_njit_optional = njit
+    numba_njit_or_python = njit
     numba_vectorize = vectorize
     numba_prange = prange
 
@@ -141,10 +141,10 @@ except ImportError:
 
     nb_ = _RecursiveStubClass()
 
-    numba_jit = _make_raising_decorator("jit")
-    numba_njit = _make_raising_decorator("njit")
-    numba_njit_optional = _make_identity_decorator("njit")
-    numba_vectorize = _make_raising_decorator("vectorize")
+    numba_jit = _make_raising_decorator("numba_jit")
+    numba_njit = _make_raising_decorator("numba_njit")
+    numba_njit_or_python = _make_identity_decorator("numba_njit_or_python")
+    numba_vectorize = _make_raising_decorator("numba_vectorize")
     numba_prange = range
 
     NumbaTypedDict = _TypedDictFallback
