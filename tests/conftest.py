@@ -4,9 +4,9 @@ import importlib.util
 
 import pytest
 
-NUMBA_AVAILABLE = importlib.util.find_spec("numba") is not None
+NUMBA_UNAVAILABLE = importlib.util.find_spec("numba") is None
 
 pytest.mark.requires_numba = pytest.mark.skipif(
-    NUMBA_AVAILABLE,
-    reason="numba package not installed",
+    NUMBA_UNAVAILABLE,
+    reason="numba package not installed. Install with `pip install alphabase[full]`",
 )
