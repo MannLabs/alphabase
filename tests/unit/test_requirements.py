@@ -70,7 +70,7 @@ def _get_requirements_path():
     return requirements_path
 
 
-@pytest.mark.parametrize("extra_name", [""])
+@pytest.mark.parametrize("extra_name", ["", "_numba", "_rdkit", "_hdf"])
 def test_requirements(extra_name):
     """Test the strict and loose requirements.
 

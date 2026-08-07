@@ -1,0 +1,2 @@
+# Dependencies required for running the "stable" version of alphabase with hdf support for the alphapept PG reader.
+tables==3.9.2

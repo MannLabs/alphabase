@@ -1,0 +1,2 @@
+# Dependencies required for running the "stable" version of alphabase with rdkit support.
+rdkit==2024.3.3
