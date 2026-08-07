@@ -4,7 +4,6 @@ import warnings
 from abc import ABC
 from typing import List, Optional
 
-import numba
 import numpy as np
 import pandas as pd
 
@@ -17,14 +16,12 @@ from alphabase.psm_reader.psm_reader import (
 )
 from alphabase.psm_reader.utils import get_column_mapping_for_df
 
-# Module-level constant for use in numba-compiled functions
 _SEPARATOR = ModificationKeys.SEPARATOR
 
 # make sure all warnings are shown
 warnings.filterwarnings("always")
 
 
-@numba.njit
 def replace_parentheses_with_brackets(
     modseq: str,
 ) -> str:
@@ -46,7 +43,6 @@ def replace_parentheses_with_brackets(
     return modseq
 
 
-@numba.njit
 def parse_mod_seq(
     modseq: str,
     mod_sep: str = "()",

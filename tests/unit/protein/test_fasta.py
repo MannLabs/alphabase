@@ -3,6 +3,8 @@ import pytest
 
 from alphabase.protein.fasta import Digest
 
+pytestmark = pytest.mark.requires_numba
+
 
 class TestDigestGetCutPositions:
     """Test the get_cut_positions method of the Digest class."""
