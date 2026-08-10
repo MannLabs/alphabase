@@ -25,6 +25,10 @@ _FRAGMENT_ANNOTATION_PATTERN = re.compile(
 # A modification entry, e.g. '9-Oxidation (M)-(15.99)', '0-Acetylation (Protein N-term)-(42.01)'.
 _MOD_ENTRY_PATTERN = re.compile(r"^(\d+)-(.+)-\(([0-9.]+)\)$")
 
+# Markers PEAKS writes inside a terminal modification name, e.g. "Acetylation (Protein N-term)"
+_PEAKS_N_TERM_MARKER = "N-term"
+_PEAKS_C_TERM_MARKER = "C-term"
+
 # The fragment types present in PEAKS DIA libraries: b/y ions up to charge 3 with
 # H2O and NH3 neutral losses. Used as the default so none of the file's peaks are
 # silently dropped (the LibraryReaderBase default omits H2O/NH3 losses).
@@ -176,10 +180,10 @@ class PeaksModificationTranslator:
             position, name, mass_str = match.groups()
             mass = float(mass_str)
 
-            if ModificationKeys.N_TERM in name:
+            if _PEAKS_N_TERM_MARKER in name:
                 site = "0"
                 aa_or_term = ModificationKeys.ANY_N_TERM
-            elif ModificationKeys.C_TERM in name:
+            elif _PEAKS_C_TERM_MARKER in name:
                 site = "-1"
                 aa_or_term = ModificationKeys.ANY_C_TERM
             else:
@@ -335,20 +339,22 @@ class PeaksLibraryReader(LibraryReaderBase):
             column translation and library pipeline.
 
         """
-        cm = self.column_mapping
-        seq_col = cm[PsmDfCols.SEQUENCE]
-        charge_col = cm[PsmDfCols.CHARGE]
-        precursor_mz_col = cm[PsmDfCols.PRECURSOR_MZ]
-        rt_col = cm[PsmDfCols.RT]
-        mod_col = cm[PsmDfCols.TMP_MODS]  # raw 'Modifications' column, parsed later
+        column_mapping = self.column_mapping
+        seq_col = column_mapping[PsmDfCols.SEQUENCE]
+        charge_col = column_mapping[PsmDfCols.CHARGE]
+        precursor_mz_col = column_mapping[PsmDfCols.PRECURSOR_MZ]
+        rt_col = column_mapping[PsmDfCols.RT]
+        mod_col = column_mapping[
+            PsmDfCols.TMP_MODS
+        ]  # raw 'Modifications' column, parsed later
         peaks_col = self._peaks_list_column
 
-        frag_mz_col = cm[LibPsmDfCols.FRAGMENT_MZ]
-        frag_intensity_col = cm[LibPsmDfCols.FRAGMENT_INTENSITY]
-        frag_type_col = cm[LibPsmDfCols.FRAGMENT_TYPE]
-        frag_charge_col = cm[LibPsmDfCols.FRAGMENT_CHARGE]
-        frag_number_col = cm[LibPsmDfCols.FRAGMENT_SERIES]
-        frag_loss_col = cm[LibPsmDfCols.FRAGMENT_LOSS_TYPE]
+        frag_mz_col = column_mapping[LibPsmDfCols.FRAGMENT_MZ]
+        frag_intensity_col = column_mapping[LibPsmDfCols.FRAGMENT_INTENSITY]
+        frag_type_col = column_mapping[LibPsmDfCols.FRAGMENT_TYPE]
+        frag_charge_col = column_mapping[LibPsmDfCols.FRAGMENT_CHARGE]
+        frag_number_col = column_mapping[LibPsmDfCols.FRAGMENT_SERIES]
+        frag_loss_col = column_mapping[LibPsmDfCols.FRAGMENT_LOSS_TYPE]
 
         records = []
         skipped_tokens = []
