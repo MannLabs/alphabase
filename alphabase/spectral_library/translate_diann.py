@@ -10,7 +10,7 @@ from typing import List, Optional, Union
 import pandas as pd
 import tqdm
 
-from alphabase.psm_reader.keys import LibPsmDfCols, PsmDfCols
+from alphabase.psm_reader.keys import ConstantsClass, LibPsmDfCols, PsmDfCols
 from alphabase.spectral_library.base import SpecLibBase
 from alphabase.spectral_library.translate import (
     create_modified_sequence,
@@ -20,14 +20,54 @@ from alphabase.spectral_library.translate import (
     mod_to_unimod_dict,
 )
 
+
+class DiannParquetCols(metaclass=ConstantsClass):
+    """Column names of a DIA-NN 1.9.1+ `.parquet` spectral library.
+
+    DIA-NN uses its report-style dot notation here. ``SIGNATURE`` is listed for
+    completeness but is not written: DIA-NN requires third-party libraries to omit it.
+    """
+
+    PRECURSOR_ID = "Precursor.Id"
+    MODIFIED_SEQUENCE = "Modified.Sequence"
+    STRIPPED_SEQUENCE = "Stripped.Sequence"
+    PRECURSOR_CHARGE = "Precursor.Charge"
+    PROTEOTYPIC = "Proteotypic"
+    DECOY = "Decoy"
+    N_TERM = "N.Term"
+    C_TERM = "C.Term"
+    RT = "RT"
+    IM = "IM"
+    Q_VALUE = "Q.Value"
+    PEPTIDOFORM_Q_VALUE = "Peptidoform.Q.Value"
+    PTM_SITE_CONFIDENCE = "PTM.Site.Confidence"
+    PG_Q_VALUE = "PG.Q.Value"
+    PRECURSOR_MZ = "Precursor.Mz"
+    PRODUCT_MZ = "Product.Mz"
+    RELATIVE_INTENSITY = "Relative.Intensity"
+    FRAGMENT_TYPE = "Fragment.Type"
+    FRAGMENT_CHARGE = "Fragment.Charge"
+    FRAGMENT_SERIES_NUMBER = "Fragment.Series.Number"
+    FRAGMENT_LOSS_TYPE = "Fragment.Loss.Type"
+    FRAGMENT_SCORE = "Fragment.Score"
+    EXCLUDE_FROM_QUANT = "Exclude.From.Quant"
+    PROTEIN_IDS = "Protein.Ids"
+    PROTEIN_GROUP = "Protein.Group"
+    PROTEIN_NAMES = "Protein.Names"
+    GENES = "Genes"
+    FLAGS = "Flags"
+    SOURCE_ID = "Source.Id"
+    SIGNATURE = "Signature"
+
+
 # fragment column names passed to `merge_precursor_fragment_df`
 DIANN_PARQUET_FRAG_HEADS = {
-    "frag_type_head": "Fragment.Type",
-    "frag_mass_head": "Product.Mz",
-    "frag_inten_head": "Relative.Intensity",
-    "frag_charge_head": "Fragment.Charge",
-    "frag_series_head": "Fragment.Series.Number",
-    "frag_loss_head": "Fragment.Loss.Type",
+    "frag_type_head": DiannParquetCols.FRAGMENT_TYPE,
+    "frag_mass_head": DiannParquetCols.PRODUCT_MZ,
+    "frag_inten_head": DiannParquetCols.RELATIVE_INTENSITY,
+    "frag_charge_head": DiannParquetCols.FRAGMENT_CHARGE,
+    "frag_series_head": DiannParquetCols.FRAGMENT_SERIES_NUMBER,
+    "frag_loss_head": DiannParquetCols.FRAGMENT_LOSS_TYPE,
 }
 
 # dtype tokens for DIANN_PARQUET_SCHEMA (INT64 / FLOAT=float32 / str)
@@ -39,35 +79,35 @@ DIANN_DTYPE_STR = "str"
 # order, dtype casting and the pyarrow schema. `Signature` is omitted, as DIA-NN requires
 # for third-party libraries.
 DIANN_PARQUET_SCHEMA = [
-    ("Precursor.Id", DIANN_DTYPE_STR),
-    ("Modified.Sequence", DIANN_DTYPE_STR),
-    ("Stripped.Sequence", DIANN_DTYPE_STR),
-    ("Precursor.Charge", DIANN_DTYPE_INT),
-    ("Proteotypic", DIANN_DTYPE_INT),
-    ("Decoy", DIANN_DTYPE_INT),
-    ("N.Term", DIANN_DTYPE_INT),
-    ("C.Term", DIANN_DTYPE_INT),
-    ("RT", DIANN_DTYPE_FLOAT),
-    ("IM", DIANN_DTYPE_FLOAT),
-    ("Q.Value", DIANN_DTYPE_FLOAT),
-    ("Peptidoform.Q.Value", DIANN_DTYPE_FLOAT),
-    ("PTM.Site.Confidence", DIANN_DTYPE_FLOAT),
-    ("PG.Q.Value", DIANN_DTYPE_FLOAT),
-    ("Precursor.Mz", DIANN_DTYPE_FLOAT),
-    ("Product.Mz", DIANN_DTYPE_FLOAT),
-    ("Relative.Intensity", DIANN_DTYPE_FLOAT),
-    ("Fragment.Type", DIANN_DTYPE_STR),
-    ("Fragment.Charge", DIANN_DTYPE_INT),
-    ("Fragment.Series.Number", DIANN_DTYPE_INT),
-    ("Fragment.Loss.Type", DIANN_DTYPE_STR),
-    ("Fragment.Score", DIANN_DTYPE_FLOAT),
-    ("Exclude.From.Quant", DIANN_DTYPE_INT),
-    ("Protein.Ids", DIANN_DTYPE_STR),
-    ("Protein.Group", DIANN_DTYPE_STR),
-    ("Protein.Names", DIANN_DTYPE_STR),
-    ("Genes", DIANN_DTYPE_STR),
-    ("Flags", DIANN_DTYPE_INT),
-    ("Source.Id", DIANN_DTYPE_STR),
+    (DiannParquetCols.PRECURSOR_ID, DIANN_DTYPE_STR),
+    (DiannParquetCols.MODIFIED_SEQUENCE, DIANN_DTYPE_STR),
+    (DiannParquetCols.STRIPPED_SEQUENCE, DIANN_DTYPE_STR),
+    (DiannParquetCols.PRECURSOR_CHARGE, DIANN_DTYPE_INT),
+    (DiannParquetCols.PROTEOTYPIC, DIANN_DTYPE_INT),
+    (DiannParquetCols.DECOY, DIANN_DTYPE_INT),
+    (DiannParquetCols.N_TERM, DIANN_DTYPE_INT),
+    (DiannParquetCols.C_TERM, DIANN_DTYPE_INT),
+    (DiannParquetCols.RT, DIANN_DTYPE_FLOAT),
+    (DiannParquetCols.IM, DIANN_DTYPE_FLOAT),
+    (DiannParquetCols.Q_VALUE, DIANN_DTYPE_FLOAT),
+    (DiannParquetCols.PEPTIDOFORM_Q_VALUE, DIANN_DTYPE_FLOAT),
+    (DiannParquetCols.PTM_SITE_CONFIDENCE, DIANN_DTYPE_FLOAT),
+    (DiannParquetCols.PG_Q_VALUE, DIANN_DTYPE_FLOAT),
+    (DiannParquetCols.PRECURSOR_MZ, DIANN_DTYPE_FLOAT),
+    (DiannParquetCols.PRODUCT_MZ, DIANN_DTYPE_FLOAT),
+    (DiannParquetCols.RELATIVE_INTENSITY, DIANN_DTYPE_FLOAT),
+    (DiannParquetCols.FRAGMENT_TYPE, DIANN_DTYPE_STR),
+    (DiannParquetCols.FRAGMENT_CHARGE, DIANN_DTYPE_INT),
+    (DiannParquetCols.FRAGMENT_SERIES_NUMBER, DIANN_DTYPE_INT),
+    (DiannParquetCols.FRAGMENT_LOSS_TYPE, DIANN_DTYPE_STR),
+    (DiannParquetCols.FRAGMENT_SCORE, DIANN_DTYPE_FLOAT),
+    (DiannParquetCols.EXCLUDE_FROM_QUANT, DIANN_DTYPE_INT),
+    (DiannParquetCols.PROTEIN_IDS, DIANN_DTYPE_STR),
+    (DiannParquetCols.PROTEIN_GROUP, DIANN_DTYPE_STR),
+    (DiannParquetCols.PROTEIN_NAMES, DIANN_DTYPE_STR),
+    (DiannParquetCols.GENES, DIANN_DTYPE_STR),
+    (DiannParquetCols.FLAGS, DIANN_DTYPE_INT),
+    (DiannParquetCols.SOURCE_ID, DIANN_DTYPE_STR),
 ]
 DIANN_PARQUET_COLUMN_ORDER = [name for name, _ in DIANN_PARQUET_SCHEMA]
 _DIANN_TO_PANDAS_DTYPE = {
@@ -158,7 +198,7 @@ def speclib_to_diann_df(  # noqa: PLR0913, PLR0915
 
     df = pd.DataFrame(index=precursor_df.index)
 
-    df["Modified.Sequence"] = precursor_df[
+    df[DiannParquetCols.MODIFIED_SEQUENCE] = precursor_df[
         [PsmDfCols.SEQUENCE, PsmDfCols.MODS, PsmDfCols.MOD_SITES]
     ].apply(
         create_modified_sequence,
@@ -168,46 +208,52 @@ def speclib_to_diann_df(  # noqa: PLR0913, PLR0915
         nterm="",
         cterm="",
     )
-    df["Stripped.Sequence"] = precursor_df[PsmDfCols.SEQUENCE]
-    df["Precursor.Charge"] = precursor_df[PsmDfCols.CHARGE]
-    df["Precursor.Id"] = df["Modified.Sequence"] + df["Precursor.Charge"].astype(str)
-    df["Precursor.Mz"] = precursor_df[PsmDfCols.PRECURSOR_MZ]
+    df[DiannParquetCols.STRIPPED_SEQUENCE] = precursor_df[PsmDfCols.SEQUENCE]
+    df[DiannParquetCols.PRECURSOR_CHARGE] = precursor_df[PsmDfCols.CHARGE]
+    df[DiannParquetCols.PRECURSOR_ID] = df[DiannParquetCols.MODIFIED_SEQUENCE] + df[
+        DiannParquetCols.PRECURSOR_CHARGE
+    ].astype(str)
+    df[DiannParquetCols.PRECURSOR_MZ] = precursor_df[PsmDfCols.PRECURSOR_MZ]
 
     rt = _first_present(
         precursor_df, ["irt_pred", "rt_pred", PsmDfCols.RT, "irt", PsmDfCols.RT_NORM]
     )
     if rt is None:
         raise ValueError("precursor_df must contain a retention time column")
-    df["RT"] = rt
-    df["IM"] = _first_present(precursor_df, ["mobility_pred", PsmDfCols.MOBILITY], 0.0)
+    df[DiannParquetCols.RT] = rt
+    df[DiannParquetCols.IM] = _first_present(
+        precursor_df, ["mobility_pred", PsmDfCols.MOBILITY], 0.0
+    )
 
-    df["Protein.Group"] = _first_present(
+    df[DiannParquetCols.PROTEIN_GROUP] = _first_present(
         precursor_df, [PsmDfCols.PROTEINS, PsmDfCols.UNIPROT_IDS], ""
     )
-    df["Protein.Ids"] = _first_present(
+    df[DiannParquetCols.PROTEIN_IDS] = _first_present(
         precursor_df, [PsmDfCols.UNIPROT_IDS, PsmDfCols.PROTEINS], ""
     )
-    df["Protein.Names"] = _first_present(precursor_df, ["protein_names"], "")
-    df["Genes"] = _first_present(precursor_df, [PsmDfCols.GENES], "")
-    df["Decoy"] = _first_present(precursor_df, [PsmDfCols.DECOY], 0)
+    df[DiannParquetCols.PROTEIN_NAMES] = _first_present(
+        precursor_df, ["protein_names"], ""
+    )
+    df[DiannParquetCols.GENES] = _first_present(precursor_df, [PsmDfCols.GENES], "")
+    df[DiannParquetCols.DECOY] = _first_present(precursor_df, [PsmDfCols.DECOY], 0)
 
     # N.Term/C.Term mark peptides at the protein N-/C-terminus (from FASTA digestion)
-    df["N.Term"] = _first_present(precursor_df, ["is_prot_nterm"], 0)
-    df["C.Term"] = _first_present(precursor_df, ["is_prot_cterm"], 0)
+    df[DiannParquetCols.N_TERM] = _first_present(precursor_df, ["is_prot_nterm"], 0)
+    df[DiannParquetCols.C_TERM] = _first_present(precursor_df, ["is_prot_cterm"], 0)
 
     # proteotypic unless the peptide maps to multiple (';'-joined) proteins
-    df["Proteotypic"] = (
-        ~df["Protein.Ids"].astype(str).str.contains(";", regex=False)
+    df[DiannParquetCols.PROTEOTYPIC] = (
+        ~df[DiannParquetCols.PROTEIN_IDS].astype(str).str.contains(";", regex=False)
     ).astype("int64")
 
     # constant defaults for columns a SpecLibBase has no value for
-    df["Q.Value"] = 0.0
-    df["Peptidoform.Q.Value"] = 0.0
-    df["PTM.Site.Confidence"] = 1.0
-    df["PG.Q.Value"] = 0.0
-    df["Fragment.Score"] = 0.0
-    df["Exclude.From.Quant"] = 0
-    df["Source.Id"] = ""
+    df[DiannParquetCols.Q_VALUE] = 0.0
+    df[DiannParquetCols.PEPTIDOFORM_Q_VALUE] = 0.0
+    df[DiannParquetCols.PTM_SITE_CONFIDENCE] = 1.0
+    df[DiannParquetCols.PG_Q_VALUE] = 0.0
+    df[DiannParquetCols.FRAGMENT_SCORE] = 0.0
+    df[DiannParquetCols.EXCLUDE_FROM_QUANT] = 0
+    df[DiannParquetCols.SOURCE_ID] = ""
 
     df[LibPsmDfCols.FRAG_START_IDX] = precursor_df[LibPsmDfCols.FRAG_START_IDX]
     df[LibPsmDfCols.FRAG_STOP_IDX] = precursor_df[LibPsmDfCols.FRAG_STOP_IDX]
@@ -234,17 +280,20 @@ def speclib_to_diann_df(  # noqa: PLR0913, PLR0915
         verbose=verbose,
         **DIANN_PARQUET_FRAG_HEADS,
     )
-    df = df[df["Relative.Intensity"] > min_frag_intensity]
-    df.loc[df["Fragment.Loss.Type"] == "modloss", "Fragment.Loss.Type"] = modloss
+    df = df[df[DiannParquetCols.RELATIVE_INTENSITY] > min_frag_intensity]
+    df.loc[
+        df[DiannParquetCols.FRAGMENT_LOSS_TYPE] == "modloss",
+        DiannParquetCols.FRAGMENT_LOSS_TYPE,
+    ] = modloss
     df = df.reset_index(drop=True)
 
     # Flags: base bit on all fragments, base-peak bit on each precursor's most intense one
-    df["Flags"] = _DIANN_FLAG_BASE
+    df[DiannParquetCols.FLAGS] = _DIANN_FLAG_BASE
     if len(df):
-        base_peak_idx = df.groupby("Precursor.Id", sort=False)[
-            "Relative.Intensity"
+        base_peak_idx = df.groupby(DiannParquetCols.PRECURSOR_ID, sort=False)[
+            DiannParquetCols.RELATIVE_INTENSITY
         ].idxmax()
-        df.loc[base_peak_idx, "Flags"] |= _DIANN_FLAG_FIRST_FRAGMENT
+        df.loc[base_peak_idx, DiannParquetCols.FLAGS] |= _DIANN_FLAG_FIRST_FRAGMENT
 
     df = df.drop([LibPsmDfCols.FRAG_START_IDX, LibPsmDfCols.FRAG_STOP_IDX], axis=1)
 
