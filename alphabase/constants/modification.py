@@ -62,6 +62,12 @@ class ModificationKeys(metaclass=_ConstantsClass):
     #: Protein C-terminus only
     PROTEIN_C_TERM: str = "Protein_C-term"
 
+    #: Suffix shared by all N-terminal sites ("Any_N-term", "Protein_N-term")
+    N_TERM: str = "N-term"
+
+    #: Suffix shared by all C-terminal sites ("Any_C-term", "Protein_C-term")
+    C_TERM: str = "C-term"
+
     #: AA-specific N-term suffix: "Gln->pyro-Glu@Q^Any_N-term" (Q at any N-term)
     ANY_N_TERM_SPECIFIC: str = "^Any_N-term"
 

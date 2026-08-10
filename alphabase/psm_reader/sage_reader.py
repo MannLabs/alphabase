@@ -536,8 +536,12 @@ def _get_annotated_mod_df() -> pd.DataFrame:
     mod_annotated_df["localizer_rank"] = mod_annotated_df["previous_aa"].str.len()
     mod_annotated_df.loc[mod_annotated_df["localizer_rank"] > 1, "previous_aa"] = ""
 
-    mod_annotated_df["is_nterm"] = mod_annotated_df["mod_name"].str.contains("N-term")
-    mod_annotated_df["is_cterm"] = mod_annotated_df["mod_name"].str.contains("C-term")
+    mod_annotated_df["is_nterm"] = mod_annotated_df["mod_name"].str.contains(
+        ModificationKeys.N_TERM
+    )
+    mod_annotated_df["is_cterm"] = mod_annotated_df["mod_name"].str.contains(
+        ModificationKeys.C_TERM
+    )
 
     return mod_annotated_df[
         ["mass", "previous_aa", "is_nterm", "is_cterm", "unimod_id", "localizer_rank"]
