@@ -2,10 +2,10 @@
 
 from typing import List, Tuple, Union
 
-import numba as nb
 import numpy as np
 import pandas as pd
 
+from alphabase.numba_wrapper import numba_njit
 from alphabase.peptide.fragment import (
     UNANNOTATED_TYPE,
     create_dense_matrices,
@@ -216,7 +216,7 @@ def annotate_fragments_flat(
     return outlib_flat
 
 
-@nb.njit()
+@numba_njit
 def annotate_spectrum(  # noqa: PLR0913
     spectrum_mz: np.ndarray,
     fragment_mz: np.ndarray,

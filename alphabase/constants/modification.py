@@ -1,7 +1,6 @@
 import os
 from typing import List, Union
 
-import numba
 import numpy as np
 import pandas as pd
 
@@ -10,6 +9,7 @@ from alphabase.constants.atom import (
     calc_mass_from_formula,
     parse_formula,
 )
+from alphabase.numba_wrapper import numba_jit, numba_njit
 
 
 class _ConstantsClass(type):
@@ -61,6 +61,12 @@ class ModificationKeys(metaclass=_ConstantsClass):
 
     #: Protein C-terminus only
     PROTEIN_C_TERM: str = "Protein_C-term"
+
+    #: Suffix shared by all N-terminal sites ("Any_N-term", "Protein_N-term")
+    N_TERM: str = "N-term"
+
+    #: Suffix shared by all C-terminal sites ("Any_C-term", "Protein_C-term")
+    C_TERM: str = "C-term"
 
     #: AA-specific N-term suffix: "Gln->pyro-Glu@Q^Any_N-term" (Q at any N-term)
     ANY_N_TERM_SPECIFIC: str = "^Any_N-term"
@@ -271,7 +277,7 @@ def calc_modification_mass_sum(mod_names: List[str]) -> float:
     return np.sum([MOD_MASS[mod] for mod in mod_names])
 
 
-@numba.jit(nopython=True, nogil=True)
+@numba_jit(nopython=True, nogil=True)
 def _calc_modloss_with_importance(
     mod_losses: np.ndarray, _loss_importance: np.ndarray
 ) -> np.ndarray:
@@ -359,7 +365,7 @@ def calc_modloss_mass_with_importance(
         ]
 
 
-@numba.njit
+@numba_njit
 def _calc_modloss(mod_losses: np.ndarray) -> np.ndarray:
     """
     Calculate modification loss masses (e.g. -98 Da for Phospho@S/T).

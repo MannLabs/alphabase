@@ -751,6 +751,42 @@ library_reader_base:
     - 'Modified.Sequence'
   modification_mapping_type: 'maxquant'
 
+# PEAKS Studio DIA library export (wide format: one row per precursor, all
+# fragments packed into a single "Peaks List" cell). PeaksLibraryReader explodes
+# it into the long format below before the standard library pipeline runs, and converts it to the dense SpeclibBase format.
+# Columns tested against PEAKS Studio 13.5.
+
+peaks_library:
+  reader_type: peaks_library
+  rt_unit: second
+  fixed_C57: False
+  column_mapping:
+    'sequence': 'Sequence (backbone)'
+    'modified_sequence': 'Sequence (backbone)'
+    'charge': 'z'
+    'precursor_mz': 'm/z'
+    'rt': 'rt (seconds)'
+    '_tmp_mods': 'Modifications'   # raw mod column, parsed in code (like MSFragger)
+    'fragment_mz': 'FragmentMz'
+    'fragment_intensity': 'FragmentIntensity'
+    'fragment_type': 'FragmentType'
+    'fragment_charge': 'FragmentCharge'
+    'fragment_series': 'FragmentNumber'
+    'fragment_loss_type': 'FragmentLossType'
+  mod_seq_columns:
+    - 'Sequence (backbone)'
+  # packed per-precursor fragment column.
+  peaks_list_column: 'Peaks List'
+  modification_mapping_type: null  # modifications resolved in code using mass and residue/terminus, not by name
+  mod_mass_tol: 0.1
+  # alphabase mod names the PEAKS "Modifications" column resolves to (matched by
+  # mass + residue/terminus). A modification not listed here warns and its
+  # precursor is dropped; add it here to keep those precursors.
+  mass_mapped_mods:
+    - 'Carboxymethyl@C'         # 58.01
+    - 'Oxidation@M'             # 15.99
+    - 'Acetyl@Protein_N-term'   # 42.01
+
 sage:
   reader_type: sage
   rt_unit: second

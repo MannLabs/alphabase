@@ -5,7 +5,6 @@ import warnings
 from typing import Union
 
 import ahocorasick
-import numba
 import numpy as np
 import pandas as pd
 import regex as re
@@ -15,6 +14,7 @@ from tqdm import tqdm
 from alphabase.constants._const import CONST_FILE_FOLDER
 from alphabase.constants.modification import ModificationKeys
 from alphabase.io.hdf import HDF_File
+from alphabase.numba_wrapper import numba_njit
 from alphabase.spectral_library.base import SpecLibBase
 from alphabase.utils import explode_multiple_columns
 from alphabase.yaml_utils import load_yaml
@@ -114,7 +114,7 @@ Pre-built protease dict with regular expression.
 """
 
 
-@numba.njit
+@numba_njit
 def cleave_sequence_with_cut_pos(
     sequence: str,
     cut_pos: np.ndarray,
