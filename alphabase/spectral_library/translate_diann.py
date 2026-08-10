@@ -121,7 +121,7 @@ _DIANN_FLAG_BASE = 1 << 0
 _DIANN_FLAG_FIRST_FRAGMENT = 1 << 4
 
 
-def _first_present(
+def _get_first_present_column(
     precursor_df: pd.DataFrame,
     candidates: List[str],
     default: Union[str, float, None] = None,
@@ -133,6 +133,8 @@ def _first_present(
     return default
 
 
+# TODO: go for an OOP approach: a writer class holding the export settings as state, with
+# the precursor mapping / fragment explosion / dtype casting as methods.
 def speclib_to_diann_df(  # noqa: PLR0913, PLR0915
     speclib: SpecLibBase,
     *,
@@ -215,31 +217,39 @@ def speclib_to_diann_df(  # noqa: PLR0913, PLR0915
     ].astype(str)
     df[DiannParquetCols.PRECURSOR_MZ] = precursor_df[PsmDfCols.PRECURSOR_MZ]
 
-    rt = _first_present(
+    rt = _get_first_present_column(
         precursor_df, ["irt_pred", "rt_pred", PsmDfCols.RT, "irt", PsmDfCols.RT_NORM]
     )
     if rt is None:
         raise ValueError("precursor_df must contain a retention time column")
     df[DiannParquetCols.RT] = rt
-    df[DiannParquetCols.IM] = _first_present(
+    df[DiannParquetCols.IM] = _get_first_present_column(
         precursor_df, ["mobility_pred", PsmDfCols.MOBILITY], 0.0
     )
 
-    df[DiannParquetCols.PROTEIN_GROUP] = _first_present(
+    df[DiannParquetCols.PROTEIN_GROUP] = _get_first_present_column(
         precursor_df, [PsmDfCols.PROTEINS, PsmDfCols.UNIPROT_IDS], ""
     )
-    df[DiannParquetCols.PROTEIN_IDS] = _first_present(
+    df[DiannParquetCols.PROTEIN_IDS] = _get_first_present_column(
         precursor_df, [PsmDfCols.UNIPROT_IDS, PsmDfCols.PROTEINS], ""
     )
-    df[DiannParquetCols.PROTEIN_NAMES] = _first_present(
+    df[DiannParquetCols.PROTEIN_NAMES] = _get_first_present_column(
         precursor_df, ["protein_names"], ""
     )
-    df[DiannParquetCols.GENES] = _first_present(precursor_df, [PsmDfCols.GENES], "")
-    df[DiannParquetCols.DECOY] = _first_present(precursor_df, [PsmDfCols.DECOY], 0)
+    df[DiannParquetCols.GENES] = _get_first_present_column(
+        precursor_df, [PsmDfCols.GENES], ""
+    )
+    df[DiannParquetCols.DECOY] = _get_first_present_column(
+        precursor_df, [PsmDfCols.DECOY], 0
+    )
 
     # N.Term/C.Term mark peptides at the protein N-/C-terminus (from FASTA digestion)
-    df[DiannParquetCols.N_TERM] = _first_present(precursor_df, ["is_prot_nterm"], 0)
-    df[DiannParquetCols.C_TERM] = _first_present(precursor_df, ["is_prot_cterm"], 0)
+    df[DiannParquetCols.N_TERM] = _get_first_present_column(
+        precursor_df, ["is_prot_nterm"], 0
+    )
+    df[DiannParquetCols.C_TERM] = _get_first_present_column(
+        precursor_df, ["is_prot_cterm"], 0
+    )
 
     # proteotypic unless the peptide maps to multiple (';'-joined) proteins
     df[DiannParquetCols.PROTEOTYPIC] = (
@@ -392,6 +402,8 @@ def translate_to_parquet(  # noqa: PLR0913
     writer = pq.ParquetWriter(parquet_path, schema)
     try:
         for i in tqdm.tqdm(range(0, len(precursor_df), batch_size)):
+            # Only the precursors are batched: frag_start_idx/frag_stop_idx are absolute offsets into
+            # the full fragment frames, so those stay whole for the lookup to stay in sync.
             batch_speclib._precursor_df = precursor_df.iloc[i : i + batch_size]  # noqa: SLF001
             df = speclib_to_diann_df(
                 batch_speclib,
