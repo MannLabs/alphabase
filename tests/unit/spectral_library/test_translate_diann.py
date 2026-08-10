@@ -2,6 +2,7 @@
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from alphabase.peptide.fragment import get_charged_frag_types
 from alphabase.spectral_library.base import SpecLibBase
@@ -12,6 +13,10 @@ from alphabase.spectral_library.translate_diann import (
     speclib_to_diann_df,
     translate_to_parquet,
 )
+
+# every test builds a library with modified peptides, whose fragment m/z calculation
+# needs `_calc_modloss` from numba
+pytestmark = pytest.mark.requires_numba
 
 
 def _build_speclib() -> SpecLibBase:

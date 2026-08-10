@@ -514,6 +514,9 @@ def test_diann_speclib_reader() -> None:
     _assert_reference_df_equal(reader.psm_df, "diann_speclib")
 
 
+# unlike the tsv libraries above, every peptide here carries a modification, so the
+# fragment m/z calculation needs `_calc_modloss` from numba
+@pytest.mark.requires_numba
 def test_diann_parquet_speclib_reader() -> None:
     """Test reading a DIA-NN 2.0 parquet spectral library."""
     # head of a DIA-NN 2.0 `report-lib.parquet` (report-style dot-notation columns)
