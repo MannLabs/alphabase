@@ -439,14 +439,16 @@ def translate_to_tsv(
     if isinstance(tsv, str):
         with open(tsv, "w"):
             pass
-    _speclib = SpecLibBase()
-    _speclib._fragment_intensity_df = speclib._fragment_intensity_df
-    _speclib._fragment_mz_df = speclib._fragment_mz_df
+    # process precursors in batches: the flat (one row per fragment) format is much larger
+    # than the compact library, so batching keeps peak memory bounded for large libraries
+    batch_speclib = SpecLibBase()
+    batch_speclib._fragment_intensity_df = speclib._fragment_intensity_df
+    batch_speclib._fragment_mz_df = speclib._fragment_mz_df
     precursor_df = speclib._precursor_df
     for i in tqdm.tqdm(range(0, len(precursor_df), batch_size)):
-        _speclib._precursor_df = precursor_df.iloc[i : i + batch_size]
+        batch_speclib._precursor_df = precursor_df.iloc[i : i + batch_size]
         df = speclib_to_single_df(
-            _speclib,
+            batch_speclib,
             translate_mod_dict=translate_mod_dict,
             keep_k_highest_fragments=keep_k_highest_fragments,
             min_frag_mz=0,
