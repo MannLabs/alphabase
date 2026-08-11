@@ -48,7 +48,7 @@ except ImportError:
         if not _NUMBA_WARNING_SHOWN:
             warnings.warn(
                 "numba is not installed. "
-                "Install with `pip install alphabase[full]` for full functionality.",
+                "Install it through pip or install alphabase with the 'numba' or 'full' extra (or their '-stable' variants).",
                 UserWarning,
                 stacklevel=3,
             )
@@ -72,7 +72,7 @@ except ImportError:
                 ) -> Any:  # noqa: ANN401
                     raise ImportError(
                         f"numba is required to call '{func.__name__}'. "
-                        "Install with `pip install alphabase[full]`"
+                        "Install it through pip or install alphabase with the 'numba' or 'full' extra (or their '-stable' variants)."
                     )
 
                 return wrapper

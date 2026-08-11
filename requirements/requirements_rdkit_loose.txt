@@ -1,0 +1,2 @@
+# Dependencies required for running the "loose" version of alphabase with rdkit support.
+rdkit

@@ -12,5 +12,4 @@ pyahocorasick
 pyteomics
 pyyaml
 lxml
-rdkit
 certifi

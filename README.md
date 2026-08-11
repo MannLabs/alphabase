@@ -85,14 +85,17 @@ from within a Jupyter notebook by prepending it with a `!`*:
 pip install alphabase
 ```
 
-Note that this installs only a subset of alphabase functionality, as it misses `numba`.
-If you encounter a respective warning, you need to install the `full` extra option
+Note that this installs only a subset of alphabase functionality, as it misses `numba`, `rdkit` and `tables`.
+The latter is required to read alphapept protein group matrices in hdf format.
+If you encounter a respective warning, you need to install the `numba`, `rdkit` and/or `hdf` extra option,
+or the `full` extra option, which combines all of them
 ``` bash
+pip install "alphabase[numba]"
+pip install "alphabase[rdkit]"
+pip install "alphabase[hdf]"
 pip install "alphabase[full]"
 ```
-(note the double quotes `"`).
-
-You need to install the `hdf` extra option of the package to be able to read alphapept protein group matrices in hdf format.
+(note the double quotes `"`) or install the respective packages manually.
 
 #### Optional: Stable dependencies
 Installing AlphaBase like this avoids conflicts when integrating it in
@@ -110,6 +113,7 @@ or
 ``` bash
 pip install "alphabase[stable,full-stable]"
 ```
+The `-stable` suffix is available for each of the extra options above, e.g. `numba-stable`.
 
 
 
