@@ -55,15 +55,15 @@ optional-dependencies.rdkit = { file = ["requirements/requirements_rdkit_loose.t
 optional-dependencies.rdkit-stable = { file = ["requirements/requirements_rdkit.txt" ] }
 optional-dependencies.hdf = { file = ["requirements/requirements_hdf_loose.txt" ] }
 optional-dependencies.hdf-stable = { file = ["requirements/requirements_hdf.txt" ] }
+# `hdf` is deliberately excluded from `full`: PyTables ships no macOS arm64 wheel for
+# any version supporting Python 3.9, so including it makes `full` uninstallable there.
 optional-dependencies.full = { file = [
     "requirements/requirements_numba_loose.txt",
-    "requirements/requirements_rdkit_loose.txt",
-    "requirements/requirements_hdf_loose.txt"
+    "requirements/requirements_rdkit_loose.txt"
 ] }
 optional-dependencies.full-stable = { file = [
     "requirements/requirements_numba.txt",
-    "requirements/requirements_rdkit.txt",
-    "requirements/requirements_hdf.txt"
+    "requirements/requirements_rdkit.txt"
 ] }
 optional-dependencies.tests = { file = ["requirements/requirements_tests.txt" ] }
 optional-dependencies.development = { file = [

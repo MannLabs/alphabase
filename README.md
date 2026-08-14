@@ -88,7 +88,7 @@ pip install alphabase
 Note that this installs only a subset of alphabase functionality, as it misses `numba`, `rdkit` and `tables`.
 The latter is required to read alphapept protein group matrices in hdf format.
 If you encounter a respective warning, you need to install the `numba`, `rdkit` and/or `hdf` extra option,
-or the `full` extra option, which combines all of them
+or the `full` extra option, which combines `numba` and `rdkit`
 ``` bash
 pip install "alphabase[numba]"
 pip install "alphabase[rdkit]"
@@ -96,6 +96,10 @@ pip install "alphabase[hdf]"
 pip install "alphabase[full]"
 ```
 (note the double quotes `"`) or install the respective packages manually.
+
+`hdf` is deliberately not part of `full`: `tables` publishes no macOS arm64 (Apple Silicon) wheels
+for any version that supports Python 3.9, so it would have to be compiled against a local HDF5
+installation there. Install `hdf` explicitly if you need it.
 
 #### Optional: Stable dependencies
 Installing AlphaBase like this avoids conflicts when integrating it in
