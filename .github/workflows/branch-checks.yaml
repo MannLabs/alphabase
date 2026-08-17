@@ -28,7 +28,7 @@ jobs:
       install-script: pip_install.sh stable,full-stable,tests
 
   run-tests-stable-notfull:
-    name: Test stable, not full, ${{ matrix.os }}
+    name: Test stable, not full, ${{ matrix.os }}, py${{ matrix.python-version }}
     needs: pre-commit
     strategy:
       matrix:
