@@ -13,7 +13,7 @@ name: Pip installation and tests
 
 jobs:
   stable_installation:
-    name: Test stable, full, ${{ matrix.os }}
+    name: Test stable, full, ${{ matrix.os }}, py${{ matrix.python-version }}
     strategy:
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest, macos-latest-xlarge]
@@ -25,7 +25,7 @@ jobs:
       install-script: pip_install.sh stable,full-stable,tests
 
   loose_installation:
-    name: Test loose, full, ${{ matrix.os }}
+    name: Test loose, full, ${{ matrix.os }}, py${{ matrix.python-version }}
     strategy:
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest, macos-latest-xlarge]
@@ -39,7 +39,7 @@ jobs:
   # `hdf` is tested on ubuntu only: PyTables ships no macOS arm64 wheel for any version
   # supporting Python 3.9, and building it from source requires a local HDF5 installation.
   stable_installation_hdf:
-    name: Test stable, hdf, ${{ matrix.os }}
+    name: Test stable, hdf, ${{ matrix.os }}, py${{ matrix.python-version }}
     strategy:
       matrix:
         os: [ubuntu-latest]
@@ -51,7 +51,7 @@ jobs:
       install-script: pip_install.sh stable,hdf-stable,tests
 
   loose_installation_hdf:
-    name: Test loose, hdf, ${{ matrix.os }}
+    name: Test loose, hdf, ${{ matrix.os }}, py${{ matrix.python-version }}
     strategy:
       matrix:
         os: [ubuntu-latest]
@@ -63,7 +63,7 @@ jobs:
       install-script: pip_install.sh hdf,tests
 
   stable_installation_notfull:
-    name: Test stable, not full, ${{ matrix.os }}
+    name: Test stable, not full, ${{ matrix.os }}, py${{ matrix.python-version }}
     strategy:
       matrix:
         os: [ubuntu-latest]
@@ -75,7 +75,7 @@ jobs:
       install-script: pip_install.sh stable,tests
 
   loose_installation_notfull:
-    name: Test loose, not full, ${{ matrix.os }}
+    name: Test loose, not full, ${{ matrix.os }}, py${{ matrix.python-version }}
     strategy:
       matrix:
         os: [ubuntu-latest]

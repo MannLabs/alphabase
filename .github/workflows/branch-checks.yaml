@@ -15,12 +15,12 @@ jobs:
 
   # For feature branches, we don't test the full matrix (os x [stable, loose]) in order to save time & resources.
   run-tests-stable-full:
-    name: Test stable, full, ${{ matrix.os }}
+    name: Test stable, full, ${{ matrix.os }}, py${{ matrix.python-version }}
     needs: pre-commit
     strategy:
       matrix:
         os: [ubuntu-latest]
-        python-version: [3.9]
+        python-version: [3.9, 3.11]
     uses: ./.github/workflows/_run_tests.yml
     with:
       python-version: ${{ matrix.python-version }}
@@ -33,9 +33,9 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        python-version: [3.9]
+        python-version: [3.9, 3.11]
     uses: ./.github/workflows/_run_tests.yml
     with:
-      python-version: ${{ matrix.python-version }}
+      python-version: ${{ matrix.python-version }}, py${{ matrix.python-version }}
       os: ${{ matrix.os }}
       install-script: pip_install.sh stable,tests
