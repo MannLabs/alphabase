@@ -36,6 +36,6 @@ jobs:
         python-version: [3.9, 3.11]
     uses: ./.github/workflows/_run_tests.yml
     with:
-      python-version: ${{ matrix.python-version }}, py${{ matrix.python-version }}
+      python-version: ${{ matrix.python-version }}
       os: ${{ matrix.os }}
       install-script: pip_install.sh stable,tests
