@@ -121,6 +121,7 @@ modification_mappings:
       - 'M(Oxidation (M))'
       - 'M(ox)'
     'Phospho@S':
+      - 'S(Phospho)'
       - 'S(Phospho (S))'
       - 'S(Phospho (ST))'
       - 'S(Phospho (STY))'
@@ -128,6 +129,7 @@ modification_mappings:
       - 'S(ph)'
       - 'pS'
     'Phospho@T':
+      - 'T(Phospho)'
       - 'T(Phospho (T))'
       - 'T(Phospho (ST))'
       - 'T(Phospho (STY))'
@@ -135,6 +137,7 @@ modification_mappings:
       - 'T(ph)'
       - 'pT'
     'Phospho@Y':
+      - 'Y(Phospho)'
       - 'Y(Phospho (Y))'
       - 'Y(Phospho (STY))'
       - 'Y(Phospho (STYDH))'
