@@ -477,7 +477,8 @@ class SpecLibBase:
             (self._precursor_df) = calc_precursor_isotope_info_mp(
                 self.precursor_df,
                 processes=mp_process_num,
-                process_bar=mp_process_bar,
+                mp_batch_size=mp_batch_size,
+                progress_bar=mp_process_bar,
             )
         else:
             (self._precursor_df) = calc_precursor_isotope_info(self.precursor_df)

@@ -24,7 +24,8 @@ from alphabase.peptide.precursor import (
     calc_precursor_isotope_intensity_mp,
     update_precursor_mz,
 )
-from alphabase.utils import spawn_pool
+from alphabase.spectral_library.base import SpecLibBase
+from alphabase.utils import parallel_imap
 
 CUSTOM_MOD = "TestCustomMod@K"
 CUSTOM_MOD_COMPOSITION = "H(4)O(2)"
@@ -87,20 +88,21 @@ def test_worker_registry_matches_parent(mutate, restore_registry):
     expected = get_modification_state()
 
     # When a worker process reports its own registry
-    with spawn_pool(2) as pool:
-        registries = pool.map(_worker_registry, [None, None])
+    registries = list(
+        parallel_imap(_worker_registry, [None, None], processes=2, progress=False)
+    )
 
     # Then it is identical to the parent's
     for registry in registries:
         pd.testing.assert_frame_equal(registry, expected)
 
 
-def _precursor_df(n_precursors=40):
+def _precursor_df(n_precursors=40, mod=CUSTOM_MOD):
     df = pd.DataFrame(
         {
             "sequence": ["PEPTIDEK"] * n_precursors,
-            "mods": [CUSTOM_MOD] * n_precursors,
-            "mod_sites": ["8"] * n_precursors,
+            "mods": [mod] * n_precursors,
+            "mod_sites": ["8" if mod else ""] * n_precursors,
             "charge": [2] * n_precursors,
         }
     )
@@ -123,3 +125,36 @@ def test_isotope_intensity_mp_matches_single_process(restore_registry):
     pd.testing.assert_frame_equal(
         single.sort_index()[isotope_cols], multi.sort_index()[isotope_cols]
     )
+
+
+def test_caller_supplied_progress_bar_is_used():
+    # Given a caller supplying its own progress bar rather than the default
+    seen_totals = []
+
+    def progress(iterator, total):
+        seen_totals.append(total)
+        return iterator
+
+    # When isotope intensities are calculated with multiprocessing
+    calc_precursor_isotope_intensity_mp(
+        _precursor_df(40, mod=""),
+        max_isotope=6,
+        mp_batch_size=10,
+        mp_process_num=2,
+        progress_bar=progress,
+    )
+
+    # Then it is actually driven, rather than being treated as a plain flag
+    assert seen_totals == [4]
+
+
+def test_speclib_isotope_info_runs_with_multiprocessing():
+    # Given a library large enough to take the multiprocessing branch
+    lib = SpecLibBase()
+    lib._precursor_df = _precursor_df(20_000, mod="")
+
+    # When isotope info is calculated
+    lib.calc_precursor_isotope_info(mp_process_num=2, mp_batch_size=1000)
+
+    # Then it completes; it used to raise TypeError on an unknown keyword
+    assert "isotope_apex_offset" in lib.precursor_df.columns

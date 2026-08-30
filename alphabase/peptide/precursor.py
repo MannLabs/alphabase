@@ -3,7 +3,6 @@ from functools import partial
 
 import numpy as np
 import pandas as pd
-from tqdm import tqdm
 from xxhash import xxh64_intdigest
 
 from alphabase.constants.aa import AA_Composition
@@ -12,7 +11,7 @@ from alphabase.constants.isotope import IsotopeDistribution
 from alphabase.constants.modification import MOD_Composition, ModificationKeys
 from alphabase.numba_wrapper import numba_njit
 from alphabase.peptide.mass_calc import calc_peptide_masses_for_same_len_seqs
-from alphabase.utils import spawn_pool
+from alphabase.utils import parallel_apply
 
 
 def refine_precursor_df(
@@ -475,24 +474,6 @@ def calc_precursor_isotope_info(
     return precursor_df
 
 
-def _batchify_df(df_group, mp_batch_size):
-    """Internal funciton for multiprocessing"""
-    for _, df in df_group:
-        for i in range(0, len(df), mp_batch_size):
-            yield df.iloc[i : i + mp_batch_size, :]
-
-
-def _count_batchify_df(df_group, mp_batch_size):
-    """Internal funciton for multiprocessing"""
-    count = 0
-    for _, df in df_group:
-        for _ in range(0, len(df), mp_batch_size):
-            count += 1
-    return count
-
-
-# `progress_bar` should be replaced by more advanced tqdm wrappers created by Sander
-# I will leave it to alphabase.utils
 def calc_precursor_isotope_info_mp(
     precursor_df: pd.DataFrame,
     processes: int = 8,
@@ -535,23 +516,17 @@ def calc_precursor_isotope_info_mp(
             precursor_df=precursor_df,
             min_right_most_intensity=min_right_most_intensity,
         )
-    df_list = []
-    df_group = precursor_df.groupby("nAA")
-    with spawn_pool(processes) as p:
-        processing = p.imap(
-            partial(
-                calc_precursor_isotope_info,
-                min_right_most_intensity=min_right_most_intensity,
-            ),
-            _batchify_df(df_group, mp_batch_size),
-        )
-        if progress_bar:
-            processing = progress_bar(
-                processing, _count_batchify_df(df_group, mp_batch_size)
-            )
-        for df in processing:
-            df_list.append(df)
-    return pd.concat(df_list)
+    return parallel_apply(
+        partial(
+            calc_precursor_isotope_info,
+            min_right_most_intensity=min_right_most_intensity,
+        ),
+        precursor_df,
+        processes=processes,
+        batch_size=mp_batch_size,
+        group_by="nAA",
+        progress=progress_bar,
+    )
 
 
 def calc_precursor_isotope_intensity(
@@ -678,28 +653,20 @@ def calc_precursor_isotope_intensity_mp(
             normalize=normalize,
         )
 
-    df_list = []
-    df_group = precursor_df.groupby("nAA")
-
-    with spawn_pool(mp_process_num) as p:
-        processing = p.imap(
-            partial(
-                calc_precursor_isotope_intensity,
-                max_isotope=max_isotope,
-                min_right_most_intensity=min_right_most_intensity,
-                normalize=normalize,
-            ),
-            _batchify_df(df_group, mp_batch_size),
-        )
-
-        if progress_bar:
-            df_list = list(
-                tqdm(processing, total=_count_batchify_df(df_group, mp_batch_size))
-            )
-        else:
-            df_list = list(processing)
-
-    return pd.concat(df_list, ignore_index=True)
+    return parallel_apply(
+        partial(
+            calc_precursor_isotope_intensity,
+            max_isotope=max_isotope,
+            min_right_most_intensity=min_right_most_intensity,
+            normalize=normalize,
+        ),
+        precursor_df,
+        processes=mp_process_num,
+        batch_size=mp_batch_size,
+        group_by="nAA",
+        progress=progress_bar,
+        ignore_index=True,
+    )
 
 
 calc_precursor_isotope = calc_precursor_isotope_intensity
