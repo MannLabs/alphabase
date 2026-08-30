@@ -1,10 +1,10 @@
 import copy
-import multiprocessing as mp
 from typing import Any
 
 import pandas as pd
 
 from alphabase.spectral_library.base import SpecLibBase
+from alphabase.utils import spawn_pool
 
 
 def _batchify_series(series, mp_batch_size):
@@ -195,7 +195,7 @@ class SpecLibDecoy(SpecLibBase):
         )
 
         series_list = []
-        with mp.get_context("spawn").Pool(mp_process_num) as p:
+        with spawn_pool(mp_process_num) as p:
             processing = p.imap(self.generator, sequence_batches)
             for df in processing:
                 series_list.append(df)

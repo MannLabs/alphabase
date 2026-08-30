@@ -1,3 +1,11 @@
+"""Modification registry.
+
+`MOD_DF` is the single source of truth: every other module-level lookup here is
+derived from it and rebuilt in place by :func:`update_all_by_MOD_DF`. Anything
+that mutates the registry must go through that function, which is what makes
+:func:`get_modification_state` a complete snapshot of the registry.
+"""
+
 import os
 from typing import List, Union
 
@@ -463,7 +471,7 @@ def _check_mass_sanity(
     composition_mass = calc_mass_from_formula(composition)
     if not np.allclose(composition_mass, MOD_MASS[mod_name], atol=1e-5):
         raise ValueError(
-            f"Modification mass of {mod_name} is inconsistent with the composition formula: {composition}, df version {MOD_DF.loc[mod_name,['composition']]}"
+            f"Modification mass of {mod_name} is inconsistent with the composition formula: {composition}, df version {MOD_DF.loc[mod_name, ['composition']]}"
             f" calculated_mass={composition_mass}, mod_mass={MOD_MASS[mod_name]}"
         )
 
@@ -531,6 +539,36 @@ def _add_a_new_modification(
 def has_custom_mods():
     """Returns whether `MOD_DF` has user-defined modifications or not."""
     return len(MOD_DF[MOD_DF["classification"] == _MOD_CLASSIFICATION_USER_ADDED]) > 0
+
+
+def get_modification_state() -> pd.DataFrame:
+    """Snapshot the modification registry so it can be handed to another process.
+
+    Returns
+    -------
+    pd.DataFrame
+        A copy of :data:`MOD_DF`. It carries every runtime change to the
+        registry, not just user-added modifications.
+    """
+    return MOD_DF.copy()
+
+
+def set_modification_state(mod_df: pd.DataFrame) -> None:
+    """Install a registry snapshot and rebuild every derived lookup.
+
+    Processes started with the "spawn" start method re-import alphabase and so
+    see only the modifications in `modification.tsv`. Without this, every
+    runtime change -- custom modifications, modloss filtering, lower-case AAs,
+    a custom TSV -- is silently absent in workers.
+
+    Parameters
+    ----------
+    mod_df : pd.DataFrame
+        Snapshot as returned by :func:`get_modification_state`.
+    """
+    global MOD_DF
+    MOD_DF = mod_df
+    update_all_by_MOD_DF()
 
 
 def add_new_modifications(new_mods: Union[list, dict]):

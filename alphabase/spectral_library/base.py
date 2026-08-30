@@ -7,7 +7,6 @@ import warnings
 import numpy as np
 import pandas as pd
 
-from alphabase.constants.modification import has_custom_mods
 from alphabase.io.hdf import HDF_File
 from alphabase.peptide.fragment import (
     calc_fragment_count,
@@ -428,13 +427,6 @@ class SpecLibBase:
         do_multiprocessing = (
             mp_process_num > 1 and len(self.precursor_df) > mp_batch_size
         )
-
-        if do_multiprocessing and has_custom_mods():
-            logging.warning(
-                "Multiprocessing not compatible with custom modifications yet, falling back to single process."
-            )
-            do_multiprocessing = False
-            # TODO enable multiprocessing also in this case
 
         if do_multiprocessing:
             (self._precursor_df) = calc_precursor_isotope_intensity_mp(

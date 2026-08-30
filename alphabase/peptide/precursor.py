@@ -1,4 +1,3 @@
-import multiprocessing as mp
 import typing
 from functools import partial
 
@@ -13,6 +12,7 @@ from alphabase.constants.isotope import IsotopeDistribution
 from alphabase.constants.modification import MOD_Composition, ModificationKeys
 from alphabase.numba_wrapper import numba_njit
 from alphabase.peptide.mass_calc import calc_peptide_masses_for_same_len_seqs
+from alphabase.utils import spawn_pool
 
 
 def refine_precursor_df(
@@ -537,7 +537,7 @@ def calc_precursor_isotope_info_mp(
         )
     df_list = []
     df_group = precursor_df.groupby("nAA")
-    with mp.get_context("spawn").Pool(processes) as p:
+    with spawn_pool(processes) as p:
         processing = p.imap(
             partial(
                 calc_precursor_isotope_info,
@@ -681,7 +681,7 @@ def calc_precursor_isotope_intensity_mp(
     df_list = []
     df_group = precursor_df.groupby("nAA")
 
-    with mp.get_context("spawn").Pool(mp_process_num) as p:
+    with spawn_pool(mp_process_num) as p:
         processing = p.imap(
             partial(
                 calc_precursor_isotope_intensity,

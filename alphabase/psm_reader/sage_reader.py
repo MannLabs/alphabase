@@ -1,7 +1,6 @@
 """SageReader for reading Sage output files."""
 
 import logging
-import multiprocessing as mp
 import re
 from abc import ABC
 from functools import partial
@@ -17,6 +16,7 @@ from alphabase.psm_reader.psm_reader import (
     PSMReaderBase,
     psm_reader_provider,
 )
+from alphabase.utils import spawn_pool
 
 
 class SageModificationTranslator:
@@ -492,7 +492,7 @@ def _apply_translate_modifications_mp(
         Whether to show a progress bar. Defaults to True
 
     """
-    with mp.get_context("spawn").Pool(mp_process_num) as p:
+    with spawn_pool(mp_process_num) as p:
         processing = p.imap(
             partial(
                 _apply_translate_modifications,
