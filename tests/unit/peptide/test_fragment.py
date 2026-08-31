@@ -299,3 +299,29 @@ def test_flatten_fragments_empty_precursor_df():
 
     assert len(precursor_df) == 0
     assert len(frag_df) == 0
+
+
+@pytest.mark.requires_numba
+def test_flatten_fragments_long_precursor():
+    """A long precursor keeps fragment numbers above 255, and the columns stay uint32."""
+    n_rows = 260  # close to the max_frag_per_peptide limit of fill_in_indices
+    n_types = len(CHARGED_FRAG_TYPES)
+    rng = np.random.default_rng(0)
+    mz_df = pd.DataFrame(
+        (rng.random((n_rows, n_types)) * 1000 + 100).astype(PEAK_MZ_DTYPE),
+        columns=CHARGED_FRAG_TYPES,
+    )
+    intensity_df = pd.DataFrame(
+        rng.random((n_rows, n_types)).astype(PEAK_INTENSITY_DTYPE),
+        columns=CHARGED_FRAG_TYPES,
+    )
+    precursor_df = pd.DataFrame({"frag_start_idx": [0], "frag_stop_idx": [n_rows]})
+
+    _, frag_df = flatten_fragments(
+        precursor_df, mz_df, intensity_df, keep_top_k_fragments=n_rows * n_types
+    )
+
+    assert frag_df["position"].max() == n_rows - 1
+    assert frag_df["number"].max() == n_rows
+    assert frag_df["position"].dtype == np.uint32
+    assert frag_df["number"].dtype == np.uint32

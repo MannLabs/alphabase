@@ -850,7 +850,6 @@ def fill_in_indices(
 
     """
     array = np.arange(0, max_frag_per_peptide).reshape(-1, 1)
-    ones = np.ones(max_frag_per_peptide).reshape(-1, 1)
     length = len(frag_start_idxes)
 
     for i in numba_prange(length):
@@ -858,7 +857,7 @@ def fill_in_indices(
         frag_end = frag_stop_idxes[i]
         max_index = frag_end - frag_start
         indices[frag_start:frag_end] = array[:max_index]
-        max_indices[frag_start:frag_end] = ones[:max_index] * max_index
+        max_indices[frag_start:frag_end] = max_index
         if flattened_intensity is None or top_k >= max_index * number_of_fragment_types:
             continue
         idxes = np.argsort(
@@ -875,13 +874,13 @@ def fill_in_indices(
 
 
 @numba_vectorize(
-    [nb_.uint32(nb_.int8, nb_.uint32, nb_.uint32, nb_.uint32)], target="parallel"
+    [nb_.uint16(nb_.int8, nb_.uint16, nb_.uint16, nb_.uint16)], target="parallel"
 )
 def calculate_fragment_numbers(
     frag_direction: np.int8,
-    frag_number: np.uint32,
-    index: np.uint32,
-    max_index: np.uint32,
+    frag_number: np.uint16,
+    index: np.uint16,
+    max_index: np.uint16,
 ):
     """
     Calculate fragment numbers for each fragment based on the fragment direction.
@@ -891,13 +890,13 @@ def calculate_fragment_numbers(
     frag_direction : np.int8
         directions of fragments for each peptide
 
-    frag_number : np.uint32
+    frag_number : np.uint16
         fragment numbers for each peptide
 
-    index : np.uint32
+    index : np.uint16
         index of fragment per peptide (from 0 to max_index-1)
 
-    max_index : np.uint32
+    max_index : np.uint16
         max index of fragments per peptide (number of fragments per peptide)
     """
     if frag_direction == 1:
@@ -942,13 +941,16 @@ def parse_fragment(
     Returns
     -------
     Tuple[np.ndarray, np.ndarray, np.ndarray]
-        Tuple of fragment numbers, fragment positions and not top k excluded indices
+        Tuple of fragment numbers (uint16), fragment positions (uint16) and not
+        top k excluded indices (bool)
 
     """
-    # Allocate memory for fragment numbers, indices, max indices and excluded indices
-    frag_numbers = np.empty_like(frag_directions, dtype=np.uint32)
-    indices = np.empty_like(frag_directions, dtype=np.uint32)
-    max_indices = np.empty_like(frag_directions, dtype=np.uint32)
+    # uint16 holds every value, because `max_frag_per_peptide` of
+    # `fill_in_indices` bounds the fragment numbers and indices. A wider dtype
+    # would cost 2 more bytes per dense slot.
+    frag_numbers = np.empty_like(frag_directions, dtype=np.uint16)
+    indices = np.empty_like(frag_directions, dtype=np.uint16)
+    max_indices = np.empty_like(frag_directions, dtype=np.uint16)
     excluded_indices = np.zeros(
         frag_directions.shape[0] * frag_directions.shape[1], dtype=np.bool_
     )
@@ -1234,11 +1236,12 @@ def flatten_fragments(
             frag_df["charge"] = charges[kept_frag_types]
         del kept_frag_types
 
+    # the dense arrays are uint16, but the flat columns keep their uint32 dtype
     if "number" in custom_columns:
-        frag_df["number"] = numbers.reshape(-1)[kept_indices]
+        frag_df["number"] = numbers.reshape(-1)[kept_indices].astype(np.uint32)
 
     if "position" in custom_columns:
-        frag_df["position"] = positions.reshape(-1)[kept_indices]
+        frag_df["position"] = positions.reshape(-1)[kept_indices].astype(np.uint32)
 
     _reannotate_precursor_pointers(precursor_df, kept_indices, n_fragment_types)
 
