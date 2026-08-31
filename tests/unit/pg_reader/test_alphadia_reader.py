@@ -1,8 +1,9 @@
 """Unit tests for AlphaDia PG reader."""
 
 import os
+from collections.abc import Generator
 from pathlib import Path
-from typing import Any, Generator
+from typing import Any
 from unittest.mock import Mock, patch
 
 import pandas as pd

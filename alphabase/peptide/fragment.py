@@ -1,6 +1,6 @@
 import warnings
 from dataclasses import dataclass, field
-from typing import Dict, List, Tuple, Union
+from typing import Union
 
 import numpy as np
 import pandas as pd
@@ -316,7 +316,7 @@ def parse_all_frag_type_representation():
 parse_all_frag_type_representation()
 
 
-def sort_charged_frag_types(charged_frag_types: List[str]) -> List[str]:
+def sort_charged_frag_types(charged_frag_types: list[str]) -> list[str]:
     """charged frag types are sorted by (no-loss, loss) and then alphabetically"""
     has_loss = [
         f.replace(FRAGMENT_CHARGE_SEPARATOR, "").count("_") > 0
@@ -328,8 +328,8 @@ def sort_charged_frag_types(charged_frag_types: List[str]) -> List[str]:
 
 
 def get_charged_frag_types(
-    frag_types: List[str], max_frag_charge: int = 2
-) -> List[str]:
+    frag_types: list[str], max_frag_charge: int = 2
+) -> list[str]:
     """
     Calculate the combination of fragment types and charge states.
     Returns a sorted list of charged fragment types.
@@ -364,8 +364,8 @@ def get_charged_frag_types(
 
 
 def filter_valid_charged_frag_types(
-    charged_frag_types: List[str],
-) -> List[str]:
+    charged_frag_types: list[str],
+) -> list[str]:
     """
     Filters a list of charged fragment types and returns only the valid ones.
     A valid charged fragment type must:
@@ -397,7 +397,7 @@ def filter_valid_charged_frag_types(
     return valid_types
 
 
-def parse_charged_frag_type(charged_frag_type: str) -> Tuple[str, int]:
+def parse_charged_frag_type(charged_frag_type: str) -> tuple[str, int]:
     """
     Oppsite to `get_charged_frag_types`.
 
@@ -440,8 +440,8 @@ def parse_charged_frag_type(charged_frag_type: str) -> Tuple[str, int]:
 
 
 def init_zero_fragment_dataframe(
-    peplen_array: np.ndarray, charged_frag_types: List[str], dtype=PEAK_MZ_DTYPE
-) -> Tuple[pd.DataFrame, np.ndarray, np.ndarray]:
+    peplen_array: np.ndarray, charged_frag_types: list[str], dtype=PEAK_MZ_DTYPE
+) -> tuple[pd.DataFrame, np.ndarray, np.ndarray]:
     """Initialize a zero dataframe based on peptide length
     (nAA) array (peplen_array) and charge_frag_types (column number).
     The row number of returned dataframe is np.sum(peplen_array-1).
@@ -487,7 +487,7 @@ def init_fragment_dataframe_from_other(
 
 def init_fragment_by_precursor_dataframe(
     precursor_df,
-    charged_frag_types: List[str],
+    charged_frag_types: list[str],
     *,
     reference_fragment_df: pd.DataFrame = None,
     dtype: np.dtype = PEAK_MZ_DTYPE,
@@ -572,8 +572,8 @@ def update_sliced_fragment_dataframe(
     fragment_df: pd.DataFrame,
     fragment_df_vals: np.ndarray,
     values: np.ndarray,
-    frag_start_end_list: List[Tuple[int, int]],
-    charged_frag_types: List[str] = None,
+    frag_start_end_list: list[tuple[int, int]],
+    charged_frag_types: list[str] = None,
 ):
     """
     Set the values of the slices `frag_start_end_list=[(start,end),(start,end),...]`
@@ -616,8 +616,8 @@ def update_sliced_fragment_dataframe(
 
 def get_sliced_fragment_dataframe(
     fragment_df: pd.DataFrame,
-    frag_start_end_list: Union[List, np.ndarray],
-    charged_frag_types: List = None,
+    frag_start_end_list: Union[list, np.ndarray],
+    charged_frag_types: list = None,
 ) -> pd.DataFrame:
     """
     Get the sliced fragment_df from `frag_start_end_list=[(start,end),(start,end),...]`.
@@ -653,10 +653,10 @@ def get_sliced_fragment_dataframe(
 
 
 def concat_precursor_fragment_dataframes(
-    precursor_df_list: List[pd.DataFrame],
-    fragment_df_list: List[pd.DataFrame],
+    precursor_df_list: list[pd.DataFrame],
+    fragment_df_list: list[pd.DataFrame],
     *other_fragment_df_lists,
-) -> Tuple[pd.DataFrame, ...]:
+) -> tuple[pd.DataFrame, ...]:
     """
     Since fragment_df is indexed by precursor_df, when we concatenate multiple
     fragment_df, the indexed positions will change for in precursor_dfs,
@@ -914,7 +914,7 @@ def parse_fragment(
     top_k: int,
     intensities: np.ndarray,
     number_of_fragment_types: int,
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Parse fragments to get fragment numbers, fragment positions and not top k excluded indices in one hit
     faster than doing each operation individually, and makes the most of the operations that are done in parallel.
@@ -979,8 +979,8 @@ def flatten_fragments(
     min_fragment_intensity: float = -1,
     keep_top_k_fragments: int = 1000,
     custom_columns: list = ["type", "number", "position", "charge", "loss_type"],
-    custom_df: Dict[str, pd.DataFrame] = {},
-) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    custom_df: dict[str, pd.DataFrame] = {},
+) -> tuple[pd.DataFrame, pd.DataFrame]:
     """
     Converts the tabular fragment format consisting of
     the `fragment_mz_df` and the `fragment_intensity_df`
@@ -1168,10 +1168,10 @@ def compress_fragment_indices(frag_idx):
 
 def remove_unused_fragments(
     precursor_df: pd.DataFrame,
-    fragment_df_list: Tuple[pd.DataFrame, ...],
+    fragment_df_list: tuple[pd.DataFrame, ...],
     frag_start_col: str = "frag_start_idx",
     frag_stop_col: str = "frag_stop_idx",
-) -> Tuple[pd.DataFrame, Tuple[pd.DataFrame, ...]]:
+) -> tuple[pd.DataFrame, tuple[pd.DataFrame, ...]]:
     """Removes unused fragments of removed precursors,
     reannotates the `frag_start_col` and `frag_stop_col`
 
@@ -1220,7 +1220,7 @@ def remove_unused_fragments(
 
 def create_fragment_mz_dataframe_by_sort_precursor(
     precursor_df: pd.DataFrame,
-    charged_frag_types: List,
+    charged_frag_types: list,
     batch_size: int = 500000,
     dtype: np.dtype = PEAK_MZ_DTYPE,
 ) -> pd.DataFrame:
@@ -1277,7 +1277,7 @@ def create_fragment_mz_dataframe_by_sort_precursor(
 
 def create_fragment_mz_dataframe(
     precursor_df: pd.DataFrame,
-    charged_frag_types: List,
+    charged_frag_types: list,
     *,
     reference_fragment_df: pd.DataFrame = None,
     inplace_in_reference: bool = False,

@@ -2,7 +2,7 @@
 
 import io
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -24,7 +24,7 @@ class LibraryReaderBase(ModifiedSequenceReader, SpecLibBase):
 
     def __init__(  # noqa: PLR0913 many arguments in function definition
         self,
-        charged_frag_types: List[str] = [
+        charged_frag_types: list[str] = [
             "b_z1",
             "b_z2",
             "y_z1",
@@ -38,7 +38,7 @@ class LibraryReaderBase(ModifiedSequenceReader, SpecLibBase):
         modification_mapping: Optional[dict] = None,
         fdr: float = 0.01,
         fixed_C57: bool = False,  # noqa: FBT001, FBT002, N803 TODO: make this  *,fixed_c57  (breaking)
-        mod_seq_columns: Optional[List[str]] = None,
+        mod_seq_columns: Optional[list[str]] = None,
         rt_unit: Optional[str] = None,
         # library reader-specific:
         precursor_mz_min: float = 400,

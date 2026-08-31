@@ -1,5 +1,4 @@
 import multiprocessing as mp
-import typing
 
 import numpy as np
 import pandas as pd
@@ -13,7 +12,7 @@ from alphabase.utils import explode_multiple_columns
 
 # @numba.njit #(cannot use numba for pd.Series)
 def create_modified_sequence(
-    seq_mods_sites: typing.Tuple,  # must be ('sequence','mods','mod_sites')
+    seq_mods_sites: tuple,  # must be ('sequence','mods','mod_sites')
     translate_mod_dict: dict = None,
     mod_sep="[]",
     nterm="_",

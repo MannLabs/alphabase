@@ -19,7 +19,7 @@ modifications are added or existing ones are changed.
 """
 
 import os
-from typing import Dict, Literal
+from typing import Literal
 
 import pandas as pd
 
@@ -37,8 +37,8 @@ aa_modifier = AminoAcidModifier()
 
 
 def process_modifications(
-    mods_dict: Dict[str, str], mod_type: Literal["ptm", "n_term", "c_term"] = "ptm"
-) -> Dict[str, Dict[str, str]]:
+    mods_dict: dict[str, str], mod_type: Literal["ptm", "n_term", "c_term"] = "ptm"
+) -> dict[str, dict[str, str]]:
     """
     Process various types of modifications (PTM, N-term, C-term) with a unified approach.
 
