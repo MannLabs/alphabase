@@ -1,7 +1,8 @@
 """Unit tests for PGReaderBase class."""
 
 import os
-from typing import Any, Generator, Union
+from collections.abc import Generator
+from typing import Any, Union
 from unittest.mock import Mock, patch
 
 import pandas as pd
