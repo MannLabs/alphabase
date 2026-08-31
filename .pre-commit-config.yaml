@@ -8,19 +8,21 @@ repos:
     - id: end-of-file-fixer
     - id: trailing-whitespace
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.4.0
-  hooks:
-    - id: ruff-format
-    # running ruff with rules in pyproject.toml (all files, limited rules)
-    - id: ruff
-      args:
-        - "--fix"
-- repo: https://github.com/astral-sh/ruff-pre-commit
   rev: v0.7.3 # newer version -> stricter
   hooks:
     - id: ruff
-      # running ruff again with rules in ruff-lint-psm-readers.toml (specific files, all rules)
+      name: ruff (permissive)
+      # running ruff with rules in ruff-lint-psm-readers.toml (specific files, all rules)
       args:
         - "--config"
         - "ruff-lint-psm-readers.toml"
         - "--fix"
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.4.0
+  hooks:
+    # running ruff with rules in pyproject.toml (all files, limited rules)
+    - id: ruff
+      name: ruff (strict)
+      args:
+        - "--fix"
+    - id: ruff-format
