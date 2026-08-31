@@ -972,6 +972,76 @@ def _parse_fragment(
     return frag_numbers, indices, excluded_indices
 
 
+def _annotate_charged_frag_types(
+    charged_frag_types: np.ndarray,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Give the series id, loss id, charge and direction of every charged fragment type.
+
+    Parameters
+    ----------
+    charged_frag_types : np.ndarray
+        names of the charged fragment types, in the order of the dense columns
+
+    Returns
+    -------
+    Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]
+        series ids, loss ids, charges and directions, one value per charged fragment type
+
+    """
+    series_ids = []
+    loss_ids = []
+    charges = []
+    directions = []  # 'abc': direction=1, 'xyz': direction=-1, otherwise 0
+
+    for charged_frag_type in charged_frag_types:
+        frag_type, charge = parse_charged_frag_type(charged_frag_type)
+        series_ids.append(FRAGMENT_TYPES[frag_type].series_id)
+        loss_ids.append(FRAGMENT_TYPES[frag_type].loss_id)
+        charges.append(charge)
+        directions.append(FRAGMENT_TYPES[frag_type].direction_id)
+
+    return (
+        np.array(series_ids, dtype=np.int8),
+        np.array(loss_ids, dtype=np.int16),
+        np.array(charges, dtype=np.int8),
+        np.array(directions, dtype=np.int8),
+    )
+
+
+def _reannotate_precursor_pointers(
+    precursor_df: pd.DataFrame, excluded: np.ndarray, n_fragment_types: int
+) -> None:
+    """Add the flat fragment pointers to `precursor_df`, in place.
+
+    Parameters
+    ----------
+    precursor_df : pd.DataFrame
+        precursor dataframe with the `frag_start_idx` and `frag_stop_idx` columns
+
+    excluded : np.ndarray
+        whether each dense slot is excluded from the flat fragment dataframe
+
+    n_fragment_types : int
+        number of charged fragment types, that is the number of dense columns
+
+    """
+    precursor_df["flat_frag_start_idx"] = precursor_df.frag_start_idx
+    precursor_df["flat_frag_stop_idx"] = precursor_df.frag_stop_idx
+    precursor_df[["flat_frag_start_idx", "flat_frag_stop_idx"]] *= n_fragment_types
+
+    # cumulative sum counts the number of fragments before the given fragment which were removed.
+    # This sum does not include the fragment at the index position and has therefore len N +1
+    cum_sum_tresh = np.zeros(shape=len(excluded) + 1, dtype=np.int64)
+    cum_sum_tresh[1:] = np.cumsum(excluded)
+
+    precursor_df["flat_frag_start_idx"] -= cum_sum_tresh[
+        precursor_df.flat_frag_start_idx.values
+    ]
+    precursor_df["flat_frag_stop_idx"] -= cum_sum_tresh[
+        precursor_df.flat_frag_stop_idx.values
+    ]
+
+
 def flatten_fragments(
     precursor_df: pd.DataFrame,
     fragment_mz_df: pd.DataFrame,
@@ -1052,37 +1122,23 @@ def flatten_fragments(
     for col_name, df in custom_df.items():
         frag_df[col_name] = df.values.reshape(-1)
 
-    frag_types = []
-    frag_loss_types = []
-    frag_charges = []
-    frag_directions = []  # 'abc': direction=1, 'xyz': direction=-1, otherwise 0
-
-    for charged_frag_type in fragment_mz_df.columns.values:
-        frag_type, charge = parse_charged_frag_type(charged_frag_type)
-        frag_charges.append(charge)
-        frag_types.append(FRAGMENT_TYPES[frag_type].series_id)
-        frag_loss_types.append(FRAGMENT_TYPES[frag_type].loss_id)
-        frag_directions.append(FRAGMENT_TYPES[frag_type].direction_id)
-
-    if "type" in custom_columns:
-        frag_df["type"] = np.array(
-            np.tile(frag_types, len(fragment_mz_df)), dtype=np.int8
-        )
-    if "loss_type" in custom_columns:
-        frag_df["loss_type"] = np.array(
-            np.tile(frag_loss_types, len(fragment_mz_df)), dtype=np.int16
-        )
-    if "charge" in custom_columns:
-        frag_df["charge"] = np.array(
-            np.tile(frag_charges, len(fragment_mz_df)), dtype=np.int8
-        )
-
-    frag_directions = np.array(
-        np.tile(frag_directions, (len(fragment_mz_df), 1)), dtype=np.int8
+    series_ids, loss_ids, charges, directions = _annotate_charged_frag_types(
+        fragment_mz_df.columns.values
     )
 
+    # tiling the typed arrays keeps their dtype. A tiled list of Python ints gave
+    # a dense int64 array first, which cost 8 bytes per dense slot.
+    if "type" in custom_columns:
+        frag_df["type"] = np.tile(series_ids, len(fragment_mz_df))
+    if "loss_type" in custom_columns:
+        frag_df["loss_type"] = np.tile(loss_ids, len(fragment_mz_df))
+    if "charge" in custom_columns:
+        frag_df["charge"] = np.tile(charges, len(fragment_mz_df))
+
+    dense_directions = np.tile(directions, (len(fragment_mz_df), 1))
+
     numbers, positions, excluded_indices = _parse_fragment(
-        frag_directions,
+        dense_directions,
         precursor_df.frag_start_idx.values,
         precursor_df.frag_stop_idx.values,
         keep_top_k_fragments,
@@ -1095,12 +1151,6 @@ def flatten_fragments(
 
     if "position" in custom_columns:
         frag_df["position"] = positions.reshape(-1)
-
-    precursor_df["flat_frag_start_idx"] = precursor_df.frag_start_idx
-    precursor_df["flat_frag_stop_idx"] = precursor_df.frag_stop_idx
-    precursor_df[["flat_frag_start_idx", "flat_frag_stop_idx"]] *= len(
-        fragment_mz_df.columns
-    )
 
     if use_intensity:
         frag_df["intensity"][frag_df["mz"] == 0.0] = 0.0
@@ -1117,17 +1167,7 @@ def flatten_fragments(
     frag_df = frag_df[~excluded]
     frag_df = frag_df.reset_index(drop=True)
 
-    # cumulative sum counts the number of fragments before the given fragment which were removed.
-    # This sum does not include the fragment at the index position and has therefore len N +1
-    cum_sum_tresh = np.zeros(shape=len(excluded) + 1, dtype=np.int64)
-    cum_sum_tresh[1:] = np.cumsum(excluded)
-
-    precursor_df["flat_frag_start_idx"] -= cum_sum_tresh[
-        precursor_df.flat_frag_start_idx.values
-    ]
-    precursor_df["flat_frag_stop_idx"] -= cum_sum_tresh[
-        precursor_df.flat_frag_stop_idx.values
-    ]
+    _reannotate_precursor_pointers(precursor_df, excluded, len(fragment_mz_df.columns))
 
     return precursor_df, frag_df
 
