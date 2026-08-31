@@ -1,4 +1,3 @@
-from typing import List, Tuple
 
 import numpy as np
 
@@ -17,7 +16,7 @@ from alphabase.constants.modification import (
 
 
 def calc_diff_modification_mass(
-    pep_len: int, mass_diffs: List[float], mass_diff_sites: List[int]
+    pep_len: int, mass_diffs: list[float], mass_diff_sites: list[int]
 ) -> np.ndarray:
     """
     For open-search, we may also get modification
@@ -52,7 +51,7 @@ def calc_diff_modification_mass(
 
 
 def calc_mod_diff_masses_for_same_len_seqs(
-    nAA: int, aa_mass_diffs_list: List[List[float]], mod_sites_list: List[List[int]]
+    nAA: int, aa_mass_diffs_list: list[list[float]], mod_sites_list: list[list[int]]
 ) -> np.ndarray:
     """
     Calculate diff modification masses for the given peptide length (`nAA`),
@@ -96,11 +95,11 @@ def calc_mod_diff_masses_for_same_len_seqs(
 
 def calc_b_y_and_peptide_mass(
     sequence: str,
-    mod_names: List[str],
-    mod_sites: List[int],
-    aa_mass_diffs: List[float] = None,
-    aa_mass_diff_sites: List[int] = None,
-) -> Tuple[np.ndarray, np.ndarray, float]:
+    mod_names: list[str],
+    mod_sites: list[int],
+    aa_mass_diffs: list[float] = None,
+    aa_mass_diff_sites: list[int] = None,
+) -> tuple[np.ndarray, np.ndarray, float]:
     """
     It is highly recommend to use
     `calc_b_y_and_peptide_masses_for_same_len_seqs`
@@ -124,7 +123,7 @@ def calc_b_y_and_peptide_mass(
 
 
 def calc_peptide_masses_for_same_len_seqs(
-    sequences: np.ndarray, mod_list: List[str], mod_diff_list: List[str] = None
+    sequences: np.ndarray, mod_list: list[str], mod_diff_list: list[str] = None
 ) -> np.ndarray:
     """
     Calculate peptide masses for peptide sequences with same lengths.
@@ -171,11 +170,11 @@ def calc_peptide_masses_for_same_len_seqs(
 
 def calc_b_y_and_peptide_masses_for_same_len_seqs(
     sequences: np.ndarray,
-    mod_list: List[List[str]],
-    site_list: List[List[int]],
-    mod_diff_list: List[List[float]] = None,
-    mod_diff_site_list: List[List[int]] = None,
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    mod_list: list[list[str]],
+    site_list: list[list[int]],
+    mod_diff_list: list[list[float]] = None,
+    mod_diff_site_list: list[list[int]] = None,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Calculate b/y fragment masses and peptide masses
     for peptide sequences with same lengths.

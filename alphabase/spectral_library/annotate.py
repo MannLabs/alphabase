@@ -1,6 +1,6 @@
 """Module for annotating spectral libraries with raw mass spectrometry data."""
 
-from typing import List, Tuple, Union
+from typing import Union
 
 import numpy as np
 import pandas as pd
@@ -329,7 +329,7 @@ def annotate_spectrum(  # noqa: PLR0913
 
 
 def _build_theoretical_flatlib(
-    template: SpecLibFlat, charged_frag_types: List[str]
+    template: SpecLibFlat, charged_frag_types: list[str]
 ) -> SpecLibFlat:
     """Generate a flat spectral library containing theoretical fragments."""
     theoretical_flat = SpecLibFlat(
@@ -360,7 +360,7 @@ def _build_theoretical_flatlib(
 
 
 def add_dense_lib(
-    flatlib: SpecLibFlat, charged_frag_types: Union[List[str], Tuple[str, ...]]
+    flatlib: SpecLibFlat, charged_frag_types: Union[list[str], tuple[str, ...]]
 ) -> SpecLibFlat:
     """Add dense format to the flatlib object.
 

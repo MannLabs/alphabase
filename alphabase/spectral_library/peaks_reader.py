@@ -7,7 +7,7 @@ alphabase spectral library.
 
 import re
 import warnings
-from typing import List, Optional, Set, Tuple
+from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -56,7 +56,7 @@ DEFAULT_PEAKS_CHARGED_FRAG_TYPES = [
 
 def _parse_fragment_annotation(
     annotation: str,
-) -> Optional[Tuple[str, int, int, str]]:
+) -> Optional[tuple[str, int, int, str]]:
     """Parse a PEAKS fragment annotation into its components.
 
     Parameters
@@ -88,14 +88,14 @@ class PeaksModificationTranslator:
     precursor for removal.
     """
 
-    def __init__(self, mass_mapped_mods: List[str], mod_mass_tol: float):
+    def __init__(self, mass_mapped_mods: list[str], mod_mass_tol: float):
         """Store the candidate alphabase mod names and the mass tolerance (Da)."""
         self._mass_mapped_mods = mass_mapped_mods
         self._mod_mass_tol = mod_mass_tol
 
     def translate(
         self, sequences: np.ndarray, mod_strings: np.ndarray
-    ) -> Tuple[list, list]:
+    ) -> tuple[list, list]:
         """Translate PEAKS ``Modifications`` cells to alphabase mods and mod_sites.
 
         Parameters
@@ -116,7 +116,7 @@ class PeaksModificationTranslator:
 
         """
         cache = {}
-        unknown_mods: Set[str] = set()
+        unknown_mods: set[str] = set()
         mods_list = []
         sites_list = []
         for sequence, mod_str in zip(sequences, mod_strings):
@@ -138,7 +138,7 @@ class PeaksModificationTranslator:
 
     def _parse_cell(
         self, sequence: str, mod_str: str
-    ) -> Tuple[Optional[str], Optional[str], Set[str]]:
+    ) -> tuple[Optional[str], Optional[str], set[str]]:
         """Parse a single PEAKS ``Modifications`` cell.
 
         Positions are 0-based indices into the backbone sequence; a mod whose name
@@ -166,7 +166,7 @@ class PeaksModificationTranslator:
 
         mods = []
         sites = []
-        unknown: Set[str] = set()
+        unknown: set[str] = set()
         for raw_entry in mod_str.split(";"):
             entry = raw_entry.strip()
             if not entry:
@@ -272,12 +272,12 @@ class PeaksLibraryReader(LibraryReaderBase):
 
     def __init__(  # noqa: PLR0913 many arguments
         self,
-        charged_frag_types: Optional[List[str]] = None,
+        charged_frag_types: Optional[list[str]] = None,
         column_mapping: Optional[dict] = None,
         modification_mapping: Optional[dict] = None,
         fdr: float = 0.01,
         fixed_C57: bool = False,  # noqa: N803, FBT001, FBT002
-        mod_seq_columns: Optional[List[str]] = None,
+        mod_seq_columns: Optional[list[str]] = None,
         rt_unit: Optional[str] = None,
         precursor_mz_min: float = 400,
         precursor_mz_max: float = 2000,

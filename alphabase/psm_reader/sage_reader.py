@@ -6,7 +6,7 @@ import re
 from abc import ABC
 from collections.abc import Generator
 from functools import partial
-from typing import List, Optional, Tuple
+from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -114,7 +114,7 @@ class SageModificationTranslator:
 
     def _annotate_from_custom_translation(
         self, discovered_modifications_df: pd.DataFrame, translation_df: pd.DataFrame
-    ) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    ) -> tuple[pd.DataFrame, pd.DataFrame]:
         """Annotate modifications from custom translation df, if provided.
 
         Discovered modifications are first matched using the custom translation dataframe.
@@ -237,7 +237,7 @@ def _discover_modifications(psm_df: pd.DataFrame) -> pd.DataFrame:
 
 def _match_modified_sequence(
     sequence: str,
-) -> List[Tuple[str, str, bool, bool, float]]:
+) -> list[tuple[str, str, bool, bool, float]]:
     """Get all matches with the amino acid location.
 
     P[-100.0]EPTIDE -> [('[-100.0]', 'P', False, False, -100.0)]
@@ -334,7 +334,7 @@ def _lookup_modification(
 
 def _translate_modifications(
     sequence: str, mod_translation_df: pd.DataFrame
-) -> Tuple[Optional[str], Optional[str]]:
+) -> tuple[Optional[str], Optional[str]]:
     """Translate modifications in the sequence to alphabase style modifications.
 
     Parameters

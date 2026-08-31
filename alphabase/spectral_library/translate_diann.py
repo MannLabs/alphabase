@@ -5,7 +5,7 @@ This reuses shared export helpers from
 preparation for a larger refactor of the library-export code.
 """
 
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 import pandas as pd
 import tqdm
@@ -123,7 +123,7 @@ _DIANN_FLAG_FIRST_FRAGMENT = 1 << 4
 
 def _get_first_present_column(
     precursor_df: pd.DataFrame,
-    candidates: List[str],
+    candidates: list[str],
     default: Union[str, float, None] = None,
 ) -> Union[pd.Series, str, float, None]:
     """Return the first present candidate column of `precursor_df`, else `default`."""

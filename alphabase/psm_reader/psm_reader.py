@@ -5,7 +5,7 @@ import io
 import warnings
 from abc import ABC
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Type, Union
+from typing import Optional, Union
 
 import pandas as pd
 
@@ -48,7 +48,7 @@ class PSMReaderBase(ABC):
         fdr: float = 0.01,
         keep_decoy: bool = False,
         rt_unit: Optional[str] = None,
-        mod_seq_columns: Optional[List[str]] = None,
+        mod_seq_columns: Optional[list[str]] = None,
         **kwargs,
     ):
         """The Base class for all PSMReaders.
@@ -182,11 +182,11 @@ class PSMReaderBase(ABC):
         return self._psm_df
 
     @property
-    def modification_mapping(self) -> Dict:
+    def modification_mapping(self) -> dict:
         """Get the modification mapping dictionary."""
         return self._modification_mapper.modification_mapping
 
-    def add_modification_mapping(self, modification_mapping: Dict) -> None:
+    def add_modification_mapping(self, modification_mapping: dict) -> None:
         """Append additional modification mappings for the search engine.
 
         See ModificationMapper.add_modification_mapping for more details.
@@ -194,7 +194,7 @@ class PSMReaderBase(ABC):
         self._modification_mapper.add_modification_mapping(modification_mapping)
 
     def set_modification_mapping(
-        self, modification_mapping: Optional[Dict] = None
+        self, modification_mapping: Optional[dict] = None
     ) -> None:
         """Set the modification mapping for the search engine.
 
@@ -202,17 +202,17 @@ class PSMReaderBase(ABC):
         """
         self._modification_mapper.set_modification_mapping(modification_mapping)
 
-    def add_column_mapping(self, column_mapping: Dict) -> None:
+    def add_column_mapping(self, column_mapping: dict) -> None:
         """Add additional column mappings for the search engine."""
         self.column_mapping = {**self.column_mapping, **column_mapping}
 
-    def load(self, _file: Union[List[str], str]) -> pd.DataFrame:
+    def load(self, _file: Union[list[str], str]) -> pd.DataFrame:
         """Import a single file or multiple files."""
         if isinstance(_file, list):
             return self.import_files(_file)
         return self.import_file(_file)
 
-    def import_files(self, file_list: List[str]) -> pd.DataFrame:
+    def import_files(self, file_list: list[str]) -> pd.DataFrame:
         """Import multiple files."""
         df_list = [self.import_file(file) for file in file_list]
         self._psm_df = pd.concat(df_list, ignore_index=True)
@@ -280,7 +280,7 @@ class PSMReaderBase(ABC):
 
     def _get_actual_column(
         self,
-        column_list: List[str],
+        column_list: list[str],
         df: pd.DataFrame,
     ) -> Optional[str]:
         """Get the first column from `column_list` that is a column of `df`."""
@@ -430,7 +430,7 @@ class PSMReaderBase(ABC):
 
     def filter_psm_by_modifications(
         self,
-        include_mod_set: Optional[Set] = None,
+        include_mod_set: Optional[set] = None,
     ) -> None:
         """Only keeps peptides with modifications in `include_mod_list`."""
         if include_mod_set is None:
@@ -457,7 +457,7 @@ class PSMReaderProvider:
         self.reader_dict = {}
 
     def register_reader(
-        self, reader_type: str, reader_class: Type[PSMReaderBase]
+        self, reader_type: str, reader_class: type[PSMReaderBase]
     ) -> None:
         """Register a reader by reader_type."""
         self.reader_dict[reader_type.lower()] = reader_class
