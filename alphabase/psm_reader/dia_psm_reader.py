@@ -1,6 +1,6 @@
 """Readers for Spectronaut's output library and reports, Swath data and DIANN data."""
 
-from typing import List, Optional
+from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -49,7 +49,7 @@ class DiannReader(ModifiedSequenceReader):
         *,
         column_mapping: Optional[dict] = None,
         modification_mapping: Optional[dict] = None,
-        mod_seq_columns: Optional[List[str]] = None,
+        mod_seq_columns: Optional[list[str]] = None,
         fdr: float = 0.01,
         keep_decoy: bool = False,
         rt_unit: Optional[str] = None,

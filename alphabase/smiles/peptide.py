@@ -88,7 +88,7 @@ class PeptideSmilesEncoder:
             (n_term_mod, c_term_mod)
         """
         n_term_mod = mods.get(0)
-        c_term_mod = mods.get(-1, None)
+        c_term_mod = mods.get(-1)
         return n_term_mod, c_term_mod
 
     def _get_amino_acid_smiles(self, aa: str, mod_idx: int, mods: dict) -> str:
