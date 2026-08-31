@@ -114,9 +114,12 @@ def test_create_array_with_custom_temp_dir_not_a_dir():
     """Test creating an array with custom temp dir: not a directory."""
     tempmmap = sys.modules["alphabase.io.tempmmap"]
 
-    with tempfile.TemporaryFile() as temp_file, pytest.raises(
-        ValueError,
-        match=f"The path '{temp_file.name}' does not point to a directory.",
+    with (
+        tempfile.TemporaryFile() as temp_file,
+        pytest.raises(
+            ValueError,
+            match=f"The path '{temp_file.name}' does not point to a directory.",
+        ),
     ):
         # when
         _ = tempmmap.create_empty_mmap(
@@ -223,16 +226,20 @@ def test_create_empty_with_custom_file_path_exists():
     tempmmap = sys.modules["alphabase.io.tempmmap"]
 
     # when
-    with tempfile.TemporaryFile() as temp_file, pytest.raises(
-        ValueError,
-        match=f"The file '{temp_file.name}' already exists. Set overwrite to True to overwrite the file or choose a different name.",
+    with (
+        tempfile.TemporaryFile() as temp_file,
+        pytest.raises(
+            ValueError,
+            match=f"The file '{temp_file.name}' already exists. Set overwrite to True to overwrite the file or choose a different name.",
+        ),
     ):
         _ = tempmmap.create_empty_mmap((5, 5), np.float32, file_path=temp_file.name)
 
     # when 2
-    with tempfile.TemporaryDirectory() as temp_dir, open(
-        f"{temp_dir}/temp_mmap.hdf", "w"
-    ) as temp_file:
+    with (
+        tempfile.TemporaryDirectory() as temp_dir,
+        open(f"{temp_dir}/temp_mmap.hdf", "w") as temp_file,
+    ):
         _ = tempmmap.create_empty_mmap(
             (5, 5), np.float32, file_path=temp_file.name, overwrite=True
         )
