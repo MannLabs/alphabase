@@ -2,9 +2,10 @@
 
 import re
 import warnings
+from collections.abc import Iterable
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Dict, Iterable, Optional, Type, Union
+from typing import Any, Dict, Optional, Type, Union
 
 import pandas as pd
 

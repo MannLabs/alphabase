@@ -4,8 +4,9 @@ import logging
 import multiprocessing as mp
 import re
 from abc import ABC
+from collections.abc import Generator
 from functools import partial
-from typing import Generator, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
