@@ -972,6 +972,154 @@ def parse_fragment(
     return frag_numbers, indices, excluded_indices
 
 
+def _annotate_charged_frag_types(
+    charged_frag_types: np.ndarray,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Give the series id, loss id, charge and direction of every charged fragment type.
+
+    Parameters
+    ----------
+    charged_frag_types : np.ndarray
+        names of the charged fragment types, in the order of the dense columns
+
+    Returns
+    -------
+    Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]
+        series ids, loss ids, charges and directions, one value per charged fragment type
+
+    """
+    series_ids = []
+    loss_ids = []
+    charges = []
+    directions = []  # 'abc': direction=1, 'xyz': direction=-1, otherwise 0
+
+    for charged_frag_type in charged_frag_types:
+        frag_type, charge = parse_charged_frag_type(charged_frag_type)
+        series_ids.append(FRAGMENT_TYPES[frag_type].series_id)
+        loss_ids.append(FRAGMENT_TYPES[frag_type].loss_id)
+        charges.append(charge)
+        directions.append(FRAGMENT_TYPES[frag_type].direction_id)
+
+    return (
+        np.array(series_ids, dtype=np.int8),
+        np.array(loss_ids, dtype=np.int16),
+        np.array(charges, dtype=np.int8),
+        np.array(directions, dtype=np.int8),
+    )
+
+
+def _select_dense_fragments(
+    precursor_df: pd.DataFrame,
+    mz: np.ndarray,
+    intensity: Union[np.ndarray, None],
+    directions: np.ndarray,
+    n_fragment_rows: int,
+    n_fragment_types: int,
+    keep_top_k_fragments: int,
+    min_fragment_intensity: float,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Select the dense fragment slots to keep, and number every dense slot.
+
+    A slot is excluded if it holds padding (`mz == 0`), if its intensity is below
+    `min_fragment_intensity`, or if it is not one of the `keep_top_k_fragments`
+    most intense slots of its precursor.
+
+    Parameters
+    ----------
+    precursor_df : pd.DataFrame
+        precursor dataframe with the `frag_start_idx` and `frag_stop_idx` columns
+
+    mz : np.ndarray
+        flattened fragment mz values, of length n_fragment_rows * n_fragment_types
+
+    intensity : np.ndarray or None
+        flattened fragment intensities, or None to filter on mz only.
+        Padding slots are set to zero intensity.
+
+    directions : np.ndarray
+        direction of every charged fragment type
+
+    n_fragment_rows : int
+        number of rows of the dense fragment dataframes
+
+    n_fragment_types : int
+        number of charged fragment types, that is the number of dense columns
+
+    keep_top_k_fragments : int
+        number of most intense slots to keep per precursor
+
+    min_fragment_intensity : float
+        minimum intensity of a slot to keep
+
+    Returns
+    -------
+    Tuple[np.ndarray, np.ndarray, np.ndarray]
+        ascending indices of the kept slots, and the fragment number and position
+        of every dense slot
+
+    """
+    # tile the int8 directions, because a tiled list gives a dense int64 array
+    dense_directions = np.tile(directions, (n_fragment_rows, 1))
+
+    numbers, positions, not_top_k = parse_fragment(
+        dense_directions,
+        precursor_df.frag_start_idx.values,
+        precursor_df.frag_stop_idx.values,
+        keep_top_k_fragments,
+        intensity,
+        n_fragment_types,
+    )
+    del dense_directions
+
+    if intensity is None:
+        excluded = mz == 0
+    else:
+        is_padding = mz == 0
+        intensity[is_padding] = 0.0
+        # in-place operations prevent more dense boolean arrays
+        excluded = intensity < min_fragment_intensity
+        excluded |= is_padding
+        excluded |= not_top_k
+        del is_padding
+    del not_top_k
+
+    # The in-place inversion prevents one more dense array. The indices stay
+    # ascending, so the fragments keep their dense order.
+    np.logical_not(excluded, out=excluded)
+    return np.flatnonzero(excluded), numbers, positions
+
+
+def _reannotate_precursor_pointers(
+    precursor_df: pd.DataFrame, kept_indices: np.ndarray, n_fragment_types: int
+) -> None:
+    """Add the flat fragment pointers to `precursor_df`, in place.
+
+    A new pointer is the count of kept fragments before the dense position. A
+    binary search on the ascending `kept_indices` gives this count and replaces a
+    dense cumulative sum.
+
+    Parameters
+    ----------
+    precursor_df : pd.DataFrame
+        precursor dataframe with the `frag_start_idx` and `frag_stop_idx` columns
+
+    kept_indices : np.ndarray
+        ascending indices of the kept dense slots
+
+    n_fragment_types : int
+        number of charged fragment types, that is the number of dense columns
+
+    """
+    dense_start_idx = precursor_df.frag_start_idx.values.astype(np.int64)
+    dense_stop_idx = precursor_df.frag_stop_idx.values.astype(np.int64)
+    precursor_df["flat_frag_start_idx"] = np.searchsorted(
+        kept_indices, dense_start_idx * n_fragment_types
+    )
+    precursor_df["flat_frag_stop_idx"] = np.searchsorted(
+        kept_indices, dense_stop_idx * n_fragment_types
+    )
+
+
 def flatten_fragments(
     precursor_df: pd.DataFrame,
     fragment_mz_df: pd.DataFrame,
@@ -1052,49 +1200,20 @@ def flatten_fragments(
         else None
     )
 
-    frag_types = []
-    frag_loss_types = []
-    frag_charges = []
-    frag_directions = []  # 'abc': direction=1, 'xyz': direction=-1, otherwise 0
-
-    for charged_frag_type in fragment_mz_df.columns.values:
-        frag_type, charge = parse_charged_frag_type(charged_frag_type)
-        frag_charges.append(charge)
-        frag_types.append(FRAGMENT_TYPES[frag_type].series_id)
-        frag_loss_types.append(FRAGMENT_TYPES[frag_type].loss_id)
-        frag_directions.append(FRAGMENT_TYPES[frag_type].direction_id)
-
-    dense_frag_directions = np.array(
-        np.tile(frag_directions, (len(fragment_mz_df), 1)), dtype=np.int8
+    series_ids, loss_ids, charges, directions = _annotate_charged_frag_types(
+        fragment_mz_df.columns.values
     )
 
-    numbers, positions, excluded_indices = parse_fragment(
-        dense_frag_directions,
-        precursor_df.frag_start_idx.values,
-        precursor_df.frag_stop_idx.values,
-        keep_top_k_fragments,
+    kept_indices, numbers, positions = _select_dense_fragments(
+        precursor_df,
+        mz,
         intensity,
+        directions,
+        len(fragment_mz_df),
         n_fragment_types,
+        keep_top_k_fragments,
+        min_fragment_intensity,
     )
-    del dense_frag_directions
-
-    if use_intensity:
-        is_padding = mz == 0
-        intensity[is_padding] = 0.0
-        # in-place operations prevent more dense boolean arrays
-        excluded = intensity < min_fragment_intensity
-        excluded |= is_padding
-        excluded |= excluded_indices
-        del is_padding
-    else:
-        excluded = mz == 0
-    del excluded_indices
-
-    # The in-place inversion prevents one more dense array. The indices stay
-    # ascending, so the fragments keep their dense order.
-    np.logical_not(excluded, out=excluded)
-    kept_indices = np.flatnonzero(excluded)
-    del excluded
 
     frag_df = {}
     frag_df["mz"] = mz[kept_indices]
@@ -1108,13 +1227,11 @@ def flatten_fragments(
         # the column of a dense slot gives its charged fragment type
         kept_frag_types = kept_indices % n_fragment_types
         if "type" in custom_columns:
-            frag_df["type"] = np.array(frag_types, dtype=np.int8)[kept_frag_types]
+            frag_df["type"] = series_ids[kept_frag_types]
         if "loss_type" in custom_columns:
-            frag_df["loss_type"] = np.array(frag_loss_types, dtype=np.int16)[
-                kept_frag_types
-            ]
+            frag_df["loss_type"] = loss_ids[kept_frag_types]
         if "charge" in custom_columns:
-            frag_df["charge"] = np.array(frag_charges, dtype=np.int8)[kept_frag_types]
+            frag_df["charge"] = charges[kept_frag_types]
         del kept_frag_types
 
     if "number" in custom_columns:
@@ -1123,16 +1240,7 @@ def flatten_fragments(
     if "position" in custom_columns:
         frag_df["position"] = positions.reshape(-1)[kept_indices]
 
-    # A new pointer is the count of kept fragments before the dense position. A
-    # binary search gives this count and replaces a dense cumulative sum.
-    dense_start_idx = precursor_df.frag_start_idx.values.astype(np.int64)
-    dense_stop_idx = precursor_df.frag_stop_idx.values.astype(np.int64)
-    precursor_df["flat_frag_start_idx"] = np.searchsorted(
-        kept_indices, dense_start_idx * n_fragment_types
-    )
-    precursor_df["flat_frag_stop_idx"] = np.searchsorted(
-        kept_indices, dense_stop_idx * n_fragment_types
-    )
+    _reannotate_precursor_pointers(precursor_df, kept_indices, n_fragment_types)
 
     return precursor_df, pd.DataFrame(frag_df, copy=False)
 
