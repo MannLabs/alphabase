@@ -75,7 +75,7 @@ optional-dependencies.development = { file = [
 version = {attr = "alphabase.__version__"}
 
 [tool.ruff]
-target-version="py39"
+target-version = "py39"
 
 [tool.ruff.lint]
 select =  [
