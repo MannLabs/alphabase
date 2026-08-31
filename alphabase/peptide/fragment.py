@@ -802,7 +802,7 @@ def mask_fragments_for_charge_greater_than_precursor_charge(
 
 
 @numba_njit(parallel=True)
-def fill_in_indices(
+def _fill_in_indices(
     frag_start_idxes: np.ndarray,
     frag_stop_idxes: np.ndarray,
     row_positions: np.ndarray,
@@ -876,7 +876,7 @@ def fill_in_indices(
 
 
 @numba_vectorize([nb_.uint32(nb_.int8, nb_.uint16, nb_.uint16)], target="parallel")
-def calculate_fragment_numbers(
+def _calculate_fragment_numbers(
     frag_direction: np.int8,
     row_position: np.uint16,
     row_count: np.uint16,
@@ -909,7 +909,7 @@ def calculate_fragment_numbers(
     return 0
 
 
-def parse_fragment(
+def _parse_fragment(
     frag_start_idxes: np.ndarray,
     frag_stop_idxes: np.ndarray,
     top_k: int,
@@ -952,7 +952,7 @@ def parse_fragment(
 
     """
     # uint16 holds every value, because `max_frag_per_peptide` of
-    # `fill_in_indices` bounds the row positions and the row counts. Rows that no
+    # `_fill_in_indices` bounds the row positions and the row counts. Rows that no
     # peptide covers keep a zero.
     row_positions = np.zeros(n_fragment_rows, dtype=np.uint16)
     row_counts = np.zeros(n_fragment_rows, dtype=np.uint16)
@@ -960,7 +960,7 @@ def parse_fragment(
         n_fragment_rows * number_of_fragment_types, dtype=np.bool_
     )
 
-    fill_in_indices(
+    _fill_in_indices(
         frag_start_idxes,
         frag_stop_idxes,
         row_positions,
@@ -1055,7 +1055,7 @@ def _select_dense_fragments(
         count of every fragment row
 
     """
-    row_positions, row_counts, not_top_k = parse_fragment(
+    row_positions, row_counts, not_top_k = _parse_fragment(
         precursor_df.frag_start_idx.values,
         precursor_df.frag_stop_idx.values,
         keep_top_k_fragments,
@@ -1145,7 +1145,7 @@ def _annotate_kept_fragments(
     if "charge" in custom_columns:
         columns["charge"] = charges[kept_frag_types]
     if "number" in custom_columns:
-        columns["number"] = calculate_fragment_numbers(
+        columns["number"] = _calculate_fragment_numbers(
             directions[kept_frag_types], row_positions[kept_rows], row_counts[kept_rows]
         )
     if "position" in custom_columns:

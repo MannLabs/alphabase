@@ -8,11 +8,11 @@ from alphabase.peptide.fragment import (
     FRAGMENT_TYPES,
     PEAK_INTENSITY_DTYPE,
     PEAK_MZ_DTYPE,
-    calculate_fragment_numbers,
+    _calculate_fragment_numbers,
+    _parse_fragment,
     filter_valid_charged_frag_types,
     flatten_fragments,
     parse_charged_frag_type,
-    parse_fragment,
 )
 
 
@@ -306,7 +306,7 @@ def test_flatten_fragments_empty_precursor_df():
 @pytest.mark.requires_numba
 def test_flatten_fragments_long_precursor():
     """A long precursor keeps fragment numbers above 255, and the columns stay uint32."""
-    n_rows = 260  # close to the max_frag_per_peptide limit of fill_in_indices
+    n_rows = 260  # close to the max_frag_per_peptide limit of _fill_in_indices
     n_types = len(CHARGED_FRAG_TYPES)
     rng = np.random.default_rng(0)
     mz_df = pd.DataFrame(
@@ -336,7 +336,7 @@ def test_calculate_fragment_numbers_counts_from_both_ends():
     row_positions = np.array([0, 0, 0, 3, 3], dtype=np.uint16)
     row_counts = np.array([7, 7, 7, 7, 7], dtype=np.uint16)
 
-    numbers = calculate_fragment_numbers(directions, row_positions, row_counts)
+    numbers = _calculate_fragment_numbers(directions, row_positions, row_counts)
 
     np.testing.assert_array_equal(numbers, [1, 7, 0, 4, 4])
     assert numbers.dtype == np.uint32
@@ -348,7 +348,7 @@ def test_parse_fragment_gives_one_value_per_fragment_row():
     frag_start_idx = np.array([0, 3], dtype=np.int64)
     frag_stop_idx = np.array([3, 7], dtype=np.int64)
 
-    row_positions, row_counts, not_top_k = parse_fragment(
+    row_positions, row_counts, not_top_k = _parse_fragment(
         frag_start_idx, frag_stop_idx, 1000, None, 7, 4
     )
 
