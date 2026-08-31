@@ -311,7 +311,7 @@ class ZenodoDownloader(FileDownloader):
     )
     """Download URL for Zenodo records"""
 
-    def _encode_url(self) -> str:  # pragma: no cover
+    def _encode_url(self) -> str:
         """Encode Zenodo sharing link as url for downloading files."""
         return self._url
 
