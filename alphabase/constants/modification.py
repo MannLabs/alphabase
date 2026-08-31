@@ -463,7 +463,7 @@ def _check_mass_sanity(
     composition_mass = calc_mass_from_formula(composition)
     if not np.allclose(composition_mass, MOD_MASS[mod_name], atol=1e-5):
         raise ValueError(
-            f"Modification mass of {mod_name} is inconsistent with the composition formula: {composition}, df version {MOD_DF.loc[mod_name,['composition']]}"
+            f"Modification mass of {mod_name} is inconsistent with the composition formula: {composition}, df version {MOD_DF.loc[mod_name, ['composition']]}"
             f" calculated_mass={composition_mass}, mod_mass={MOD_MASS[mod_name]}"
         )
 

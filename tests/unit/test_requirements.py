@@ -97,7 +97,7 @@ def test_requirements(extra_name):
     set_strict = set(req_strict_names)
     assert (
         set_strict == set_loose
-    ), f"Requirements in do not match. only in strict: {set_strict-set_loose}; only in loose: {set_loose-set_strict}"
+    ), f"Requirements in do not match. only in strict: {set_strict - set_loose}; only in loose: {set_loose - set_strict}"
 
     for _, (req, comment) in reqs_strict.items():
         assert (

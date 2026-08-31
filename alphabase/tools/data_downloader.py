@@ -204,9 +204,12 @@ class FileDownloader(ABC):
         """
         try:
             if max_size_kb:
-                with urlopen(
-                    self._encoded_url, context=_create_ssl_context()
-                ) as response, open(self._output_path, "wb") as out_file:
+                with (
+                    urlopen(
+                        self._encoded_url, context=_create_ssl_context()
+                    ) as response,
+                    open(self._output_path, "wb") as out_file,
+                ):
                     out_file.write(response.read(max_size_kb * 1024))
                 print(f"Truncating file to max. {max_size_kb} bytes ..")
 
@@ -214,9 +217,12 @@ class FileDownloader(ABC):
                 self._truncate_file(self._output_path)
 
             else:
-                with urlopen(
-                    self._encoded_url, context=_create_ssl_context()
-                ) as response, open(self._output_path, "wb") as out_file:
+                with (
+                    urlopen(
+                        self._encoded_url, context=_create_ssl_context()
+                    ) as response,
+                    open(self._output_path, "wb") as out_file,
+                ):
                     total_size = int(response.headers.get("Content-Length", -1))
                     progress = Progress()
                     block_num = 0
