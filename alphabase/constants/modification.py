@@ -1,9 +1,8 @@
 """Modification registry.
 
-`MOD_DF` is the single source of truth: every other module-level lookup here is
-derived from it and rebuilt in place by :func:`update_all_by_MOD_DF`. Anything
-that mutates the registry must go through that function, which is what makes
-:func:`get_modification_state` a complete snapshot of the registry.
+`update_all_by_MOD_DF` calculates all other module-level lookups from `MOD_DF`.
+Thus a copy of `MOD_DF` is a complete snapshot of the registry. Change the
+registry only with `update_all_by_MOD_DF`, to keep this true.
 """
 
 import os
@@ -542,29 +541,28 @@ def has_custom_mods():
 
 
 def get_modification_state() -> pd.DataFrame:
-    """Snapshot the modification registry so it can be handed to another process.
+    """Copy the modification registry, to send it to a different process.
 
     Returns
     -------
     pd.DataFrame
-        A copy of :data:`MOD_DF`. It carries every runtime change to the
-        registry, not just user-added modifications.
+        A copy of :data:`MOD_DF`. It contains all changes made at run time, not
+        only the user-added modifications.
     """
     return MOD_DF.copy()
 
 
 def set_modification_state(mod_df: pd.DataFrame) -> None:
-    """Install a registry snapshot and rebuild every derived lookup.
+    """Install a registry copy and calculate the derived lookups again.
 
-    Processes started with the "spawn" start method re-import alphabase and so
-    see only the modifications in `modification.tsv`. Without this, every
-    runtime change -- custom modifications, modloss filtering, lower-case AAs,
-    a custom TSV -- is silently absent in workers.
+    A process that starts with the "spawn" method imports alphabase again. Thus
+    it knows only the modifications in `modification.tsv`. Use this function to
+    give the process all changes that were made at run time.
 
     Parameters
     ----------
     mod_df : pd.DataFrame
-        Snapshot as returned by :func:`get_modification_state`.
+        A copy from :func:`get_modification_state`.
     """
     global MOD_DF
     MOD_DF = mod_df
