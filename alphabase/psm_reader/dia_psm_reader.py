@@ -126,9 +126,11 @@ class SpectronautReportReader(ModifiedSequenceReader):
 
     def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
         """Spectronaut report-specific preprocessing of output data."""
-        df[[self.mod_seq_column, PsmDfCols.CHARGE]] = df[
-            self._precursor_id_column
-        ].str.split(".", expand=True, n=2)
+        # In case charge state column is missing, we splice it out of the precursor id column
+        if PsmDfCols.CHARGE not in df.columns:
+            df[[self.mod_seq_column, PsmDfCols.CHARGE]] = df[
+                self._precursor_id_column
+            ].str.split(".", expand=True, n=2)
         df[PsmDfCols.CHARGE] = df[PsmDfCols.CHARGE].astype(np.int8)
         return df
 
