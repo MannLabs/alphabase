@@ -1040,14 +1040,10 @@ def flatten_fragments(
 
     n_fragment_types = len(fragment_mz_df.columns)
 
-    # Only `mz` and `intensity` are required at the full dense length of
-    # n_fragment_rows * n_fragment_types, as they determine which fragments are
-    # retained. Every other flat column is built directly from the indices of the
-    # retained fragments, so neither the dense intermediates for
-    # type/loss_type/charge/number/position nor the copy that filtering an
-    # assembled dataframe would make are ever materialised. Peak memory is thus
-    # driven by the number of retained fragments instead of the number of dense
-    # slots, which for top-k libraries is dominated by mz==0 padding.
+    # Only mz and intensity need the full dense length, because they give the
+    # keep mask. Dense arrays for the other columns and a copy from a filtered
+    # dataframe increase the peak memory. For top-k libraries, mz == 0 padding
+    # fills most dense slots.
     mz = fragment_mz_df.values.reshape(-1)
     use_intensity = len(fragment_intensity_df) > 0
     intensity = (
@@ -1085,7 +1081,7 @@ def flatten_fragments(
     if use_intensity:
         is_padding = mz == 0
         intensity[is_padding] = 0.0
-        # accumulated in place to avoid intermediate dense boolean arrays
+        # in-place operations prevent more dense boolean arrays
         excluded = intensity < min_fragment_intensity
         excluded |= is_padding
         excluded |= excluded_indices
@@ -1094,9 +1090,8 @@ def flatten_fragments(
         excluded = mz == 0
     del excluded_indices
 
-    # `excluded` is inverted in place into the keep mask, which saves another
-    # dense boolean array. The resulting indices are ascending, so indexing with
-    # them retains the fragment order of the dense representation.
+    # The in-place inversion prevents one more dense array. The indices stay
+    # ascending, so the fragments keep their dense order.
     np.logical_not(excluded, out=excluded)
     kept_indices = np.flatnonzero(excluded)
     del excluded
@@ -1105,13 +1100,12 @@ def flatten_fragments(
     frag_df["mz"] = mz[kept_indices]
     if use_intensity:
         frag_df["intensity"] = intensity[kept_indices]
-    # add additional columns to the fragment dataframe
-    # each column in the flat fragment dataframe is a whole pandas dataframe in the dense representation
+    # each custom_df value is a dense dataframe
     for col_name, df in custom_df.items():
         frag_df[col_name] = df.values.reshape(-1)[kept_indices]
 
     if {"type", "loss_type", "charge"} & set(custom_columns):
-        # the charged fragment type of a dense slot is given by its column
+        # the column of a dense slot gives its charged fragment type
         kept_frag_types = kept_indices % n_fragment_types
         if "type" in custom_columns:
             frag_df["type"] = np.array(frag_types, dtype=np.int8)[kept_frag_types]
@@ -1129,9 +1123,8 @@ def flatten_fragments(
     if "position" in custom_columns:
         frag_df["position"] = positions.reshape(-1)[kept_indices]
 
-    # The reannotated pointer of a precursor is the number of retained fragments
-    # before its dense start/stop position. As `kept_indices` is sorted, this is a
-    # binary search, which replaces a cumulative sum over all dense slots.
+    # A new pointer is the count of kept fragments before the dense position. A
+    # binary search gives this count and replaces a dense cumulative sum.
     dense_start_idx = precursor_df.frag_start_idx.values.astype(np.int64)
     dense_stop_idx = precursor_df.frag_stop_idx.values.astype(np.int64)
     precursor_df["flat_frag_start_idx"] = np.searchsorted(

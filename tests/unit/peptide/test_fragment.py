@@ -72,14 +72,14 @@ N_PRECURSORS = 5
 
 
 def _dense_library():
-    """Dense fragment frames with padding, and the matching precursor pointers."""
+    """Make dense fragment frames with padding, and the matching precursor pointers."""
     rng = np.random.default_rng(0)
     n_rows = N_PRECURSORS * ROWS_PER_PRECURSOR
     n_types = len(CHARGED_FRAG_TYPES)
 
     mz = (rng.random((n_rows, n_types)) * 1000 + 100).astype(PEAK_MZ_DTYPE)
-    # modloss fragments are not predicted for unmodified precursors and single
-    # fragments can fall outside the mz range: both appear as mz == 0 padding
+    # unmodified precursors have no modloss fragments, and some fragments fall
+    # outside the mz range. Both cases give mz == 0 padding.
     mz[: 2 * ROWS_PER_PRECURSOR, 4:] = 0
     mz[3, 0] = 0
     # distinct intensities make the top-k selection unambiguous
@@ -103,7 +103,7 @@ def _dense_library():
 def _expected_keep_mask(
     precursor_df, mz_df, intensity_df, keep_top_k_fragments, min_fragment_intensity
 ):
-    """Keep mask over all dense slots, derived without using flatten_fragments."""
+    """Give the keep mask over all dense slots. This does not use flatten_fragments."""
     n_types = mz_df.shape[1]
     mz = mz_df.values.reshape(-1)
     intensity = None if len(intensity_df) == 0 else intensity_df.values.reshape(-1)
@@ -131,7 +131,7 @@ def _expected_keep_mask(
 def test_flatten_fragments_retains_expected_fragments(
     keep_top_k_fragments, min_fragment_intensity
 ):
-    """Only the dense slots passing the mz, intensity and top-k filters are retained."""
+    """The flat library keeps only the slots that pass all filters."""
     precursor_df, mz_df, intensity_df = _dense_library()
     expected_mask = _expected_keep_mask(
         precursor_df,
@@ -161,7 +161,7 @@ def test_flatten_fragments_retains_expected_fragments(
 @pytest.mark.requires_numba
 @pytest.mark.parametrize("keep_top_k_fragments", [1000, 5])
 def test_flatten_fragments_annotates_retained_fragments(keep_top_k_fragments):
-    """Annotation columns describe the dense slot each retained fragment came from."""
+    """Each annotation column describes the dense slot of its fragment."""
     precursor_df, mz_df, intensity_df = _dense_library()
     n_types = mz_df.shape[1]
     expected_mask = _expected_keep_mask(
@@ -193,8 +193,8 @@ def test_flatten_fragments_annotates_retained_fragments(keep_top_k_fragments):
         ],
     )
 
-    # position counts the fragment rows of a precursor, number counts the ion
-    # series in the direction of the fragment type
+    # position counts the fragment rows of a precursor. number counts the ion
+    # series in the direction of the fragment type.
     expected_position = kept_rows % ROWS_PER_PRECURSOR
     np.testing.assert_array_equal(frag_df["position"].values, expected_position)
     directions = np.array(
@@ -209,7 +209,7 @@ def test_flatten_fragments_annotates_retained_fragments(keep_top_k_fragments):
 @pytest.mark.requires_numba
 @pytest.mark.parametrize("keep_top_k_fragments", [1000, 5])
 def test_flatten_fragments_reannotates_precursor_pointers(keep_top_k_fragments):
-    """The flat pointers of a precursor address exactly its retained fragments."""
+    """The flat pointers of a precursor address only its own fragments."""
     precursor_df, mz_df, intensity_df = _dense_library()
     n_types = mz_df.shape[1]
     mz = mz_df.values.reshape(-1)
@@ -228,7 +228,7 @@ def test_flatten_fragments_reannotates_precursor_pointers(keep_top_k_fragments):
             mz[block][expected_mask[block]],
         )
 
-    # the pointers tile the fragment dataframe without gaps or overlaps
+    # the pointers must cover the fragment dataframe with no gap and no overlap
     assert precursor_df.flat_frag_start_idx.iloc[0] == 0
     assert precursor_df.flat_frag_stop_idx.iloc[-1] == len(frag_df)
     np.testing.assert_array_equal(
@@ -239,7 +239,7 @@ def test_flatten_fragments_reannotates_precursor_pointers(keep_top_k_fragments):
 
 @pytest.mark.requires_numba
 def test_flatten_fragments_filters_custom_df_columns():
-    """Columns provided via custom_df are filtered like the mz column."""
+    """flatten_fragments filters a custom_df column like the mz column."""
     precursor_df, mz_df, intensity_df = _dense_library()
     cardinality_df = pd.DataFrame(
         np.arange(mz_df.size, dtype=np.uint8).reshape(mz_df.shape),
@@ -264,7 +264,7 @@ def test_flatten_fragments_filters_custom_df_columns():
 
 @pytest.mark.requires_numba
 def test_flatten_fragments_without_intensity():
-    """Without intensities only mz == 0 padding is removed and no intensity column is added."""
+    """Without intensities, flatten_fragments removes only the mz == 0 padding."""
     precursor_df, mz_df, _ = _dense_library()
     expected_mask = _expected_keep_mask(precursor_df, mz_df, pd.DataFrame(), 1000, -1)
 
@@ -278,7 +278,7 @@ def test_flatten_fragments_without_intensity():
 
 @pytest.mark.requires_numba
 def test_flatten_fragments_selects_custom_columns():
-    """Only the requested annotation columns are created."""
+    """flatten_fragments creates only the requested annotation columns."""
     precursor_df, mz_df, intensity_df = _dense_library()
 
     _, frag_df = flatten_fragments(
@@ -290,7 +290,7 @@ def test_flatten_fragments_selects_custom_columns():
 
 @pytest.mark.requires_numba
 def test_flatten_fragments_empty_precursor_df():
-    """An empty library flattens to an empty fragment dataframe."""
+    """An empty library gives an empty fragment dataframe."""
     _, mz_df, intensity_df = _dense_library()
 
     precursor_df, frag_df = flatten_fragments(
