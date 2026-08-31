@@ -110,6 +110,7 @@ def _precursor_df(n_precursors=40, mod=CUSTOM_MOD):
     return update_precursor_mz(df)
 
 
+@pytest.mark.requires_numba
 def test_isotope_intensity_mp_matches_single_process(restore_registry):
     # Given a library with a custom modification on its precursors
     _add_custom_mod()
@@ -127,6 +128,7 @@ def test_isotope_intensity_mp_matches_single_process(restore_registry):
     )
 
 
+@pytest.mark.requires_numba
 def test_caller_supplied_progress_bar_is_used():
     # Given a caller that supplies its own progress bar
     seen_totals = []
@@ -148,6 +150,7 @@ def test_caller_supplied_progress_bar_is_used():
     assert seen_totals == [4]
 
 
+@pytest.mark.requires_numba
 def test_speclib_isotope_info_runs_with_multiprocessing():
     # Given a library that is large enough to use the workers
     lib = SpecLibBase()
