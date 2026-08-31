@@ -19,7 +19,7 @@ def abundance_convolution(
     mono1: int,
     d2: np.ndarray,
     mono2: int,
-) -> typing.Tuple[np.ndarray, int]:
+) -> tuple[np.ndarray, int]:
     """
     If we have two isotope distributions,
     we can convolute them into one distribution.
@@ -60,7 +60,7 @@ def one_element_dist(
     n: int,
     chem_isotope_dist: NumbaTypedDict,
     chem_mono_idx: NumbaTypedDict,
-) -> typing.Tuple[np.ndarray, int]:
+) -> tuple[np.ndarray, int]:
     """
     Calculate the isotope distribution for
     an element and its numbers.
@@ -101,7 +101,7 @@ def one_element_dist(
         )
 
 
-def formula_dist(formula: typing.Union[list, str]) -> typing.Tuple[np.ndarray, int]:
+def formula_dist(formula: typing.Union[list, str]) -> tuple[np.ndarray, int]:
     """
     Generate the isotope distribution and the mono index for
     a given formula (as a list, e.g. `[('H', 2), ('C', 2), ('O', 1)]`).
@@ -210,8 +210,8 @@ class IsotopeDistribution:
 
     def calc_formula_distribution(
         self,
-        formula: typing.List[typing.Tuple[str, int]],
-    ) -> typing.Tuple[np.ndarray, int]:
+        formula: list[tuple[str, int]],
+    ) -> tuple[np.ndarray, int]:
         """Calculate isotope abundance distribution for a given formula
 
         Parameters

@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Optional
 
 import pandas as pd
 
@@ -144,7 +144,7 @@ class AminoAcidModifier:
         self._ptm_dict = None
 
     @property
-    def aa_smiles(self) -> Dict[str, str]:
+    def aa_smiles(self) -> dict[str, str]:
         """
         Dictionary of amino acid SMILES.
 
@@ -162,7 +162,7 @@ class AminoAcidModifier:
         return self._aa_smiles
 
     @property
-    def aa_mols(self) -> Dict[str, Chem.Mol]:
+    def aa_mols(self) -> dict[str, Chem.Mol]:
         """
         Dictionary of amino acid RDKit molecules.
 
@@ -178,7 +178,7 @@ class AminoAcidModifier:
         return self._aa_mols
 
     @property
-    def n_term_modifications(self) -> Dict[str, str]:
+    def n_term_modifications(self) -> dict[str, str]:
         """
         Dictionary of N-terminal modifications.
 
@@ -194,7 +194,7 @@ class AminoAcidModifier:
         return self._n_term_modifications
 
     @property
-    def c_term_modifications(self) -> Dict[str, str]:
+    def c_term_modifications(self) -> dict[str, str]:
         """
         Dictionary of C-terminal modifications.
 
@@ -210,7 +210,7 @@ class AminoAcidModifier:
         return self._c_term_modifications
 
     @property
-    def ptm_dict(self) -> Dict[str, str]:
+    def ptm_dict(self) -> dict[str, str]:
         """
         Dictionary of post-translational modifications (PTMs).
 
@@ -228,7 +228,7 @@ class AminoAcidModifier:
             }
         return self._ptm_dict
 
-    def _get_modifications(self, *terms: str) -> Dict[str, str]:
+    def _get_modifications(self, *terms: str) -> dict[str, str]:
         """
         Helper method to get modifications based on specific terms.
 

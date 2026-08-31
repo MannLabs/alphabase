@@ -1,5 +1,4 @@
 import os
-import typing
 
 import numpy as np
 import pandas as pd
@@ -29,7 +28,7 @@ AA_DF: pd.DataFrame = pd.DataFrame()
 AA_Composition: dict = {}
 
 
-def replace_atoms(atom_replace_dict: typing.Dict):
+def replace_atoms(atom_replace_dict: dict):
     for aa, row in aa_formula.iterrows():
         formula = row["formula"]
         atom_comp = dict(parse_formula(formula))
@@ -81,7 +80,7 @@ def reset_AA_Composition():
 reset_AA_Composition()
 
 
-def reset_AA_atoms(atom_replace_dict: typing.Dict = {}):
+def reset_AA_atoms(atom_replace_dict: dict = {}):
     reset_elements()
     replace_atoms(atom_replace_dict)
     reset_AA_mass()

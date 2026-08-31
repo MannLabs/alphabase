@@ -2,7 +2,7 @@
 
 import copy
 from collections import defaultdict
-from typing import Dict, Optional
+from typing import Optional
 
 from alphabase.constants.modification import ModificationKeys
 from alphabase.psm_reader.utils import MOD_TO_UNIMOD_DICT, get_extended_modifications
@@ -13,9 +13,9 @@ class ModificationMapper:
 
     def __init__(
         self,
-        custom_modification_mapping: Optional[Dict[str, str]],
+        custom_modification_mapping: Optional[dict[str, str]],
         *,
-        reader_yaml: Dict,
+        reader_yaml: dict,
         mapping_type: str,
         add_unimod_to_mod_mapping: bool,
     ):
@@ -87,7 +87,7 @@ class ModificationMapper:
             )
 
     def set_modification_mapping(
-        self, modification_mapping: Optional[Dict] = None
+        self, modification_mapping: Optional[dict] = None
     ) -> None:
         """Set the modification mapping for the search engine.
 
@@ -149,7 +149,7 @@ class ModificationMapper:
             if isinstance(val, str):
                 self.modification_mapping[mod] = [val]
 
-    def _get_reversed_mod_mapping(self) -> Dict[str, str]:
+    def _get_reversed_mod_mapping(self) -> dict[str, str]:
         """Create a reverse mapping from the modification format used by the search engine to the AlphaBase format."""
         rev_mod_mapping = {}
         for mod_alphabase_format, mod_other_format in self.modification_mapping.items():
