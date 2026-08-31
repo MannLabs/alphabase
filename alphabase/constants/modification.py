@@ -1,3 +1,10 @@
+"""Modification registry.
+
+`update_all_by_MOD_DF` calculates all other module-level lookups from `MOD_DF`.
+Thus a copy of `MOD_DF` is a complete snapshot of the registry. Change the
+registry only with `update_all_by_MOD_DF`, to keep this true.
+"""
+
 import os
 from typing import List, Union
 
@@ -463,7 +470,7 @@ def _check_mass_sanity(
     composition_mass = calc_mass_from_formula(composition)
     if not np.allclose(composition_mass, MOD_MASS[mod_name], atol=1e-5):
         raise ValueError(
-            f"Modification mass of {mod_name} is inconsistent with the composition formula: {composition}, df version {MOD_DF.loc[mod_name,['composition']]}"
+            f"Modification mass of {mod_name} is inconsistent with the composition formula: {composition}, df version {MOD_DF.loc[mod_name, ['composition']]}"
             f" calculated_mass={composition_mass}, mod_mass={MOD_MASS[mod_name]}"
         )
 
@@ -531,6 +538,35 @@ def _add_a_new_modification(
 def has_custom_mods():
     """Returns whether `MOD_DF` has user-defined modifications or not."""
     return len(MOD_DF[MOD_DF["classification"] == _MOD_CLASSIFICATION_USER_ADDED]) > 0
+
+
+def get_modification_state() -> pd.DataFrame:
+    """Copy the modification registry, to send it to a different process.
+
+    Returns
+    -------
+    pd.DataFrame
+        A copy of :data:`MOD_DF`. It contains all changes made at run time, not
+        only the user-added modifications.
+    """
+    return MOD_DF.copy()
+
+
+def set_modification_state(mod_df: pd.DataFrame) -> None:
+    """Install a registry copy and calculate the derived lookups again.
+
+    A process that starts with the "spawn" method imports alphabase again. Thus
+    it knows only the modifications in `modification.tsv`. Use this function to
+    give the process all changes that were made at run time.
+
+    Parameters
+    ----------
+    mod_df : pd.DataFrame
+        A copy from :func:`get_modification_state`.
+    """
+    global MOD_DF
+    MOD_DF = mod_df
+    update_all_by_MOD_DF()
 
 
 def add_new_modifications(new_mods: Union[list, dict]):

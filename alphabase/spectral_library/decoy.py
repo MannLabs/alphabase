@@ -1,16 +1,10 @@
 import copy
-import multiprocessing as mp
 from typing import Any
 
 import pandas as pd
 
 from alphabase.spectral_library.base import SpecLibBase
-
-
-def _batchify_series(series, mp_batch_size):
-    """Internal funciton for multiprocessing"""
-    for i in range(0, len(series), mp_batch_size):
-        yield series.iloc[i : i + mp_batch_size]
+from alphabase.utils import parallel_apply
 
 
 class BaseDecoyGenerator:
@@ -190,16 +184,13 @@ class SpecLibDecoy(SpecLibBase):
             self._remove_target_seqs()
             return
 
-        sequence_batches = list(
-            _batchify_series(self._precursor_df["sequence"], mp_batch_size)
+        self._precursor_df["sequence"] = parallel_apply(
+            self.generator,
+            self._precursor_df["sequence"],
+            processes=mp_process_num,
+            batch_size=mp_batch_size,
+            progress=False,
         )
-
-        series_list = []
-        with mp.get_context("spawn").Pool(mp_process_num) as p:
-            processing = p.imap(self.generator, sequence_batches)
-            for df in processing:
-                series_list.append(df)
-        self._precursor_df["sequence"] = pd.concat(series_list)
         self._remove_target_seqs()
 
     def _remove_target_seqs(self):

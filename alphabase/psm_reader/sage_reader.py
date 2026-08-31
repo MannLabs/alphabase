@@ -1,15 +1,13 @@
 """SageReader for reading Sage output files."""
 
 import logging
-import multiprocessing as mp
 import re
 from abc import ABC
 from functools import partial
-from typing import Generator, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
-from tqdm import tqdm
 
 from alphabase.constants.modification import MOD_DF, ModificationKeys
 from alphabase.psm_reader.keys import PsmDfCols
@@ -17,6 +15,7 @@ from alphabase.psm_reader.psm_reader import (
     PSMReaderBase,
     psm_reader_provider,
 )
+from alphabase.utils import parallel_apply
 
 
 class SageModificationTranslator:
@@ -443,27 +442,6 @@ def _apply_translate_modifications(
     return psm_df
 
 
-def _batchify_df(df: pd.DataFrame, mp_batch_size: int) -> Generator:
-    """Internal funciton for applying translation modifications in parallel.
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-        The PSM dataframe.
-
-    mp_batch_size : int
-        The batch size for parallel processing.
-
-    Returns
-    -------
-    typing.Generator
-        A generator for the batchified dataframe.
-
-    """
-    for i in range(0, len(df), mp_batch_size):
-        yield df.iloc[i : i + mp_batch_size, :]
-
-
 def _apply_translate_modifications_mp(
     psm_df: pd.DataFrame,
     mod_translation_df: pd.DataFrame,
@@ -492,22 +470,17 @@ def _apply_translate_modifications_mp(
         Whether to show a progress bar. Defaults to True
 
     """
-    with mp.get_context("spawn").Pool(mp_process_num) as p:
-        processing = p.imap(
-            partial(
-                _apply_translate_modifications,
-                mod_translation_df=mod_translation_df,
-            ),
-            _batchify_df(psm_df, mp_batch_size),
-        )
-        if progress_bar:
-            df_list = list(
-                tqdm(processing, total=int(np.ceil(len(psm_df) / mp_batch_size)))
-            )
-        else:
-            df_list = list(processing)
-
-    return pd.concat(df_list, ignore_index=True)
+    return parallel_apply(
+        partial(
+            _apply_translate_modifications,
+            mod_translation_df=mod_translation_df,
+        ),
+        psm_df,
+        processes=mp_process_num,
+        batch_size=mp_batch_size,
+        progress=progress_bar,
+        ignore_index=True,
+    )
 
 
 def _get_annotated_mod_df() -> pd.DataFrame:
