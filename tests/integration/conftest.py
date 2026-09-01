@@ -2,20 +2,36 @@
 
 import importlib.util
 import os
+from importlib.metadata import version
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 import pytest
+from packaging.version import Version
 
 from alphabase.tools.data_downloader import DataShareDownloader
 
 TABLES_PACKAGE_UNAVAILABLE = importlib.util.find_spec("tables") is None
 NUMBA_UNAVAILABLE = importlib.util.find_spec("numba") is None
 
+FIRST_NUMPY2_COMPATIBLE_TABLES_VERSION = Version("3.10")
+FIRST_ABI_BREAKING_NUMPY_VERSION = Version("2.0")
+
+PYTABLES_NUMPY_ABI_BROKEN = not TABLES_PACKAGE_UNAVAILABLE and (
+    Version(version("tables")) < FIRST_NUMPY2_COMPATIBLE_TABLES_VERSION
+    and Version(np.__version__) >= FIRST_ABI_BREAKING_NUMPY_VERSION
+)
+
 
 pytest.mark.optional_pytables_dependency = pytest.mark.skipif(
     TABLES_PACKAGE_UNAVAILABLE,
     reason="pytables package not installed. Install with `pip install alphabase[hdf]`",
+)
+
+pytest.mark.broken_pytables_numpy_abi = pytest.mark.skipif(
+    PYTABLES_NUMPY_ABI_BROKEN,
+    reason="tables<3.10 is built against numpy<2 and raises a dtype-size ValueError on import with numpy>=2",
 )
 
 pytest.mark.requires_numba = pytest.mark.skipif(

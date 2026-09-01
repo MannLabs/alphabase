@@ -53,9 +53,7 @@ class TestAlphapeptPGReaderImportIntegration:
 
         pd.testing.assert_frame_equal(result_df, reference)
 
-    @pytest.mark.skip(
-        reason="tables 3.9.2 (last release supporting py3.9) is built against numpy<2 and raises a dtype-size ValueError on import with numpy>=2"
-    )
+    @pytest.mark.broken_pytables_numpy_abi
     @pytest.mark.optional_pytables_dependency
     def test_import_hdf_file_equivalent(
         self, example_alphapept_hdf: tuple[str, pd.DataFrame]
@@ -111,9 +109,7 @@ class TestAlphapeptPGReaderImportIntegration:
             PGCols.DECOY_INDICATOR,
         ]
 
-    @pytest.mark.skip(
-        reason="tables 3.9.2 (last release supporting py3.9) is built against numpy<2 and raises a dtype-size ValueError on import with numpy>=2"
-    )
+    @pytest.mark.broken_pytables_numpy_abi
     @pytest.mark.optional_pytables_dependency
     @pytest.mark.parametrize(
         ("measurement_regex", "expected_shape", "expected_colums"),
