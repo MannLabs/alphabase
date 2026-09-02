@@ -131,6 +131,45 @@ def test_speclib_to_diann_df_flags() -> None:
         assert top["Flags"] & (1 << 4) > 0
 
 
+def test_speclib_to_diann_df_flags_one_base_peak_per_precursor_row() -> None:
+    """Precursor rows that share a peptidoform and charge each get their own base peak.
+
+    The base peak used to be found by grouping on `Precursor.Id`, which is only the
+    modified sequence and the charge, so two such rows shared one bit between them.
+    """
+    precursor_df = pd.DataFrame(
+        {
+            # the first two rows are the same peptidoform at the same charge
+            "sequence": ["PEPTIDEK", "PEPTIDEK", "ACDEFGHIK"],
+            "mods": ["", "", ""],
+            "mod_sites": ["", "", ""],
+            "charge": [2, 2, 2],
+            "rt": [0.1, 0.2, 0.3],
+            "proteins": ["PROT1", "PROT1", "PROT2"],
+        }
+    )
+    precursor_df["nAA"] = precursor_df["sequence"].str.len()
+
+    speclib = SpecLibBase(charged_frag_types=get_charged_frag_types(["b", "y"], 2))
+    speclib.precursor_df = precursor_df
+    speclib.calc_fragment_mz_df()
+    rng = np.random.default_rng(0)
+    speclib._fragment_intensity_df = pd.DataFrame(
+        rng.random(speclib.fragment_mz_df.shape), columns=speclib.charged_frag_types
+    )
+
+    df = speclib_to_diann_df(
+        speclib, min_frag_mz=0, max_frag_mz=0, min_frag_intensity=0.0, verbose=False
+    )
+
+    assert df["Precursor.Id"].nunique() == 2  # noqa: PLR2004  two distinct peptidoforms
+    # one base peak per precursor row, so three across two Precursor.Ids
+    is_base_peak = (df["Flags"] & (1 << 4)) > 0
+    assert is_base_peak.sum() == len(speclib.precursor_df)
+    # and each is the most intense fragment of its own precursor
+    assert (df.loc[is_base_peak, "Relative.Intensity"] == 1.0).all()
+
+
 def test_translate_to_parquet_roundtrip(tmp_path) -> None:
     """SpecLibBase -> DIA-NN parquet -> LibraryReaderBase preserves precursors/fragments."""
     speclib = _build_speclib()

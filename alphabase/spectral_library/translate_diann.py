@@ -6,6 +6,7 @@ Shared export helpers live in :mod:`alphabase.spectral_library.translate_core`.
 import functools
 from typing import Optional
 
+import numpy as np
 import pandas as pd
 
 from alphabase.psm_reader.keys import ConstantsClass, LibPsmDfCols, PsmDfCols
@@ -122,6 +123,9 @@ _DIANN_TO_PANDAS_DTYPE = {
 # `Flags` bitfield: bit 0 on every fragment, bit 4 on each precursor's base peak.
 _DIANN_FLAG_BASE = 1 << 0
 _DIANN_FLAG_FIRST_FRAGMENT = 1 << 4
+
+# internal column naming the source precursor row of a fragment, dropped before returning
+_PRECURSOR_ROW = "_precursor_row"
 
 
 # precursor columns of the DIA-NN schema that map to more than one alphabase column
@@ -286,6 +290,10 @@ def _precursors_to_diann_df(  # noqa: PLR0913  the frames and the export setting
     df[LibPsmDfCols.FRAG_START_IDX] = precursor_df[LibPsmDfCols.FRAG_START_IDX]
     df[LibPsmDfCols.FRAG_STOP_IDX] = precursor_df[LibPsmDfCols.FRAG_STOP_IDX]
 
+    # carried through the explode, so every kept fragment names its source precursor
+    # row. A position rather than an index label, which need not be unique.
+    df[_PRECURSOR_ROW] = np.arange(len(precursor_df))
+
     df = explode_top_fragments(
         df,
         fragment_mz_df,
@@ -299,13 +307,17 @@ def _precursors_to_diann_df(  # noqa: PLR0913  the frames and the export setting
     # exploding repeats the precursor's index, so make it unique before addressing rows
     df = df.reset_index(drop=True)
 
-    # Flags: base bit on all fragments, base-peak bit on each precursor's most intense one
+    # Flags: base bit on all fragments, base-peak bit on each precursor's most intense
+    # one. Grouped by the source precursor row, not by `Precursor.Id`: that is only the
+    # modified sequence and the charge, so two precursor rows sharing a peptidoform
+    # would share one base-peak bit between them and one of them would get none.
     df[DiannParquetCols.FLAGS] = _DIANN_FLAG_BASE
     if len(df):
-        base_peak_idx = df.groupby(DiannParquetCols.PRECURSOR_ID, sort=False)[
+        base_peak_idx = df.groupby(_PRECURSOR_ROW, sort=False)[
             DiannParquetCols.RELATIVE_INTENSITY
         ].idxmax()
         df.loc[base_peak_idx, DiannParquetCols.FLAGS] |= _DIANN_FLAG_FIRST_FRAGMENT
+    df = df.drop(columns=_PRECURSOR_ROW)
 
     for name, dtype in DIANN_PARQUET_SCHEMA:
         if dtype == "str":
