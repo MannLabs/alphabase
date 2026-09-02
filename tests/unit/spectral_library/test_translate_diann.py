@@ -150,15 +150,16 @@ def test_translate_to_parquet_roundtrip(tmp_path) -> None:
 @pytest.mark.parametrize(
     ("present", "expected"),
     [
-        (["irt_pred", "rt_pred", "rt", "irt", "rt_norm"], "irt_pred"),
-        (["rt_pred", "rt", "irt", "rt_norm"], "rt_pred"),
+        (["irt_pred", "rt_pred", "rt_norm_pred", "rt", "irt", "rt_norm"], "irt_pred"),
+        (["rt_pred", "rt_norm_pred", "rt", "irt", "rt_norm"], "rt_pred"),
+        (["rt_norm_pred", "rt", "irt", "rt_norm"], "rt_norm_pred"),
         (["rt", "irt", "rt_norm"], "rt"),
         (["irt", "rt_norm"], "irt"),
         (["rt_norm"], "rt_norm"),
     ],
 )
 def test_speclib_to_diann_df_rt_column_precedence(present: list, expected: str) -> None:
-    """RT is taken from the first present of irt_pred, rt_pred, rt, irt, rt_norm."""
+    """RT comes from the first present candidate, predictions before measurements."""
     speclib = _build_speclib()
     # give each candidate column a distinct value, so `RT` identifies its source
     values = {name: float(i + 1) for i, name in enumerate(present)}
@@ -174,14 +175,29 @@ def test_speclib_to_diann_df_rt_column_precedence(present: list, expected: str) 
     assert df["RT"].unique().tolist() == [values[expected]]
 
 
-def test_speclib_to_diann_df_rejects_rt_norm_pred() -> None:
-    """CHARACTERIZATION (bug): `rt_norm_pred` is not a recognised RT column.
+def test_speclib_to_diann_df_accepts_rt_norm_pred() -> None:
+    """A library carrying only `rt_norm_pred` exports, rather than being rejected.
 
-    peptdeep writes it alongside `rt_pred`, so a library carrying only
-    `rt_norm_pred` is rejected. A later commit adds it to the candidates.
+    peptdeep writes `rt_norm_pred` alongside `rt_pred`, so this matters for a
+    library whose `rt_pred` was dropped.
     """
     speclib = _build_speclib()
     speclib._precursor_df = speclib._precursor_df.rename(columns={"rt": "rt_norm_pred"})
+
+    df = speclib_to_diann_df(
+        speclib,
+        min_frag_mz=0,
+        max_frag_mz=np.inf,
+        min_frag_intensity=0.0,
+        verbose=False,
+    )
+    assert df["RT"].notna().all()
+
+
+def test_speclib_to_diann_df_without_any_rt_column_is_rejected() -> None:
+    """A library with no retention time at all is still an error."""
+    speclib = _build_speclib()
+    speclib._precursor_df = speclib._precursor_df.drop(columns=["rt"])
 
     with pytest.raises(ValueError, match="must contain a retention time column"):
         speclib_to_diann_df(

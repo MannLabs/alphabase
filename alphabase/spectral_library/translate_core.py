@@ -23,11 +23,15 @@ from alphabase.peptide.precursor import update_precursor_mz
 from alphabase.psm_reader.keys import ConstantsClass, PsmDfCols
 from alphabase.utils import explode_multiple_columns
 
-# Candidate precursor columns in order of precedence, for libraries that carry more than
-# one. The `*_pred` names are peptdeep's prediction outputs, which take priority over a
-# measured value; `irt_pred` outranks `rt_pred` because an indexed RT is what a
-# third-party library wants.
-RT_COLUMNS = ["irt_pred", "rt_pred", PsmDfCols.RT, "irt", PsmDfCols.RT_NORM]
+# Candidate precursor columns, in order of precedence.
+RT_COLUMNS = [
+    "irt_pred",
+    "rt_pred",
+    "rt_norm_pred",
+    PsmDfCols.RT,
+    "irt",
+    PsmDfCols.RT_NORM,
+]
 MOBILITY_COLUMNS = ["mobility_pred", PsmDfCols.MOBILITY]
 CCS_COLUMNS = ["ccs_pred", PsmDfCols.CCS]
 

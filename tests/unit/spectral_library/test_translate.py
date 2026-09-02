@@ -3,11 +3,9 @@
 These tests pin the behaviour of `alphabase.spectral_library.translate` as it is
 today, so that the upcoming restructuring can be shown to change nothing.
 
-Two tests still pin *buggy* behaviour that a later commit fixes. Each carries a
-`CHARACTERIZATION (bug)` note in its docstring:
-
-1. `rt_norm_pred` is not accepted as a retention time column
-2. the exploded fragment columns are object dtype, with a string `FragmentCharge`
+One test still pins *buggy* behaviour that a later commit fixes, marked
+`CHARACTERIZATION (bug)` in its docstring: the exploded fragment columns are
+object dtype, with a string `FragmentCharge`.
 
 One more, `test_speclib_to_swath_df_returns_none`, pins a function that a later
 commit removes rather than fixes.
@@ -169,15 +167,16 @@ def test_modified_sequence_uses_translate_mod_dict() -> None:
 @pytest.mark.parametrize(
     ("present", "expected"),
     [
-        (["irt_pred", "rt_pred", "rt", "irt", "rt_norm"], "irt_pred"),
-        (["rt_pred", "rt", "irt", "rt_norm"], "rt_pred"),
+        (["irt_pred", "rt_pred", "rt_norm_pred", "rt", "irt", "rt_norm"], "irt_pred"),
+        (["rt_pred", "rt_norm_pred", "rt", "irt", "rt_norm"], "rt_pred"),
+        (["rt_norm_pred", "rt", "irt", "rt_norm"], "rt_norm_pred"),
         (["rt", "irt", "rt_norm"], "rt"),
         (["irt", "rt_norm"], "irt"),
         (["rt_norm"], "rt_norm"),
     ],
 )
 def test_rt_column_precedence(present: list, expected: str) -> None:
-    """RT is taken from the first present of irt_pred, rt_pred, rt, irt, rt_norm."""
+    """RT comes from the first present candidate, predictions before measurements."""
     speclib = _build_speclib()
     # give each candidate column a distinct value, so `RT` identifies its source
     values = {name: float(i + 1) for i, name in enumerate(present)}
@@ -188,16 +187,24 @@ def test_rt_column_precedence(present: list, expected: str) -> None:
     assert _export(speclib)["RT"].unique().tolist() == [values[expected]]
 
 
-def test_rt_norm_pred_is_not_accepted() -> None:
-    """CHARACTERIZATION (bug): `rt_norm_pred` is not a recognised RT column.
+def test_rt_norm_pred_is_accepted() -> None:
+    """A library carrying only `rt_norm_pred` exports, rather than being rejected.
 
-    peptdeep writes it alongside `rt_pred`, so a library carrying only
-    `rt_norm_pred` is rejected. A later commit adds it to the candidates.
+    peptdeep writes `rt_norm_pred` alongside `rt_pred`, so this matters for a
+    library whose `rt_pred` was dropped.
     """
     speclib = _build_speclib()
     speclib._precursor_df = speclib._precursor_df.rename(
         columns={"rt_pred": "rt_norm_pred"}
     )
+
+    assert _export(speclib)["RT"].notna().all()
+
+
+def test_export_without_any_rt_column_is_rejected() -> None:
+    """A library with no retention time at all is still an error."""
+    speclib = _build_speclib()
+    speclib._precursor_df = speclib._precursor_df.drop(columns=["rt_pred"])
 
     with pytest.raises(ValueError, match="must contain the RT columns"):
         _export(speclib)
