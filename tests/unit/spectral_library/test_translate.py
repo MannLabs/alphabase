@@ -3,17 +3,11 @@
 These tests pin the behaviour of `alphabase.spectral_library.translate` as it is
 today, so that the upcoming restructuring can be shown to change nothing.
 
-Six tests deliberately pin *buggy* behaviour that a later commit fixes. Each
-carries a `CHARACTERIZATION (bug)` note in its docstring and is expected to be
-rewritten there:
+Two tests still pin *buggy* behaviour that a later commit fixes. Each carries a
+`CHARACTERIZATION (bug)` note in its docstring:
 
-1. the export zeroes intensities in the caller's library and adds `precursor_mz`
-2. so a second export of the same library silently differs from a fresh one
-3. with the m/z window disabled, empty fragment slots leak into the output
-4. `translate_to_tsv` masks by m/z unconditionally, so disabling the window
-   yields a file whose every fragment is at m/z 0
-5. `rt_norm_pred` is not accepted as a retention time column
-6. the exploded fragment columns are object dtype, with a string `FragmentCharge`
+1. `rt_norm_pred` is not accepted as a retention time column
+2. the exploded fragment columns are object dtype, with a string `FragmentCharge`
 
 One more, `test_speclib_to_swath_df_returns_none`, pins a function that a later
 commit removes rather than fixes.
@@ -112,7 +106,7 @@ def _export(speclib: SpecLibBase, **kwargs) -> pd.DataFrame:
 def _unfiltered(speclib: SpecLibBase, **kwargs) -> pd.DataFrame:
     """Export with every fragment filter disabled, to see the raw selection."""
     return _export(
-        speclib, min_frag_mz=0, max_frag_mz=0, min_frag_intensity=0.0, **kwargs
+        speclib, min_frag_mz=0, max_frag_mz=np.inf, min_frag_intensity=0.0, **kwargs
     )
 
 
@@ -281,6 +275,21 @@ def test_mz_window_selects_fragments_inside_it() -> None:
     assert df["FragmentMz"].between(600, 900).all()
 
 
+def test_unbounded_mz_window_spellings_agree() -> None:
+    """0 and `np.inf` mean no bound; the old 0/0 sentinel warns but still works."""
+    unbounded = _export(_build_speclib(), min_frag_mz=0, max_frag_mz=np.inf)
+    pd.testing.assert_frame_equal(
+        unbounded, _export(_build_speclib(), min_frag_mz=-np.inf, max_frag_mz=np.inf)
+    )
+
+    with pytest.warns(FutureWarning, match="max_frag_mz=np.inf"):
+        deprecated = _export(_build_speclib(), min_frag_mz=0, max_frag_mz=0)
+    pd.testing.assert_frame_equal(unbounded, deprecated)
+
+    # a bound of 0 on its own now means what it says, rather than "no bound"
+    assert len(_export(_build_speclib(), max_frag_mz=0)) == 0
+
+
 def test_min_frag_nAA_masks_the_smallest_fragments() -> None:
     """`min_frag_nAA=n` removes the n-1 smallest b and y fragments per terminus."""
     for min_frag_nAA in (2, 3, 4):
@@ -288,6 +297,17 @@ def test_min_frag_nAA_masks_the_smallest_fragments() -> None:
         for series in ("b", "y"):
             numbers = df.loc[df["FragmentType"] == series, "FragmentNumber"]
             assert numbers.min() == min_frag_nAA, (series, min_frag_nAA)
+
+
+def test_min_frag_nAA_wider_than_any_precursor() -> None:
+    """Regression guard: a mask wider than the block covers all of it, not part.
+
+    A `min_frag_nAA` larger than any precursor's fragment count is not a request
+    the export defines an answer to -- it is pinned only because the masking
+    works on row offsets, where an unclamped negative start silently masks the
+    wrong end. This is what main does too.
+    """
+    assert len(_export(_build_speclib(), min_frag_nAA=12)) == 0
 
 
 def test_modloss_label() -> None:
@@ -300,73 +320,54 @@ def test_modloss_label() -> None:
     assert set(custom["FragmentLossType"]) <= {"noloss", "H2O"}
 
 
-def test_export_modifies_the_source_library() -> None:
-    """CHARACTERIZATION (bug): the export edits the library it is handed.
-
-    The m/z window is applied by zeroing intensities *in the library*, and
-    `precursor_mz` is computed onto the caller's precursor frame. A later commit
-    filters on a copy instead.
-    """
+def test_export_leaves_the_source_library_untouched() -> None:
+    """The export reads the library and writes nothing back to it."""
     speclib = _build_speclib()
     intensities_before = speclib.fragment_intensity_df.to_numpy(copy=True)
+    mz_before = speclib.fragment_mz_df.to_numpy(copy=True)
     columns_before = set(speclib.precursor_df.columns)
 
     _export(speclib)
 
-    zeroed = (intensities_before != 0) & (speclib.fragment_intensity_df.to_numpy() == 0)
-    assert zeroed.sum() > 0
-    assert set(speclib.precursor_df.columns) - columns_before == {"precursor_mz"}
+    np.testing.assert_array_equal(
+        speclib.fragment_intensity_df.to_numpy(), intensities_before
+    )
+    np.testing.assert_array_equal(speclib.fragment_mz_df.to_numpy(), mz_before)
+    # `precursor_mz` in particular is computed on a copy, not onto the library
+    assert set(speclib.precursor_df.columns) == columns_before
 
 
-def test_second_export_of_the_same_library_differs_from_a_fresh_one() -> None:
-    """CHARACTERIZATION (bug): the in-place edit corrupts later exports.
+def test_second_export_of_the_same_library_matches_a_fresh_one() -> None:
+    """Exporting twice at different m/z windows is not order-dependent.
 
-    Exporting at 200-2000 and then at 100-3000 cannot recover the fragments the
-    first window zeroed, so the second export silently loses fragments a fresh
-    library would have kept, and substitutes others in their top-k slots.
+    A narrow window followed by a wider one used to be unable to recover the
+    fragments the first export had zeroed in the library.
     """
-
-    def fragment_keys(df: pd.DataFrame) -> set:
-        return set(
-            zip(
-                df["ModifiedPeptide"],
-                df["FragmentType"],
-                df["FragmentNumber"],
-                df["FragmentCharge"],
-                df["FragmentLossType"],
-            )
-        )
-
     reused = _build_speclib()
     _export(reused, min_frag_mz=DEFAULT_MIN_FRAG_MZ, max_frag_mz=DEFAULT_MAX_FRAG_MZ)
     second = _export(reused, min_frag_mz=100, max_frag_mz=3000)
     fresh = _export(_build_speclib(), min_frag_mz=100, max_frag_mz=3000)
 
-    assert fragment_keys(second) != fragment_keys(fresh)
-    assert len(fragment_keys(fresh) - fragment_keys(second)) > 0
+    pd.testing.assert_frame_equal(second, fresh)
 
 
-def test_disabled_mz_window_keeps_empty_fragment_slots() -> None:
-    """CHARACTERIZATION (bug): with the window off, m/z 0 padding is exported.
+def test_disabled_mz_window_skips_empty_fragment_slots() -> None:
+    """Empty fragment slots are never exported, m/z window or not.
 
-    A precursor's `*_modloss` slots are 0 unless it carries a loss-bearing mod.
-    The m/z window is what removes them, so disabling it emits them as if they
-    were real fragments -- mostly labelled with the `modloss` loss label. A later
-    commit skips empty slots regardless of the window.
-
-    The fixture's seeded intensities give those empty slots a positive intensity,
-    which is what makes them win a top-k slot here; a predictor would leave them
-    near 0. The selection has no notion of an empty slot either way.
+    A precursor's `*_modloss` slots carry m/z 0 unless it has a loss-bearing mod.
+    The m/z window used to be the only thing removing them, so disabling it
+    emitted them as if they were real fragments -- and they took top-k slots away
+    from fragments that do exist.
     """
     df = _unfiltered(_build_speclib())
 
-    padding = df["FragmentMz"] == 0
-    assert padding.sum() > 0
-    # and the padding rows carry the modification-loss label
-    assert (df.loc[padding, "FragmentLossType"] == "H3PO4").all()
-    # only the three phospho-bearing precursors have any real loss fragment
-    real_loss = df[(df["FragmentLossType"] == "H3PO4") & (df["FragmentMz"] > 0)]
-    assert real_loss["ModifiedPeptide"].nunique() < padding.sum()
+    assert (df["FragmentMz"] > 0).all()
+    # the freed slots go to real fragments, so disabling the window cannot yield
+    # fewer of them than the default window does
+    assert len(df) >= len(_export(_build_speclib()))
+    # only the loss-bearing precursors carry a loss fragment
+    with_loss = set(df.loc[df["FragmentLossType"] == "H3PO4", "StrippedPeptide"])
+    assert with_loss <= {"SVIVSPYSTGAK", "LHDSTPPPYK"}
 
 
 def test_exploded_fragment_columns_are_object_dtype() -> None:
@@ -455,34 +456,38 @@ def test_translate_to_tsv_multiprocessing_matches_single_process(tmp_path) -> No
     assert len(set(digests)) == 1
 
 
-def test_translate_to_tsv_disabled_mz_window_writes_only_empty_slots(
+def test_translate_to_tsv_disabled_mz_window_matches_the_in_memory_export(
     tmp_path,
 ) -> None:
-    """CHARACTERIZATION (bug): `min_frag_mz=0, max_frag_mz=0` writes m/z 0 rows.
+    """`min_frag_mz=0, max_frag_mz=np.inf` disables the filter in both entry points.
 
-    Unlike `speclib_to_single_df`, `translate_to_tsv` masks by m/z without
-    checking whether the window is disabled, so 0/0 -- the documented way to turn
-    the filter off -- zeroes every real fragment's intensity and leaves only the
-    empty slots to be selected. The file is a valid tsv of unusable fragments,
-    written without a warning.
+    `translate_to_tsv` used to mask by m/z without checking whether the window
+    was disabled, so 0/0 -- the documented way to turn the filter off -- zeroed
+    every real fragment and wrote a file of nothing but empty slots, while
+    `speclib_to_single_df` given the same arguments kept the real ones.
     """
     tsv = str(tmp_path / "lib.tsv")
     translate_to_tsv(
         _build_speclib(),
         tsv,
         min_frag_mz=0,
-        max_frag_mz=0,
+        max_frag_mz=np.inf,
         min_frag_intensity=0.0,
         multiprocessing=False,
     )
 
     written = pd.read_csv(tsv, sep="\t")
     assert len(written) > 0
-    assert (written["FragmentMz"] == 0).all()
+    assert (written["FragmentMz"] > 0).all()
 
-    # the in-memory export disagrees: it guards the mask, so real fragments survive
-    in_memory = _unfiltered(_build_speclib())
-    assert (in_memory["FragmentMz"] > 0).any()
+    expected = _unfiltered(_build_speclib())
+    numeric = ["FragmentMz", "RelativeIntensity", "FragmentCharge", "FragmentNumber"]
+    expected[numeric] = expected[numeric].apply(pd.to_numeric)
+    pd.testing.assert_frame_equal(
+        written.reset_index(drop=True),
+        expected.reset_index(drop=True),
+        check_dtype=False,
+    )
 
 
 def test_translate_to_tsv_writes_a_readable_library(tmp_path) -> None:

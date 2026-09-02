@@ -1,235 +1,136 @@
+"""Translate AlphaBase spectral libraries to a SWATH/Spectronaut transition list.
+
+The shared export machinery lives in :mod:`alphabase.spectral_library.translate_core`;
+this module holds the SWATH column names, the precursor mapping and the tsv writer. The
+names it used to define are re-exported below, so importing them from here keeps
+working.
+"""
+
 import multiprocessing as mp
 
-import numpy as np
 import pandas as pd
 import tqdm
 
-from alphabase.constants.modification import MOD_DF, ModificationKeys
-from alphabase.numba_wrapper import numba_njit
 from alphabase.spectral_library.base import SpecLibBase
-from alphabase.utils import explode_multiple_columns
+from alphabase.spectral_library.translate_core import (
+    CCS_COLUMNS,
+    MOBILITY_COLUMNS,
+    RT_COLUMNS,
+    FragmentTableCols,
+    create_modified_sequence,
+    first_present_column,
+    fragment_table,
+    get_precursor_mz,
+    is_nterm_frag,
+    join_fragments,
+    mod_to_unimod_dict,
+)
+
+# the SWATH names for the canonical fragment columns, in output order
+SWATH_FRAGMENT_COLUMNS = {
+    FragmentTableCols.FRAG_TYPE: "FragmentType",
+    FragmentTableCols.MZ: "FragmentMz",
+    FragmentTableCols.INTENSITY: "RelativeIntensity",
+    FragmentTableCols.CHARGE: "FragmentCharge",
+    FragmentTableCols.SERIES_NUMBER: "FragmentNumber",
+    FragmentTableCols.LOSS_TYPE: "FragmentLossType",
+}
+
+__all__ = [
+    # re-exported from translate_core, where these now live
+    "create_modified_sequence",
+    "is_nterm_frag",
+    "mod_to_unimod_dict",
+    "get_precursor_mz",
+    # this module's own
+    "WritingProcess",
+    "speclib_to_single_df",
+    "speclib_to_swath_df",
+    "translate_to_tsv",
+]
+
+# pandas renamed `to_csv`'s newline argument in 1.5; alphabase does not pin a minimum
+_CSV_NEWLINE = (
+    {"lineterminator": "\n"}
+    if tuple(int(part) for part in pd.__version__.split(".")[:2]) >= (1, 5)
+    else {"line_terminator": "\n"}
+)
 
 
-# @numba.njit #(cannot use numba for pd.Series)
-def create_modified_sequence(
-    seq_mods_sites: tuple,  # must be ('sequence','mods','mod_sites')
-    translate_mod_dict: dict = None,
-    mod_sep="[]",
-    nterm="_",
-    cterm="_",
-):
-    """
-    Translate `(sequence, mods, mod_sites)` into a modified sequence. Used by `df.apply()`.
-    For example, `('ABCDEFG','Mod1@A;Mod2@E','1;5')`->`_A[Mod1@A]BCDE[Mod2@E]FG_`.
-
-    Parameters
-    ----------
-    seq_mods_sites : List
-        must be `(sequence, mods, mod_sites)`
-
-    translate_mod_dict : dict
-        A dict to map AlphaX modification names to other software,
-        use unimod name if None.
-        Defaults to None.
-
-    mod_sep : str
-        '[]' or '()', default '[]'
-
-    """
-    mod_seq, mods, mod_sites = seq_mods_sites
-    if mods:
-        mods = mods.split(ModificationKeys.SEPARATOR)
-        mod_sites = [int(i) for i in mod_sites.split(ModificationKeys.SEPARATOR)]
-        rev_order = np.argsort(mod_sites)[::-1]
-        mod_sites = [mod_sites[rev_order[i]] for i in range(len(mod_sites))]
-        mods = [mods[rev_order[i]] for i in range(len(mods))]
-        if translate_mod_dict is None:
-            mods = [mod[: mod.find(ModificationKeys.SITE_SEPARATOR)] for mod in mods]
-        else:
-            mods = [translate_mod_dict[mod] for mod in mods]
-        for _site, mod in zip(mod_sites, mods):
-            if _site > 0:
-                mod_seq = (
-                    mod_seq[:_site] + mod_sep[0] + mod + mod_sep[1] + mod_seq[_site:]
-                )
-            elif _site == -1:
-                cterm += mod_sep[0] + mod + mod_sep[1]
-            elif _site == 0:
-                nterm += mod_sep[0] + mod + mod_sep[1]
-            else:
-                mod_seq = (
-                    mod_seq[:_site] + mod_sep[0] + mod + mod_sep[1] + mod_seq[_site:]
-                )
-    return nterm + mod_seq + cterm
-
-
-@numba_njit
-def _get_frag_info_from_column_name(column: str):
-    """
-    Only used when converting alphabase libraries into other libraries
-    """
-    idx = column.rfind("_")
-    frag_type = column[:idx]
-    charge = column[idx + 2 :]
-    if len(frag_type) == 1:
-        loss_type = "noloss"
-    else:
-        idx = frag_type.find("_")
-        loss_type = frag_type[idx + 1 :]
-        frag_type = frag_type[0]
-    return frag_type, loss_type, charge
-
-
-def _get_frag_num(columns, rows, frag_len):
-    frag_nums = []
-    for r, c in zip(rows, columns):
-        if is_nterm_frag(c):
-            frag_nums.append(r + 1)
-        else:
-            frag_nums.append(frag_len - r)
-    return frag_nums
-
-
-def merge_precursor_fragment_df(
+def _precursors_to_swath_df(  # noqa: PLR0913
     precursor_df: pd.DataFrame,
     fragment_mz_df: pd.DataFrame,
-    fragment_inten_df: pd.DataFrame,
-    top_n_inten: int,
-    frag_type_head: str = "FragmentType",
-    frag_mass_head: str = "FragmentMz",
-    frag_inten_head: str = "RelativeIntensity",
-    frag_charge_head: str = "FragmentCharge",
-    frag_series_head: str = "FragmentNumber",
-    frag_loss_head: str = "FragmentLossType",
-    verbose=True,
-):
-    """
-    Convert alphabase library into a single dataframe.
-    This method is not important, as it will be only
-    used by DiaNN, or spectronaut, or others
-    """
-    df = precursor_df.copy()
-    frag_columns = fragment_mz_df.columns.values.astype("U")
-    frag_type_list = []
-    frag_loss_list = []
-    frag_charge_list = []
-    frag_mass_list = []
-    frag_inten_list = []
-    frag_num_list = []
-    iters = enumerate(df[["frag_start_idx", "frag_stop_idx"]].values)
-    if verbose:
-        iters = tqdm.tqdm(iters)
-    for _i, (start, end) in iters:
-        intens = fragment_inten_df.iloc[start:end, :].to_numpy(
-            copy=True
-        )  # is loc[start:end-1,:] faster?
-        max_inten = np.amax(intens)
-        if max_inten > 0:
-            intens /= max_inten
-        masses = fragment_mz_df.iloc[start:end, :].values
-        sorted_idx = np.argsort(intens.reshape(-1))[-top_n_inten:][::-1]
-        idx_in_df = np.unravel_index(sorted_idx, masses.shape)
-
-        frag_len = end - start
-        rows = np.arange(frag_len, dtype=np.int32)[idx_in_df[0]]
-        columns = frag_columns[idx_in_df[1]]
-
-        frag_types, loss_types, charges = zip(
-            *[_get_frag_info_from_column_name(_) for _ in columns]
-        )
-
-        frag_nums = _get_frag_num(columns, rows, frag_len)
-
-        frag_type_list.append(frag_types)
-        frag_loss_list.append(loss_types)
-        frag_charge_list.append(charges)
-        frag_mass_list.append(masses[idx_in_df])
-        frag_inten_list.append(intens[idx_in_df])
-        frag_num_list.append(frag_nums)
-
-    df[frag_type_head] = frag_type_list
-    df[frag_mass_head] = frag_mass_list
-    df[frag_inten_head] = frag_inten_list
-    df[frag_charge_head] = frag_charge_list
-    df[frag_series_head] = frag_num_list
-    df[frag_loss_head] = frag_loss_list
-
-    return explode_multiple_columns(
-        df,
-        [
-            frag_type_head,
-            frag_mass_head,
-            frag_inten_head,
-            frag_charge_head,
-            frag_series_head,
-            frag_loss_head,
-        ],
-    )
-
-    # try:
-    #     return df.explode([
-    #         frag_type_head,
-    #         frag_mass_head,
-    #         frag_inten_head,
-    #         frag_charge_head,
-    #         frag_loss_head,
-    #         frag_num_head
-    #     ])
-    # except ValueError:
-    #     # df.explode does not allow mulitple columns before pandas version 1.x.x.
-    #     df = df.explode(frag_type_head)
-
-    #     df[frag_mass_head] = _flatten(frag_mass_list)
-    #     df[frag_inten_head] = _flatten(frag_inten_list)
-    #     df[frag_charge_head] = _flatten(frag_charge_list)
-    #     df[frag_loss_head] = _flatten(frag_loss_list)
-    #     df[frag_num_head] = _flatten(frag_num_list)
-    #     return df
-
-
-mod_to_unimod_dict = {}
-for mod_name, unimod_id in MOD_DF[["mod_name", "unimod_id"]].values:
-    if unimod_id == -1 or unimod_id == "-1":
-        continue
-    mod_to_unimod_dict[mod_name] = f"UniMod:{unimod_id}"
-
-
-def is_nterm_frag(frag_type: str):
-    return frag_type[0] in "abc"
-
-
-def mask_fragment_intensity_by_mz_(
-    fragment_mz_df: pd.DataFrame,
     fragment_intensity_df: pd.DataFrame,
-    min_frag_mz,
-    max_frag_mz,
-):
-    fragment_intensity_df.mask(
-        (fragment_mz_df > max_frag_mz) | (fragment_mz_df < min_frag_mz), 0, inplace=True
+    *,
+    translate_mod_dict: dict = None,
+    keep_k_highest_fragments: int = 12,
+    min_frag_mz=200,
+    max_frag_mz=2000,
+    min_frag_intensity=0.01,
+    min_frag_nAA=0,
+    modloss: str = "H3PO4",
+    verbose=True,
+) -> pd.DataFrame:
+    """Convert precursor and fragment frames to a SWATH transition list.
+
+    The dataframe-in form of :func:`speclib_to_single_df`, so that one batch of
+    precursors can be converted without standing up a `SpecLibBase` around it.
+    """
+    df = pd.DataFrame()
+    df["ModifiedPeptide"] = precursor_df[["sequence", "mods", "mod_sites"]].apply(
+        create_modified_sequence,
+        axis=1,
+        translate_mod_dict=translate_mod_dict,
+        mod_sep="[]",
     )
 
+    df["PrecursorCharge"] = precursor_df["charge"]
 
-def mask_fragment_intensity_by_frag_nAA(
-    fragment_intensity_df: pd.DataFrame, precursor_df: pd.DataFrame, max_mask_frag_nAA
-):
-    if max_mask_frag_nAA <= 0:
-        return
-    b_mask = np.zeros(len(fragment_intensity_df), dtype=np.bool_)
-    y_mask = b_mask.copy()
-    for i_frag in range(max_mask_frag_nAA):
-        b_mask[precursor_df.frag_start_idx.values + i_frag] = True
-        y_mask[precursor_df.frag_stop_idx.values - i_frag - 1] = True
+    rt = first_present_column(precursor_df, RT_COLUMNS)
+    if rt is None:
+        raise ValueError("precursor_df must contain the RT columns")
+    df["RT"] = rt
 
-    masks = np.zeros(
-        (len(fragment_intensity_df), len(fragment_intensity_df.columns)), dtype=np.bool_
+    # ion mobility and CCS are optional: the column is omitted, not defaulted
+    mobility = first_present_column(precursor_df, MOBILITY_COLUMNS)
+    if mobility is not None:
+        df["IonMobility"] = mobility
+
+    ccs = first_present_column(precursor_df, CCS_COLUMNS)
+    if ccs is not None:
+        df["CCS"] = ccs
+
+    df["StrippedPeptide"] = precursor_df["sequence"]
+
+    df["PrecursorMz"] = get_precursor_mz(precursor_df)
+
+    # this format prefers uniprot_ids; the DIA-NN one splits them over two columns
+    proteins = first_present_column(precursor_df, ["uniprot_ids", "proteins"])
+    if proteins is not None:
+        df["ProteinID"] = proteins
+
+    if "genes" in precursor_df.columns:
+        df["Genes"] = precursor_df["genes"]
+
+    if "decoy" in precursor_df.columns:
+        df["Decoy"] = precursor_df["decoy"]
+
+    fragments = fragment_table(
+        precursor_df["frag_start_idx"].to_numpy(),
+        precursor_df["frag_stop_idx"].to_numpy(),
+        fragment_mz_df,
+        fragment_intensity_df,
+        keep_k_highest=keep_k_highest_fragments,
+        min_frag_mz=min_frag_mz,
+        max_frag_mz=max_frag_mz,
+        min_frag_nAA=min_frag_nAA,
+        verbose=verbose,
     )
-    for i, col in enumerate(fragment_intensity_df.columns.values):
-        if is_nterm_frag(col):
-            masks[:, i] = b_mask
-        else:
-            masks[:, i] = y_mask
+    df = join_fragments(df, fragments, SWATH_FRAGMENT_COLUMNS)
+    df = df[df["RelativeIntensity"] > min_frag_intensity]
+    df.loc[df["FragmentLossType"] == "modloss", "FragmentLossType"] = modloss
 
-    fragment_intensity_df.mask(masks, 0, inplace=True)
+    return df
 
 
 def speclib_to_single_df(
@@ -242,12 +143,6 @@ def speclib_to_single_df(
     min_frag_intensity=0.01,
     min_frag_nAA=0,
     modloss: str = "H3PO4",
-    frag_type_head: str = "FragmentType",
-    frag_mass_head: str = "FragmentMz",
-    frag_inten_head: str = "RelativeIntensity",
-    frag_charge_head: str = "FragmentCharge",
-    frag_loss_head: str = "FragmentLossType",
-    frag_series_head: str = "FragmentNumber",
     verbose=True,
 ) -> pd.DataFrame:
     """
@@ -265,97 +160,29 @@ def speclib_to_single_df(
     keep_k_highest_peaks : int
         only keep highest fragments for each precursor. Default: 12
 
+    min_frag_mz, max_frag_mz : float
+        Fragment m/z range; fragments outside it are dropped. Pass 0 for no lower bound
+        and `np.inf` for no upper bound.
+
     Returns
     -------
     pd.DataFrame
         a single dataframe in the SWATH-like format
 
     """
-    df = pd.DataFrame()
-    df["ModifiedPeptide"] = speclib._precursor_df[
-        ["sequence", "mods", "mod_sites"]
-    ].apply(
-        create_modified_sequence,
-        axis=1,
-        translate_mod_dict=translate_mod_dict,
-        mod_sep="[]",
-    )
-
-    df["frag_start_idx"] = speclib._precursor_df["frag_start_idx"]
-    df["frag_stop_idx"] = speclib._precursor_df["frag_stop_idx"]
-
-    df["PrecursorCharge"] = speclib._precursor_df["charge"]
-
-    for rt_col in ["irt_pred", "rt_pred", "rt", "irt", "rt_norm"]:
-        if rt_col in speclib.precursor_df.columns:
-            df["RT"] = speclib.precursor_df[rt_col]
-            break
-    if "RT" not in df.columns:
-        raise ValueError("precursor_df must contain the RT columns")
-
-    for im_col in ["mobility_pred", "mobility"]:
-        if im_col in speclib.precursor_df.columns:
-            df["IonMobility"] = speclib.precursor_df[im_col]
-            break
-
-    for ccs_col in ["ccs_pred", "ccs"]:
-        if ccs_col in speclib.precursor_df.columns:
-            df["CCS"] = speclib.precursor_df[ccs_col]
-            break
-
-    # df['LabelModifiedSequence'] = df['ModifiedPeptide']
-    df["StrippedPeptide"] = speclib.precursor_df["sequence"]
-
-    if "precursor_mz" not in speclib._precursor_df.columns:
-        speclib.calc_precursor_mz()
-    df["PrecursorMz"] = speclib._precursor_df["precursor_mz"]
-
-    for prot_col in ["uniprot_ids", "proteins"]:
-        if prot_col in speclib.precursor_df.columns:
-            df["ProteinID"] = speclib.precursor_df[prot_col]
-            break
-
-    if "genes" in speclib._precursor_df.columns:
-        df["Genes"] = speclib._precursor_df["genes"]
-
-    if "decoy" in speclib._precursor_df.columns:
-        df["Decoy"] = speclib._precursor_df["decoy"]
-
-    # if 'protein_group' in speclib._precursor_df.columns:
-    #     df['ProteinGroups'] = speclib._precursor_df['protein_group']
-
-    if min_frag_mz > 0 or max_frag_mz > 0:
-        mask_fragment_intensity_by_mz_(
-            speclib._fragment_mz_df,
-            speclib._fragment_intensity_df,
-            min_frag_mz,
-            max_frag_mz,
-        )
-
-    if min_frag_nAA > 0:
-        mask_fragment_intensity_by_frag_nAA(
-            speclib._fragment_intensity_df,
-            speclib._precursor_df,
-            max_mask_frag_nAA=min_frag_nAA - 1,
-        )
-
-    df = merge_precursor_fragment_df(
-        df,
+    return _precursors_to_swath_df(
+        speclib._precursor_df,
         speclib._fragment_mz_df,
         speclib._fragment_intensity_df,
-        top_n_inten=keep_k_highest_fragments,
-        frag_type_head=frag_type_head,
-        frag_mass_head=frag_mass_head,
-        frag_inten_head=frag_inten_head,
-        frag_charge_head=frag_charge_head,
-        frag_loss_head=frag_loss_head,
-        frag_series_head=frag_series_head,
+        translate_mod_dict=translate_mod_dict,
+        keep_k_highest_fragments=keep_k_highest_fragments,
+        min_frag_mz=min_frag_mz,
+        max_frag_mz=max_frag_mz,
+        min_frag_intensity=min_frag_intensity,
+        min_frag_nAA=min_frag_nAA,
+        modloss=modloss,
         verbose=verbose,
     )
-    df = df[df["RelativeIntensity"] > min_frag_intensity]
-    df.loc[df[frag_loss_head] == "modloss", frag_loss_head] = modloss
-
-    return df.drop(["frag_start_idx", "frag_stop_idx"], axis=1)
 
 
 def speclib_to_swath_df(
@@ -387,17 +214,13 @@ class WritingProcess(mp.Process):
             df, batch = self.task_queue.get()
             if df is None:
                 break
-            if tuple([int(i) for i in pd.__version__.split(".")[:2]]) >= (1, 5):
-                newline = dict(lineterminator="\n")
-            else:
-                newline = dict(line_terminator="\n")
             df.to_csv(
                 self.tsv,
                 header=(batch == 0),
                 sep="\t",
                 mode="a",
                 index=False,
-                **newline,
+                **_CSV_NEWLINE,
             )
 
 
@@ -414,6 +237,19 @@ def translate_to_tsv(
     translate_mod_dict: dict = None,
     multiprocessing: bool = True,
 ):
+    """Translate an alphabase library into a SWATH/Spectronaut transition-list tsv.
+
+    Precursors are converted in batches and appended to the tsv, so large libraries do
+    not need to be held in memory at once in the flat, one-row-per-fragment format.
+
+    Parameters
+    ----------
+    min_frag_mz, max_frag_mz : float
+        Fragment m/z range; fragments outside it are dropped. Pass 0 for no lower bound
+        and `np.inf` for no upper bound.
+
+    See :func:`speclib_to_single_df`, whose parameters this shares, for the rest.
+    """
     if multiprocessing:
         queue_size = 1000000 // batch_size
         if queue_size < 2:
@@ -423,47 +259,36 @@ def translate_to_tsv(
         df_head_queue = mp.Queue(maxsize=queue_size)
         writing_process = WritingProcess(df_head_queue, tsv)
         writing_process.start()
-    mask_fragment_intensity_by_mz_(
-        speclib._fragment_mz_df,
-        speclib._fragment_intensity_df,
-        min_frag_mz,
-        max_frag_mz,
-    )
-    if min_frag_nAA > 0:
-        mask_fragment_intensity_by_frag_nAA(
-            speclib._fragment_intensity_df,
-            speclib._precursor_df,
-            max_mask_frag_nAA=min_frag_nAA - 1,
-        )
     if isinstance(tsv, str):
         with open(tsv, "w"):
             pass
-    # process precursors in batches: the flat (one row per fragment) format is much larger
-    # than the compact library, so batching keeps peak memory bounded for large libraries
-    batch_speclib = SpecLibBase()
-    batch_speclib._fragment_intensity_df = speclib._fragment_intensity_df
-    batch_speclib._fragment_mz_df = speclib._fragment_mz_df
+
+    # only the precursors are batched -- the fragment indices are absolute
     precursor_df = speclib._precursor_df
-    for i in tqdm.tqdm(range(0, len(precursor_df), batch_size)):
-        batch_speclib._precursor_df = precursor_df.iloc[i : i + batch_size]
-        df = speclib_to_single_df(
-            batch_speclib,
+    for first_row in tqdm.tqdm(range(0, len(precursor_df), batch_size)):
+        df = _precursors_to_swath_df(
+            precursor_df.iloc[first_row : first_row + batch_size],
+            speclib._fragment_mz_df,
+            speclib._fragment_intensity_df,
             translate_mod_dict=translate_mod_dict,
             keep_k_highest_fragments=keep_k_highest_fragments,
-            min_frag_mz=0,
-            max_frag_mz=0,
+            min_frag_mz=min_frag_mz,
+            max_frag_mz=max_frag_mz,
             min_frag_intensity=min_frag_intensity,
-            min_frag_nAA=0,
+            min_frag_nAA=min_frag_nAA,
             verbose=False,
         )
         if multiprocessing:
-            df_head_queue.put((df, i))
+            df_head_queue.put((df, first_row))
         else:
-            if tuple([int(i) for i in pd.__version__.split(".")[:2]]) >= (1, 5):
-                newline = dict(lineterminator="\n")
-            else:
-                newline = dict(line_terminator="\n")
-            df.to_csv(tsv, header=(i == 0), sep="\t", mode="a", index=False, **newline)
+            df.to_csv(
+                tsv,
+                header=(first_row == 0),
+                sep="\t",
+                mode="a",
+                index=False,
+                **_CSV_NEWLINE,
+            )
     if multiprocessing:
         df_head_queue.put((None, None))
         print(
