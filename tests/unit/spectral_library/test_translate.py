@@ -13,6 +13,7 @@ each one is expected to change them.
 """
 
 import io
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -21,12 +22,16 @@ import pytest
 from alphabase.peptide.fragment import get_charged_frag_types
 from alphabase.spectral_library.base import SpecLibBase
 from alphabase.spectral_library.translate import (
+    SWATH_FRAGMENT_COLUMNS,
     create_modified_sequence,
-    merge_precursor_fragment_df,
     mod_to_unimod_dict,
     speclib_to_single_df,
     speclib_to_swath_df,
     translate_to_tsv,
+)
+from alphabase.spectral_library.translate_core import (
+    FragmentFilter,
+    explode_top_fragments,
 )
 
 # the libraries hold modified peptides, whose fragment m/z calculation needs
@@ -118,25 +123,28 @@ def test_create_modified_sequence_unimod_dict() -> None:
 
 
 # --------------------------------------------------------------------------------------
-# merge_precursor_fragment_df
+# explode_top_fragments
 # --------------------------------------------------------------------------------------
 
 
-def test_merge_precursor_fragment_df_keeps_k_highest_per_precursor() -> None:
-    """Each precursor keeps its `top_n_inten` most intense fragments, most intense first."""
+def test_explode_top_fragments_keeps_k_highest_per_precursor() -> None:
+    """Each precursor keeps its `keep_k_highest` most intense fragments, most intense first."""
     speclib = _build_speclib()
     top_n = 5
 
-    df = merge_precursor_fragment_df(
+    df = explode_top_fragments(
         speclib.precursor_df,
         speclib.fragment_mz_df,
         speclib.fragment_intensity_df,
-        top_n_inten=top_n,
+        columns=SWATH_FRAGMENT_COLUMNS,
+        fragment_filter=FragmentFilter(
+            keep_k_highest=top_n, min_mz=0, max_mz=0, min_intensity=-1
+        ),
         verbose=False,
     )
 
     assert len(df) == top_n * len(speclib.precursor_df)
-    for _, group in df.groupby("frag_start_idx", sort=False):
+    for _, group in df.groupby(level=0, sort=False):
         intensities = group["RelativeIntensity"].astype(float).to_numpy()
         assert len(intensities) == top_n
         # rows of a precursor come out in descending intensity order
@@ -145,35 +153,35 @@ def test_merge_precursor_fragment_df_keeps_k_highest_per_precursor() -> None:
         assert intensities[0] == pytest.approx(1.0)
 
 
-def test_merge_precursor_fragment_df_annotates_fragments() -> None:
+def test_explode_top_fragments_annotates_fragments() -> None:
     """Fragment type, charge, loss type and series number describe the dense column."""
     speclib = _build_speclib()
 
-    df = merge_precursor_fragment_df(
+    df = explode_top_fragments(
         speclib.precursor_df,
         speclib.fragment_mz_df,
         speclib.fragment_intensity_df,
-        top_n_inten=100,  # keep everything
+        columns=SWATH_FRAGMENT_COLUMNS,
+        fragment_filter=FragmentFilter(
+            keep_k_highest=100, min_mz=0, max_mz=0, min_intensity=-1
+        ),
+        modloss_label="modloss",
         verbose=False,
     )
 
     assert set(df["FragmentType"]) <= {"b", "y"}
     assert set(df["FragmentCharge"]) == {"1", "2"}
     assert set(df["FragmentLossType"]) == {"noloss", "modloss"}
+    # the fragment pointers are not carried into the result
+    assert "frag_start_idx" not in df.columns
 
-    n_aa = speclib.precursor_df["nAA"].to_numpy()
-    for (start, stop), group in df.groupby(
-        ["frag_start_idx", "frag_stop_idx"], sort=False
-    ):
-        frag_len = stop - start
+    n_aa = speclib.precursor_df["nAA"]
+    for precursor_idx, group in df.groupby(level=0, sort=False):
+        frag_len = n_aa.loc[precursor_idx] - 1
         numbers = group["FragmentNumber"].astype(int)
         # b ions are numbered from the N-term, y ions from the C-term; both run 1..frag_len
         assert numbers.min() >= 1
         assert numbers.max() <= frag_len
-        assert (
-            frag_len
-            == n_aa[np.argmax(speclib.precursor_df["frag_start_idx"] == start)] - 1
-        )
 
 
 # --------------------------------------------------------------------------------------
@@ -458,107 +466,146 @@ def test_translate_to_tsv_batches_do_not_change_the_output() -> None:
 
 
 # --------------------------------------------------------------------------------------
-# characterization of known bugs
+# the library is not modified by being exported
 # --------------------------------------------------------------------------------------
 
 
-def test_speclib_to_single_df_mutates_the_input_intensities_characterization() -> None:
-    """BUG: the m/z range mask is applied to the caller's fragment intensities.
+@pytest.mark.parametrize("min_frag_nAA", [0, 3])
+def test_speclib_to_single_df_does_not_modify_the_library(min_frag_nAA: int) -> None:
+    """Exporting leaves the library it is given untouched.
 
-    `speclib_to_single_df` masks `speclib._fragment_intensity_df` in place, so a
-    library is changed by being exported.
+    The fragment filters used to be applied to `speclib._fragment_intensity_df` in
+    place, which zeroed the intensities of the caller's library, and calculating
+    `precursor_mz` added a column to its precursor dataframe.
     """
     speclib = _build_speclib()
-    before = speclib.fragment_intensity_df.to_numpy().copy()
+    intensities_before = speclib.fragment_intensity_df.to_numpy().copy()
+    mz_before = speclib.fragment_mz_df.to_numpy().copy()
+    precursor_columns_before = list(speclib.precursor_df.columns)
 
-    speclib_to_single_df(speclib, min_frag_mz=200, max_frag_mz=2000, verbose=False)
+    df = speclib_to_single_df(
+        speclib,
+        min_frag_mz=200,
+        max_frag_mz=2000,
+        min_frag_nAA=min_frag_nAA,
+        verbose=False,
+    )
 
-    after = speclib.fragment_intensity_df.to_numpy()
-    assert not np.array_equal(before, after)
-    # the masked values are zeroed, and none of them were zero before
-    assert (before == 0).sum() == 0
-    assert (after == 0).sum() > 0
+    assert len(df) > 0
+    np.testing.assert_array_equal(
+        intensities_before, speclib.fragment_intensity_df.to_numpy()
+    )
+    np.testing.assert_array_equal(mz_before, speclib.fragment_mz_df.to_numpy())
+    assert list(speclib.precursor_df.columns) == precursor_columns_before
 
 
-def test_speclib_to_single_df_adds_precursor_mz_to_the_input_characterization() -> None:
-    """BUG: calculating precursor_mz adds a column to the caller's precursor dataframe."""
+def test_translate_to_tsv_does_not_modify_the_library() -> None:
+    """The streamed export leaves the library untouched, and warns about nothing.
+
+    The batch slice used to be assigned to a stand-in `SpecLibBase`, and writing
+    `precursor_mz` into that slice raised `SettingWithCopyWarning` once per batch.
+    """
     speclib = _build_speclib()
-    assert "precursor_mz" not in speclib.precursor_df.columns
+    intensities_before = speclib.fragment_intensity_df.to_numpy().copy()
+    precursor_columns_before = list(speclib.precursor_df.columns)
 
-    speclib_to_single_df(speclib, verbose=False)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", pd.errors.SettingWithCopyWarning)
+        translate_to_tsv(speclib, io.StringIO(), batch_size=2, multiprocessing=False)
 
-    assert "precursor_mz" in speclib.precursor_df.columns
+    np.testing.assert_array_equal(
+        intensities_before, speclib.fragment_intensity_df.to_numpy()
+    )
+    assert list(speclib.precursor_df.columns) == precursor_columns_before
+
+
+def test_repeated_exports_give_the_same_result() -> None:
+    """Exporting the same library twice gives the same rows both times.
+
+    The in-place masking made the second export see already-zeroed intensities.
+    """
+    speclib = _build_speclib()
+
+    first = speclib_to_single_df(
+        speclib, min_frag_mz=300, max_frag_mz=1800, verbose=False
+    )
+    second = speclib_to_single_df(
+        speclib, min_frag_mz=300, max_frag_mz=1800, verbose=False
+    )
+
+    pd.testing.assert_frame_equal(first, second)
+
+    # and a narrower window first does not shrink what a wider one can find
+    speclib = _build_speclib()
+    speclib_to_single_df(speclib, min_frag_mz=1000, max_frag_mz=1100, verbose=False)
+    wide = speclib_to_single_df(
+        speclib, min_frag_mz=300, max_frag_mz=1800, verbose=False
+    )
+    assert len(wide) == len(first)
+
+
+# --------------------------------------------------------------------------------------
+# fragment filters
+# --------------------------------------------------------------------------------------
+
+
+def test_translate_to_tsv_disabled_mz_range_keeps_every_fragment() -> None:
+    """`min_frag_mz=0, max_frag_mz=0` disables the m/z filter, as it is documented to.
+
+    `translate_to_tsv` used to mask unconditionally, so with both bounds at 0 the
+    mask became `(mz > 0) | (mz < 0)` and only the m/z 0 padding slots came through.
+    """
+    buffer = io.StringIO()
+    translate_to_tsv(
+        _build_speclib(), buffer, min_frag_mz=0, max_frag_mz=0, multiprocessing=False
+    )
+    written = _read_tsv(buffer)
+
+    in_memory = speclib_to_single_df(
+        _build_speclib(), min_frag_mz=0, max_frag_mz=0, verbose=False
+    )
+
+    assert (written["FragmentMz"] > 0).any()
+    assert len(written) == len(in_memory)
+    np.testing.assert_allclose(
+        written["FragmentMz"].to_numpy(),
+        in_memory["FragmentMz"].astype(float).to_numpy(),
+    )
+
+
+def test_min_frag_nAA_is_bounded_by_the_precursor_length() -> None:
+    """A mask window longer than a precursor masks only that precursor's fragments.
+
+    The window used to be applied as `frag_start_idx + i` without checking that the
+    row still belonged to the precursor, so it reached into the next precursor's
+    fragments and, at the end of the library, off the end of the array.
+    """
+    speclib = _build_speclib()
+    n_fragment_rows = len(speclib.fragment_mz_df)
+
+    # a window longer than the whole library masks everything and raises nothing
+    df = speclib_to_single_df(
+        speclib,
+        min_frag_nAA=n_fragment_rows + 2,
+        min_frag_mz=0,
+        max_frag_mz=0,
+        min_frag_intensity=-1,
+        verbose=False,
+    )
+    assert (df["RelativeIntensity"].astype(float) == 0).all()
+
+    # a window of 3 leaves the fragments numbered 3 and up, for every precursor
+    df = speclib_to_single_df(
+        speclib, min_frag_nAA=3, min_frag_mz=0, max_frag_mz=0, verbose=False
+    )
+    assert df["FragmentNumber"].astype(int).min() >= 3
+    assert set(df["StrippedPeptide"]) == set(speclib.precursor_df["sequence"])
 
 
 def test_speclib_to_swath_df_returns_none_characterization() -> None:
-    """BUG: `speclib_to_swath_df` never returns its result.
+    """`speclib_to_swath_df` never returns its result.
 
     The function has been missing its `return` since translate.py moved into
     alphabase, so it is annotated `-> pd.DataFrame` but always gives None.
     """
     assert speclib_to_swath_df(_build_speclib()) is None
-
-
-def test_translate_to_tsv_disabled_mz_range_drops_every_fragment_characterization() -> (
-    None
-):
-    """BUG: `min_frag_mz=0, max_frag_mz=0` drops every real fragment.
-
-    The other entry points guard the mask with `min_frag_mz > 0 or max_frag_mz > 0`,
-    which is documented as the way to disable it. `translate_to_tsv` masks
-    unconditionally, so the mask becomes `(mz > 0) | (mz < 0)` and zeroes the
-    intensity of every fragment that has an m/z. Only the padding slots, whose
-    m/z is 0, come through.
-    """
-    buffer = io.StringIO()
-    translate_to_tsv(
-        _build_speclib(),
-        buffer,
-        min_frag_mz=0,
-        max_frag_mz=0,
-        multiprocessing=False,
-    )
-    written = _read_tsv(buffer)
-
-    assert len(written) > 0
-    assert (written["FragmentMz"] == 0).all()
-
-    # the guarded path keeps the real fragments for the same settings
-    guarded = speclib_to_single_df(
-        _build_speclib(), min_frag_mz=0, max_frag_mz=0, verbose=False
-    )
-    assert (guarded["FragmentMz"].astype(float) > 0).sum() > 0
-
-
-def test_translate_to_tsv_batch_slice_warns_characterization() -> None:
-    """BUG: the per-batch precursor slice is a view, so writing to it warns.
-
-    `translate_to_tsv` assigns `precursor_df.iloc[i:i + batch_size]` to the
-    batch library, and calculating `precursor_mz` then writes to that slice.
-    pandas raises `SettingWithCopyWarning`, the column never reaches the caller,
-    and it is recalculated for every batch.
-    """
-    speclib = _build_speclib()
-    assert "precursor_mz" not in speclib.precursor_df.columns
-
-    with pytest.warns(pd.errors.SettingWithCopyWarning):
-        translate_to_tsv(speclib, io.StringIO(), batch_size=2, multiprocessing=False)
-
-    assert "precursor_mz" not in speclib.precursor_df.columns
-
-
-def test_min_frag_nAA_reaches_into_the_next_precursor_characterization() -> None:
-    """BUG: the nAA mask is not bounded by the length of its own precursor.
-
-    `mask_fragment_intensity_by_frag_nAA` sets `frag_start_idx + i` for every
-    `i` below the window, without checking that the row still belongs to the
-    precursor, so a precursor shorter than the window masks its neighbour's
-    fragments. With a window longer than the whole library it runs off the end.
-    """
-    speclib = _build_speclib()
-    n_fragment_rows = len(speclib.fragment_mz_df)
-
-    with pytest.raises(IndexError):
-        speclib_to_single_df(
-            speclib, min_frag_nAA=n_fragment_rows + 2, min_frag_mz=0, verbose=False
-        )

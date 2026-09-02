@@ -10,7 +10,8 @@ Everything they have in common lives here: rendering modified sequences, finding
 precursor columns, masking and flattening the dense fragment dataframes.
 """
 
-from typing import Optional, Union
+from dataclasses import dataclass
+from typing import Callable, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -18,6 +19,7 @@ import tqdm
 
 from alphabase.constants.modification import MOD_DF, ModificationKeys
 from alphabase.numba_wrapper import numba_njit
+from alphabase.peptide.precursor import update_precursor_mz
 from alphabase.utils import explode_multiple_columns
 
 # ---------------------------------------------------------------------------------------
@@ -61,6 +63,41 @@ def first_present_column(
         if col in precursor_df.columns:
             return precursor_df[col]
     return default
+
+
+# columns `update_precursor_mz` reads; anything else is left out of the copy it works on
+_PRECURSOR_MZ_INPUT_COLUMNS = ("sequence", "mods", "mod_sites", "charge", "nAA")
+
+
+def precursor_mz_series(precursor_df: pd.DataFrame) -> pd.Series:
+    """Give the precursor m/z of every precursor, without modifying `precursor_df`.
+
+    `update_precursor_mz` writes its result into the dataframe it is given, which would
+    add a column to the library being exported. Calculate it on a copy of the columns it
+    reads instead, and give back only the result.
+
+    Parameters
+    ----------
+    precursor_df : pd.DataFrame
+        Precursor dataframe with the `sequence`, `mods`, `mod_sites` and `charge`
+        columns, or with `precursor_mz` already calculated.
+
+    Returns
+    -------
+    pd.Series
+        The precursor m/z, indexed like `precursor_df`.
+
+    """
+    if "precursor_mz" in precursor_df.columns:
+        return precursor_df["precursor_mz"]
+
+    present = [c for c in _PRECURSOR_MZ_INPUT_COLUMNS if c in precursor_df.columns]
+    slim_df = precursor_df[present].copy()
+    if "nAA" not in slim_df.columns:
+        # `update_precursor_mz` would otherwise reorder the rows to add it
+        slim_df["nAA"] = slim_df["sequence"].str.len()
+    update_precursor_mz(slim_df)
+    return slim_df["precursor_mz"]
 
 
 # ---------------------------------------------------------------------------------------
@@ -309,57 +346,108 @@ def mask_fragment_intensity_by_frag_nAA(  # noqa: N802  public name
 # ---------------------------------------------------------------------------------------
 
 
-def merge_precursor_fragment_df(  # noqa: PLR0913  one argument per output column
+@dataclass(frozen=True)
+class FragmentColumns:
+    """Names to give the fragment columns of a translated library."""
+
+    frag_type: str
+    mz: str
+    intensity: str
+    charge: str
+    series_number: str
+    loss_type: str
+
+    def as_list(self) -> list:
+        """The column names in the order they are added to the translated library."""
+        return [
+            self.frag_type,
+            self.mz,
+            self.intensity,
+            self.charge,
+            self.series_number,
+            self.loss_type,
+        ]
+
+
+@dataclass(frozen=True)
+class FragmentFilter:
+    """Which fragments of a library to export.
+
+    Attributes
+    ----------
+    keep_k_highest : int
+        Number of most intense fragments to keep per precursor.
+
+    min_mz, max_mz : float
+        The fragment m/z range to keep. Both zero keeps every m/z.
+
+    min_intensity : float
+        Drop fragments at or below this intensity, relative to the most intense
+        fragment of their precursor.
+
+    min_nAA : int
+        Drop the b/y fragments with a series number below this. Zero keeps all.
+
+    """
+
+    keep_k_highest: int = 12
+    min_mz: float = 200.0
+    max_mz: float = 2000.0
+    min_intensity: float = 0.01
+    min_nAA: int = 0  # noqa: N815  matches the min_frag_nAA parameter of the formats
+
+    @property
+    def limits_mz(self) -> bool:
+        """Whether the m/z range excludes anything."""
+        return self.min_mz > 0 or self.max_mz > 0
+
+    @property
+    def masked_frag_nAA(self) -> int:  # noqa: N802  matches min_nAA
+        """Number of fragments to drop at each terminus of a precursor."""
+        return max(self.min_nAA - 1, 0)
+
+
+def explode_top_fragments(  # noqa: PLR0913  the frames, the column names and the filters
     precursor_df: pd.DataFrame,
     fragment_mz_df: pd.DataFrame,
-    fragment_inten_df: pd.DataFrame,
-    top_n_inten: int,
-    frag_type_head: str = "FragmentType",
-    frag_mass_head: str = "FragmentMz",
-    frag_inten_head: str = "RelativeIntensity",
-    frag_charge_head: str = "FragmentCharge",
-    frag_series_head: str = "FragmentNumber",
-    frag_loss_head: str = "FragmentLossType",
+    fragment_intensity_df: pd.DataFrame,
     *,
+    columns: FragmentColumns,
+    fragment_filter: FragmentFilter,
+    modloss_label: str = "H3PO4",
     verbose: bool = True,
 ) -> pd.DataFrame:
     """Flatten the dense fragment dataframes onto the precursors, one row per fragment.
 
-    Every precursor keeps its `top_n_inten` most intense fragments, in descending
-    intensity order, with the intensities relative to its own most intense fragment.
+    Every precursor keeps the `keep_k_highest` most intense of the fragments that pass
+    `fragment_filter`, in descending intensity order, with the intensities relative to
+    its own most intense fragment.
+
+    The filters are applied to a private copy of each precursor's fragments, so neither
+    `fragment_mz_df` nor `fragment_intensity_df` is modified.
 
     Parameters
     ----------
     precursor_df : pd.DataFrame
-        Precursor dataframe with the `frag_start_idx` and `frag_stop_idx` columns. Its
-        other columns are carried through, repeated once per kept fragment.
+        Precursor dataframe with the `frag_start_idx` and `frag_stop_idx` columns, which
+        index into the dense fragment dataframes. Its other columns are carried through,
+        repeated once per kept fragment; the two index columns are not.
 
     fragment_mz_df : pd.DataFrame
         Dense fragment m/z dataframe.
 
-    fragment_inten_df : pd.DataFrame
+    fragment_intensity_df : pd.DataFrame
         Dense fragment intensity dataframe.
 
-    top_n_inten : int
-        Number of most intense fragments to keep per precursor.
+    columns : FragmentColumns
+        Names to give the fragment columns of the result.
 
-    frag_type_head : str
-        Name to give the fragment type column of the result.
+    fragment_filter : FragmentFilter
+        Which fragments to keep.
 
-    frag_mass_head : str
-        Name to give the fragment m/z column of the result.
-
-    frag_inten_head : str
-        Name to give the relative fragment intensity column of the result.
-
-    frag_charge_head : str
-        Name to give the fragment charge column of the result.
-
-    frag_series_head : str
-        Name to give the fragment series number column of the result.
-
-    frag_loss_head : str
-        Name to give the fragment loss type column of the result.
+    modloss_label : str
+        Written in place of the `modloss` loss type, which names the lost molecule
+        rather than the mechanism. Default: "H3PO4"
 
     verbose : bool
         Show a progress bar over the precursors.
@@ -372,6 +460,8 @@ def merge_precursor_fragment_df(  # noqa: PLR0913  one argument per output colum
     """
     df = precursor_df.copy()
     frag_columns = fragment_mz_df.columns.to_numpy().astype("U")
+    is_nterm_column = np.array([is_nterm_frag(col) for col in frag_columns])
+
     frag_type_list = []
     frag_loss_list = []
     frag_charge_list = []
@@ -382,48 +472,98 @@ def merge_precursor_fragment_df(  # noqa: PLR0913  one argument per output colum
     if verbose:
         iters = tqdm.tqdm(iters)
     for _i, (start, end) in iters:
-        intens = fragment_inten_df.iloc[start:end, :].to_numpy(
-            copy=True
-        )  # is loc[start:end-1,:] faster?
+        # `copy=True`, so the masking below cannot reach the caller's library
+        intens = fragment_intensity_df.iloc[start:end, :].to_numpy(copy=True)
+        masses = fragment_mz_df.iloc[start:end, :].to_numpy()
+
+        if fragment_filter.limits_mz:
+            intens[
+                (masses < fragment_filter.min_mz) | (masses > fragment_filter.max_mz)
+            ] = 0
+        n_masked = min(fragment_filter.masked_frag_nAA, len(intens))
+        if n_masked > 0:
+            # b ions are numbered from the start of the block, y ions from its end
+            intens[:n_masked, is_nterm_column] = 0
+            intens[len(intens) - n_masked :, ~is_nterm_column] = 0
+
         max_inten = np.amax(intens)
         if max_inten > 0:
             intens /= max_inten
-        masses = fragment_mz_df.iloc[start:end, :].to_numpy()
-        sorted_idx = np.argsort(intens.reshape(-1))[-top_n_inten:][::-1]
+        sorted_idx = np.argsort(intens.reshape(-1))[-fragment_filter.keep_k_highest :][
+            ::-1
+        ]
         idx_in_df = np.unravel_index(sorted_idx, masses.shape)
 
         frag_len = end - start
         rows = np.arange(frag_len, dtype=np.int32)[idx_in_df[0]]
-        columns = frag_columns[idx_in_df[1]]
+        kept_columns = frag_columns[idx_in_df[1]]
 
         frag_types, loss_types, charges = zip(
-            *[_get_frag_info_from_column_name(_) for _ in columns]
+            *[_get_frag_info_from_column_name(_) for _ in kept_columns]
         )
-
-        frag_nums = _get_frag_num(columns, rows, frag_len)
 
         frag_type_list.append(frag_types)
         frag_loss_list.append(loss_types)
         frag_charge_list.append(charges)
         frag_mass_list.append(masses[idx_in_df])
         frag_inten_list.append(intens[idx_in_df])
-        frag_num_list.append(frag_nums)
+        frag_num_list.append(_get_frag_num(kept_columns, rows, frag_len))
 
-    df[frag_type_head] = frag_type_list
-    df[frag_mass_head] = frag_mass_list
-    df[frag_inten_head] = frag_inten_list
-    df[frag_charge_head] = frag_charge_list
-    df[frag_series_head] = frag_num_list
-    df[frag_loss_head] = frag_loss_list
+    df[columns.frag_type] = frag_type_list
+    df[columns.mz] = frag_mass_list
+    df[columns.intensity] = frag_inten_list
+    df[columns.charge] = frag_charge_list
+    df[columns.series_number] = frag_num_list
+    df[columns.loss_type] = frag_loss_list
 
-    return explode_multiple_columns(
-        df,
-        [
-            frag_type_head,
-            frag_mass_head,
-            frag_inten_head,
-            frag_charge_head,
-            frag_series_head,
-            frag_loss_head,
-        ],
-    )
+    df = explode_multiple_columns(df, columns.as_list())
+    df = df[df[columns.intensity] > fragment_filter.min_intensity]
+    df.loc[df[columns.loss_type] == "modloss", columns.loss_type] = modloss_label
+    return df.drop(["frag_start_idx", "frag_stop_idx"], axis=1)
+
+
+def translate_in_batches(  # noqa: PLR0913  the frames, the two callables and the batching
+    precursor_df: pd.DataFrame,
+    fragment_mz_df: pd.DataFrame,
+    fragment_intensity_df: pd.DataFrame,
+    convert: Callable[[pd.DataFrame, pd.DataFrame, pd.DataFrame], pd.DataFrame],
+    write: Callable[[pd.DataFrame, int], None],
+    *,
+    batch_size: int,
+    progress: bool = True,
+) -> None:
+    """Convert a library in batches of precursors and write each batch out.
+
+    One row per fragment is much larger than the dense library, so batching keeps the
+    peak memory of an export bounded. Only the precursors are batched: `frag_start_idx`
+    and `frag_stop_idx` are absolute offsets into the dense fragment dataframes, so
+    those are passed whole for the lookup to stay in sync.
+
+    Parameters
+    ----------
+    precursor_df : pd.DataFrame
+        Precursor dataframe of the library to convert.
+
+    fragment_mz_df, fragment_intensity_df : pd.DataFrame
+        Dense fragment dataframes of the library to convert.
+
+    convert : callable
+        Called as `convert(precursor_batch, fragment_mz_df, fragment_intensity_df)`,
+        and gives the translated rows of that batch.
+
+    write : callable
+        Called as `write(translated_batch, batch_start)`, where `batch_start` is the
+        position of the batch's first precursor. It is 0 for the first batch, which is
+        how a writer knows to emit a header.
+
+    batch_size : int
+        Number of precursors to convert per batch.
+
+    progress : bool
+        Show a progress bar over the batches.
+
+    """
+    batch_starts = range(0, len(precursor_df), batch_size)
+    for start in tqdm.tqdm(batch_starts, disable=not progress):
+        batch_df = precursor_df.iloc[start : start + batch_size]
+        write(convert(batch_df, fragment_mz_df, fragment_intensity_df), start)

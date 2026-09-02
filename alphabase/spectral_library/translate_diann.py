@@ -3,22 +3,24 @@
 Shared export helpers live in :mod:`alphabase.spectral_library.translate_core`.
 """
 
+import functools
 from typing import Optional
 
 import pandas as pd
-import tqdm
 
 from alphabase.psm_reader.keys import ConstantsClass, LibPsmDfCols, PsmDfCols
 from alphabase.spectral_library.base import SpecLibBase
 from alphabase.spectral_library.translate_core import (
     MOBILITY_COLUMNS,
     RT_COLUMNS,
+    FragmentColumns,
+    FragmentFilter,
     create_modified_sequence,
+    explode_top_fragments,
     first_present_column,
-    mask_fragment_intensity_by_frag_nAA,
-    mask_fragment_intensity_by_mz_,
-    merge_precursor_fragment_df,
     mod_to_unimod_dict,
+    precursor_mz_series,
+    translate_in_batches,
 )
 
 
@@ -61,15 +63,15 @@ class DiannParquetCols(metaclass=ConstantsClass):
     SIGNATURE = "Signature"
 
 
-# fragment column names passed to `merge_precursor_fragment_df`
-DIANN_PARQUET_FRAG_HEADS = {
-    "frag_type_head": DiannParquetCols.FRAGMENT_TYPE,
-    "frag_mass_head": DiannParquetCols.PRODUCT_MZ,
-    "frag_inten_head": DiannParquetCols.RELATIVE_INTENSITY,
-    "frag_charge_head": DiannParquetCols.FRAGMENT_CHARGE,
-    "frag_series_head": DiannParquetCols.FRAGMENT_SERIES_NUMBER,
-    "frag_loss_head": DiannParquetCols.FRAGMENT_LOSS_TYPE,
-}
+# fragment column names given to `explode_top_fragments`
+DIANN_FRAGMENT_COLUMNS = FragmentColumns(
+    frag_type=DiannParquetCols.FRAGMENT_TYPE,
+    mz=DiannParquetCols.PRODUCT_MZ,
+    intensity=DiannParquetCols.RELATIVE_INTENSITY,
+    charge=DiannParquetCols.FRAGMENT_CHARGE,
+    series_number=DiannParquetCols.FRAGMENT_SERIES_NUMBER,
+    loss_type=DiannParquetCols.FRAGMENT_LOSS_TYPE,
+)
 
 # dtype tokens for DIANN_PARQUET_SCHEMA (INT64 / FLOAT=float32 / str)
 DIANN_DTYPE_INT = "int"
@@ -127,7 +129,7 @@ PROTEIN_GROUP_COLUMNS = (PsmDfCols.PROTEINS, PsmDfCols.UNIPROT_IDS)
 PROTEIN_IDS_COLUMNS = (PsmDfCols.UNIPROT_IDS, PsmDfCols.PROTEINS)
 
 
-def speclib_to_diann_df(  # noqa: PLR0913, PLR0915
+def speclib_to_diann_df(  # noqa: PLR0913
     speclib: SpecLibBase,
     *,
     translate_mod_dict: Optional[dict] = None,
@@ -183,12 +185,40 @@ def speclib_to_diann_df(  # noqa: PLR0913, PLR0915
         A long-format dataframe in the DIA-NN parquet library schema.
 
     """
+    return _precursors_to_diann_df(
+        speclib.precursor_df,
+        speclib.fragment_mz_df,
+        speclib.fragment_intensity_df,
+        translate_mod_dict=translate_mod_dict,
+        fragment_filter=FragmentFilter(
+            keep_k_highest=keep_k_highest_fragments,
+            min_mz=min_frag_mz,
+            max_mz=max_frag_mz,
+            min_intensity=min_frag_intensity,
+            min_nAA=min_frag_nAA,
+        ),
+        modloss=modloss,
+        verbose=verbose,
+    )
+
+
+def _precursors_to_diann_df(  # noqa: PLR0913  the frames and the export settings
+    precursor_df: pd.DataFrame,
+    fragment_mz_df: pd.DataFrame,
+    fragment_intensity_df: pd.DataFrame,
+    *,
+    translate_mod_dict: Optional[dict],
+    fragment_filter: FragmentFilter,
+    modloss: str,
+    verbose: bool,
+) -> pd.DataFrame:
+    """Translate precursors and their fragments into DIA-NN parquet rows.
+
+    The dataframe-level implementation of :func:`speclib_to_diann_df`, so that a batch
+    of precursors can be translated without building a `SpecLibBase` around it.
+    """
     if translate_mod_dict is None:
         translate_mod_dict = mod_to_unimod_dict
-
-    if PsmDfCols.PRECURSOR_MZ not in speclib.precursor_df.columns:
-        speclib.calc_precursor_mz()
-    precursor_df = speclib.precursor_df
 
     df = pd.DataFrame(index=precursor_df.index)
 
@@ -207,7 +237,7 @@ def speclib_to_diann_df(  # noqa: PLR0913, PLR0915
     df[DiannParquetCols.PRECURSOR_ID] = df[DiannParquetCols.MODIFIED_SEQUENCE] + df[
         DiannParquetCols.PRECURSOR_CHARGE
     ].astype(str)
-    df[DiannParquetCols.PRECURSOR_MZ] = precursor_df[PsmDfCols.PRECURSOR_MZ]
+    df[DiannParquetCols.PRECURSOR_MZ] = precursor_mz_series(precursor_df)
 
     rt = first_present_column(precursor_df, RT_COLUMNS)
     if rt is None:
@@ -256,33 +286,17 @@ def speclib_to_diann_df(  # noqa: PLR0913, PLR0915
     df[LibPsmDfCols.FRAG_START_IDX] = precursor_df[LibPsmDfCols.FRAG_START_IDX]
     df[LibPsmDfCols.FRAG_STOP_IDX] = precursor_df[LibPsmDfCols.FRAG_STOP_IDX]
 
-    if min_frag_mz > 0 or max_frag_mz > 0:
-        mask_fragment_intensity_by_mz_(
-            speclib.fragment_mz_df,
-            speclib.fragment_intensity_df,
-            min_frag_mz,
-            max_frag_mz,
-        )
-    if min_frag_nAA > 0:
-        mask_fragment_intensity_by_frag_nAA(
-            speclib.fragment_intensity_df,
-            speclib.precursor_df,
-            max_mask_frag_nAA=min_frag_nAA - 1,
-        )
-
-    df = merge_precursor_fragment_df(
+    df = explode_top_fragments(
         df,
-        speclib.fragment_mz_df,
-        speclib.fragment_intensity_df,
-        top_n_inten=keep_k_highest_fragments,
+        fragment_mz_df,
+        fragment_intensity_df,
+        columns=DIANN_FRAGMENT_COLUMNS,
+        fragment_filter=fragment_filter,
+        modloss_label=modloss,
         verbose=verbose,
-        **DIANN_PARQUET_FRAG_HEADS,
     )
-    df = df[df[DiannParquetCols.RELATIVE_INTENSITY] > min_frag_intensity]
-    df.loc[
-        df[DiannParquetCols.FRAGMENT_LOSS_TYPE] == "modloss",
-        DiannParquetCols.FRAGMENT_LOSS_TYPE,
-    ] = modloss
+
+    # exploding repeats the precursor's index, so make it unique before addressing rows
     df = df.reset_index(drop=True)
 
     # Flags: base bit on all fragments, base-peak bit on each precursor's most intense one
@@ -292,8 +306,6 @@ def speclib_to_diann_df(  # noqa: PLR0913, PLR0915
             DiannParquetCols.RELATIVE_INTENSITY
         ].idxmax()
         df.loc[base_peak_idx, DiannParquetCols.FLAGS] |= _DIANN_FLAG_FIRST_FRAGMENT
-
-    df = df.drop([LibPsmDfCols.FRAG_START_IDX, LibPsmDfCols.FRAG_STOP_IDX], axis=1)
 
     for name, dtype in DIANN_PARQUET_SCHEMA:
         if dtype == "str":
@@ -364,46 +376,35 @@ def translate_to_parquet(  # noqa: PLR0913
         [(name, arrow_type[dtype]()) for name, dtype in DIANN_PARQUET_SCHEMA]
     )
 
-    if min_frag_mz > 0 or max_frag_mz > 0:
-        mask_fragment_intensity_by_mz_(
-            speclib.fragment_mz_df,
-            speclib.fragment_intensity_df,
-            min_frag_mz,
-            max_frag_mz,
-        )
-    if min_frag_nAA > 0:
-        mask_fragment_intensity_by_frag_nAA(
-            speclib.fragment_intensity_df,
-            speclib.precursor_df,
-            max_mask_frag_nAA=min_frag_nAA - 1,
-        )
-
-    # process precursors in batches: the flat (one row per fragment) format is much larger
-    # than the compact library, so batching keeps peak memory bounded for large libraries.
-    # SpecLibBase has no public setters for the fragment frames, and its precursor_df setter
-    # would refine/reorder the batch, so the private frames are assigned directly here.
-    batch_speclib = SpecLibBase()
-    batch_speclib._fragment_intensity_df = speclib.fragment_intensity_df  # noqa: SLF001
-    batch_speclib._fragment_mz_df = speclib.fragment_mz_df  # noqa: SLF001
-    precursor_df = speclib.precursor_df
+    convert = functools.partial(
+        _precursors_to_diann_df,
+        translate_mod_dict=translate_mod_dict,
+        fragment_filter=FragmentFilter(
+            keep_k_highest=keep_k_highest_fragments,
+            min_mz=min_frag_mz,
+            max_mz=max_frag_mz,
+            min_intensity=min_frag_intensity,
+            min_nAA=min_frag_nAA,
+        ),
+        modloss="H3PO4",
+        verbose=False,
+    )
 
     writer = pq.ParquetWriter(parquet_path, schema)
+
+    def write(df: pd.DataFrame, _batch_start: int) -> None:
+        writer.write_table(
+            pa.Table.from_pandas(df, schema=schema, preserve_index=False)
+        )
+
     try:
-        for i in tqdm.tqdm(range(0, len(precursor_df), batch_size)):
-            # Only the precursors are batched: frag_start_idx/frag_stop_idx are absolute offsets into
-            # the full fragment frames, so those stay whole for the lookup to stay in sync.
-            batch_speclib._precursor_df = precursor_df.iloc[i : i + batch_size]  # noqa: SLF001
-            df = speclib_to_diann_df(
-                batch_speclib,
-                translate_mod_dict=translate_mod_dict,
-                keep_k_highest_fragments=keep_k_highest_fragments,
-                min_frag_mz=0,
-                max_frag_mz=0,
-                min_frag_intensity=min_frag_intensity,
-                min_frag_nAA=0,
-                verbose=False,
-            )
-            table = pa.Table.from_pandas(df, schema=schema, preserve_index=False)
-            writer.write_table(table)
+        translate_in_batches(
+            speclib.precursor_df,
+            speclib.fragment_mz_df,
+            speclib.fragment_intensity_df,
+            convert,
+            write,
+            batch_size=batch_size,
+        )
     finally:
         writer.close()

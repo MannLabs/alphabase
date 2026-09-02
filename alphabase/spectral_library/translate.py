@@ -9,71 +9,67 @@ and DIA-NN's legacy tsv reader accept, and which
 Shared export helpers live in :mod:`alphabase.spectral_library.translate_core`.
 """
 
+import functools
 import multiprocessing as mp
+from typing import IO, Optional, Union
 
 import pandas as pd
-import tqdm
 
 from alphabase.spectral_library.base import SpecLibBase
 from alphabase.spectral_library.translate_core import (
     CCS_COLUMNS,
     MOBILITY_COLUMNS,
     RT_COLUMNS,
+    FragmentColumns,
+    FragmentFilter,
     create_modified_sequence,
+    explode_top_fragments,
     first_present_column,
     is_nterm_frag,  # noqa: F401  re-exported for backwards compatibility
-    mask_fragment_intensity_by_frag_nAA,
-    mask_fragment_intensity_by_mz_,
-    merge_precursor_fragment_df,
+    mask_fragment_intensity_by_frag_nAA,  # noqa: F401  re-exported, no longer used here
+    mask_fragment_intensity_by_mz_,  # noqa: F401  re-exported, no longer used here
     mod_to_unimod_dict,  # noqa: F401  re-exported for backwards compatibility
+    precursor_mz_series,
+    translate_in_batches,
 )
 
 # precursor columns of the transition list that map to more than one alphabase column
 PROTEIN_ID_COLUMNS = ("uniprot_ids", "proteins")
 
+SWATH_FRAGMENT_COLUMNS = FragmentColumns(
+    frag_type="FragmentType",
+    mz="FragmentMz",
+    intensity="RelativeIntensity",
+    charge="FragmentCharge",
+    series_number="FragmentNumber",
+    loss_type="FragmentLossType",
+)
 
-def speclib_to_single_df(
-    speclib: SpecLibBase,
+# `line_terminator` was renamed to `lineterminator` in pandas 1.5
+_TO_CSV_NEWLINE = (
+    {"lineterminator": "\n"}
+    if tuple(int(i) for i in pd.__version__.split(".")[:2]) >= (1, 5)
+    else {"line_terminator": "\n"}
+)
+
+
+def _precursors_to_swath_df(
+    precursor_df: pd.DataFrame,
+    fragment_mz_df: pd.DataFrame,
+    fragment_intensity_df: pd.DataFrame,
     *,
-    translate_mod_dict: dict = None,
-    keep_k_highest_fragments: int = 12,
-    min_frag_mz=200,
-    max_frag_mz=2000,
-    min_frag_intensity=0.01,
-    min_frag_nAA=0,
-    modloss: str = "H3PO4",
-    frag_type_head: str = "FragmentType",
-    frag_mass_head: str = "FragmentMz",
-    frag_inten_head: str = "RelativeIntensity",
-    frag_charge_head: str = "FragmentCharge",
-    frag_loss_head: str = "FragmentLossType",
-    frag_series_head: str = "FragmentNumber",
-    verbose=True,
+    translate_mod_dict: Optional[dict],
+    fragment_filter: FragmentFilter,
+    columns: FragmentColumns,
+    modloss: str,
+    verbose: bool,
 ) -> pd.DataFrame:
+    """Translate precursors and their fragments into transition list rows.
+
+    The dataframe-level implementation of :func:`speclib_to_single_df`, so that a batch
+    of precursors can be translated without building a `SpecLibBase` around it.
     """
-    Convert alphabase library to diann (or Spectronaut) library dataframe
-    This method is not important, as it will be only
-    used by DiaNN, or spectronaut, or others
-
-    Parameters
-    ----------
-    translate_mod_dict : dict
-        A dict to map AlphaX modification names to other software,
-        use unimod name if None.
-        Defaults to None.
-
-    keep_k_highest_peaks : int
-        only keep highest fragments for each precursor. Default: 12
-
-    Returns
-    -------
-    pd.DataFrame
-        a single dataframe in the SWATH-like format
-
-    """
-    precursor_df = speclib.precursor_df
-
-    df = pd.DataFrame()
+    df = pd.DataFrame(index=precursor_df.index)
     df["ModifiedPeptide"] = precursor_df[["sequence", "mods", "mod_sites"]].apply(
         create_modified_sequence,
         axis=1,
@@ -101,10 +97,7 @@ def speclib_to_single_df(
 
     # df['LabelModifiedSequence'] = df['ModifiedPeptide']
     df["StrippedPeptide"] = precursor_df["sequence"]
-
-    if "precursor_mz" not in precursor_df.columns:
-        speclib.calc_precursor_mz()
-    df["PrecursorMz"] = speclib.precursor_df["precursor_mz"]
+    df["PrecursorMz"] = precursor_mz_series(precursor_df)
 
     protein_id = first_present_column(precursor_df, PROTEIN_ID_COLUMNS)
     if protein_id is not None:
@@ -118,50 +111,109 @@ def speclib_to_single_df(
     if decoy is not None:
         df["Decoy"] = decoy
 
-    # if 'protein_group' in speclib._precursor_df.columns:
-    #     df['ProteinGroups'] = speclib._precursor_df['protein_group']
-
-    if min_frag_mz > 0 or max_frag_mz > 0:
-        mask_fragment_intensity_by_mz_(
-            speclib._fragment_mz_df,
-            speclib._fragment_intensity_df,
-            min_frag_mz,
-            max_frag_mz,
-        )
-
-    if min_frag_nAA > 0:
-        mask_fragment_intensity_by_frag_nAA(
-            speclib._fragment_intensity_df,
-            speclib._precursor_df,
-            max_mask_frag_nAA=min_frag_nAA - 1,
-        )
-
-    df = merge_precursor_fragment_df(
+    return explode_top_fragments(
         df,
-        speclib._fragment_mz_df,
-        speclib._fragment_intensity_df,
-        top_n_inten=keep_k_highest_fragments,
-        frag_type_head=frag_type_head,
-        frag_mass_head=frag_mass_head,
-        frag_inten_head=frag_inten_head,
-        frag_charge_head=frag_charge_head,
-        frag_loss_head=frag_loss_head,
-        frag_series_head=frag_series_head,
+        fragment_mz_df,
+        fragment_intensity_df,
+        columns=columns,
+        fragment_filter=fragment_filter,
+        modloss_label=modloss,
         verbose=verbose,
     )
-    df = df[df["RelativeIntensity"] > min_frag_intensity]
-    df.loc[df[frag_loss_head] == "modloss", frag_loss_head] = modloss
 
-    return df.drop(["frag_start_idx", "frag_stop_idx"], axis=1)
+
+def speclib_to_single_df(  # noqa: PLR0913  one argument per output column
+    speclib: SpecLibBase,
+    *,
+    translate_mod_dict: Optional[dict] = None,
+    keep_k_highest_fragments: int = 12,
+    min_frag_mz: float = 200,
+    max_frag_mz: float = 2000,
+    min_frag_intensity: float = 0.01,
+    min_frag_nAA: int = 0,  # noqa: N803  public name
+    modloss: str = "H3PO4",
+    frag_type_head: str = "FragmentType",
+    frag_mass_head: str = "FragmentMz",
+    frag_inten_head: str = "RelativeIntensity",
+    frag_charge_head: str = "FragmentCharge",
+    frag_loss_head: str = "FragmentLossType",
+    frag_series_head: str = "FragmentNumber",
+    verbose: bool = True,
+) -> pd.DataFrame:
+    """Convert an alphabase library into a transition list dataframe.
+
+    The library is not modified.
+
+    Parameters
+    ----------
+    speclib : SpecLibBase
+        The alphabase spectral library to convert.
+
+    translate_mod_dict : dict
+        A dict to map AlphaX modification names to other software,
+        use the alphabase name without its site if None.
+        Defaults to None.
+
+    keep_k_highest_fragments : int
+        only keep highest fragments for each precursor. Default: 12
+
+    min_frag_mz, max_frag_mz : float
+        Fragment m/z range; fragments outside it are dropped. Set both to 0 to disable.
+
+    min_frag_intensity : float
+        Drop fragments whose relative intensity is at or below this value.
+
+    min_frag_nAA : int
+        Drop the b/y fragments with a series number below this; 0 keeps all.
+
+    modloss : str
+        Loss label written for modification-loss fragments. Default: "H3PO4"
+
+    frag_type_head, frag_mass_head, frag_inten_head, frag_charge_head, frag_loss_head,
+    frag_series_head : str
+        Names to give the fragment columns of the result.
+
+    verbose : bool
+        Show a progress bar while exploding fragments.
+
+    Returns
+    -------
+    pd.DataFrame
+        a single dataframe in the SWATH-like format
+
+    """
+    return _precursors_to_swath_df(
+        speclib.precursor_df,
+        speclib.fragment_mz_df,
+        speclib.fragment_intensity_df,
+        translate_mod_dict=translate_mod_dict,
+        fragment_filter=FragmentFilter(
+            keep_k_highest=keep_k_highest_fragments,
+            min_mz=min_frag_mz,
+            max_mz=max_frag_mz,
+            min_intensity=min_frag_intensity,
+            min_nAA=min_frag_nAA,
+        ),
+        columns=FragmentColumns(
+            frag_type=frag_type_head,
+            mz=frag_mass_head,
+            intensity=frag_inten_head,
+            charge=frag_charge_head,
+            series_number=frag_series_head,
+            loss_type=frag_loss_head,
+        ),
+        modloss=modloss,
+        verbose=verbose,
+    )
 
 
 def speclib_to_swath_df(
     speclib: SpecLibBase,
     *,
     keep_k_highest_fragments: int = 12,
-    min_frag_mz=200,
-    max_frag_mz=2000,
-    min_frag_intensity=0.01,
+    min_frag_mz: float = 200,
+    max_frag_mz: float = 2000,
+    min_frag_intensity: float = 0.01,
 ) -> pd.DataFrame:
     speclib_to_single_df(
         speclib,
@@ -173,97 +225,130 @@ def speclib_to_swath_df(
     )
 
 
+def _write_tsv(tsv: Union[str, IO], df: pd.DataFrame, batch_start: int) -> None:
+    """Append a batch to the tsv, with a header only for the first batch."""
+    df.to_csv(
+        tsv,
+        header=(batch_start == 0),
+        sep="\t",
+        mode="a",
+        index=False,
+        **_TO_CSV_NEWLINE,
+    )
+
+
 class WritingProcess(mp.Process):
-    def __init__(self, task_queue, tsv, *args, **kwargs):
+    """Writes the translated batches it is given to a tsv, off the translating process."""
+
+    def __init__(self, task_queue: mp.Queue, tsv: Union[str, IO], *args, **kwargs):
         self.task_queue: mp.Queue = task_queue
         self.tsv = tsv
         super().__init__(*args, **kwargs)
 
-    def run(self):
+    def run(self) -> None:
+        """Write batches until the queue gives a None, which ends the process."""
         while True:
             df, batch = self.task_queue.get()
             if df is None:
                 break
-            if tuple([int(i) for i in pd.__version__.split(".")[:2]]) >= (1, 5):
-                newline = dict(lineterminator="\n")
-            else:
-                newline = dict(line_terminator="\n")
-            df.to_csv(
-                self.tsv,
-                header=(batch == 0),
-                sep="\t",
-                mode="a",
-                index=False,
-                **newline,
-            )
+            _write_tsv(self.tsv, df, batch)
 
 
-def translate_to_tsv(
+def translate_to_tsv(  # noqa: PLR0913  one argument per export setting
     speclib: SpecLibBase,
-    tsv: str,
+    tsv: Union[str, IO],
     *,
     keep_k_highest_fragments: int = 12,
     min_frag_mz: float = 200,
     max_frag_mz: float = 2000,
     min_frag_intensity: float = 0.01,
-    min_frag_nAA: int = 0,
+    min_frag_nAA: int = 0,  # noqa: N803  public name
     batch_size: int = 100000,
-    translate_mod_dict: dict = None,
-    multiprocessing: bool = True,
-):
-    if multiprocessing:
-        queue_size = 1000000 // batch_size
-        if queue_size < 2:
-            queue_size = 2
-        elif queue_size > 10:
-            queue_size = 10
-        df_head_queue = mp.Queue(maxsize=queue_size)
-        writing_process = WritingProcess(df_head_queue, tsv)
-        writing_process.start()
-    mask_fragment_intensity_by_mz_(
-        speclib._fragment_mz_df,
-        speclib._fragment_intensity_df,
-        min_frag_mz,
-        max_frag_mz,
+    translate_mod_dict: Optional[dict] = None,
+    multiprocessing: bool = True,  # noqa: FBT001, FBT002  public name
+) -> None:
+    """Translate an alphabase library into a transition list tsv.
+
+    Precursors are converted in batches and streamed to one file, so a large library
+    does not need to be held in the flat format all at once. The library is not
+    modified.
+
+    Parameters
+    ----------
+    speclib : SpecLibBase
+        The alphabase spectral library to translate.
+
+    tsv : str or file object
+        Path of the tsv to write, or an open file to write to.
+
+    keep_k_highest_fragments : int
+        Keep only the k most intense fragments per precursor. Default: 12
+
+    min_frag_mz, max_frag_mz : float
+        Fragment m/z range; fragments outside it are dropped. Set both to 0 to disable.
+
+    min_frag_intensity : float
+        Drop fragments whose relative intensity is at or below this value.
+
+    min_frag_nAA : int
+        Drop the b/y fragments with a series number below this; 0 keeps all.
+
+    batch_size : int
+        Number of precursors to convert per batch. Default: 100000
+
+    translate_mod_dict : dict
+        A dict to map AlphaX modification names to other software.
+        Defaults to None, which uses the alphabase names without their sites.
+
+    multiprocessing : bool
+        Write from a separate process, so writing overlaps with translating. Needs
+        `tsv` to be a path.
+
+    """
+    convert = functools.partial(
+        _precursors_to_swath_df,
+        translate_mod_dict=translate_mod_dict,
+        fragment_filter=FragmentFilter(
+            keep_k_highest=keep_k_highest_fragments,
+            min_mz=min_frag_mz,
+            max_mz=max_frag_mz,
+            min_intensity=min_frag_intensity,
+            min_nAA=min_frag_nAA,
+        ),
+        columns=SWATH_FRAGMENT_COLUMNS,
+        modloss="H3PO4",
+        verbose=False,
     )
-    if min_frag_nAA > 0:
-        mask_fragment_intensity_by_frag_nAA(
-            speclib._fragment_intensity_df,
-            speclib._precursor_df,
-            max_mask_frag_nAA=min_frag_nAA - 1,
-        )
+
     if isinstance(tsv, str):
         with open(tsv, "w"):
             pass
-    # process precursors in batches: the flat (one row per fragment) format is much larger
-    # than the compact library, so batching keeps peak memory bounded for large libraries
-    batch_speclib = SpecLibBase()
-    batch_speclib._fragment_intensity_df = speclib._fragment_intensity_df
-    batch_speclib._fragment_mz_df = speclib._fragment_mz_df
-    precursor_df = speclib._precursor_df
-    for i in tqdm.tqdm(range(0, len(precursor_df), batch_size)):
-        batch_speclib._precursor_df = precursor_df.iloc[i : i + batch_size]
-        df = speclib_to_single_df(
-            batch_speclib,
-            translate_mod_dict=translate_mod_dict,
-            keep_k_highest_fragments=keep_k_highest_fragments,
-            min_frag_mz=0,
-            max_frag_mz=0,
-            min_frag_intensity=min_frag_intensity,
-            min_frag_nAA=0,
-            verbose=False,
-        )
-        if multiprocessing:
-            df_head_queue.put((df, i))
-        else:
-            if tuple([int(i) for i in pd.__version__.split(".")[:2]]) >= (1, 5):
-                newline = dict(lineterminator="\n")
-            else:
-                newline = dict(line_terminator="\n")
-            df.to_csv(tsv, header=(i == 0), sep="\t", mode="a", index=False, **newline)
+
+    writing_process = None
     if multiprocessing:
-        df_head_queue.put((None, None))
-        print(
-            "Translation finished, it will take several minutes to export the rest precursors to the tsv file..."
+        queue_size = min(max(1000000 // batch_size, 2), 10)
+        df_head_queue = mp.Queue(maxsize=queue_size)
+        writing_process = WritingProcess(df_head_queue, tsv)
+        writing_process.start()
+
+        def write(df: pd.DataFrame, batch_start: int) -> None:
+            df_head_queue.put((df, batch_start))
+    else:
+        write = functools.partial(_write_tsv, tsv)
+
+    try:
+        translate_in_batches(
+            speclib.precursor_df,
+            speclib.fragment_mz_df,
+            speclib.fragment_intensity_df,
+            convert,
+            write,
+            batch_size=batch_size,
         )
-        writing_process.join()
+    finally:
+        if writing_process is not None:
+            df_head_queue.put((None, None))
+            print(  # noqa: T201  kept from the original
+                "Translation finished, it will take several minutes to export the rest precursors to the tsv file..."
+            )
+            writing_process.join()
