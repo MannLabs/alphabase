@@ -7,6 +7,7 @@ working.
 """
 
 import multiprocessing as mp
+import warnings
 
 import pandas as pd
 import tqdm
@@ -44,8 +45,8 @@ __all__ = [
     "get_precursor_mz",
     # this module's own
     "WritingProcess",
-    "speclib_to_single_df",
     "speclib_to_swath_df",
+    "speclib_to_single_df",
     "translate_to_tsv",
 ]
 
@@ -73,7 +74,7 @@ def _precursors_to_swath_df(  # noqa: PLR0913
 ) -> pd.DataFrame:
     """Convert precursor and fragment frames to a SWATH transition list.
 
-    The dataframe-in form of :func:`speclib_to_single_df`, so that one batch of
+    The dataframe-in form of :func:`speclib_to_swath_df`, so that one batch of
     precursors can be converted without standing up a `SpecLibBase` around it.
     """
     df = pd.DataFrame()
@@ -133,7 +134,7 @@ def _precursors_to_swath_df(  # noqa: PLR0913
     return df
 
 
-def speclib_to_single_df(
+def speclib_to_swath_df(
     speclib: SpecLibBase,
     *,
     translate_mod_dict: dict = None,
@@ -145,10 +146,7 @@ def speclib_to_single_df(
     modloss: str = "H3PO4",
     verbose=True,
 ) -> pd.DataFrame:
-    """
-    Convert alphabase library to diann (or Spectronaut) library dataframe
-    This method is not important, as it will be only
-    used by DiaNN, or spectronaut, or others
+    """Convert an alphabase library to a SWATH/Spectronaut transition-list dataframe.
 
     Parameters
     ----------
@@ -167,7 +165,7 @@ def speclib_to_single_df(
     Returns
     -------
     pd.DataFrame
-        a single dataframe in the SWATH-like format
+        One row per precursor/fragment pair, in SWATH column names.
 
     """
     return _precursors_to_swath_df(
@@ -185,22 +183,15 @@ def speclib_to_single_df(
     )
 
 
-def speclib_to_swath_df(
-    speclib: SpecLibBase,
-    *,
-    keep_k_highest_fragments: int = 12,
-    min_frag_mz=200,
-    max_frag_mz=2000,
-    min_frag_intensity=0.01,
-) -> pd.DataFrame:
-    speclib_to_single_df(
-        speclib,
-        translate_mod_dict=None,
-        keep_k_highest_fragments=keep_k_highest_fragments,
-        min_frag_mz=min_frag_mz,
-        max_frag_mz=max_frag_mz,
-        min_frag_intensity=min_frag_intensity,
+def speclib_to_single_df(speclib: SpecLibBase, **kwargs) -> pd.DataFrame:
+    """Deprecated alias of :func:`speclib_to_swath_df`."""
+    warnings.warn(
+        "speclib_to_single_df is deprecated; use speclib_to_swath_df, which names the "
+        "format it produces.",
+        FutureWarning,
+        stacklevel=2,
     )
+    return speclib_to_swath_df(speclib, **kwargs)
 
 
 class WritingProcess(mp.Process):
@@ -248,7 +239,7 @@ def translate_to_tsv(
         Fragment m/z range; fragments outside it are dropped. Pass 0 for no lower bound
         and `np.inf` for no upper bound.
 
-    See :func:`speclib_to_single_df`, whose parameters this shares, for the rest.
+    See :func:`speclib_to_swath_df`, whose parameters this shares, for the rest.
     """
     if multiprocessing:
         queue_size = 1000000 // batch_size
@@ -295,3 +286,11 @@ def translate_to_tsv(
             "Translation finished, it will take several minutes to export the rest precursors to the tsv file..."
         )
         writing_process.join()
+        if writing_process.exitcode:
+            raise RuntimeError(
+                f"the process writing {tsv} exited with code "
+                f"{writing_process.exitcode}, so the file is incomplete; its traceback "
+                'is above. A script with no `if __name__ == "__main__":` guard is the '
+                "usual cause on macOS and Windows. Pass multiprocessing=False to write "
+                "from this process instead."
+            )

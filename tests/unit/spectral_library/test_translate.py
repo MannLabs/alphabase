@@ -2,15 +2,6 @@
 
 These tests pin the behaviour of `alphabase.spectral_library.translate` as it is
 today, so that the upcoming restructuring can be shown to change nothing.
-
-Two tests still pin *buggy* behaviour that a later commit fixes. Each carries a
-`CHARACTERIZATION (bug)` note in its docstring:
-
-1. `rt_norm_pred` is not accepted as a retention time column
-2. the exploded fragment columns are object dtype, with a string `FragmentCharge`
-
-One more, `test_speclib_to_swath_df_returns_none`, pins a function that a later
-commit removes rather than fixes.
 """
 
 import hashlib
@@ -20,6 +11,7 @@ import pandas as pd
 import pytest
 
 from alphabase.peptide.fragment import get_charged_frag_types
+from alphabase.spectral_library import translate
 from alphabase.spectral_library.base import SpecLibBase
 from alphabase.spectral_library.reader import LibraryReaderBase
 from alphabase.spectral_library.translate import (
@@ -100,7 +92,7 @@ def _build_speclib(**extra_columns) -> SpecLibBase:
 
 def _export(speclib: SpecLibBase, **kwargs) -> pd.DataFrame:
     """Run the in-memory export with the progress bar off."""
-    return speclib_to_single_df(speclib, verbose=False, **kwargs)
+    return speclib_to_swath_df(speclib, verbose=False, **kwargs)
 
 
 def _unfiltered(speclib: SpecLibBase, **kwargs) -> pd.DataFrame:
@@ -169,15 +161,16 @@ def test_modified_sequence_uses_translate_mod_dict() -> None:
 @pytest.mark.parametrize(
     ("present", "expected"),
     [
-        (["irt_pred", "rt_pred", "rt", "irt", "rt_norm"], "irt_pred"),
-        (["rt_pred", "rt", "irt", "rt_norm"], "rt_pred"),
+        (["irt_pred", "rt_pred", "rt_norm_pred", "rt", "irt", "rt_norm"], "irt_pred"),
+        (["rt_pred", "rt_norm_pred", "rt", "irt", "rt_norm"], "rt_pred"),
+        (["rt_norm_pred", "rt", "irt", "rt_norm"], "rt_norm_pred"),
         (["rt", "irt", "rt_norm"], "rt"),
         (["irt", "rt_norm"], "irt"),
         (["rt_norm"], "rt_norm"),
     ],
 )
 def test_rt_column_precedence(present: list, expected: str) -> None:
-    """RT is taken from the first present of irt_pred, rt_pred, rt, irt, rt_norm."""
+    """RT comes from the first present candidate, predictions before measurements."""
     speclib = _build_speclib()
     # give each candidate column a distinct value, so `RT` identifies its source
     values = {name: float(i + 1) for i, name in enumerate(present)}
@@ -188,16 +181,24 @@ def test_rt_column_precedence(present: list, expected: str) -> None:
     assert _export(speclib)["RT"].unique().tolist() == [values[expected]]
 
 
-def test_rt_norm_pred_is_not_accepted() -> None:
-    """CHARACTERIZATION (bug): `rt_norm_pred` is not a recognised RT column.
+def test_rt_norm_pred_is_accepted() -> None:
+    """A library carrying only `rt_norm_pred` exports, rather than being rejected.
 
-    peptdeep writes it alongside `rt_pred`, so a library carrying only
-    `rt_norm_pred` is rejected. A later commit adds it to the candidates.
+    peptdeep writes `rt_norm_pred` alongside `rt_pred`, so this matters for a
+    library whose `rt_pred` was dropped.
     """
     speclib = _build_speclib()
     speclib._precursor_df = speclib._precursor_df.rename(
         columns={"rt_pred": "rt_norm_pred"}
     )
+
+    assert _export(speclib)["RT"].notna().all()
+
+
+def test_export_without_any_rt_column_is_rejected() -> None:
+    """A library with no retention time at all is still an error."""
+    speclib = _build_speclib()
+    speclib._precursor_df = speclib._precursor_df.drop(columns=["rt_pred"])
 
     with pytest.raises(ValueError, match="must contain the RT columns"):
         _export(speclib)
@@ -370,42 +371,34 @@ def test_disabled_mz_window_skips_empty_fragment_slots() -> None:
     assert with_loss <= {"SVIVSPYSTGAK", "LHDSTPPPYK"}
 
 
-def test_exploded_fragment_columns_are_object_dtype() -> None:
-    """CHARACTERIZATION (bug): the fragment columns are objects, not numbers.
+def test_fragment_columns_are_typed() -> None:
+    """The fragment columns are numbers, and m/z and intensity keep their own dtype.
 
-    Unlike the DIA-NN export, this one does no dtype casting, so `FragmentMz` and
-    friends are object-dtype, and `FragmentCharge` holds strings -- it is parsed
-    out of the fragment column name and never converted. That costs ~14x the
-    memory of the equivalent typed columns, and makes arithmetic on the charge
-    concatenate rather than add. The cells already hold correctly typed numpy
-    scalars, so a later commit types the columns from their source dtype, leaving
-    the written tsv byte-identical.
+    The fixture builds a float32 m/z frame and a float64 intensity frame, so the
+    two carry through independently rather than being cast to one width.
     """
-    df = _export(_build_speclib())
+    speclib = _build_speclib()
+    df = _export(speclib)
 
-    for column in (
-        "FragmentType",
-        "FragmentMz",
-        "RelativeIntensity",
-        "FragmentCharge",
-        "FragmentNumber",
-        "FragmentLossType",
-    ):
-        assert df[column].dtype == object, column
+    assert df["FragmentMz"].dtype == speclib.fragment_mz_df.to_numpy().dtype
+    assert (
+        df["RelativeIntensity"].dtype == speclib.fragment_intensity_df.to_numpy().dtype
+    )
+    assert df["FragmentCharge"].dtype.kind == "i"
+    assert df["FragmentNumber"].dtype.kind == "i"
+    # the two label columns stay strings
+    assert df["FragmentType"].dtype == object
+    assert df["FragmentLossType"].dtype == object
 
-    assert set(map(type, df["FragmentCharge"])) == {str}
-    assert set(df["FragmentCharge"]) == {"1", "2"}
+    assert set(df["FragmentCharge"]) == {1, 2}
 
 
-def test_speclib_to_swath_df_returns_none() -> None:
-    """CHARACTERIZATION: the wrapper discards its result, returning None.
+def test_speclib_to_single_df_is_a_deprecated_alias() -> None:
+    """The old name still works, warns, and returns what the new one returns."""
+    with pytest.warns(FutureWarning, match="use speclib_to_swath_df"):
+        aliased = speclib_to_single_df(_build_speclib(), verbose=False)
 
-    It is a parameter subset of `speclib_to_single_df` that has been missing its
-    `return` since 93aa2fa, so it is only ever called for the side effect of
-    editing the library. Pinned as the evidence that removing it later is safe:
-    nothing can depend on a function that has only ever returned None.
-    """
-    assert speclib_to_swath_df(_build_speclib()) is None
+    pd.testing.assert_frame_equal(aliased, _export(_build_speclib()))
 
 
 def test_translate_to_tsv_matches_the_in_memory_export(tmp_path) -> None:
@@ -421,8 +414,6 @@ def test_translate_to_tsv_matches_the_in_memory_export(tmp_path) -> None:
     assert len(lines) == len(expected) + 1
     written = pd.read_csv(tsv, sep="\t")
     assert list(written.columns) == list(expected.columns)
-    numeric = ["FragmentMz", "RelativeIntensity", "FragmentCharge", "FragmentNumber"]
-    expected[numeric] = expected[numeric].apply(pd.to_numeric)
     pd.testing.assert_frame_equal(
         written.reset_index(drop=True),
         expected.reset_index(drop=True),
@@ -464,7 +455,7 @@ def test_translate_to_tsv_disabled_mz_window_matches_the_in_memory_export(
     `translate_to_tsv` used to mask by m/z without checking whether the window
     was disabled, so 0/0 -- the documented way to turn the filter off -- zeroed
     every real fragment and wrote a file of nothing but empty slots, while
-    `speclib_to_single_df` given the same arguments kept the real ones.
+    `speclib_to_swath_df` given the same arguments kept the real ones.
     """
     tsv = str(tmp_path / "lib.tsv")
     translate_to_tsv(
@@ -481,8 +472,6 @@ def test_translate_to_tsv_disabled_mz_window_matches_the_in_memory_export(
     assert (written["FragmentMz"] > 0).all()
 
     expected = _unfiltered(_build_speclib())
-    numeric = ["FragmentMz", "RelativeIntensity", "FragmentCharge", "FragmentNumber"]
-    expected[numeric] = expected[numeric].apply(pd.to_numeric)
     pd.testing.assert_frame_equal(
         written.reset_index(drop=True),
         expected.reset_index(drop=True),
@@ -513,3 +502,35 @@ def test_translate_to_tsv_writes_a_readable_library(tmp_path) -> None:
         return set(zip(df["sequence"], df["mod_sites"], df["charge"].astype(int)))
 
     assert keys(reader.precursor_df) == keys(speclib.precursor_df)
+
+
+class _DeadWriter:
+    """Stands in for a `WritingProcess` whose child died without writing."""
+
+    exitcode = 1
+
+    def __init__(self, task_queue, tsv) -> None:
+        pass
+
+    def start(self) -> None:
+        pass
+
+    def join(self) -> None:
+        pass
+
+
+def test_translate_to_tsv_raises_when_the_writing_process_dies(
+    tmp_path, monkeypatch
+) -> None:
+    """A writer that died is an error, not a quietly truncated file.
+
+    `multiprocessing=True` is the default, and the writer process dies before it
+    writes anything if the calling script has no `if __name__ == "__main__":`
+    guard -- the norm on the spawn platforms, macOS and Windows. Nothing checked
+    on it, so the export printed its success message and returned normally,
+    leaving a 0-byte tsv behind.
+    """
+    monkeypatch.setattr(translate, "WritingProcess", _DeadWriter)
+
+    with pytest.raises(RuntimeError, match="exited with code 1"):
+        translate_to_tsv(_build_speclib(), str(tmp_path / "lib.tsv"))
