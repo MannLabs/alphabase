@@ -10,6 +10,7 @@ Before this module, they lived in ``translate.py``, which made the SWATH format 
 facto shared library: ``translate_diann`` imported five helpers from it.
 """
 
+import warnings
 from typing import Optional, Union
 
 import numpy as np
@@ -18,6 +19,7 @@ import tqdm
 
 from alphabase.constants.modification import MOD_DF, ModificationKeys
 from alphabase.numba_wrapper import numba_njit
+from alphabase.peptide.precursor import update_precursor_mz
 from alphabase.psm_reader.keys import ConstantsClass, PsmDfCols
 from alphabase.utils import explode_multiple_columns
 
@@ -65,6 +67,19 @@ FRAGMENT_VALUE_COLUMNS = [
     FragmentTableCols.SERIES_NUMBER,
     FragmentTableCols.LOSS_TYPE,
 ]
+
+
+def get_precursor_mz(precursor_df: pd.DataFrame) -> pd.Series:
+    """Return the precursors' m/z, leaving `precursor_df` alone.
+
+    The read-only counterpart of
+    :func:`alphabase.peptide.precursor.update_precursor_mz`, which writes its result
+    into the frame it is handed -- so an export that called it left a `precursor_mz`
+    column behind on the caller's library.
+    """
+    if PsmDfCols.PRECURSOR_MZ in precursor_df.columns:
+        return precursor_df[PsmDfCols.PRECURSOR_MZ]
+    return update_precursor_mz(precursor_df.copy())[PsmDfCols.PRECURSOR_MZ]
 
 
 def first_present_column(
@@ -207,11 +222,21 @@ def fragment_table(  # noqa: PLR0913
     fragment_intensity_df: pd.DataFrame,
     *,
     keep_k_highest: int,
+    min_frag_mz: float = 0,
+    max_frag_mz: float = np.inf,
+    min_frag_nAA: int = 0,  # noqa: N803
     verbose: bool = True,
 ) -> pd.DataFrame:
     """Flatten each precursor's most intense fragments into one row per fragment.
 
-    Intensities are normalized to the precursor's most intense fragment, and the
+    Filtering, normalization and selection all happen on a per-precursor copy, so the
+    library's fragment frames are left exactly as they were. Fragments outside the m/z
+    window are dropped rather than zeroed, as are empty fragment slots -- a `*_modloss`
+    column of a precursor whose modification has no loss carries m/z 0, and selecting it
+    would export a fragment that does not exist. An unbounded window is expressed by the
+    bounds themselves, `0` and `np.inf`, so no combination of them is a special case.
+
+    Intensities are normalized to the precursor's most intense kept fragment, and the
     `keep_k_highest` highest are kept in descending order. The result carries the
     canonical columns of :class:`FragmentTableCols`, including `precursor_row` -- the
     positional row of the precursor -- so it needs no precursor frame to be built and
@@ -232,6 +257,16 @@ def fragment_table(  # noqa: PLR0913
     keep_k_highest : int
         Keep this many fragments per precursor.
 
+    min_frag_mz : float
+        Drop fragments below this m/z. 0 for no lower bound, as m/z is positive.
+
+    max_frag_mz : float
+        Drop fragments above this m/z. `np.inf` for no upper bound.
+
+    min_frag_nAA : int
+        Drop the smallest `min_frag_nAA - 1` fragments of each series; 0 disables. The
+        off-by-one is the existing meaning of the export parameter of the same name.
+
     verbose : bool
         Show a progress bar over the precursors.
 
@@ -242,6 +277,18 @@ def fragment_table(  # noqa: PLR0913
 
     """
     frag_columns = fragment_mz_df.columns.to_numpy().astype("U")
+    is_nterm = np.array([is_nterm_frag(column) for column in frag_columns])
+    n_masked_per_terminus = max(min_frag_nAA - 1, 0)
+
+    if min_frag_mz == 0 and max_frag_mz == 0:
+        warnings.warn(
+            "Disabling the fragment m/z window with min_frag_mz=0, max_frag_mz=0 is "
+            "deprecated; pass max_frag_mz=np.inf instead. min_frag_mz=0 already means "
+            "no lower bound, as m/z is positive.",
+            FutureWarning,
+        )
+        max_frag_mz = np.inf
+
     frag_types = []
     frag_losses = []
     frag_charges = []
@@ -252,21 +299,34 @@ def fragment_table(  # noqa: PLR0913
     if verbose:
         iters = tqdm.tqdm(iters)
     for start, end in iters:
+        masses = fragment_mz_df.iloc[start:end, :].to_numpy()
+        keep = (masses > 0) & (masses >= min_frag_mz) & (masses <= max_frag_mz)
+        if n_masked_per_terminus:
+            # b numbers count from the first row, y numbers from the last, so the
+            # smallest of each series sit at opposite ends of the block. `max(..., 0)`
+            # because a negative slice start wraps rather than clamping.
+            keep[:n_masked_per_terminus, is_nterm] = False
+            keep[max(len(keep) - n_masked_per_terminus, 0) :, ~is_nterm] = False
+
+        # `copy=True`, so normalizing and zeroing below cannot reach the library
         intens = fragment_intensity_df.iloc[start:end, :].to_numpy(copy=True)
+        intens[~keep] = 0
         max_inten = np.amax(intens)
         if max_inten > 0:
             intens /= max_inten
-        masses = fragment_mz_df.iloc[start:end, :].to_numpy()
+
         sorted_idx = np.argsort(intens.reshape(-1))[-keep_k_highest:][::-1]
+        # a filtered-out slot can still be selected when a precursor has fewer than
+        # `keep_k_highest` fragments left, so drop those rather than export them
+        sorted_idx = sorted_idx[keep.reshape(-1)[sorted_idx]]
         idx_in_df = np.unravel_index(sorted_idx, masses.shape)
 
         frag_len = end - start
         rows = np.arange(frag_len, dtype=np.int32)[idx_in_df[0]]
         columns = frag_columns[idx_in_df[1]]
 
-        types, losses, charges = zip(
-            *[_get_frag_info_from_column_name(_) for _ in columns]
-        )
+        infos = [_get_frag_info_from_column_name(column) for column in columns]
+        types, losses, charges = zip(*infos) if infos else ((), (), ())
         frag_types.append(types)
         frag_losses.append(losses)
         frag_charges.append(charges)
@@ -285,7 +345,9 @@ def fragment_table(  # noqa: PLR0913
             FragmentTableCols.LOSS_TYPE: frag_losses,
         }
     )
-    return explode_multiple_columns(table, FRAGMENT_VALUE_COLUMNS)
+    table = explode_multiple_columns(table, FRAGMENT_VALUE_COLUMNS)
+    # a precursor that kept nothing explodes to one all-NaN row; drop those
+    return table.dropna(subset=[FragmentTableCols.MZ])
 
 
 def join_fragments(
@@ -319,48 +381,3 @@ def join_fragments(
     for canonical, name in columns.items():
         joined[name] = fragment_df[canonical].to_numpy()
     return joined
-
-
-def mask_fragment_intensity_by_mz_(
-    fragment_mz_df: pd.DataFrame,
-    fragment_intensity_df: pd.DataFrame,
-    min_frag_mz: float,
-    max_frag_mz: float,
-) -> None:
-    """Zero the intensity of fragments outside [`min_frag_mz`, `max_frag_mz`], in place.
-
-    Note that this edits the intensity frame it is given, and does not remove any
-    fragment: what drops a fragment from an export is the caller's `min_frag_intensity`
-    filter afterwards.
-    """
-    fragment_intensity_df.mask(
-        (fragment_mz_df > max_frag_mz) | (fragment_mz_df < min_frag_mz), 0, inplace=True
-    )
-
-
-def mask_fragment_intensity_by_frag_nAA(  # noqa: N802
-    fragment_intensity_df: pd.DataFrame,
-    precursor_df: pd.DataFrame,
-    max_mask_frag_nAA: int,  # noqa: N803
-) -> None:
-    """Zero the intensity of the smallest fragments of each precursor, in place.
-
-    The `max_mask_frag_nAA` fragments nearest each terminus are masked: the lowest b
-    numbers from `frag_start_idx` forwards, and the lowest y numbers from
-    `frag_stop_idx` backwards.
-    """
-    if max_mask_frag_nAA <= 0:
-        return
-    b_mask = np.zeros(len(fragment_intensity_df), dtype=np.bool_)
-    y_mask = b_mask.copy()
-    for i_frag in range(max_mask_frag_nAA):
-        b_mask[precursor_df.frag_start_idx.to_numpy() + i_frag] = True
-        y_mask[precursor_df.frag_stop_idx.to_numpy() - i_frag - 1] = True
-
-    masks = np.zeros(
-        (len(fragment_intensity_df), len(fragment_intensity_df.columns)), dtype=np.bool_
-    )
-    for i, col in enumerate(fragment_intensity_df.columns.to_numpy()):
-        masks[:, i] = b_mask if is_nterm_frag(col) else y_mask
-
-    fragment_intensity_df.mask(masks, 0, inplace=True)

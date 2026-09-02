@@ -55,7 +55,11 @@ def test_speclib_to_diann_df_columns_and_mod_format() -> None:
     speclib = _build_speclib()
 
     df = speclib_to_diann_df(
-        speclib, min_frag_mz=0, max_frag_mz=0, min_frag_intensity=0.0, verbose=False
+        speclib,
+        min_frag_mz=0,
+        max_frag_mz=np.inf,
+        min_frag_intensity=0.0,
+        verbose=False,
     )
 
     # exact DIA-NN column set/order, and `Signature` must NOT be present
@@ -96,7 +100,11 @@ def test_speclib_to_diann_df_flags() -> None:
     speclib = _build_speclib()
 
     df = speclib_to_diann_df(
-        speclib, min_frag_mz=0, max_frag_mz=0, min_frag_intensity=0.0, verbose=False
+        speclib,
+        min_frag_mz=0,
+        max_frag_mz=np.inf,
+        min_frag_intensity=0.0,
+        verbose=False,
     )
 
     # every row has the base bit (1 << 0)
@@ -119,7 +127,7 @@ def test_translate_to_parquet_roundtrip(tmp_path) -> None:
 
     out_path = str(tmp_path / "lib.parquet")
     translate_to_parquet(
-        speclib, out_path, min_frag_mz=0, max_frag_mz=0, min_frag_intensity=0.0
+        speclib, out_path, min_frag_mz=0, max_frag_mz=np.inf, min_frag_intensity=0.0
     )
 
     exported = pd.read_parquet(out_path)
@@ -157,7 +165,11 @@ def test_speclib_to_diann_df_rt_column_precedence(present: list, expected: str) 
     speclib._precursor_df = speclib._precursor_df.drop(columns=["rt"]).assign(**values)
 
     df = speclib_to_diann_df(
-        speclib, min_frag_mz=0, max_frag_mz=0, min_frag_intensity=0.0, verbose=False
+        speclib,
+        min_frag_mz=0,
+        max_frag_mz=np.inf,
+        min_frag_intensity=0.0,
+        verbose=False,
     )
     assert df["RT"].unique().tolist() == [values[expected]]
 
@@ -173,7 +185,11 @@ def test_speclib_to_diann_df_rejects_rt_norm_pred() -> None:
 
     with pytest.raises(ValueError, match="must contain a retention time column"):
         speclib_to_diann_df(
-            speclib, min_frag_mz=0, max_frag_mz=0, min_frag_intensity=0.0, verbose=False
+            speclib,
+            min_frag_mz=0,
+            max_frag_mz=np.inf,
+            min_frag_intensity=0.0,
+            verbose=False,
         )
 
 
@@ -190,7 +206,11 @@ def test_speclib_to_diann_df_flags_group_by_precursor_id() -> None:
     n_precursors = len(speclib.precursor_df)
 
     df = speclib_to_diann_df(
-        speclib, min_frag_mz=0, max_frag_mz=0, min_frag_intensity=0.0, verbose=False
+        speclib,
+        min_frag_mz=0,
+        max_frag_mz=np.inf,
+        min_frag_intensity=0.0,
+        verbose=False,
     )
 
     # every precursor row is exported, but only the distinct ids get a base peak
@@ -198,33 +218,34 @@ def test_speclib_to_diann_df_flags_group_by_precursor_id() -> None:
     assert int((df["Flags"] & (1 << 4) > 0).sum()) == n_precursors // 2
 
 
-def test_speclib_to_diann_df_modifies_the_source_library() -> None:
-    """CHARACTERIZATION (bug): the export edits the library it is handed.
-
-    The m/z window is applied by zeroing intensities *in the library*, and
-    `precursor_mz` is computed onto the caller's precursor frame. A later commit
-    filters on a copy instead.
-    """
+def test_speclib_to_diann_df_leaves_the_source_library_untouched() -> None:
+    """The export reads the library and writes nothing back to it."""
     speclib = _build_speclib()
     intensities_before = speclib.fragment_intensity_df.to_numpy(copy=True)
+    mz_before = speclib.fragment_mz_df.to_numpy(copy=True)
     columns_before = set(speclib.precursor_df.columns)
 
     speclib_to_diann_df(speclib, verbose=False)
 
-    zeroed = (intensities_before != 0) & (speclib.fragment_intensity_df.to_numpy() == 0)
-    assert zeroed.sum() > 0
-    assert set(speclib.precursor_df.columns) - columns_before == {"precursor_mz"}
+    np.testing.assert_array_equal(
+        speclib.fragment_intensity_df.to_numpy(), intensities_before
+    )
+    np.testing.assert_array_equal(speclib.fragment_mz_df.to_numpy(), mz_before)
+    assert set(speclib.precursor_df.columns) == columns_before
 
 
-def test_translate_to_parquet_modifies_the_source_library(tmp_path) -> None:
-    """CHARACTERIZATION (bug): the streaming export edits the library too."""
+def test_translate_to_parquet_leaves_the_source_library_untouched(tmp_path) -> None:
+    """The streaming export writes nothing back to the library either."""
     speclib = _build_speclib()
     intensities_before = speclib.fragment_intensity_df.to_numpy(copy=True)
+    columns_before = set(speclib.precursor_df.columns)
 
     translate_to_parquet(speclib, str(tmp_path / "lib.parquet"))
 
-    zeroed = (intensities_before != 0) & (speclib.fragment_intensity_df.to_numpy() == 0)
-    assert zeroed.sum() > 0
+    np.testing.assert_array_equal(
+        speclib.fragment_intensity_df.to_numpy(), intensities_before
+    )
+    assert set(speclib.precursor_df.columns) == columns_before
 
 
 def test_translate_to_parquet_batching_does_not_change_the_output(tmp_path) -> None:
@@ -236,7 +257,7 @@ def test_translate_to_parquet_batching_does_not_change_the_output(tmp_path) -> N
             _build_speclib(),
             path,
             min_frag_mz=0,
-            max_frag_mz=0,
+            max_frag_mz=np.inf,
             min_frag_intensity=0.0,
             batch_size=batch_size,
         )

@@ -9,7 +9,6 @@ from typing import Optional
 import pandas as pd
 import tqdm
 
-from alphabase.peptide.precursor import update_precursor_mz
 from alphabase.psm_reader.keys import ConstantsClass, LibPsmDfCols, PsmDfCols
 from alphabase.spectral_library.base import SpecLibBase
 from alphabase.spectral_library.translate_core import (
@@ -19,9 +18,8 @@ from alphabase.spectral_library.translate_core import (
     create_modified_sequence,
     first_present_column,
     fragment_table,
+    get_precursor_mz,
     join_fragments,
-    mask_fragment_intensity_by_frag_nAA,
-    mask_fragment_intensity_by_mz_,
     mod_to_unimod_dict,
 )
 
@@ -147,9 +145,6 @@ def _precursors_to_diann_df(  # noqa: PLR0913
     if translate_mod_dict is None:
         translate_mod_dict = mod_to_unimod_dict
 
-    if PsmDfCols.PRECURSOR_MZ not in precursor_df.columns:
-        update_precursor_mz(precursor_df)
-
     df = pd.DataFrame(index=precursor_df.index)
 
     df[DiannParquetCols.MODIFIED_SEQUENCE] = precursor_df[
@@ -167,7 +162,7 @@ def _precursors_to_diann_df(  # noqa: PLR0913
     df[DiannParquetCols.PRECURSOR_ID] = df[DiannParquetCols.MODIFIED_SEQUENCE] + df[
         DiannParquetCols.PRECURSOR_CHARGE
     ].astype(str)
-    df[DiannParquetCols.PRECURSOR_MZ] = precursor_df[PsmDfCols.PRECURSOR_MZ]
+    df[DiannParquetCols.PRECURSOR_MZ] = get_precursor_mz(precursor_df)
 
     rt = first_present_column(precursor_df, RT_COLUMNS)
     if rt is None:
@@ -213,26 +208,15 @@ def _precursors_to_diann_df(  # noqa: PLR0913
     df[DiannParquetCols.EXCLUDE_FROM_QUANT] = 0
     df[DiannParquetCols.SOURCE_ID] = ""
 
-    if min_frag_mz > 0 or max_frag_mz > 0:
-        mask_fragment_intensity_by_mz_(
-            fragment_mz_df,
-            fragment_intensity_df,
-            min_frag_mz,
-            max_frag_mz,
-        )
-    if min_frag_nAA > 0:
-        mask_fragment_intensity_by_frag_nAA(
-            fragment_intensity_df,
-            precursor_df,
-            max_mask_frag_nAA=min_frag_nAA - 1,
-        )
-
     fragments = fragment_table(
         precursor_df[LibPsmDfCols.FRAG_START_IDX].to_numpy(),
         precursor_df[LibPsmDfCols.FRAG_STOP_IDX].to_numpy(),
         fragment_mz_df,
         fragment_intensity_df,
         keep_k_highest=keep_k_highest_fragments,
+        min_frag_mz=min_frag_mz,
+        max_frag_mz=max_frag_mz,
+        min_frag_nAA=min_frag_nAA,
         verbose=verbose,
     )
     df = join_fragments(df, fragments, DIANN_FRAGMENT_COLUMNS)
@@ -295,7 +279,8 @@ def speclib_to_diann_df(  # noqa: PLR0913
         Keep only the k most intense fragments per precursor. Default: 12
 
     min_frag_mz, max_frag_mz : float
-        Fragment m/z range; fragments outside it are dropped. Set both to 0 to disable.
+        Fragment m/z range; fragments outside it are dropped. Pass 0 for no lower bound
+        and `np.inf` for no upper bound.
 
     min_frag_intensity : float
         Drop fragments whose relative intensity is at or below this value.
@@ -363,7 +348,8 @@ def translate_to_parquet(  # noqa: PLR0913
         Keep only the k most intense fragments per precursor. Default: 12
 
     min_frag_mz, max_frag_mz : float
-        Fragment m/z range; fragments outside it are dropped. Set both to 0 to disable.
+        Fragment m/z range; fragments outside it are dropped. Pass 0 for no lower bound
+        and `np.inf` for no upper bound.
 
     min_frag_intensity : float
         Drop fragments whose relative intensity is at or below this value.
@@ -391,27 +377,9 @@ def translate_to_parquet(  # noqa: PLR0913
         [(name, arrow_type[dtype]()) for name, dtype in DIANN_PARQUET_SCHEMA]
     )
 
-    if min_frag_mz > 0 or max_frag_mz > 0:
-        mask_fragment_intensity_by_mz_(
-            speclib.fragment_mz_df,
-            speclib.fragment_intensity_df,
-            min_frag_mz,
-            max_frag_mz,
-        )
-    if min_frag_nAA > 0:
-        mask_fragment_intensity_by_frag_nAA(
-            speclib.fragment_intensity_df,
-            speclib.precursor_df,
-            max_mask_frag_nAA=min_frag_nAA - 1,
-        )
-
     writer = pq.ParquetWriter(parquet_path, schema)
     try:
-        # Convert a batch of precursors at a time: the flat, one-row-per-fragment format
-        # is much larger than the compact library. Only the precursors are batched, as
-        # frag_start_idx/frag_stop_idx are absolute offsets into the whole fragment
-        # frames. The filters are already applied above, to the whole library, so the
-        # per-batch conversion must not apply them again.
+        # only the precursors are batched -- the fragment indices are absolute
         precursor_df = speclib.precursor_df
         for first_row in tqdm.tqdm(range(0, len(precursor_df), batch_size)):
             df = _precursors_to_diann_df(
@@ -420,10 +388,10 @@ def translate_to_parquet(  # noqa: PLR0913
                 speclib.fragment_intensity_df,
                 translate_mod_dict=translate_mod_dict,
                 keep_k_highest_fragments=keep_k_highest_fragments,
-                min_frag_mz=0,
-                max_frag_mz=0,
+                min_frag_mz=min_frag_mz,
+                max_frag_mz=max_frag_mz,
                 min_frag_intensity=min_frag_intensity,
-                min_frag_nAA=0,
+                min_frag_nAA=min_frag_nAA,
                 verbose=False,
             )
             writer.write_table(

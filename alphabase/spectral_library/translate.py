@@ -11,7 +11,6 @@ import multiprocessing as mp
 import pandas as pd
 import tqdm
 
-from alphabase.peptide.precursor import update_precursor_mz
 from alphabase.spectral_library.base import SpecLibBase
 from alphabase.spectral_library.translate_core import (
     CCS_COLUMNS,
@@ -21,10 +20,9 @@ from alphabase.spectral_library.translate_core import (
     create_modified_sequence,
     first_present_column,
     fragment_table,
+    get_precursor_mz,
     is_nterm_frag,
     join_fragments,
-    mask_fragment_intensity_by_frag_nAA,
-    mask_fragment_intensity_by_mz_,
     mod_to_unimod_dict,
 )
 
@@ -42,9 +40,8 @@ __all__ = [
     # re-exported from translate_core, where these now live
     "create_modified_sequence",
     "is_nterm_frag",
-    "mask_fragment_intensity_by_frag_nAA",
-    "mask_fragment_intensity_by_mz_",
     "mod_to_unimod_dict",
+    "get_precursor_mz",
     # this module's own
     "WritingProcess",
     "speclib_to_single_df",
@@ -105,9 +102,7 @@ def _precursors_to_swath_df(  # noqa: PLR0913
 
     df["StrippedPeptide"] = precursor_df["sequence"]
 
-    if "precursor_mz" not in precursor_df.columns:
-        update_precursor_mz(precursor_df)
-    df["PrecursorMz"] = precursor_df["precursor_mz"]
+    df["PrecursorMz"] = get_precursor_mz(precursor_df)
 
     # this format prefers uniprot_ids; the DIA-NN one splits them over two columns
     proteins = first_present_column(precursor_df, ["uniprot_ids", "proteins"])
@@ -120,27 +115,15 @@ def _precursors_to_swath_df(  # noqa: PLR0913
     if "decoy" in precursor_df.columns:
         df["Decoy"] = precursor_df["decoy"]
 
-    if min_frag_mz > 0 or max_frag_mz > 0:
-        mask_fragment_intensity_by_mz_(
-            fragment_mz_df,
-            fragment_intensity_df,
-            min_frag_mz,
-            max_frag_mz,
-        )
-
-    if min_frag_nAA > 0:
-        mask_fragment_intensity_by_frag_nAA(
-            fragment_intensity_df,
-            precursor_df,
-            max_mask_frag_nAA=min_frag_nAA - 1,
-        )
-
     fragments = fragment_table(
         precursor_df["frag_start_idx"].to_numpy(),
         precursor_df["frag_stop_idx"].to_numpy(),
         fragment_mz_df,
         fragment_intensity_df,
         keep_k_highest=keep_k_highest_fragments,
+        min_frag_mz=min_frag_mz,
+        max_frag_mz=max_frag_mz,
+        min_frag_nAA=min_frag_nAA,
         verbose=verbose,
     )
     df = join_fragments(df, fragments, SWATH_FRAGMENT_COLUMNS)
@@ -176,6 +159,10 @@ def speclib_to_single_df(
 
     keep_k_highest_peaks : int
         only keep highest fragments for each precursor. Default: 12
+
+    min_frag_mz, max_frag_mz : float
+        Fragment m/z range; fragments outside it are dropped. Pass 0 for no lower bound
+        and `np.inf` for no upper bound.
 
     Returns
     -------
@@ -250,6 +237,19 @@ def translate_to_tsv(
     translate_mod_dict: dict = None,
     multiprocessing: bool = True,
 ):
+    """Translate an alphabase library into a SWATH/Spectronaut transition-list tsv.
+
+    Precursors are converted in batches and appended to the tsv, so large libraries do
+    not need to be held in memory at once in the flat, one-row-per-fragment format.
+
+    Parameters
+    ----------
+    min_frag_mz, max_frag_mz : float
+        Fragment m/z range; fragments outside it are dropped. Pass 0 for no lower bound
+        and `np.inf` for no upper bound.
+
+    See :func:`speclib_to_single_df`, whose parameters this shares, for the rest.
+    """
     if multiprocessing:
         queue_size = 1000000 // batch_size
         if queue_size < 2:
@@ -259,27 +259,11 @@ def translate_to_tsv(
         df_head_queue = mp.Queue(maxsize=queue_size)
         writing_process = WritingProcess(df_head_queue, tsv)
         writing_process.start()
-    mask_fragment_intensity_by_mz_(
-        speclib._fragment_mz_df,
-        speclib._fragment_intensity_df,
-        min_frag_mz,
-        max_frag_mz,
-    )
-    if min_frag_nAA > 0:
-        mask_fragment_intensity_by_frag_nAA(
-            speclib._fragment_intensity_df,
-            speclib._precursor_df,
-            max_mask_frag_nAA=min_frag_nAA - 1,
-        )
     if isinstance(tsv, str):
         with open(tsv, "w"):
             pass
 
-    # Convert a batch of precursors at a time: the flat, one-row-per-fragment format is
-    # much larger than the compact library. Only the precursors are batched, as
-    # frag_start_idx/frag_stop_idx are absolute offsets into the whole fragment frames.
-    # The filters are already applied above, to the whole library, so the per-batch
-    # conversion must not apply them again.
+    # only the precursors are batched -- the fragment indices are absolute
     precursor_df = speclib._precursor_df
     for first_row in tqdm.tqdm(range(0, len(precursor_df), batch_size)):
         df = _precursors_to_swath_df(
@@ -288,10 +272,10 @@ def translate_to_tsv(
             speclib._fragment_intensity_df,
             translate_mod_dict=translate_mod_dict,
             keep_k_highest_fragments=keep_k_highest_fragments,
-            min_frag_mz=0,
-            max_frag_mz=0,
+            min_frag_mz=min_frag_mz,
+            max_frag_mz=max_frag_mz,
             min_frag_intensity=min_frag_intensity,
-            min_frag_nAA=0,
+            min_frag_nAA=min_frag_nAA,
             verbose=False,
         )
         if multiprocessing:
