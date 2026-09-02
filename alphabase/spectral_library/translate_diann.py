@@ -9,6 +9,7 @@ from typing import Optional
 import pandas as pd
 import tqdm
 
+from alphabase.peptide.precursor import update_precursor_mz
 from alphabase.psm_reader.keys import ConstantsClass, LibPsmDfCols, PsmDfCols
 from alphabase.spectral_library.base import SpecLibBase
 from alphabase.spectral_library.translate_core import (
@@ -124,10 +125,10 @@ _DIANN_FLAG_BASE = 1 << 0
 _DIANN_FLAG_FIRST_FRAGMENT = 1 << 4
 
 
-# TODO: go for an OOP approach: a writer class holding the export settings as state, with
-# the precursor mapping / fragment explosion / dtype casting as methods.
-def speclib_to_diann_df(  # noqa: PLR0913
-    speclib: SpecLibBase,
+def _precursors_to_diann_df(  # noqa: PLR0913
+    precursor_df: pd.DataFrame,
+    fragment_mz_df: pd.DataFrame,
+    fragment_intensity_df: pd.DataFrame,
     *,
     translate_mod_dict: Optional[dict] = None,
     keep_k_highest_fragments: int = 12,
@@ -138,56 +139,16 @@ def speclib_to_diann_df(  # noqa: PLR0913
     modloss: str = "H3PO4",
     verbose: bool = True,
 ) -> pd.DataFrame:
-    """Convert an alphabase library to a DIA-NN 1.9.1+ parquet-format dataframe.
+    """Convert precursor and fragment frames to a DIA-NN parquet-format dataframe.
 
-    Emits DIA-NN's report-style dot-notation columns (see ``DIANN_PARQUET_SCHEMA``) and
-    ``(UniMod:N)`` modified sequences, importable by DIA-NN 1.9.1+ and readable back with
-    :class:`alphabase.spectral_library.reader.LibraryReaderBase`. Columns a ``SpecLibBase``
-    has no value for are filled with defaults matching a DIA-NN predicted library (q-values
-    and scores 0, ``PTM.Site.Confidence`` 1, ``Source.Id`` empty).
-
-    ``N.Term``/``C.Term`` are protein-terminus flags taken from ``is_prot_nterm``/
-    ``is_prot_cterm`` (alphabase FASTA digestion) if present, else 0. ``Signature`` is not
-    written, as DIA-NN requires for third-party libraries.
-
-    Parameters
-    ----------
-    speclib : SpecLibBase
-        The alphabase spectral library to convert.
-
-    translate_mod_dict : dict
-        Maps AlphaBase modification names to other software; defaults to UniMod ids.
-
-    keep_k_highest_fragments : int
-        Keep only the k most intense fragments per precursor. Default: 12
-
-    min_frag_mz, max_frag_mz : float
-        Fragment m/z range; fragments outside it are dropped. Set both to 0 to disable.
-
-    min_frag_intensity : float
-        Drop fragments whose relative intensity is at or below this value.
-
-    min_frag_nAA : int
-        Mask the smallest ``min_frag_nAA - 1`` b/y fragments per precursor; 0 disables.
-
-    modloss : str
-        Loss label written for modification-loss fragments. Default: "H3PO4"
-
-    verbose : bool
-        Show a progress bar while exploding fragments.
-
-    Returns
-    -------
-    pd.DataFrame
-        A long-format dataframe in the DIA-NN parquet library schema.
-
+    The dataframe-in form of :func:`speclib_to_diann_df`, so that one batch of
+    precursors can be converted without standing up a `SpecLibBase` around it.
     """
     if translate_mod_dict is None:
         translate_mod_dict = mod_to_unimod_dict
 
-    if PsmDfCols.PRECURSOR_MZ not in speclib.precursor_df.columns:
-        speclib.calc_precursor_mz()
-    precursor_df = speclib.precursor_df
+    if PsmDfCols.PRECURSOR_MZ not in precursor_df.columns:
+        update_precursor_mz(precursor_df)
 
     df = pd.DataFrame(index=precursor_df.index)
 
@@ -254,23 +215,23 @@ def speclib_to_diann_df(  # noqa: PLR0913
 
     if min_frag_mz > 0 or max_frag_mz > 0:
         mask_fragment_intensity_by_mz_(
-            speclib.fragment_mz_df,
-            speclib.fragment_intensity_df,
+            fragment_mz_df,
+            fragment_intensity_df,
             min_frag_mz,
             max_frag_mz,
         )
     if min_frag_nAA > 0:
         mask_fragment_intensity_by_frag_nAA(
-            speclib.fragment_intensity_df,
-            speclib.precursor_df,
+            fragment_intensity_df,
+            precursor_df,
             max_mask_frag_nAA=min_frag_nAA - 1,
         )
 
     fragments = fragment_table(
         precursor_df[LibPsmDfCols.FRAG_START_IDX].to_numpy(),
         precursor_df[LibPsmDfCols.FRAG_STOP_IDX].to_numpy(),
-        speclib.fragment_mz_df,
-        speclib.fragment_intensity_df,
+        fragment_mz_df,
+        fragment_intensity_df,
         keep_k_highest=keep_k_highest_fragments,
         verbose=verbose,
     )
@@ -296,6 +257,77 @@ def speclib_to_diann_df(  # noqa: PLR0913
         else:
             df[name] = df[name].astype(_DIANN_TO_PANDAS_DTYPE[dtype])
     return df[DIANN_PARQUET_COLUMN_ORDER]
+
+
+def speclib_to_diann_df(  # noqa: PLR0913
+    speclib: SpecLibBase,
+    *,
+    translate_mod_dict: Optional[dict] = None,
+    keep_k_highest_fragments: int = 12,
+    min_frag_mz: float = 200,
+    max_frag_mz: float = 2000,
+    min_frag_intensity: float = 0.01,
+    min_frag_nAA: int = 0,  # noqa: N803
+    modloss: str = "H3PO4",
+    verbose: bool = True,
+) -> pd.DataFrame:
+    """Convert an alphabase library to a DIA-NN 1.9.1+ parquet-format dataframe.
+
+    Emits DIA-NN's report-style dot-notation columns (see ``DIANN_PARQUET_SCHEMA``) and
+    ``(UniMod:N)`` modified sequences, importable by DIA-NN 1.9.1+ and readable back with
+    :class:`alphabase.spectral_library.reader.LibraryReaderBase`. Columns a ``SpecLibBase``
+    has no value for are filled with defaults matching a DIA-NN predicted library (q-values
+    and scores 0, ``PTM.Site.Confidence`` 1, ``Source.Id`` empty).
+
+    ``N.Term``/``C.Term`` are protein-terminus flags taken from ``is_prot_nterm``/
+    ``is_prot_cterm`` (alphabase FASTA digestion) if present, else 0. ``Signature`` is not
+    written, as DIA-NN requires for third-party libraries.
+
+    Parameters
+    ----------
+    speclib : SpecLibBase
+        The alphabase spectral library to convert.
+
+    translate_mod_dict : dict
+        Maps AlphaBase modification names to other software; defaults to UniMod ids.
+
+    keep_k_highest_fragments : int
+        Keep only the k most intense fragments per precursor. Default: 12
+
+    min_frag_mz, max_frag_mz : float
+        Fragment m/z range; fragments outside it are dropped. Set both to 0 to disable.
+
+    min_frag_intensity : float
+        Drop fragments whose relative intensity is at or below this value.
+
+    min_frag_nAA : int
+        Mask the smallest ``min_frag_nAA - 1`` b/y fragments per precursor; 0 disables.
+
+    modloss : str
+        Loss label written for modification-loss fragments. Default: "H3PO4"
+
+    verbose : bool
+        Show a progress bar while exploding fragments.
+
+    Returns
+    -------
+    pd.DataFrame
+        A long-format dataframe in the DIA-NN parquet library schema.
+
+    """
+    return _precursors_to_diann_df(
+        speclib.precursor_df,
+        speclib.fragment_mz_df,
+        speclib.fragment_intensity_df,
+        translate_mod_dict=translate_mod_dict,
+        keep_k_highest_fragments=keep_k_highest_fragments,
+        min_frag_mz=min_frag_mz,
+        max_frag_mz=max_frag_mz,
+        min_frag_intensity=min_frag_intensity,
+        min_frag_nAA=min_frag_nAA,
+        modloss=modloss,
+        verbose=verbose,
+    )
 
 
 def translate_to_parquet(  # noqa: PLR0913
@@ -373,23 +405,19 @@ def translate_to_parquet(  # noqa: PLR0913
             max_mask_frag_nAA=min_frag_nAA - 1,
         )
 
-    # process precursors in batches: the flat (one row per fragment) format is much larger
-    # than the compact library, so batching keeps peak memory bounded for large libraries.
-    # SpecLibBase has no public setters for the fragment frames, and its precursor_df setter
-    # would refine/reorder the batch, so the private frames are assigned directly here.
-    batch_speclib = SpecLibBase()
-    batch_speclib._fragment_intensity_df = speclib.fragment_intensity_df  # noqa: SLF001
-    batch_speclib._fragment_mz_df = speclib.fragment_mz_df  # noqa: SLF001
-    precursor_df = speclib.precursor_df
-
     writer = pq.ParquetWriter(parquet_path, schema)
     try:
-        for i in tqdm.tqdm(range(0, len(precursor_df), batch_size)):
-            # Only the precursors are batched: frag_start_idx/frag_stop_idx are absolute offsets into
-            # the full fragment frames, so those stay whole for the lookup to stay in sync.
-            batch_speclib._precursor_df = precursor_df.iloc[i : i + batch_size]  # noqa: SLF001
-            df = speclib_to_diann_df(
-                batch_speclib,
+        # Convert a batch of precursors at a time: the flat, one-row-per-fragment format
+        # is much larger than the compact library. Only the precursors are batched, as
+        # frag_start_idx/frag_stop_idx are absolute offsets into the whole fragment
+        # frames. The filters are already applied above, to the whole library, so the
+        # per-batch conversion must not apply them again.
+        precursor_df = speclib.precursor_df
+        for first_row in tqdm.tqdm(range(0, len(precursor_df), batch_size)):
+            df = _precursors_to_diann_df(
+                precursor_df.iloc[first_row : first_row + batch_size],
+                speclib.fragment_mz_df,
+                speclib.fragment_intensity_df,
                 translate_mod_dict=translate_mod_dict,
                 keep_k_highest_fragments=keep_k_highest_fragments,
                 min_frag_mz=0,
@@ -398,7 +426,8 @@ def translate_to_parquet(  # noqa: PLR0913
                 min_frag_nAA=0,
                 verbose=False,
             )
-            table = pa.Table.from_pandas(df, schema=schema, preserve_index=False)
-            writer.write_table(table)
+            writer.write_table(
+                pa.Table.from_pandas(df, schema=schema, preserve_index=False)
+            )
     finally:
         writer.close()
