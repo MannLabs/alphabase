@@ -21,7 +21,6 @@ from alphabase.constants.modification import MOD_DF, ModificationKeys
 from alphabase.numba_wrapper import numba_njit
 from alphabase.peptide.precursor import update_precursor_mz
 from alphabase.psm_reader.keys import ConstantsClass, PsmDfCols
-from alphabase.utils import explode_multiple_columns
 
 # Candidate precursor columns, in order of precedence.
 RT_COLUMNS = [
@@ -60,17 +59,6 @@ class FragmentTableCols(metaclass=ConstantsClass):
     CHARGE = "charge"
     SERIES_NUMBER = "series_number"
     LOSS_TYPE = "loss_type"
-
-
-# the per-fragment columns, in the order the exports emit them
-FRAGMENT_VALUE_COLUMNS = [
-    FragmentTableCols.FRAG_TYPE,
-    FragmentTableCols.MZ,
-    FragmentTableCols.INTENSITY,
-    FragmentTableCols.CHARGE,
-    FragmentTableCols.SERIES_NUMBER,
-    FragmentTableCols.LOSS_TYPE,
-]
 
 
 def get_precursor_mz(precursor_df: pd.DataFrame) -> pd.Series:
@@ -192,7 +180,8 @@ def _get_frag_info_from_column_name(column: str) -> tuple:
     """Split a fragment column name into `(frag_type, loss_type, charge)`.
 
     For example `y_modloss_z2` -> `('y', 'modloss', '2')` and `b_z1` -> `('b',
-    'noloss', '1')`. The charge is left as a string, as it is only written out.
+    'noloss', '1')`. The charge stays a string because numba cannot parse one;
+    :func:`fragment_table` casts the collected column.
     """
     idx = column.rfind("_")
     frag_type = column[:idx]
@@ -277,7 +266,9 @@ def fragment_table(  # noqa: PLR0913
     Returns
     -------
     pd.DataFrame
-        One row per kept fragment, in :class:`FragmentTableCols` columns.
+        One row per kept fragment, in :class:`FragmentTableCols` columns. `mz` and
+        `intensity` keep the dtype of the frame they came from; the charge and series
+        number are integers.
 
     """
     frag_columns = fragment_mz_df.columns.to_numpy().astype("U")
@@ -293,12 +284,12 @@ def fragment_table(  # noqa: PLR0913
         )
         max_frag_mz = np.inf
 
-    frag_types = []
-    frag_losses = []
-    frag_charges = []
-    frag_masses = []
-    frag_intensities = []
-    frag_numbers = []
+    frag_types: list = []
+    frag_losses: list = []
+    frag_charges: list = []
+    frag_numbers: list = []
+    frag_masses: list = []
+    frag_intensities: list = []
     iters = zip(frag_start_idx, frag_stop_idx)
     if verbose:
         iters = tqdm.tqdm(iters)
@@ -331,27 +322,27 @@ def fragment_table(  # noqa: PLR0913
 
         infos = [_get_frag_info_from_column_name(column) for column in columns]
         types, losses, charges = zip(*infos) if infos else ((), (), ())
-        frag_types.append(types)
-        frag_losses.append(losses)
-        frag_charges.append(charges)
+        frag_types.extend(types)
+        frag_losses.extend(losses)
+        frag_charges.extend(charges)
+        frag_numbers.extend(_get_frag_num(columns, rows, frag_len))
         frag_masses.append(masses[idx_in_df])
         frag_intensities.append(intens[idx_in_df])
-        frag_numbers.append(_get_frag_num(columns, rows, frag_len))
 
-    table = pd.DataFrame(
+    return pd.DataFrame(
         {
-            FragmentTableCols.PRECURSOR_ROW: np.arange(len(frag_start_idx)),
+            FragmentTableCols.PRECURSOR_ROW: np.repeat(
+                np.arange(len(frag_start_idx)),
+                [len(kept) for kept in frag_masses],
+            ),
             FragmentTableCols.FRAG_TYPE: frag_types,
-            FragmentTableCols.MZ: frag_masses,
-            FragmentTableCols.INTENSITY: frag_intensities,
-            FragmentTableCols.CHARGE: frag_charges,
-            FragmentTableCols.SERIES_NUMBER: frag_numbers,
+            FragmentTableCols.MZ: np.concatenate(frag_masses),
+            FragmentTableCols.INTENSITY: np.concatenate(frag_intensities),
+            FragmentTableCols.CHARGE: np.array(frag_charges, dtype=np.int64),
+            FragmentTableCols.SERIES_NUMBER: np.array(frag_numbers, dtype=np.int64),
             FragmentTableCols.LOSS_TYPE: frag_losses,
         }
     )
-    table = explode_multiple_columns(table, FRAGMENT_VALUE_COLUMNS)
-    # a precursor that kept nothing explodes to one all-NaN row; drop those
-    return table.dropna(subset=[FragmentTableCols.MZ])
 
 
 def join_fragments(

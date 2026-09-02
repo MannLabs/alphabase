@@ -3,11 +3,7 @@
 These tests pin the behaviour of `alphabase.spectral_library.translate` as it is
 today, so that the upcoming restructuring can be shown to change nothing.
 
-One test still pins *buggy* behaviour that a later commit fixes, marked
-`CHARACTERIZATION (bug)` in its docstring: the exploded fragment columns are
-object dtype, with a string `FragmentCharge`.
-
-One more, `test_speclib_to_swath_df_returns_none`, pins a function that a later
+One test, `test_speclib_to_swath_df_returns_none`, pins a function that a later
 commit removes rather than fixes.
 """
 
@@ -18,6 +14,7 @@ import pandas as pd
 import pytest
 
 from alphabase.peptide.fragment import get_charged_frag_types
+from alphabase.spectral_library import translate
 from alphabase.spectral_library.base import SpecLibBase
 from alphabase.spectral_library.reader import LibraryReaderBase
 from alphabase.spectral_library.translate import (
@@ -377,31 +374,26 @@ def test_disabled_mz_window_skips_empty_fragment_slots() -> None:
     assert with_loss <= {"SVIVSPYSTGAK", "LHDSTPPPYK"}
 
 
-def test_exploded_fragment_columns_are_object_dtype() -> None:
-    """CHARACTERIZATION (bug): the fragment columns are objects, not numbers.
+def test_fragment_columns_are_typed() -> None:
+    """The fragment columns are numbers, and m/z and intensity keep their own dtype.
 
-    Unlike the DIA-NN export, this one does no dtype casting, so `FragmentMz` and
-    friends are object-dtype, and `FragmentCharge` holds strings -- it is parsed
-    out of the fragment column name and never converted. That costs ~14x the
-    memory of the equivalent typed columns, and makes arithmetic on the charge
-    concatenate rather than add. The cells already hold correctly typed numpy
-    scalars, so a later commit types the columns from their source dtype, leaving
-    the written tsv byte-identical.
+    The fixture builds a float32 m/z frame and a float64 intensity frame, so the
+    two carry through independently rather than being cast to one width.
     """
-    df = _export(_build_speclib())
+    speclib = _build_speclib()
+    df = _export(speclib)
 
-    for column in (
-        "FragmentType",
-        "FragmentMz",
-        "RelativeIntensity",
-        "FragmentCharge",
-        "FragmentNumber",
-        "FragmentLossType",
-    ):
-        assert df[column].dtype == object, column
+    assert df["FragmentMz"].dtype == speclib.fragment_mz_df.to_numpy().dtype
+    assert (
+        df["RelativeIntensity"].dtype == speclib.fragment_intensity_df.to_numpy().dtype
+    )
+    assert df["FragmentCharge"].dtype.kind == "i"
+    assert df["FragmentNumber"].dtype.kind == "i"
+    # the two label columns stay strings
+    assert df["FragmentType"].dtype == object
+    assert df["FragmentLossType"].dtype == object
 
-    assert set(map(type, df["FragmentCharge"])) == {str}
-    assert set(df["FragmentCharge"]) == {"1", "2"}
+    assert set(df["FragmentCharge"]) == {1, 2}
 
 
 def test_speclib_to_swath_df_returns_none() -> None:
@@ -428,8 +420,6 @@ def test_translate_to_tsv_matches_the_in_memory_export(tmp_path) -> None:
     assert len(lines) == len(expected) + 1
     written = pd.read_csv(tsv, sep="\t")
     assert list(written.columns) == list(expected.columns)
-    numeric = ["FragmentMz", "RelativeIntensity", "FragmentCharge", "FragmentNumber"]
-    expected[numeric] = expected[numeric].apply(pd.to_numeric)
     pd.testing.assert_frame_equal(
         written.reset_index(drop=True),
         expected.reset_index(drop=True),
@@ -488,8 +478,6 @@ def test_translate_to_tsv_disabled_mz_window_matches_the_in_memory_export(
     assert (written["FragmentMz"] > 0).all()
 
     expected = _unfiltered(_build_speclib())
-    numeric = ["FragmentMz", "RelativeIntensity", "FragmentCharge", "FragmentNumber"]
-    expected[numeric] = expected[numeric].apply(pd.to_numeric)
     pd.testing.assert_frame_equal(
         written.reset_index(drop=True),
         expected.reset_index(drop=True),
@@ -520,3 +508,35 @@ def test_translate_to_tsv_writes_a_readable_library(tmp_path) -> None:
         return set(zip(df["sequence"], df["mod_sites"], df["charge"].astype(int)))
 
     assert keys(reader.precursor_df) == keys(speclib.precursor_df)
+
+
+class _DeadWriter:
+    """Stands in for a `WritingProcess` whose child died without writing."""
+
+    exitcode = 1
+
+    def __init__(self, task_queue, tsv) -> None:
+        pass
+
+    def start(self) -> None:
+        pass
+
+    def join(self) -> None:
+        pass
+
+
+def test_translate_to_tsv_raises_when_the_writing_process_dies(
+    tmp_path, monkeypatch
+) -> None:
+    """A writer that died is an error, not a quietly truncated file.
+
+    `multiprocessing=True` is the default, and the writer process dies before it
+    writes anything if the calling script has no `if __name__ == "__main__":`
+    guard -- the norm on the spawn platforms, macOS and Windows. Nothing checked
+    on it, so the export printed its success message and returned normally,
+    leaving a 0-byte tsv behind.
+    """
+    monkeypatch.setattr(translate, "WritingProcess", _DeadWriter)
+
+    with pytest.raises(RuntimeError, match="exited with code 1"):
+        translate_to_tsv(_build_speclib(), str(tmp_path / "lib.tsv"))

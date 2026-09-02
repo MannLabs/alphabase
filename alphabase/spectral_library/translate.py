@@ -295,3 +295,11 @@ def translate_to_tsv(
             "Translation finished, it will take several minutes to export the rest precursors to the tsv file..."
         )
         writing_process.join()
+        if writing_process.exitcode:
+            raise RuntimeError(
+                f"the process writing {tsv} exited with code "
+                f"{writing_process.exitcode}, so the file is incomplete; its traceback "
+                'is above. A script with no `if __name__ == "__main__":` guard is the '
+                "usual cause on macOS and Windows. Pass multiprocessing=False to write "
+                "from this process instead."
+            )
