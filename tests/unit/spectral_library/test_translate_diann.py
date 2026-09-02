@@ -209,13 +209,12 @@ def test_speclib_to_diann_df_without_any_rt_column_is_rejected() -> None:
         )
 
 
-def test_speclib_to_diann_df_flags_group_by_precursor_id() -> None:
-    """CHARACTERIZATION (bug): duplicate precursors share one base-peak flag.
+def test_speclib_to_diann_df_flags_one_base_peak_per_precursor_row() -> None:
+    """Duplicate precursors each get their own base-peak flag.
 
-    `Flags` marks the base peak by grouping on `Precursor.Id`, so a library
-    holding the same precursor twice -- which `SpecLibBase.append` produces --
-    gets one flag for the pair instead of one per precursor row. A later commit
-    groups by precursor row instead.
+    `Flags` marks the base peak per precursor *row*, so a library holding the same
+    precursor twice -- which `SpecLibBase.append` produces -- gets one flag each
+    rather than one for the pair. `Precursor.Id` cannot distinguish them.
     """
     speclib = _build_speclib()
     speclib.append(_build_speclib())
@@ -229,9 +228,14 @@ def test_speclib_to_diann_df_flags_group_by_precursor_id() -> None:
         verbose=False,
     )
 
-    # every precursor row is exported, but only the distinct ids get a base peak
+    # the duplicated precursors share an id, so the id count is half the row count
     assert df["Precursor.Id"].nunique() == n_precursors // 2
-    assert int((df["Flags"] & (1 << 4) > 0).sum()) == n_precursors // 2
+    assert int((df["Flags"] & (1 << 4) > 0).sum()) == n_precursors
+
+    # and each flagged fragment is the most intense of its own precursor's block
+    flagged = df["Flags"] & (1 << 4) > 0
+    for _, group in df.groupby("Precursor.Id", sort=False):
+        assert group[flagged.loc[group.index]].shape[0] == 2
 
 
 def test_speclib_to_diann_df_leaves_the_source_library_untouched() -> None:

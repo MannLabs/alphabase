@@ -62,8 +62,10 @@ class DiannParquetCols(metaclass=ConstantsClass):
     SOURCE_ID = "Source.Id"
 
 
-# the DIA-NN names for the canonical fragment columns, in output order
+# the DIA-NN names for the canonical fragment columns, in output order. `precursor_row`
+# keeps its name for the base-peak flag; the schema selection at the end drops it.
 DIANN_FRAGMENT_COLUMNS = {
+    FragmentTableCols.PRECURSOR_ROW: FragmentTableCols.PRECURSOR_ROW,
     FragmentTableCols.FRAG_TYPE: DiannParquetCols.FRAGMENT_TYPE,
     FragmentTableCols.MZ: DiannParquetCols.PRODUCT_MZ,
     FragmentTableCols.INTENSITY: DiannParquetCols.RELATIVE_INTENSITY,
@@ -227,10 +229,10 @@ def _precursors_to_diann_df(  # noqa: PLR0913
     ] = modloss
     df = df.reset_index(drop=True)
 
-    # Flags: base bit on all fragments, base-peak bit on each precursor's most intense one
     df[DiannParquetCols.FLAGS] = _DIANN_FLAG_BASE
     if len(df):
-        base_peak_idx = df.groupby(DiannParquetCols.PRECURSOR_ID, sort=False)[
+        # by row: `Precursor.Id` repeats when a library holds the same precursor twice
+        base_peak_idx = df.groupby(FragmentTableCols.PRECURSOR_ROW, sort=False)[
             DiannParquetCols.RELATIVE_INTENSITY
         ].idxmax()
         df.loc[base_peak_idx, DiannParquetCols.FLAGS] |= _DIANN_FLAG_FIRST_FRAGMENT
