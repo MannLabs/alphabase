@@ -2,9 +2,6 @@
 
 These tests pin the behaviour of `alphabase.spectral_library.translate` as it is
 today, so that the upcoming restructuring can be shown to change nothing.
-
-One test, `test_speclib_to_swath_df_returns_none`, pins a function that a later
-commit removes rather than fixes.
 """
 
 import hashlib
@@ -95,7 +92,7 @@ def _build_speclib(**extra_columns) -> SpecLibBase:
 
 def _export(speclib: SpecLibBase, **kwargs) -> pd.DataFrame:
     """Run the in-memory export with the progress bar off."""
-    return speclib_to_single_df(speclib, verbose=False, **kwargs)
+    return speclib_to_swath_df(speclib, verbose=False, **kwargs)
 
 
 def _unfiltered(speclib: SpecLibBase, **kwargs) -> pd.DataFrame:
@@ -396,15 +393,12 @@ def test_fragment_columns_are_typed() -> None:
     assert set(df["FragmentCharge"]) == {1, 2}
 
 
-def test_speclib_to_swath_df_returns_none() -> None:
-    """CHARACTERIZATION: the wrapper discards its result, returning None.
+def test_speclib_to_single_df_is_a_deprecated_alias() -> None:
+    """The old name still works, warns, and returns what the new one returns."""
+    with pytest.warns(FutureWarning, match="use speclib_to_swath_df"):
+        aliased = speclib_to_single_df(_build_speclib(), verbose=False)
 
-    It is a parameter subset of `speclib_to_single_df` that has been missing its
-    `return` since 93aa2fa, so it is only ever called for the side effect of
-    editing the library. Pinned as the evidence that removing it later is safe:
-    nothing can depend on a function that has only ever returned None.
-    """
-    assert speclib_to_swath_df(_build_speclib()) is None
+    pd.testing.assert_frame_equal(aliased, _export(_build_speclib()))
 
 
 def test_translate_to_tsv_matches_the_in_memory_export(tmp_path) -> None:
@@ -461,7 +455,7 @@ def test_translate_to_tsv_disabled_mz_window_matches_the_in_memory_export(
     `translate_to_tsv` used to mask by m/z without checking whether the window
     was disabled, so 0/0 -- the documented way to turn the filter off -- zeroed
     every real fragment and wrote a file of nothing but empty slots, while
-    `speclib_to_single_df` given the same arguments kept the real ones.
+    `speclib_to_swath_df` given the same arguments kept the real ones.
     """
     tsv = str(tmp_path / "lib.tsv")
     translate_to_tsv(
