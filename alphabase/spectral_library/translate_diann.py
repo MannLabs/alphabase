@@ -1,19 +1,20 @@
 """Translate AlphaBase spectral libraries to DIA-NN 1.9.1+ parquet format.
 
-This reuses shared export helpers from
-:mod:`alphabase.spectral_library.translate`; it is kept as a separate module in
-preparation for a larger refactor of the library-export code.
+Shared export helpers live in :mod:`alphabase.spectral_library.translate_core`.
 """
 
-from typing import Optional, Union
+from typing import Optional
 
 import pandas as pd
 import tqdm
 
 from alphabase.psm_reader.keys import ConstantsClass, LibPsmDfCols, PsmDfCols
 from alphabase.spectral_library.base import SpecLibBase
-from alphabase.spectral_library.translate import (
+from alphabase.spectral_library.translate_core import (
+    MOBILITY_COLUMNS,
+    RT_COLUMNS,
     create_modified_sequence,
+    first_present_column,
     mask_fragment_intensity_by_frag_nAA,
     mask_fragment_intensity_by_mz_,
     merge_precursor_fragment_df,
@@ -121,20 +122,11 @@ _DIANN_FLAG_BASE = 1 << 0
 _DIANN_FLAG_FIRST_FRAGMENT = 1 << 4
 
 
-def _get_first_present_column(
-    precursor_df: pd.DataFrame,
-    candidates: list[str],
-    default: Union[str, float, None] = None,
-) -> Union[pd.Series, str, float, None]:
-    """Return the first present candidate column of `precursor_df`, else `default`."""
-    for col in candidates:
-        if col in precursor_df.columns:
-            return precursor_df[col]
-    return default
+# precursor columns of the DIA-NN schema that map to more than one alphabase column
+PROTEIN_GROUP_COLUMNS = (PsmDfCols.PROTEINS, PsmDfCols.UNIPROT_IDS)
+PROTEIN_IDS_COLUMNS = (PsmDfCols.UNIPROT_IDS, PsmDfCols.PROTEINS)
 
 
-# TODO: go for an OOP approach: a writer class holding the export settings as state, with
-# the precursor mapping / fragment explosion / dtype casting as methods.
 def speclib_to_diann_df(  # noqa: PLR0913, PLR0915
     speclib: SpecLibBase,
     *,
@@ -217,38 +209,34 @@ def speclib_to_diann_df(  # noqa: PLR0913, PLR0915
     ].astype(str)
     df[DiannParquetCols.PRECURSOR_MZ] = precursor_df[PsmDfCols.PRECURSOR_MZ]
 
-    rt = _get_first_present_column(
-        precursor_df, ["irt_pred", "rt_pred", PsmDfCols.RT, "irt", PsmDfCols.RT_NORM]
-    )
+    rt = first_present_column(precursor_df, RT_COLUMNS)
     if rt is None:
         raise ValueError("precursor_df must contain a retention time column")
     df[DiannParquetCols.RT] = rt
-    df[DiannParquetCols.IM] = _get_first_present_column(
-        precursor_df, ["mobility_pred", PsmDfCols.MOBILITY], 0.0
-    )
+    df[DiannParquetCols.IM] = first_present_column(precursor_df, MOBILITY_COLUMNS, 0.0)
 
-    df[DiannParquetCols.PROTEIN_GROUP] = _get_first_present_column(
-        precursor_df, [PsmDfCols.PROTEINS, PsmDfCols.UNIPROT_IDS], ""
+    df[DiannParquetCols.PROTEIN_GROUP] = first_present_column(
+        precursor_df, PROTEIN_GROUP_COLUMNS, ""
     )
-    df[DiannParquetCols.PROTEIN_IDS] = _get_first_present_column(
-        precursor_df, [PsmDfCols.UNIPROT_IDS, PsmDfCols.PROTEINS], ""
+    df[DiannParquetCols.PROTEIN_IDS] = first_present_column(
+        precursor_df, PROTEIN_IDS_COLUMNS, ""
     )
-    df[DiannParquetCols.PROTEIN_NAMES] = _get_first_present_column(
-        precursor_df, ["protein_names"], ""
+    df[DiannParquetCols.PROTEIN_NAMES] = first_present_column(
+        precursor_df, ("protein_names",), ""
     )
-    df[DiannParquetCols.GENES] = _get_first_present_column(
-        precursor_df, [PsmDfCols.GENES], ""
+    df[DiannParquetCols.GENES] = first_present_column(
+        precursor_df, (PsmDfCols.GENES,), ""
     )
-    df[DiannParquetCols.DECOY] = _get_first_present_column(
-        precursor_df, [PsmDfCols.DECOY], 0
+    df[DiannParquetCols.DECOY] = first_present_column(
+        precursor_df, (PsmDfCols.DECOY,), 0
     )
 
     # N.Term/C.Term mark peptides at the protein N-/C-terminus (from FASTA digestion)
-    df[DiannParquetCols.N_TERM] = _get_first_present_column(
-        precursor_df, ["is_prot_nterm"], 0
+    df[DiannParquetCols.N_TERM] = first_present_column(
+        precursor_df, ("is_prot_nterm",), 0
     )
-    df[DiannParquetCols.C_TERM] = _get_first_present_column(
-        precursor_df, ["is_prot_cterm"], 0
+    df[DiannParquetCols.C_TERM] = first_present_column(
+        precursor_df, ("is_prot_cterm",), 0
     )
 
     # proteotypic unless the peptide maps to multiple (';'-joined) proteins
