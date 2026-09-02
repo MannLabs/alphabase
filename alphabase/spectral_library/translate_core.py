@@ -18,7 +18,7 @@ import tqdm
 
 from alphabase.constants.modification import MOD_DF, ModificationKeys
 from alphabase.numba_wrapper import numba_njit
-from alphabase.psm_reader.keys import LibPsmDfCols, PsmDfCols
+from alphabase.psm_reader.keys import ConstantsClass, PsmDfCols
 from alphabase.utils import explode_multiple_columns
 
 # Candidate precursor columns in order of precedence, for libraries that carry more than
@@ -37,6 +37,34 @@ mod_to_unimod_dict = {
     for mod_name, unimod_id in MOD_DF[["mod_name", "unimod_id"]].to_numpy()
     if unimod_id not in (-1, "-1")
 }
+
+
+class FragmentTableCols(metaclass=ConstantsClass):
+    """Canonical columns of the flattened fragment table.
+
+    Each export renames these to its own dialect. ``PRECURSOR_ROW`` is the positional
+    row of the precursor a fragment belongs to; it is what joins the table back to the
+    precursors and is not written out.
+    """
+
+    PRECURSOR_ROW = "precursor_row"
+    FRAG_TYPE = "frag_type"
+    MZ = "mz"
+    INTENSITY = "intensity"
+    CHARGE = "charge"
+    SERIES_NUMBER = "series_number"
+    LOSS_TYPE = "loss_type"
+
+
+# the per-fragment columns, in the order the exports emit them
+FRAGMENT_VALUE_COLUMNS = [
+    FragmentTableCols.FRAG_TYPE,
+    FragmentTableCols.MZ,
+    FragmentTableCols.INTENSITY,
+    FragmentTableCols.CHARGE,
+    FragmentTableCols.SERIES_NUMBER,
+    FragmentTableCols.LOSS_TYPE,
+]
 
 
 def first_present_column(
@@ -172,54 +200,37 @@ def _get_frag_num(columns: np.ndarray, rows: np.ndarray, frag_len: int) -> list:
     ]
 
 
-def merge_precursor_fragment_df(  # noqa: PLR0913
-    precursor_df: pd.DataFrame,
+def fragment_table(  # noqa: PLR0913
+    frag_start_idx: np.ndarray,
+    frag_stop_idx: np.ndarray,
     fragment_mz_df: pd.DataFrame,
-    fragment_inten_df: pd.DataFrame,
-    top_n_inten: int,
-    frag_type_head: str = "FragmentType",
-    frag_mass_head: str = "FragmentMz",
-    frag_inten_head: str = "RelativeIntensity",
-    frag_charge_head: str = "FragmentCharge",
-    frag_series_head: str = "FragmentNumber",
-    frag_loss_head: str = "FragmentLossType",
-    verbose: bool = True,  # noqa: FBT001, FBT002
+    fragment_intensity_df: pd.DataFrame,
+    *,
+    keep_k_highest: int,
+    verbose: bool = True,
 ) -> pd.DataFrame:
-    """Attach each precursor's most intense fragments and explode to one row each.
+    """Flatten each precursor's most intense fragments into one row per fragment.
 
-    `precursor_df` is the half-built *output* frame and must carry `frag_start_idx` and
-    `frag_stop_idx` to look the fragments up with; the caller drops them afterwards.
     Intensities are normalized to the precursor's most intense fragment, and the
-    `top_n_inten` highest are kept in descending order.
+    `keep_k_highest` highest are kept in descending order. The result carries the
+    canonical columns of :class:`FragmentTableCols`, including `precursor_row` -- the
+    positional row of the precursor -- so it needs no precursor frame to be built and
+    no output frame to be built into. :func:`join_fragments` attaches the precursors.
 
     Parameters
     ----------
-    precursor_df : pd.DataFrame
-        The output frame so far, one row per precursor.
+    frag_start_idx, frag_stop_idx : np.ndarray
+        Per precursor, the half-open row range into the fragment frames. These are
+        absolute offsets, so batching the precursors leaves the fragment frames whole.
 
-    fragment_mz_df, fragment_inten_df : pd.DataFrame
-        The library's fragment frames, indexed by the precursor's index range.
+    fragment_mz_df : pd.DataFrame
+        The library's fragment m/z frame.
 
-    top_n_inten : int
+    fragment_intensity_df : pd.DataFrame
+        The library's fragment intensity frame.
+
+    keep_k_highest : int
         Keep this many fragments per precursor.
-
-    frag_type_head : str
-        Output column name for the fragment series letter.
-
-    frag_mass_head : str
-        Output column name for the fragment m/z.
-
-    frag_inten_head : str
-        Output column name for the normalized fragment intensity.
-
-    frag_charge_head : str
-        Output column name for the fragment charge.
-
-    frag_series_head : str
-        Output column name for the fragment number within its series.
-
-    frag_loss_head : str
-        Output column name for the fragment loss type.
 
     verbose : bool
         Show a progress bar over the precursors.
@@ -227,64 +238,87 @@ def merge_precursor_fragment_df(  # noqa: PLR0913
     Returns
     -------
     pd.DataFrame
-        One row per kept precursor/fragment pair.
+        One row per kept fragment, in :class:`FragmentTableCols` columns.
 
     """
-    df = precursor_df.copy()
     frag_columns = fragment_mz_df.columns.to_numpy().astype("U")
-    frag_type_list = []
-    frag_loss_list = []
-    frag_charge_list = []
-    frag_mass_list = []
-    frag_inten_list = []
-    frag_num_list = []
-    iters = enumerate(
-        df[[LibPsmDfCols.FRAG_START_IDX, LibPsmDfCols.FRAG_STOP_IDX]].to_numpy()
-    )
+    frag_types = []
+    frag_losses = []
+    frag_charges = []
+    frag_masses = []
+    frag_intensities = []
+    frag_numbers = []
+    iters = zip(frag_start_idx, frag_stop_idx)
     if verbose:
         iters = tqdm.tqdm(iters)
-    for _i, (start, end) in iters:
-        intens = fragment_inten_df.iloc[start:end, :].to_numpy(copy=True)
+    for start, end in iters:
+        intens = fragment_intensity_df.iloc[start:end, :].to_numpy(copy=True)
         max_inten = np.amax(intens)
         if max_inten > 0:
             intens /= max_inten
         masses = fragment_mz_df.iloc[start:end, :].to_numpy()
-        sorted_idx = np.argsort(intens.reshape(-1))[-top_n_inten:][::-1]
+        sorted_idx = np.argsort(intens.reshape(-1))[-keep_k_highest:][::-1]
         idx_in_df = np.unravel_index(sorted_idx, masses.shape)
 
         frag_len = end - start
         rows = np.arange(frag_len, dtype=np.int32)[idx_in_df[0]]
         columns = frag_columns[idx_in_df[1]]
 
-        frag_types, loss_types, charges = zip(
+        types, losses, charges = zip(
             *[_get_frag_info_from_column_name(_) for _ in columns]
         )
+        frag_types.append(types)
+        frag_losses.append(losses)
+        frag_charges.append(charges)
+        frag_masses.append(masses[idx_in_df])
+        frag_intensities.append(intens[idx_in_df])
+        frag_numbers.append(_get_frag_num(columns, rows, frag_len))
 
-        frag_type_list.append(frag_types)
-        frag_loss_list.append(loss_types)
-        frag_charge_list.append(charges)
-        frag_mass_list.append(masses[idx_in_df])
-        frag_inten_list.append(intens[idx_in_df])
-        frag_num_list.append(_get_frag_num(columns, rows, frag_len))
-
-    df[frag_type_head] = frag_type_list
-    df[frag_mass_head] = frag_mass_list
-    df[frag_inten_head] = frag_inten_list
-    df[frag_charge_head] = frag_charge_list
-    df[frag_series_head] = frag_num_list
-    df[frag_loss_head] = frag_loss_list
-
-    return explode_multiple_columns(
-        df,
-        [
-            frag_type_head,
-            frag_mass_head,
-            frag_inten_head,
-            frag_charge_head,
-            frag_series_head,
-            frag_loss_head,
-        ],
+    table = pd.DataFrame(
+        {
+            FragmentTableCols.PRECURSOR_ROW: np.arange(len(frag_start_idx)),
+            FragmentTableCols.FRAG_TYPE: frag_types,
+            FragmentTableCols.MZ: frag_masses,
+            FragmentTableCols.INTENSITY: frag_intensities,
+            FragmentTableCols.CHARGE: frag_charges,
+            FragmentTableCols.SERIES_NUMBER: frag_numbers,
+            FragmentTableCols.LOSS_TYPE: frag_losses,
+        }
     )
+    return explode_multiple_columns(table, FRAGMENT_VALUE_COLUMNS)
+
+
+def join_fragments(
+    precursor_df: pd.DataFrame,
+    fragment_df: pd.DataFrame,
+    columns: dict,
+) -> pd.DataFrame:
+    """Repeat each precursor row across its fragments, renamed to `columns`.
+
+    Parameters
+    ----------
+    precursor_df : pd.DataFrame
+        The export's precursor rows, in the order `fragment_df`'s `precursor_row`
+        indexes them.
+
+    fragment_df : pd.DataFrame
+        A :func:`fragment_table` result.
+
+    columns : dict
+        Maps :class:`FragmentTableCols` names to this format's output names. Its order
+        is the order the fragment columns are appended in.
+
+    Returns
+    -------
+    pd.DataFrame
+        One row per precursor/fragment pair, keeping `precursor_df`'s index.
+
+    """
+    rows = fragment_df[FragmentTableCols.PRECURSOR_ROW].to_numpy()
+    joined = precursor_df.iloc[rows].copy()
+    for canonical, name in columns.items():
+        joined[name] = fragment_df[canonical].to_numpy()
+    return joined
 
 
 def mask_fragment_intensity_by_mz_(

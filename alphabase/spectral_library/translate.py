@@ -16,14 +16,26 @@ from alphabase.spectral_library.translate_core import (
     CCS_COLUMNS,
     MOBILITY_COLUMNS,
     RT_COLUMNS,
+    FragmentTableCols,
     create_modified_sequence,
     first_present_column,
+    fragment_table,
     is_nterm_frag,
+    join_fragments,
     mask_fragment_intensity_by_frag_nAA,
     mask_fragment_intensity_by_mz_,
-    merge_precursor_fragment_df,
     mod_to_unimod_dict,
 )
+
+# the SWATH names for the canonical fragment columns, in output order
+SWATH_FRAGMENT_COLUMNS = {
+    FragmentTableCols.FRAG_TYPE: "FragmentType",
+    FragmentTableCols.MZ: "FragmentMz",
+    FragmentTableCols.INTENSITY: "RelativeIntensity",
+    FragmentTableCols.CHARGE: "FragmentCharge",
+    FragmentTableCols.SERIES_NUMBER: "FragmentNumber",
+    FragmentTableCols.LOSS_TYPE: "FragmentLossType",
+}
 
 __all__ = [
     # re-exported from translate_core, where these now live
@@ -31,7 +43,6 @@ __all__ = [
     "is_nterm_frag",
     "mask_fragment_intensity_by_frag_nAA",
     "mask_fragment_intensity_by_mz_",
-    "merge_precursor_fragment_df",
     "mod_to_unimod_dict",
     # this module's own
     "WritingProcess",
@@ -91,9 +102,6 @@ def speclib_to_single_df(
         mod_sep="[]",
     )
 
-    df["frag_start_idx"] = speclib._precursor_df["frag_start_idx"]
-    df["frag_stop_idx"] = speclib._precursor_df["frag_stop_idx"]
-
     df["PrecursorCharge"] = speclib._precursor_df["charge"]
 
     rt = first_present_column(speclib.precursor_df, RT_COLUMNS)
@@ -142,17 +150,19 @@ def speclib_to_single_df(
             max_mask_frag_nAA=min_frag_nAA - 1,
         )
 
-    df = merge_precursor_fragment_df(
-        df,
+    fragments = fragment_table(
+        speclib._precursor_df["frag_start_idx"].to_numpy(),
+        speclib._precursor_df["frag_stop_idx"].to_numpy(),
         speclib._fragment_mz_df,
         speclib._fragment_intensity_df,
-        top_n_inten=keep_k_highest_fragments,
+        keep_k_highest=keep_k_highest_fragments,
         verbose=verbose,
     )
+    df = join_fragments(df, fragments, SWATH_FRAGMENT_COLUMNS)
     df = df[df["RelativeIntensity"] > min_frag_intensity]
     df.loc[df["FragmentLossType"] == "modloss", "FragmentLossType"] = modloss
 
-    return df.drop(["frag_start_idx", "frag_stop_idx"], axis=1)
+    return df
 
 
 def speclib_to_swath_df(

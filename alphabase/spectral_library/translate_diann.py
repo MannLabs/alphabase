@@ -14,11 +14,13 @@ from alphabase.spectral_library.base import SpecLibBase
 from alphabase.spectral_library.translate_core import (
     MOBILITY_COLUMNS,
     RT_COLUMNS,
+    FragmentTableCols,
     create_modified_sequence,
     first_present_column,
+    fragment_table,
+    join_fragments,
     mask_fragment_intensity_by_frag_nAA,
     mask_fragment_intensity_by_mz_,
-    merge_precursor_fragment_df,
     mod_to_unimod_dict,
 )
 
@@ -61,14 +63,14 @@ class DiannParquetCols(metaclass=ConstantsClass):
     SOURCE_ID = "Source.Id"
 
 
-# fragment column names passed to `merge_precursor_fragment_df`
-DIANN_PARQUET_FRAG_HEADS = {
-    "frag_type_head": DiannParquetCols.FRAGMENT_TYPE,
-    "frag_mass_head": DiannParquetCols.PRODUCT_MZ,
-    "frag_inten_head": DiannParquetCols.RELATIVE_INTENSITY,
-    "frag_charge_head": DiannParquetCols.FRAGMENT_CHARGE,
-    "frag_series_head": DiannParquetCols.FRAGMENT_SERIES_NUMBER,
-    "frag_loss_head": DiannParquetCols.FRAGMENT_LOSS_TYPE,
+# the DIA-NN names for the canonical fragment columns, in output order
+DIANN_FRAGMENT_COLUMNS = {
+    FragmentTableCols.FRAG_TYPE: DiannParquetCols.FRAGMENT_TYPE,
+    FragmentTableCols.MZ: DiannParquetCols.PRODUCT_MZ,
+    FragmentTableCols.INTENSITY: DiannParquetCols.RELATIVE_INTENSITY,
+    FragmentTableCols.CHARGE: DiannParquetCols.FRAGMENT_CHARGE,
+    FragmentTableCols.SERIES_NUMBER: DiannParquetCols.FRAGMENT_SERIES_NUMBER,
+    FragmentTableCols.LOSS_TYPE: DiannParquetCols.FRAGMENT_LOSS_TYPE,
 }
 
 # dtype tokens for DIANN_PARQUET_SCHEMA (INT64 / FLOAT=float32 / str)
@@ -124,7 +126,7 @@ _DIANN_FLAG_FIRST_FRAGMENT = 1 << 4
 
 # TODO: go for an OOP approach: a writer class holding the export settings as state, with
 # the precursor mapping / fragment explosion / dtype casting as methods.
-def speclib_to_diann_df(  # noqa: PLR0913, PLR0915
+def speclib_to_diann_df(  # noqa: PLR0913
     speclib: SpecLibBase,
     *,
     translate_mod_dict: Optional[dict] = None,
@@ -250,9 +252,6 @@ def speclib_to_diann_df(  # noqa: PLR0913, PLR0915
     df[DiannParquetCols.EXCLUDE_FROM_QUANT] = 0
     df[DiannParquetCols.SOURCE_ID] = ""
 
-    df[LibPsmDfCols.FRAG_START_IDX] = precursor_df[LibPsmDfCols.FRAG_START_IDX]
-    df[LibPsmDfCols.FRAG_STOP_IDX] = precursor_df[LibPsmDfCols.FRAG_STOP_IDX]
-
     if min_frag_mz > 0 or max_frag_mz > 0:
         mask_fragment_intensity_by_mz_(
             speclib.fragment_mz_df,
@@ -267,14 +266,15 @@ def speclib_to_diann_df(  # noqa: PLR0913, PLR0915
             max_mask_frag_nAA=min_frag_nAA - 1,
         )
 
-    df = merge_precursor_fragment_df(
-        df,
+    fragments = fragment_table(
+        precursor_df[LibPsmDfCols.FRAG_START_IDX].to_numpy(),
+        precursor_df[LibPsmDfCols.FRAG_STOP_IDX].to_numpy(),
         speclib.fragment_mz_df,
         speclib.fragment_intensity_df,
-        top_n_inten=keep_k_highest_fragments,
+        keep_k_highest=keep_k_highest_fragments,
         verbose=verbose,
-        **DIANN_PARQUET_FRAG_HEADS,
     )
+    df = join_fragments(df, fragments, DIANN_FRAGMENT_COLUMNS)
     df = df[df[DiannParquetCols.RELATIVE_INTENSITY] > min_frag_intensity]
     df.loc[
         df[DiannParquetCols.FRAGMENT_LOSS_TYPE] == "modloss",
@@ -289,8 +289,6 @@ def speclib_to_diann_df(  # noqa: PLR0913, PLR0915
             DiannParquetCols.RELATIVE_INTENSITY
         ].idxmax()
         df.loc[base_peak_idx, DiannParquetCols.FLAGS] |= _DIANN_FLAG_FIRST_FRAGMENT
-
-    df = df.drop([LibPsmDfCols.FRAG_START_IDX, LibPsmDfCols.FRAG_STOP_IDX], axis=1)
 
     for name, dtype in DIANN_PARQUET_SCHEMA:
         if dtype == "str":
