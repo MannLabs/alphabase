@@ -1,15 +1,6 @@
-"""Characterization tests for `alphabase.spectral_library.translate`.
+"""Tests for `alphabase.spectral_library.translate`, the SWATH transition list format.
 
-Tests only. No production change.
-
-`translate.py` had no unit test; its only coverage was
-`nbs_tests/spectral_library/translate.ipynb`. These black-box tests pin the
-behaviour of the module as it is today, so the refactor that follows can be
-checked step by step.
-
-Tests named `..._characterization` pin behaviour that is a bug. They record
-what the module does today, not what it should do, and the commit that fixes
-each one is expected to change them.
+The shared machinery these are built on is tested in `test_translate_core.py`.
 """
 
 import io
@@ -22,16 +13,10 @@ import pytest
 from alphabase.peptide.fragment import get_charged_frag_types
 from alphabase.spectral_library.base import SpecLibBase
 from alphabase.spectral_library.translate import (
-    SWATH_FRAGMENT_COLUMNS,
-    create_modified_sequence,
     mod_to_unimod_dict,
     speclib_to_swath_df,
     translate_to_transition_df,
     translate_to_tsv,
-)
-from alphabase.spectral_library.translate_core import (
-    FragmentFilter,
-    explode_top_fragments,
 )
 
 # the libraries hold modified peptides, whose fragment m/z calculation needs
@@ -73,115 +58,6 @@ def _build_speclib(*, rt_column: str = "rt") -> SpecLibBase:
         columns=speclib.charged_frag_types,
     )
     return speclib
-
-
-# --------------------------------------------------------------------------------------
-# create_modified_sequence
-# --------------------------------------------------------------------------------------
-
-
-@pytest.mark.parametrize(
-    ("seq_mods_sites", "kwargs", "expected"),
-    [
-        # no modification: only the terminus markers are added
-        (("PEPTIDEK", "", ""), {}, "_PEPTIDEK_"),
-        # a single side-chain modification, inserted after its residue
-        (("ACDEFGHIK", "Carbamidomethyl@C", "2"), {}, "_AC[Carbamidomethyl]DEFGHIK_"),
-        # site 0 is the peptide N-term, site -1 the C-term
-        (("PEPTIDEK", "Acetyl@Any_N-term", "0"), {}, "_[Acetyl]PEPTIDEK_"),
-        (("PEPTIDEK", "Amidated@Any_C-term", "-1"), {}, "_PEPTIDEK_[Amidated]"),
-        # several modifications are applied from the C-term inwards, so the
-        # earlier sites keep their original offsets
-        (
-            ("ACDEFGHIK", "Carbamidomethyl@C;Oxidation@M", "2;5"),
-            {},
-            "_AC[Carbamidomethyl]DEF[Oxidation]GHIK_",
-        ),
-        # mod_sep and the terminus markers are configurable
-        (
-            ("ACDEFGHIK", "Carbamidomethyl@C", "2"),
-            {"mod_sep": "()", "nterm": "", "cterm": ""},
-            "AC(Carbamidomethyl)DEFGHIK",
-        ),
-        # translate_mod_dict replaces the alphabase names
-        (
-            ("ACDEFGHIK", "Carbamidomethyl@C", "2"),
-            {"translate_mod_dict": {"Carbamidomethyl@C": "UniMod:4"}},
-            "_AC[UniMod:4]DEFGHIK_",
-        ),
-    ],
-)
-def test_create_modified_sequence(seq_mods_sites, kwargs, expected) -> None:
-    """`create_modified_sequence` renders (sequence, mods, mod_sites) as a mod sequence."""
-    assert create_modified_sequence(seq_mods_sites, **kwargs) == expected
-
-
-def test_create_modified_sequence_unimod_dict() -> None:
-    """`mod_to_unimod_dict` maps alphabase mod names onto UniMod ids."""
-    assert mod_to_unimod_dict["Carbamidomethyl@C"] == "UniMod:4"
-    assert mod_to_unimod_dict["Oxidation@M"] == "UniMod:35"
-
-
-# --------------------------------------------------------------------------------------
-# explode_top_fragments
-# --------------------------------------------------------------------------------------
-
-
-def test_explode_top_fragments_keeps_k_highest_per_precursor() -> None:
-    """Each precursor keeps its `keep_k_highest` most intense fragments, most intense first."""
-    speclib = _build_speclib()
-    top_n = 5
-
-    df = explode_top_fragments(
-        speclib.precursor_df,
-        speclib.fragment_mz_df,
-        speclib.fragment_intensity_df,
-        columns=SWATH_FRAGMENT_COLUMNS,
-        fragment_filter=FragmentFilter(
-            keep_k_highest=top_n, min_mz=0, max_mz=0, min_intensity=-1
-        ),
-        verbose=False,
-    )
-
-    assert len(df) == top_n * len(speclib.precursor_df)
-    for _, group in df.groupby(level=0, sort=False):
-        intensities = group["RelativeIntensity"].astype(float).to_numpy()
-        assert len(intensities) == top_n
-        # rows of a precursor come out in descending intensity order
-        assert np.all(np.diff(intensities) <= 0)
-        # intensities are relative to the most intense fragment of the precursor
-        assert intensities[0] == pytest.approx(1.0)
-
-
-def test_explode_top_fragments_annotates_fragments() -> None:
-    """Fragment type, charge, loss type and series number describe the dense column."""
-    speclib = _build_speclib()
-
-    df = explode_top_fragments(
-        speclib.precursor_df,
-        speclib.fragment_mz_df,
-        speclib.fragment_intensity_df,
-        columns=SWATH_FRAGMENT_COLUMNS,
-        fragment_filter=FragmentFilter(
-            keep_k_highest=100, min_mz=0, max_mz=0, min_intensity=-1
-        ),
-        modloss_label="modloss",
-        verbose=False,
-    )
-
-    assert set(df["FragmentType"]) <= {"b", "y"}
-    assert set(df["FragmentCharge"]) == {"1", "2"}
-    assert set(df["FragmentLossType"]) == {"noloss", "modloss"}
-    # the fragment pointers are not carried into the result
-    assert "frag_start_idx" not in df.columns
-
-    n_aa = speclib.precursor_df["nAA"]
-    for precursor_idx, group in df.groupby(level=0, sort=False):
-        frag_len = n_aa.loc[precursor_idx] - 1
-        numbers = group["FragmentNumber"].astype(int)
-        # b ions are numbered from the N-term, y ions from the C-term; both run 1..frag_len
-        assert numbers.min() >= 1
-        assert numbers.max() <= frag_len
 
 
 # --------------------------------------------------------------------------------------
