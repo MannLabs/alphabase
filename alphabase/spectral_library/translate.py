@@ -9,6 +9,13 @@ from alphabase.numba_wrapper import numba_njit
 from alphabase.spectral_library.base import SpecLibBase
 from alphabase.utils import explode_multiple_columns
 
+# pandas renamed `to_csv`'s newline argument in 1.5; alphabase does not pin a minimum
+_CSV_NEWLINE = (
+    {"lineterminator": "\n"}
+    if tuple(int(part) for part in pd.__version__.split(".")[:2]) >= (1, 5)
+    else {"line_terminator": "\n"}
+)
+
 
 # @numba.njit #(cannot use numba for pd.Series)
 def create_modified_sequence(
@@ -166,26 +173,6 @@ def merge_precursor_fragment_df(
         ],
     )
 
-    # try:
-    #     return df.explode([
-    #         frag_type_head,
-    #         frag_mass_head,
-    #         frag_inten_head,
-    #         frag_charge_head,
-    #         frag_loss_head,
-    #         frag_num_head
-    #     ])
-    # except ValueError:
-    #     # df.explode does not allow mulitple columns before pandas version 1.x.x.
-    #     df = df.explode(frag_type_head)
-
-    #     df[frag_mass_head] = _flatten(frag_mass_list)
-    #     df[frag_inten_head] = _flatten(frag_inten_list)
-    #     df[frag_charge_head] = _flatten(frag_charge_list)
-    #     df[frag_loss_head] = _flatten(frag_loss_list)
-    #     df[frag_num_head] = _flatten(frag_num_list)
-    #     return df
-
 
 mod_to_unimod_dict = {}
 for mod_name, unimod_id in MOD_DF[["mod_name", "unimod_id"]].values:
@@ -242,12 +229,6 @@ def speclib_to_single_df(
     min_frag_intensity=0.01,
     min_frag_nAA=0,
     modloss: str = "H3PO4",
-    frag_type_head: str = "FragmentType",
-    frag_mass_head: str = "FragmentMz",
-    frag_inten_head: str = "RelativeIntensity",
-    frag_charge_head: str = "FragmentCharge",
-    frag_loss_head: str = "FragmentLossType",
-    frag_series_head: str = "FragmentNumber",
     verbose=True,
 ) -> pd.DataFrame:
     """
@@ -303,7 +284,6 @@ def speclib_to_single_df(
             df["CCS"] = speclib.precursor_df[ccs_col]
             break
 
-    # df['LabelModifiedSequence'] = df['ModifiedPeptide']
     df["StrippedPeptide"] = speclib.precursor_df["sequence"]
 
     if "precursor_mz" not in speclib._precursor_df.columns:
@@ -320,9 +300,6 @@ def speclib_to_single_df(
 
     if "decoy" in speclib._precursor_df.columns:
         df["Decoy"] = speclib._precursor_df["decoy"]
-
-    # if 'protein_group' in speclib._precursor_df.columns:
-    #     df['ProteinGroups'] = speclib._precursor_df['protein_group']
 
     if min_frag_mz > 0 or max_frag_mz > 0:
         mask_fragment_intensity_by_mz_(
@@ -344,16 +321,10 @@ def speclib_to_single_df(
         speclib._fragment_mz_df,
         speclib._fragment_intensity_df,
         top_n_inten=keep_k_highest_fragments,
-        frag_type_head=frag_type_head,
-        frag_mass_head=frag_mass_head,
-        frag_inten_head=frag_inten_head,
-        frag_charge_head=frag_charge_head,
-        frag_loss_head=frag_loss_head,
-        frag_series_head=frag_series_head,
         verbose=verbose,
     )
     df = df[df["RelativeIntensity"] > min_frag_intensity]
-    df.loc[df[frag_loss_head] == "modloss", frag_loss_head] = modloss
+    df.loc[df["FragmentLossType"] == "modloss", "FragmentLossType"] = modloss
 
     return df.drop(["frag_start_idx", "frag_stop_idx"], axis=1)
 
@@ -387,17 +358,13 @@ class WritingProcess(mp.Process):
             df, batch = self.task_queue.get()
             if df is None:
                 break
-            if tuple([int(i) for i in pd.__version__.split(".")[:2]]) >= (1, 5):
-                newline = dict(lineterminator="\n")
-            else:
-                newline = dict(line_terminator="\n")
             df.to_csv(
                 self.tsv,
                 header=(batch == 0),
                 sep="\t",
                 mode="a",
                 index=False,
-                **newline,
+                **_CSV_NEWLINE,
             )
 
 
@@ -459,11 +426,9 @@ def translate_to_tsv(
         if multiprocessing:
             df_head_queue.put((df, i))
         else:
-            if tuple([int(i) for i in pd.__version__.split(".")[:2]]) >= (1, 5):
-                newline = dict(lineterminator="\n")
-            else:
-                newline = dict(line_terminator="\n")
-            df.to_csv(tsv, header=(i == 0), sep="\t", mode="a", index=False, **newline)
+            df.to_csv(
+                tsv, header=(i == 0), sep="\t", mode="a", index=False, **_CSV_NEWLINE
+            )
     if multiprocessing:
         df_head_queue.put((None, None))
         print(

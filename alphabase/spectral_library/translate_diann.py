@@ -24,8 +24,8 @@ from alphabase.spectral_library.translate import (
 class DiannParquetCols(metaclass=ConstantsClass):
     """Column names of a DIA-NN 1.9.1+ `.parquet` spectral library.
 
-    DIA-NN uses its report-style dot notation here. ``SIGNATURE`` is listed for
-    completeness but is not written: DIA-NN requires third-party libraries to omit it.
+    DIA-NN uses its report-style dot notation here. ``Signature`` is deliberately
+    absent: DIA-NN requires third-party libraries to omit it.
     """
 
     PRECURSOR_ID = "Precursor.Id"
@@ -57,7 +57,6 @@ class DiannParquetCols(metaclass=ConstantsClass):
     GENES = "Genes"
     FLAGS = "Flags"
     SOURCE_ID = "Source.Id"
-    SIGNATURE = "Signature"
 
 
 # fragment column names passed to `merge_precursor_fragment_df`
