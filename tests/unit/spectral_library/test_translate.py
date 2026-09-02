@@ -25,8 +25,8 @@ from alphabase.spectral_library.translate import (
     SWATH_FRAGMENT_COLUMNS,
     create_modified_sequence,
     mod_to_unimod_dict,
-    speclib_to_single_df,
     speclib_to_swath_df,
+    translate_to_transition_df,
     translate_to_tsv,
 )
 from alphabase.spectral_library.translate_core import (
@@ -185,15 +185,15 @@ def test_explode_top_fragments_annotates_fragments() -> None:
 
 
 # --------------------------------------------------------------------------------------
-# speclib_to_single_df
+# translate_to_transition_df
 # --------------------------------------------------------------------------------------
 
 
-def test_speclib_to_single_df_columns() -> None:
+def test_translate_to_transition_df_columns() -> None:
     """The SWATH-like dataframe carries one row per fragment and its precursor columns."""
     speclib = _build_speclib()
 
-    df = speclib_to_single_df(speclib, verbose=False)
+    df = translate_to_transition_df(speclib, verbose=False)
 
     assert list(df.columns) == [
         "ModifiedPeptide",
@@ -222,54 +222,56 @@ def test_speclib_to_single_df_columns() -> None:
     assert set(df["Decoy"]) <= set(precursor_df["decoy"])
 
 
-def test_speclib_to_single_df_modified_peptide_uses_alphabase_mod_names() -> None:
+def test_translate_to_transition_df_modified_peptide_uses_alphabase_mod_names() -> None:
     """Without a translate_mod_dict the mod name is used, stripped of its site."""
     speclib = _build_speclib()
 
-    df = speclib_to_single_df(speclib, verbose=False)
+    df = translate_to_transition_df(speclib, verbose=False)
 
     modified = set(df["ModifiedPeptide"])
     assert "_PEPTIDEK_" in modified
     assert "_AC[Carbamidomethyl]DEFGHIK_" in modified
 
 
-def test_speclib_to_single_df_translate_mod_dict() -> None:
+def test_translate_to_transition_df_translate_mod_dict() -> None:
     """A translate_mod_dict renames the modifications, here onto UniMod ids."""
     speclib = _build_speclib()
 
-    df = speclib_to_single_df(
+    df = translate_to_transition_df(
         speclib, translate_mod_dict=mod_to_unimod_dict, verbose=False
     )
 
     assert "_AC[UniMod:4]DEFGHIK_" in set(df["ModifiedPeptide"])
 
 
-def test_speclib_to_single_df_filters_by_fragment_mz() -> None:
+def test_translate_to_transition_df_filters_by_fragment_mz() -> None:
     """Fragments outside [min_frag_mz, max_frag_mz] are dropped."""
     speclib = _build_speclib()
 
-    df = speclib_to_single_df(speclib, min_frag_mz=300, max_frag_mz=800, verbose=False)
+    df = translate_to_transition_df(
+        speclib, min_frag_mz=300, max_frag_mz=800, verbose=False
+    )
 
     assert len(df) > 0
     assert df["FragmentMz"].astype(float).min() >= 300
     assert df["FragmentMz"].astype(float).max() <= 800
 
 
-def test_speclib_to_single_df_filters_by_intensity() -> None:
+def test_translate_to_transition_df_filters_by_intensity() -> None:
     """Fragments at or below min_frag_intensity are dropped."""
     speclib = _build_speclib()
 
-    df = speclib_to_single_df(speclib, min_frag_intensity=0.5, verbose=False)
+    df = translate_to_transition_df(speclib, min_frag_intensity=0.5, verbose=False)
 
     assert len(df) > 0
     assert df["RelativeIntensity"].astype(float).min() > 0.5
 
 
-def test_speclib_to_single_df_min_frag_nAA_masks_shortest_fragments() -> None:
+def test_translate_to_transition_df_min_frag_nAA_masks_shortest_fragments() -> None:
     """min_frag_nAA masks the b/y fragments below that series number."""
     speclib = _build_speclib()
 
-    df = speclib_to_single_df(
+    df = translate_to_transition_df(
         speclib, min_frag_mz=0, min_frag_intensity=0.0, min_frag_nAA=3, verbose=False
     )
 
@@ -277,11 +279,11 @@ def test_speclib_to_single_df_min_frag_nAA_masks_shortest_fragments() -> None:
     assert df["FragmentNumber"].astype(int).min() >= 3
 
 
-def test_speclib_to_single_df_labels_modloss() -> None:
+def test_translate_to_transition_df_labels_modloss() -> None:
     """The `modloss` loss type is renamed to the given molecule."""
     speclib = _build_speclib()
 
-    df = speclib_to_single_df(
+    df = translate_to_transition_df(
         speclib, min_frag_mz=0, min_frag_intensity=0.0, modloss="H3PO4", verbose=False
     )
 
@@ -292,73 +294,73 @@ def test_speclib_to_single_df_labels_modloss() -> None:
 @pytest.mark.parametrize(
     "rt_column", ["irt_pred", "rt_pred", "rt_norm_pred", "rt", "irt", "rt_norm"]
 )
-def test_speclib_to_single_df_accepts_rt_columns(rt_column: str) -> None:
+def test_translate_to_transition_df_accepts_rt_columns(rt_column: str) -> None:
     """Any of the recognised retention time columns provides RT."""
     speclib = _build_speclib(rt_column=rt_column)
 
-    df = speclib_to_single_df(speclib, verbose=False)
+    df = translate_to_transition_df(speclib, verbose=False)
 
     assert df["RT"].notna().all()
 
 
-def test_speclib_to_single_df_requires_an_rt_column() -> None:
+def test_translate_to_transition_df_requires_an_rt_column() -> None:
     """Without a recognised retention time column the conversion fails."""
     speclib = _build_speclib()
     speclib._precursor_df = speclib._precursor_df.drop(columns=["rt"])
 
     with pytest.raises(ValueError, match="RT"):
-        speclib_to_single_df(speclib, verbose=False)
+        translate_to_transition_df(speclib, verbose=False)
 
 
-def test_speclib_to_single_df_rt_norm_pred_is_an_rt_column() -> None:
+def test_translate_to_transition_df_rt_norm_pred_is_an_rt_column() -> None:
     """`rt_norm_pred` provides RT on its own, and defers to `rt_pred` when both exist.
 
     peptdeep writes `rt_norm_pred` alongside `rt_pred`, so a library predicted by
     peptdeep can carry either.
     """
     speclib = _build_speclib(rt_column="rt_norm_pred")
-    df = speclib_to_single_df(speclib, min_frag_intensity=0.0, verbose=False)
+    df = translate_to_transition_df(speclib, min_frag_intensity=0.0, verbose=False)
     assert df["RT"].notna().all()
 
     speclib = _build_speclib(rt_column="rt_norm_pred")
     speclib.precursor_df["rt_pred"] = speclib.precursor_df["rt_norm_pred"] + 10
-    df = speclib_to_single_df(speclib, min_frag_intensity=0.0, verbose=False)
+    df = translate_to_transition_df(speclib, min_frag_intensity=0.0, verbose=False)
     assert df["RT"].min() >= 10
 
 
-def test_speclib_to_single_df_rt_column_precedence() -> None:
+def test_translate_to_transition_df_rt_column_precedence() -> None:
     """`irt_pred` wins over `rt_pred`, which wins over `rt`."""
     speclib = _build_speclib()
     precursor_df = speclib.precursor_df
     precursor_df["rt_pred"] = precursor_df["rt"] + 10
     precursor_df["irt_pred"] = precursor_df["rt"] + 20
 
-    df = speclib_to_single_df(speclib, min_frag_intensity=0.0, verbose=False)
+    df = translate_to_transition_df(speclib, min_frag_intensity=0.0, verbose=False)
     assert df["RT"].min() >= 20
 
     speclib._precursor_df = precursor_df.drop(columns=["irt_pred"])
-    df = speclib_to_single_df(speclib, min_frag_intensity=0.0, verbose=False)
+    df = translate_to_transition_df(speclib, min_frag_intensity=0.0, verbose=False)
     assert 10 <= df["RT"].min() < 20
 
 
-def test_speclib_to_single_df_mobility_and_ccs() -> None:
+def test_translate_to_transition_df_mobility_and_ccs() -> None:
     """IonMobility and CCS are taken from the precursor dataframe when present."""
     speclib = _build_speclib()
     speclib.precursor_df["mobility_pred"] = 1.0
     speclib.precursor_df["ccs_pred"] = 2.0
 
-    df = speclib_to_single_df(speclib, verbose=False)
+    df = translate_to_transition_df(speclib, verbose=False)
 
     assert (df["IonMobility"] == 1.0).all()
     assert (df["CCS"] == 2.0).all()
 
 
-def test_speclib_to_single_df_calculates_missing_precursor_mz() -> None:
+def test_translate_to_transition_df_calculates_missing_precursor_mz() -> None:
     """precursor_mz is calculated when the precursor dataframe does not carry it."""
     speclib = _build_speclib()
     assert "precursor_mz" not in speclib.precursor_df.columns
 
-    df = speclib_to_single_df(speclib, verbose=False)
+    df = translate_to_transition_df(speclib, verbose=False)
 
     assert (df["PrecursorMz"] > 0).all()
 
@@ -373,9 +375,9 @@ def _read_tsv(buffer: io.StringIO) -> pd.DataFrame:
     return pd.read_csv(buffer, sep="\t")
 
 
-def test_translate_to_tsv_matches_speclib_to_single_df() -> None:
+def test_translate_to_tsv_matches_translate_to_transition_df() -> None:
     """The streamed tsv holds the same rows as the in-memory conversion."""
-    expected = speclib_to_single_df(
+    expected = translate_to_transition_df(
         _build_speclib(), translate_mod_dict=mod_to_unimod_dict, verbose=False
     )
 
@@ -471,7 +473,9 @@ def test_translate_to_tsv_batches_do_not_change_the_output() -> None:
 
 
 @pytest.mark.parametrize("min_frag_nAA", [0, 3])
-def test_speclib_to_single_df_does_not_modify_the_library(min_frag_nAA: int) -> None:
+def test_translate_to_transition_df_does_not_modify_the_library(
+    min_frag_nAA: int,
+) -> None:
     """Exporting leaves the library it is given untouched.
 
     The fragment filters used to be applied to `speclib._fragment_intensity_df` in
@@ -483,7 +487,7 @@ def test_speclib_to_single_df_does_not_modify_the_library(min_frag_nAA: int) -> 
     mz_before = speclib.fragment_mz_df.to_numpy().copy()
     precursor_columns_before = list(speclib.precursor_df.columns)
 
-    df = speclib_to_single_df(
+    df = translate_to_transition_df(
         speclib,
         min_frag_mz=200,
         max_frag_mz=2000,
@@ -526,10 +530,10 @@ def test_repeated_exports_give_the_same_result() -> None:
     """
     speclib = _build_speclib()
 
-    first = speclib_to_single_df(
+    first = translate_to_transition_df(
         speclib, min_frag_mz=300, max_frag_mz=1800, verbose=False
     )
-    second = speclib_to_single_df(
+    second = translate_to_transition_df(
         speclib, min_frag_mz=300, max_frag_mz=1800, verbose=False
     )
 
@@ -537,8 +541,10 @@ def test_repeated_exports_give_the_same_result() -> None:
 
     # and a narrower window first does not shrink what a wider one can find
     speclib = _build_speclib()
-    speclib_to_single_df(speclib, min_frag_mz=1000, max_frag_mz=1100, verbose=False)
-    wide = speclib_to_single_df(
+    translate_to_transition_df(
+        speclib, min_frag_mz=1000, max_frag_mz=1100, verbose=False
+    )
+    wide = translate_to_transition_df(
         speclib, min_frag_mz=300, max_frag_mz=1800, verbose=False
     )
     assert len(wide) == len(first)
@@ -561,7 +567,7 @@ def test_translate_to_tsv_disabled_mz_range_keeps_every_fragment() -> None:
     )
     written = _read_tsv(buffer)
 
-    in_memory = speclib_to_single_df(
+    in_memory = translate_to_transition_df(
         _build_speclib(), min_frag_mz=0, max_frag_mz=0, verbose=False
     )
 
@@ -584,7 +590,7 @@ def test_min_frag_nAA_is_bounded_by_the_precursor_length() -> None:
     n_fragment_rows = len(speclib.fragment_mz_df)
 
     # a window longer than the whole library masks everything and raises nothing
-    df = speclib_to_single_df(
+    df = translate_to_transition_df(
         speclib,
         min_frag_nAA=n_fragment_rows + 2,
         min_frag_mz=0,
@@ -595,11 +601,23 @@ def test_min_frag_nAA_is_bounded_by_the_precursor_length() -> None:
     assert (df["RelativeIntensity"].astype(float) == 0).all()
 
     # a window of 3 leaves the fragments numbered 3 and up, for every precursor
-    df = speclib_to_single_df(
+    df = translate_to_transition_df(
         speclib, min_frag_nAA=3, min_frag_mz=0, max_frag_mz=0, verbose=False
     )
     assert df["FragmentNumber"].astype(int).min() >= 3
     assert set(df["StrippedPeptide"]) == set(speclib.precursor_df["sequence"])
+
+
+def test_speclib_to_single_df_is_a_deprecated_alias() -> None:
+    """The old name still works, and says what to use instead."""
+    from alphabase.spectral_library.translate import speclib_to_single_df
+
+    with pytest.warns(FutureWarning, match="translate_to_transition_df"):
+        deprecated = speclib_to_single_df(_build_speclib(), verbose=False)
+
+    pd.testing.assert_frame_equal(
+        deprecated, translate_to_transition_df(_build_speclib(), verbose=False)
+    )
 
 
 def test_speclib_to_swath_df_returns_none_characterization() -> None:

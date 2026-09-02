@@ -4,6 +4,7 @@ Shared export helpers live in :mod:`alphabase.spectral_library.translate_core`.
 """
 
 import functools
+import warnings
 from typing import Optional
 
 import numpy as np
@@ -133,7 +134,7 @@ PROTEIN_GROUP_COLUMNS = (PsmDfCols.PROTEINS, PsmDfCols.UNIPROT_IDS)
 PROTEIN_IDS_COLUMNS = (PsmDfCols.UNIPROT_IDS, PsmDfCols.PROTEINS)
 
 
-def speclib_to_diann_df(  # noqa: PLR0913
+def translate_to_diann_df(  # noqa: PLR0913
     speclib: SpecLibBase,
     *,
     translate_mod_dict: Optional[dict] = None,
@@ -206,6 +207,17 @@ def speclib_to_diann_df(  # noqa: PLR0913
     )
 
 
+def speclib_to_diann_df(speclib: SpecLibBase, **kwargs) -> pd.DataFrame:
+    """Deprecated alias of :func:`translate_to_diann_df`."""
+    warnings.warn(
+        "`alphabase.spectral_library.translate_diann.speclib_to_diann_df()` is "
+        "deprecated. Please use "
+        "`alphabase.spectral_library.translate_diann.translate_to_diann_df()` instead.",
+        FutureWarning,
+    )
+    return translate_to_diann_df(speclib, **kwargs)
+
+
 def _precursors_to_diann_df(  # noqa: PLR0913  the frames and the export settings
     precursor_df: pd.DataFrame,
     fragment_mz_df: pd.DataFrame,
@@ -218,7 +230,7 @@ def _precursors_to_diann_df(  # noqa: PLR0913  the frames and the export setting
 ) -> pd.DataFrame:
     """Translate precursors and their fragments into DIA-NN parquet rows.
 
-    The dataframe-level implementation of :func:`speclib_to_diann_df`, so that a batch
+    The dataframe-level implementation of :func:`translate_to_diann_df`, so that a batch
     of precursors can be translated without building a `SpecLibBase` around it.
     """
     if translate_mod_dict is None:
@@ -342,7 +354,7 @@ def translate_to_parquet(  # noqa: PLR0913
     """Translate an alphabase library into a DIA-NN 1.9.1+ parquet spectral library.
 
     The written parquet uses DIA-NN's report-style column schema (see
-    :func:`speclib_to_diann_df`) and can be imported by DIA-NN or read back with
+    :func:`translate_to_diann_df`) and can be imported by DIA-NN or read back with
     :class:`alphabase.spectral_library.reader.LibraryReaderBase`.
 
     Precursors are processed in batches and streamed to a single parquet file, so large

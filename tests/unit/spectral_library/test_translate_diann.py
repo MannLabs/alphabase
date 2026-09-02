@@ -10,7 +10,7 @@ from alphabase.spectral_library.reader import LibraryReaderBase
 from alphabase.spectral_library.translate_diann import (
     DIANN_PARQUET_COLUMN_ORDER,
     DIANN_PARQUET_SCHEMA,
-    speclib_to_diann_df,
+    translate_to_diann_df,
     translate_to_parquet,
 )
 
@@ -50,11 +50,11 @@ def _build_speclib() -> SpecLibBase:
     return speclib
 
 
-def test_speclib_to_diann_df_columns_and_mod_format() -> None:
+def test_translate_to_diann_df_columns_and_mod_format() -> None:
     """The DIA-NN dataframe matches DIA-NN's schema, dtypes and (UniMod:N) sequences."""
     speclib = _build_speclib()
 
-    df = speclib_to_diann_df(
+    df = translate_to_diann_df(
         speclib, min_frag_mz=0, max_frag_mz=0, min_frag_intensity=0.0, verbose=False
     )
 
@@ -94,7 +94,7 @@ def test_speclib_to_diann_df_columns_and_mod_format() -> None:
 @pytest.mark.parametrize(
     "rt_column", ["irt_pred", "rt_pred", "rt_norm_pred", "rt", "irt", "rt_norm"]
 )
-def test_speclib_to_diann_df_accepts_rt_columns(rt_column: str) -> None:
+def test_translate_to_diann_df_accepts_rt_columns(rt_column: str) -> None:
     """Any of the recognised retention time columns provides RT.
 
     The candidate columns are shared with the transition list format, so both
@@ -103,18 +103,18 @@ def test_speclib_to_diann_df_accepts_rt_columns(rt_column: str) -> None:
     speclib = _build_speclib()
     speclib.precursor_df.rename(columns={"rt": rt_column}, inplace=True)  # noqa: PD002
 
-    df = speclib_to_diann_df(
+    df = translate_to_diann_df(
         speclib, min_frag_mz=0, max_frag_mz=0, min_frag_intensity=0.0, verbose=False
     )
 
     assert df["RT"].notna().all()
 
 
-def test_speclib_to_diann_df_flags() -> None:
+def test_translate_to_diann_df_flags() -> None:
     """DIA-NN `Flags`: bit 0 on every fragment, bit 4 on one base peak per precursor."""
     speclib = _build_speclib()
 
-    df = speclib_to_diann_df(
+    df = translate_to_diann_df(
         speclib, min_frag_mz=0, max_frag_mz=0, min_frag_intensity=0.0, verbose=False
     )
 
@@ -131,7 +131,7 @@ def test_speclib_to_diann_df_flags() -> None:
         assert top["Flags"] & (1 << 4) > 0
 
 
-def test_speclib_to_diann_df_flags_one_base_peak_per_precursor_row() -> None:
+def test_translate_to_diann_df_flags_one_base_peak_per_precursor_row() -> None:
     """Precursor rows that share a peptidoform and charge each get their own base peak.
 
     The base peak used to be found by grouping on `Precursor.Id`, which is only the
@@ -158,7 +158,7 @@ def test_speclib_to_diann_df_flags_one_base_peak_per_precursor_row() -> None:
         rng.random(speclib.fragment_mz_df.shape), columns=speclib.charged_frag_types
     )
 
-    df = speclib_to_diann_df(
+    df = translate_to_diann_df(
         speclib, min_frag_mz=0, max_frag_mz=0, min_frag_intensity=0.0, verbose=False
     )
 
@@ -168,6 +168,18 @@ def test_speclib_to_diann_df_flags_one_base_peak_per_precursor_row() -> None:
     assert is_base_peak.sum() == len(speclib.precursor_df)
     # and each is the most intense fragment of its own precursor
     assert (df.loc[is_base_peak, "Relative.Intensity"] == 1.0).all()
+
+
+def test_speclib_to_diann_df_is_a_deprecated_alias() -> None:
+    """The old name still works, and says what to use instead."""
+    from alphabase.spectral_library.translate_diann import speclib_to_diann_df
+
+    with pytest.warns(FutureWarning, match="translate_to_diann_df"):
+        deprecated = speclib_to_diann_df(_build_speclib(), verbose=False)
+
+    pd.testing.assert_frame_equal(
+        deprecated, translate_to_diann_df(_build_speclib(), verbose=False)
+    )
 
 
 def test_translate_to_parquet_roundtrip(tmp_path) -> None:

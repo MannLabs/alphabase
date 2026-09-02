@@ -11,6 +11,7 @@ Shared export helpers live in :mod:`alphabase.spectral_library.translate_core`.
 
 import functools
 import multiprocessing as mp
+import warnings
 from typing import IO, Optional, Union
 
 import pandas as pd
@@ -66,7 +67,7 @@ def _precursors_to_swath_df(
 ) -> pd.DataFrame:
     """Translate precursors and their fragments into transition list rows.
 
-    The dataframe-level implementation of :func:`speclib_to_single_df`, so that a batch
+    The dataframe-level implementation of :func:`translate_to_transition_df`, so that a batch
     of precursors can be translated without building a `SpecLibBase` around it.
     """
     df = pd.DataFrame(index=precursor_df.index)
@@ -122,7 +123,7 @@ def _precursors_to_swath_df(
     )
 
 
-def speclib_to_single_df(  # noqa: PLR0913  one argument per output column
+def translate_to_transition_df(  # noqa: PLR0913  one argument per output column
     speclib: SpecLibBase,
     *,
     translate_mod_dict: Optional[dict] = None,
@@ -142,7 +143,8 @@ def speclib_to_single_df(  # noqa: PLR0913  one argument per output column
 ) -> pd.DataFrame:
     """Convert an alphabase library into a transition list dataframe.
 
-    The library is not modified.
+    One row per precursor/fragment pair, in Spectronaut's column names. The library is
+    not modified.
 
     Parameters
     ----------
@@ -215,7 +217,7 @@ def speclib_to_swath_df(
     max_frag_mz: float = 2000,
     min_frag_intensity: float = 0.01,
 ) -> pd.DataFrame:
-    speclib_to_single_df(
+    translate_to_transition_df(
         speclib,
         translate_mod_dict=None,
         keep_k_highest_fragments=keep_k_highest_fragments,
@@ -223,6 +225,17 @@ def speclib_to_swath_df(
         max_frag_mz=max_frag_mz,
         min_frag_intensity=min_frag_intensity,
     )
+
+
+def speclib_to_single_df(speclib: SpecLibBase, **kwargs) -> pd.DataFrame:
+    """Deprecated alias of :func:`translate_to_transition_df`."""
+    warnings.warn(
+        "`alphabase.spectral_library.translate.speclib_to_single_df()` is deprecated. "
+        "Please use "
+        "`alphabase.spectral_library.translate.translate_to_transition_df()` instead.",
+        FutureWarning,
+    )
+    return translate_to_transition_df(speclib, **kwargs)
 
 
 def _write_tsv(tsv: Union[str, IO], df: pd.DataFrame, batch_start: int) -> None:
