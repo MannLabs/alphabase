@@ -281,7 +281,9 @@ def test_speclib_to_single_df_labels_modloss() -> None:
     assert "modloss" not in set(df["FragmentLossType"])
 
 
-@pytest.mark.parametrize("rt_column", ["irt_pred", "rt_pred", "rt", "irt", "rt_norm"])
+@pytest.mark.parametrize(
+    "rt_column", ["irt_pred", "rt_pred", "rt_norm_pred", "rt", "irt", "rt_norm"]
+)
 def test_speclib_to_single_df_accepts_rt_columns(rt_column: str) -> None:
     """Any of the recognised retention time columns provides RT."""
     speclib = _build_speclib(rt_column=rt_column)
@@ -298,6 +300,22 @@ def test_speclib_to_single_df_requires_an_rt_column() -> None:
 
     with pytest.raises(ValueError, match="RT"):
         speclib_to_single_df(speclib, verbose=False)
+
+
+def test_speclib_to_single_df_rt_norm_pred_is_an_rt_column() -> None:
+    """`rt_norm_pred` provides RT on its own, and defers to `rt_pred` when both exist.
+
+    peptdeep writes `rt_norm_pred` alongside `rt_pred`, so a library predicted by
+    peptdeep can carry either.
+    """
+    speclib = _build_speclib(rt_column="rt_norm_pred")
+    df = speclib_to_single_df(speclib, min_frag_intensity=0.0, verbose=False)
+    assert df["RT"].notna().all()
+
+    speclib = _build_speclib(rt_column="rt_norm_pred")
+    speclib.precursor_df["rt_pred"] = speclib.precursor_df["rt_norm_pred"] + 10
+    df = speclib_to_single_df(speclib, min_frag_intensity=0.0, verbose=False)
+    assert df["RT"].min() >= 10
 
 
 def test_speclib_to_single_df_rt_column_precedence() -> None:
@@ -527,18 +545,6 @@ def test_translate_to_tsv_batch_slice_warns_characterization() -> None:
         translate_to_tsv(speclib, io.StringIO(), batch_size=2, multiprocessing=False)
 
     assert "precursor_mz" not in speclib.precursor_df.columns
-
-
-def test_speclib_to_single_df_rejects_rt_norm_pred_characterization() -> None:
-    """BUG: `rt_norm_pred` is not recognised as a retention time column.
-
-    peptdeep writes `rt_norm_pred` alongside `rt_pred`, but only the latter is
-    in the candidate list.
-    """
-    speclib = _build_speclib(rt_column="rt_norm_pred")
-
-    with pytest.raises(ValueError, match="RT"):
-        speclib_to_single_df(speclib, verbose=False)
 
 
 def test_min_frag_nAA_reaches_into_the_next_precursor_characterization() -> None:

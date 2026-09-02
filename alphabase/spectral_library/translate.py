@@ -2,8 +2,8 @@
 
 The exported table is a *transition list*: one row per precursor/fragment pair, the
 shape SRM/DIA tools use for an assay library. It carries Spectronaut's column names
-(`ModifiedPeptide`, `StrippedPeptide`, `RelativeIntensity`, ...), which Spectronaut,
-DIA-NN's legacy tsv reader and MaxDIA all accept, and which
+(`ModifiedPeptide`, `StrippedPeptide`, `RelativeIntensity`, ...), which both Spectronaut
+and DIA-NN's legacy tsv reader accept, and which
 :class:`alphabase.spectral_library.reader.SWATHLibraryReader` reads back.
 
 Shared export helpers live in :mod:`alphabase.spectral_library.translate_core`.

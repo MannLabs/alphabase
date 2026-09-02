@@ -28,7 +28,7 @@ from alphabase.utils import explode_multiple_columns
 # read the same source columns, so the order is shared; the target column names are not,
 # and stay in the format modules. Spelled out, because `PsmDfCols` has constants for the
 # measured columns but not for the predicted ones that peptdeep writes.
-RT_COLUMNS = ("irt_pred", "rt_pred", "rt", "irt", "rt_norm")
+RT_COLUMNS = ("irt_pred", "rt_pred", "rt_norm_pred", "rt", "irt", "rt_norm")
 MOBILITY_COLUMNS = ("mobility_pred", "mobility")
 CCS_COLUMNS = ("ccs_pred", "ccs")
 

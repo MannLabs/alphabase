@@ -91,6 +91,25 @@ def test_speclib_to_diann_df_columns_and_mod_format() -> None:
     assert set(df.loc[df["Proteotypic"] == 0, "Stripped.Sequence"]) == {"ACDEFGHIK"}
 
 
+@pytest.mark.parametrize(
+    "rt_column", ["irt_pred", "rt_pred", "rt_norm_pred", "rt", "irt", "rt_norm"]
+)
+def test_speclib_to_diann_df_accepts_rt_columns(rt_column: str) -> None:
+    """Any of the recognised retention time columns provides RT.
+
+    The candidate columns are shared with the transition list format, so both
+    formats accept `rt_norm_pred` as peptdeep writes it.
+    """
+    speclib = _build_speclib()
+    speclib.precursor_df.rename(columns={"rt": rt_column}, inplace=True)  # noqa: PD002
+
+    df = speclib_to_diann_df(
+        speclib, min_frag_mz=0, max_frag_mz=0, min_frag_intensity=0.0, verbose=False
+    )
+
+    assert df["RT"].notna().all()
+
+
 def test_speclib_to_diann_df_flags() -> None:
     """DIA-NN `Flags`: bit 0 on every fragment, bit 4 on one base peak per precursor."""
     speclib = _build_speclib()
