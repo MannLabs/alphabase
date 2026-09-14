@@ -19,7 +19,7 @@ from alphabase.psm_reader.utils import (
     keep_modifications,
     translate_modifications,
 )
-from alphabase.utils import _get_delimiter
+from alphabase.utils import _coerce_object_nan_to_empty_string, _get_delimiter
 from alphabase.yaml_utils import load_yaml
 
 #: See `psm_reader.yaml <https://github.com/MannLabs/alphabase/blob/main/alphabase/constants/const_files/psm_reader.yaml>`_
@@ -265,10 +265,20 @@ class PSMReaderBase(ABC):
         filename : str | pathlib.Path | io.StringIO
             The file path to the PSM file or the file in the io.StringIO.
 
+
+        Returns
+        -------
+        DataFrame.
+            - Missing values in object columns are encoded as empty strings.
+            - Missing values in numeric columns are encoded as np.nan
+
         """
         if isinstance(filename, io.StringIO):
             sep = _get_delimiter(filename)
-            return pd.read_csv(filename, sep=sep, keep_default_na=True)
+            df = pd.read_csv(filename, sep=sep, keep_default_na=True)
+            # NAs have a special meaning as they indicate unresolved modifications
+            # Use empty strings in object/string columns to indicate missing values
+            return _coerce_object_nan_to_empty_string(df)
 
         file_path = Path(filename)
 
@@ -276,7 +286,11 @@ class PSMReaderBase(ABC):
             return pd.read_parquet(file_path)
 
         sep = _get_delimiter(str(file_path))
-        return pd.read_csv(file_path, sep=sep, keep_default_na=True)
+        # NAs have a special meaning as they indicate unresolved modifications
+        # Use empty strings in object/string columns to indicate missing values
+        return _coerce_object_nan_to_empty_string(
+            pd.read_csv(file_path, sep=sep, keep_default_na=True)
+        )
 
     def _get_actual_column(
         self,
