@@ -240,13 +240,13 @@ class MaxQuantReader(ModifiedSequenceReader):
     def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
         """MaxQuant-specific preprocessing of output data."""
         df = df[~pd.isna(df["Retention time"])]
-        df.fillna("", inplace=True)
 
         # remove MBR PSMs as they are currently not supported and will crash import
         mapped_columns = get_column_mapping_for_df(self.column_mapping, df)
         if PsmDfCols.SCAN_NUM in mapped_columns:
             scan_num_col = mapped_columns[PsmDfCols.SCAN_NUM]
-            no_ms2_mask = df[scan_num_col] == ""
+            # MBR PSMs carry no scan number: blank in a text column, NaN in a numeric one
+            no_ms2_mask = df[scan_num_col].isna() | (df[scan_num_col] == "")
             if (num_no_ms2_mask := np.sum(no_ms2_mask)) > 0:
                 warnings.warn(
                     f"MaxQuant PSM file contains {num_no_ms2_mask} MBR PSMs without MS2 scan. This is not yet supported and rows containing MBR PSMs will be removed."

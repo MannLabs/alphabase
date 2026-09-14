@@ -18,6 +18,7 @@ from alphabase.psm_reader.psm_reader import (
     PSMReaderBase,
     psm_reader_provider,
 )
+from alphabase.utils import _coerce_object_nan_to_empty_string
 
 
 class SageModificationTranslator:
@@ -669,14 +670,14 @@ class SageReaderTSV(SageReaderBase):
     """Reader for Sage output files in TSV format."""
 
     def _load_file(self, filename: str) -> pd.DataFrame:
-        return pd.read_csv(filename, sep="\t")
+        return _coerce_object_nan_to_empty_string(pd.read_csv(filename, sep="\t"))
 
 
 class SageReaderParquet(SageReaderBase):
     """Reader for Sage output files in parquet format."""
 
     def _load_file(self, filename: str) -> pd.DataFrame:
-        return pd.read_parquet(filename)
+        return _coerce_object_nan_to_empty_string(pd.read_parquet(filename))
 
 
 def register_readers() -> None:
