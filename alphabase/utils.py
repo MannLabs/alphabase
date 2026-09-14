@@ -70,3 +70,53 @@ def _get_delimiter(file_path: str) -> str:
         return ","
     else:
         return "\t"
+
+
+def _coerce_object_nan_to_empty_string(df: pd.DataFrame) -> pd.DataFrame:
+    """Coerce NaN values in object and string columns to an empty string.
+
+    Returns
+    -------
+    Copy of dataframe with coerced columns
+
+    Example
+    -------
+    .. code-block:: python
+
+        df["numeric_column"]
+        >   0    1.0
+            1    2.0
+            2    NaN
+            Name: "numeric_column", dtype: float64
+
+        df["object_column"]
+        >   0    A
+            1    B
+            2    nan
+            Name: "object_column", dtype: object
+
+        new_df = _coerce_nan_to_missing_string(df)
+
+        pd.testing.assert_series_equal(new_df["numeric_column], df["numeric_column"])
+        new_df["object_column"]
+        >   0    A
+            1    B
+            2    ""
+            Name: "object_column", dtype: object
+
+    """
+    df = df.copy()
+    for column in df.columns:
+        if len(df) > 0 and df[column].isna().all():
+            # a column holding only missing values carries no type information: pandas
+            # infers float64, but alphabase expects text (an unpopulated `Genes` column).
+            # Assigning avoids fillna's deprecated object-dtype downcasting.
+            df[column] = ""
+        elif pd.api.types.is_object_dtype(df[column]) or pd.api.types.is_string_dtype(
+            df[column]
+        ):
+            # StringDtype covers pandas' `string[...]` variants, which are neither
+            # `object` nor numeric and become the default for text from pandas 3 on
+            df[column] = df[column].fillna("")
+
+    return df
