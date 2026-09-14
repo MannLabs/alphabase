@@ -13,7 +13,6 @@ from alphabase.psm_reader.psm_reader import (
     PSMReaderBase,
     psm_reader_provider,
 )
-from alphabase.utils import _coerce_object_nan_to_empty_string
 
 
 def _convert_one_pfind_mod(mod: str) -> Optional[str]:  # noqa:  C901 too complex (11 > 10) TODO: refactor
@@ -134,12 +133,6 @@ class pFindReader(PSMReaderBase):  # noqa: N801 name `pFindReader` should use Ca
 
     def _translate_modifications(self) -> None:
         pass
-
-    def _load_file(self, filename: str) -> pd.DataFrame:
-        """Load a pFind output file to a DataFrame."""
-        return _coerce_object_nan_to_empty_string(
-            pd.read_csv(filename, index_col=False, sep="\t", keep_default_na=True)
-        )
 
     def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
         """pFind-specific preprocessing of output data."""

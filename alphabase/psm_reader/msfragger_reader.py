@@ -414,12 +414,6 @@ class MSFraggerPsmTsvReader(PSMReaderBase):
     def _translate_modifications(self) -> None:
         """No-op: modification translation is handled in _load_modifications."""
 
-    def _load_file(self, filename: str) -> pd.DataFrame:
-        """Load MSFragger PSM TSV file."""
-        return _coerce_object_nan_to_empty_string(
-            pd.read_csv(filename, sep="\t", keep_default_na=True)
-        )
-
     def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
         """MSFragger PSM TSV preprocessing."""
         df[[PsmDfCols.RAW_NAME, PsmDfCols.SCAN_NUM]] = (
