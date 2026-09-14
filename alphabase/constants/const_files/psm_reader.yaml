@@ -673,6 +673,9 @@ diann: # 1.8.1
     - "Modified.Sequence"
   modification_mapping_type: 'maxquant'
 
+# PG: Protein group/Protein-level
+# EG: Elution group-level (co-eluted, modified sequence)
+# FG: Fragment group-level (Precursors)
 spectronaut_report:
   reader_type: spectronaut_report
   rt_unit: minute
@@ -684,11 +687,20 @@ spectronaut_report:
     'proteins': ['PG.ProteinNames','PG.ProteinGroups']
     'genes': 'PG.Genes'
     'uniprot_ids': 'PG.UniProtIds'
-    'charge': 'charge'
+    'charge':
+      - 'charge'
+      - 'FG.Charge'
+    'intensity':
+      - 'PG.Quantity'
+    'precursor_id':
+      - 'FG.XICDBID'
+      - 'EG.PrecursorId'
+      - 'FG.LabeledSequence'
+    'precursor_intensity':
+      - 'FG.Quantity'
   mod_seq_columns:
     - 'ModifiedSequence'
-  precursor_id_columns:
-    - "EG.PrecursorId"
+    - 'EG.ModifiedSequence'
   modification_mapping_type: 'maxquant'
 
 spectronaut:
@@ -705,6 +717,8 @@ spectronaut:
     'mobility': ['Mobility','IonMobility','PrecursorIonMobility']
     'proteins': ['Protein Name','ProteinId','ProteinID','ProteinName','ProteinGroup','ProteinGroups']
     'uniprot_ids': ['UniProtIds','UniProtID','UniprotId']
+    'precursor_id':
+      - "EG.PrecursorId"
     'genes': ['Genes','Gene','GeneName','GeneNames']
   mod_seq_columns:
     - 'ModifiedPeptide'
@@ -713,8 +727,6 @@ spectronaut:
     - 'ModifiedPeptideSequence'
     - 'LabeledSequence'
     - 'FullUniModPeptideName'
-  precursor_id_columns:
-    - "EG.PrecursorId"
   modification_mapping_type: 'maxquant'
 
 library_reader_base:
