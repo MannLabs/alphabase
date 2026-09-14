@@ -178,11 +178,9 @@ class SpectronautReportReader(ModifiedSequenceReader):
         )
         mod_seq_available = self.mod_seq_column is not None
 
-        # Return early if charge and modified sequence are available
         if charge_available and mod_seq_available:
             return df
 
-        # If precursor_id is missing, there is no way to extract the information
         if precursor_id_column is None:
             warnings.warn(
                 "Cannot extract charge and modified sequence column from available columns."
@@ -198,8 +196,6 @@ class SpectronautReportReader(ModifiedSequenceReader):
             )
 
         if not mod_seq_available:
-            # `import_file()` sets mod_seq_column to None. Update to extracted column (standardized name)
-            # otherwise `_load_modifications()` looks up a `None` column
             self.mod_seq_column = PsmDfCols.MODIFIED_SEQUENCE
             df[self.mod_seq_column] = self._extract_mod_seq_from_precursor_column(
                 df[precursor_id_column]
