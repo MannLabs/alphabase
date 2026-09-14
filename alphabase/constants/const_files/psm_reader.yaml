@@ -690,6 +690,7 @@ spectronaut_report:
     'proteins':
       - 'PG.ProteinNames'
       - 'PG.ProteinGroups'
+      - 'PG.ProteinAccessions'
     'genes': 'PG.Genes'
     'uniprot_ids': 'PG.UniProtIds'
     'charge':
@@ -698,11 +699,18 @@ spectronaut_report:
     'intensity':
       - 'PG.Quantity'
     'precursor_id':
-      - 'FG.XICDBID'
       - 'EG.PrecursorId'
       - 'FG.LabeledSequence'
+      - 'FG.XICDBID'
     'precursor_intensity':
       - 'FG.Quantity'
+    'precursor_mz': 'FG.PrecMz'
+    'sequence':
+      - "PEP.StrippedSequence"
+    'fdr':
+      - "FG.Qvalue"
+    'protein_fdr':
+      - "PG.QValue (Run-Wise)"
   mod_seq_columns:
     - 'ModifiedSequence'
     - 'EG.ModifiedSequence'
