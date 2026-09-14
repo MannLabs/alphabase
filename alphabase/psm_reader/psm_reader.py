@@ -283,7 +283,7 @@ class PSMReaderBase(ABC):
         file_path = Path(filename)
 
         if file_path.suffix == ".parquet":
-            return pd.read_parquet(file_path)
+            return _coerce_object_nan_to_empty_string(pd.read_parquet(file_path))
 
         sep = _get_delimiter(str(file_path))
         # NAs have a special meaning as they indicate unresolved modifications
