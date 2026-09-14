@@ -75,6 +75,9 @@ def _get_delimiter(file_path: str) -> str:
 def _coerce_object_nan_to_empty_string(df: pd.DataFrame) -> pd.DataFrame:
     """Coerce NaN values in object and string columns to an empty string.
 
+    NAs have a special meaning in alphabase as they indicate unresolved modifications.
+    Use empty strings in object/string columns to indicate missing values.
+
     Returns
     -------
     Copy of dataframe with coerced columns
