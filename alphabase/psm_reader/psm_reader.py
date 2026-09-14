@@ -268,7 +268,7 @@ class PSMReaderBase(ABC):
         """
         if isinstance(filename, io.StringIO):
             sep = _get_delimiter(filename)
-            return pd.read_csv(filename, sep=sep, keep_default_na=False)
+            return pd.read_csv(filename, sep=sep, keep_default_na=True)
 
         file_path = Path(filename)
 
@@ -276,7 +276,7 @@ class PSMReaderBase(ABC):
             return pd.read_parquet(file_path)
 
         sep = _get_delimiter(str(file_path))
-        return pd.read_csv(file_path, sep=sep, keep_default_na=False)
+        return pd.read_csv(file_path, sep=sep, keep_default_na=True)
 
     def _get_actual_column(
         self,
