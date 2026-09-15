@@ -16,7 +16,7 @@ from alphabase.psm_reader.psm_reader import (
     psm_reader_provider,
     psm_reader_yaml,
 )
-from alphabase.utils import _coerce_object_nan_to_empty_string
+from alphabase.utils import _sanitize_missing_values
 
 
 def _is_all_fragger_decoy(proteins: list[str]) -> bool:
@@ -493,7 +493,7 @@ class MSFraggerPepXMLReader(PSMReaderBase):
 
     def _load_file(self, filename: str) -> pd.DataFrame:
         """Load a MsFragger output file to a DataFrame."""
-        return _coerce_object_nan_to_empty_string(pepxml.DataFrame(filename))
+        return _sanitize_missing_values(pepxml.DataFrame(filename))
 
     def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
         """MsFragger-specific preprocessing of output data."""
