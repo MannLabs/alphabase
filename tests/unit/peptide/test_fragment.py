@@ -161,11 +161,13 @@ def test_flatten_fragments_retains_expected_fragments(
     )
 
     # Then
-    assert len(frag_df) == keep.sum()
-    np.testing.assert_array_equal(frag_df["mz"].values, _flat(MZ, PEAK_MZ_DTYPE)[keep])
-    np.testing.assert_array_equal(
-        frag_df["intensity"].values, _flat(INTENSITY, PEAK_INTENSITY_DTYPE)[keep]
+    expected_df = pd.DataFrame(
+        {
+            "mz": _flat(MZ, PEAK_MZ_DTYPE)[keep],
+            "intensity": _flat(INTENSITY, PEAK_INTENSITY_DTYPE)[keep],
+        }
     )
+    pd.testing.assert_frame_equal(frag_df[["mz", "intensity"]], expected_df)
 
 
 @pytest.mark.requires_numba
@@ -173,21 +175,27 @@ def test_flatten_fragments_annotates_retained_fragments(library):
     """Each annotation column describes the dense slot of its fragment."""
     # Given
     precursor_df, mz_df, intensity_df = library
+    # position is the dense row within the precursor, number counts the ion series:
+    # b_modloss forward from position 0, y backward over ROWS_PER_PRECURSOR rows
+    expected_df = pd.DataFrame(
+        {
+            "mz": np.array([100.0, 110.0, 120.0, 121.0, 131.0], dtype=PEAK_MZ_DTYPE),
+            "intensity": np.array(
+                [0.11, 0.82, 0.93, 0.48, 0.61], dtype=PEAK_INTENSITY_DTYPE
+            ),
+            "type": np.array([121, 121, 121, 98, 98], dtype=np.int8),
+            "loss_type": np.array([0, 0, 0, 98, 98], dtype=np.int16),
+            "charge": np.array([1, 1, 1, 1, 1], dtype=np.int8),
+            "number": np.array([2, 1, 2, 1, 2], dtype=np.uint32),
+            "position": np.array([0, 1, 0, 0, 1], dtype=np.uint32),
+        }
+    )
 
     # When
     _, frag_df = flatten_fragments(precursor_df, mz_df, intensity_df)
 
     # Then
-    np.testing.assert_array_equal(
-        frag_df["mz"].values, _flat(MZ, PEAK_MZ_DTYPE)[_flat(KEEP_UNFILTERED, bool)]
-    )
-    # position is the dense row of the fragment within its precursor
-    np.testing.assert_array_equal(frag_df["position"].values, [0, 1, 0, 0, 1])
-    # b_modloss counts forward, y counts backward over ROWS_PER_PRECURSOR rows
-    np.testing.assert_array_equal(frag_df["number"].values, [2, 1, 2, 1, 2])
-    np.testing.assert_array_equal(frag_df["type"].values, [121, 121, 121, 98, 98])
-    np.testing.assert_array_equal(frag_df["loss_type"].values, [0, 0, 0, 98, 98])
-    np.testing.assert_array_equal(frag_df["charge"].values, [1, 1, 1, 1, 1])
+    pd.testing.assert_frame_equal(frag_df, expected_df)
 
 
 @pytest.mark.requires_numba
