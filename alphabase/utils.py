@@ -96,7 +96,7 @@ def _sanitize_missing_values(df: pd.DataFrame) -> pd.DataFrame:
             2    nan
             Name: "object_column", dtype: object
 
-        new_df = _coerce_nan_to_missing_string(df)
+        new_df = _sanitize_missing_values(df)
 
         pd.testing.assert_series_equal(new_df["numeric_column], df["numeric_column"])
         new_df["object_column"]
