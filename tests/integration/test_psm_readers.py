@@ -10,7 +10,6 @@ import logging
 import os
 from io import StringIO
 from pathlib import Path
-from unittest import skip
 
 import numpy as np
 import pandas as pd
@@ -421,7 +420,6 @@ def test_spectronaut_v20_reader() -> None:
     _assert_reference_df_equal(reader.psm_df, "spectronaut_v20")
 
 
-@skip  # TODO currently not working due to missing column EG.PrecursorId in input data
 def test_spectronaut_report_reader_186() -> None:
     """Test the Spectronaut report reader with extended input from v18.6."""
 
