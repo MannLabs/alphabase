@@ -1,7 +1,6 @@
 """Reader for AlphaPept's .ms_data.hdf files."""
 
 from pathlib import Path
-from typing import Tuple
 
 import h5py
 import numpy as np
@@ -17,7 +16,7 @@ from alphabase.psm_reader.psm_reader import (
 _SEPARATOR = ModificationKeys.SEPARATOR
 
 
-def parse_ap(precursor: str) -> Tuple[str, str, str, str, int]:
+def parse_ap(precursor: str) -> tuple[str, str, str, str, int]:
     """Parser to parse peptide strings."""
     items = precursor.split("_")
     decoy = 1 if len(items) == 3 else 0  # noqa: PLR2004 magic value

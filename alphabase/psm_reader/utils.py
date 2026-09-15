@@ -1,6 +1,6 @@
 """Utility functions for PSM readers."""
 
-from typing import Dict, List, Tuple, Union
+from typing import Union
 
 import pandas as pd
 from pandas._libs.missing import NAType
@@ -19,8 +19,8 @@ for mod_name, unimod_id_ in MOD_DF[["mod_name", "unimod_id"]].to_numpy():
 
 
 def translate_modifications(
-    mod_str: str, mod_dict: Dict
-) -> Tuple[Union[str, NAType], List[str]]:
+    mod_str: str, mod_dict: dict
+) -> tuple[Union[str, NAType], list[str]]:
     """Translate modifications of `mod_str` to the AlphaBase format mapped by mod_dict.
 
     Parameters
@@ -84,7 +84,7 @@ def keep_modifications(mod_str: str, mod_set: set) -> Union[str, NAType]:
     return mod_str
 
 
-def get_extended_modifications(mod_list: List[str]) -> List[str]:
+def get_extended_modifications(mod_list: list[str]) -> list[str]:
     """Get an extended set of modifications from a list of modifications.
 
     Extend bracket types of modifications and strip off underscore, e.g.
@@ -113,7 +113,7 @@ def get_extended_modifications(mod_list: List[str]) -> List[str]:
     return sorted(list(mod_set))
 
 
-def get_column_mapping_for_df(column_mapping: dict, df: pd.DataFrame) -> Dict[str, str]:
+def get_column_mapping_for_df(column_mapping: dict, df: pd.DataFrame) -> dict[str, str]:
     """Determine the mapping of AlphaBase columns to the columns in the given DataFrame.
 
     For each AlphaBase column name, check if the corresponding search engine-specific

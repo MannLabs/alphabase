@@ -1,7 +1,7 @@
 """MSFragger reader."""
 
 import warnings
-from typing import Dict, List, Optional, Tuple
+from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -18,7 +18,7 @@ from alphabase.psm_reader.psm_reader import (
 )
 
 
-def _is_all_fragger_decoy(proteins: List[str]) -> bool:
+def _is_all_fragger_decoy(proteins: list[str]) -> bool:
     """Check if all proteins are MSFragger decoy entries.
 
     Parameters
@@ -37,7 +37,7 @@ def _is_all_fragger_decoy(proteins: List[str]) -> bool:
     )
 
 
-def _extract_position(entry: str) -> Tuple[int, str]:
+def _extract_position(entry: str) -> tuple[int, str]:
     """Extract leading position digits from modification entry.
 
     Parameters
@@ -80,7 +80,7 @@ def _extract_mass_shift(entry: str) -> float:
     )
 
 
-def _parse_lookup_key(lookup_key: str, entry: str) -> Tuple[str, float]:
+def _parse_lookup_key(lookup_key: str, entry: str) -> tuple[str, float]:
     """Parse lookup key into amino acid and mass shift.
 
     Parameters
@@ -111,9 +111,9 @@ class MSFraggerModificationTranslator:
 
     def __init__(
         self,
-        mass_mapped_mods: List[str],
+        mass_mapped_mods: list[str],
         mod_mass_tol: float,
-        rev_mod_mapping: Dict[str, str],
+        rev_mod_mapping: dict[str, str],
     ):
         """Initialize MSFragger modification translator.
 
@@ -161,7 +161,7 @@ class MSFraggerModificationTranslator:
 
         return psm_df
 
-    def _parse_assigned_modifications(self, assigned_mods: str) -> Tuple[str, str]:
+    def _parse_assigned_modifications(self, assigned_mods: str) -> tuple[str, str]:
         """Parse MSFragger Assigned Modifications string.
 
         Parameters
@@ -196,7 +196,7 @@ class MSFraggerModificationTranslator:
             sites
         )
 
-    def _parse_single_modification(self, entry: str) -> Tuple[str, str]:
+    def _parse_single_modification(self, entry: str) -> tuple[str, str]:
         """Parse a single modification entry."""
         if entry.startswith(MsFraggerTokens.N_TERM):
             return self._resolve_terminal_mod(entry, "Any_N-term"), "0"
@@ -287,10 +287,10 @@ class MSFraggerModificationTranslator:
 
 def _get_mods_from_masses(  # noqa: PLR0912, C901 too many branches, too complex TODO: refactor
     sequence: str,
-    msf_aa_mods: List[str],
-    mass_mapped_mods: List[str],
+    msf_aa_mods: list[str],
+    mass_mapped_mods: list[str],
     mod_mass_tol: float,
-) -> Tuple[str, str, str, str]:
+) -> tuple[str, str, str, str]:
     mods = []
     mod_sites = []
     aa_mass_diffs = []
