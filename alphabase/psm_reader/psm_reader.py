@@ -153,11 +153,6 @@ class PSMReaderBase(ABC):
         self._fdr_threshold = fdr
         self._keep_decoy = keep_decoy
 
-        self._precursor_id_columns = psm_reader_yaml[self._reader_type].get(
-            "precursor_id_columns", []
-        )
-        self._precursor_id_column = None
-
         self._rt_unit = (
             rt_unit
             if rt_unit is not None
@@ -237,9 +232,6 @@ class PSMReaderBase(ABC):
             # TODO: think about dropping the 'inplace' pattern here
             self.mod_seq_column = self._get_actual_column(
                 self._mod_seq_columns, origin_df
-            )
-            self._precursor_id_column = self._get_actual_column(
-                self._precursor_id_columns, origin_df
             )
 
             origin_df = self._pre_process(origin_df)
