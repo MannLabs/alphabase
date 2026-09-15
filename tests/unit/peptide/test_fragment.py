@@ -63,7 +63,7 @@ def test_filter_valid_charged_frag_types(mock_parse):
 CHARGED_FRAG_TYPES = ["y_z1", "b_modloss_z1"]
 N_PRECURSORS = 2
 ROWS_PER_PRECURSOR = 2
-# mirrors the max_frag_per_peptide default of fill_in_indices
+# mirrors the max_frag_per_peptide default of _fill_in_indices
 MAX_FRAG_PER_PEPTIDE = 300
 # each mz encodes its own slot as 100 + row * 10 + column
 MZ = [
@@ -315,7 +315,7 @@ def test_flatten_fragments_long_precursor():
     n_rows = np.iinfo(np.uint8).max + 2
     assert (
         n_rows <= MAX_FRAG_PER_PEPTIDE
-    ), "fill_in_indices cannot index a precursor this long"
+    ), "_fill_in_indices cannot index a precursor this long"
     n_types = len(CHARGED_FRAG_TYPES)
     rng = np.random.default_rng(0)
     mz_df = pd.DataFrame(
