@@ -70,3 +70,51 @@ def _get_delimiter(file_path: str) -> str:
         return ","
     else:
         return "\t"
+
+
+def _sanitize_missing_values(df: pd.DataFrame) -> pd.DataFrame:
+    """Coerce NaN values in object and string columns to an empty string.
+
+    NAs have a special meaning in alphabase as they indicate unresolved modifications.
+    Use empty strings in object/string columns to indicate missing values.
+
+    Returns
+    -------
+    Copy of dataframe with coerced columns
+
+    Example
+    -------
+    .. code-block:: python
+
+        df["numeric_column"]
+        >   0    1.0
+            2    NaN
+            Name: "numeric_column", dtype: float64
+
+        df["object_column"]
+        >   0    A
+            2    nan
+            Name: "object_column", dtype: object
+
+        new_df = _coerce_nan_to_missing_string(df)
+
+        pd.testing.assert_series_equal(new_df["numeric_column], df["numeric_column"])
+        new_df["object_column"]
+        >   0    A
+            2    ""
+            Name: "object_column", dtype: object
+
+    """
+    df = df.copy()
+    for column in df.columns:
+        if len(df) > 0 and df[column].isna().all():
+            # a column holding only missing values carries no type information: pandas
+            # infers float64, but alphabase expects text (e.g. an unpopulated `Genes` column).
+            # Assigning avoids fillna's deprecated object-dtype downcasting.
+            df[column] = ""
+        elif pd.api.types.is_object_dtype(df[column]) or pd.api.types.is_string_dtype(
+            df[column]
+        ):
+            df[column] = df[column].fillna("")
+
+    return df
