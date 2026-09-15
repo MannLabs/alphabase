@@ -204,9 +204,12 @@ class FileDownloader(ABC):
         """
         try:
             if max_size_kb:
-                with urlopen(
-                    self._encoded_url, context=_create_ssl_context()
-                ) as response, open(self._output_path, "wb") as out_file:
+                with (
+                    urlopen(
+                        self._encoded_url, context=_create_ssl_context()
+                    ) as response,
+                    open(self._output_path, "wb") as out_file,
+                ):
                     out_file.write(response.read(max_size_kb * 1024))
                 print(f"Truncating file to max. {max_size_kb} bytes ..")
 
@@ -214,9 +217,12 @@ class FileDownloader(ABC):
                 self._truncate_file(self._output_path)
 
             else:
-                with urlopen(
-                    self._encoded_url, context=_create_ssl_context()
-                ) as response, open(self._output_path, "wb") as out_file:
+                with (
+                    urlopen(
+                        self._encoded_url, context=_create_ssl_context()
+                    ) as response,
+                    open(self._output_path, "wb") as out_file,
+                ):
                     total_size = int(response.headers.get("Content-Length", -1))
                     progress = Progress()
                     block_num = 0
@@ -287,3 +293,52 @@ class DataShareDownloader(FileDownloader):
             return f"{self._url}/download"
 
         return self._url
+
+
+class ZenodoDownloader(FileDownloader):
+    """Class for downloading files from Zenodo links.
+
+    Example
+    -------
+
+    .. code-block:: python
+
+        downloader = ZenodoDownloader.from_record_data(
+            record_id="15002613",
+            file_name="report.parquet",
+            output_dir="/tmp/"
+        )
+        downloader.download()
+
+    """
+
+    ZENODO_DOWNLOAD_URL = (
+        "https://zenodo.org/api/records/{record_id}/files/{file_name}/content"
+    )
+    """Download URL for Zenodo records"""
+
+    def _encode_url(self) -> str:
+        """Encode Zenodo sharing link as url for downloading files."""
+        return self._url
+
+    @classmethod
+    def from_record_data(
+        cls, record_id: str, file_name: str, output_dir: str
+    ) -> "ZenodoDownloader":
+        """Create Zenodo Downloader from record information.
+
+        Parameters
+        -----------
+        record_id
+            Record ID as displayed in zenodo url
+            e.g. 12345 in https://zenodo.org/records/12345.
+        file_name
+            File name to extract from record.
+        output_dir
+            Directory to save downloaded file to.
+
+        """
+        zenodo_download_url = cls.ZENODO_DOWNLOAD_URL.format(
+            record_id=record_id, file_name=file_name
+        )
+        return cls(url=zenodo_download_url, output_dir=output_dir)

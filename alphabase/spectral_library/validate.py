@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import Union
 
 import numpy as np
 import pandas as pd
@@ -165,7 +165,7 @@ class Required(Column):
 
 
 class Schema:
-    def __init__(self, name: str, properties: List[Column]):
+    def __init__(self, name: str, properties: list[Column]):
         """
         Schema for validating dataframes
 
