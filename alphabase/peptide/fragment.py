@@ -802,7 +802,7 @@ def mask_fragments_for_charge_greater_than_precursor_charge(
 
 
 @numba_njit(parallel=True)
-def fill_in_indices(
+def _fill_in_indices(
     frag_start_idxes: np.ndarray,
     frag_stop_idxes: np.ndarray,
     indices: np.ndarray,
@@ -877,7 +877,7 @@ def fill_in_indices(
 @numba_vectorize(
     [nb_.uint32(nb_.int8, nb_.uint32, nb_.uint32, nb_.uint32)], target="parallel"
 )
-def calculate_fragment_numbers(
+def _calculate_fragment_numbers(
     frag_direction: np.int8,
     frag_number: np.uint32,
     index: np.uint32,
@@ -885,6 +885,10 @@ def calculate_fragment_numbers(
 ):
     """
     Calculate fragment numbers for each fragment based on the fragment direction.
+
+    The fragment number is the MS series numbering, i.e. the 1-based index within the
+    ion series (the n of b2 or y7). Forward series are numbered from the N-terminus,
+    reverse series from the C-terminus.
 
     Parameters
     ----------
@@ -907,7 +911,7 @@ def calculate_fragment_numbers(
     return frag_number
 
 
-def parse_fragment(
+def _parse_fragment(
     frag_directions: np.ndarray,
     frag_start_idxes: np.ndarray,
     frag_stop_idxes: np.ndarray,
@@ -918,6 +922,10 @@ def parse_fragment(
     """
     Parse fragments to get fragment numbers, fragment positions and not top k excluded indices in one hit
     faster than doing each operation individually, and makes the most of the operations that are done in parallel.
+
+    The fragment number is the MS series numbering, i.e. the 1-based index within the ion
+    series (the n of b2 or y7). The fragment position is the 0-based index of the fragment
+    in the sequence, from left to right, and is shared by all series.
 
     Parameters
     ----------
@@ -954,7 +962,7 @@ def parse_fragment(
     )
 
     # Fill in indices, max indices and excluded indices
-    fill_in_indices(
+    _fill_in_indices(
         frag_start_idxes,
         frag_stop_idxes,
         indices,
@@ -966,7 +974,7 @@ def parse_fragment(
     )
 
     # Calculate fragment numbers
-    frag_numbers = calculate_fragment_numbers(
+    frag_numbers = _calculate_fragment_numbers(
         frag_directions, frag_numbers, indices, max_indices
     )
     return frag_numbers, indices, excluded_indices
@@ -1081,7 +1089,7 @@ def flatten_fragments(
         np.tile(frag_directions, (len(fragment_mz_df), 1)), dtype=np.int8
     )
 
-    numbers, positions, excluded_indices = parse_fragment(
+    numbers, positions, excluded_indices = _parse_fragment(
         frag_directions,
         precursor_df.frag_start_idx.values,
         precursor_df.frag_stop_idx.values,
