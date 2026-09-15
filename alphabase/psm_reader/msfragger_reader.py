@@ -16,6 +16,7 @@ from alphabase.psm_reader.psm_reader import (
     psm_reader_provider,
     psm_reader_yaml,
 )
+from alphabase.utils import _sanitize_missing_values
 
 
 def _is_all_fragger_decoy(proteins: list[str]) -> bool:
@@ -415,11 +416,12 @@ class MSFraggerPsmTsvReader(PSMReaderBase):
 
     def _load_file(self, filename: str) -> pd.DataFrame:
         """Load MSFragger PSM TSV file."""
-        return pd.read_csv(filename, sep="\t", keep_default_na=False)
+        return _sanitize_missing_values(
+            pd.read_csv(filename, sep="\t", keep_default_na=True)
+        )
 
     def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
         """MSFragger PSM TSV preprocessing."""
-        df.fillna("", inplace=True)
         df[[PsmDfCols.RAW_NAME, PsmDfCols.SCAN_NUM]] = (
             df["Spectrum"].str.split(".").apply(lambda x: pd.Series([x[0], int(x[1])]))
         )
@@ -497,11 +499,10 @@ class MSFraggerPepXMLReader(PSMReaderBase):
 
     def _load_file(self, filename: str) -> pd.DataFrame:
         """Load a MsFragger output file to a DataFrame."""
-        return pepxml.DataFrame(filename)
+        return _sanitize_missing_values(pepxml.DataFrame(filename))
 
     def _pre_process(self, df: pd.DataFrame) -> pd.DataFrame:
         """MsFragger-specific preprocessing of output data."""
-        df.fillna("", inplace=True)
         if "ion_mobility" in df.columns:
             df["ion_mobility"] = df["ion_mobility"].astype(float)
         df[PsmDfCols.RAW_NAME] = df["spectrum"].str.split(".").apply(lambda x: x[0])

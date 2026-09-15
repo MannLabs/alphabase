@@ -45,11 +45,11 @@ class TestDataProcessing:
     """Tests for data processing and integration."""
 
     def test_preprocessing(self, reader):
-        """Test preprocessing extracts raw names, scan_num, and fills NAs correctly."""
+        """Test preprocessing extracts raw names and scan_num."""
         df = pd.DataFrame(
             {
                 "Spectrum": ["file1.01234.01234.3", "file2.01235.01235.2"],
-                "Peptide": ["PEPTIDE", None],
+                "Peptide": ["PEPTIDE", ""],
                 "Is Decoy": ["false", "true"],
                 "Assigned Modifications": ["5S(79.9663)", ""],
             }
