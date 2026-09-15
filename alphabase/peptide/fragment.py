@@ -801,80 +801,6 @@ def mask_fragments_for_charge_greater_than_precursor_charge(
     return fragment_df
 
 
-@numba_njit(parallel=True)
-def _fill_in_indices(
-    frag_start_idxes: np.ndarray,
-    frag_stop_idxes: np.ndarray,
-    row_positions: np.ndarray,
-    row_counts: np.ndarray,
-    excluded_indices: np.ndarray,
-    top_k: int,
-    flattened_intensity: np.ndarray,
-    number_of_fragment_types: int,
-    max_frag_per_peptide: int = 300,
-) -> None:
-    """
-    Fill in row positions, row counts and excluded indices for each peptide.
-    row_positions: index of the fragment row within its peptide (from 0 to row count - 1)
-    row_counts: number of fragment rows of the peptide
-    excluded_indices: not top k excluded indices per peptide
-
-    Parameters
-    ----------
-    frag_start_idxes : np.ndarray
-        start indices of fragments for each peptide
-
-    frag_stop_idxes : np.ndarray
-        stop indices of fragments for each peptide
-
-    row_positions : np.ndarray
-        index of the fragment row within its peptide, one value per fragment row.
-        It will be filled in this function.
-
-    row_counts : np.ndarray
-        number of fragment rows of the peptide, one value per fragment row.
-        It will be filled in this function.
-
-    excluded_indices : np.ndarray
-        not top k excluded indices per peptide it will be filled in this function
-
-    top_k : int
-        top k highest peaks to keep
-
-    flattened_intensity : np.ndarray
-        Flattened fragment intensities
-
-    number_of_fragment_types : int
-        number of types of fragments (e.g. b,y,b_modloss,y_modloss, ...) equals to the number of columns in fragment mz dataframe
-
-    max_frag_per_peptide : int, optional
-        maximum number of fragments per peptide, Defaults to 300
-
-    """
-    array = np.arange(0, max_frag_per_peptide)
-    length = len(frag_start_idxes)
-
-    for i in numba_prange(length):
-        frag_start = frag_start_idxes[i]
-        frag_end = frag_stop_idxes[i]
-        row_count = frag_end - frag_start
-        row_positions[frag_start:frag_end] = array[:row_count]
-        row_counts[frag_start:frag_end] = row_count
-        if flattened_intensity is None or top_k >= row_count * number_of_fragment_types:
-            continue
-        idxes = np.argsort(
-            flattened_intensity[
-                frag_start * number_of_fragment_types : frag_end
-                * number_of_fragment_types
-            ]
-        )
-        _excl = np.ones_like(idxes, dtype=np.bool_)
-        _excl[idxes[-top_k:]] = False
-        excluded_indices[
-            frag_start * number_of_fragment_types : frag_end * number_of_fragment_types
-        ] = _excl
-
-
 @numba_vectorize([nb_.uint32(nb_.int8, nb_.uint16, nb_.uint16)], target="parallel")
 def _calculate_fragment_numbers(
     frag_direction: np.int8,
@@ -913,6 +839,7 @@ def _calculate_fragment_numbers(
     return 0
 
 
+@numba_njit(parallel=True)
 def _parse_fragment(
     frag_start_idxes: np.ndarray,
     frag_stop_idxes: np.ndarray,
@@ -920,6 +847,7 @@ def _parse_fragment(
     intensities: np.ndarray,
     n_fragment_rows: int,
     number_of_fragment_types: int,
+    max_frag_per_peptide: int = 300,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Parse fragments to get row positions, row counts and not top k excluded indices in one hit
@@ -948,6 +876,9 @@ def _parse_fragment(
     number_of_fragment_types : int
         number of types of fragments (e.g. b,y,b_modloss,y_modloss, ...) equals to the number of columns in fragment mz dataframe
 
+    max_frag_per_peptide : int, optional
+        maximum number of fragments per peptide, Defaults to 300
+
     Returns
     -------
     Tuple[np.ndarray, np.ndarray, np.ndarray]
@@ -955,25 +886,35 @@ def _parse_fragment(
         fragment row, and the not top k excluded indices (bool) of every dense slot
 
     """
-    # uint16 holds every value, because `max_frag_per_peptide` of
-    # `_fill_in_indices` bounds the row positions and the row counts. Rows that no
-    # peptide covers keep a zero.
+    # uint16 holds every value, because `max_frag_per_peptide` bounds the row
+    # positions and the row counts. Rows that no peptide covers keep a zero.
     row_positions = np.zeros(n_fragment_rows, dtype=np.uint16)
     row_counts = np.zeros(n_fragment_rows, dtype=np.uint16)
     excluded_indices = np.zeros(
         n_fragment_rows * number_of_fragment_types, dtype=np.bool_
     )
 
-    _fill_in_indices(
-        frag_start_idxes,
-        frag_stop_idxes,
-        row_positions,
-        row_counts,
-        excluded_indices,
-        top_k,
-        intensities,
-        number_of_fragment_types,
-    )
+    array = np.arange(0, max_frag_per_peptide)
+
+    for i in numba_prange(len(frag_start_idxes)):
+        frag_start = frag_start_idxes[i]
+        frag_end = frag_stop_idxes[i]
+        row_count = frag_end - frag_start
+        row_positions[frag_start:frag_end] = array[:row_count]
+        row_counts[frag_start:frag_end] = row_count
+        if intensities is None or top_k >= row_count * number_of_fragment_types:
+            continue
+        idxes = np.argsort(
+            intensities[
+                frag_start * number_of_fragment_types : frag_end
+                * number_of_fragment_types
+            ]
+        )
+        _excl = np.ones_like(idxes, dtype=np.bool_)
+        _excl[idxes[-top_k:]] = False
+        excluded_indices[
+            frag_start * number_of_fragment_types : frag_end * number_of_fragment_types
+        ] = _excl
 
     return row_positions, row_counts, excluded_indices
 
