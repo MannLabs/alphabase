@@ -541,28 +541,28 @@ def has_custom_mods():
 
 
 def get_modification_state() -> pd.DataFrame:
-    """Copy the modification registry, to send it to a different process.
+    """Snapshot the modification registry, for a multiprocessing worker or a test.
 
     Returns
     -------
     pd.DataFrame
-        A copy of :data:`MOD_DF`. It contains all changes made at run time, not
-        only the user-added modifications.
+        A copy of :data:`MOD_DF`, including all run-time changes.
     """
     return MOD_DF.copy()
 
 
 def set_modification_state(mod_df: pd.DataFrame) -> None:
-    """Install a registry copy and calculate the derived lookups again.
+    """Install a registry snapshot and rebuild the derived lookups.
 
-    A process that starts with the "spawn" method imports alphabase again. Thus
-    it knows only the modifications in `modification.tsv`. Use this function to
-    give the process all changes that were made at run time.
+    A multiprocessing worker started with "spawn" imports alphabase afresh and
+    so knows only `modification.tsv`. Installing the parent's snapshot gives it
+    every run-time change: custom modifications, modloss filtering, lower-case
+    amino acids, a custom TSV.
 
     Parameters
     ----------
     mod_df : pd.DataFrame
-        A copy from :func:`get_modification_state`.
+        A snapshot from :func:`get_modification_state`.
     """
     global MOD_DF
     MOD_DF = mod_df

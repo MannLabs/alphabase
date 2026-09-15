@@ -1,9 +1,4 @@
-"""A worker must have the same modification registry as the parent process.
-
-A worker starts with the "spawn" method and imports alphabase again. Thus it
-knows only `modification.tsv`, until the parent sends it the registry. These
-tests examine each change that is possible at run time.
-"""
+"""A spawned worker must end up with the parent's modification registry."""
 
 import os
 
@@ -12,6 +7,7 @@ import pytest
 
 from alphabase.constants._const import CONST_FILE_FOLDER
 from alphabase.constants.modification import (
+    MOD_MASS,
     add_modifications_for_lower_case_AA,
     add_new_modifications,
     get_modification_state,
@@ -25,7 +21,7 @@ from alphabase.peptide.precursor import (
     update_precursor_mz,
 )
 from alphabase.spectral_library.base import SpecLibBase
-from alphabase.utils import parallel_imap
+from alphabase.utils import _spawn_pool
 
 CUSTOM_MOD = "TestCustomMod@K"
 CUSTOM_MOD_COMPOSITION = "H(4)O(2)"
@@ -40,8 +36,8 @@ def restore_registry():
 
 
 def _worker_registry(_):
-    """Give the registry of the worker process."""
-    return get_modification_state()
+    """Give the worker's registry, and one lookup that is derived from it."""
+    return get_modification_state(), dict(MOD_MASS)
 
 
 def _add_custom_mod():
@@ -49,8 +45,7 @@ def _add_custom_mod():
 
 
 def _filter_modloss():
-    # At import, `load_mod_df` uses level 1 and keeps 2 modloss values. Level 0
-    # keeps 867. Thus a worker without this change is different.
+    # level 0 differs from the level `load_mod_df` uses at import
     keep_modloss_by_importance(0.0)
 
 
@@ -85,16 +80,16 @@ def _load_custom_tsv():
 def test_worker_registry_matches_parent(mutate, restore_registry):
     # Given a registry that changed at run time
     mutate()
-    expected = get_modification_state()
+    expected_df, expected_mass = get_modification_state(), dict(MOD_MASS)
 
-    # When a worker process gives its own registry
-    registries = list(
-        parallel_imap(_worker_registry, [None, None], processes=2, progress=False)
-    )
+    # When each worker reports its registry and a lookup derived from it
+    with _spawn_pool(2) as pool:
+        reports = pool.map(_worker_registry, [None, None])
 
-    # Then it is the same as the registry of the parent
-    for registry in registries:
-        pd.testing.assert_frame_equal(registry, expected)
+    # Then both match the parent, so the worker rebuilt its derived lookups too
+    for mod_df, mod_mass in reports:
+        pd.testing.assert_frame_equal(mod_df, expected_df)
+        assert mod_mass == expected_mass
 
 
 def _precursor_df(n_precursors=40, mod=CUSTOM_MOD):
