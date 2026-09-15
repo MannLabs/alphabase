@@ -416,7 +416,7 @@ class MSFraggerPsmTsvReader(PSMReaderBase):
 
     def _load_file(self, filename: str) -> pd.DataFrame:
         """Load MSFragger PSM TSV file."""
-        return _coerce_object_nan_to_empty_string(
+        return _sanitize_missing_values(
             pd.read_csv(filename, sep="\t", keep_default_na=True)
         )
 
