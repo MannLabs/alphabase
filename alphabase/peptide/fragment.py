@@ -1068,7 +1068,6 @@ def _select_dense_fragments(
         intensity,
         n_fragment_types,
     )
-    del dense_directions
 
     if intensity is None:
         excluded = mz == 0
@@ -1079,8 +1078,6 @@ def _select_dense_fragments(
         excluded = intensity < min_fragment_intensity
         excluded |= is_padding
         excluded |= not_top_k
-        del is_padding
-    del not_top_k
 
     # The in-place inversion prevents one more dense array. The indices stay
     # ascending, so the fragments keep their dense order.
