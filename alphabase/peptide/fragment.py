@@ -982,7 +982,7 @@ def _parse_fragment(
 
 def _annotate_charged_frag_types(
     charged_frag_types: np.ndarray,
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """Give the series id, loss id, charge and direction of every charged fragment type.
 
     Parameters
