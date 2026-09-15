@@ -2,9 +2,10 @@
 
 import re
 import warnings
+from collections.abc import Iterable
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Dict, Iterable, Optional, Type, Union
+from typing import Any, Optional, Union
 
 import pandas as pd
 
@@ -93,7 +94,7 @@ class PGReaderBase:
 
         self.measurement_regex = self._get_measurement_regex(regex=measurement_regex)
 
-    def add_column_mapping(self, column_mapping: Dict) -> None:
+    def add_column_mapping(self, column_mapping: dict) -> None:
         """Add additional column mappings for the search engine."""
         self.column_mapping = {**self.column_mapping, **column_mapping}
 
@@ -273,10 +274,10 @@ class PGReaderProvider:
 
     def __init__(self):
         """Initialize PGReaderProvider."""
-        self.reader_dict: dict[str, Type[PGReaderBase]] = {}
+        self.reader_dict: dict[str, type[PGReaderBase]] = {}
 
     def register_reader(
-        self, reader_type: str, reader_class: Type[PGReaderBase]
+        self, reader_type: str, reader_class: type[PGReaderBase]
     ) -> None:
         """Register a reader by reader_type."""
         self.reader_dict[reader_type.lower()] = reader_class

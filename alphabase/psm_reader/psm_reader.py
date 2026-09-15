@@ -5,7 +5,7 @@ import io
 import warnings
 from abc import ABC
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Type, Union
+from typing import Optional, Union
 
 import pandas as pd
 
@@ -19,7 +19,7 @@ from alphabase.psm_reader.utils import (
     keep_modifications,
     translate_modifications,
 )
-from alphabase.utils import _get_delimiter
+from alphabase.utils import _get_delimiter, _sanitize_missing_values
 from alphabase.yaml_utils import load_yaml
 
 #: See `psm_reader.yaml <https://github.com/MannLabs/alphabase/blob/main/alphabase/constants/const_files/psm_reader.yaml>`_
@@ -48,7 +48,7 @@ class PSMReaderBase(ABC):
         fdr: float = 0.01,
         keep_decoy: bool = False,
         rt_unit: Optional[str] = None,
-        mod_seq_columns: Optional[List[str]] = None,
+        mod_seq_columns: Optional[list[str]] = None,
         **kwargs,
     ):
         """The Base class for all PSMReaders.
@@ -153,11 +153,6 @@ class PSMReaderBase(ABC):
         self._fdr_threshold = fdr
         self._keep_decoy = keep_decoy
 
-        self._precursor_id_columns = psm_reader_yaml[self._reader_type].get(
-            "precursor_id_columns", []
-        )
-        self._precursor_id_column = None
-
         self._rt_unit = (
             rt_unit
             if rt_unit is not None
@@ -182,11 +177,11 @@ class PSMReaderBase(ABC):
         return self._psm_df
 
     @property
-    def modification_mapping(self) -> Dict:
+    def modification_mapping(self) -> dict:
         """Get the modification mapping dictionary."""
         return self._modification_mapper.modification_mapping
 
-    def add_modification_mapping(self, modification_mapping: Dict) -> None:
+    def add_modification_mapping(self, modification_mapping: dict) -> None:
         """Append additional modification mappings for the search engine.
 
         See ModificationMapper.add_modification_mapping for more details.
@@ -194,7 +189,7 @@ class PSMReaderBase(ABC):
         self._modification_mapper.add_modification_mapping(modification_mapping)
 
     def set_modification_mapping(
-        self, modification_mapping: Optional[Dict] = None
+        self, modification_mapping: Optional[dict] = None
     ) -> None:
         """Set the modification mapping for the search engine.
 
@@ -202,17 +197,17 @@ class PSMReaderBase(ABC):
         """
         self._modification_mapper.set_modification_mapping(modification_mapping)
 
-    def add_column_mapping(self, column_mapping: Dict) -> None:
+    def add_column_mapping(self, column_mapping: dict) -> None:
         """Add additional column mappings for the search engine."""
         self.column_mapping = {**self.column_mapping, **column_mapping}
 
-    def load(self, _file: Union[List[str], str]) -> pd.DataFrame:
+    def load(self, _file: Union[list[str], str]) -> pd.DataFrame:
         """Import a single file or multiple files."""
         if isinstance(_file, list):
             return self.import_files(_file)
         return self.import_file(_file)
 
-    def import_files(self, file_list: List[str]) -> pd.DataFrame:
+    def import_files(self, file_list: list[str]) -> pd.DataFrame:
         """Import multiple files."""
         df_list = [self.import_file(file) for file in file_list]
         self._psm_df = pd.concat(df_list, ignore_index=True)
@@ -238,9 +233,6 @@ class PSMReaderBase(ABC):
             self.mod_seq_column = self._get_actual_column(
                 self._mod_seq_columns, origin_df
             )
-            self._precursor_id_column = self._get_actual_column(
-                self._precursor_id_columns, origin_df
-            )
 
             origin_df = self._pre_process(origin_df)
             self._translate_columns(origin_df)  # only here
@@ -265,22 +257,33 @@ class PSMReaderBase(ABC):
         filename : str | pathlib.Path | io.StringIO
             The file path to the PSM file or the file in the io.StringIO.
 
+
+        Returns
+        -------
+        DataFrame.
+            - Missing values in object columns are encoded as empty strings.
+            - Missing values in numeric columns are encoded as np.nan
+
         """
         if isinstance(filename, io.StringIO):
             sep = _get_delimiter(filename)
-            return pd.read_csv(filename, sep=sep, keep_default_na=False)
+            df = pd.read_csv(filename, sep=sep, keep_default_na=True)
+            return _sanitize_missing_values(df)
 
         file_path = Path(filename)
 
         if file_path.suffix == ".parquet":
-            return pd.read_parquet(file_path)
+            return _sanitize_missing_values(pd.read_parquet(file_path))
 
         sep = _get_delimiter(str(file_path))
-        return pd.read_csv(file_path, sep=sep, keep_default_na=False)
+
+        return _sanitize_missing_values(
+            pd.read_csv(file_path, sep=sep, keep_default_na=True)
+        )
 
     def _get_actual_column(
         self,
-        column_list: List[str],
+        column_list: list[str],
         df: pd.DataFrame,
     ) -> Optional[str]:
         """Get the first column from `column_list` that is a column of `df`."""
@@ -430,7 +433,7 @@ class PSMReaderBase(ABC):
 
     def filter_psm_by_modifications(
         self,
-        include_mod_set: Optional[Set] = None,
+        include_mod_set: Optional[set] = None,
     ) -> None:
         """Only keeps peptides with modifications in `include_mod_list`."""
         if include_mod_set is None:
@@ -457,7 +460,7 @@ class PSMReaderProvider:
         self.reader_dict = {}
 
     def register_reader(
-        self, reader_type: str, reader_class: Type[PSMReaderBase]
+        self, reader_type: str, reader_class: type[PSMReaderBase]
     ) -> None:
         """Register a reader by reader_type."""
         self.reader_dict[reader_type.lower()] = reader_class

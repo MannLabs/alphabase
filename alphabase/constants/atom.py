@@ -1,6 +1,5 @@
 import os
 import re
-import typing
 from collections import defaultdict
 
 import numpy as np
@@ -102,7 +101,7 @@ MASS_H2O: int = None  # raise errors if the value is not reset
 MASS_NH3: int = None
 
 
-def update_atom_infos(new_atom_info: typing.Dict):
+def update_atom_infos(new_atom_info: dict):
     """Update the atom information in CHEM_INFO_DICT.
 
     Args:

@@ -84,7 +84,7 @@ class SpecLibBase:
         # ['b_z1','b_z2','y_z1','y_modloss_z1', ...];
         # 'b_z1': 'b' is the fragment type and
         # 'z1' is the charge state z=1.
-        charged_frag_types: typing.List[str] = ["b_z1", "b_z2", "y_z1", "y_z2"],
+        charged_frag_types: list[str] = ["b_z1", "b_z2", "y_z1", "y_z2"],
         precursor_mz_min: float = 400,
         precursor_mz_max: float = 6000,
         decoy: str = None,
@@ -194,7 +194,7 @@ class SpecLibBase:
     def append(
         self,
         other: "SpecLibBase",
-        dfs_to_append: typing.List[str] = [
+        dfs_to_append: list[str] = [
             "_precursor_df",
             "_fragment_df",
             "_fragment_intensity_df",
