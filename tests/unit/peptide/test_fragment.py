@@ -7,6 +7,8 @@ import pytest
 from alphabase.peptide.fragment import (
     PEAK_INTENSITY_DTYPE,
     PEAK_MZ_DTYPE,
+    _calculate_fragment_numbers,
+    _parse_fragment,
     filter_valid_charged_frag_types,
     flatten_fragments,
     parse_charged_frag_type,
@@ -63,7 +65,7 @@ def test_filter_valid_charged_frag_types(mock_parse):
 CHARGED_FRAG_TYPES = ["y_z1", "b_modloss_z1"]
 N_PRECURSORS = 2
 ROWS_PER_PRECURSOR = 2
-# mirrors the max_frag_per_peptide default of _fill_in_indices
+# mirrors the max_frag_per_peptide default of _parse_fragment
 MAX_FRAG_PER_PEPTIDE = 300
 # each mz encodes its own slot as 100 + row * 10 + column
 MZ = [
@@ -326,7 +328,7 @@ def test_flatten_fragments_long_precursor():
     n_rows = np.iinfo(np.uint8).max + 2
     assert (
         n_rows <= MAX_FRAG_PER_PEPTIDE
-    ), "_fill_in_indices cannot index a precursor this long"
+    ), "_parse_fragment cannot index a precursor this long"
     n_types = len(CHARGED_FRAG_TYPES)
     rng = np.random.default_rng(0)
     mz_df = pd.DataFrame(
@@ -351,4 +353,40 @@ def test_flatten_fragments_long_precursor():
     pd.testing.assert_series_equal(
         frag_df[["position", "number"]].max(),
         pd.Series({"position": n_rows - 1, "number": n_rows}, dtype=np.uint32),
+    )
+
+
+@pytest.mark.requires_numba
+def test_calculate_fragment_numbers_counts_from_both_ends():
+    """'abc' ions count from the first amino acid, 'xyz' ions from the last one."""
+    directions = np.array([1, -1, 0, 1, -1], dtype=np.int8)
+    row_positions = np.array([0, 0, 0, 3, 3], dtype=np.uint16)
+    row_counts = np.array([7, 7, 7, 7, 7], dtype=np.uint16)
+
+    numbers = _calculate_fragment_numbers(directions, row_positions, row_counts)
+
+    np.testing.assert_array_equal(
+        numbers, np.array([1, 7, 0, 4, 4], dtype=np.uint32), strict=True
+    )
+
+
+@pytest.mark.requires_numba
+def test_parse_fragment_gives_one_value_per_fragment_row():
+    """Row positions and row counts hold one value per fragment row, not per dense slot."""
+    frag_start_idx = np.array([0, 3], dtype=np.int64)
+    frag_stop_idx = np.array([3, 7], dtype=np.int64)
+
+    row_positions, row_counts, not_top_k = _parse_fragment(
+        frag_start_idx, frag_stop_idx, 1000, None, 7, 4
+    )
+
+    np.testing.assert_array_equal(
+        row_positions, np.array([0, 1, 2, 0, 1, 2, 3], dtype=np.uint16), strict=True
+    )
+    np.testing.assert_array_equal(
+        row_counts, np.array([3, 3, 3, 4, 4, 4, 4], dtype=np.uint16), strict=True
+    )
+    # one flag per dense slot, and nothing is excluded without intensities
+    np.testing.assert_array_equal(
+        not_top_k, np.zeros(7 * 4, dtype=np.bool_), strict=True
     )
