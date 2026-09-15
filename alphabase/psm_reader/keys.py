@@ -1,6 +1,6 @@
 """Constants for accessing the columns of a PSM dataframe."""
 
-from typing import Any, List, NoReturn
+from typing import Any, NoReturn
 
 
 class ConstantsClass(type):
@@ -10,7 +10,7 @@ class ConstantsClass(type):
         """Raise an error when trying to set an attribute."""
         raise TypeError("Constants class cannot be modified")
 
-    def get_values(cls) -> List[str]:
+    def get_values(cls) -> list[str]:
         """Get all user-defined string values of the class."""
         return [
             value

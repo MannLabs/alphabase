@@ -1,5 +1,5 @@
 import os
-from typing import List, Union
+from typing import Union
 
 import numpy as np
 import pandas as pd
@@ -184,7 +184,7 @@ load_mod_df()
 
 
 def calc_modification_mass(
-    nAA: int, mod_names: List[str], mod_sites: List[int]
+    nAA: int, mod_names: list[str], mod_sites: list[int]
 ) -> np.ndarray:
     """
     Calculate modification masses for the given peptide length (`nAA`),
@@ -221,7 +221,7 @@ def calc_modification_mass(
 
 
 def calc_mod_masses_for_same_len_seqs(
-    nAA: int, mod_names_list: List[List[str]], mod_sites_list: List[List[int]]
+    nAA: int, mod_names_list: list[list[str]], mod_sites_list: list[list[int]]
 ) -> np.ndarray:
     """
     Calculate modification masses for the given peptides with same peptide length (`nAA`).
@@ -258,7 +258,7 @@ def calc_mod_masses_for_same_len_seqs(
     return masses
 
 
-def calc_modification_mass_sum(mod_names: List[str]) -> float:
+def calc_modification_mass_sum(mod_names: list[str]) -> float:
     """
     Calculate summed mass of the given modification
     without knowing the sites and peptide length.
@@ -314,8 +314,8 @@ def _calc_modloss_with_importance(
 
 def calc_modloss_mass_with_importance(
     nAA: int,
-    mod_names: List,
-    mod_sites: List,
+    mod_names: list,
+    mod_sites: list,
     for_nterm_frag: bool,
 ) -> np.ndarray:
     """
@@ -390,8 +390,8 @@ def _calc_modloss(mod_losses: np.ndarray) -> np.ndarray:
 
 def calc_modloss_mass(
     nAA: int,
-    mod_names: List,
-    mod_sites: List,
+    mod_names: list,
+    mod_sites: list,
     for_nterm_frag: bool,
 ) -> np.ndarray:
     """

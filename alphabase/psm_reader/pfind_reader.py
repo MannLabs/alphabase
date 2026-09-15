@@ -1,6 +1,6 @@
 """pFind reader."""
 
-from typing import Optional, Tuple, Union
+from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -91,7 +91,7 @@ def translate_pFind_mod(mod_str: str) -> Union[str, NAType]:  # noqa: N802 name 
     return ModificationKeys.SEPARATOR.join(ret_mods)
 
 
-def get_pFind_mods(pfind_mod_str: str) -> Tuple[str, str]:  # noqa: N802 name `get_pFind_mods` should be lowercase TODO: used by peptdeep
+def get_pFind_mods(pfind_mod_str: str) -> tuple[str, str]:  # noqa: N802 name `get_pFind_mods` should be lowercase TODO: used by peptdeep
     """Parse pFind modification string."""
     pfind_mod_str = pfind_mod_str.strip(ModificationKeys.SEPARATOR)
     if not pfind_mod_str:
