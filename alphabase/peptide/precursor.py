@@ -14,6 +14,11 @@ from alphabase.peptide.mass_calc import calc_peptide_masses_for_same_len_seqs
 from alphabase.utils import parallel_apply
 
 
+def _xxh64_str_intdigest(text: str, *, seed: int) -> int:
+    """xxhash>=4 no longer encodes strings implicitly; utf-8 keeps hash values identical to xxhash<4."""
+    return xxh64_intdigest(text.encode(), seed=seed)
+
+
 def refine_precursor_df(
     df: pd.DataFrame,
     drop_frag_idx=False,
@@ -177,9 +182,9 @@ def get_mod_seq_hash(
     """
     return np.array(
         [
-            xxh64_intdigest(sequence, seed=seed),
-            xxh64_intdigest(mods, seed=seed),
-            xxh64_intdigest(mod_sites, seed=seed),
+            _xxh64_str_intdigest(sequence, seed=seed),
+            _xxh64_str_intdigest(mods, seed=seed),
+            _xxh64_str_intdigest(mod_sites, seed=seed),
         ],
         dtype=np.uint64,
     ).sum()  # use np.sum to prevent overflow
@@ -232,15 +237,15 @@ def get_mod_seq_charge_hash(
 def hash_mod_seq_df(precursor_df: pd.DataFrame, *, seed=0):
     """Internal function"""
     hash_vals = precursor_df.sequence.apply(
-        lambda x: xxh64_intdigest(x, seed=seed)
+        lambda x: _xxh64_str_intdigest(x, seed=seed)
     ).to_numpy(copy=True, dtype=np.uint64)
     hash_vals += (
-        precursor_df.mods.apply(lambda x: xxh64_intdigest(x, seed=seed))
+        precursor_df.mods.apply(lambda x: _xxh64_str_intdigest(x, seed=seed))
         .astype(np.uint64)
         .values
     )
     hash_vals += (
-        precursor_df.mod_sites.apply(lambda x: xxh64_intdigest(x, seed=seed))
+        precursor_df.mod_sites.apply(lambda x: _xxh64_str_intdigest(x, seed=seed))
         .astype(np.uint64)
         .values
     )
