@@ -886,6 +886,10 @@ def _calculate_fragment_numbers(
     """
     Calculate fragment numbers for each fragment based on the fragment direction.
 
+    The fragment number is the MS series numbering, i.e. the 1-based index within the
+    ion series (the n of b2 or y7). Forward series are numbered from the N-terminus,
+    reverse series from the C-terminus.
+
     Parameters
     ----------
     frag_direction : np.int8
@@ -918,6 +922,10 @@ def _parse_fragment(
     """
     Parse fragments to get fragment numbers, fragment positions and not top k excluded indices in one hit
     faster than doing each operation individually, and makes the most of the operations that are done in parallel.
+
+    The fragment number is the MS series numbering, i.e. the 1-based index within the ion
+    series (the n of b2 or y7). The fragment position is the 0-based index of the fragment
+    in the sequence, from left to right, and is shared by all series.
 
     Parameters
     ----------
