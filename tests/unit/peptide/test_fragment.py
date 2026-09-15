@@ -365,8 +365,9 @@ def test_calculate_fragment_numbers_counts_from_both_ends():
 
     numbers = _calculate_fragment_numbers(directions, row_positions, row_counts)
 
-    np.testing.assert_array_equal(numbers, [1, 7, 0, 4, 4])
-    assert numbers.dtype == np.uint32
+    np.testing.assert_array_equal(
+        numbers, np.array([1, 7, 0, 4, 4], dtype=np.uint32), strict=True
+    )
 
 
 @pytest.mark.requires_numba
@@ -379,10 +380,13 @@ def test_parse_fragment_gives_one_value_per_fragment_row():
         frag_start_idx, frag_stop_idx, 1000, None, 7, 4
     )
 
-    np.testing.assert_array_equal(row_positions, [0, 1, 2, 0, 1, 2, 3])
-    np.testing.assert_array_equal(row_counts, [3, 3, 3, 4, 4, 4, 4])
-    assert row_positions.dtype == np.uint16
-    assert row_counts.dtype == np.uint16
+    np.testing.assert_array_equal(
+        row_positions, np.array([0, 1, 2, 0, 1, 2, 3], dtype=np.uint16), strict=True
+    )
+    np.testing.assert_array_equal(
+        row_counts, np.array([3, 3, 3, 4, 4, 4, 4], dtype=np.uint16), strict=True
+    )
     # one flag per dense slot, and nothing is excluded without intensities
-    assert len(not_top_k) == 7 * 4
-    assert not not_top_k.any()
+    np.testing.assert_array_equal(
+        not_top_k, np.zeros(7 * 4, dtype=np.bool_), strict=True
+    )
