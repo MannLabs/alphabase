@@ -884,6 +884,10 @@ def _calculate_fragment_numbers(
     """
     Calculate the number of a fragment in its ion series.
 
+    The fragment number is the MS series numbering, i.e. the 1-based index within the
+    ion series (the n of b2 or y7). Forward series are numbered from the N-terminus,
+    reverse series from the C-terminus.
+
     Parameters
     ----------
     frag_direction : np.int8
@@ -993,7 +997,7 @@ def _annotate_charged_frag_types(
     series_ids = []
     loss_ids = []
     charges = []
-    directions = []  # 'abc': direction=1, 'xyz': direction=-1, otherwise 0
+    directions = []  # a/b/c series count forward (1), x/y/z series backward (-1)
 
     for charged_frag_type in charged_frag_types:
         frag_type, charge = parse_charged_frag_type(charged_frag_type)
@@ -1056,8 +1060,8 @@ def _select_dense_fragments(
 
     """
     row_positions, row_counts, not_top_k = _parse_fragment(
-        precursor_df.frag_start_idx.values,
-        precursor_df.frag_stop_idx.values,
+        precursor_df["frag_start_idx"].values,
+        precursor_df["frag_stop_idx"].values,
         keep_top_k_fragments,
         intensity,
         n_fragment_rows,
@@ -1071,7 +1075,6 @@ def _select_dense_fragments(
         excluded = intensity < min_fragment_intensity
         excluded |= mz == 0
         excluded |= not_top_k
-    del not_top_k
 
     # The in-place inversion prevents one more dense array. The indices stay
     # ascending, so the fragments keep their dense order.
@@ -1176,8 +1179,8 @@ def _reannotate_precursor_pointers(
         number of charged fragment types, that is the number of dense columns
 
     """
-    dense_start_idx = precursor_df.frag_start_idx.values.astype(np.int64)
-    dense_stop_idx = precursor_df.frag_stop_idx.values.astype(np.int64)
+    dense_start_idx = precursor_df["frag_start_idx"].values.astype(np.int64)
+    dense_stop_idx = precursor_df["frag_stop_idx"].values.astype(np.int64)
     precursor_df["flat_frag_start_idx"] = np.searchsorted(
         kept_indices, dense_start_idx * n_fragment_types
     )
