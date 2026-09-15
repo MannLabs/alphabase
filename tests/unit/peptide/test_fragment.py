@@ -23,7 +23,7 @@ from alphabase.peptide.fragment import (
 def test_parse_charged_frag_type_with_valid_input(input_str, expected):
     """Test parse_charged_frag_type with valid input."""
     result = parse_charged_frag_type(input_str)
-    assert result == (expected[0], expected[1])
+    assert result == expected
 
 
 @pytest.mark.parametrize(
@@ -343,7 +343,12 @@ def test_flatten_fragments_long_precursor():
         precursor_df, mz_df, intensity_df, keep_top_k_fragments=n_rows * n_types
     )
 
-    assert frag_df["position"].max() == n_rows - 1
-    assert frag_df["number"].max() == n_rows
-    assert frag_df["position"].dtype == np.uint32
-    assert frag_df["number"].dtype == np.uint32
+    # .max() over mixed dtypes upcasts, so the dtypes need their own comparison
+    pd.testing.assert_series_equal(
+        frag_df[["position", "number"]].dtypes,
+        pd.Series({"position": np.dtype(np.uint32), "number": np.dtype(np.uint32)}),
+    )
+    pd.testing.assert_series_equal(
+        frag_df[["position", "number"]].max(),
+        pd.Series({"position": n_rows - 1, "number": n_rows}, dtype=np.uint32),
+    )
