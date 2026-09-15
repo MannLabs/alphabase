@@ -5,7 +5,6 @@ import pandas as pd
 import pytest
 
 from alphabase.peptide.fragment import (
-    FRAGMENT_TYPES,
     PEAK_INTENSITY_DTYPE,
     PEAK_MZ_DTYPE,
     filter_valid_charged_frag_types,
@@ -59,35 +58,66 @@ def test_filter_valid_charged_frag_types(mock_parse):
     assert len(recorded_warnings) == 1  # Should have 2 warning messages
 
 
-CHARGED_FRAG_TYPES = [
-    "b_z1",
-    "b_z2",
-    "y_z1",
-    "y_z2",
-    "b_modloss_z1",
-    "y_modloss_z1",
-]
-ROWS_PER_PRECURSOR = 4
-N_PRECURSORS = 5
+# one reverse series without loss and one forward series with loss, so that direction,
+# series and loss all vary over two columns
+CHARGED_FRAG_TYPES = ["y_z1", "b_modloss_z1"]
+N_PRECURSORS = 2
+ROWS_PER_PRECURSOR = 2
 # mirrors the max_frag_per_peptide default of fill_in_indices
 MAX_FRAG_PER_PEPTIDE = 300
+# each mz encodes its own slot as 100 + row * 10 + column
+MZ = [
+    # y_z1, b_modloss_z1
+    [100.0, 0.0],  # precursor 0, row 0, unmodified: no modloss fragment
+    [110.0, 0.0],  # precursor 0, row 1, unmodified: no modloss fragment
+    [120.0, 121.0],  # precursor 1, row 0
+    [0.0, 131.0],  # precursor 1, row 1, y_z1 outside the mz range
+]
+# distinct over the whole library, so the top k selection is unambiguous
+INTENSITY = [
+    [0.11, 0.01],
+    [0.82, 0.02],
+    [0.93, 0.48],
+    [0.03, 0.61],
+]
+# slots kept when only the mz == 0 padding is dropped
+KEEP_UNFILTERED = [
+    [1, 0],
+    [1, 0],
+    [1, 1],
+    [0, 1],
+]
+# keep_top_k_fragments, min_fragment_intensity, kept slots per dense row
+FILTER_CASES = [
+    pytest.param(1000, -1, KEEP_UNFILTERED, id="padding_only"),
+    pytest.param(
+        1000,
+        0.3,
+        [
+            [0, 0],
+            [1, 0],
+            [1, 1],
+            [0, 1],
+        ],
+        id="min_intensity",
+    ),
+    pytest.param(
+        1,
+        -1,
+        [
+            [0, 0],
+            [1, 0],
+            [1, 0],
+            [0, 0],
+        ],
+        id="top_1_per_precursor",
+    ),
+]
 
 
-def _dense_library():
-    """Make dense fragment frames with padding, and the matching precursor pointers."""
-    rng = np.random.default_rng(0)
-    n_rows = N_PRECURSORS * ROWS_PER_PRECURSOR
-    n_types = len(CHARGED_FRAG_TYPES)
-
-    mz = (rng.random((n_rows, n_types)) * 1000 + 100).astype(PEAK_MZ_DTYPE)
-    # unmodified precursors have no modloss fragments, and some fragments fall
-    # outside the mz range. Both cases give mz == 0 padding.
-    mz[: 2 * ROWS_PER_PRECURSOR, 4:] = 0
-    mz[3, 0] = 0
-    # distinct intensities make the top-k selection unambiguous
-    intensity = rng.permutation(n_rows * n_types).reshape(n_rows, n_types)
-    intensity = (intensity / intensity.max()).astype(PEAK_INTENSITY_DTYPE)
-
+@pytest.fixture
+def library():
+    """Give MZ and INTENSITY as fragment frames with the matching precursor pointers."""
     frag_start_idx = np.arange(N_PRECURSORS) * ROWS_PER_PRECURSOR
     precursor_df = pd.DataFrame(
         {
@@ -97,127 +127,29 @@ def _dense_library():
     )
     return (
         precursor_df,
-        pd.DataFrame(mz, columns=CHARGED_FRAG_TYPES),
-        pd.DataFrame(intensity, columns=CHARGED_FRAG_TYPES),
-    )
-
-
-def _expected_keep_mask(
-    precursor_df, mz_df, intensity_df, keep_top_k_fragments, min_fragment_intensity
-):
-    """Give the keep mask over all dense slots. This does not use flatten_fragments."""
-    n_types = mz_df.shape[1]
-    mz = mz_df.values.reshape(-1)
-    intensity = None if len(intensity_df) == 0 else intensity_df.values.reshape(-1)
-
-    mask = np.zeros(mz.size, dtype=bool)
-    for start, stop in zip(precursor_df.frag_start_idx, precursor_df.frag_stop_idx):
-        block = slice(start * n_types, stop * n_types)
-        keep = mz[block] != 0
-        if intensity is not None:
-            keep &= intensity[block] >= min_fragment_intensity
-            n_slots = (stop - start) * n_types
-            if keep_top_k_fragments < n_slots:
-                in_top_k = np.zeros(n_slots, dtype=bool)
-                in_top_k[np.argsort(intensity[block])[-keep_top_k_fragments:]] = True
-                keep &= in_top_k
-        mask[block] = keep
-    return mask
-
-
-# 2 precursors x 2 fragment rows x 2 types, b forward and y reverse
-MINIMAL_FRAG_TYPES = ["b_z1", "y_z1"]
-MINIMAL_N_PRECURSORS = 2
-MINIMAL_ROWS_PER_PRECURSOR = 2
-MINIMAL_MZ = [
-    # b_z1,  y_z1
-    [100.0, 200.0],  # precursor 0, row 0
-    [0.0, 300.0],  # precursor 0, row 1, b_z1 padding
-    [400.0, 500.0],  # precursor 1, row 0
-    [600.0, 0.0],  # precursor 1, row 1, y_z1 padding
-]
-MINIMAL_INTENSITY = [
-    [0.10, 0.80],
-    [0.00, 0.50],
-    [0.90, 0.35],
-    [0.40, 0.00],
-]
-# keep_top_k_fragments, min_fragment_intensity, kept dense slots.
-# Slots are row-major, per precursor [row 0 b, row 0 y, row 1 b, row 1 y].
-MINIMAL_FILTER_CASES = [
-    pytest.param(
-        1000,
-        -1,
-        [True, True, False, True, True, True, True, False],
-        id="padding_only",
-    ),
-    pytest.param(
-        2,
-        -1,
-        [False, True, False, True, True, False, True, False],
-        id="top_2_per_precursor",
-    ),
-    pytest.param(
-        1000,
-        0.3,
-        [False, True, False, True, True, True, True, False],
-        id="min_intensity",
-    ),
-]
-
-
-@pytest.fixture
-def minimal_library():
-    """Give MINIMAL_MZ and MINIMAL_INTENSITY with the matching precursor pointers."""
-    frag_start_idx = np.arange(MINIMAL_N_PRECURSORS) * MINIMAL_ROWS_PER_PRECURSOR
-    precursor_df = pd.DataFrame(
-        {
-            "frag_start_idx": frag_start_idx,
-            "frag_stop_idx": frag_start_idx + MINIMAL_ROWS_PER_PRECURSOR,
-        }
-    )
-    return (
-        precursor_df,
+        pd.DataFrame(np.array(MZ, dtype=PEAK_MZ_DTYPE), columns=CHARGED_FRAG_TYPES),
         pd.DataFrame(
-            np.array(MINIMAL_MZ, dtype=PEAK_MZ_DTYPE), columns=MINIMAL_FRAG_TYPES
-        ),
-        pd.DataFrame(
-            np.array(MINIMAL_INTENSITY, dtype=PEAK_INTENSITY_DTYPE),
-            columns=MINIMAL_FRAG_TYPES,
+            np.array(INTENSITY, dtype=PEAK_INTENSITY_DTYPE), columns=CHARGED_FRAG_TYPES
         ),
     )
 
 
-@pytest.mark.parametrize(
-    "keep_top_k_fragments, min_fragment_intensity, expected_mask", MINIMAL_FILTER_CASES
-)
-def test_expected_keep_mask_matches_hand_written_mask(
-    minimal_library, keep_top_k_fragments, min_fragment_intensity, expected_mask
-):
-    """_expected_keep_mask reproduces the masks of MINIMAL_FILTER_CASES."""
-    # Given
-    precursor_df, mz_df, intensity_df = minimal_library
-
-    # When
-    mask = _expected_keep_mask(
-        precursor_df, mz_df, intensity_df, keep_top_k_fragments, min_fragment_intensity
-    )
-
-    # Then
-    np.testing.assert_array_equal(mask, expected_mask)
+def _flat(values, dtype):
+    """Flatten a dense grid to the slot order of the flat fragment dataframe."""
+    return np.array(values, dtype=dtype).reshape(-1)
 
 
 @pytest.mark.requires_numba
 @pytest.mark.parametrize(
-    "keep_top_k_fragments, min_fragment_intensity, expected_mask", MINIMAL_FILTER_CASES
+    "keep_top_k_fragments, min_fragment_intensity, expected_keep", FILTER_CASES
 )
-def test_flatten_fragments_on_minimal_library(
-    minimal_library, keep_top_k_fragments, min_fragment_intensity, expected_mask
+def test_flatten_fragments_retains_expected_fragments(
+    library, keep_top_k_fragments, min_fragment_intensity, expected_keep
 ):
-    """flatten_fragments keeps exactly the slots of MINIMAL_FILTER_CASES."""
+    """The flat library keeps only the slots listed in FILTER_CASES."""
     # Given
-    precursor_df, mz_df, intensity_df = minimal_library
-    expected_mask = np.array(expected_mask)
+    precursor_df, mz_df, intensity_df = library
+    keep = _flat(expected_keep, bool)
 
     # When
     _, frag_df = flatten_fragments(
@@ -229,59 +161,51 @@ def test_flatten_fragments_on_minimal_library(
     )
 
     # Then
+    assert len(frag_df) == keep.sum()
+    np.testing.assert_array_equal(frag_df["mz"].values, _flat(MZ, PEAK_MZ_DTYPE)[keep])
     np.testing.assert_array_equal(
-        frag_df["mz"].values,
-        np.array(MINIMAL_MZ, dtype=PEAK_MZ_DTYPE).reshape(-1)[expected_mask],
-    )
-    np.testing.assert_array_equal(
-        frag_df["intensity"].values,
-        np.array(MINIMAL_INTENSITY, dtype=PEAK_INTENSITY_DTYPE).reshape(-1)[
-            expected_mask
-        ],
+        frag_df["intensity"].values, _flat(INTENSITY, PEAK_INTENSITY_DTYPE)[keep]
     )
 
 
 @pytest.mark.requires_numba
-def test_flatten_fragments_annotates_minimal_library(minimal_library):
-    """flatten_fragments annotates each kept slot with its dense position."""
+def test_flatten_fragments_annotates_retained_fragments(library):
+    """Each annotation column describes the dense slot of its fragment."""
     # Given
-    precursor_df, mz_df, intensity_df = minimal_library
+    precursor_df, mz_df, intensity_df = library
 
     # When
     _, frag_df = flatten_fragments(precursor_df, mz_df, intensity_df)
 
     # Then
-    # kept slots: p0 r0 b, p0 r0 y, p0 r1 y, p1 r0 b, p1 r0 y, p1 r1 b
     np.testing.assert_array_equal(
-        frag_df["mz"].values, [100.0, 200.0, 300.0, 400.0, 500.0, 600.0]
+        frag_df["mz"].values, _flat(MZ, PEAK_MZ_DTYPE)[_flat(KEEP_UNFILTERED, bool)]
     )
-    np.testing.assert_array_equal(frag_df["position"].values, [0, 0, 1, 0, 0, 1])
-    # b: number = position + 1, y: number = MINIMAL_ROWS_PER_PRECURSOR - position
-    np.testing.assert_array_equal(frag_df["number"].values, [1, 2, 1, 1, 2, 2])
-    np.testing.assert_array_equal(frag_df["type"].values, [98, 121, 121, 98, 121, 98])
-    np.testing.assert_array_equal(frag_df["charge"].values, [1, 1, 1, 1, 1, 1])
-    np.testing.assert_array_equal(frag_df["loss_type"].values, [0, 0, 0, 0, 0, 0])
+    # position is the dense row of the fragment within its precursor
+    np.testing.assert_array_equal(frag_df["position"].values, [0, 1, 0, 0, 1])
+    # b_modloss counts forward, y counts backward over ROWS_PER_PRECURSOR rows
+    np.testing.assert_array_equal(frag_df["number"].values, [2, 1, 2, 1, 2])
+    np.testing.assert_array_equal(frag_df["type"].values, [121, 121, 121, 98, 98])
+    np.testing.assert_array_equal(frag_df["loss_type"].values, [0, 0, 0, 98, 98])
+    np.testing.assert_array_equal(frag_df["charge"].values, [1, 1, 1, 1, 1])
 
 
 @pytest.mark.requires_numba
 @pytest.mark.parametrize(
-    "keep_top_k_fragments, min_fragment_intensity",
-    [(1000, -1), (1000, 0.5), (8, -1), (5, 0.2), (1, -1)],
+    "keep_top_k_fragments, min_fragment_intensity, expected_keep", FILTER_CASES
 )
-def test_flatten_fragments_retains_expected_fragments(
-    keep_top_k_fragments, min_fragment_intensity
+def test_flatten_fragments_reannotates_precursor_pointers(
+    library, keep_top_k_fragments, min_fragment_intensity, expected_keep
 ):
-    """The flat library keeps only the slots that pass all filters."""
-    precursor_df, mz_df, intensity_df = _dense_library()
-    expected_mask = _expected_keep_mask(
-        precursor_df,
-        mz_df,
-        intensity_df,
-        keep_top_k_fragments,
-        min_fragment_intensity,
-    )
+    """The flat pointers of a precursor address only its own fragments."""
+    # Given
+    precursor_df, mz_df, intensity_df = library
+    n_types = len(CHARGED_FRAG_TYPES)
+    mz = _flat(MZ, PEAK_MZ_DTYPE)
+    keep = _flat(expected_keep, bool)
 
-    _, frag_df = flatten_fragments(
+    # When
+    precursor_df, frag_df = flatten_fragments(
         precursor_df,
         mz_df,
         intensity_df,
@@ -289,83 +213,12 @@ def test_flatten_fragments_retains_expected_fragments(
         keep_top_k_fragments=keep_top_k_fragments,
     )
 
-    assert len(frag_df) == expected_mask.sum()
-    np.testing.assert_array_equal(
-        frag_df["mz"].values, mz_df.values.reshape(-1)[expected_mask]
-    )
-    np.testing.assert_array_equal(
-        frag_df["intensity"].values, intensity_df.values.reshape(-1)[expected_mask]
-    )
-
-
-@pytest.mark.requires_numba
-@pytest.mark.parametrize("keep_top_k_fragments", [1000, 5])
-def test_flatten_fragments_annotates_retained_fragments(keep_top_k_fragments):
-    """Each annotation column describes the dense slot of its fragment."""
-    precursor_df, mz_df, intensity_df = _dense_library()
-    n_types = mz_df.shape[1]
-    expected_mask = _expected_keep_mask(
-        precursor_df, mz_df, intensity_df, keep_top_k_fragments, -1
-    )
-    kept_slots = np.flatnonzero(expected_mask)
-    kept_columns = kept_slots % n_types
-    kept_rows = kept_slots // n_types
-
-    _, frag_df = flatten_fragments(
-        precursor_df, mz_df, intensity_df, keep_top_k_fragments=keep_top_k_fragments
-    )
-
-    frag_types = [parse_charged_frag_type(col) for col in CHARGED_FRAG_TYPES]
-    np.testing.assert_array_equal(
-        frag_df["charge"].values,
-        np.array([charge for _, charge in frag_types])[kept_columns],
-    )
-    np.testing.assert_array_equal(
-        frag_df["type"].values,
-        np.array([FRAGMENT_TYPES[name].series_id for name, _ in frag_types])[
-            kept_columns
-        ],
-    )
-    np.testing.assert_array_equal(
-        frag_df["loss_type"].values,
-        np.array([FRAGMENT_TYPES[name].loss_id for name, _ in frag_types])[
-            kept_columns
-        ],
-    )
-
-    # position counts the fragment rows of a precursor. number counts the ion
-    # series in the direction of the fragment type.
-    expected_position = kept_rows % ROWS_PER_PRECURSOR
-    np.testing.assert_array_equal(frag_df["position"].values, expected_position)
-    directions = np.array(
-        [FRAGMENT_TYPES[name].direction_id for name, _ in frag_types]
-    )[kept_columns]
-    expected_number = np.where(
-        directions == 1, expected_position + 1, ROWS_PER_PRECURSOR - expected_position
-    )
-    np.testing.assert_array_equal(frag_df["number"].values, expected_number)
-
-
-@pytest.mark.requires_numba
-@pytest.mark.parametrize("keep_top_k_fragments", [1000, 5])
-def test_flatten_fragments_reannotates_precursor_pointers(keep_top_k_fragments):
-    """The flat pointers of a precursor address only its own fragments."""
-    precursor_df, mz_df, intensity_df = _dense_library()
-    n_types = mz_df.shape[1]
-    mz = mz_df.values.reshape(-1)
-    expected_mask = _expected_keep_mask(
-        precursor_df, mz_df, intensity_df, keep_top_k_fragments, -1
-    )
-
-    precursor_df, frag_df = flatten_fragments(
-        precursor_df, mz_df, intensity_df, keep_top_k_fragments=keep_top_k_fragments
-    )
-
+    # Then
     for row in precursor_df.itertuples():
         block = slice(row.frag_start_idx * n_types, row.frag_stop_idx * n_types)
         np.testing.assert_array_equal(
             frag_df["mz"].values[row.flat_frag_start_idx : row.flat_frag_stop_idx],
-            mz[block][expected_mask[block]],
+            mz[block][keep[block]],
         )
 
     # the pointers must cover the fragment dataframe with no gap and no overlap
@@ -378,65 +231,71 @@ def test_flatten_fragments_reannotates_precursor_pointers(keep_top_k_fragments):
 
 
 @pytest.mark.requires_numba
-def test_flatten_fragments_filters_custom_df_columns():
+def test_flatten_fragments_filters_custom_df_columns(library):
     """flatten_fragments filters a custom_df column like the mz column."""
-    precursor_df, mz_df, intensity_df = _dense_library()
-    cardinality_df = pd.DataFrame(
-        np.arange(mz_df.size, dtype=np.uint8).reshape(mz_df.shape),
-        columns=CHARGED_FRAG_TYPES,
-    )
-    expected_mask = _expected_keep_mask(precursor_df, mz_df, intensity_df, 5, -1)
+    # Given
+    precursor_df, mz_df, intensity_df = library
+    cardinality = np.arange(mz_df.size, dtype=np.uint8).reshape(mz_df.shape)
+    cardinality_df = pd.DataFrame(cardinality, columns=CHARGED_FRAG_TYPES)
 
+    # When
     _, frag_df = flatten_fragments(
         precursor_df,
         mz_df,
         intensity_df,
-        keep_top_k_fragments=5,
         custom_df={"cardinality": cardinality_df},
     )
 
-    assert "cardinality" in frag_df.columns
+    # Then
     np.testing.assert_array_equal(
         frag_df["cardinality"].values,
-        cardinality_df.values.reshape(-1)[expected_mask],
+        cardinality.reshape(-1)[_flat(KEEP_UNFILTERED, bool)],
     )
 
 
 @pytest.mark.requires_numba
-def test_flatten_fragments_without_intensity():
+def test_flatten_fragments_without_intensity(library):
     """Without intensities, flatten_fragments removes only the mz == 0 padding."""
-    precursor_df, mz_df, _ = _dense_library()
-    expected_mask = _expected_keep_mask(precursor_df, mz_df, pd.DataFrame(), 1000, -1)
+    # Given
+    precursor_df, mz_df, _ = library
 
+    # When
     _, frag_df = flatten_fragments(precursor_df, mz_df, pd.DataFrame())
 
+    # Then
     assert "intensity" not in frag_df.columns
     np.testing.assert_array_equal(
-        frag_df["mz"].values, mz_df.values.reshape(-1)[expected_mask]
+        frag_df["mz"].values, _flat(MZ, PEAK_MZ_DTYPE)[_flat(KEEP_UNFILTERED, bool)]
     )
 
 
 @pytest.mark.requires_numba
-def test_flatten_fragments_selects_custom_columns():
+def test_flatten_fragments_selects_custom_columns(library):
     """flatten_fragments creates only the requested annotation columns."""
-    precursor_df, mz_df, intensity_df = _dense_library()
+    # Given
+    precursor_df, mz_df, intensity_df = library
 
+    # When
     _, frag_df = flatten_fragments(
         precursor_df, mz_df, intensity_df, custom_columns=["number", "charge"]
     )
 
+    # Then
     assert list(frag_df.columns) == ["mz", "intensity", "charge", "number"]
 
 
 @pytest.mark.requires_numba
-def test_flatten_fragments_empty_precursor_df():
+def test_flatten_fragments_empty_precursor_df(library):
     """An empty library gives an empty fragment dataframe."""
-    _, mz_df, intensity_df = _dense_library()
+    # Given
+    _, mz_df, intensity_df = library
 
+    # When
     precursor_df, frag_df = flatten_fragments(
         pd.DataFrame({"frag_start_idx": [], "frag_stop_idx": []}), mz_df, intensity_df
     )
 
+    # Then
     assert len(precursor_df) == 0
     assert len(frag_df) == 0
 
