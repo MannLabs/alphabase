@@ -1097,7 +1097,7 @@ def _annotate_kept_fragments(
             directions[kept_frag_types], row_positions[kept_rows], row_counts[kept_rows]
         )
     if "position" in custom_columns:
-        # the flat column keeps its uint32 dtype
+        # row_positions is uint16, the flat column stays uint32
         columns["position"] = row_positions[kept_rows].astype(np.uint32)
 
     return columns
@@ -1208,9 +1208,9 @@ def flatten_fragments(
     # fills most dense slots.
     mz = fragment_mz_df.values.reshape(-1)
     use_intensity = len(fragment_intensity_df) > 0
-    # `copy=False` keeps a dense copy out of memory whenever the dtype already
-    # matches. Nothing writes to `mz` or `intensity`, so both stay views on the
-    # input dataframes.
+    # `copy=False` returns a view when the dtype already matches, instead of
+    # allocating a second dense array. Neither `mz` nor `intensity` is written
+    # to, so the view is safe.
     intensity = (
         fragment_intensity_df.values.astype(PEAK_INTENSITY_DTYPE, copy=False).reshape(
             -1
