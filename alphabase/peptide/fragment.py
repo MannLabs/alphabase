@@ -812,7 +812,11 @@ def _calculate_fragment_numbers(
 
     The fragment number is the MS series numbering, i.e. the 1-based index within the
     ion series (the n of b2 or y7). Forward series are numbered from the N-terminus,
-    reverse series from the C-terminus.
+    reverse series from the C-terminus:
+
+    - direction 1: `row_position + 1`
+    - direction -1: `row_count - row_position`
+    - any other direction: 0
 
     Parameters
     ----------
@@ -829,7 +833,7 @@ def _calculate_fragment_numbers(
     Returns
     -------
     np.uint32
-        number of the fragment in its ion series, and 0 for direction 0
+        number of the fragment in its ion series
 
     """
     if frag_direction == 1:
