@@ -991,7 +991,7 @@ def _annotate_charged_frag_types(
     series_ids = []
     loss_ids = []
     charges = []
-    directions = []  # 'abc': direction=1, 'xyz': direction=-1, otherwise 0
+    directions = []  # a/b/c series count forward (1), x/y/z series backward (-1)
 
     for charged_frag_type in charged_frag_types:
         frag_type, charge = parse_charged_frag_type(charged_frag_type)
@@ -1029,8 +1029,7 @@ def _reannotate_precursor_pointers(
     precursor_df["flat_frag_stop_idx"] = precursor_df.frag_stop_idx
     precursor_df[["flat_frag_start_idx", "flat_frag_stop_idx"]] *= n_fragment_types
 
-    # cumulative sum counts the number of fragments before the given fragment which were removed.
-    # This sum does not include the fragment at the index position and has therefore len N +1
+    # exclusive prefix sum, so cum_sum_tresh[i] counts the slots removed before slot i
     cum_sum_tresh = np.zeros(shape=len(excluded) + 1, dtype=np.int64)
     cum_sum_tresh[1:] = np.cumsum(excluded)
 
@@ -1126,14 +1125,14 @@ def flatten_fragments(
         fragment_mz_df.columns.values
     )
 
-    # tiling the typed arrays keeps their dtype. A tiled list of Python ints gave
-    # a dense int64 array first, which cost 8 bytes per dense slot.
-    if "type" in custom_columns:
-        frag_df["type"] = np.tile(series_ids, len(fragment_mz_df))
-    if "loss_type" in custom_columns:
-        frag_df["loss_type"] = np.tile(loss_ids, len(fragment_mz_df))
-    if "charge" in custom_columns:
-        frag_df["charge"] = np.tile(charges, len(fragment_mz_df))
+    frag_type_annotations = {
+        "type": series_ids,
+        "loss_type": loss_ids,
+        "charge": charges,
+    }
+    for col_name, values in frag_type_annotations.items():
+        if col_name in custom_columns:
+            frag_df[col_name] = np.tile(values, len(fragment_mz_df))
 
     dense_directions = np.tile(directions, (len(fragment_mz_df), 1))
 
