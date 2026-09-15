@@ -1062,8 +1062,8 @@ def _select_dense_fragments(
 
     numbers, positions, not_top_k = _parse_fragment(
         dense_directions,
-        precursor_df.frag_start_idx.values,
-        precursor_df.frag_stop_idx.values,
+        precursor_df["frag_start_idx"].values,
+        precursor_df["frag_stop_idx"].values,
         keep_top_k_fragments,
         intensity,
         n_fragment_types,
@@ -1171,8 +1171,8 @@ def _reannotate_precursor_pointers(
         number of charged fragment types, that is the number of dense columns
 
     """
-    dense_start_idx = precursor_df.frag_start_idx.values.astype(np.int64)
-    dense_stop_idx = precursor_df.frag_stop_idx.values.astype(np.int64)
+    dense_start_idx = precursor_df["frag_start_idx"].values.astype(np.int64)
+    dense_stop_idx = precursor_df["frag_stop_idx"].values.astype(np.int64)
     precursor_df["flat_frag_start_idx"] = np.searchsorted(
         kept_indices, dense_start_idx * n_fragment_types
     )
