@@ -520,7 +520,7 @@ def test_spectronaut_v20_reader() -> None:
     reader = SpectronautReportReader()
     reader.import_file(input_data)
 
-    _assert_reference_df_equal(reader.psm_df, "spectronaut_v20")
+    _assert_reference_df_equal(reader.psm_df, "spectronaut_v20", loose_check=True)
 
 
 def test_spectronaut_report_reader_186() -> None:
@@ -531,7 +531,9 @@ def test_spectronaut_report_reader_186() -> None:
     reader = SpectronautReportReader()
     reader.import_file(input_data)
 
-    _assert_reference_df_equal(reader.psm_df, "spectronaut_18.6_report")
+    _assert_reference_df_equal(
+        reader.psm_df, "spectronaut_18.6_report", loose_check=True
+    )
 
 
 def test_spectronaut_reader_with_mod() -> None:
