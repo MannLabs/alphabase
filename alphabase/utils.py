@@ -72,7 +72,7 @@ def _get_delimiter(file_path: str) -> str:
         return "\t"
 
 
-def _coerce_object_nan_to_empty_string(df: pd.DataFrame) -> pd.DataFrame:
+def _sanitize_missing_values(df: pd.DataFrame) -> pd.DataFrame:
     """Coerce NaN values in object and string columns to an empty string.
 
     NAs have a special meaning in alphabase as they indicate unresolved modifications.

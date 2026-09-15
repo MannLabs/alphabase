@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from alphabase.utils import _coerce_object_nan_to_empty_string
+from alphabase.utils import _sanitize_missing_values
 
 
 @pytest.mark.parametrize(
@@ -48,8 +48,8 @@ from alphabase.utils import _coerce_object_nan_to_empty_string
         ),
     ],
 )
-def test__coerce_object_nan_to_empty_string(values, dtype, expected_values):
-    """Test that columns get coerced correctly by _coerce_object_nan_to_empty_string
+def test__sanitize_missing_values(values, dtype, expected_values):
+    """Test that columns get coerced correctly by _sanitize_missing_values
 
     - Numeric missing values are retained
     - Object/string missing values are parsed to empty strings.
@@ -57,7 +57,7 @@ def test__coerce_object_nan_to_empty_string(values, dtype, expected_values):
     """
     df = pd.DataFrame({"column": pd.Series(values, dtype=dtype)})
 
-    result = _coerce_object_nan_to_empty_string(df)
+    result = _sanitize_missing_values(df)
 
     pd.testing.assert_series_equal(
         result["column"],
