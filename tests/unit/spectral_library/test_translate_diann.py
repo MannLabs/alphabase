@@ -150,15 +150,16 @@ def test_translate_to_parquet_roundtrip(tmp_path) -> None:
 @pytest.mark.parametrize(
     ("present", "expected"),
     [
-        (["irt_pred", "rt_pred", "rt", "irt", "rt_norm"], "irt_pred"),
-        (["rt_pred", "rt", "irt", "rt_norm"], "rt_pred"),
+        (["irt_pred", "rt_pred", "rt_norm_pred", "rt", "irt", "rt_norm"], "irt_pred"),
+        (["rt_pred", "rt_norm_pred", "rt", "irt", "rt_norm"], "rt_pred"),
+        (["rt_norm_pred", "rt", "irt", "rt_norm"], "rt_norm_pred"),
         (["rt", "irt", "rt_norm"], "rt"),
         (["irt", "rt_norm"], "irt"),
         (["rt_norm"], "rt_norm"),
     ],
 )
 def test_speclib_to_diann_df_rt_column_precedence(present: list, expected: str) -> None:
-    """RT is taken from the first present of irt_pred, rt_pred, rt, irt, rt_norm."""
+    """RT comes from the first present candidate, predictions before measurements."""
     speclib = _build_speclib()
     # give each candidate column a distinct value, so `RT` identifies its source
     values = {name: float(i + 1) for i, name in enumerate(present)}
@@ -174,14 +175,29 @@ def test_speclib_to_diann_df_rt_column_precedence(present: list, expected: str) 
     assert df["RT"].unique().tolist() == [values[expected]]
 
 
-def test_speclib_to_diann_df_rejects_rt_norm_pred() -> None:
-    """CHARACTERIZATION (bug): `rt_norm_pred` is not a recognised RT column.
+def test_speclib_to_diann_df_accepts_rt_norm_pred() -> None:
+    """A library carrying only `rt_norm_pred` exports, rather than being rejected.
 
-    peptdeep writes it alongside `rt_pred`, so a library carrying only
-    `rt_norm_pred` is rejected. A later commit adds it to the candidates.
+    peptdeep writes `rt_norm_pred` alongside `rt_pred`, so this matters for a
+    library whose `rt_pred` was dropped.
     """
     speclib = _build_speclib()
     speclib._precursor_df = speclib._precursor_df.rename(columns={"rt": "rt_norm_pred"})
+
+    df = speclib_to_diann_df(
+        speclib,
+        min_frag_mz=0,
+        max_frag_mz=np.inf,
+        min_frag_intensity=0.0,
+        verbose=False,
+    )
+    assert df["RT"].notna().all()
+
+
+def test_speclib_to_diann_df_without_any_rt_column_is_rejected() -> None:
+    """A library with no retention time at all is still an error."""
+    speclib = _build_speclib()
+    speclib._precursor_df = speclib._precursor_df.drop(columns=["rt"])
 
     with pytest.raises(ValueError, match="must contain a retention time column"):
         speclib_to_diann_df(
@@ -193,13 +209,12 @@ def test_speclib_to_diann_df_rejects_rt_norm_pred() -> None:
         )
 
 
-def test_speclib_to_diann_df_flags_group_by_precursor_id() -> None:
-    """CHARACTERIZATION (bug): duplicate precursors share one base-peak flag.
+def test_speclib_to_diann_df_flags_one_base_peak_per_precursor_row() -> None:
+    """Duplicate precursors each get their own base-peak flag.
 
-    `Flags` marks the base peak by grouping on `Precursor.Id`, so a library
-    holding the same precursor twice -- which `SpecLibBase.append` produces --
-    gets one flag for the pair instead of one per precursor row. A later commit
-    groups by precursor row instead.
+    `Flags` marks the base peak per precursor *row*, so a library holding the same
+    precursor twice -- which `SpecLibBase.append` produces -- gets one flag each
+    rather than one for the pair. `Precursor.Id` cannot distinguish them.
     """
     speclib = _build_speclib()
     speclib.append(_build_speclib())
@@ -213,9 +228,14 @@ def test_speclib_to_diann_df_flags_group_by_precursor_id() -> None:
         verbose=False,
     )
 
-    # every precursor row is exported, but only the distinct ids get a base peak
+    # the duplicated precursors share an id, so the id count is half the row count
     assert df["Precursor.Id"].nunique() == n_precursors // 2
-    assert int((df["Flags"] & (1 << 4) > 0).sum()) == n_precursors // 2
+    assert int((df["Flags"] & (1 << 4) > 0).sum()) == n_precursors
+
+    # and each flagged fragment is the most intense of its own precursor's block
+    flagged = df["Flags"] & (1 << 4) > 0
+    for _, group in df.groupby("Precursor.Id", sort=False):
+        assert group[flagged.loc[group.index]].shape[0] == 2
 
 
 def test_speclib_to_diann_df_leaves_the_source_library_untouched() -> None:
