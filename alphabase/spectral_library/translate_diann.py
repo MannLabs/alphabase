@@ -17,7 +17,7 @@ from alphabase.spectral_library.translate_core import (
     FragmentTableCols,
     create_modified_sequence,
     first_present_column,
-    fragment_table,
+    get_fragment_table,
     get_precursor_mz,
     join_fragments,
     mod_to_unimod_dict,
@@ -208,7 +208,7 @@ def _precursors_to_diann_df(  # noqa: PLR0913
     df[DiannParquetCols.EXCLUDE_FROM_QUANT] = 0
     df[DiannParquetCols.SOURCE_ID] = ""
 
-    fragments = fragment_table(
+    fragments = get_fragment_table(
         precursor_df[LibPsmDfCols.FRAG_START_IDX].to_numpy(),
         precursor_df[LibPsmDfCols.FRAG_STOP_IDX].to_numpy(),
         fragment_mz_df,
@@ -264,8 +264,7 @@ def speclib_to_diann_df(  # noqa: PLR0913
     and scores 0, ``PTM.Site.Confidence`` 1, ``Source.Id`` empty).
 
     ``N.Term``/``C.Term`` are protein-terminus flags taken from ``is_prot_nterm``/
-    ``is_prot_cterm`` (alphabase FASTA digestion) if present, else 0. ``Signature`` is not
-    written, as DIA-NN requires for third-party libraries.
+    ``is_prot_cterm`` (alphabase FASTA digestion) if present, else 0.
 
     Parameters
     ----------

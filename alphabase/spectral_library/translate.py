@@ -19,7 +19,7 @@ from alphabase.spectral_library.translate_core import (
     FragmentTableCols,
     create_modified_sequence,
     first_present_column,
-    fragment_table,
+    get_fragment_table,
     get_precursor_mz,
     is_nterm_frag,
     join_fragments,
@@ -115,7 +115,7 @@ def _precursors_to_swath_df(  # noqa: PLR0913
     if "decoy" in precursor_df.columns:
         df["Decoy"] = precursor_df["decoy"]
 
-    fragments = fragment_table(
+    fragments = get_fragment_table(
         precursor_df["frag_start_idx"].to_numpy(),
         precursor_df["frag_stop_idx"].to_numpy(),
         fragment_mz_df,
@@ -145,10 +145,10 @@ def speclib_to_single_df(
     modloss: str = "H3PO4",
     verbose=True,
 ) -> pd.DataFrame:
-    """
-    Convert alphabase library to diann (or Spectronaut) library dataframe
-    This method is not important, as it will be only
-    used by DiaNN, or spectronaut, or others
+    """Convert an alphabase library into a SWATH/Spectronaut transition list.
+
+    The in-memory counterpart of :func:`translate_to_tsv`, which writes the same
+    table to a file.
 
     Parameters
     ----------
@@ -157,8 +157,8 @@ def speclib_to_single_df(
         use unimod name if None.
         Defaults to None.
 
-    keep_k_highest_peaks : int
-        only keep highest fragments for each precursor. Default: 12
+    keep_k_highest_fragments : int
+        Keep only the k most intense fragments per precursor. Default: 12
 
     min_frag_mz, max_frag_mz : float
         Fragment m/z range; fragments outside it are dropped. Pass 0 for no lower bound

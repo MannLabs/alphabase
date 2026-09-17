@@ -1,13 +1,11 @@
-"""Machinery shared by the spectral library export formats.
+"""Code shared by the two spectral library export formats.
 
-:module:`alphabase.spectral_library.translate` writes a SWATH/Spectronaut transition list
-and :module:`alphabase.spectral_library.translate_diann` a DIA-NN 1.9.1+ parquet library.
-Both flatten the same alphabase library into one row per precursor/fragment pair and
-differ only in dialect, so the modified-sequence rendering, the fragment selection and
-the candidate precursor columns live here rather than in either format.
+`translate` writes a SWATH/Spectronaut transition list. `translate_diann` writes a
+DIA-NN 1.9.1+ parquet library. Both turn the same alphabase library into one row per
+precursor and fragment, and only the output format differs.
 
-Before this module, they lived in ``translate.py``, which made the SWATH format the de
-facto shared library: ``translate_diann`` imported five helpers from it.
+The parts they share live here: rendering modified sequences, picking which fragments
+to keep, and finding the precursor columns to export.
 """
 
 import warnings
@@ -74,8 +72,7 @@ def get_precursor_mz(precursor_df: pd.DataFrame) -> pd.Series:
 
     The read-only counterpart of
     :func:`alphabase.peptide.precursor.update_precursor_mz`, which writes its result
-    into the frame it is handed -- so an export that called it left a `precursor_mz`
-    column behind on the caller's library.
+    into the frame it is handed.
     """
     if PsmDfCols.PRECURSOR_MZ in precursor_df.columns:
         return precursor_df[PsmDfCols.PRECURSOR_MZ]
@@ -113,7 +110,6 @@ def first_present_column(
     return default
 
 
-# @numba.njit #(cannot use numba for pd.Series)
 def create_modified_sequence(
     seq_mods_sites: tuple,  # must be ('sequence','mods','mod_sites')
     translate_mod_dict: Optional[dict] = None,
@@ -123,13 +119,15 @@ def create_modified_sequence(
 ) -> str:
     """Translate `(sequence, mods, mod_sites)` into a modified sequence.
 
-    Used by `df.apply()`. For example, `('ABCDEFG','Mod1@A;Mod2@E','1;5')` ->
-    `_A[Mod1@A]BCDE[Mod2@E]FG_`.
+    Used by `df.apply()`. Sites are 1-based, 0 is the N-terminus and -1 the
+    C-terminus::
 
-    Sites are 1-based and applied from the C-terminal end inwards, so an earlier
-    insertion cannot shift a later site. Site 0 is the N-terminus and -1 the
-    C-terminus; both are rendered onto `nterm`/`cterm`, which puts an N-terminal mod
-    inside the leading separator and a C-terminal one after the trailing separator.
+        ('ABCDEFG', 'Mod1@A;Mod2@E', '1;5')        -> _A[Mod1]BCDE[Mod2]FG_
+        ('PEPTIDE', 'Acetyl@Protein_N-term', '0')  -> _[Acetyl]PEPTIDE_
+        ('PEPTIDE', 'Amidated@Any_C-term', '-1')   -> _PEPTIDE_[Amidated]
+
+    Mods are inserted from the C-terminal end inwards, so an earlier insertion
+    cannot shift a later site.
 
     Parameters
     ----------
@@ -215,7 +213,7 @@ def _get_frag_num(columns: np.ndarray, rows: np.ndarray, frag_len: int) -> list:
     ]
 
 
-def fragment_table(  # noqa: PLR0913
+def get_fragment_table(  # noqa: PLR0913
     frag_start_idx: np.ndarray,
     frag_stop_idx: np.ndarray,
     fragment_mz_df: pd.DataFrame,
@@ -229,18 +227,11 @@ def fragment_table(  # noqa: PLR0913
 ) -> pd.DataFrame:
     """Flatten each precursor's most intense fragments into one row per fragment.
 
-    Filtering, normalization and selection all happen on a per-precursor copy, so the
-    library's fragment frames are left exactly as they were. Fragments outside the m/z
-    window are dropped rather than zeroed, as are empty fragment slots -- a `*_modloss`
-    column of a precursor whose modification has no loss carries m/z 0, and selecting it
-    would export a fragment that does not exist. An unbounded window is expressed by the
-    bounds themselves, `0` and `np.inf`, so no combination of them is a special case.
-
-    Intensities are normalized to the precursor's most intense kept fragment, and the
-    `keep_k_highest` highest are kept in descending order. The result carries the
-    canonical columns of :class:`FragmentTableCols`, including `precursor_row` -- the
-    positional row of the precursor -- so it needs no precursor frame to be built and
-    no output frame to be built into. :func:`join_fragments` attaches the precursors.
+    Works on a per-precursor copy, so the library's fragment frames are untouched.
+    Fragments outside the m/z window are dropped, as are empty slots. Intensities are
+    normalized to each precursor's most intense kept fragment, and the `keep_k_highest`
+    highest are kept in descending order. The default bounds `0` and `np.inf` accept
+    every fragment, so an unbounded window needs no special handling.
 
     Parameters
     ----------
@@ -295,22 +286,23 @@ def fragment_table(  # noqa: PLR0913
     frag_masses = []
     frag_intensities = []
     frag_numbers = []
-    iters = zip(frag_start_idx, frag_stop_idx)
+    frag_idx_ranges = zip(frag_start_idx, frag_stop_idx)
     if verbose:
-        iters = tqdm.tqdm(iters)
-    for start, end in iters:
+        frag_idx_ranges = tqdm.tqdm(frag_idx_ranges)
+    for start, end in frag_idx_ranges:
         masses = fragment_mz_df.iloc[start:end, :].to_numpy()
-        keep = (masses > 0) & (masses >= min_frag_mz) & (masses <= max_frag_mz)
+        keep_mask = (masses > 0) & (masses >= min_frag_mz) & (masses <= max_frag_mz)
         if n_masked_per_terminus:
             # b numbers count from the first row, y numbers from the last, so the
             # smallest of each series sit at opposite ends of the block. `max(..., 0)`
             # because a negative slice start wraps rather than clamping.
-            keep[:n_masked_per_terminus, is_nterm] = False
-            keep[max(len(keep) - n_masked_per_terminus, 0) :, ~is_nterm] = False
+            cterm_start = max(len(keep_mask) - n_masked_per_terminus, 0)
+            keep_mask[:n_masked_per_terminus, is_nterm] = False
+            keep_mask[cterm_start:, ~is_nterm] = False
 
         # `copy=True`, so normalizing and zeroing below cannot reach the library
         intens = fragment_intensity_df.iloc[start:end, :].to_numpy(copy=True)
-        intens[~keep] = 0
+        intens[~keep_mask] = 0
         max_inten = np.amax(intens)
         if max_inten > 0:
             intens /= max_inten
@@ -318,7 +310,7 @@ def fragment_table(  # noqa: PLR0913
         sorted_idx = np.argsort(intens.reshape(-1))[-keep_k_highest:][::-1]
         # a filtered-out slot can still be selected when a precursor has fewer than
         # `keep_k_highest` fragments left, so drop those rather than export them
-        sorted_idx = sorted_idx[keep.reshape(-1)[sorted_idx]]
+        sorted_idx = sorted_idx[keep_mask.reshape(-1)[sorted_idx]]
         idx_in_df = np.unravel_index(sorted_idx, masses.shape)
 
         frag_len = end - start
@@ -334,7 +326,7 @@ def fragment_table(  # noqa: PLR0913
         frag_intensities.append(intens[idx_in_df])
         frag_numbers.append(_get_frag_num(columns, rows, frag_len))
 
-    table = pd.DataFrame(
+    fragments_df = pd.DataFrame(
         {
             FragmentTableCols.PRECURSOR_ROW: np.arange(len(frag_start_idx)),
             FragmentTableCols.FRAG_TYPE: frag_types,
@@ -345,9 +337,9 @@ def fragment_table(  # noqa: PLR0913
             FragmentTableCols.LOSS_TYPE: frag_losses,
         }
     )
-    table = explode_multiple_columns(table, FRAGMENT_VALUE_COLUMNS)
+    fragments_df = explode_multiple_columns(fragments_df, FRAGMENT_VALUE_COLUMNS)
     # a precursor that kept nothing explodes to one all-NaN row; drop those
-    return table.dropna(subset=[FragmentTableCols.MZ])
+    return fragments_df.dropna(subset=[FragmentTableCols.MZ])
 
 
 def join_fragments(
@@ -364,7 +356,7 @@ def join_fragments(
         indexes them.
 
     fragment_df : pd.DataFrame
-        A :func:`fragment_table` result.
+        A :func:`get_fragment_table` result.
 
     columns : dict
         Maps :class:`FragmentTableCols` names to this format's output names. Its order
