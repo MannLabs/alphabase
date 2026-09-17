@@ -330,12 +330,11 @@ def get_fragment_table(  # noqa: PLR0913
             FragmentTableCols.FRAG_TYPE: frag_types,
             FragmentTableCols.MZ: np.concatenate(frag_masses),
             FragmentTableCols.INTENSITY: np.concatenate(frag_intensities),
-            FragmentTableCols.CHARGE: np.array(frag_charges, dtype=np.int64),
+            FragmentTableCols.CHARGE: np.array(frag_charges, dtype=np.int8),
             FragmentTableCols.SERIES_NUMBER: np.array(frag_numbers, dtype=np.int64),
             FragmentTableCols.LOSS_TYPE: frag_losses,
         }
     )
-
 
 
 def join_fragments(
