@@ -525,6 +525,9 @@ def _add_a_new_modification(
     if MOD_DF.loc[mod_name, "modloss"] > 0:
         MOD_DF.loc[mod_name, "modloss_importance"] = 1e10
     MOD_DF.fillna(0, inplace=True)
+    # Enlarging MOD_DF with a new row upcasts the integer column to float, which
+    # would be exported as e.g. "UniMod:4.0" for every modification.
+    MOD_DF["unimod_id"] = MOD_DF["unimod_id"].astype(np.int32)
     # update_all_by_MOD_DF()
 
 

@@ -57,6 +57,17 @@ def test_add_new_modifications(cleanup_test_mods):
     assert "TestMod@N-term" in MOD_Composition
 
 
+def test_add_new_modifications_keeps_unimod_id_integer(cleanup_test_mods):
+    """Test that adding a modification does not upcast unimod_id to float."""
+    # Add a custom modification
+    add_new_modifications([("TestMod@N-term", "C(2)H(3)O(1)", "H(2)O(1)")])
+
+    # unimod_id should still be integer, for existing and new modifications
+    assert MOD_DF["unimod_id"].dtype == "int32"
+    assert str(MOD_DF.loc["Carbamidomethyl@C", "unimod_id"]) == "4"
+    assert MOD_DF.loc["TestMod@N-term", "unimod_id"] == 0
+
+
 def test_add_multiple_modifications(cleanup_test_mods):
     """Test adding multiple modifications."""
     # Add multiple custom modifications
