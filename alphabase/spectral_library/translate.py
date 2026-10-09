@@ -1,10 +1,12 @@
 import multiprocessing as mp
+from collections.abc import Mapping
 
 import numpy as np
 import pandas as pd
 import tqdm
 
-from alphabase.constants.modification import MOD_DF, ModificationKeys
+from alphabase.constants import modification
+from alphabase.constants.modification import ModificationKeys
 from alphabase.numba_wrapper import numba_njit
 from alphabase.spectral_library.base import SpecLibBase
 from alphabase.utils import explode_multiple_columns
@@ -187,11 +189,55 @@ def merge_precursor_fragment_df(
     #     return df
 
 
-mod_to_unimod_dict = {}
-for mod_name, unimod_id in MOD_DF[["mod_name", "unimod_id"]].values:
-    if unimod_id == -1 or unimod_id == "-1":
-        continue
-    mod_to_unimod_dict[mod_name] = f"UniMod:{unimod_id}"
+class _ModToUnimodDict(Mapping):
+    """AlphaBase modification name -> ``"UniMod:<id>"``, read from the current :data:`MOD_DF`.
+
+    Unlike a dict built at import time, this includes modifications added later with
+    :func:`~alphabase.constants.modification.add_new_modifications`. Modifications
+    without a UniMod id (-1) are absent, so looking one up raises a ``KeyError``.
+    Pickling (e.g. for multiprocessing) produces a plain dict of the current state.
+    """
+
+    def __init__(self):
+        self._cache_key = None
+        self._lookup = {}
+
+    def _current(self) -> dict:
+        # MOD_DF is replaced by load_mod_df() and grown by add_new_modifications(),
+        # so rebuild whenever the table object or its length changes.
+        mod_df = modification.MOD_DF
+        cache_key = (id(mod_df), len(mod_df))
+        if cache_key != self._cache_key:
+            unimod_ids = mod_df["unimod_id"].astype(int)
+            self._lookup = {
+                mod_name: f"UniMod:{unimod_id}"
+                for mod_name, unimod_id in zip(mod_df["mod_name"], unimod_ids)
+                if unimod_id != -1
+            }
+            self._cache_key = cache_key
+        return self._lookup
+
+    def __getitem__(self, mod_name: str) -> str:
+        lookup = self._current()
+        if mod_name not in lookup:
+            raise KeyError(
+                f"{mod_name!r} has no UniMod id. Register it with "
+                "add_new_modifications(..., unimod_id=...) or pass a "
+                "translate_mod_dict that names it."
+            )
+        return lookup[mod_name]
+
+    def __iter__(self):
+        return iter(self._current())
+
+    def __len__(self) -> int:
+        return len(self._current())
+
+    def __reduce__(self):
+        return (dict, (dict(self._current()),))
+
+
+mod_to_unimod_dict = _ModToUnimodDict()
 
 
 def is_nterm_frag(frag_type: str):

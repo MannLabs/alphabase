@@ -20,6 +20,7 @@ def cleanup_test_mods():
         "InitMod2@S",
         "RoundTrip1@N-term",
         "RoundTrip2@S",
+        "UnimodMod@R",
     ]
 
     yield
@@ -65,7 +66,17 @@ def test_add_new_modifications_keeps_unimod_id_integer(cleanup_test_mods):
     # unimod_id should still be integer, for existing and new modifications
     assert MOD_DF["unimod_id"].dtype == "int32"
     assert str(MOD_DF.loc["Carbamidomethyl@C", "unimod_id"]) == "4"
-    assert MOD_DF.loc["TestMod@N-term", "unimod_id"] == 0
+    assert MOD_DF.loc["TestMod@N-term", "unimod_id"] == -1
+
+
+def test_add_new_modifications_with_unimod_id(cleanup_test_mods):
+    """Test that a UniMod id given when adding a modification is stored."""
+    # Add a custom modification with a UniMod accession
+    add_new_modifications({"UnimodMod@R": {"composition": "C(2)", "unimod_id": 21}})
+
+    # The accession is stored as an integer
+    assert MOD_DF.loc["UnimodMod@R", "unimod_id"] == 21
+    assert MOD_DF["unimod_id"].dtype == "int32"
 
 
 def test_add_multiple_modifications(cleanup_test_mods):

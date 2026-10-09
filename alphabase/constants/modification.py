@@ -473,6 +473,7 @@ def _add_a_new_modification(
     composition: str,
     modloss_composition: str = "",
     smiles: str = "",
+    unimod_id: int = -1,
 ):
     """
     Add a new modification into :data:`MOD_DF` or update SMILES if modification already exists.
@@ -490,6 +491,10 @@ def _add_a_new_modification(
 
     smiles : str
         SMILES string of the modification
+
+    unimod_id : int
+        UniMod accession of the modification, or -1 if it has none (the default).
+        Exports that name modifications by UniMod accession need it.
     """
     _check_mass_sanity(mod_name, composition, smiles)
 
@@ -513,7 +518,7 @@ def _add_a_new_modification(
         composition,
         modloss_composition,
         _MOD_CLASSIFICATION_USER_ADDED,
-        0,
+        unimod_id,
         smiles,
     ]
     composition_mass = calc_mass_from_formula(composition)
@@ -548,6 +553,8 @@ def add_new_modifications(new_mods: Union[list, dict]):
         mod@site:str (e.g. Mod@S),
         composition:str (e.g. "H(4)O(2)"),
         [optional] modloss composition:str (e.g. "H(2)O(1)"),
+        [optional] smiles:str,
+        [optional] unimod_id:int (e.g. 21),
         ), ...]
         ```,
         dict example:
@@ -555,7 +562,9 @@ def add_new_modifications(new_mods: Union[list, dict]):
         {
         "mod@site": {
         "composition":"H(4)O(2)",
-        "modloss_composition":"H(2)O(1)"
+        "modloss_composition":"H(2)O(1)",
+        "smiles":"...",
+        "unimod_id":21
         }, ...
         }
         ```
