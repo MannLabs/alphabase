@@ -385,12 +385,27 @@ class AminoAcidModifier:
             i + aa_mol_num_atoms for i in mod_neighbor_indices
         ]
 
-        # Create bonds from each modification neighbor to the nitrogen
-        for neighbor_idx in mod_neighbor_indices_combined:
-            rw_mol.AddBond(n_idx, neighbor_idx, Chem.rdchem.BondType.SINGLE)
+        # Bond order is taken from the modification so it can attach through a
+        # double bond, e.g. an imine from an aldehyde probe.
+        total_bond_order = 0
+        for neighbor_idx, neighbor_idx_combined in zip(
+            mod_neighbor_indices, mod_neighbor_indices_combined
+        ):
+            bond = n_mod_mol.GetBondBetweenAtoms(mod_placeholder_idx, neighbor_idx)
+            rw_mol.AddBond(n_idx, neighbor_idx_combined, bond.GetBondType())
+            total_bond_order += int(bond.GetBondTypeAsDouble())
 
-        # Remove [Lv] and corresponding [Fl] atoms (one [Fl] per new bond)
-        fl_to_remove = fl_indices[: len(mod_neighbor_indices)]
+        # [Lv+] lets the nitrogen itself become charged, which is what allows it to
+        # end up as an aromatic ring nitrogen.
+        placeholder_charge = n_mod_mol.GetAtomWithIdx(
+            mod_placeholder_idx
+        ).GetFormalCharge()
+        if placeholder_charge:
+            rw_mol.GetAtomWithIdx(n_idx).SetFormalCharge(placeholder_charge)
+
+        # A double bond consumes two of the nitrogen's hydrogens; valence beyond the
+        # available [Fl] is paid for by the charge above.
+        fl_to_remove = fl_indices[:total_bond_order]
         to_remove = sorted([mod_placeholder_idx_combined] + fl_to_remove, reverse=True)
         for idx in to_remove:
             rw_mol.RemoveAtom(idx)

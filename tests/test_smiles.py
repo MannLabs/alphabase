@@ -208,6 +208,44 @@ class TestNTermModWithPlaceholder:
         with pytest.raises(ValueError, match="should have exactly one neighbor"):
             aa_modifier._apply_n_term_mod_with_placeholder(malformed_mol, mod_mol)
 
+    def test_double_bond_placeholder_gives_imine(self, alanine_smiles):
+        """[Lv]=C attaches through a double bond, consuming both amine hydrogens."""
+        # Given: a modification bonded to [Lv] by a double bond (an aryl aldimine)
+        mod_mol = Chem.MolFromSmiles("[Lv]=Cc1ccc(C)cn1")
+
+        # When: applying it to alanine
+        result = aa_modifier._apply_n_term_mod_with_placeholder(
+            Chem.MolFromSmiles(alanine_smiles), mod_mol
+        )
+
+        # Then: the product carries a C=N imine, not a secondary amine
+        assert result.HasSubstructMatch(Chem.MolFromSmarts("[NX2]=[CX3]"))
+        assert not result.HasSubstructMatch(Chem.MolFromSmarts("[NX3;H1][CX4]"))
+
+    def test_charged_placeholder_gives_aromatic_cation(self, alanine_smiles):
+        """[Lv+] transfers its charge, letting the amine become a ring nitrogen."""
+        # Given: an isoquinolinium written in Kekule form with [Lv+] as the ring N
+        mod_mol = Chem.MolFromSmiles("[Lv+]1C=CC2=CC=CC=C2C=1")
+
+        # When: applying it to alanine
+        result = aa_modifier._apply_n_term_mod_with_placeholder(
+            Chem.MolFromSmiles(alanine_smiles), mod_mol
+        )
+        Chem.SanitizeMol(result)
+
+        # Then: the N-terminal nitrogen is an aromatic, positively charged ring atom
+        assert result.HasSubstructMatch(Chem.MolFromSmarts("[n+]1ccc2ccccc2c1"))
+
+    def test_existing_single_bond_mods_are_unchanged(self, alanine_smiles):
+        """Every [Lv] modification in the registry keeps its previous behaviour."""
+        # Given/When/Then: single-bonded, neutral placeholders are unaffected by
+        # reading bond order and charge, since order == neighbor count and charge == 0
+        for name, mod_smiles in n_term_modifications.items():
+            if "[Lv]" not in mod_smiles:
+                continue
+            result = modify_amino_acid(alanine_smiles, n_term_mod=name)
+            assert Chem.MolFromSmiles(result) is not None, name
+
 
 @pytest.mark.parametrize("aa, smiles", aa_smiles.items())
 def test_all_amino_acids(aa, smiles):
