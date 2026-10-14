@@ -222,6 +222,13 @@ class TestNTermModWithPlaceholder:
         assert result.HasSubstructMatch(Chem.MolFromSmarts("[NX2]=[CX3]"))
         assert not result.HasSubstructMatch(Chem.MolFromSmarts("[NX3;H1][CX4]"))
 
+    def test_charged_placeholder_is_detected(self):
+        """A charged placeholder must still route through the placeholder path."""
+        # Given/When/Then: [Lv+] is recognised, not just a bare [Lv]
+        assert aa_modifier._has_n_term_mod_placeholder("[Lv+]1C=CC2=CC=CC=C2C=1")
+        assert aa_modifier._has_n_term_mod_placeholder("CC(=O)[Lv]")
+        assert not aa_modifier._has_n_term_mod_placeholder("CC(=O)N")
+
     def test_charged_placeholder_gives_aromatic_cation(self, alanine_smiles):
         """[Lv+] transfers its charge, letting the amine become a ring nitrogen."""
         # Given: an isoquinolinium written in Kekule form with [Lv+] as the ring N

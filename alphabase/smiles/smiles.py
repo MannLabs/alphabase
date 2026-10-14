@@ -345,7 +345,8 @@ class AminoAcidModifier:
 
     def _has_n_term_mod_placeholder(self, mod_smiles: str) -> bool:
         """Check if the modification SMILES contains the N-term mod placeholder."""
-        return f"[{MOD_N_TERM_PLACEHOLDER_ATOM}]" in mod_smiles
+        # Matches a charged placeholder such as [Lv+] as well as a bare [Lv].
+        return f"[{MOD_N_TERM_PLACEHOLDER_ATOM}" in mod_smiles
 
     def _apply_n_term_mod_with_placeholder(
         self, aa_mol: Chem.Mol, n_mod_mol: Chem.Mol
