@@ -2858,3 +2858,80 @@ Lactyl@Protein_N-term	72.021129	72.0627	H(4)C(3)O(2)	0.0		Post-translational	0	C
 YnLactyl@K	239.126991	239.2941	H(17)C(11)N(3)O(3)	0.0		Post-translational	0	OCCCCCCN1C=C(C[C@@H](O)C(=O)NCCCC[C@H](N([Fl])([Fl]))C(=O)[Ts])N=N1	0.0
 YnLactyl@Any_N-term	239.126991	239.2941	H(17)C(11)N(3)O(3)	0.0		Post-translational	0	OCCCCCCN1C=C(C[C@@H](O)C(=O)[Lv])N=N1	0.0
 YnLactyl@Protein_N-term	239.126991	239.2941	H(17)C(11)N(3)O(3)	0.0		Post-translational	0	OCCCCCCN1C=C(C[C@@H](O)C(=O)[Lv])N=N1	0.0
+IA-DTB@C	0.0	0.0	C(28)H(46)N(10)O(6)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(CSCC(=O)NCCCCc1cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]1NC(=O)N[C@@H]1C)nn1)C(=O)[Ts]	0.0
+CA-DTB@C	0.0	0.0	C(28)H(46)N(10)O(6)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(CSCC(=O)NCCCCc1cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]1NC(=O)N[C@@H]1C)nn1)C(=O)[Ts]	0.0
+BMK-DTB@C	0.0	0.0	C(27)H(43)N(9)O(6)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(CSCC(=O)CCCc1cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]1NC(=O)N[C@@H]1C)nn1)C(=O)[Ts]	0.0
+PFPSA-DTB@C	0.0	0.0	C(30)H(40)N(10)O(7)S(1)F(4)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(CSc1c(F)c(F)c(S(=O)(=O)NCCc1cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]1NC(=O)N[C@@H]1C)nn1)c(F)c1F)C(=O)[Ts]	0.0
+BrBT-DTB@C	0.0	0.0	C(31)H(41)N(11)O(6)S(1)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(CSC1=NC2=CC=C(C(=O)NCc1cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]1NC(=O)N[C@@H]1C)nn1)C=C2S1)C(=O)[Ts]	0.0
+MSBT-DTB@C	0.0	0.0	C(31)H(41)N(11)O(6)S(1)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(CSC1=NC2=CC=C(C(=O)NCc1cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]1NC(=O)N[C@@H]1C)nn1)C=C2S1)C(=O)[Ts]	0.0
+MST-DTB@C	0.0	0.0	C(30)H(41)N(13)O(6)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(CSc1nnnn1-c2ccc(OCc1cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]1NC(=O)N[C@@H]1C)nn1)cc2)C(=O)[Ts]	0.0
+MSOD-DTB@C	0.0	0.0	C(31)H(41)N(11)O(7)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(CSc1nnc(-c2ccc(OCc1cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]1NC(=O)N[C@@H]1C)nn1)cc2)o1)C(=O)[Ts]	0.0
+EBX1-DTB@C	0.0	0.0	C(27)H(41)N(9)O(6)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(CSC#CCCOCc1cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]1NC(=O)N[C@@H]1C)nn1)C(=O)[Ts]	0.0
+EBX2-DTB@C	0.0	0.0	C(22)H(35)N(9)O(5)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(CSc1cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]1NC(=O)N[C@@H]1C)nn1)C(=O)[Ts]	0.0
+Ep-DTB@C	0.0	0.0	C(26)H(43)N(9)O(6)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(CSCC(O)CCc1cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]1NC(=O)N[C@@H]1C)nn1)C(=O)[Ts]	0.0
+Ts-DTB@C	0.0	0.0	C(24)H(39)N(9)O(5)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(CSCCc1cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]1NC(=O)N[C@@H]1C)nn1)C(=O)[Ts]	0.0
+Ts-DTB@E	0.0	0.0	C(24)H(39)N(9)O(5)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(CCC(=O)OCCc1cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]1NC(=O)N[C@@H]1C)nn1)C(=O)[Ts]	0.0
+MI-DTB@C	0.0	0.0	C(32)H(51)N(11)O(9)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(CSC(CC(=O)O)C(=O)NCCNC(=O)CCCc1cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]1NC(=O)N[C@@H]1C)nn1)C(=O)[Ts]	0.0
+AlkPA-DTB@C	0.0	0.0	C(29)H(46)N(10)O(6)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(CSC=CC(=O)NCCCCc1cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]1NC(=O)N[C@@H]1C)nn1)C(=O)[Ts]	0.0
+ArPA-DTB@C	0.0	0.0	C(31)H(42)N(10)O(6)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(CSC=CC(=O)Nc1ccc(c1cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]1NC(=O)N[C@@H]1C)nn1)cc1)C(=O)[Ts]	0.0
+AlkAA-DTB@C	0.0	0.0	C(29)H(48)N(10)O(6)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(CSCCC(=O)NCCCCc1cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]1NC(=O)N[C@@H]1C)nn1)C(=O)[Ts]	0.0
+AlkAA-DTB@H	0.0	0.0	C(29)H(48)N(10)O(6)	0.0		User-added	0		0.0
+AlkAA-DTB@K	0.0	0.0	C(29)H(48)N(10)O(6)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(CCCCNCCC(=O)NCCCCc1cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]1NC(=O)N[C@@H]1C)nn1)C(=O)[Ts]	0.0
+AlkAA-DTB@Protein_N-term	0.0	0.0	C(29)H(48)N(10)O(6)	0.0		User-added	0		0.0
+ArAA-DTB@C	0.0	0.0	C(31)H(44)N(10)O(6)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(CSCCC(=O)Nc1ccc(c1cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]1NC(=O)N[C@@H]1C)nn1)cc1)C(=O)[Ts]	0.0
+ArAA-DTB@H	0.0	0.0	C(31)H(44)N(10)O(6)	0.0		User-added	0		0.0
+ArAA-DTB@K	0.0	0.0	C(31)H(44)N(10)O(6)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(CCCCNCCC(=O)Nc1ccc(c1cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]1NC(=O)N[C@@H]1C)nn1)cc1)C(=O)[Ts]	0.0
+ArAA-DTB@Protein_N-term	0.0	0.0	C(31)H(44)N(10)O(6)	0.0		User-added	0		0.0
+AlkVS-DTB@C	0.0	0.0	C(29)H(49)N(9)O(8)S(1)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(CSCCS(=O)(=O)CCOCCCc1cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]1NC(=O)N[C@@H]1C)nn1)C(=O)[Ts]	0.0
+AlkVS-DTB@H	0.0	0.0	C(29)H(49)N(9)O(8)S(1)	0.0		User-added	0		0.0
+AlkVS-DTB@K	0.0	0.0	C(29)H(49)N(9)O(8)S(1)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(CCCCNCCS(=O)(=O)CCOCCCc1cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]1NC(=O)N[C@@H]1C)nn1)C(=O)[Ts]	0.0
+AlkVS-DTB@Protein_N-term	0.0	0.0	C(29)H(49)N(9)O(8)S(1)	0.0		User-added	0		0.0
+ArVS-DTB@C	0.0	0.0	C(32)H(46)N(10)O(8)S(1)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(CSCCS(=O)(=O)c1ccc(C(=O)NCc1cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]1NC(=O)N[C@@H]1C)nn1)cc1)C(=O)[Ts]	0.0
+ArVS-DTB@H	0.0	0.0	C(32)H(46)N(10)O(8)S(1)	0.0		User-added	0		0.0
+ArVS-DTB@K	0.0	0.0	C(32)H(46)N(10)O(8)S(1)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(CCCCNCCS(=O)(=O)c1ccc(C(=O)NCc1cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]1NC(=O)N[C@@H]1C)nn1)cc1)C(=O)[Ts]	0.0
+ArVS-DTB@Protein_N-term	0.0	0.0	C(32)H(46)N(10)O(8)S(1)	0.0		User-added	0		0.0
+AlkVSA-DTB@C	0.0	0.0	C(28)H(48)N(10)O(7)S(1)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(CSCCS(=O)(=O)NCCCCc1cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]1NC(=O)N[C@@H]1C)nn1)C(=O)[Ts]	0.0
+AlkVSA-DTB@H	0.0	0.0	C(28)H(48)N(10)O(7)S(1)	0.0		User-added	0		0.0
+AlkVSA-DTB@K	0.0	0.0	C(28)H(48)N(10)O(7)S(1)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(CCCCNCCS(=O)(=O)NCCCCc1cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]1NC(=O)N[C@@H]1C)nn1)C(=O)[Ts]	0.0
+AlkVSA-DTB@Protein_N-term	0.0	0.0	C(28)H(48)N(10)O(7)S(1)	0.0		User-added	0		0.0
+ArVSA-DTB@C	0.0	0.0	C(30)H(44)N(10)O(7)S(1)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(CSCCS(=O)(=O)Nc1ccc(c1cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]1NC(=O)N[C@@H]1C)nn1)cc1)C(=O)[Ts]	0.0
+ArVSA-DTB@H	0.0	0.0	C(30)H(44)N(10)O(7)S(1)	0.0		User-added	0		0.0
+ArVSA-DTB@K	0.0	0.0	C(30)H(44)N(10)O(7)S(1)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(CCCCNCCS(=O)(=O)Nc1ccc(c1cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]1NC(=O)N[C@@H]1C)nn1)cc1)C(=O)[Ts]	0.0
+ArVSA-DTB@Protein_N-term	0.0	0.0	C(30)H(44)N(10)O(7)S(1)	0.0		User-added	0		0.0
+STP-DTB@K	0.0	0.0	C(25)H(39)N(9)O(6)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(CCCCNC(=O)CCc1cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]1NC(=O)N[C@@H]1C)nn1)C(=O)[Ts]	0.0
+STP-DTB@S	0.0	0.0	C(25)H(39)N(9)O(6)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(COC(=O)CCc1cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]1NC(=O)N[C@@H]1C)nn1)C(=O)[Ts]	0.0
+STP-DTB@T	0.0	0.0	C(25)H(39)N(9)O(6)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])([C@]([H])(OC(=O)CCc1cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]1NC(=O)N[C@@H]1C)nn1)C)C(=O)[Ts]	0.0
+STP-DTB@Protein_N-term	0.0	0.0	C(25)H(39)N(9)O(6)	0.0		User-added	0		0.0
+ArSq-DTB@K	0.0	0.0	C(32)H(40)N(10)O(7)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(CCCCNC1=C(Nc2ccc(c1cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]1NC(=O)N[C@@H]1C)nn1)cc2)C(=O)C1=O)C(=O)[Ts]	0.0
+EBA-DTB@K	0.0	0.0	C(32)H(41)N(9)O(6)	0.0		User-added	0		0.0
+oNBA-DTB@K	0.0	0.0	C(31)H(41)N(11)O(7)	0.0		User-added	0		0.0
+PCA-DTB@Protein_N-term	0.0	0.0	C(28)H(38)N(10)O(5)	0.0		User-added	0		0.0
+MeTet-DTB@C	0.0	0.0	C(32)H(46)N(12)O(6)	0.0		User-added	0		0.0
+MeTet-DTB@D	0.0	0.0	C(32)H(46)N(12)O(6)	0.0		User-added	0		0.0
+MeTet-DTB@E	0.0	0.0	C(32)H(46)N(12)O(6)	0.0		User-added	0		0.0
+Az-DTB@C	0.0	0.0	C(31)H(44)N(10)O(6)	0.0		User-added	0		0.0
+Az-DTB@D	0.0	0.0	C(31)H(44)N(10)O(6)	0.0		User-added	0		0.0
+Az-DTB@E	0.0	0.0	C(31)H(44)N(10)O(6)	0.0		User-added	0		0.0
+HC-DTB@C	0.0	0.0	C(32)H(46)N(12)O(6)	0.0		User-added	0		0.0
+HC-DTB@D	0.0	0.0	C(32)H(46)N(12)O(6)	0.0		User-added	0		0.0
+HC-DTB@E	0.0	0.0	C(32)H(46)N(12)O(6)	0.0		User-added	0		0.0
+SuTEx2-DTB@K	0.0	0.0	C(30)H(42)N(10)O(8)S(1)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(CCCCNS(=O)(=O)c1ccc(C(=O)NCc1cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]1NC(=O)N[C@@H]1C)nn1)cc1)C(=O)[Ts]	0.0
+SuTEx2-DTB@Y	0.0	0.0	C(30)H(42)N(10)O(8)S(1)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(Cc1ccc(OS(=O)(=O)c1ccc(C(=O)NCc1cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]1NC(=O)N[C@@H]1C)nn1)cc1)cc1)C(=O)[Ts]	0.0
+PTAD-DTB@Y	0.0	0.0	C(31)H(42)N(12)O(8)	0.0		User-added	0		0.0
+OxMet2-DTB@M	0.0	0.0	C(29)H(47)N(11)O(7)	0.0		User-added	0		0.0
+CP-DTB@H	0.0	0.0	C(27)H(44)N(10)O(7)	0.0		User-added	0		0.0
+CP-DTB@W	0.0	0.0	C(27)H(44)N(10)O(7)	0.0		User-added	0		0.0
+HMN-DTB@C	0.0	0.0	C(36)H(49)N(9)O(7)	0.0		User-added	0		0.0
+HMN-DTB@H	0.0	0.0	C(36)H(49)N(9)O(7)	0.0		User-added	0		0.0
+HMN-DTB@W	0.0	0.0	C(36)H(49)N(9)O(7)	0.0		User-added	0		0.0
+HMN-DTB@Y	0.0	0.0	C(36)H(49)N(9)O(7)	0.0		User-added	0		0.0
+MMP-DTB@C	0.0	0.0	C(30)H(44)N(10)O(8)S(1)	0.0		User-added	0		0.0
+MMP-DTB@H	0.0	0.0	C(30)H(44)N(10)O(8)S(1)	0.0		User-added	0		0.0
+MMP-DTB@W	0.0	0.0	C(30)H(44)N(10)O(8)S(1)	0.0		User-added	0		0.0
+MMP-DTB@Y	0.0	0.0	C(30)H(44)N(10)O(8)S(1)	0.0		User-added	0		0.0
+PhGO-DTB@R	0.0	0.0	C(31)H(41)N(9)O(7)	0.0		User-added	0		0.0
+FP-DTB@Y	0.0	0.0	C(28)H(48)N(9)O(7)P(1)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(Cc1ccc(OP(=O)(OCC)CCCCc1cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]1NC(=O)N[C@@H]1C)nn1)cc1)C(=O)[Ts]	0.0
+Isx-DTB@D	0.0	0.0	C(37)H(54)N(10)O(7)	0.0		User-added	0		0.0
+Isx-DTB@E	0.0	0.0	C(37)H(54)N(10)O(7)	0.0		User-added	0		0.0
+Isx-DTB@K	0.0	0.0	C(37)H(54)N(10)O(7)	0.0		User-added	0		0.0
+Isx-DTB@Protein_N-term	0.0	0.0	C(37)H(54)N(10)O(7)	0.0		User-added	0		0.0
