@@ -2892,7 +2892,7 @@ CA-DTB@C	0.0	0.0	C(28)H(46)N(10)O(6)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(C
 CP-DTB@H	0.0	0.0	C(27)H(44)N(10)O(7)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(CC1=CN(N(C)C(=O)OCCCc%11cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]%10NC(=O)N[C@@H]%10C)nn%11)C=N1)C(=O)[Ts]	0.0
 CP-DTB@W	0.0	0.0	C(27)H(44)N(10)O(7)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(CC(=C(N(C)C(=O)OCCCc%11cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]%10NC(=O)N[C@@H]%10C)nn%11)N2)C1=C2C=CC=C1)C(=O)[Ts]	0.0
 EBA-DTB@K	0.0	0.0	C(32)H(41)N(9)O(6)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(CCCC[n+]%12ccc%13ccc(OCc%11cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]%10NC(=O)N[C@@H]%10C)nn%11)cc%13c%12)C(=O)[Ts]	0.0
-EBA-DTB@Any_N-term	0.0	0.0	C(32)H(41)N(9)O(6)	0.0		User-added	0		0.0
+EBA-DTB@Any_N-term	0.0	0.0	C(32)H(41)N(9)O(6)	0.0		User-added	0	[Lv+]%12C=CC%13=CC=C(OCc%11cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]%10NC(=O)N[C@@H]%10C)nn%11)C=C%13C=%12	0.0
 EBX1-DTB@C	0.0	0.0	C(27)H(41)N(9)O(6)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(CSC#CCCOCc%11cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]%10NC(=O)N[C@@H]%10C)nn%11)C(=O)[Ts]	0.0
 EBX2-DTB@C	0.0	0.0	C(22)H(35)N(9)O(5)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(CSc%11cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]%10NC(=O)N[C@@H]%10C)nn%11)C(=O)[Ts]	0.0
 EBX2-DTB@H	0.0	0.0	C(22)H(35)N(9)O(5)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(CC1=CN(c%11cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]%10NC(=O)N[C@@H]%10C)nn%11)C=N1)C(=O)[Ts]	0.0
@@ -2950,7 +2950,7 @@ MeTet-DTB@T	0.0	0.0	C(32)H(46)N(12)O(6)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H]
 MeTet-DTB@Any_C-term	0.0	0.0	C(32)H(46)N(12)O(6)	0.0		User-added	0	N(c%12ccc(C(=O)NCc%11cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]%10NC(=O)N[C@@H]%10C)nn%11)cc%12)NC(C)=O	0.0
 OxMet2-DTB@C	0.0	0.0	C(29)H(47)N(11)O(7)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(CSNC(=O)N%12CCC(OCc%11cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]%10NC(=O)N[C@@H]%10C)nn%11)CC%12)C(=O)[Ts]	0.0
 OxMet2-DTB@M	0.0	0.0	C(29)H(47)N(11)O(7)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(CCS(C)=NC(=O)N%12CCC(OCc%11cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]%10NC(=O)N[C@@H]%10C)nn%11)CC%12)C(=O)[Ts]	0.0
-PCA-DTB@Any_N-term	0.0	0.0	C(28)H(38)N(10)O(5)	0.0		User-added	0		0.0
+PCA-DTB@Any_N-term	0.0	0.0	C(28)H(38)N(10)O(5)	0.0		User-added	0	[Lv]=Cc%12ccc(c%11cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]%10NC(=O)N[C@@H]%10C)nn%11)cn%12	0.0
 PFPSA-DTB@C	0.0	0.0	C(30)H(40)N(10)O(7)S(1)F(4)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(CSc%12c(F)c(F)c(S(=O)(=O)NCCc%11cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]%10NC(=O)N[C@@H]%10C)nn%11)c(F)c%12F)C(=O)[Ts]	0.0
 PFPSA-DTB@K	0.0	0.0	C(30)H(40)N(10)O(7)S(1)F(4)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(CCCCNc%12c(F)c(F)c(S(=O)(=O)NCCc%11cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]%10NC(=O)N[C@@H]%10C)nn%11)c(F)c%12F)C(=O)[Ts]	0.0
 PFPSA-DTB@H	0.0	0.0	C(30)H(40)N(10)O(7)S(1)F(4)	0.0		User-added	0	N([Fl])([Fl])[C@@]([H])(CC1=CN(c%12c(F)c(F)c(S(=O)(=O)NCCc%11cn(CCCC[C@@H](C(N)=O)NC(=O)CNC(=O)CNC(=O)CCCCC[C@H]%10NC(=O)N[C@@H]%10C)nn%11)c(F)c%12F)C=N1)C(=O)[Ts]	0.0
