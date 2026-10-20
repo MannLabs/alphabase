@@ -169,14 +169,11 @@ def annotate_fragments_flat(
     fragment_df_list = []
     matched_precursor_df = speclib_flat.precursor_df.copy()
 
-    start_index = 0
-    for i, (peak_start, peak_stop, flat_frag_start, flat_frag_stop) in enumerate(
-        zip(
-            matched_precursor_df["peak_start_idx"],
-            matched_precursor_df["peak_stop_idx"],
-            matched_precursor_df["flat_frag_start_idx"],
-            matched_precursor_df["flat_frag_stop_idx"],
-        )
+    for peak_start, peak_stop, flat_frag_start, flat_frag_stop in zip(
+        matched_precursor_df["peak_start_idx"],
+        matched_precursor_df["peak_stop_idx"],
+        matched_precursor_df["flat_frag_start_idx"],
+        matched_precursor_df["flat_frag_stop_idx"],
     ):
         spectrum_peak_df = raw_data_peak_df.iloc[peak_start:peak_stop].copy()
         fragment_df = speclib_flat.fragment_df.iloc[flat_frag_start:flat_frag_stop]
@@ -199,13 +196,12 @@ def annotate_fragments_flat(
             mass_error_ppm=mass_error_ppm,
         )
 
-        matched_precursor_df.loc[i, "flat_frag_start_idx"] = start_index
-        matched_precursor_df.loc[i, "flat_frag_stop_idx"] = start_index + len(
-            spectrum_peak_df
-        )
-        start_index += len(spectrum_peak_df)
-
         fragment_df_list.append(spectrum_peak_df)
+
+    peak_counts = np.array([len(df) for df in fragment_df_list], dtype=np.int64)
+    flat_frag_stop_idx = np.cumsum(peak_counts)
+    matched_precursor_df["flat_frag_start_idx"] = flat_frag_stop_idx - peak_counts
+    matched_precursor_df["flat_frag_stop_idx"] = flat_frag_stop_idx
 
     outlib_flat = SpecLibFlat()
     outlib_flat.precursor_df = matched_precursor_df.drop(
