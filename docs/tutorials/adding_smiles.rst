@@ -9,6 +9,28 @@ AlphaBase uses SMILES strings to allow users to work with peptides as graphs.
 Defining your modifications in this way guarantees that the elemental composition is always consistent with the underlying chemistry.
 See `Wikipedia <https://en.wikipedia.org/wiki/Simplified_Molecular_Input_Line_Entry_System>`_ for more information.
 
+How to write the SMILES
+-----------------------
+Every SMILES is a complete, valid molecule. The atoms at which building blocks are joined are marked with
+atom-map numbers:
+
+* ``:1`` marks the alpha-amine nitrogen.
+* ``:2`` marks the hydroxyl oxygen of the alpha-carboxylic acid.
+
+Three kinds of SMILES are distinguished by the modification name:
+
+* **Residue-level modifications** (e.g. ``Phospho@S``) are written as the whole modified amino acid and carry
+  both anchors, e.g. ``[NH2:1][C@@H](COP(=O)(O)O)C(=O)[OH:2]``. Please write the stereochemistry of the alpha carbon.
+* **N-terminal modifications** (``@Any_N-term``, ``@Protein_N-term``) are written as the modified amine and carry
+  only ``:1``, e.g. acetamide ``[NH2:1]C(C)=O`` for acetylation or dimethylamine ``[NH:1](C)C`` for dimethylation.
+* **C-terminal modifications** (``@Any_C-term``, ``@Protein_C-term``) are written as the group replacing the
+  carboxylic hydroxyl and carry only ``:2``, e.g. methanol ``[OH:2]C`` for methylation or ammonia ``[NH3:2]`` for amidation.
+
+When joining, the anchor of the modification replaces the anchor of the residue: its element, formal charge and isotope
+are taken over, its neighbours are bonded with the written bond orders, and hydrogens are recomputed.
+An imine is therefore written as ``[N:1]=C...``, an N-terminal ring nitrogen as ``[nH+:1]1...``, and a
+:sup:`15`\ N-labelled terminus as ``[15NH2:1]...``. Hydrogen counts written on an anchor are ignored.
+
 Overview of the workflow
 ------------------------
 1. Fill three dictionaries (``n_term_modifications``, ``c_term_modifications``, and ``ptm_dict``) with the modification names and the corresponding SMILES strings.
@@ -37,6 +59,7 @@ Underlying API
 Internally the script leverages three public classes / functions:
 
 * ``alphabase.smiles.smiles.AminoAcidModifier`` - applies SMILES modifications to an amino-acid backbone
+* ``alphabase.smiles.smiles.merge_at_anchors`` - joins two molecules at their anchors; used for terminal modifications and peptide bonds
 * ``alphabase.constants.atom.ChemicalCompositonFormula`` - converts SMILES ⇒ elemental composition
 * ``alphabase.constants.modification.add_new_modifications`` - inserts calculated compositions into the global table
 
@@ -50,8 +73,8 @@ Below is a minimal snippet that adds a hypothetical modification called *Foo@K* 
     from alphabase.smiles.adding_smiles import process_modifications, ptm_dict
     from alphabase.constants.modification import add_new_modifications
 
-    # 1) add your SMILES
-    ptm_dict["Foo@K"] = "CC(O)CN"
+    # 1) add your SMILES: here a hypothetical 2-hydroxypropyl group on the lysine side chain
+    ptm_dict["Foo@K"] = "[NH2:1][C@@H](CCCCNCC(C)O)C(=O)[OH:2]"
 
     # 2) calculate the composition and store it
     new_mods = process_modifications(ptm_dict, mod_type="ptm")

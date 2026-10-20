@@ -1,10 +1,9 @@
-from typing import Optional
+from typing import Literal, Optional
 
 import pandas as pd
 
 try:
     from rdkit import Chem
-    from rdkit.Chem.rdmolops import ReplaceSubstructs, SanitizeMol
 except ImportError as e:
     raise ImportError(
         "rdkit is required for the smiles module. "
@@ -14,121 +13,180 @@ except ImportError as e:
 from alphabase.constants.aa import aa_formula
 from alphabase.constants.modification import MOD_DF
 
-N_TERM_PLACEHOLDER_ATOM = "Fl"
-C_TERM_PLACEHOLDER_ATOM = "Ts"
-# Placeholder in N-terminal modification SMILES representing the N-terminal amine
-MOD_N_TERM_PLACEHOLDER_ATOM = "Lv"
+# Residues and terminal modifications are complete molecules. The atoms at which they
+# are joined carry these atom-map numbers, e.g. alanine is [NH2:1][C@@H](C)C(=O)[OH:2].
+N_TERM_ANCHOR = 1  # the alpha-amine nitrogen
+C_TERM_ANCHOR = 2  # the hydroxyl oxygen of the alpha-carboxylic acid
+
+SmilesKind = Literal["residue", "n_term", "c_term"]
+
+_ANCHORS_BY_KIND: dict[str, tuple[int, ...]] = {
+    "residue": (N_TERM_ANCHOR, C_TERM_ANCHOR),
+    "n_term": (N_TERM_ANCHOR,),
+    "c_term": (C_TERM_ANCHOR,),
+}
+_TETRAHEDRAL_TAGS = (
+    Chem.ChiralType.CHI_TETRAHEDRAL_CW,
+    Chem.ChiralType.CHI_TETRAHEDRAL_CCW,
+)
 
 
-def _find_mod_placeholder(n_mod_mol: Chem.Mol) -> tuple[int, list[int]]:
+def parse_smiles(smiles: str, kind: SmilesKind) -> Chem.Mol:
     """
-    Find the modification placeholder atom and its neighbor indices.
+    Parse the SMILES of a residue or a terminal modification and validate its anchors.
 
     Parameters
     ----------
-    n_mod_mol : Chem.Mol
-        The modification molecule with placeholder.
-
-    Returns
-    -------
-    tuple[int, list[int]]
-        Tuple of (placeholder atom index, list of neighbor atom indices).
-
-    Raises
-    ------
-    ValueError
-        If no placeholder is found or multiple placeholders exist.
-    """
-    mod_placeholder_idx = None
-    mod_placeholder_neighbor_indices = []
-    mod_placeholder_count = 0
-
-    for atom in n_mod_mol.GetAtoms():
-        if atom.GetSymbol() == MOD_N_TERM_PLACEHOLDER_ATOM:
-            mod_placeholder_count += 1
-            if mod_placeholder_idx is None:
-                mod_placeholder_idx = atom.GetIdx()
-                mod_placeholder_neighbor_indices = [
-                    n.GetIdx() for n in atom.GetNeighbors()
-                ]
-
-    if mod_placeholder_idx is None:
-        raise ValueError(
-            f"Modification does not contain placeholder [{MOD_N_TERM_PLACEHOLDER_ATOM}]"
-        )
-    if mod_placeholder_count > 1:
-        raise ValueError(
-            f"Modification contains {mod_placeholder_count} placeholders "
-            f"[{MOD_N_TERM_PLACEHOLDER_ATOM}], expected exactly 1"
-        )
-
-    return mod_placeholder_idx, mod_placeholder_neighbor_indices
-
-
-def _find_n_term_site(aa_mol: Chem.Mol) -> tuple[int, list[int]]:
-    """
-    Find the N-terminal nitrogen and placeholder indices in the amino acid.
-
-    Parameters
-    ----------
-    aa_mol : Chem.Mol
-        The amino acid molecule with N-terminal placeholders.
-
-    Returns
-    -------
-    tuple[int, list[int]]
-        Tuple of (nitrogen atom index, list of placeholder indices).
-
-    Raises
-    ------
-    ValueError
-        If no N-terminal placeholder is found or placeholder has invalid neighbors.
-    """
-    n_idx = None
-    fl_indices = []
-
-    for atom in aa_mol.GetAtoms():
-        if atom.GetSymbol() == N_TERM_PLACEHOLDER_ATOM:
-            neighbors = atom.GetNeighbors()
-            if len(neighbors) != 1:
-                raise ValueError(
-                    f"N-terminal placeholder [{N_TERM_PLACEHOLDER_ATOM}] should have "
-                    f"exactly one neighbor, found {len(neighbors)}"
-                )
-            n_idx = neighbors[0].GetIdx()
-            fl_indices.append(atom.GetIdx())
-
-    if n_idx is None:
-        raise ValueError(
-            f"Amino acid does not contain N-terminal placeholder [{N_TERM_PLACEHOLDER_ATOM}]"
-        )
-
-    return n_idx, fl_indices
-
-
-def _replace_remaining_n_term_placeholders(mol: Chem.Mol) -> Chem.Mol:
-    """
-    Replace any remaining N-terminal placeholders with hydrogen atoms.
-
-    Parameters
-    ----------
-    mol : Chem.Mol
-        The molecule potentially containing placeholders.
+    smiles : str
+        SMILES with atom-mapped anchors: a residue carries both :1 (alpha-amine nitrogen)
+        and :2 (carboxylic hydroxyl oxygen), an N-terminal modification only :1 and a
+        C-terminal modification only :2.
+    kind : {"residue", "n_term", "c_term"}
+        What the SMILES describes.
 
     Returns
     -------
     Chem.Mol
-        The molecule with placeholders replaced by hydrogen.
+        The sanitized molecule, anchors still mapped.
+
+    Raises
+    ------
+    ValueError
+        If the SMILES is invalid or does not carry exactly the anchors expected for `kind`.
     """
-    n_term_placeholder_mol = Chem.MolFromSmiles(
-        f"[{N_TERM_PLACEHOLDER_ATOM}]", sanitize=False
+    mol = Chem.MolFromSmiles(smiles)
+    if mol is None:
+        raise ValueError(f"Invalid SMILES: {smiles}")
+
+    expected = _ANCHORS_BY_KIND[kind]
+    found = tuple(
+        sorted(atom.GetAtomMapNum() for atom in mol.GetAtoms() if atom.GetAtomMapNum())
     )
-    return ReplaceSubstructs(
-        mol,
-        n_term_placeholder_mol,
-        Chem.MolFromSmiles("[H]", sanitize=False),
-        replaceAll=True,
-    )[0]
+    if found != expected:
+        raise ValueError(
+            f"A {kind} SMILES must carry exactly the atom maps {list(expected)}, "
+            f"found {list(found)} in {smiles}"
+        )
+    return mol
+
+
+def merge_at_anchors(
+    target: Chem.Mol,
+    target_anchor: int,
+    fragment: Chem.Mol,
+    fragment_anchor: int,
+) -> Chem.Mol:
+    """
+    Fuse the anchor atom of `fragment` into the anchor atom of `target`.
+
+    The fused atom takes element, formal charge and isotope from the fragment's anchor
+    and is bonded to the neighbours of both anchors, with the fragment's bond orders.
+    Hydrogens are recomputed, and tetrahedral stereo of all neighbours is retained.
+    The fused atom keeps the anchor label if both labels are equal, otherwise it is no
+    longer an anchor (as for the nitrogen of a peptide bond).
+
+    Parameters
+    ----------
+    target : Chem.Mol
+        Molecule that keeps its atom indices, e.g. a residue or a growing peptide.
+    target_anchor : int
+        Atom-map number of the anchor in `target`.
+    fragment : Chem.Mol
+        Molecule fused onto `target`, e.g. a terminal modification or the next residue.
+    fragment_anchor : int
+        Atom-map number of the anchor in `fragment`.
+
+    Returns
+    -------
+    Chem.Mol
+        The sanitized, fused molecule.
+
+    Raises
+    ------
+    ValueError
+        If either anchor is missing or ambiguous, or if the fused atom exceeds its valence.
+    """
+    target_idx = _find_anchor(target, target_anchor)
+    fragment_idx = _find_anchor(fragment, fragment_anchor) + target.GetNumAtoms()
+
+    mol = Chem.RWMol(Chem.CombineMols(target, fragment))
+    # An aromatic bond cannot be moved onto an atom that is not flagged aromatic yet;
+    # sanitization re-perceives aromaticity of the fused molecule.
+    Chem.Kekulize(mol, clearAromaticFlags=True)
+
+    fragment_neighbors = [
+        neighbor.GetIdx()
+        for neighbor in mol.GetAtomWithIdx(fragment_idx).GetNeighbors()
+    ]
+    for neighbor_idx in fragment_neighbors:
+        _move_bond(mol, neighbor_idx, fragment_idx, target_idx)
+
+    fragment_atom = mol.GetAtomWithIdx(fragment_idx)
+    fused_atom = mol.GetAtomWithIdx(target_idx)
+    fused_atom.SetAtomicNum(fragment_atom.GetAtomicNum())
+    fused_atom.SetFormalCharge(fragment_atom.GetFormalCharge())
+    fused_atom.SetIsotope(fragment_atom.GetIsotope())
+    # Hydrogens written on either anchor described its open valences before fusing.
+    fused_atom.SetNumExplicitHs(0)
+    fused_atom.SetNumRadicalElectrons(0)
+    fused_atom.SetNoImplicit(False)
+    fused_atom.SetAtomMapNum(target_anchor if target_anchor == fragment_anchor else 0)
+    mol.RemoveAtom(fragment_idx)
+
+    fused = mol.GetMol()
+    try:
+        Chem.SanitizeMol(fused)
+    except Chem.rdchem.MolSanitizeException as e:
+        raise ValueError(
+            f"Cannot fuse anchor :{fragment_anchor} of {_to_smiles(fragment)} "
+            f"into anchor :{target_anchor} of {_to_smiles(target)}: {e}"
+        ) from e
+    return fused
+
+
+def _find_anchor(mol: Chem.Mol, anchor: int) -> int:
+    """Return the index of the single atom carrying the given anchor label."""
+    matches = [
+        atom.GetIdx() for atom in mol.GetAtoms() if atom.GetAtomMapNum() == anchor
+    ]
+    if len(matches) != 1:
+        raise ValueError(
+            f"Expected exactly one atom with atom map :{anchor}, found {len(matches)}"
+        )
+    return matches[0]
+
+
+def _move_bond(
+    mol: Chem.RWMol, neighbor_idx: int, old_end_idx: int, new_end_idx: int
+) -> None:
+    """Reattach a bond from one anchor to the other, keeping the neighbour's stereo."""
+    neighbor_bonds = [
+        bond.GetOtherAtomIdx(neighbor_idx)
+        for bond in mol.GetAtomWithIdx(neighbor_idx).GetBonds()
+    ]
+    bond_type = mol.GetBondBetweenAtoms(neighbor_idx, old_end_idx).GetBondType()
+    mol.RemoveBond(neighbor_idx, old_end_idx)
+    mol.AddBond(neighbor_idx, new_end_idx, bond_type)
+
+    # A chiral tag is relative to the order of the atom's bonds. The re-added bond is
+    # appended last, so skipping an odd number of bonds would invert the configuration.
+    skipped_bonds = len(neighbor_bonds) - 1 - neighbor_bonds.index(old_end_idx)
+    neighbor = mol.GetAtomWithIdx(neighbor_idx)
+    if skipped_bonds % 2 and neighbor.GetChiralTag() in _TETRAHEDRAL_TAGS:
+        neighbor.InvertChirality()
+
+
+def _without_atom_maps(mol: Chem.Mol) -> Chem.Mol:
+    """Return a copy without anchor labels, as handed out to users."""
+    unmapped = Chem.Mol(mol)
+    for atom in unmapped.GetAtoms():
+        atom.SetAtomMapNum(0)
+    return unmapped
+
+
+def _to_smiles(mol: Chem.Mol) -> str:
+    """Return the SMILES without anchor labels, as handed out to users."""
+    return Chem.MolToSmiles(_without_atom_maps(mol))
 
 
 class AminoAcidModifier:
@@ -137,6 +195,7 @@ class AminoAcidModifier:
     """
 
     def __init__(self):
+        """Defer loading the SMILES tables until they are first accessed."""
         self._aa_smiles = None
         self._aa_mols = None
         self._n_term_modifications = None
@@ -169,11 +228,13 @@ class AminoAcidModifier:
         Returns
         -------
         Dict[str, Chem.Mol]
-            A dictionary with amino acid codes as keys and their RDKit molecules as values.
+            A dictionary with amino acid codes as keys and their RDKit molecules
+            (anchors mapped) as values.
         """
         if self._aa_mols is None:
             self._aa_mols = {
-                aa: Chem.MolFromSmiles(smiles) for aa, smiles in self.aa_smiles.items()
+                aa: parse_smiles(smiles, "residue")
+                for aa, smiles in self.aa_smiles.items()
             }
         return self._aa_mols
 
@@ -261,7 +322,8 @@ class AminoAcidModifier:
         Parameters
         ----------
         aa_smiles : str
-            SMILES of an amino acid with or without PTMs, must have the placeholder atoms [Fl] for N-term and [Ts] for C-term.
+            SMILES of an amino acid with or without PTMs, with its alpha-amine nitrogen
+            mapped as :1 and its carboxylic hydroxyl oxygen mapped as :2.
         n_term_mod : Optional[str], optional
             N-terminal modification name. Options are the keys in the n_term_modifications dict.
         c_term_mod : Optional[str], optional
@@ -274,27 +336,16 @@ class AminoAcidModifier:
         """
         errors = []
 
-        n_term_placeholder = f"[{N_TERM_PLACEHOLDER_ATOM}]"
-        c_term_placeholder = f"[{C_TERM_PLACEHOLDER_ATOM}]"
-
-        if n_term_placeholder not in aa_smiles:
-            errors.append(
-                f"The amino acid {aa_smiles} must contain the N-terminal placeholder {n_term_placeholder}."
-            )
-        if c_term_placeholder not in aa_smiles:
-            errors.append(
-                f"The amino acid {aa_smiles} must contain the C-terminal placeholder {c_term_placeholder}."
-            )
+        try:
+            parse_smiles(aa_smiles, "residue")
+        except ValueError as e:
+            errors.append(str(e))
 
         if n_term_mod is not None and n_term_mod not in self.n_term_modifications:
             errors.append(f"Unrecognized N-terminal modification: {n_term_mod}")
 
         if c_term_mod is not None and c_term_mod not in self.c_term_modifications:
             errors.append(f"Unrecognized C-terminal modification: {c_term_mod}")
-
-        mol = Chem.MolFromSmiles(aa_smiles)
-        if mol is None:
-            errors.append(f"Invalid amino acid SMILES: {aa_smiles}")
 
         if errors:
             raise ValueError("\n".join(errors))
@@ -311,177 +362,53 @@ class AminoAcidModifier:
         Parameters
         ----------
         aa_smiles : str
-            SMILES of an amino acid with or without PTMs, must have the placeholder atoms [Fl] for N-term and [Ts] for C-term.
+            SMILES of an amino acid with or without PTMs, with its alpha-amine nitrogen
+            mapped as :1 and its carboxylic hydroxyl oxygen mapped as :2.
         n_term_mod : Optional[str], optional
             N-terminal modification name. Options are the keys in the n_term_modifications dict.
-            If None, the amino acid is not modified, so using hydrogen atoms.
+            If None, the amino acid keeps its free amine.
         c_term_mod : Optional[str], optional
             C-terminal modification name. Options are the keys in the c_term_modifications dict.
-            If None, the amino acid is not modified, so using the -OH group.
+            If None, the amino acid keeps its free carboxylic acid.
 
         Returns
         -------
         str
-            SMILES string of the modified amino acid.
+            SMILES string of the modified amino acid, without atom maps.
         """
         self.validate_correct_args(aa_smiles, n_term_mod, c_term_mod)
-        mol = Chem.MolFromSmiles(aa_smiles)
-        n_term_placeholder_mol = Chem.MolFromSmiles(
-            f"[{N_TERM_PLACEHOLDER_ATOM}]", sanitize=False
+        mol = self._apply_terminal_modifications(
+            parse_smiles(aa_smiles, "residue"), n_term_mod, c_term_mod
         )
-        c_term_placeholder_mol = Chem.MolFromSmiles(
-            f"[{C_TERM_PLACEHOLDER_ATOM}]", sanitize=False
-        )
+        return _to_smiles(mol)
 
-        mol = self._apply_n_terminal_modification(
-            mol, n_term_placeholder_mol, n_term_mod
-        )
-        mol = self._apply_c_terminal_modification(
-            mol, c_term_placeholder_mol, c_term_mod
-        )
-
-        SanitizeMol(mol)
-        return Chem.MolToSmiles(mol)
-
-    def _has_n_term_mod_placeholder(self, mod_smiles: str) -> bool:
-        """Check if the modification SMILES contains the N-term mod placeholder."""
-        # Matches a charged placeholder such as [Lv+] as well as a bare [Lv].
-        return f"[{MOD_N_TERM_PLACEHOLDER_ATOM}" in mod_smiles
-
-    def _apply_n_term_mod_with_placeholder(
-        self, aa_mol: Chem.Mol, n_mod_mol: Chem.Mol
-    ) -> Chem.Mol:
-        """
-        Apply N-terminal modification where [Lv] represents the N-terminal amine.
-
-        The modification SMILES contains a [Lv] placeholder that represents the
-        N-terminal nitrogen itself. All neighbors of [Lv] in the modification
-        become bonded to the actual nitrogen, replacing the [Fl] placeholders.
-
-        This allows modifications like Dimethyl where [Lv] has multiple neighbors:
-        - Acetyl: CC(=O)[Lv] - one neighbor (carbonyl C) bonds to N
-        - Dimethyl: C[Lv]C - two neighbors (both methyl C) bond to N
-
-        Parameters
-        ----------
-        aa_mol : Chem.Mol
-            The amino acid molecule with [Fl] N-terminal placeholders.
-        n_mod_mol : Chem.Mol
-            The modification molecule with [Lv] representing the N-terminal amine.
-
-        Returns
-        -------
-        Chem.Mol
-            The modified molecule with [Fl] placeholders replaced.
-        """
-        mod_placeholder_idx, mod_neighbor_indices = _find_mod_placeholder(n_mod_mol)
-        n_idx, fl_indices = _find_n_term_site(aa_mol)
-
-        # Combine molecules and adjust indices
-        combined = Chem.CombineMols(aa_mol, n_mod_mol)
-        rw_mol = Chem.RWMol(combined)
-        aa_mol_num_atoms = aa_mol.GetNumAtoms()
-        mod_placeholder_idx_combined = mod_placeholder_idx + aa_mol_num_atoms
-        mod_neighbor_indices_combined = [
-            i + aa_mol_num_atoms for i in mod_neighbor_indices
-        ]
-
-        # Bond order is taken from the modification so it can attach through a
-        # double bond, e.g. an imine from an aldehyde probe.
-        total_bond_order = 0
-        for neighbor_idx, neighbor_idx_combined in zip(
-            mod_neighbor_indices, mod_neighbor_indices_combined
-        ):
-            bond = n_mod_mol.GetBondBetweenAtoms(mod_placeholder_idx, neighbor_idx)
-            rw_mol.AddBond(n_idx, neighbor_idx_combined, bond.GetBondType())
-            total_bond_order += int(bond.GetBondTypeAsDouble())
-
-        # [Lv+] lets the nitrogen itself become charged, which is what allows it to
-        # end up as an aromatic ring nitrogen.
-        placeholder_charge = n_mod_mol.GetAtomWithIdx(
-            mod_placeholder_idx
-        ).GetFormalCharge()
-        if placeholder_charge:
-            rw_mol.GetAtomWithIdx(n_idx).SetFormalCharge(placeholder_charge)
-
-        # A double bond consumes two of the nitrogen's hydrogens; valence beyond the
-        # available [Fl] is paid for by the charge above.
-        fl_to_remove = fl_indices[:total_bond_order]
-        to_remove = sorted([mod_placeholder_idx_combined] + fl_to_remove, reverse=True)
-        for idx in to_remove:
-            rw_mol.RemoveAtom(idx)
-
-        return _replace_remaining_n_term_placeholders(rw_mol.GetMol())
-
-    def _apply_n_terminal_modification(
+    def _apply_terminal_modifications(
         self,
-        aa_mol: Chem.Mol,
-        n_term_placeholder_mol: Chem.Mol,
+        mol: Chem.Mol,
         n_term_mod: Optional[str],
-    ) -> Chem.Mol:
-        """
-        Apply N-terminal modification to the molecule.
-
-        Parameters
-        ----------
-        aa_mol : Chem.Mol
-            The amino acid molecule to modify.
-        n_term_placeholder_mol : Chem.Mol
-            The N-terminal placeholder molecule.
-        n_term_mod : Optional[str]
-            The N-terminal modification to apply.
-
-        Returns
-        -------
-        Chem.Mol
-            The modified molecule.
-        """
-        if n_term_mod:
-            n_mod_smiles = self.n_term_modifications[n_term_mod]
-            n_mod_mol = Chem.MolFromSmiles(n_mod_smiles)
-
-            # Branch: use placeholder-based or index-based modification
-            if self._has_n_term_mod_placeholder(n_mod_smiles):
-                return self._apply_n_term_mod_with_placeholder(aa_mol, n_mod_mol)
-            else:
-                # Legacy: index-based connection (first atom connects to N)
-                aa_mol = ReplaceSubstructs(aa_mol, n_term_placeholder_mol, n_mod_mol)[0]
-
-        # replacing all leftover N-terminal placeholders with hydrogen atoms
-        return ReplaceSubstructs(
-            aa_mol,
-            n_term_placeholder_mol,
-            Chem.MolFromSmiles("[H]", sanitize=False),
-            replaceAll=True,
-        )[0]
-
-    def _apply_c_terminal_modification(
-        self,
-        aa_mol: Chem.Mol,
-        c_term_placeholder_mol: Chem.Mol,
         c_term_mod: Optional[str],
     ) -> Chem.Mol:
         """
-        Apply C-terminal modification to the molecule.
+        Fuse terminal modifications onto the anchors of a residue or peptide.
 
         Parameters
         ----------
-        aa_mol : Chem.Mol
-            The amino acid molecule to modify.
-        c_term_placeholder_mol : Chem.Mol
-            The C-terminal placeholder molecule.
+        mol : Chem.Mol
+            Residue or peptide with mapped anchors.
+        n_term_mod : Optional[str]
+            N-terminal modification name, or None to keep the free amine.
         c_term_mod : Optional[str]
-            The C-terminal modification to apply.
+            C-terminal modification name, or None to keep the free carboxylic acid.
 
         Returns
         -------
         Chem.Mol
-            The modified molecule.
+            The modified molecule, anchors still mapped.
         """
+        if n_term_mod:
+            n_mod_mol = parse_smiles(self.n_term_modifications[n_term_mod], "n_term")
+            mol = merge_at_anchors(mol, N_TERM_ANCHOR, n_mod_mol, N_TERM_ANCHOR)
         if c_term_mod:
-            c_mod_smiles = self.c_term_modifications[c_term_mod]
-            c_mod_mol = Chem.MolFromSmiles(c_mod_smiles)
-            return ReplaceSubstructs(aa_mol, c_term_placeholder_mol, c_mod_mol)[0]
-        return ReplaceSubstructs(
-            aa_mol, c_term_placeholder_mol, Chem.MolFromSmiles("O", sanitize=False)
-        )[0]
+            c_mod_mol = parse_smiles(self.c_term_modifications[c_term_mod], "c_term")
+            mol = merge_at_anchors(mol, C_TERM_ANCHOR, c_mod_mol, C_TERM_ANCHOR)
+        return mol
