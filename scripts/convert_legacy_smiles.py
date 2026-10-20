@@ -97,6 +97,7 @@ def convert_legacy_smiles(smiles: str, kind: SmilesKind) -> str:
 
 
 def _kind_of_modification(mod_name: str) -> SmilesKind:
+    """Classify a modification name as residue-level, N-terminal or C-terminal."""
     # Same classification as AminoAcidModifier; "^Any_N-term" PTMs are residue-level.
     if "@Protein_N-term" in mod_name or "@Any_N-term" in mod_name:
         return "n_term"

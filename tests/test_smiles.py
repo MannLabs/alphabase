@@ -46,10 +46,12 @@ UNDEFINED_ALPHA_CARBON_STEREO = {
 
 
 def canonical(smiles: str) -> str:
+    """Canonicalize, so that different writings of one molecule compare equal."""
     return Chem.MolToSmiles(Chem.MolFromSmiles(smiles))
 
 
 def cip_labels(mol: Chem.Mol) -> list[str]:
+    """Return the sorted R/S labels of all stereocentres, independent of atom order."""
     mol = Chem.Mol(mol)
     rdCIPLabeler.AssignCIPLabels(mol)
     return sorted(
@@ -65,6 +67,7 @@ def random_writings(smiles: str, n: int = 8) -> list[str]:
 
 
 def alpha_carbon_idx(residue: Chem.Mol) -> int:
+    """Return the index of the alpha carbon, the atom linking the amine and carboxyl anchors."""
     amine = next(a for a in residue.GetAtoms() if a.GetAtomMapNum() == N_TERM_ANCHOR)
     return next(
         carbon.GetIdx()

@@ -26,6 +26,7 @@ class PeptideSmilesEncoder:
     """
 
     def __init__(self):
+        """Use an AminoAcidModifier for residue SMILES and terminal modifications."""
         self.amino_acid_modifier = AminoAcidModifier()
 
     def _parse_modifications(
@@ -188,7 +189,7 @@ class PeptideSmilesEncoder:
         mod_site: Optional[str] = "",
     ) -> str:
         """
-        Encode a peptide sequence into an RDKit molecule object.
+        Encode a peptide sequence into a SMILES string.
 
         Parameters
         ----------

@@ -145,6 +145,7 @@ def merge_at_anchors(
 
 
 def _find_anchor(mol: Chem.Mol, anchor: int) -> int:
+    """Return the index of the single atom carrying the given anchor label."""
     matches = [
         atom.GetIdx() for atom in mol.GetAtoms() if atom.GetAtomMapNum() == anchor
     ]
@@ -158,6 +159,7 @@ def _find_anchor(mol: Chem.Mol, anchor: int) -> int:
 def _move_bond(
     mol: Chem.RWMol, neighbor_idx: int, old_end_idx: int, new_end_idx: int
 ) -> None:
+    """Reattach a bond from one anchor to the other, keeping the neighbour's stereo."""
     neighbor_bonds = [
         bond.GetOtherAtomIdx(neighbor_idx)
         for bond in mol.GetAtomWithIdx(neighbor_idx).GetBonds()
@@ -175,6 +177,7 @@ def _move_bond(
 
 
 def _without_atom_maps(mol: Chem.Mol) -> Chem.Mol:
+    """Return a copy without anchor labels, as handed out to users."""
     unmapped = Chem.Mol(mol)
     for atom in unmapped.GetAtoms():
         atom.SetAtomMapNum(0)
@@ -182,6 +185,7 @@ def _without_atom_maps(mol: Chem.Mol) -> Chem.Mol:
 
 
 def _to_smiles(mol: Chem.Mol) -> str:
+    """Return the SMILES without anchor labels, as handed out to users."""
     return Chem.MolToSmiles(_without_atom_maps(mol))
 
 
@@ -191,6 +195,7 @@ class AminoAcidModifier:
     """
 
     def __init__(self):
+        """Defer loading the SMILES tables until they are first accessed."""
         self._aa_smiles = None
         self._aa_mols = None
         self._n_term_modifications = None

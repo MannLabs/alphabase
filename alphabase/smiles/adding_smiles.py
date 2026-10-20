@@ -206,6 +206,7 @@ for i in ptm_dict:
 
 
 def main():
+    """Compute the compositions of all dictionaries above and write them to modification.tsv."""
     ptms_to_add = process_modifications(ptm_dict, mod_type="ptm")
     add_new_modifications(ptms_to_add)
 
