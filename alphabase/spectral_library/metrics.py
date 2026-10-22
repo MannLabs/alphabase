@@ -72,6 +72,7 @@ def calculate_precursor_metrics(
         PIF, sequence coverage, Gini, normalized count and median finite error.
         With no cleavage sites, coverage and normalized count are zero. With
         no intensity, Gini is one; with no finite errors, mass accuracy is infinite.
+
     """
     coverage = (dense_intensities > 0).any(axis=1)
     ordered = np.sort(dense_intensities, axis=None)
@@ -108,6 +109,7 @@ def apply_precursor_metrics(flatlib: SpecLibFlat) -> SpecLibFlat:
     -------
     SpecLibFlat
         The input library with its precursor metrics updated in place.
+
     """
     peaks = flatlib.fragment_df
     intensity = peaks["intensity"].to_numpy()
