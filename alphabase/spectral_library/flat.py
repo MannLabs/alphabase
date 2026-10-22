@@ -284,6 +284,10 @@ class SpecLibFlat(SpecLibBase):
         Create a hybrid SpecLibFlat which has both flat and dense fragment representations.
         Converts the flat fragment representation to dense matrices and stores them in the object.
 
+        Each dense cell uses the strongest observed peak, with the first input peak
+        winning equal-intensity ties. All additional columns use that same peak.
+        The flat fragment table is preserved.
+
         Creates fragment_mz_df (using calculated m/z values) and fragment_intensity_df by default.
         For each additional column specified (e.g., 'intensity'), creates a corresponding
         _fragment_<column>_df matrix. Including 'mz' in additional_columns will use observed

@@ -10,6 +10,7 @@ from alphabase.peptide.fragment import (
     _calc_column_indices,
     _calc_row_indices,
     _start_stop_to_idx,
+    create_dense_fragment_arrays,
     create_dense_matrices,
     get_charged_frag_types,
 )
@@ -614,4 +615,86 @@ def test_calc_dense_fragments():
     )
     np.testing.assert_array_equal(
         speclib_flat._fragment_correlation_df.values, expected_correlation
+    )
+
+
+@pytest.fixture
+def duplicate_fragment_peaks():
+    return {
+        "type": np.array([98, 98, 98, 98, 121, 255], dtype=np.uint8),
+        "loss_type": np.zeros(6, dtype=np.uint8),
+        "charge": np.ones(6, dtype=np.uint8),
+        "position": np.array([0, 0, 0, 0, 1, 255], dtype=np.int64),
+        "intensity": np.array([4.0, 10.0, 10.0, 0.0, 5.0, 100.0]),
+        "error": np.array([4.0, 1.0, 2.0, 3.0, 7.0, np.inf]),
+        "mz_observed": np.array([10.0, 11.0, 12.0, 13.0, 14.0, 99.0]),
+    }
+
+
+def test_dense_arrays_keep_values_from_first_strongest_peak(duplicate_fragment_peaks):
+    matrices = create_dense_fragment_arrays(
+        duplicate_fragment_peaks,
+        2,
+        ["y_z1", "b_z1"],
+        ["intensity", "error", "mz_observed"],
+    )
+    np.testing.assert_array_equal(matrices["intensity"], [[0, 10], [5, 0]])
+    np.testing.assert_array_equal(matrices["error"], [[0, 1], [7, 0]])
+    np.testing.assert_array_equal(matrices["mz_observed"], [[0, 11], [14, 0]])
+
+
+def test_dense_library_and_array_conversion_agree(duplicate_fragment_peaks):
+    library = SpecLibFlat(charged_frag_types=["b_z1", "y_z1"])
+    library._precursor_df = pd.DataFrame(
+        {
+            "sequence": ["PEP"],
+            "mods": [""],
+            "mod_sites": [""],
+            "charge": [2],
+            "nAA": [3],
+            "flat_frag_start_idx": [0],
+            "flat_frag_stop_idx": [6],
+            "beam_rank": [2],
+        }
+    )
+    library._fragment_df = pd.DataFrame(duplicate_fragment_peaks)
+    columns = ["intensity", "error", "mz_observed"]
+    library.calc_dense_fragments(additional_columns=columns)
+    matrices = create_dense_fragment_arrays(
+        duplicate_fragment_peaks, 2, ["b_z1", "y_z1"], columns
+    )
+    for column in columns:
+        np.testing.assert_array_equal(
+            getattr(library, f"_fragment_{column}_df"), matrices[column]
+        )
+    assert library.precursor_df["beam_rank"].tolist() == [2]
+    assert len(library.fragment_df) == 6
+
+
+@pytest.mark.parametrize("lengths", [[8, 3], [1]])
+def test_dense_library_with_no_peaks(lengths):
+    library = SpecLibFlat(charged_frag_types=["b_z1", "y_z1"])
+    library._precursor_df = pd.DataFrame(
+        {
+            "sequence": ["A" * length for length in lengths],
+            "mods": "",
+            "mod_sites": "",
+            "charge": 2,
+            "nAA": lengths,
+            "flat_frag_start_idx": 0,
+            "flat_frag_stop_idx": 0,
+        }
+    )
+    library._fragment_df = pd.DataFrame(
+        {
+            column: np.array([], dtype=np.uint8 if column != "intensity" else float)
+            for column in ["type", "loss_type", "charge", "position", "intensity"]
+        }
+    )
+    library.calc_dense_fragments()
+    assert library.precursor_df["nAA"].tolist() == lengths
+    assert library.fragment_intensity_df.shape == (sum(lengths) - len(lengths), 2)
+    assert not library.fragment_intensity_df.to_numpy().any()
+    np.testing.assert_array_equal(
+        library.precursor_df["frag_stop_idx"], np.cumsum(np.array(lengths) - 1)
     )
