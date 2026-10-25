@@ -82,6 +82,7 @@ class ModificationKeys(metaclass=_ConstantsClass):
 
 
 #: Main entry of modification infomation (DataFrame fotmat).
+#: After editing it directly, call :func:`update_all_by_MOD_DF` to refresh the dicts below.
 MOD_DF: pd.DataFrame = pd.DataFrame()
 
 
@@ -96,6 +97,9 @@ MOD_LOSS_MASS: dict = {}
 MOD_Composition: dict = {}
 #: Modification loss importance
 MOD_LOSS_IMPORTANCE: dict = {}
+#: Modification to UniMod accession dict, e.g. {'Oxidation@M': 'UniMod:35'}.
+#: Modifications without a UniMod id are absent.
+MOD_TO_UNIMOD: dict = {}
 
 _MOD_CLASSIFICATION_USER_ADDED = "User-added"
 
@@ -117,6 +121,16 @@ def update_all_by_MOD_DF():
     MOD_LOSS_MASS.update(MOD_DF["modloss"].to_dict())
     MOD_LOSS_IMPORTANCE.clear()
     MOD_LOSS_IMPORTANCE.update(MOD_DF["modloss_importance"].to_dict())
+    MOD_TO_UNIMOD.clear()
+    MOD_TO_UNIMOD.update(
+        {
+            mod_name: f"UniMod:{unimod_id}"
+            for mod_name, unimod_id in zip(
+                MOD_DF["mod_name"], MOD_DF["unimod_id"].astype(int)
+            )
+            if unimod_id != -1
+        }
+    )
 
     MOD_Composition.clear()
     for mod, chem in MOD_CHEM.items():
