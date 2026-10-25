@@ -2,8 +2,8 @@
 
 import pytest
 
+from alphabase.constants import modification
 from alphabase.constants.modification import (
-    MOD_DF,
     add_new_modifications,
     update_all_by_MOD_DF,
 )
@@ -16,9 +16,10 @@ TEST_MODS = ["LateUnimod@R", "LateNoUnimod@R", "Swapped1@R", "Swapped2@R"]
 def cleanup_test_mods():
     """Remove the test modifications after each test."""
     yield
+    # Other tests may reload MOD_DF, so always use the module's current table.
     for mod in TEST_MODS:
-        if mod in MOD_DF.index:
-            MOD_DF.drop(mod, inplace=True)
+        if mod in modification.MOD_DF.index:
+            modification.MOD_DF.drop(mod, inplace=True)
     update_all_by_MOD_DF()
 
 
@@ -56,7 +57,7 @@ def test_mod_to_unimod_dict_sees_swap_that_keeps_mod_count(cleanup_test_mods):
     assert mod_to_unimod_dict["Swapped1@R"] == "UniMod:21"
 
     # When it is replaced by another one, leaving the number of modifications unchanged
-    MOD_DF.drop("Swapped1@R", inplace=True)
+    modification.MOD_DF.drop("Swapped1@R", inplace=True)
     update_all_by_MOD_DF()
     add_new_modifications({"Swapped2@R": {"composition": "C(2)", "unimod_id": 35}})
 
@@ -72,7 +73,7 @@ def test_mod_to_unimod_dict_sees_changed_unimod_id(cleanup_test_mods):
     assert mod_to_unimod_dict["LateUnimod@R"] == "UniMod:21"
 
     # When its UniMod id is edited in MOD_DF
-    MOD_DF.loc["LateUnimod@R", "unimod_id"] = 35
+    modification.MOD_DF.loc["LateUnimod@R", "unimod_id"] = 35
     update_all_by_MOD_DF()
 
     # Then
