@@ -82,6 +82,7 @@ class ModificationKeys(metaclass=_ConstantsClass):
 
 
 #: Main entry of modification infomation (DataFrame fotmat).
+#: After editing it directly, call :func:`update_all_by_MOD_DF` to refresh the dicts below.
 MOD_DF: pd.DataFrame = pd.DataFrame()
 
 
@@ -96,6 +97,9 @@ MOD_LOSS_MASS: dict = {}
 MOD_Composition: dict = {}
 #: Modification loss importance
 MOD_LOSS_IMPORTANCE: dict = {}
+#: Modification to UniMod accession dict, e.g. {'Oxidation@M': 'UniMod:35'}.
+#: Modifications without a UniMod id are absent.
+MOD_TO_UNIMOD: dict = {}
 
 _MOD_CLASSIFICATION_USER_ADDED = "User-added"
 
@@ -117,6 +121,16 @@ def update_all_by_MOD_DF():
     MOD_LOSS_MASS.update(MOD_DF["modloss"].to_dict())
     MOD_LOSS_IMPORTANCE.clear()
     MOD_LOSS_IMPORTANCE.update(MOD_DF["modloss_importance"].to_dict())
+    MOD_TO_UNIMOD.clear()
+    MOD_TO_UNIMOD.update(
+        {
+            mod_name: f"UniMod:{unimod_id}"
+            for mod_name, unimod_id in zip(
+                MOD_DF["mod_name"], MOD_DF["unimod_id"].astype(int)
+            )
+            if unimod_id != -1
+        }
+    )
 
     MOD_Composition.clear()
     for mod, chem in MOD_CHEM.items():
@@ -473,6 +487,7 @@ def _add_a_new_modification(
     composition: str,
     modloss_composition: str = "",
     smiles: str = "",
+    unimod_id: int = -1,
 ):
     """
     Add a new modification into :data:`MOD_DF` or update SMILES if modification already exists.
@@ -490,6 +505,10 @@ def _add_a_new_modification(
 
     smiles : str
         SMILES string of the modification
+
+    unimod_id : int
+        UniMod accession of the modification, or -1 if it has none (the default).
+        Exports that name modifications by UniMod accession need it.
     """
     _check_mass_sanity(mod_name, composition, smiles)
 
@@ -513,7 +532,7 @@ def _add_a_new_modification(
         composition,
         modloss_composition,
         _MOD_CLASSIFICATION_USER_ADDED,
-        0,
+        unimod_id,
         smiles,
     ]
     composition_mass = calc_mass_from_formula(composition)
@@ -525,6 +544,9 @@ def _add_a_new_modification(
     if MOD_DF.loc[mod_name, "modloss"] > 0:
         MOD_DF.loc[mod_name, "modloss_importance"] = 1e10
     MOD_DF.fillna(0, inplace=True)
+    # Enlarging MOD_DF with a new row upcasts the integer column to float, which
+    # would be exported as e.g. "UniMod:4.0" for every modification.
+    MOD_DF["unimod_id"] = MOD_DF["unimod_id"].astype(np.int32)
     # update_all_by_MOD_DF()
 
 
@@ -545,6 +567,8 @@ def add_new_modifications(new_mods: Union[list, dict]):
         mod@site:str (e.g. Mod@S),
         composition:str (e.g. "H(4)O(2)"),
         [optional] modloss composition:str (e.g. "H(2)O(1)"),
+        [optional] smiles:str,
+        [optional] unimod_id:int (e.g. 21),
         ), ...]
         ```,
         dict example:
@@ -552,7 +576,9 @@ def add_new_modifications(new_mods: Union[list, dict]):
         {
         "mod@site": {
         "composition":"H(4)O(2)",
-        "modloss_composition":"H(2)O(1)"
+        "modloss_composition":"H(2)O(1)",
+        "smiles":"...",
+        "unimod_id":21
         }, ...
         }
         ```

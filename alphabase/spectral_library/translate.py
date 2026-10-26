@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import tqdm
 
-from alphabase.constants.modification import MOD_DF, ModificationKeys
+from alphabase.constants.modification import MOD_TO_UNIMOD, ModificationKeys
 from alphabase.numba_wrapper import numba_njit
 from alphabase.spectral_library.base import SpecLibBase
 from alphabase.utils import explode_multiple_columns
@@ -187,11 +187,9 @@ def merge_precursor_fragment_df(
     #     return df
 
 
-mod_to_unimod_dict = {}
-for mod_name, unimod_id in MOD_DF[["mod_name", "unimod_id"]].values:
-    if unimod_id == -1 or unimod_id == "-1":
-        continue
-    mod_to_unimod_dict[mod_name] = f"UniMod:{unimod_id}"
+# The same dict object as MOD_TO_UNIMOD, which update_all_by_MOD_DF() refreshes in place,
+# so it includes modifications added later with add_new_modifications().
+mod_to_unimod_dict = MOD_TO_UNIMOD
 
 
 def is_nterm_frag(frag_type: str):
