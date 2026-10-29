@@ -70,12 +70,6 @@ class DIANNKeepProlineDecoyGenerator(DIANNDecoyGenerator):
     Decoy of `DIANNDecoyGenerator` that keeps a proline before the C-terminal
     residue and mutates the residue before it instead.
 
-    The parent's mutation map turns that proline into L, so no decoy ends in xP[KR].
-    Such peptides fragment into an intense y2 (PK / PR) ion that has the
-    same mass for all of them and that only targets can match. Where these
-    peptides are abundant (e.g. plasma), false targets ending in xP[KR]
-    pass without any decoy to account for them.
-
     Sequences shorter than 5 residues get the parent's decoy, because
     moving the mutation inwards would hit the N-terminal mutation.
     """
