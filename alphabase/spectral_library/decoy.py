@@ -89,6 +89,31 @@ class DIANNKeepProlineDecoyGenerator(DIANNDecoyGenerator):
         return self.mutated_AAs[self.raw_AAs.index(amino_acid)]
 
 
+class DIANNInnerDecoyGenerator(DIANNKeepProlineDecoyGenerator):
+    """
+    Decoy that applies the mutation map of `DIANNDecoyGenerator` to the third
+    and the third-to-last residue instead of the second and the second-to-last.
+
+    A proline at either mutated position moves that mutation one residue
+    inwards, so the decoy keeps the proline. Sequences shorter than 7 residues
+    get the parent's decoy, because the two mutations could fall on the same
+    residue.
+    """
+
+    def _decoy(self, sequence: str) -> str:
+        if len(sequence) < 7:
+            return super()._decoy(sequence)
+        first, second = 2, len(sequence) - 3
+        if sequence[second] == "P":
+            second -= 1
+        if sequence[first] == "P" and first + 1 < second:
+            first += 1
+        residues = list(sequence)
+        residues[first] = self._mutate(sequence[first])
+        residues[second] = self._mutate(sequence[second])
+        return "".join(residues)
+
+
 class PseudoReverseDecoyGenerator(BaseDecoyGenerator):
     def __init__(self, fix_C_term: bool = True):
         """
@@ -283,3 +308,4 @@ register and get different types of decoy methods.
 decoy_lib_provider.register("pseudo_reverse", PseudoReverseDecoyGenerator)
 decoy_lib_provider.register("diann", DIANNDecoyGenerator)
 decoy_lib_provider.register("diann_keep_proline", DIANNKeepProlineDecoyGenerator)
+decoy_lib_provider.register("diann_inner", DIANNInnerDecoyGenerator)

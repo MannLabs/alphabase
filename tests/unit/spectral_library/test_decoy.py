@@ -7,6 +7,7 @@ import pytest
 from alphabase.spectral_library.base import SpecLibBase
 from alphabase.spectral_library.decoy import (
     DIANNDecoyGenerator,
+    DIANNInnerDecoyGenerator,
     DIANNKeepProlineDecoyGenerator,
     decoy_lib_provider,
 )
@@ -98,3 +99,62 @@ def test_keep_proline_decoy_library_from_provider(multiprocessing):
     expected = [generator._decoy(s) for s in sequences]
     assert decoys == [d for d in expected if d not in set(sequences)]
     assert decoys[:2] == ["ALLLEPK", "ALLLDDK"]
+
+
+def test_inner_decoy_mutates_the_third_and_the_third_to_last_residue():
+    assert DIANNInnerDecoyGenerator()._decoy("AGLLDEVK") == "AGVLDDVK"
+
+
+def test_inner_decoy_keeps_b2_and_y2():
+    decoy = DIANNInnerDecoyGenerator()._decoy("LGEHNIDVLEGNEQFINAAK")
+    assert decoy[:2] == "LG"
+    assert decoy[-2:] == "AK"
+
+
+def test_inner_decoy_moves_a_mutation_off_a_proline():
+    assert DIANNInnerDecoyGenerator()._decoy("PEPTIDEK") == "PEPSIEEK"
+    assert DIANNInnerDecoyGenerator()._decoy("AAAAPGK") == "AALLPGK"
+
+
+def test_inner_decoy_keeps_the_n_terminal_proline_without_room_to_move():
+    # the C-terminal mutation already moved onto the residue after the proline
+    assert DIANNInnerDecoyGenerator()._decoy("AAPAPGK") == "AALLPGK"
+
+
+@pytest.mark.parametrize("sequence", ["AAPK", "AAAPK", "AGLDPK", "AGLDEK"])
+def test_inner_decoy_of_sequences_shorter_than_7_is_the_keep_proline_decoy(
+    sequence,
+):
+    assert DIANNInnerDecoyGenerator()._decoy(
+        sequence
+    ) == DIANNKeepProlineDecoyGenerator()._decoy(sequence)
+
+
+def test_inner_decoy_properties_on_random_sequences():
+    generator = DIANNInnerDecoyGenerator()
+    for sequence in _random_sequences(2000, min_length=6, max_length=30):
+        decoy = generator._decoy(sequence)
+
+        assert len(decoy) == len(sequence)
+        assert decoy[:2] == sequence[:2]
+        assert decoy[-2:] == sequence[-2:]
+        assert sum(a != b for a, b in zip(decoy, sequence)) == 2
+
+
+def test_inner_decoy_is_registered():
+    assert decoy_lib_provider.decoy_dict["diann_inner"] is DIANNInnerDecoyGenerator
+
+
+@pytest.mark.parametrize("multiprocessing", [False, True])
+def test_inner_decoy_library_from_provider(multiprocessing):
+    # given
+    sequences = ["AGLLDEVK", "PEPTIDEK", *_random_sequences(40, 7, 20)]
+
+    # when
+    decoys = _decoy_library("diann_inner", sequences, multiprocessing)
+
+    # then
+    generator = DIANNInnerDecoyGenerator()
+    expected = [generator._decoy(s) for s in sequences]
+    assert decoys == [d for d in expected if d not in set(sequences)]
+    assert decoys[:2] == ["AGVLDDVK", "PEPSIEEK"]
