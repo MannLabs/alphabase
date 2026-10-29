@@ -70,12 +70,6 @@ class DIANNKeepProlineDecoyGenerator(DIANNDecoyGenerator):
     Decoy of `DIANNDecoyGenerator` that keeps a proline before the C-terminal
     residue and mutates the residue before it instead.
 
-    The parent's mutation map turns that proline into L, so no decoy ends in xP[KR].
-    Such peptides fragment into an intense y2 (PK / PR) ion that has the
-    same mass for all of them and that only targets can match. Where these
-    peptides are abundant (e.g. plasma), false targets ending in xP[KR]
-    pass without any decoy to account for them.
-
     Sequences shorter than 5 residues get the parent's decoy, because
     moving the mutation inwards would hit the N-terminal mutation.
     """
@@ -99,11 +93,6 @@ class DIANNInnerDecoyGenerator(DIANNKeepProlineDecoyGenerator):
     """
     Decoy that applies the mutation map of `DIANNDecoyGenerator` to the third
     and the third-to-last residue instead of the second and the second-to-last.
-
-    Every decoy keeps its target's b1, b2, y1 and y2. These short ions are the
-    ones a false target most often shares with co-eluting peptides by chance;
-    with the outer residues mutated, decoys carry rarer short-ion masses, match
-    fewer of them and so underestimate the false targets.
 
     A proline at either mutated position moves that mutation one residue
     inwards, so the decoy keeps the proline. Sequences shorter than 7 residues
