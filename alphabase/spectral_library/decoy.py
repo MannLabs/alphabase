@@ -1,10 +1,26 @@
 import copy
+import hashlib
 import multiprocessing as mp
+from collections import Counter
 from typing import Any
 
+import numpy as np
 import pandas as pd
 
+from alphabase.constants.aa import AA_ASCII_MASS
 from alphabase.spectral_library.base import SpecLibBase
+
+STANDARD_AAS = "ACDEFGHIKLMNPQRSTVWY"
+# A replacement this light is indistinguishable from the target at fragment level (I/L) or mimics a
+# common modification (deamidation), so the decoy would be a plausible target rather than a false one
+EXCLUDED_MUTATIONS = ("IL", "LI", "ND", "QE")
+# Residues that carry fixed labels or define the digestion site keep the decoy's chemistry and cleavage
+FROZEN_AAS = "CK"
+MIN_MASS_DELTA = 0.05
+MAX_MASS_DELTA = 25.0
+MIN_FALLBACK_LENGTH = 4
+DROPPED_SEQUENCE = ""
+_UNIFORM_BYTES = 8
 
 
 def _batchify_series(series, mp_batch_size):
@@ -26,6 +42,9 @@ class BaseDecoyGenerator:
         """
 
         return series.apply(self._decoy)
+
+    def fit(self, sequences: pd.Series) -> None:
+        """Learn from the target sequences before decoying; most generators need nothing."""
 
     def _decoy(self, sequence: str) -> str:
         raise NotImplementedError("Subclass should implement this method.")
@@ -85,6 +104,116 @@ class PseudoReverseDecoyGenerator(BaseDecoyGenerator):
             return sequence[:-1][::-1] + sequence[-1]
         else:
             return sequence[::-1]
+
+
+class NearMassMutationDecoyGenerator(BaseDecoyGenerator):
+    def __init__(
+        self,
+        seed: int = 0,
+        min_mass_delta: float = MIN_MASS_DELTA,
+        max_mass_delta: float = MAX_MASS_DELTA,
+        frozen_AAs: str = FROZEN_AAS,
+        excluded_mutations: tuple = EXCLUDED_MUTATIONS,
+    ):
+        """
+        Decoy generator replacing one inner residue of the target by a residue of similar mass.
+
+        Unlike DIA-NN decoys, which send most residues to L at positions 2 and n-1, the replaced
+        site and residue are spread like in the targets, so decoy fragments do not pile up on a
+        few masses. The replacement is drawn from the targets' inner-residue composition (see
+        `fit`), and the choice depends only on the seed and the sequence, so a sequence gets the
+        same decoy in every batch and process.
+
+        Peptides without a replaceable inner residue get the DIA-NN mutation if they have at least
+        4 residues, otherwise an empty sequence, which `SpecLibDecoy` drops.
+
+        Parameters
+        ----------
+
+        seed : int, optional
+            Seed of the site and residue choice. Defaults to 0.
+
+        min_mass_delta : float, optional
+            Replacements must differ by more than this mass (Da). Defaults to 0.05.
+
+        max_mass_delta : float, optional
+            Replacements must differ by at most this mass (Da). Defaults to 25.
+
+        frozen_AAs : str, optional
+            Residues never replaced nor drawn. Defaults to 'CK'.
+
+        excluded_mutations : tuple, optional
+            Original and replacement residue pairs never drawn.
+            Defaults to I to L, L to I, N to D and Q to E.
+        """
+        self.seed = seed
+        self.min_mass_delta = min_mass_delta
+        self.max_mass_delta = max_mass_delta
+        self.frozen_AAs = frozen_AAs
+        self.excluded_mutations = set(excluded_mutations)
+        self._fallback = DIANNDecoyGenerator()
+        # residue -> (replacement residues, their cumulative draw probabilities)
+        self._replacements = None
+
+    def fit(self, sequences: pd.Series) -> None:
+        """Sets the replacement probabilities from the inner-residue composition of the targets."""
+        composition = Counter()
+        for sequence in sequences.unique():
+            composition.update(sequence[1:-1])
+
+        self._replacements = {}
+        for original in STANDARD_AAS:
+            if original in self.frozen_AAs:
+                continue
+            candidates = [
+                aa
+                for aa in STANDARD_AAS
+                if composition[aa] > 0
+                and aa not in self.frozen_AAs
+                and original + aa not in self.excluded_mutations
+                and self.min_mass_delta
+                < abs(AA_ASCII_MASS[ord(aa)] - AA_ASCII_MASS[ord(original)])
+                <= self.max_mass_delta
+            ]
+            if not candidates:
+                continue
+            weights = np.array([composition[aa] for aa in candidates], dtype=float)
+            self._replacements[original] = (
+                candidates,
+                np.cumsum(weights) / weights.sum(),
+            )
+
+    def _uniforms(self, sequence: str) -> tuple:
+        """Two uniform numbers in [0, 1) derived from the seed and the sequence only."""
+        digest = hashlib.blake2b(
+            f"{self.seed}:{sequence}".encode(), digest_size=2 * _UNIFORM_BYTES
+        ).digest()
+        scale = 2.0 ** (8 * _UNIFORM_BYTES)
+        return (
+            int.from_bytes(digest[:_UNIFORM_BYTES], "little") / scale,
+            int.from_bytes(digest[_UNIFORM_BYTES:], "little") / scale,
+        )
+
+    def _decoy(self, sequence: str) -> str:
+        if self._replacements is None:
+            raise RuntimeError("Call fit() with the target sequences before decoying.")
+
+        sites = [
+            i for i in range(1, len(sequence) - 1) if sequence[i] in self._replacements
+        ]
+        if not sites:
+            if len(sequence) >= MIN_FALLBACK_LENGTH:
+                return self._fallback._decoy(sequence)
+            return DROPPED_SEQUENCE
+
+        site_draw, residue_draw = self._uniforms(sequence)
+        site = sites[int(site_draw * len(sites))]
+        candidates, cumulative = self._replacements[sequence[site]]
+        index = min(
+            int(np.searchsorted(cumulative, residue_draw, side="right")),
+            len(candidates) - 1,
+        )
+        return sequence[:site] + candidates[index] + sequence[site + 1 :]
 
 
 class SpecLibDecoy(SpecLibBase):
@@ -182,6 +311,7 @@ class SpecLibDecoy(SpecLibBase):
             Number of processes for multiprocessing.
             Defaults to 8.
         """
+        self.generator.fit(self._precursor_df["sequence"])
 
         if not multiprocessing or self._precursor_df.shape[0] < mp_batch_size:
             self._precursor_df["sequence"] = self.generator(
@@ -203,11 +333,22 @@ class SpecLibDecoy(SpecLibBase):
         self._remove_target_seqs()
 
     def _remove_target_seqs(self):
-        target_seqs = set(self.target_lib._precursor_df.sequence.values)
+        """Drops decoys equal to a target up to I/L, which fragments cannot tell apart, and dropped sequences."""
+        target_seqs = set(
+            _equate_isoleucine_leucine(self.target_lib._precursor_df.sequence)
+        )
+        decoy_seqs = self._precursor_df.sequence
         self._precursor_df.drop(
-            self._precursor_df.loc[self._precursor_df.sequence.isin(target_seqs)].index,
+            self._precursor_df.loc[
+                _equate_isoleucine_leucine(decoy_seqs).isin(target_seqs)
+                | (decoy_seqs == DROPPED_SEQUENCE)
+            ].index,
             inplace=True,
         )
+
+
+def _equate_isoleucine_leucine(sequences: pd.Series) -> pd.Series:
+    return sequences.str.replace("I", "L", regex=False)
 
 
 class SpecLibDecoyProvider:
@@ -258,3 +399,4 @@ register and get different types of decoy methods.
 
 decoy_lib_provider.register("pseudo_reverse", PseudoReverseDecoyGenerator)
 decoy_lib_provider.register("diann", DIANNDecoyGenerator)
+decoy_lib_provider.register("near_mass_mutation", NearMassMutationDecoyGenerator)
