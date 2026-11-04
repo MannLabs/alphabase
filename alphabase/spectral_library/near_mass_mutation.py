@@ -1,9 +1,4 @@
-"""Near-mass mutation of peptide sequences, vectorised over all sequences with numpy.
-
-Sequences are handled as a 2D uint8 array of ASCII codes, one row per sequence, padded with
-zeros. Every step works on that array at once, so the cost per sequence is a few numpy
-operations instead of a Python loop.
-"""
+"""Near-mass mutation of peptides on zero-padded uint8 code arrays, avoiding a Python loop per sequence."""
 
 from typing import NamedTuple
 
@@ -12,22 +7,20 @@ import numpy as np
 from alphabase.constants.aa import AA_ASCII_MASS
 
 STANDARD_AAS = "ACDEFGHIKLMNPQRSTVWY"
-# A replacement this light is indistinguishable from the target at fragment level (I/L) or mimics a
-# common modification (deamidation, either way), so the decoy would be a plausible target rather than a false one
+# I/L look identical to fragments, N/D and Q/E mimic deamidation
 EXCLUDED_MUTATIONS = ("IL", "LI", "ND", "DN", "QE", "EQ")
-# Residues that carry fixed labels or define the digestion site keep the decoy's chemistry and cleavage
+# C carries fixed labels, K defines the cleavage site
 FROZEN_AAS = "CK"
-# A proline before the C-terminal residue suppresses cleavage there and shapes the fragment pattern,
-# so the second-to-last position neither loses nor gains one
+# a proline before the C-terminal residue shapes fragmentation
 PENULTIMATE_FROZEN_AAS = "P"
 MIN_MASS_DELTA = 0.05
 MAX_MASS_DELTA = 25.0
 
 INNER_TABLE = 0
 PENULTIMATE_TABLE = 1
-# every uint8 code indexes the tables directly, so unknown residues simply have no candidates
+# any uint8 code indexes the tables, so unknown residues have no candidates
 _N_CODES = 256
-# above any uniform draw, so padded candidate slots are never counted as passed
+# above any draw, so padding slots are never picked
 _NO_CANDIDATE = 2.0
 
 _HASH_BASE = np.uint64(0x100000001B3)
@@ -149,7 +142,7 @@ def _build_replacement_table(
     counts = composition[aas]
     frozen = np.isin(aas, _codes_of(frozen_aas))
 
-    # rows are the original residue, columns the replacement
+    # original x replacement
     mass_deltas = np.abs(masses[None, :] - masses[:, None])
     allowed = (
         (min_mass_delta < mass_deltas)
@@ -161,7 +154,7 @@ def _build_replacement_table(
     for original, replacement in excluded_mutations:
         allowed[STANDARD_AAS.index(original), STANDARD_AAS.index(replacement)] = False
 
-    # moves the allowed replacements to the front, keeping their STANDARD_AAS order
+    # allowed candidates first, so a draw indexes only the first n_candidates slots
     order = np.argsort(~allowed, axis=1, kind="stable")
     sorted_allowed = np.take_along_axis(allowed, order, axis=1)
     weights = np.where(sorted_allowed, counts[order], 0).astype(np.float64)
