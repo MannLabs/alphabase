@@ -1,26 +1,17 @@
 import copy
-import hashlib
 import multiprocessing as mp
-from collections import Counter
 from typing import Any
 
 import numpy as np
 import pandas as pd
 
-from alphabase.constants.aa import AA_ASCII_MASS
+from alphabase.spectral_library import near_mass_mutation
 from alphabase.spectral_library.base import SpecLibBase
 
-STANDARD_AAS = "ACDEFGHIKLMNPQRSTVWY"
-# A replacement this light is indistinguishable from the target at fragment level (I/L) or mimics a
-# common modification (deamidation), so the decoy would be a plausible target rather than a false one
-EXCLUDED_MUTATIONS = ("IL", "LI", "ND", "QE")
-# Residues that carry fixed labels or define the digestion site keep the decoy's chemistry and cleavage
-FROZEN_AAS = "CK"
-MIN_MASS_DELTA = 0.05
-MAX_MASS_DELTA = 25.0
 MIN_FALLBACK_LENGTH = 4
 DROPPED_SEQUENCE = ""
-_UNIFORM_BYTES = 8
+# bounds the padded code arrays of one chunk to a few hundred MB
+_NEAR_MASS_CHUNK_SIZE = 200_000
 
 
 def _batchify_series(series, mp_batch_size):
@@ -34,6 +25,9 @@ class BaseDecoyGenerator:
     Base class for decoy generator.
     A class is used instead of a function to make as it needs to be pickled for multiprocessing.
     """
+
+    # vectorised generators are faster in one process than after pickling batches to a pool
+    supports_multiprocessing = True
 
     def __call__(self, series: pd.Series) -> pd.Series:
         """
@@ -107,13 +101,15 @@ class PseudoReverseDecoyGenerator(BaseDecoyGenerator):
 
 
 class NearMassMutationDecoyGenerator(BaseDecoyGenerator):
+    supports_multiprocessing = False
+
     def __init__(
         self,
         seed: int = 0,
-        min_mass_delta: float = MIN_MASS_DELTA,
-        max_mass_delta: float = MAX_MASS_DELTA,
-        frozen_AAs: str = FROZEN_AAS,
-        excluded_mutations: tuple = EXCLUDED_MUTATIONS,
+        min_mass_delta: float = near_mass_mutation.MIN_MASS_DELTA,
+        max_mass_delta: float = near_mass_mutation.MAX_MASS_DELTA,
+        frozen_AAs: str = near_mass_mutation.FROZEN_AAS,
+        excluded_mutations: tuple = near_mass_mutation.EXCLUDED_MUTATIONS,
     ):
         """
         Decoy generator replacing one inner residue of the target by a residue of similar mass.
@@ -124,8 +120,13 @@ class NearMassMutationDecoyGenerator(BaseDecoyGenerator):
         `fit`), and the choice depends only on the seed and the sequence, so a sequence gets the
         same decoy in every batch and process.
 
+        A proline at the second-to-last position is never replaced, and no proline is placed there.
+
         Peptides without a replaceable inner residue get the DIA-NN mutation if they have at least
         4 residues, otherwise an empty sequence, which `SpecLibDecoy` drops.
+
+        The work is vectorised in `alphabase.spectral_library.near_mass_mutation`, and each unique
+        sequence is decoyed once.
 
         Parameters
         ----------
@@ -144,76 +145,55 @@ class NearMassMutationDecoyGenerator(BaseDecoyGenerator):
 
         excluded_mutations : tuple, optional
             Original and replacement residue pairs never drawn.
-            Defaults to I to L, L to I, N to D and Q to E.
+            Defaults to I to L, L to I, N to D, D to N, Q to E and E to Q.
         """
         self.seed = seed
         self.min_mass_delta = min_mass_delta
         self.max_mass_delta = max_mass_delta
         self.frozen_AAs = frozen_AAs
-        self.excluded_mutations = set(excluded_mutations)
+        self.excluded_mutations = tuple(excluded_mutations)
         self._fallback = DIANNDecoyGenerator()
-        # residue -> (replacement residues, their cumulative draw probabilities)
-        self._replacements = None
+        self._tables = None
 
     def fit(self, sequences: pd.Series) -> None:
         """Sets the replacement probabilities from the inner-residue composition of the targets."""
-        composition = Counter()
-        for sequence in sequences.unique():
-            composition.update(sequence[1:-1])
-
-        self._replacements = {}
-        for original in STANDARD_AAS:
-            if original in self.frozen_AAs:
-                continue
-            candidates = [
-                aa
-                for aa in STANDARD_AAS
-                if composition[aa] > 0
-                and aa not in self.frozen_AAs
-                and original + aa not in self.excluded_mutations
-                and self.min_mass_delta
-                < abs(AA_ASCII_MASS[ord(aa)] - AA_ASCII_MASS[ord(original)])
-                <= self.max_mass_delta
-            ]
-            if not candidates:
-                continue
-            weights = np.array([composition[aa] for aa in candidates], dtype=float)
-            self._replacements[original] = (
-                candidates,
-                np.cumsum(weights) / weights.sum(),
-            )
-
-    def _uniforms(self, sequence: str) -> tuple:
-        """Two uniform numbers in [0, 1) derived from the seed and the sequence only."""
-        digest = hashlib.blake2b(
-            f"{self.seed}:{sequence}".encode(), digest_size=2 * _UNIFORM_BYTES
-        ).digest()
-        scale = 2.0 ** (8 * _UNIFORM_BYTES)
-        return (
-            int.from_bytes(digest[:_UNIFORM_BYTES], "little") / scale,
-            int.from_bytes(digest[_UNIFORM_BYTES:], "little") / scale,
+        codes = near_mass_mutation.encode(pd.unique(sequences.to_numpy()))
+        self._tables = near_mass_mutation.build_replacement_tables(
+            near_mass_mutation.inner_composition(codes),
+            min_mass_delta=self.min_mass_delta,
+            max_mass_delta=self.max_mass_delta,
+            frozen_aas=self.frozen_AAs,
+            excluded_mutations=self.excluded_mutations,
         )
 
-    def _decoy(self, sequence: str) -> str:
-        if self._replacements is None:
+    def __call__(self, series: pd.Series) -> pd.Series:
+        if self._tables is None:
             raise RuntimeError("Call fit() with the target sequences before decoying.")
 
-        sites = [
-            i for i in range(1, len(sequence) - 1) if sequence[i] in self._replacements
-        ]
-        if not sites:
-            if len(sequence) >= MIN_FALLBACK_LENGTH:
-                return self._fallback._decoy(sequence)
-            return DROPPED_SEQUENCE
+        unique_index, unique_sequences = pd.factorize(series.to_numpy())
+        decoys = np.empty(len(unique_sequences), dtype=object)
+        for start in range(0, len(unique_sequences), _NEAR_MASS_CHUNK_SIZE):
+            chunk = slice(start, start + _NEAR_MASS_CHUNK_SIZE)
+            decoys[chunk] = self._decoy_unique(unique_sequences[chunk])
+        return pd.Series(decoys[unique_index], index=series.index, name=series.name)
 
-        site_draw, residue_draw = self._uniforms(sequence)
-        site = sites[int(site_draw * len(sites))]
-        candidates, cumulative = self._replacements[sequence[site]]
-        index = min(
-            int(np.searchsorted(cumulative, residue_draw, side="right")),
-            len(candidates) - 1,
+    def _decoy(self, sequence: str) -> str:
+        return self._decoy_unique(np.array([sequence], dtype=object))[0]
+
+    def _decoy_unique(self, sequences: np.ndarray) -> np.ndarray:
+        codes = near_mass_mutation.encode(sequences)
+        mutated, has_site = near_mass_mutation.mutate(
+            codes, near_mass_mutation.draw_uniforms(codes, self.seed), self._tables
         )
-        return sequence[:site] + candidates[index] + sequence[site + 1 :]
+        decoys = near_mass_mutation.decode(mutated).astype(object)
+        for row in np.flatnonzero(~has_site):
+            decoys[row] = self._decoy_without_site(sequences[row])
+        return decoys
+
+    def _decoy_without_site(self, sequence: str) -> str:
+        if len(sequence) >= MIN_FALLBACK_LENGTH:
+            return self._fallback._decoy(sequence)
+        return DROPPED_SEQUENCE
 
 
 class SpecLibDecoy(SpecLibBase):
@@ -313,7 +293,11 @@ class SpecLibDecoy(SpecLibBase):
         """
         self.generator.fit(self._precursor_df["sequence"])
 
-        if not multiprocessing or self._precursor_df.shape[0] < mp_batch_size:
+        if (
+            not multiprocessing
+            or not self.generator.supports_multiprocessing
+            or self._precursor_df.shape[0] < mp_batch_size
+        ):
             self._precursor_df["sequence"] = self.generator(
                 self._precursor_df["sequence"]
             )
@@ -335,20 +319,22 @@ class SpecLibDecoy(SpecLibBase):
     def _remove_target_seqs(self):
         """Drops decoys equal to a target up to I/L, which fragments cannot tell apart, and dropped sequences."""
         target_seqs = set(
-            _equate_isoleucine_leucine(self.target_lib._precursor_df.sequence)
+            _equate_isoleucine_leucine(
+                pd.unique(self.target_lib._precursor_df.sequence.to_numpy())
+            )
         )
-        decoy_seqs = self._precursor_df.sequence
+        decoy_index, decoy_seqs = pd.factorize(self._precursor_df.sequence.to_numpy())
+        drop_unique = _equate_isoleucine_leucine(decoy_seqs).isin(target_seqs) | (
+            decoy_seqs == DROPPED_SEQUENCE
+        )
         self._precursor_df.drop(
-            self._precursor_df.loc[
-                _equate_isoleucine_leucine(decoy_seqs).isin(target_seqs)
-                | (decoy_seqs == DROPPED_SEQUENCE)
-            ].index,
+            self._precursor_df.index[drop_unique.to_numpy()[decoy_index]],
             inplace=True,
         )
 
 
-def _equate_isoleucine_leucine(sequences: pd.Series) -> pd.Series:
-    return sequences.str.replace("I", "L", regex=False)
+def _equate_isoleucine_leucine(sequences: np.ndarray) -> pd.Series:
+    return pd.Series(sequences, dtype=object).str.replace("I", "L", regex=False)
 
 
 class SpecLibDecoyProvider:

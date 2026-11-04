@@ -1,40 +1,24 @@
-import numpy as np
 import pandas as pd
 import pytest
 
-from alphabase.constants.aa import AA_ASCII_MASS
 from alphabase.spectral_library.base import SpecLibBase
 from alphabase.spectral_library.decoy import (
     NearMassMutationDecoyGenerator,
     decoy_lib_provider,
 )
 
-STANDARD_AAS = "ACDEFGHIKLMNPQRSTVWY"
-FORBIDDEN_MUTATIONS = {("I", "L"), ("L", "I"), ("N", "D"), ("Q", "E")}
-MIN_MASS_DELTA = 0.05
-MAX_MASS_DELTA = 25.0
+TARGETS = ["PEPTIDEK", "LGANDQEWR", "SAMPLERFYK", "VHITGPR"]
 CHARGE = 2
 
 
-def _random_peptides(n: int, seed: int = 1) -> pd.Series:
-    rng = np.random.default_rng(seed)
-    lengths = rng.integers(7, 25, size=n)
-    return pd.Series(
-        [
-            "".join(rng.choice(list(STANDARD_AAS), size=length)) + "K"
-            for length in lengths
-        ]
-    )
-
-
-def _fitted_generator(sequences: pd.Series, **kwargs) -> NearMassMutationDecoyGenerator:
-    generator = NearMassMutationDecoyGenerator(**kwargs)
-    generator.fit(sequences)
+def _fitted_generator(targets: list, seed: int = 0) -> NearMassMutationDecoyGenerator:
+    generator = NearMassMutationDecoyGenerator(seed=seed)
+    generator.fit(pd.Series(targets))
     return generator
 
 
-def _mutations(target: str, decoy: str) -> list:
-    return [(i, a, b) for i, (a, b) in enumerate(zip(target, decoy)) if a != b]
+def _decoys(generator: NearMassMutationDecoyGenerator, sequences: list) -> list:
+    return list(generator(pd.Series(sequences)))
 
 
 def _target_lib(sequences: list) -> SpecLibBase:
@@ -51,102 +35,119 @@ def _target_lib(sequences: list) -> SpecLibBase:
     return lib
 
 
-def test_near_mass_decoy_replaces_one_inner_residue_within_mass_range():
+def test_near_mass_decoy_replaces_one_inner_residue_by_one_of_similar_mass():
     # given
-    targets = _random_peptides(500)
-    generator = _fitted_generator(targets)
+    generator = _fitted_generator(TARGETS)
 
     # when
-    decoys = generator(targets)
+    decoys = _decoys(generator, TARGETS)
 
-    # then
-    for target, decoy in zip(targets, decoys):
-        assert len(decoy) == len(target)
-        mutations = _mutations(target, decoy)
-        assert len(mutations) == 1
-        position, original, replacement = mutations[0]
-        assert 0 < position < len(target) - 1
-        mass_delta = abs(AA_ASCII_MASS[ord(replacement)] - AA_ASCII_MASS[ord(original)])
-        assert MIN_MASS_DELTA < mass_delta <= MAX_MASS_DELTA
+    # then I->D, Q->H, E->D and I->T, each within 25 Da
+    assert decoys == ["PEPTDDEK", "LGANDHEWR", "SAMPLDRFYK", "VHTTGPR"]
 
 
-def test_near_mass_decoy_never_touches_frozen_or_forbidden_residues():
+def test_near_mass_decoy_depends_on_seed():
     # given
-    targets = _random_peptides(2000)
-    generator = _fitted_generator(targets)
+    generator = _fitted_generator(TARGETS, seed=1)
 
     # when
-    decoys = generator(targets)
+    decoys = _decoys(generator, TARGETS)
 
     # then
-    for target, decoy in zip(targets, decoys):
-        ((_, original, replacement),) = _mutations(target, decoy)
-        assert original not in "CK"
-        assert replacement not in "CK"
-        assert (original, replacement) not in FORBIDDEN_MUTATIONS
-
-
-def test_near_mass_decoy_draws_only_residues_present_in_targets():
-    # given
-    targets = _random_peptides(500).str.replace("W", "F")
-    generator = _fitted_generator(targets)
-
-    # when
-    decoys = generator(targets)
-
-    # then
-    assert not decoys.str.contains("W").any()
-
-
-def test_near_mass_decoy_is_deterministic_and_seed_dependent():
-    # given
-    targets = _random_peptides(200)
-
-    # when
-    first = _fitted_generator(targets, seed=0)(targets)
-    repeated = _fitted_generator(targets, seed=0)(targets)
-    other_seed = _fitted_generator(targets, seed=1)(targets)
-
-    # then
-    pd.testing.assert_series_equal(first, repeated)
-    assert (first != other_seed).any()
+    assert decoys == ["PEPTDDEK", "LGAEDQEWR", "SAMPLEYFYK", "VHITAPR"]
 
 
 def test_near_mass_decoy_of_a_sequence_does_not_depend_on_the_batch():
     # given
-    targets = _random_peptides(200)
+    generator = _fitted_generator(TARGETS)
+
+    # when
+    decoys = _decoys(generator, ["SAMPLERFYK"])
+
+    # then same decoy as within the batch of all targets
+    assert decoys == ["SAMPLDRFYK"]
+
+
+@pytest.mark.parametrize(
+    "targets, sequence",
+    [
+        (["ACKR"], "GCR"),
+        (["ACKR"], "GKR"),
+        (["ALIR"], "GIR"),
+        (["ALIR"], "GLR"),
+        (["ANDR"], "GNR"),
+        (["ANDR"], "GDR"),
+        (["AQER"], "GQR"),
+        (["AQER"], "GER"),
+    ],
+)
+def test_near_mass_decoy_never_draws_frozen_residues_or_excluded_mutations(
+    targets, sequence
+):
+    # given the only other inner residue of the targets is frozen or an excluded replacement
     generator = _fitted_generator(targets)
 
     # when
-    whole = generator(targets)
-    in_batches = pd.concat([generator(targets.iloc[:50]), generator(targets.iloc[50:])])
+    decoys = _decoys(generator, [sequence])
+
+    # then nothing is replaceable and the short peptide is dropped
+    assert decoys == [""]
+
+
+def test_near_mass_decoy_draws_only_residues_present_in_targets():
+    # given F is the only replacement of Y among the inner residues of the targets
+    generator = _fitted_generator(["GAFR"])
+
+    # when
+    decoys = _decoys(generator, ["GYR"])
 
     # then
-    pd.testing.assert_series_equal(whole, in_batches)
+    assert decoys == ["GFR"]
+
+
+def test_near_mass_decoy_keeps_proline_at_second_to_last_position():
+    # given
+    generator = _fitted_generator(["GASPR"])
+
+    # when
+    decoys = _decoys(generator, ["GGPR"])
+
+    # then
+    assert decoys == ["GAPR"]
+
+
+def test_near_mass_decoy_does_not_place_proline_at_second_to_last_position():
+    # given A and P are the only replacements of S among the inner residues of the targets,
+    # and with this seed P would be drawn without the rule
+    generator = _fitted_generator(["GSPAK"], seed=1)
+
+    # when
+    decoys = _decoys(generator, ["GSK"])
+
+    # then
+    assert decoys == ["GAK"]
 
 
 def test_near_mass_decoy_falls_back_to_diann_mutation_without_replaceable_residue():
     # given
-    targets = _random_peptides(100)
-    generator = _fitted_generator(targets)
+    generator = _fitted_generator(TARGETS)
 
     # when
-    decoy = generator(pd.Series(["ACKCR"])).iloc[0]
+    decoys = _decoys(generator, ["ACKCR"])
 
     # then
-    assert decoy == "ASKSR"
+    assert decoys == ["ASKSR"]
 
 
 def test_near_mass_decoy_drops_short_peptide_without_replaceable_residue():
     # given
-    targets = _random_peptides(100)
-    generator = _fitted_generator(targets)
+    generator = _fitted_generator(TARGETS)
 
     # when
-    decoy = generator(pd.Series(["ACR"])).iloc[0]
+    decoys = _decoys(generator, ["ACR"])
 
     # then
-    assert decoy == ""
+    assert decoys == [""]
 
 
 def test_near_mass_decoy_requires_fit():
@@ -166,17 +167,13 @@ def test_decoy_lib_drops_decoys_equal_to_a_target_up_to_isoleucine_leucine():
     # when
     decoy_lib.decoy_sequence(multiprocessing=False)
 
-    # then
-    assert "GALR" not in decoy_lib.precursor_df.sequence.values
-    assert "EDITPEPK" in decoy_lib.precursor_df.sequence.values
+    # then GALR and IAGR equal GAIR and LAGR up to I/L
+    assert list(decoy_lib.precursor_df.sequence) == ["EDITPEPK"]
 
 
 def test_near_mass_decoy_lib_recomputes_precursor_mz():
     # given
-    target_lib = _target_lib(list(_random_peptides(50)))
-    # carried into the decoy library, as calc_precursor_mz may reorder rows
-    target_lib._precursor_df["target_sequence"] = target_lib.precursor_df.sequence
-    target_lib._precursor_df["target_mz"] = target_lib.precursor_df.precursor_mz
+    target_lib = _target_lib(TARGETS)
     decoy_lib = decoy_lib_provider.get_decoy_lib("near_mass_mutation", target_lib)
 
     # when
@@ -184,26 +181,29 @@ def test_near_mass_decoy_lib_recomputes_precursor_mz():
     decoy_lib.calc_precursor_mz()
 
     # then
-    assert len(decoy_lib.precursor_df) > 0
-    for row in decoy_lib.precursor_df.itertuples():
-        ((_, original, replacement),) = _mutations(row.target_sequence, row.sequence)
-        mass_delta = AA_ASCII_MASS[ord(replacement)] - AA_ASCII_MASS[ord(original)]
-        assert row.precursor_mz == pytest.approx(
-            row.target_mz + mass_delta / CHARGE, abs=1e-6
-        )
+    assert list(decoy_lib.precursor_df.sequence) == [
+        "VHTTGPR",
+        "PEPTDDEK",
+        "LGANDHEWR",
+        "SAMPLDRFYK",
+    ]
+    assert list(decoy_lib.precursor_df.precursor_mz) == pytest.approx(
+        [384.211569, 465.706180, 549.259779, 614.313166]
+    )
 
 
-def test_near_mass_decoy_lib_multiprocessing_matches_single_process():
+def test_near_mass_decoy_lib_with_multiprocessing_matches_single_process():
     # given
-    target_lib = _target_lib(list(_random_peptides(40)))
-    single = decoy_lib_provider.get_decoy_lib("near_mass_mutation", target_lib)
-    parallel = decoy_lib_provider.get_decoy_lib("near_mass_mutation", target_lib)
+    target_lib = _target_lib(TARGETS)
+    decoy_lib = decoy_lib_provider.get_decoy_lib("near_mass_mutation", target_lib)
 
     # when
-    single.decoy_sequence(multiprocessing=False)
-    parallel.decoy_sequence(multiprocessing=True, mp_batch_size=10, mp_process_num=2)
+    decoy_lib.decoy_sequence(multiprocessing=True, mp_batch_size=2, mp_process_num=2)
 
     # then
-    pd.testing.assert_series_equal(
-        single.precursor_df.sequence, parallel.precursor_df.sequence
-    )
+    assert list(decoy_lib.precursor_df.sequence) == [
+        "VHTTGPR",
+        "PEPTDDEK",
+        "LGANDHEWR",
+        "SAMPLDRFYK",
+    ]
