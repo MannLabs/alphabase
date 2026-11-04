@@ -9,8 +9,8 @@ from alphabase.constants.aa import AA_ASCII_MASS
 STANDARD_AAS = "ACDEFGHIKLMNPQRSTVWY"
 # These mutations are excluded because I and L give identical fragments, and N/D and Q/E mimic deamidation.
 EXCLUDED_MUTATIONS = ("IL", "LI", "ND", "DN", "QE", "EQ")
-# These residues are frozen because C carries fixed labels and K defines the cleavage site.
-FROZEN_AAS = "CK"
+# These residues are frozen because C carries fixed labels and K and R define the cleavage site.
+FROZEN_AAS = "CKR"
 # A proline is frozen at the second-to-last position because it shapes fragmentation there.
 PENULTIMATE_FROZEN_AAS = "P"
 MIN_MASS_DELTA = 0.05

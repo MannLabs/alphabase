@@ -208,7 +208,7 @@ def test_near_mass_decoy_depends_on_seed():
     decoys = _decoys(generator, TARGETS)
 
     # then
-    assert decoys == ["PEPTDDEK", "LGAEDQEWR", "SAMPLEYFYK", "VHITAPR"]
+    assert decoys == ["PEPTDDEK", "LGAEDQEWR", "SAMPLLRFYK", "VHITAPR"]
 
 
 def test_near_mass_decoy_of_a_sequence_does_not_depend_on_the_batch():
@@ -227,6 +227,8 @@ def test_near_mass_decoy_of_a_sequence_does_not_depend_on_the_batch():
     [
         (["ACKR"], "GCR"),
         (["ACKR"], "GKR"),
+        (["ARR"], "GRR"),
+        (["ARR"], "GFR"),
         (["ALIR"], "GIR"),
         (["ALIR"], "GLR"),
         (["ANDR"], "GNR"),

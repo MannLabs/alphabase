@@ -69,6 +69,8 @@ def test_inner_composition_counts_all_but_terminal_residues():
         (near_mass_mutation.INNER_TABLE, "D", "EHILMPQTV"),
         (near_mass_mutation.INNER_TABLE, "P", "DILNSTV"),
         (near_mass_mutation.INNER_TABLE, "C", ""),
+        (near_mass_mutation.INNER_TABLE, "R", ""),
+        (near_mass_mutation.INNER_TABLE, "H", "DEFILMNQ"),
         (near_mass_mutation.PENULTIMATE_TABLE, "S", "ATV"),
         (near_mass_mutation.PENULTIMATE_TABLE, "D", "EHILMQTV"),
         (near_mass_mutation.PENULTIMATE_TABLE, "P", ""),

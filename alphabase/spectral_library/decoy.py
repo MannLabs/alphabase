@@ -190,7 +190,7 @@ class NearMassMutationDecoyGenerator(BaseDecoyGenerator):
             Replacements must differ by at most this mass (Da). Defaults to 25.
 
         frozen_AAs : str, optional
-            Residues never replaced nor drawn. Defaults to 'CK'.
+            Residues never replaced nor drawn. Defaults to 'CKR'.
 
         excluded_mutations : tuple, optional
             Original and replacement residue pairs never drawn.
