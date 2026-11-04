@@ -77,6 +77,55 @@ class DIANNDecoyGenerator(BaseDecoyGenerator):
         )
 
 
+class DIANNKeepProlineDecoyGenerator(DIANNDecoyGenerator):
+    """
+    Decoy of `DIANNDecoyGenerator` that keeps a proline before the C-terminal
+    residue and mutates the residue before it instead.
+
+    Sequences shorter than 5 residues get the parent's decoy, because
+    moving the mutation inwards would hit the N-terminal mutation.
+    """
+
+    def _decoy(self, sequence: str) -> str:
+        if len(sequence) < 5 or sequence[-2] != "P":
+            return super()._decoy(sequence)
+        return (
+            sequence[0]
+            + self._mutate(sequence[1])
+            + sequence[2:-3]
+            + self._mutate(sequence[-3])
+            + sequence[-2:]
+        )
+
+    def _mutate(self, amino_acid: str) -> str:
+        return self.mutated_AAs[self.raw_AAs.index(amino_acid)]
+
+
+class DIANNInnerDecoyGenerator(DIANNKeepProlineDecoyGenerator):
+    """
+    Decoy that applies the mutation map of `DIANNDecoyGenerator` to the third
+    and the third-to-last residue instead of the second and the second-to-last.
+
+    A proline at either mutated position moves that mutation one residue
+    inwards, so the decoy keeps the proline. Sequences shorter than 7 residues
+    get the parent's decoy, because the two mutations could fall on the same
+    residue.
+    """
+
+    def _decoy(self, sequence: str) -> str:
+        if len(sequence) < 7:
+            return super()._decoy(sequence)
+        first, second = 2, len(sequence) - 3
+        if sequence[second] == "P":
+            second -= 1
+        if sequence[first] == "P" and first + 1 < second:
+            first += 1
+        residues = list(sequence)
+        residues[first] = self._mutate(sequence[first])
+        residues[second] = self._mutate(sequence[second])
+        return "".join(residues)
+
+
 class PseudoReverseDecoyGenerator(BaseDecoyGenerator):
     def __init__(self, fix_C_term: bool = True):
         """
@@ -385,4 +434,6 @@ register and get different types of decoy methods.
 
 decoy_lib_provider.register("pseudo_reverse", PseudoReverseDecoyGenerator)
 decoy_lib_provider.register("diann", DIANNDecoyGenerator)
+decoy_lib_provider.register("diann_keep_proline", DIANNKeepProlineDecoyGenerator)
+decoy_lib_provider.register("diann_inner", DIANNInnerDecoyGenerator)
 decoy_lib_provider.register("near_mass_mutation", NearMassMutationDecoyGenerator)
