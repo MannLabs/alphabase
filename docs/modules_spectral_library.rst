@@ -10,4 +10,5 @@ alphabase.spectral_library
    spectral_library/reader
    spectral_library/peaks_reader
    spectral_library/translate
+   spectral_library/translate_core
    spectral_library/translate_diann
