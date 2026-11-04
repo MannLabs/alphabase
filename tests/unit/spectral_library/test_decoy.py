@@ -315,16 +315,28 @@ def test_near_mass_decoy_requires_fit():
         generator(pd.Series(["PEPTIDEK"]))
 
 
-def test_decoy_lib_drops_decoys_equal_to_a_target_up_to_isoleucine_leucine():
+def test_pseudo_reverse_decoy_lib_drops_only_decoys_identical_to_a_target():
     # given
-    target_lib = _target_lib(["LAGR", "GAIR", "PEPTIDEK"])
+    target_lib = _target_lib(["LAGR", "GAIR", "AGAR", "PEPTIDEK"])
     decoy_lib = decoy_lib_provider.get_decoy_lib("pseudo_reverse", target_lib)
 
     # when
     decoy_lib.decoy_sequence(multiprocessing=False)
 
-    # then GALR and IAGR equal GAIR and LAGR up to I/L
-    assert list(decoy_lib.precursor_df.sequence) == ["EDITPEPK"]
+    # then AGAR reverses to itself, while GALR and IAGR differ from GAIR and LAGR by I/L
+    assert list(decoy_lib.precursor_df.sequence) == ["GALR", "IAGR", "EDITPEPK"]
+
+
+def test_near_mass_decoy_lib_drops_decoys_equal_to_a_target_up_to_isoleucine_leucine():
+    # given
+    target_lib = _target_lib(["GSLR", "GAIR", "PEPTIDEK"])
+    decoy_lib = decoy_lib_provider.get_decoy_lib("near_mass_mutation", target_lib)
+
+    # when
+    decoy_lib.decoy_sequence(multiprocessing=False)
+
+    # then the decoy GSIR of GAIR equals the target GSLR up to I/L
+    assert list(decoy_lib.precursor_df.sequence) == ["GTLR", "PEPTDDEK"]
 
 
 def test_near_mass_decoy_lib_recomputes_precursor_mz():

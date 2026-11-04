@@ -27,6 +27,8 @@ class BaseDecoyGenerator:
     """
 
     supports_multiprocessing = True
+    # Older schemes keep decoys that differ from a target only by I/L, to preserve their behaviour.
+    drops_isoleucine_leucine_equivalents = False
 
     def __call__(self, series: pd.Series) -> pd.Series:
         """
@@ -151,6 +153,8 @@ class PseudoReverseDecoyGenerator(BaseDecoyGenerator):
 class NearMassMutationDecoyGenerator(BaseDecoyGenerator):
     # This generator is vectorised, so pickling batches to a pool costs more than it saves.
     supports_multiprocessing = False
+    # A single mutation can make a decoy equal another target up to I/L, which fragments cannot tell apart.
+    drops_isoleucine_leucine_equivalents = True
 
     def __init__(
         self,
@@ -366,24 +370,26 @@ class SpecLibDecoy(SpecLibBase):
         self._remove_target_seqs()
 
     def _remove_target_seqs(self):
-        """Drops empty decoys and decoys equal to a target up to I/L, which fragments cannot tell apart."""
-        target_seqs = set(
-            _equate_isoleucine_leucine(
-                pd.unique(self.target_lib._precursor_df.sequence.to_numpy())
-            )
-        )
+        """Drops empty decoys and decoys equal to a target, up to I/L if the generator asks for it."""
+        target_seqs = pd.unique(self.target_lib._precursor_df.sequence.to_numpy())
         decoy_index, decoy_seqs = pd.factorize(self._precursor_df.sequence.to_numpy())
-        drop_unique = _equate_isoleucine_leucine(decoy_seqs).isin(target_seqs) | (
+        comparable_decoy_seqs = decoy_seqs
+        if self.generator.drops_isoleucine_leucine_equivalents:
+            target_seqs = _equate_isoleucine_leucine(target_seqs)
+            comparable_decoy_seqs = _equate_isoleucine_leucine(decoy_seqs)
+
+        drop_unique = pd.Series(comparable_decoy_seqs).isin(target_seqs).to_numpy() | (
             decoy_seqs == DROPPED_SEQUENCE
         )
         self._precursor_df.drop(
-            self._precursor_df.index[drop_unique.to_numpy()[decoy_index]],
-            inplace=True,
+            self._precursor_df.index[drop_unique[decoy_index]], inplace=True
         )
 
 
-def _equate_isoleucine_leucine(sequences: np.ndarray) -> pd.Series:
-    return pd.Series(sequences, dtype=object).str.replace("I", "L", regex=False)
+def _equate_isoleucine_leucine(sequences: np.ndarray) -> np.ndarray:
+    return (
+        pd.Series(sequences, dtype=object).str.replace("I", "L", regex=False).to_numpy()
+    )
 
 
 class SpecLibDecoyProvider:
