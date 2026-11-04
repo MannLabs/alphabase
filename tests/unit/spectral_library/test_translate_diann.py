@@ -137,3 +137,110 @@ def test_translate_to_parquet_roundtrip(tmp_path) -> None:
 
     assert len(reader.precursor_df) == n_precursors
     assert _keys(reader.precursor_df) == _keys(speclib.precursor_df)
+
+
+@pytest.mark.parametrize(
+    ("present", "expected"),
+    [
+        (["irt_pred", "rt_pred", "rt", "irt", "rt_norm"], "irt_pred"),
+        (["rt_pred", "rt", "irt", "rt_norm"], "rt_pred"),
+        (["rt", "irt", "rt_norm"], "rt"),
+        (["irt", "rt_norm"], "irt"),
+        (["rt_norm"], "rt_norm"),
+    ],
+)
+def test_speclib_to_diann_df_rt_column_precedence(present: list, expected: str) -> None:
+    """RT is taken from the first present of irt_pred, rt_pred, rt, irt, rt_norm."""
+    speclib = _build_speclib()
+    # give each candidate column a distinct value, so `RT` identifies its source
+    values = {name: float(i + 1) for i, name in enumerate(present)}
+    speclib._precursor_df = speclib._precursor_df.drop(columns=["rt"]).assign(**values)
+
+    df = speclib_to_diann_df(
+        speclib, min_frag_mz=0, max_frag_mz=0, min_frag_intensity=0.0, verbose=False
+    )
+    assert df["RT"].unique().tolist() == [values[expected]]
+
+
+def test_speclib_to_diann_df_rejects_rt_norm_pred() -> None:
+    """CHARACTERIZATION (bug): `rt_norm_pred` is not a recognised RT column.
+
+    peptdeep writes it alongside `rt_pred`, so a library carrying only
+    `rt_norm_pred` is rejected. A later commit adds it to the candidates.
+    """
+    speclib = _build_speclib()
+    speclib._precursor_df = speclib._precursor_df.rename(columns={"rt": "rt_norm_pred"})
+
+    with pytest.raises(ValueError, match="must contain a retention time column"):
+        speclib_to_diann_df(
+            speclib, min_frag_mz=0, max_frag_mz=0, min_frag_intensity=0.0, verbose=False
+        )
+
+
+def test_speclib_to_diann_df_flags_group_by_precursor_id() -> None:
+    """CHARACTERIZATION (bug): duplicate precursors share one base-peak flag.
+
+    `Flags` marks the base peak by grouping on `Precursor.Id`, so a library
+    holding the same precursor twice -- which `SpecLibBase.append` produces --
+    gets one flag for the pair instead of one per precursor row. A later commit
+    groups by precursor row instead.
+    """
+    speclib = _build_speclib()
+    speclib.append(_build_speclib())
+    n_precursors = len(speclib.precursor_df)
+
+    df = speclib_to_diann_df(
+        speclib, min_frag_mz=0, max_frag_mz=0, min_frag_intensity=0.0, verbose=False
+    )
+
+    # every precursor row is exported, but only the distinct ids get a base peak
+    assert df["Precursor.Id"].nunique() == n_precursors // 2
+    assert int((df["Flags"] & (1 << 4) > 0).sum()) == n_precursors // 2
+
+
+def test_speclib_to_diann_df_modifies_the_source_library() -> None:
+    """CHARACTERIZATION (bug): the export edits the library it is handed.
+
+    The m/z window is applied by zeroing intensities *in the library*, and
+    `precursor_mz` is computed onto the caller's precursor frame. A later commit
+    filters on a copy instead.
+    """
+    speclib = _build_speclib()
+    intensities_before = speclib.fragment_intensity_df.to_numpy(copy=True)
+    columns_before = set(speclib.precursor_df.columns)
+
+    speclib_to_diann_df(speclib, verbose=False)
+
+    zeroed = (intensities_before != 0) & (speclib.fragment_intensity_df.to_numpy() == 0)
+    assert zeroed.sum() > 0
+    assert set(speclib.precursor_df.columns) - columns_before == {"precursor_mz"}
+
+
+def test_translate_to_parquet_modifies_the_source_library(tmp_path) -> None:
+    """CHARACTERIZATION (bug): the streaming export edits the library too."""
+    speclib = _build_speclib()
+    intensities_before = speclib.fragment_intensity_df.to_numpy(copy=True)
+
+    translate_to_parquet(speclib, str(tmp_path / "lib.parquet"))
+
+    zeroed = (intensities_before != 0) & (speclib.fragment_intensity_df.to_numpy() == 0)
+    assert zeroed.sum() > 0
+
+
+def test_translate_to_parquet_batching_does_not_change_the_output(tmp_path) -> None:
+    """Batch size affects only memory use, not the exported rows."""
+    frames = []
+    for batch_size in (100000, 2, 1):
+        path = str(tmp_path / f"lib_{batch_size}.parquet")
+        translate_to_parquet(
+            _build_speclib(),
+            path,
+            min_frag_mz=0,
+            max_frag_mz=0,
+            min_frag_intensity=0.0,
+            batch_size=batch_size,
+        )
+        frames.append(pd.read_parquet(path))
+
+    for frame in frames[1:]:
+        pd.testing.assert_frame_equal(frames[0], frame)
