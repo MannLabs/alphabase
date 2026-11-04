@@ -1,4 +1,4 @@
-"""Near-mass mutation of peptides on zero-padded uint8 code arrays, avoiding a Python loop per sequence."""
+"""Near-mass mutation of peptides on zero-padded uint8 code arrays, which avoids a Python loop per sequence."""
 
 from typing import NamedTuple
 
@@ -7,20 +7,20 @@ import numpy as np
 from alphabase.constants.aa import AA_ASCII_MASS
 
 STANDARD_AAS = "ACDEFGHIKLMNPQRSTVWY"
-# I/L look identical to fragments, N/D and Q/E mimic deamidation
+# These mutations are excluded because I and L give identical fragments, and N/D and Q/E mimic deamidation.
 EXCLUDED_MUTATIONS = ("IL", "LI", "ND", "DN", "QE", "EQ")
-# C carries fixed labels, K defines the cleavage site
+# These residues are frozen because C carries fixed labels and K defines the cleavage site.
 FROZEN_AAS = "CK"
-# a proline before the C-terminal residue shapes fragmentation
+# A proline is frozen at the second-to-last position because it shapes fragmentation there.
 PENULTIMATE_FROZEN_AAS = "P"
 MIN_MASS_DELTA = 0.05
 MAX_MASS_DELTA = 25.0
 
 INNER_TABLE = 0
 PENULTIMATE_TABLE = 1
-# any uint8 code indexes the tables, so unknown residues have no candidates
+# The tables cover every uint8 code, so unknown residues index them and find no candidates.
 _N_CODES = 256
-# above any draw, so padding slots are never picked
+# This value lies above any draw, so padding slots are never picked.
 _NO_CANDIDATE = 2.0
 
 _HASH_BASE = np.uint64(0x100000001B3)
@@ -142,7 +142,7 @@ def _build_replacement_table(
     counts = composition[aas]
     frozen = np.isin(aas, _codes_of(frozen_aas))
 
-    # original x replacement
+    # Rows are the original residues and columns the replacements.
     mass_deltas = np.abs(masses[None, :] - masses[:, None])
     allowed = (
         (min_mass_delta < mass_deltas)
@@ -154,7 +154,7 @@ def _build_replacement_table(
     for original, replacement in excluded_mutations:
         allowed[STANDARD_AAS.index(original), STANDARD_AAS.index(replacement)] = False
 
-    # allowed candidates first, so a draw indexes only the first n_candidates slots
+    # The allowed candidates come first, so a draw only indexes the first n_candidates slots.
     order = np.argsort(~allowed, axis=1, kind="stable")
     sorted_allowed = np.take_along_axis(allowed, order, axis=1)
     weights = np.where(sorted_allowed, counts[order], 0).astype(np.float64)

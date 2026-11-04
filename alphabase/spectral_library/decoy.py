@@ -10,7 +10,7 @@ from alphabase.spectral_library.base import SpecLibBase
 
 MIN_FALLBACK_LENGTH = 4
 DROPPED_SEQUENCE = ""
-# caps memory of the padded code arrays
+# The chunk size caps the memory of the padded code arrays.
 _NEAR_MASS_CHUNK_SIZE = 200_000
 
 
@@ -100,7 +100,7 @@ class PseudoReverseDecoyGenerator(BaseDecoyGenerator):
 
 
 class NearMassMutationDecoyGenerator(BaseDecoyGenerator):
-    # vectorised, so pickling batches to a pool costs more than it saves
+    # This generator is vectorised, so pickling batches to a pool costs more than it saves.
     supports_multiprocessing = False
 
     def __init__(
@@ -317,7 +317,7 @@ class SpecLibDecoy(SpecLibBase):
         self._remove_target_seqs()
 
     def _remove_target_seqs(self):
-        """Drops dropped sequences and decoys equal to a target up to I/L, which fragments cannot tell apart."""
+        """Drops empty decoys and decoys equal to a target up to I/L, which fragments cannot tell apart."""
         target_seqs = set(
             _equate_isoleucine_leucine(
                 pd.unique(self.target_lib._precursor_df.sequence.to_numpy())
