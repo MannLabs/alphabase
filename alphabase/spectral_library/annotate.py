@@ -8,7 +8,6 @@ import pandas as pd
 from alphabase.numba_wrapper import numba_njit
 from alphabase.peptide.fragment import (
     UNANNOTATED_TYPE,
-    create_dense_matrices,
     create_fragment_mz_dataframe,
     filter_valid_charged_frag_types,
     flatten_fragments,
@@ -393,23 +392,11 @@ def add_dense_lib(
     outlib_flat = annotate_fragments_flat(
         outlib_flat,
         raw_fragment_df,
-        mass_error_ppm=20,
     )
 
     outlib_flat.charged_frag_types = valid_charged_frag_types
 
-    df_collection, frag_start_idx, frag_stop_idx = create_dense_matrices(
-        outlib_flat.precursor_df,
-        outlib_flat.fragment_df,
-        valid_charged_frag_types,
-        flat_columns=["intensity", "error"],
-    )
-
-    outlib_flat._fragment_mz_df = df_collection["mz"]  # noqa: SLF001
-    outlib_flat._fragment_intensity_df = df_collection["intensity"]  # noqa: SLF001
-
-    outlib_flat.precursor_df["frag_start_idx"] = frag_start_idx
-    outlib_flat.precursor_df["frag_stop_idx"] = frag_stop_idx
+    outlib_flat.calc_dense_fragments()
 
     apply_precursor_metrics(outlib_flat)
 
