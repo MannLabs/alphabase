@@ -20,7 +20,8 @@ INNER_TABLE = 0
 PENULTIMATE_TABLE = 1
 # The tables cover every uint8 code, so unknown residues index them and find no candidates.
 _N_CODES = 256
-# This value lies above any draw, so padding slots are never picked.
+# Fills the cumulative probabilities after the last candidate. It is above any draw in [0, 1),
+# so `mutate` never counts those slots.
 _NO_CANDIDATE = 2.0
 
 _HASH_BASE = np.uint64(0x100000001B3)
