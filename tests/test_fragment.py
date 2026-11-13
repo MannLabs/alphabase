@@ -387,9 +387,11 @@ def test_create_dense_matrices_with_frag_start_idx():
     np.testing.assert_array_equal(frag_stop_idx, [2, 4, 6])
 
 
-def test_speclib_base_to_flat_conversion():
+@pytest.mark.parametrize("reverse_dense_columns", [False, True])
+def test_speclib_base_to_flat_conversion(reverse_dense_columns):
     """Test conversion from SpecLibBase to SpecLibFlat and back to dense matrices,
-    including handling of missing fragment types"""
+    including handling of missing fragment types and dense columns that are not in
+    sorted order"""
 
     # Create test precursor data
     repeat = 10
@@ -436,10 +438,13 @@ def test_speclib_base_to_flat_conversion():
 
     # Convert back to dense matrices, including a and x ions that weren't in original data
     dense_frag_types = ["a", "b", "x", "y"]
+    dense_charged_frag_types = get_charged_frag_types(dense_frag_types, 2)
+    if reverse_dense_columns:
+        dense_charged_frag_types = dense_charged_frag_types[::-1]
     df_collection, frag_start_idx, frag_stop_idx = create_dense_matrices(
         speclib_flat.precursor_df,
         speclib_flat.fragment_df,
-        get_charged_frag_types(dense_frag_types, 2),
+        dense_charged_frag_types,
         flat_columns=["intensity", "mz_old"],
     )
 
