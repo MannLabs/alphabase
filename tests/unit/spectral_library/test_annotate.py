@@ -4,8 +4,10 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from alphabase.peptide.fragment import flatten_fragments
 from alphabase.spectral_library.annotate import (
     add_dense_lib,
+    annotate_fragments_dense,
     annotate_fragments_flat,
     annotate_precursors_flat,
     annotate_spectrum,
@@ -15,6 +17,7 @@ from alphabase.spectral_library.flat import SpecLibFlat
 from alphabase.spectral_library.metrics import (
     _mass_accuracy_metric,
     _pif_metric,
+    apply_precursor_metrics,
     calculate_pif,
 )
 
@@ -382,6 +385,94 @@ def test_add_dense_lib(mock_speclib_annotation_flat):
     )
     assert np.all(outlib.precursor_df["sequence_coverage"] == [1.0, 1.0])
     assert np.allclose(outlib.precursor_df["pif"], 1.0)
+
+
+@pytest.fixture
+def shared_spectrum_library():
+    """Two precursors that share one spectrum, and a precursor without peaks."""
+    speclib = SpecLibBase(charged_frag_types=["b_z1", "b_z2", "y_z1", "y_z2"])
+    speclib.precursor_df = pd.DataFrame(
+        {
+            "sequence": ["PEPTIDEK", "PEPTIDKE", "SEQUENCE"],
+            "mods": ["", "", ""],
+            "mod_sites": ["", "", ""],
+            "charge": [2, 2, 2],
+        }
+    )
+    speclib.calc_fragment_mz_df()
+    fragment_mz = speclib.fragment_mz_df
+    b1, y1, b2_z2 = (
+        fragment_mz["b_z1"].iloc[0],
+        fragment_mz["y_z1"].iloc[6],
+        fragment_mz["b_z2"].iloc[1],
+    )
+    # The second peak matches b1 as well; a dense cell keeps the last matching peak.
+    peaks = pd.DataFrame(
+        {
+            "mz": [b1, b1 * (1 + 5e-6), y1, b2_z2, 1234.5678],
+            "intensity": np.array([100.0, 20.0, 60.0, 30.0, 10.0], dtype=np.float32),
+        }
+    )
+    speclib.precursor_df["peak_start_idx"] = [0, 0, len(peaks)]
+    speclib.precursor_df["peak_stop_idx"] = [len(peaks), len(peaks), len(peaks)]
+    return speclib, peaks
+
+
+def _annotate_through_flat_fragments(
+    speclib: SpecLibBase, peaks: pd.DataFrame
+) -> SpecLibFlat:
+    flatlib = SpecLibFlat(charged_frag_types=speclib.charged_frag_types)
+    flatlib._precursor_df, flatlib._fragment_df = flatten_fragments(
+        speclib.precursor_df.copy(), speclib.fragment_mz_df, pd.DataFrame()
+    )
+    flatlib = annotate_fragments_flat(flatlib, peaks)
+    flatlib.charged_frag_types = speclib.charged_frag_types
+    flatlib.calc_dense_fragments()
+    return apply_precursor_metrics(flatlib)
+
+
+def test_annotate_fragments_dense_matches_flat_annotation(shared_spectrum_library):
+    speclib, peaks = shared_spectrum_library
+
+    dense = annotate_fragments_dense(speclib, peaks)
+    flat = _annotate_through_flat_fragments(speclib, peaks)
+
+    for dense_row, flat_row in zip(
+        dense.precursor_df.itertuples(), flat.precursor_df.itertuples()
+    ):
+        np.testing.assert_array_equal(
+            dense.fragment_intensity_df.to_numpy()[
+                dense_row.frag_start_idx : dense_row.frag_stop_idx
+            ],
+            flat.fragment_intensity_df.to_numpy()[
+                flat_row.frag_start_idx : flat_row.frag_stop_idx
+            ],
+        )
+    metrics = [
+        "sequence_coverage",
+        "sequence_gini",
+        "normalized_count",
+        "mass_accuracy",
+    ]
+    pd.testing.assert_frame_equal(
+        dense.precursor_df[metrics], flat.precursor_df[metrics], check_dtype=False
+    )
+    np.testing.assert_allclose(
+        dense.precursor_df["pif"], flat.precursor_df["pif"], rtol=1e-6
+    )
+    # PEPTIDKE shares the b ions of PEPTIDEK but not its y1 peak.
+    assert dense.precursor_df["pif"].tolist() == pytest.approx(
+        [210 / 220, 150 / 220, 0.0]
+    )
+    assert dense.fragment_intensity_df["b_z1"].iloc[0] == 20.0
+    assert dense.fragment_mz_df is speclib.fragment_mz_df
+
+
+def test_annotate_fragments_dense_missing_peak_ranges(shared_spectrum_library):
+    speclib, peaks = shared_spectrum_library
+    speclib.precursor_df = speclib.precursor_df.drop(columns=["peak_start_idx"])
+    with pytest.raises(ValueError, match="peak_start_idx"):
+        annotate_fragments_dense(speclib, peaks)
 
 
 def test_mass_accuracy_metric_normal_case():

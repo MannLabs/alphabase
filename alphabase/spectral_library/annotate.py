@@ -5,7 +5,8 @@ from typing import Union
 import numpy as np
 import pandas as pd
 
-from alphabase.numba_wrapper import numba_njit
+from alphabase.constants._const import PEAK_INTENSITY_DTYPE
+from alphabase.numba_wrapper import numba_njit, numba_prange
 from alphabase.peptide.fragment import (
     UNANNOTATED_TYPE,
     create_dense_matrices,
@@ -14,8 +15,12 @@ from alphabase.peptide.fragment import (
     flatten_fragments,
     init_fragment_by_precursor_dataframe,
 )
+from alphabase.spectral_library.base import SpecLibBase
 from alphabase.spectral_library.flat import SpecLibFlat
-from alphabase.spectral_library.metrics import apply_precursor_metrics
+from alphabase.spectral_library.metrics import (
+    apply_dense_precursor_metrics,
+    apply_precursor_metrics,
+)
 
 REQUIRED_PSM_COLUMNS = [
     "sequence",
@@ -213,6 +218,70 @@ def annotate_fragments_flat(
 
 
 @numba_njit
+def _match_peaks(
+    spectrum_mz: np.ndarray,
+    fragment_mz: np.ndarray,
+    mass_error_ppm: float,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Match each observed peak to the closest theoretical fragment within the tolerance.
+
+    Parameters
+    ----------
+    spectrum_mz : np.ndarray
+        M/Z values of the observed spectrum peaks. Shape: (n_peaks,)
+    fragment_mz : np.ndarray
+        M/Z values of the theoretical fragments. Shape: (n_fragments,)
+    mass_error_ppm : float
+        Mass error tolerance in parts per million.
+
+    Returns
+    -------
+    tuple[np.ndarray, np.ndarray]
+        For each peak, the index of its fragment in ``fragment_mz`` (-1 without a
+        match) and the mass error in ppm (``np.inf`` without a match). Shape: (n_peaks,)
+
+    """
+    n_peaks = len(spectrum_mz)
+    matched_fragment = np.full(n_peaks, -1, dtype=np.int64)
+    matched_error = np.full(n_peaks, np.inf, dtype=np.float32)
+
+    sort_idx = np.argsort(fragment_mz)
+    fragment_mz_sorted = fragment_mz[sort_idx]
+
+    for i, mz in enumerate(spectrum_mz):
+        # Find the index of the closest theoretical fragment
+        idx = np.searchsorted(fragment_mz_sorted, mz)
+
+        # Check the error for this index and the previous one (if it exists)
+        error = np.inf
+        best_idx = -1
+
+        if idx < len(fragment_mz_sorted):
+            error_right = (
+                abs(mz - fragment_mz_sorted[idx]) / fragment_mz_sorted[idx] * 1e6
+            )
+            if error_right <= mass_error_ppm:
+                error = error_right
+                best_idx = idx
+
+        if idx > 0:
+            error_left = (
+                abs(mz - fragment_mz_sorted[idx - 1])
+                / fragment_mz_sorted[idx - 1]
+                * 1e6
+            )
+            if error_left <= mass_error_ppm and error_left < error:
+                error = error_left
+                best_idx = idx - 1
+
+        if best_idx != -1:
+            matched_fragment[i] = sort_idx[best_idx]
+            matched_error[i] = error
+
+    return matched_fragment, matched_error
+
+
+@numba_njit
 def annotate_spectrum(  # noqa: PLR0913
     spectrum_mz: np.ndarray,
     fragment_mz: np.ndarray,
@@ -263,56 +332,25 @@ def annotate_spectrum(  # noqa: PLR0913
         or ``np.inf`` (for the float array).
 
     """
+    matched_fragment, annotated_error = _match_peaks(
+        spectrum_mz, fragment_mz, mass_error_ppm
+    )
+
     n_peaks = len(spectrum_mz)
     annotated_type = np.full(n_peaks, UNANNOTATED_TYPE, dtype=np.uint8)
     annotated_loss_type = np.full(n_peaks, UNANNOTATED_TYPE, dtype=np.uint8)
     annotated_charge = np.full(n_peaks, UNANNOTATED_TYPE, dtype=np.uint8)
     annotated_number = np.full(n_peaks, UNANNOTATED_TYPE, dtype=np.uint8)
     annotated_position = np.full(n_peaks, UNANNOTATED_TYPE, dtype=np.uint8)
-    annotated_error = np.full(n_peaks, np.inf, dtype=np.float32)
 
-    # Sort fragment arrays based on m/z values
-    sort_idx = np.argsort(fragment_mz)
-    fragment_mz_sorted = fragment_mz[sort_idx]
-    fragment_type_sorted = fragment_type[sort_idx]
-    fragment_loss_type_sorted = fragment_loss_type[sort_idx]
-    fragment_charge_sorted = fragment_charge[sort_idx]
-    fragment_number_sorted = fragment_number[sort_idx]
-    fragment_position_sorted = fragment_position[sort_idx]
-
-    for i, mz in enumerate(spectrum_mz):
-        # Find the index of the closest theoretical fragment
-        idx = np.searchsorted(fragment_mz_sorted, mz)
-
-        # Check the error for this index and the previous one (if it exists)
-        error = np.inf
-        best_idx = -1
-
-        if idx < len(fragment_mz_sorted):
-            error_right = (
-                abs(mz - fragment_mz_sorted[idx]) / fragment_mz_sorted[idx] * 1e6
-            )
-            if error_right <= mass_error_ppm:
-                error = error_right
-                best_idx = idx
-
-        if idx > 0:
-            error_left = (
-                abs(mz - fragment_mz_sorted[idx - 1])
-                / fragment_mz_sorted[idx - 1]
-                * 1e6
-            )
-            if error_left <= mass_error_ppm and error_left < error:
-                error = error_left
-                best_idx = idx - 1
-
-        if best_idx != -1:
-            annotated_type[i] = fragment_type_sorted[best_idx]
-            annotated_loss_type[i] = fragment_loss_type_sorted[best_idx]
-            annotated_charge[i] = fragment_charge_sorted[best_idx]
-            annotated_number[i] = fragment_number_sorted[best_idx]
-            annotated_position[i] = fragment_position_sorted[best_idx]
-            annotated_error[i] = error
+    for i in range(n_peaks):
+        fragment = matched_fragment[i]
+        if fragment != -1:
+            annotated_type[i] = fragment_type[fragment]
+            annotated_loss_type[i] = fragment_loss_type[fragment]
+            annotated_charge[i] = fragment_charge[fragment]
+            annotated_number[i] = fragment_number[fragment]
+            annotated_position[i] = fragment_position[fragment]
 
     return (
         annotated_type,
@@ -322,6 +360,144 @@ def annotate_spectrum(  # noqa: PLR0913
         annotated_position,
         annotated_error,
     )
+
+
+@numba_njit
+def _median_mass_error(matched_error: np.ndarray) -> float:
+    """Median of the matched peaks' mass errors as numpy computes it for float32, or inf without matches."""
+    if len(matched_error) == 0:
+        return np.inf
+    sorted_error = np.sort(matched_error)
+    middle = len(sorted_error) // 2
+    if len(sorted_error) % 2 == 1:
+        return sorted_error[middle]
+    return (sorted_error[middle - 1] + sorted_error[middle]) * np.float32(0.5)
+
+
+@numba_njit(parallel=True)
+def _annotate_dense_fragments(  # noqa: PLR0913
+    fragment_mz: np.ndarray,
+    frag_start_idx: np.ndarray,
+    frag_stop_idx: np.ndarray,
+    peak_mz: np.ndarray,
+    peak_intensity: np.ndarray,
+    peak_start_idx: np.ndarray,
+    peak_stop_idx: np.ndarray,
+    mass_error_ppm: float,
+    fragment_intensity: np.ndarray,
+    pif: np.ndarray,
+    mass_accuracy: np.ndarray,
+) -> None:
+    """Fill ``fragment_intensity``, ``pif`` and ``mass_accuracy`` in place, one precursor per iteration.
+
+    Each precursor's theoretical fragments are its rows of ``fragment_mz`` with m/z above
+    zero, in row-major order as `flatten_fragments` lists them. Precursors write only
+    their own rows, so the fragment rows of different precursors must not overlap.
+    """
+    n_fragment_types = fragment_mz.shape[1]
+    for i in numba_prange(len(frag_start_idx)):
+        precursor_mz = fragment_mz[frag_start_idx[i] : frag_stop_idx[i]].ravel()
+        slots = np.flatnonzero(precursor_mz)
+        spectrum_intensity = peak_intensity[peak_start_idx[i] : peak_stop_idx[i]]
+        matched_fragment, matched_error = _match_peaks(
+            peak_mz[peak_start_idx[i] : peak_stop_idx[i]],
+            precursor_mz[slots],
+            mass_error_ppm,
+        )
+
+        matched_intensity = 0.0
+        total_intensity = 0.0
+        for j in range(len(matched_fragment)):
+            total_intensity += spectrum_intensity[j]
+            if matched_fragment[j] == -1:
+                continue
+            slot = slots[matched_fragment[j]]
+            fragment_intensity[
+                frag_start_idx[i] + slot // n_fragment_types, slot % n_fragment_types
+            ] = spectrum_intensity[j]
+            matched_intensity += spectrum_intensity[j]
+
+        if total_intensity > 0:
+            pif[i] = matched_intensity / total_intensity
+        mass_accuracy[i] = _median_mass_error(matched_error[matched_fragment != -1])
+
+
+def annotate_fragments_dense(
+    speclib: SpecLibBase,
+    raw_data_peak_df: pd.DataFrame,
+    mass_error_ppm: float = 20,
+) -> SpecLibBase:
+    """Annotate the dense theoretical fragments of a spectral library with observed peaks.
+
+    Each observed peak is matched to the closest theoretical fragment of its precursor,
+    as in :func:`annotate_fragments_flat`, and its intensity is written into that
+    fragment's cell of the dense intensity matrix. A cell matched by several peaks keeps
+    the last one, as :meth:`SpecLibFlat.calc_dense_fragments` does. The observed peaks
+    are read in place instead of being copied for every precursor, so memory does not
+    grow with the number of precursors that share a spectrum.
+
+    The precursor metrics of :func:`apply_precursor_metrics` are added: ``pif`` and
+    ``mass_accuracy`` from the matched peaks, the others from the dense intensities.
+
+    Parameters
+    ----------
+    speclib : SpecLibBase
+        Library with ``fragment_mz_df``, for example from ``calc_fragment_mz_df()``.
+        Its precursor_df needs ``frag_start_idx`` and ``frag_stop_idx``, which must not
+        overlap between precursors, and ``peak_start_idx`` and ``peak_stop_idx`` into
+        ``raw_data_peak_df``.
+    raw_data_peak_df : pd.DataFrame
+        Observed peaks with ``mz`` and ``intensity`` columns.
+    mass_error_ppm : float, optional
+        Mass error tolerance in parts per million (default: 20.0).
+
+    Returns
+    -------
+    SpecLibBase
+        A new library that shares ``fragment_mz_df`` and holds the dense
+        ``fragment_intensity_df`` and the annotated precursor_df.
+
+    """
+    required_columns = [
+        "frag_start_idx",
+        "frag_stop_idx",
+        "peak_start_idx",
+        "peak_stop_idx",
+    ]
+    missing_columns = set(required_columns) - set(speclib.precursor_df.columns)
+    if missing_columns:
+        raise ValueError(
+            f"The following columns are missing from speclib.precursor_df: {missing_columns}"
+        )
+
+    precursor_df = speclib.precursor_df.copy()
+    fragment_mz = np.ascontiguousarray(speclib.fragment_mz_df.to_numpy())
+    fragment_intensity = np.zeros(fragment_mz.shape, dtype=PEAK_INTENSITY_DTYPE)
+    pif = np.zeros(len(precursor_df), dtype=PEAK_INTENSITY_DTYPE)
+    mass_accuracy = np.full(len(precursor_df), np.inf)
+    _annotate_dense_fragments(
+        fragment_mz,
+        precursor_df["frag_start_idx"].to_numpy(np.int64),
+        precursor_df["frag_stop_idx"].to_numpy(np.int64),
+        raw_data_peak_df["mz"].to_numpy(),
+        raw_data_peak_df["intensity"].to_numpy(),
+        precursor_df["peak_start_idx"].to_numpy(np.int64),
+        precursor_df["peak_stop_idx"].to_numpy(np.int64),
+        mass_error_ppm,
+        fragment_intensity,
+        pif,
+        mass_accuracy,
+    )
+    precursor_df["pif"] = pif
+    precursor_df["mass_accuracy"] = mass_accuracy
+
+    outlib = SpecLibBase(charged_frag_types=speclib.charged_frag_types)
+    outlib._precursor_df = precursor_df  # noqa: SLF001
+    outlib._fragment_mz_df = speclib.fragment_mz_df  # noqa: SLF001
+    outlib._fragment_intensity_df = pd.DataFrame(  # noqa: SLF001
+        fragment_intensity, columns=speclib.fragment_mz_df.columns
+    )
+    return apply_dense_precursor_metrics(outlib)
 
 
 def _build_theoretical_flatlib(
