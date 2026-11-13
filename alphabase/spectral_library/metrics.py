@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
+from alphabase.numba_wrapper import numba_njit_or_python
 from alphabase.peptide.fragment import UNANNOTATED_TYPE
 
 if TYPE_CHECKING:
@@ -13,6 +14,7 @@ if TYPE_CHECKING:
     from alphabase.spectral_library.flat import SpecLibFlat
 
 
+@numba_njit_or_python
 def calculate_pif(intensities: np.ndarray, types: np.ndarray) -> float:
     """Calculate the precursor ion fraction (PIF) of a spectrum.
 
@@ -181,6 +183,7 @@ def _normalized_count_metric(speclib: SpecLibBase) -> None:
     speclib.precursor_df["normalized_count"] = counts
 
 
+@numba_njit_or_python
 def _nan_median(series: np.ndarray) -> float:
     """Calculate the median of a numpy array, ignoring NaNs and infs.
 

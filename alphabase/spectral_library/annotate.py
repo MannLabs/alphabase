@@ -9,6 +9,7 @@ from alphabase.constants._const import PEAK_INTENSITY_DTYPE
 from alphabase.numba_wrapper import numba_njit, numba_prange
 from alphabase.peptide.fragment import (
     UNANNOTATED_TYPE,
+    _annotate_charged_frag_types,
     create_dense_matrices,
     create_fragment_mz_dataframe,
     filter_valid_charged_frag_types,
@@ -18,8 +19,10 @@ from alphabase.peptide.fragment import (
 from alphabase.spectral_library.base import SpecLibBase
 from alphabase.spectral_library.flat import SpecLibFlat
 from alphabase.spectral_library.metrics import (
+    _nan_median,
     apply_dense_precursor_metrics,
     apply_precursor_metrics,
+    calculate_pif,
 )
 
 REQUIRED_PSM_COLUMNS = [
@@ -249,10 +252,8 @@ def _match_peaks(
     fragment_mz_sorted = fragment_mz[sort_idx]
 
     for i, mz in enumerate(spectrum_mz):
-        # Find the index of the closest theoretical fragment
         idx = np.searchsorted(fragment_mz_sorted, mz)
 
-        # Check the error for this index and the previous one (if it exists)
         error = np.inf
         best_idx = -1
 
@@ -362,21 +363,10 @@ def annotate_spectrum(  # noqa: PLR0913
     )
 
 
-@numba_njit
-def _median_mass_error(matched_error: np.ndarray) -> float:
-    """Median of the matched peaks' mass errors as numpy computes it for float32, or inf without matches."""
-    if len(matched_error) == 0:
-        return np.inf
-    sorted_error = np.sort(matched_error)
-    middle = len(sorted_error) // 2
-    if len(sorted_error) % 2 == 1:
-        return sorted_error[middle]
-    return (sorted_error[middle - 1] + sorted_error[middle]) * np.float32(0.5)
-
-
 @numba_njit(parallel=True)
 def _annotate_dense_fragments(  # noqa: PLR0913
     fragment_mz: np.ndarray,
+    fragment_type: np.ndarray,
     frag_start_idx: np.ndarray,
     frag_stop_idx: np.ndarray,
     peak_mz: np.ndarray,
@@ -391,8 +381,10 @@ def _annotate_dense_fragments(  # noqa: PLR0913
     """Fill ``fragment_intensity``, ``pif`` and ``mass_accuracy`` in place, one precursor per iteration.
 
     Each precursor's theoretical fragments are its rows of ``fragment_mz`` with m/z above
-    zero, in row-major order as `flatten_fragments` lists them. Precursors write only
-    their own rows, so the fragment rows of different precursors must not overlap.
+    zero, in row-major order as `flatten_fragments` lists them. ``fragment_type`` holds the
+    series of each column, so every peak gets the type `annotate_fragments_flat` would give
+    it. Precursors write only their own rows, so the fragment rows of different precursors
+    must not overlap.
     """
     n_fragment_types = fragment_mz.shape[1]
     for i in numba_prange(len(frag_start_idx)):
@@ -405,21 +397,21 @@ def _annotate_dense_fragments(  # noqa: PLR0913
             mass_error_ppm,
         )
 
-        matched_intensity = 0.0
-        total_intensity = 0.0
+        annotated_type = np.full(
+            len(matched_fragment), UNANNOTATED_TYPE, dtype=np.uint8
+        )
         for j in range(len(matched_fragment)):
-            total_intensity += spectrum_intensity[j]
             if matched_fragment[j] == -1:
                 continue
             slot = slots[matched_fragment[j]]
-            fragment_intensity[
-                frag_start_idx[i] + slot // n_fragment_types, slot % n_fragment_types
-            ] = spectrum_intensity[j]
-            matched_intensity += spectrum_intensity[j]
+            column = slot % n_fragment_types
+            fragment_intensity[frag_start_idx[i] + slot // n_fragment_types, column] = (
+                spectrum_intensity[j]
+            )
+            annotated_type[j] = fragment_type[column]
 
-        if total_intensity > 0:
-            pif[i] = matched_intensity / total_intensity
-        mass_accuracy[i] = _median_mass_error(matched_error[matched_fragment != -1])
+        pif[i] = calculate_pif(spectrum_intensity, annotated_type)
+        mass_accuracy[i] = _nan_median(matched_error)
 
 
 def annotate_fragments_dense(
@@ -473,10 +465,11 @@ def annotate_fragments_dense(
     precursor_df = speclib.precursor_df.copy()
     fragment_mz = np.ascontiguousarray(speclib.fragment_mz_df.to_numpy())
     fragment_intensity = np.zeros(fragment_mz.shape, dtype=PEAK_INTENSITY_DTYPE)
-    pif = np.zeros(len(precursor_df), dtype=PEAK_INTENSITY_DTYPE)
+    pif = np.zeros(len(precursor_df))
     mass_accuracy = np.full(len(precursor_df), np.inf)
     _annotate_dense_fragments(
         fragment_mz,
+        _annotate_charged_frag_types(speclib.fragment_mz_df.columns.to_numpy())[0],
         precursor_df["frag_start_idx"].to_numpy(np.int64),
         precursor_df["frag_stop_idx"].to_numpy(np.int64),
         raw_data_peak_df["mz"].to_numpy(),

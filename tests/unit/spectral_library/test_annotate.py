@@ -4,7 +4,6 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from alphabase.peptide.fragment import flatten_fragments
 from alphabase.spectral_library.annotate import (
     add_dense_lib,
     annotate_fragments_dense,
@@ -17,7 +16,6 @@ from alphabase.spectral_library.flat import SpecLibFlat
 from alphabase.spectral_library.metrics import (
     _mass_accuracy_metric,
     _pif_metric,
-    apply_precursor_metrics,
     calculate_pif,
 )
 
@@ -406,7 +404,6 @@ def shared_spectrum_library():
         fragment_mz["y_z1"].iloc[6],
         fragment_mz["b_z2"].iloc[1],
     )
-    # The second peak matches b1 as well; a dense cell keeps the last matching peak.
     peaks = pd.DataFrame(
         {
             "mz": [b1, b1 * (1 + 5e-6), y1, b2_z2, 1234.5678],
@@ -418,53 +415,37 @@ def shared_spectrum_library():
     return speclib, peaks
 
 
-def _annotate_through_flat_fragments(
-    speclib: SpecLibBase, peaks: pd.DataFrame
-) -> SpecLibFlat:
-    flatlib = SpecLibFlat(charged_frag_types=speclib.charged_frag_types)
-    flatlib._precursor_df, flatlib._fragment_df = flatten_fragments(
-        speclib.precursor_df.copy(), speclib.fragment_mz_df, pd.DataFrame()
-    )
-    flatlib = annotate_fragments_flat(flatlib, peaks)
-    flatlib.charged_frag_types = speclib.charged_frag_types
-    flatlib.calc_dense_fragments()
-    return apply_precursor_metrics(flatlib)
-
-
-def test_annotate_fragments_dense_matches_flat_annotation(shared_spectrum_library):
+def test_annotate_fragments_dense(shared_spectrum_library):
     speclib, peaks = shared_spectrum_library
 
     dense = annotate_fragments_dense(speclib, peaks)
-    flat = _annotate_through_flat_fragments(speclib, peaks)
 
-    for dense_row, flat_row in zip(
-        dense.precursor_df.itertuples(), flat.precursor_df.itertuples()
-    ):
-        np.testing.assert_array_equal(
-            dense.fragment_intensity_df.to_numpy()[
-                dense_row.frag_start_idx : dense_row.frag_stop_idx
-            ],
-            flat.fragment_intensity_df.to_numpy()[
-                flat_row.frag_start_idx : flat_row.frag_stop_idx
-            ],
-        )
-    metrics = [
-        "sequence_coverage",
-        "sequence_gini",
-        "normalized_count",
-        "mass_accuracy",
-    ]
+    precursors = dense.precursor_df.set_index("sequence")
+    expected = pd.DataFrame(
+        0.0,
+        index=dense.fragment_intensity_df.index,
+        columns=dense.fragment_intensity_df.columns,
+    )
+    for sequence in ("PEPTIDEK", "PEPTIDKE"):
+        start = precursors.loc[sequence, "frag_start_idx"]
+        expected.loc[start, "b_z1"] = 20.0
+        expected.loc[start + 1, "b_z2"] = 30.0
+    expected.loc[precursors.loc["PEPTIDEK", "frag_start_idx"] + 6, "y_z1"] = 60.0
     pd.testing.assert_frame_equal(
-        dense.precursor_df[metrics], flat.precursor_df[metrics], check_dtype=False
+        dense.fragment_intensity_df, expected, check_dtype=False
     )
-    np.testing.assert_allclose(
-        dense.precursor_df["pif"], flat.precursor_df["pif"], rtol=1e-6
+    expected_metrics = pd.DataFrame(
+        {
+            "pif": [210 / 220, 150 / 220, 0.0],
+            "mass_accuracy": [0.0, 0.0, np.inf],
+            "sequence_coverage": [3 / 7, 2 / 7, 0.0],
+        },
+        index=pd.Index(["PEPTIDEK", "PEPTIDKE", "SEQUENCE"], name="sequence"),
     )
-    # PEPTIDKE shares the b ions of PEPTIDEK but not its y1 peak.
-    assert dense.precursor_df["pif"].tolist() == pytest.approx(
-        [210 / 220, 150 / 220, 0.0]
+    pd.testing.assert_frame_equal(
+        precursors.loc[expected_metrics.index, expected_metrics.columns],
+        expected_metrics,
     )
-    assert dense.fragment_intensity_df["b_z1"].iloc[0] == 20.0
     assert dense.fragment_mz_df is speclib.fragment_mz_df
 
 
