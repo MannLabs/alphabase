@@ -6,6 +6,7 @@ import pytest
 
 from alphabase.spectral_library.annotate import (
     add_dense_lib,
+    annotate_fragments_dense,
     annotate_fragments_flat,
     annotate_precursors_flat,
     annotate_spectrum,
@@ -382,6 +383,77 @@ def test_add_dense_lib(mock_speclib_annotation_flat):
     )
     assert np.all(outlib.precursor_df["sequence_coverage"] == [1.0, 1.0])
     assert np.allclose(outlib.precursor_df["pif"], 1.0)
+
+
+@pytest.fixture
+def shared_spectrum_library():
+    """Two precursors that share one spectrum, and a precursor without peaks."""
+    speclib = SpecLibBase(charged_frag_types=["b_z1", "b_z2", "y_z1", "y_z2"])
+    speclib.precursor_df = pd.DataFrame(
+        {
+            "sequence": ["PEPTIDEK", "PEPTIDKE", "SEQUENCE"],
+            "mods": ["", "", ""],
+            "mod_sites": ["", "", ""],
+            "charge": [2, 2, 2],
+        }
+    )
+    speclib.calc_fragment_mz_df()
+    fragment_mz = speclib.fragment_mz_df
+    b1, y1, b2_z2 = (
+        fragment_mz["b_z1"].iloc[0],
+        fragment_mz["y_z1"].iloc[6],
+        fragment_mz["b_z2"].iloc[1],
+    )
+    peaks = pd.DataFrame(
+        {
+            "mz": [b1, b1 * (1 + 5e-6), y1, b2_z2, 1234.5678],
+            "intensity": np.array([100.0, 20.0, 60.0, 30.0, 10.0], dtype=np.float32),
+        }
+    )
+    speclib.precursor_df["peak_start_idx"] = [0, 0, len(peaks)]
+    speclib.precursor_df["peak_stop_idx"] = [len(peaks), len(peaks), len(peaks)]
+    return speclib, peaks
+
+
+def test_annotate_fragments_dense(shared_spectrum_library):
+    speclib, peaks = shared_spectrum_library
+
+    dense = annotate_fragments_dense(speclib, peaks)
+
+    precursors = dense.precursor_df.set_index("sequence")
+    expected = pd.DataFrame(
+        0.0,
+        index=dense.fragment_intensity_df.index,
+        columns=dense.fragment_intensity_df.columns,
+    )
+    for sequence in ("PEPTIDEK", "PEPTIDKE"):
+        start = precursors.loc[sequence, "frag_start_idx"]
+        expected.loc[start, "b_z1"] = 20.0
+        expected.loc[start + 1, "b_z2"] = 30.0
+    expected.loc[precursors.loc["PEPTIDEK", "frag_start_idx"] + 6, "y_z1"] = 60.0
+    pd.testing.assert_frame_equal(
+        dense.fragment_intensity_df, expected, check_dtype=False
+    )
+    expected_metrics = pd.DataFrame(
+        {
+            "pif": [210 / 220, 150 / 220, 0.0],
+            "mass_accuracy": [0.0, 0.0, np.inf],
+            "sequence_coverage": [3 / 7, 2 / 7, 0.0],
+        },
+        index=pd.Index(["PEPTIDEK", "PEPTIDKE", "SEQUENCE"], name="sequence"),
+    )
+    pd.testing.assert_frame_equal(
+        precursors.loc[expected_metrics.index, expected_metrics.columns],
+        expected_metrics,
+    )
+    assert dense.fragment_mz_df is speclib.fragment_mz_df
+
+
+def test_annotate_fragments_dense_missing_peak_ranges(shared_spectrum_library):
+    speclib, peaks = shared_spectrum_library
+    speclib.precursor_df = speclib.precursor_df.drop(columns=["peak_start_idx"])
+    with pytest.raises(ValueError, match="peak_start_idx"):
+        annotate_fragments_dense(speclib, peaks)
 
 
 def test_mass_accuracy_metric_normal_case():
