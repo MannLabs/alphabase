@@ -1,11 +1,15 @@
-import multiprocessing as mp
+import contextlib
+import os
+from concurrent.futures import ThreadPoolExecutor
 
 import numpy as np
 import pandas as pd
+import pyarrow as pa
+import pyarrow.compute as pc
 import tqdm
+from pandas.io.common import _is_binary_mode, get_handle
 
 from alphabase.constants.modification import MOD_DF, ModificationKeys
-from alphabase.numba_wrapper import numba_njit
 from alphabase.spectral_library.base import SpecLibBase
 from alphabase.utils import explode_multiple_columns
 
@@ -63,7 +67,6 @@ def create_modified_sequence(
     return nterm + mod_seq + cterm
 
 
-@numba_njit
 def _get_frag_info_from_column_name(column: str):
     """
     Only used when converting alphabase libraries into other libraries
@@ -232,55 +235,9 @@ def mask_fragment_intensity_by_frag_nAA(
     fragment_intensity_df.mask(masks, 0, inplace=True)
 
 
-def speclib_to_single_df(
-    speclib: SpecLibBase,
-    *,
-    translate_mod_dict: dict = None,
-    keep_k_highest_fragments: int = 12,
-    min_frag_mz=200,
-    max_frag_mz=2000,
-    min_frag_intensity=0.01,
-    min_frag_nAA=0,
-    modloss: str = "H3PO4",
-    frag_type_head: str = "FragmentType",
-    frag_mass_head: str = "FragmentMz",
-    frag_inten_head: str = "RelativeIntensity",
-    frag_charge_head: str = "FragmentCharge",
-    frag_loss_head: str = "FragmentLossType",
-    frag_series_head: str = "FragmentNumber",
-    verbose=True,
-) -> pd.DataFrame:
-    """
-    Convert alphabase library to diann (or Spectronaut) library dataframe
-    This method is not important, as it will be only
-    used by DiaNN, or spectronaut, or others
-
-    Parameters
-    ----------
-    translate_mod_dict : dict
-        A dict to map AlphaX modification names to other software,
-        use unimod name if None.
-        Defaults to None.
-
-    keep_k_highest_peaks : int
-        only keep highest fragments for each precursor. Default: 12
-
-    Returns
-    -------
-    pd.DataFrame
-        a single dataframe in the SWATH-like format
-
-    """
-    df = pd.DataFrame()
-    df["ModifiedPeptide"] = speclib._precursor_df[
-        ["sequence", "mods", "mod_sites"]
-    ].apply(
-        create_modified_sequence,
-        axis=1,
-        translate_mod_dict=translate_mod_dict,
-        mod_sep="[]",
-    )
-
+def _precursor_table(speclib: SpecLibBase, modified_peptides):
+    df = pd.DataFrame(index=speclib._precursor_df.index)
+    df["ModifiedPeptide"] = modified_peptides
     df["frag_start_idx"] = speclib._precursor_df["frag_start_idx"]
     df["frag_stop_idx"] = speclib._precursor_df["frag_stop_idx"]
 
@@ -324,6 +281,55 @@ def speclib_to_single_df(
     # if 'protein_group' in speclib._precursor_df.columns:
     #     df['ProteinGroups'] = speclib._precursor_df['protein_group']
 
+    return df
+
+
+def speclib_to_single_df(
+    speclib: SpecLibBase,
+    *,
+    translate_mod_dict: dict = None,
+    keep_k_highest_fragments: int = 12,
+    min_frag_mz=200,
+    max_frag_mz=2000,
+    min_frag_intensity=0.01,
+    min_frag_nAA=0,
+    modloss: str = "H3PO4",
+    frag_type_head: str = "FragmentType",
+    frag_mass_head: str = "FragmentMz",
+    frag_inten_head: str = "RelativeIntensity",
+    frag_charge_head: str = "FragmentCharge",
+    frag_loss_head: str = "FragmentLossType",
+    frag_series_head: str = "FragmentNumber",
+    verbose=True,
+) -> pd.DataFrame:
+    """
+    Convert alphabase library to diann (or Spectronaut) library dataframe
+    This method is not important, as it will be only
+    used by DiaNN, or spectronaut, or others
+
+    Parameters
+    ----------
+    translate_mod_dict : dict
+        A dict to map AlphaX modification names to other software,
+        use unimod name if None.
+        Defaults to None.
+
+    keep_k_highest_peaks : int
+        only keep highest fragments for each precursor. Default: 12
+
+    Returns
+    -------
+    pd.DataFrame
+        a single dataframe in the SWATH-like format
+
+    """
+    modified_peptides = speclib._precursor_df[["sequence", "mods", "mod_sites"]].apply(
+        create_modified_sequence,
+        axis=1,
+        translate_mod_dict=translate_mod_dict,
+        mod_sep="[]",
+    )
+    df = _precursor_table(speclib, modified_peptides)
     if min_frag_mz > 0 or max_frag_mz > 0:
         mask_fragment_intensity_by_mz_(
             speclib._fragment_mz_df,
@@ -376,29 +382,123 @@ def speclib_to_swath_df(
     )
 
 
-class WritingProcess(mp.Process):
-    def __init__(self, task_queue, tsv, *args, **kwargs):
-        self.task_queue: mp.Queue = task_queue
-        self.tsv = tsv
-        super().__init__(*args, **kwargs)
+def _top_fragments(
+    frag_start: np.ndarray,
+    frag_stop: np.ndarray,
+    fragment_mz: np.ndarray,
+    fragment_intensity: np.ndarray,
+    frag_columns: list,
+    *,
+    top_k: int,
+    min_frag_intensity: float,
+) -> tuple[np.ndarray, ...]:
+    lengths = frag_stop - frag_start
+    n_columns = len(frag_columns)
+    max_cells = lengths.max() * n_columns
+    # The original [-top_k:] slice takes all fragments when top_k is zero.
+    max_selected = len(range(max_cells)[-top_k:])
+    cells = np.full((len(lengths), max_selected), -1, dtype=np.intp)
+    intensities = np.zeros(cells.shape, dtype=fragment_intensity.dtype)
 
-    def run(self):
-        while True:
-            df, batch = self.task_queue.get()
-            if df is None:
-                break
-            if tuple([int(i) for i in pd.__version__.split(".")[:2]]) >= (1, 5):
-                newline = dict(lineterminator="\n")
-            else:
-                newline = dict(line_terminator="\n")
-            df.to_csv(
-                self.tsv,
-                header=(batch == 0),
-                sep="\t",
-                mode="a",
-                index=False,
-                **newline,
-            )
+    # Sort unpadded rows so ties select the same ions as a per-precursor argsort.
+    for length in np.unique(lengths):
+        precursors = np.flatnonzero(lengths == length)
+        starts = frag_start[precursors, None]
+        rows = starts + np.arange(length)
+        values = fragment_intensity[rows].reshape(len(precursors), -1)
+        base_peak = values.max(axis=1, keepdims=True)
+        np.divide(values, base_peak, out=values, where=base_peak > 0)
+        order = np.argsort(values, axis=1)[:, -top_k:][:, ::-1]
+        cells[precursors, : order.shape[1]] = starts * n_columns + order
+        intensities[precursors, : order.shape[1]] = np.take_along_axis(
+            values, order, axis=1
+        )
+
+    picked = (cells >= 0) & (intensities > min_frag_intensity)
+    precursor = np.nonzero(picked)[0]
+    row, column = np.divmod(cells[picked], n_columns)
+    n_terminal = np.array([is_nterm_frag(name) for name in frag_columns])
+    number = np.where(
+        n_terminal[column], row - frag_start[precursor] + 1, frag_stop[precursor] - row
+    )
+    return precursor, column, number, fragment_mz[row, column], intensities[picked]
+
+
+def _numeric_text(values) -> pa.Array:
+    array = pa.array(values, from_pandas=True)
+    return pc.fill_null(pc.cast(array, pa.string()), "")
+
+
+def _column_text(values: pd.Series) -> pa.Array:
+    if values.dtype.kind in "fiu":
+        return _numeric_text(values)
+    text = pa.array(np.where(values.isna(), "", values.astype(str)), pa.string())
+    needs_quotes = pc.match_substring_regex(text, '[\t\n"]')
+    if pc.any(needs_quotes).as_py():
+        quoted = pc.replace_substring(text, '"', '""')
+        quoted = pc.binary_join_element_wise('"', quoted, '"', "")
+        text = pc.if_else(needs_quotes, quoted, text)
+    return text
+
+
+def _tsv_text(
+    table: pd.DataFrame,
+    fragment_mz: np.ndarray,
+    fragment_intensity: np.ndarray,
+    frag_columns: list,
+    *,
+    with_header: bool,
+    top_k: int,
+    min_frag_intensity: float,
+) -> memoryview:
+    precursor, column, number, mz, intensity = _top_fragments(
+        table.pop("frag_start_idx").to_numpy(),
+        table.pop("frag_stop_idx").to_numpy(),
+        fragment_mz,
+        fragment_intensity,
+        frag_columns,
+        top_k=top_k,
+        min_frag_intensity=min_frag_intensity,
+    )
+    frag_types, loss_types, charges = zip(
+        *map(_get_frag_info_from_column_name, frag_columns)
+    )
+    modloss = "H3PO4"
+    row_ends = [(modloss if loss == "modloss" else loss) + "\n" for loss in loss_types]
+
+    precursor_text = pc.binary_join_element_wise(
+        *[_column_text(table[name]) for name in table.columns], "\t"
+    )
+    # Arrow holds at most 2 GiB per string array. The join below checks that,
+    # but `take` silently overflows.
+    repeated_bytes = pc.binary_length(precursor_text).to_numpy()[precursor]
+    if repeated_bytes.sum(dtype=np.int64) >= 2**31:
+        raise ValueError("batch_size is too large for one tsv batch")
+    rows = pc.binary_join_element_wise(
+        precursor_text.take(precursor),
+        pa.array(frag_types).take(column),
+        _numeric_text(mz),
+        _numeric_text(intensity),
+        pa.array(charges).take(column),
+        pc.cast(pa.array(number), pa.string()),
+        pa.array(row_ends).take(column),
+        "\t",
+    )
+    if with_header:
+        fragment_heads = (
+            "FragmentType",
+            "FragmentMz",
+            "RelativeIntensity",
+            "FragmentCharge",
+            "FragmentNumber",
+            "FragmentLossType",
+        )
+        header = "\t".join([*table.columns, *fragment_heads]) + "\n"
+        rows = pa.concat_arrays([pa.array([header]), rows])
+    # A string array stores its strings contiguously, so its data buffer is the tsv text.
+    _, offsets, text = rows.buffers()
+    text_end = np.frombuffer(offsets, dtype=np.int32)[rows.offset + len(rows)]
+    return memoryview(text)[:text_end]
 
 
 def translate_to_tsv(
@@ -410,19 +510,10 @@ def translate_to_tsv(
     max_frag_mz: float = 2000,
     min_frag_intensity: float = 0.01,
     min_frag_nAA: int = 0,
-    batch_size: int = 100000,
+    batch_size: int = 10000,
     translate_mod_dict: dict = None,
     multiprocessing: bool = True,
 ):
-    if multiprocessing:
-        queue_size = 1000000 // batch_size
-        if queue_size < 2:
-            queue_size = 2
-        elif queue_size > 10:
-            queue_size = 10
-        df_head_queue = mp.Queue(maxsize=queue_size)
-        writing_process = WritingProcess(df_head_queue, tsv)
-        writing_process.start()
     mask_fragment_intensity_by_mz_(
         speclib._fragment_mz_df,
         speclib._fragment_intensity_df,
@@ -435,38 +526,48 @@ def translate_to_tsv(
             speclib._precursor_df,
             max_mask_frag_nAA=min_frag_nAA - 1,
         )
+    precursor_df = speclib._precursor_df
+    frag_columns = list(speclib._fragment_mz_df.columns)
+    fragment_mz = speclib._fragment_mz_df.to_numpy()
+    fragment_intensity = speclib._fragment_intensity_df.to_numpy()
+
+    def render(batch_start: int) -> memoryview:
+        batch = precursor_df.iloc[batch_start : batch_start + batch_size]
+        batch_speclib = SpecLibBase()
+        batch_speclib._precursor_df = batch
+        modified_peptides = [
+            create_modified_sequence(values, translate_mod_dict)
+            for values in zip(batch["sequence"], batch["mods"], batch["mod_sites"])
+        ]
+        return _tsv_text(
+            _precursor_table(batch_speclib, modified_peptides),
+            fragment_mz,
+            fragment_intensity,
+            frag_columns,
+            with_header=batch_start == 0,
+            top_k=keep_k_highest_fragments,
+            min_frag_intensity=min_frag_intensity,
+        )
+
+    # More threads than this were not faster in measurements.
+    max_threads = 4
+    n_threads = min(os.cpu_count(), max_threads) if multiprocessing else 1
+    batch_starts = range(0, len(precursor_df), batch_size)
     if isinstance(tsv, str):
         with open(tsv, "w"):
             pass
-    # process precursors in batches: the flat (one row per fragment) format is much larger
-    # than the compact library, so batching keeps peak memory bounded for large libraries
-    batch_speclib = SpecLibBase()
-    batch_speclib._fragment_intensity_df = speclib._fragment_intensity_df
-    batch_speclib._fragment_mz_df = speclib._fragment_mz_df
-    precursor_df = speclib._precursor_df
-    for i in tqdm.tqdm(range(0, len(precursor_df), batch_size)):
-        batch_speclib._precursor_df = precursor_df.iloc[i : i + batch_size]
-        df = speclib_to_single_df(
-            batch_speclib,
-            translate_mod_dict=translate_mod_dict,
-            keep_k_highest_fragments=keep_k_highest_fragments,
-            min_frag_mz=0,
-            max_frag_mz=0,
-            min_frag_intensity=min_frag_intensity,
-            min_frag_nAA=0,
-            verbose=False,
-        )
-        if multiprocessing:
-            df_head_queue.put((df, i))
-        else:
-            if tuple([int(i) for i in pd.__version__.split(".")[:2]]) >= (1, 5):
-                newline = dict(lineterminator="\n")
-            else:
-                newline = dict(line_terminator="\n")
-            df.to_csv(tsv, header=(i == 0), sep="\t", mode="a", index=False, **newline)
-    if multiprocessing:
-        df_head_queue.put((None, None))
-        print(
-            "Translation finished, it will take several minutes to export the rest precursors to the tsv file..."
-        )
-        writing_process.join()
+    if not batch_starts:
+        return
+    with contextlib.ExitStack() as stack:
+        out = tsv
+        if isinstance(tsv, (str, os.PathLike)):
+            out = stack.enter_context(
+                get_handle(tsv, "ab", compression="infer", is_text=False)
+            ).handle
+        is_text = not _is_binary_mode(out, "")
+        pool = stack.enter_context(ThreadPoolExecutor(n_threads))
+        # Rendering one wave of batches at a time bounds the text held in memory
+        # while the batches are still written in order.
+        for wave in tqdm.tqdm(range(0, len(batch_starts), n_threads)):
+            for text in pool.map(render, batch_starts[wave : wave + n_threads]):
+                out.write(str(text, "utf-8") if is_text else text)
