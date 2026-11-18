@@ -79,7 +79,8 @@ class SageModificationTranslator:
         Returns
         -------
         pd.DataFrame
-            The PSM dataframe with columns 'mod_sites' and 'mods'.
+            The PSM dataframe with columns 'mod_sites', 'mods', 'aa_mass_diffs'
+            and 'aa_mass_diff_sites'.
 
         """
         # 1. Discover all modifications in the PSMs
@@ -264,7 +265,7 @@ def _match_modified_sequence(
         previous_char = sequence[m.start() - 1] if m.start() > 0 else ""
         next_char = sequence[m.end()] if m.end() < len(sequence) else ""
 
-        is_nterm = next_char == "-"
+        is_nterm = m.start() == 0 and next_char == "-"
         is_cterm = previous_char == "-"
 
         aa = previous_char if not (is_nterm | is_cterm) else ""
@@ -335,7 +336,7 @@ def _lookup_modification(
 
 def _translate_modifications(
     sequence: str, mod_translation_df: pd.DataFrame
-) -> tuple[Optional[str], Optional[str]]:
+) -> tuple[Optional[str], Optional[str], str, str]:
     """Translate modifications in the sequence to alphabase style modifications.
 
     Parameters
@@ -348,14 +349,17 @@ def _translate_modifications(
 
     Returns
     -------
-    typing.Tuple[str, str]
-        A tuple with the translated modification sites and names.
+    typing.Tuple[Optional[str], Optional[str], str, str]
+        Sites and names of named modifications, followed by mass shifts
+        retained without a name and their sites.
 
     """
     accumulated_non_sequence_chars = 0
 
     mod_sites = []
     mod_names = []
+    mass_diffs = []
+    mass_diff_sites = []
 
     for m in re.finditer(r"\[(\+|-)(\d+\.\d+)\]", sequence):
         group = m.group()
@@ -363,7 +367,7 @@ def _translate_modifications(
         previous_char = sequence[m.start() - 1] if m.start() > 0 else ""
         next_char = sequence[m.end()] if m.end() < len(sequence) else ""
 
-        is_nterm = next_char == "-"
+        is_nterm = m.start() == 0 and next_char == "-"
         is_cterm = previous_char == "-"
 
         if is_nterm:
@@ -373,27 +377,23 @@ def _translate_modifications(
                 & (mod_translation_df["is_nterm"])
             ]
             if len(matched_mod) == 0:
-                return None, None
+                return None, None, "", ""
 
             matched_mod_name = matched_mod.iloc[0]["matched_mod_name"]
-            mod_site = "0"
+            mod_site = 0
             mod_tag_len = m.end() - m.start() + 1
 
         elif is_cterm:
-            # real cterm mod with location -1 or side chain mod at the last aa
+            # Explicit C-terminal tag, e.g. PEPTIDE-[mass].
             matched_mod = mod_translation_df[
                 (mod_translation_df["modification"] == group)
                 & (mod_translation_df["is_cterm"])
             ]
             if len(matched_mod) == 0:
-                return None, None
+                return None, None, "", ""
 
             matched_mod_name = matched_mod.iloc[0]["matched_mod_name"]
-            mod_site = (
-                "-1"
-                if matched_mod.iloc[0]["is_cterm"]
-                else str(m.start() - accumulated_non_sequence_chars)
-            )
+            mod_site = -1
             mod_tag_len = m.end() - m.start() + 1
 
         else:
@@ -403,18 +403,33 @@ def _translate_modifications(
                 & (mod_translation_df["previous_aa"] == previous_char)
             ]
             if len(matched_mod) == 0:
-                return None, None
+                return None, None, "", ""
 
             matched_mod_name = matched_mod.iloc[0]["matched_mod_name"]
-            mod_site = str(m.start() - accumulated_non_sequence_chars)
+            mod_site = m.start() - accumulated_non_sequence_chars
             mod_tag_len = m.end() - m.start()
 
         accumulated_non_sequence_chars += mod_tag_len
-        mod_sites.append(mod_site)
-        mod_names.append(matched_mod_name)
+        if matched_mod_name.endswith(ModificationKeys.N_TERM):
+            valid_site = mod_site in (0, 1)
+        elif matched_mod_name.endswith(ModificationKeys.C_TERM):
+            peptide_length = len(re.findall(r"[A-Z]", sequence))
+            valid_site = mod_site in (-1, peptide_length)
+        else:
+            valid_site = True
 
-    return ModificationKeys.SEPARATOR.join(mod_sites), ModificationKeys.SEPARATOR.join(
-        mod_names
+        if valid_site:
+            mod_names.append(matched_mod_name)
+            mod_sites.append(str(mod_site))
+        else:
+            mass_diffs.append(group[1:-1])
+            mass_diff_sites.append(str(mod_site))
+
+    return (
+        ModificationKeys.SEPARATOR.join(mod_sites),
+        ModificationKeys.SEPARATOR.join(mod_names),
+        ModificationKeys.SEPARATOR.join(mass_diffs),
+        ModificationKeys.SEPARATOR.join(mass_diff_sites),
     )
 
 
@@ -434,10 +449,16 @@ def _apply_translate_modifications(
     Returns
     -------
     pd.DataFrame
-        The PSM dataframe with columns 'mod_sites' and 'mods'.
+        The PSM dataframe with columns 'mod_sites', 'mods', 'aa_mass_diffs'
+        and 'aa_mass_diff_sites'.
 
     """
-    psm_df[PsmDfCols.MOD_SITES], psm_df[PsmDfCols.MODS] = zip(
+    (
+        psm_df[PsmDfCols.MOD_SITES],
+        psm_df[PsmDfCols.MODS],
+        psm_df[PsmDfCols.AA_MASS_DIFFS],
+        psm_df[PsmDfCols.AA_MASS_DIFF_SITES],
+    ) = zip(
         *psm_df[PsmDfCols.MODIFIED_SEQUENCE].apply(
             lambda x: _translate_modifications(x, mod_translation_df)
         )
