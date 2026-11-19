@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Literal, Optional
 
 import pandas as pd
 
@@ -12,7 +12,8 @@ except ImportError as e:
     ) from e
 
 from alphabase.constants.aa import aa_formula
-from alphabase.constants.modification import MOD_DF
+from alphabase.constants.atom import ChemicalCompositonFormula
+from alphabase.constants.modification import MOD_DF, ModificationKeys
 
 N_TERM_PLACEHOLDER_ATOM = "Fl"
 C_TERM_PLACEHOLDER_ATOM = "Ts"
@@ -469,3 +470,83 @@ class AminoAcidModifier:
         return ReplaceSubstructs(
             aa_mol, c_term_placeholder_mol, Chem.MolFromSmiles("O", sanitize=False)
         )[0]
+
+
+def process_modifications(
+    mods_dict: dict[str, str], mod_type: Literal["ptm", "n_term", "c_term"] = "ptm"
+) -> dict[str, dict[str, str]]:
+    """
+    Process various types of modifications (PTM, N-term, C-term) with a unified approach.
+
+    This function handles the common workflow for processing modifications:
+    calculating SMILES, determining formulas, and computing composition differences.
+
+    Parameters
+    ----------
+    mods_dict : dict
+        Dictionary mapping modification names to SMILES strings
+    mod_type : str, default="ptm"
+        Type of modification: "ptm", "n_term", or "c_term"
+
+    Returns
+    -------
+    dict
+        Dictionary of dictionaries with the following structure:
+        {
+            "mod_name": {
+                "composition": str,
+                "smiles": str
+            }
+        }
+
+    Examples
+    --------
+    >>> ptms = process_modifications(ptm_dict, mod_type="ptm")
+    >>> nterms = process_modifications(n_term_modifications, mod_type="n_term")
+    """
+    aa_modifier = AminoAcidModifier()
+    # A terminal modification is applied by its name, so its SMILES has to be known.
+    if mod_type == "n_term":
+        aa_modifier.n_term_modifications.update(mods_dict)
+    elif mod_type == "c_term":
+        aa_modifier.c_term_modifications.update(mods_dict)
+
+    to_add = {}
+
+    for ptm, smiles in mods_dict.items():
+        if mod_type == "ptm":
+            original_aa = ptm.split(ModificationKeys.SITE_SEPARATOR)[1].split(
+                ModificationKeys.TERM_SEPARATOR
+            )[0]
+            if original_aa.startswith("Any"):
+                original_aa = "A"
+        else:
+            original_aa = "A"
+
+        if mod_type == "ptm":
+            smi = aa_modifier.modify_amino_acid(smiles)
+        elif mod_type == "n_term":
+            smi = aa_modifier.modify_amino_acid(
+                aa_formula.loc["A", "smiles"], n_term_mod=ptm
+            )
+        elif mod_type == "c_term":
+            smi = aa_modifier.modify_amino_acid(
+                aa_formula.loc["A", "smiles"], c_term_mod=ptm
+            )
+        else:
+            raise ValueError(f"Invalid modification type: {mod_type}")
+
+        ptm_formula = ChemicalCompositonFormula.from_smiles(smi)
+        original_aa_brutto_formula = aa_formula.loc[original_aa, "formula"]
+        composition = str(
+            ptm_formula
+            - ChemicalCompositonFormula(original_aa_brutto_formula)
+            - ChemicalCompositonFormula("H(2)O(1)")
+        )
+
+        to_add[ptm] = {
+            "composition": composition,
+            "smiles": smiles,
+        }
+
+    return to_add
