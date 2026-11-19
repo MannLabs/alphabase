@@ -14,6 +14,7 @@ except ImportError as e:
 from alphabase.constants.aa import aa_formula
 from alphabase.constants.atom import ChemicalCompositonFormula
 from alphabase.constants.modification import MOD_DF, ModificationKeys
+from alphabase.smiles.constants import Anchor
 
 N_TERM_PLACEHOLDER_ATOM = "Fl"
 C_TERM_PLACEHOLDER_ATOM = "Ts"
@@ -130,6 +131,212 @@ def _replace_remaining_n_term_placeholders(mol: Chem.Mol) -> Chem.Mol:
         Chem.MolFromSmiles("[H]", sanitize=False),
         replaceAll=True,
     )[0]
+
+
+_ANCHORS_BY_KIND: dict[str, tuple[Anchor, ...]] = {
+    "residue": (Anchor.N_TERM, Anchor.C_TERM),
+    "n_term": (Anchor.N_TERM,),
+    "c_term": (Anchor.C_TERM,),
+}
+"""The anchors that a SMILES of each kind has to carry."""
+
+_TETRAHEDRAL_TAGS = (
+    Chem.ChiralType.CHI_TETRAHEDRAL_CW,
+    Chem.ChiralType.CHI_TETRAHEDRAL_CCW,
+)
+"""Chiral tags of a tetrahedral stereocentre."""
+
+
+def parse_anchored_smiles(
+    smiles: str, kind: Literal["residue", "n_term", "c_term"]
+) -> Chem.Mol:
+    """Parse the SMILES of a residue or a terminal modification and validate its anchors.
+
+    Parameters
+    ----------
+    smiles
+        SMILES with atom-mapped anchors.
+    kind
+        What the SMILES describes.
+            - ``residue``: whole (modified) amino acid
+            - ``n_term``: N-terminal modification
+            - ``c_term``: C-terminal modification.
+
+    Returns
+    -------
+    Chem.Mol
+        The sanitized molecule, anchors still mapped.
+
+    Raises
+    ------
+    ValueError
+        If the SMILES is invalid or does not carry exactly the anchors expected for `kind`.
+    """
+    mol = Chem.MolFromSmiles(smiles)
+    if mol is None:
+        raise ValueError(f"Invalid SMILES: {smiles}")
+
+    expected = _ANCHORS_BY_KIND[kind]
+    found = tuple(
+        sorted(atom.GetAtomMapNum() for atom in mol.GetAtoms() if atom.GetAtomMapNum())
+    )
+    if found != expected:
+        raise ValueError(
+            f"A {kind} SMILES must carry exactly the atom maps "
+            f"{[int(anchor) for anchor in expected]}, "
+            f"found {list(found)} in {smiles}"
+        )
+    return mol
+
+
+def merge_at_anchors(
+    target: Chem.Mol,
+    target_anchor: int,
+    fragment: Chem.Mol,
+    fragment_anchor: int,
+) -> Chem.Mol:
+    """Fuse the anchor atom of `fragment` into the anchor atom of `target`.
+
+    The fused atom takes element, formal charge and isotope from the fragment's anchor
+    and is bonded to the neighbours of both anchors, with the fragment's bond orders.
+    Hydrogens are recomputed, and tetrahedral stereo of all neighbours is retained.
+
+    An anchor label names the role of an atom in the molecule, e.g. being its N-terminus.
+    If both labels are equal, the fused atom still has that role and keeps the label: a
+    modified alpha-amine remains the N-terminus, so the product is still a valid residue
+    and can be modified or extended again. If the labels differ, the fused atom has
+    neither role any more and loses its label: the nitrogen of a peptide bond is no
+    terminus.
+
+    Parameters
+    ----------
+    target
+        Molecule that keeps its atom indices, e.g. a residue or a growing peptide.
+    target_anchor
+        Atom-map number of the anchor in `target`.
+    fragment
+        Molecule fused onto `target`, e.g. a terminal modification or the next residue.
+    fragment_anchor
+        Atom-map number of the anchor in `fragment`.
+
+    Returns
+    -------
+    The sanitized, fused molecule.
+
+    Raises
+    ------
+    ValueError
+        If either anchor is missing or ambiguous, or if the fused atom exceeds its valence.
+
+    Examples
+    --------
+    >>> alanine = Chem.MolFromSmiles("[NH2:1][C@@H](C)C(=O)[OH:2]")
+
+    Equal labels, the label is kept: the methylated alpha-amine is still the N-terminus
+    and can be methylated a second time.
+
+    >>> methylamine = Chem.MolFromSmiles("[NH2:1]C")
+    >>> methylated = merge_at_anchors(alanine, Anchor.N_TERM, methylamine, Anchor.N_TERM)
+    >>> Chem.MolToSmiles(methylated)
+    'C[C@@H](C(=O)[OH:2])[NH:1]C'
+    >>> dimethylated = merge_at_anchors(methylated, Anchor.N_TERM, methylamine, Anchor.N_TERM)
+    >>> Chem.MolToSmiles(dimethylated)
+    'C[C@@H](C(=O)[OH:2])[N:1](C)C'
+
+    For different labels, the label is dropped: in a peptide bond only the outer :1 and :2
+    of the dipeptide remain.
+
+    >>> dipeptide = merge_at_anchors(alanine, Anchor.C_TERM, alanine, Anchor.N_TERM)
+    >>> Chem.MolToSmiles(dipeptide)
+    'C[C@H](NC(=O)[C@H](C)[NH2:1])C(=O)[OH:2]'
+    """
+    target_idx = _find_anchor(target, target_anchor)
+    fragment_idx = _find_anchor(fragment, fragment_anchor) + target.GetNumAtoms()
+
+    mol = Chem.RWMol(Chem.CombineMols(target, fragment))
+    # An aromatic bond cannot be moved onto an atom that is not flagged aromatic yet;
+    # sanitization re-perceives aromaticity of the fused molecule.
+    Chem.Kekulize(mol, clearAromaticFlags=True)
+
+    fragment_neighbors = [
+        neighbor.GetIdx()
+        for neighbor in mol.GetAtomWithIdx(fragment_idx).GetNeighbors()
+    ]
+    for neighbor_idx in fragment_neighbors:
+        _move_bond(mol, neighbor_idx, fragment_idx, target_idx)
+
+    fragment_atom = mol.GetAtomWithIdx(fragment_idx)
+    fused_atom = mol.GetAtomWithIdx(target_idx)
+    fused_atom.SetAtomicNum(fragment_atom.GetAtomicNum())
+    fused_atom.SetFormalCharge(fragment_atom.GetFormalCharge())
+    fused_atom.SetIsotope(fragment_atom.GetIsotope())
+    # Hydrogens written on either anchor described its open valences before fusing.
+    fused_atom.SetNumExplicitHs(0)
+    fused_atom.SetNumRadicalElectrons(0)
+    fused_atom.SetNoImplicit(False)
+    fused_atom.SetAtomMapNum(target_anchor if target_anchor == fragment_anchor else 0)
+    mol.RemoveAtom(fragment_idx)
+
+    fused = mol.GetMol()
+    try:
+        Chem.SanitizeMol(fused)
+    except Chem.rdchem.MolSanitizeException as e:
+        raise ValueError(
+            f"Cannot fuse anchor :{fragment_anchor} of {_to_smiles(fragment)} "
+            f"into anchor :{target_anchor} of {_to_smiles(target)}: {e}"
+        ) from e
+    return fused
+
+
+def _find_anchor(mol: Chem.Mol, anchor: int) -> int:
+    """Return the index of the single atom carrying the given anchor label.
+
+    Raises
+    ------
+    ValueError
+        If the anchor is not unique.
+    """
+    matches = [
+        atom.GetIdx() for atom in mol.GetAtoms() if atom.GetAtomMapNum() == anchor
+    ]
+    if len(matches) != 1:
+        raise ValueError(
+            f"Expected exactly one atom with atom map :{anchor}, found {len(matches)}"
+        )
+    return matches[0]
+
+
+def _move_bond(
+    mol: Chem.RWMol, neighbor_idx: int, old_end_idx: int, new_end_idx: int
+) -> None:
+    """Reattach a bond from one anchor to the other, keeping the neighbour's stereo."""
+    neighbor_bonds = [
+        bond.GetOtherAtomIdx(neighbor_idx)
+        for bond in mol.GetAtomWithIdx(neighbor_idx).GetBonds()
+    ]
+    bond_type = mol.GetBondBetweenAtoms(neighbor_idx, old_end_idx).GetBondType()
+    mol.RemoveBond(neighbor_idx, old_end_idx)
+    mol.AddBond(neighbor_idx, new_end_idx, bond_type)
+
+    # A chiral tag is relative to the order of the atom's bonds. The re-added bond is
+    # appended last, so skipping an odd number of bonds would invert the configuration.
+    skipped_bonds = len(neighbor_bonds) - 1 - neighbor_bonds.index(old_end_idx)
+    neighbor = mol.GetAtomWithIdx(neighbor_idx)
+    if skipped_bonds % 2 and neighbor.GetChiralTag() in _TETRAHEDRAL_TAGS:
+        neighbor.InvertChirality()
+
+
+def _without_atom_maps(mol: Chem.Mol) -> Chem.Mol:
+    """Return a copy without anchor labels, as handed out to users."""
+    unmapped = Chem.Mol(mol)
+    for atom in unmapped.GetAtoms():
+        atom.SetAtomMapNum(0)
+    return unmapped
+
+
+def _to_smiles(mol: Chem.Mol) -> str:
+    """Return the SMILES without anchor labels, as handed out to users."""
+    return Chem.MolToSmiles(_without_atom_maps(mol))
 
 
 class AminoAcidModifier:
