@@ -7,7 +7,10 @@ pytest.importorskip("rdkit", reason="rdkit not installed, skipping smiles tests"
 from rdkit import Chem  # noqa: E402
 
 from alphabase.constants.atom import ChemicalCompositonFormula  # noqa: E402
-from alphabase.smiles.smiles import AminoAcidModifier  # noqa: E402
+from alphabase.smiles.smiles import (  # noqa: E402
+    AminoAcidModifier,
+    process_modifications,
+)
 
 aa_modifier = AminoAcidModifier()
 modify_amino_acid = aa_modifier.modify_amino_acid
@@ -294,3 +297,32 @@ def test_error_handling_invalid_rdkit_mol():
 def test_error_unknown_atom():
     with pytest.raises(ValueError):
         ChemicalCompositonFormula("C(6)H(12)Atom(6)")
+
+
+@pytest.mark.parametrize(
+    ("mod_name", "smiles", "mod_type", "expected_composition"),
+    [
+        (
+            "Phospho@S",
+            "O=P(O)(O)OC[C@@H](C(=O)[Ts])N([Fl])([Fl])",
+            "ptm",
+            "H(1)O(3)P(1)",
+        ),
+        ("Acetyl@Any_N-term", "CC(=O)[Lv]", "n_term", "C(2)H(2)O(1)"),
+        ("Methyl@Any_C-term", "OC", "c_term", "C(1)H(2)"),
+        # Terminal modifications that are not part of the modification table
+        ("Unknown@Any_N-term", "CC(=O)[Lv]", "n_term", "C(2)H(2)O(1)"),
+        ("Unknown@Any_C-term", "OC", "c_term", "C(1)H(2)"),
+    ],
+)
+def test_process_modifications(mod_name, smiles, mod_type, expected_composition):
+    processed = process_modifications({mod_name: smiles}, mod_type=mod_type)
+
+    assert processed == {
+        mod_name: {"composition": expected_composition, "smiles": smiles}
+    }
+
+
+def test_process_modifications_rejects_unknown_mod_type():
+    with pytest.raises(ValueError, match="Invalid modification type"):
+        process_modifications({"Phospho@S": "OC"}, mod_type="side_chain")
