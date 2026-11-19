@@ -1800,7 +1800,7 @@ def _calc_column_indices(
 ) -> np.ndarray:
     """
     Calculate the column indices for a dense fragment matrix.
-    Columns are sorted according to `fragment.sort_charged_frag_types`
+    Columns follow the order of `charged_frag_types`, as the dense matrices do.
 
     Parameters
     ----------
@@ -1821,11 +1821,9 @@ def _calc_column_indices(
         for key, value in LOSS_MAPPING_INV.items()
     }
 
-    sorted_charged_frag_types = sort_charged_frag_types(charged_frag_types)
-
     # mapping of charged fragment types to indices
     inverse_frag_type_mapping = dict(
-        zip(sorted_charged_frag_types, range(len(sorted_charged_frag_types)))
+        zip(charged_frag_types, range(len(charged_frag_types)))
     )
 
     # mapping of fragment type, loss type, charge to a dense column name
