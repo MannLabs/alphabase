@@ -14,19 +14,19 @@ Overview of the workflow
 1. Fill three dictionaries (``n_term_modifications``, ``c_term_modifications``, and ``ptm_dict``) with the modification names and the corresponding SMILES strings.
 2. Run the helper script ::
 
-       python -m alphabase.smiles.adding_smiles
+       python scripts/adding_smiles.py
 
    The script will:
-   • validate that the generated composition of every modified amino-acid matches the unmodified one
+   - validate that the generated composition of every modified amino-acid matches the unmodified one
      (after subtracting H\ :sup:`2`\ O to compensate for peptide bond formation)
-   • compute the elemental composition difference of the modification
-   • append the new rows to the global modification table (``alphabase/constants/const_files/modification.tsv``)
+   - compute the elemental composition difference of the modification
+   - append the new rows to the global modification table (``alphabase/constants/const_files/modification.tsv``)
 
 3. Use the newly added modifications in the rest of AlphaBase exactly as the built-in ones.
 
 Where are the dictionaries defined?
 -----------------------------------
-All three dictionaries live inside ``alphabase.smiles.adding_smiles``.
+All three dictionaries live inside the script ``scripts/adding_smiles.py`` of the repository.
 Feel free to extend them directly or generate them programmatically.
 
 Tip: if you only need to *apply* the modifications and not to permanently store them, you can import and modify the
@@ -34,24 +34,25 @@ Tip: if you only need to *apply* the modifications and not to permanently store 
 
 Underlying API
 --------------
-Internally the script leverages three public classes / functions:
+Internally the script leverages four public classes / functions:
 
+* ``alphabase.smiles.smiles.process_modifications`` - calculates the elemental composition of modifications from their SMILES
 * ``alphabase.smiles.smiles.AminoAcidModifier`` - applies SMILES modifications to an amino-acid backbone
 * ``alphabase.constants.atom.ChemicalCompositonFormula`` - converts SMILES ⇒ elemental composition
 * ``alphabase.constants.modification.add_new_modifications`` - inserts calculated compositions into the global table
 
 The full source code of the script is available at
-`alphabase/smiles/adding_smiles.py <https://github.com/MannLabs/alphabase/blob/main/alphabase/smiles/adding_smiles.py>`_
+`scripts/adding_smiles.py <https://github.com/MannLabs/alphabase/blob/main/scripts/adding_smiles.py>`_
 
 Usage example
 --------------
 Below is a minimal snippet that adds a hypothetical modification called *Foo@K* ::
 
-    from alphabase.smiles.adding_smiles import process_modifications, ptm_dict
+    from alphabase.smiles.smiles import process_modifications
     from alphabase.constants.modification import add_new_modifications
 
-    # 1) add your SMILES
-    ptm_dict["Foo@K"] = "CC(O)CN"
+    # 1) define your SMILES
+    ptm_dict = {"Foo@K": "CC(O)CN"}
 
     # 2) calculate the composition and store it
     new_mods = process_modifications(ptm_dict, mod_type="ptm")
