@@ -475,8 +475,7 @@ class AminoAcidModifier:
 def process_modifications(
     mods_dict: dict[str, str], mod_type: Literal["ptm", "n_term", "c_term"] = "ptm"
 ) -> dict[str, dict[str, str]]:
-    """
-    Process various types of modifications (PTM, N-term, C-term) with a unified approach.
+    """Extract composition and smiles string from a SMILES representation of a modification.
 
     This function handles the common workflow for processing modifications:
     calculating SMILES, determining formulas, and computing composition differences.
@@ -501,6 +500,8 @@ def process_modifications(
 
     Examples
     --------
+    >>> ptm_dict = {"Oxidation@P": "O[C@@H]1C[C@H](N([Fl])C1)C(=O)[Ts]"} # Modification: SMILES
+    >>> n_term_modifications = {"Acetyl@Any_N-term": "CC(=O)[Lv]"} # Modification: SMILES
     >>> ptms = process_modifications(ptm_dict, mod_type="ptm")
     >>> nterms = process_modifications(n_term_modifications, mod_type="n_term")
     """
