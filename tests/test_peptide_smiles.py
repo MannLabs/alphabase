@@ -30,7 +30,7 @@ def test_peptide_to_smiles_no_modifications(encoder):
     assert np.isclose(
         actual_mass, expected_mass, atol=1e-4
     ), "Expected mass does not match actual mass"
-    expected_smiles = "[H]N([H])[C@@H](CCC(N)=O)C(=O)N([H])[C@@H](CCSC)C(=O)N([H])[C@@H](CC(N)=O)C(=O)N1CCC[C@H]1C(=O)N([H])[C@@H](Cc1cnc[nH]1)C(=O)N([H])[C@H](C(=O)N([H])[C@@H](CCCNC(=N)N)C(=O)O)[C@@H](C)CC"
+    expected_smiles = "CC[C@H](C)[C@H](NC(=O)[C@H](Cc1cnc[nH]1)NC(=O)[C@@H]1CCCN1C(=O)[C@H](CC(N)=O)NC(=O)[C@H](CCSC)NC(=O)[C@@H](N)CCC(N)=O)C(=O)N[C@@H](CCCNC(=N)N)C(=O)O"
     assert smiles == expected_smiles, "Expected SMILES does not match actual SMILES"
 
 
@@ -49,7 +49,7 @@ def test_peptide_to_smiles_with_modifications(encoder):
     assert np.isclose(
         actual_mass, expected_mass, atol=1e-4
     ), "Expected mass does not match actual mass"
-    expected_smiles = "[H]N(C(=O)[C@@H]1CCC(=O)N1[H])C(CCS(C)=O)C(=O)N([H])[C@@H](CC(N)=O)C(=O)N1CCC[C@H]1C(=O)N([H])[C@@H](Cc1cnc[nH]1)C(=O)N([H])[C@H](C(=O)N([H])[C@@H](CCCNC(=N)N)C(=O)O)[C@@H](C)CC"
+    expected_smiles = "CC[C@H](C)[C@H](NC(=O)[C@H](Cc1cnc[nH]1)NC(=O)[C@@H]1CCCN1C(=O)[C@H](CC(N)=O)NC(=O)C(CCS(C)=O)NC(=O)[C@@H]1CCC(=O)N1)C(=O)N[C@@H](CCCNC(=N)N)C(=O)O"
     assert smiles == expected_smiles, "Expected SMILES does not match actual SMILES"
 
 
@@ -114,7 +114,7 @@ def test_peptide_to_smiles_multiple_modifications(encoder):
     assert np.isclose(
         actual_mass, expected_mass, atol=1e-4
     ), "Expected mass does not match actual mass"
-    expected_smiles = "[H]N(C(=O)[C@H](CCC(N)=O)N([H])C(C)=O)C(CCS(C)=O)C(=O)N([H])[C@@H](CC(N)=O)C(=O)N1CCC[C@H]1C(=O)N([H])[C@@H](COP(=O)(O)O)C(=O)N([H])[C@H](C(=O)N([H])[C@@H](CCCNC(=N)N)C(=O)O)[C@@H](C)CC"
+    expected_smiles = "CC[C@H](C)[C@H](NC(=O)[C@H](COP(=O)(O)O)NC(=O)[C@@H]1CCCN1C(=O)[C@H](CC(N)=O)NC(=O)C(CCS(C)=O)NC(=O)[C@H](CCC(N)=O)NC(C)=O)C(=O)N[C@@H](CCCNC(=N)N)C(=O)O"
     assert smiles == expected_smiles, "Expected SMILES does not match actual SMILES"
 
 
@@ -164,13 +164,13 @@ def test_peptide_to_smiles_per_aa_no_modifications(encoder):
     # When converting the peptide to SMILES per amino acid
     smiles = encoder.peptide_to_smiles_per_amino_acid(sequence)
     expected_smiles = [
-        "[H]N([H])[C@@H](CCC(N)=O)C(=O)O",
-        "[H]N([H])[C@@H](CCSC)C(=O)O",
-        "[H]N([H])[C@@H](CC(N)=O)C(=O)O",
-        "[H]N1CCC[C@H]1C(=O)O",
-        "[H]N([H])[C@@H](Cc1cnc[nH]1)C(=O)O",
-        "[H]N([H])[C@H](C(=O)O)[C@@H](C)CC",
-        "[H]N([H])[C@@H](CCCNC(=N)N)C(=O)O",
+        "NC(=O)CC[C@H](N)C(=O)O",
+        "CSCC[C@H](N)C(=O)O",
+        "NC(=O)C[C@H](N)C(=O)O",
+        "O=C(O)[C@@H]1CCCN1",
+        "N[C@@H](Cc1cnc[nH]1)C(=O)O",
+        "CC[C@H](C)[C@H](N)C(=O)O",
+        "N=C(N)NCCC[C@H](N)C(=O)O",
     ]
     # Then
     assert smiles == expected_smiles
@@ -184,13 +184,13 @@ def test_peptide_to_smiles_per_aa_multiple_modifications(encoder):
     # When converting the peptide to SMILES per amino acid
     smiles = encoder.peptide_to_smiles_per_amino_acid(sequence, mods, mod_sites)
     expected_smiles = [
-        "[H]N(C(C)=O)[C@@H](CCC(N)=O)C(=O)O",
-        "[H]N([H])C(CCS(C)=O)C(=O)O",
-        "[H]N([H])[C@@H](CC(N)=O)C(=O)O",
-        "[H]N1CCC[C@H]1C(=O)O",
-        "[H]N([H])[C@@H](COP(=O)(O)O)C(=O)O",
-        "[H]N([H])[C@H](C(=O)O)[C@@H](C)CC",
-        "[H]N([H])[C@@H](CCCNC(=N)N)C(=O)O",
+        "CC(=O)N[C@@H](CCC(N)=O)C(=O)O",
+        "CS(=O)CCC(N)C(=O)O",
+        "NC(=O)C[C@H](N)C(=O)O",
+        "O=C(O)[C@@H]1CCCN1",
+        "N[C@@H](COP(=O)(O)O)C(=O)O",
+        "CC[C@H](C)[C@H](N)C(=O)O",
+        "N=C(N)NCCC[C@H](N)C(=O)O",
     ]
     # Then
     assert smiles == expected_smiles
@@ -204,13 +204,13 @@ def test_peptide_to_smiles_per_aa_c_terminal_modification(encoder):
     # When converting the peptide to SMILES per amino acid
     smiles = encoder.peptide_to_smiles_per_amino_acid(sequence, mods, mod_sites)
     expected_smiles = [
-        "[H]N([H])[C@@H](CCC(N)=O)C(=O)O",
-        "[H]N([H])[C@@H](CCSC)C(=O)O",
-        "[H]N([H])[C@@H](CC(N)=O)C(=O)O",
-        "[H]N1CCC[C@H]1C(=O)O",
-        "[H]N([H])[C@@H](Cc1cnc[nH]1)C(=O)O",
-        "[H]N([H])[C@H](C(=O)O)[C@@H](C)CC",
-        "[H]N([H])[C@@H](CCCNC(=N)N)C(N)=O",
+        "NC(=O)CC[C@H](N)C(=O)O",
+        "CSCC[C@H](N)C(=O)O",
+        "NC(=O)C[C@H](N)C(=O)O",
+        "O=C(O)[C@@H]1CCCN1",
+        "N[C@@H](Cc1cnc[nH]1)C(=O)O",
+        "CC[C@H](C)[C@H](N)C(=O)O",
+        "N=C(N)NCCC[C@H](N)C(N)=O",
     ]
     # Then
     assert smiles == expected_smiles
@@ -224,13 +224,13 @@ def test_peptide_to_smiles_per_aa_N_terminal_modification(encoder):
     # When converting the peptide to SMILES per amino acid
     smiles = encoder.peptide_to_smiles_per_amino_acid(sequence, mods, mod_sites)
     expected_smiles = [
-        "[H]N(C(C)=O)[C@@H](CCC(N)=O)C(=O)O",
-        "[H]N([H])[C@@H](CCSC)C(=O)O",
-        "[H]N([H])[C@@H](CC(N)=O)C(=O)O",
-        "[H]N1CCC[C@H]1C(=O)O",
-        "[H]N([H])[C@@H](Cc1cnc[nH]1)C(=O)O",
-        "[H]N([H])[C@H](C(=O)O)[C@@H](C)CC",
-        "[H]N([H])[C@@H](CCCNC(=N)N)C(=O)O",
+        "CC(=O)N[C@@H](CCC(N)=O)C(=O)O",
+        "CSCC[C@H](N)C(=O)O",
+        "NC(=O)C[C@H](N)C(=O)O",
+        "O=C(O)[C@@H]1CCCN1",
+        "N[C@@H](Cc1cnc[nH]1)C(=O)O",
+        "CC[C@H](C)[C@H](N)C(=O)O",
+        "N=C(N)NCCC[C@H](N)C(=O)O",
     ]
     # Then
     assert smiles == expected_smiles
