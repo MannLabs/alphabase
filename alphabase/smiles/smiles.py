@@ -32,7 +32,7 @@ _TETRAHEDRAL_TAGS = (
 def parse_anchored_smiles(
     smiles: str, kind: Literal["residue", "n_term", "c_term"]
 ) -> Chem.Mol:
-    """Parse the SMILES of a residue or a terminal modification and validate its anchors.
+    """Parse the SMILES of a residue or a terminal modification into RDKit molecule and validate its anchors.
 
     Parameters
     ----------
