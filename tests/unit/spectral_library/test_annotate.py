@@ -13,9 +13,9 @@ from alphabase.spectral_library.annotate import (
 from alphabase.spectral_library.base import SpecLibBase
 from alphabase.spectral_library.flat import SpecLibFlat
 from alphabase.spectral_library.metrics import (
-    _mass_accuracy_metric,
-    _pif_metric,
+    apply_precursor_metrics,
     calculate_pif,
+    calculate_precursor_metrics,
 )
 
 pytestmark = pytest.mark.requires_numba
@@ -144,7 +144,7 @@ def test_calculate_pif_all_zero_intensity():
 
 
 def test_pif_metric_updates_precursor_df(pif_speclib_flat):
-    _pif_metric(pif_speclib_flat)
+    apply_precursor_metrics(pif_speclib_flat)
     expected = np.array([0.5, 4 / 9])
     assert np.allclose(pif_speclib_flat.precursor_df["pif"], expected)
 
@@ -168,6 +168,10 @@ def pif_speclib_flat():
             "type": np.array([1, 2, 255, 3, 255], dtype=np.uint8),
         }
     )
+    flat.precursor_df["frag_start_idx"] = [0, 2]
+    flat.precursor_df["frag_stop_idx"] = [2, 5]
+    flat._fragment_df["error"] = 0.0
+    flat._fragment_intensity_df = pd.DataFrame(np.ones((5, 2)))
     return flat
 
 
@@ -384,140 +388,69 @@ def test_add_dense_lib(mock_speclib_annotation_flat):
     assert np.allclose(outlib.precursor_df["pif"], 1.0)
 
 
-def test_mass_accuracy_metric_normal_case():
-    speclib_flat = SpecLibFlat()
-    speclib_flat.precursor_df = pd.DataFrame(
-        {
-            "flat_frag_start_idx": [0, 3, 6],
-            "flat_frag_stop_idx": [3, 6, 9],
-            "sequence": ["PEP", "PEPT", "PEPTI"],
-        }
+@pytest.mark.parametrize(
+    ("errors", "expected"),
+    [
+        ([1.0, 2.0, 3.0], 2.0),
+        ([1.0, np.nan, 3.0], 2.0),
+        ([1.0, np.inf, 3.0], 2.0),
+        ([np.nan, np.inf], np.inf),
+        ([], np.inf),
+    ],
+)
+def test_precursor_mass_accuracy(errors, expected):
+    _, metrics = calculate_precursor_metrics(
+        np.ones(len(errors)),
+        np.full(len(errors), 98),
+        np.array(errors),
+        np.ones((2, 2)),
     )
-    speclib_flat._fragment_df = pd.DataFrame(
-        {
-            "error": [
-                1.0,
-                2.0,
-                3.0,  # First precursor
-                4.0,
-                5.0,
-                6.0,  # Second precursor
-                7.0,
-                8.0,
-                9.0,
-            ]  # Third precursor
-        }
+    assert metrics["mass_accuracy"] == expected
+
+
+def test_precursor_metrics_distinguish_peak_and_dense_ranges(pif_speclib_flat):
+    library = pif_speclib_flat
+    library._fragment_df["error"] = [1, 1, 1, 2, 2]
+    library._fragment_intensity_df = pd.DataFrame(
+        [[10, 0], [0, 0], [3, 4], [0, 5], [0, 0]]
     )
+    apply_precursor_metrics(library)
+    assert library.precursor_df["mass_accuracy"].tolist() == [1, 2]
+    assert library.precursor_df["sequence_coverage"].tolist() == [0.5, 2 / 3]
+    assert library.precursor_df["normalized_count"].tolist() == [0.5, 1]
+    assert library.precursor_df["pif"].tolist() == [0.5, 4 / 9]
 
-    _mass_accuracy_metric(speclib_flat)
-    expected = np.array([2.0, 5.0, 8.0])  # Medians for each group
-    assert np.allclose(speclib_flat.precursor_df["mass_accuracy"], expected)
 
-
-def test_mass_accuracy_metric_with_nans():
-    speclib_flat = SpecLibFlat()
-    speclib_flat.precursor_df = pd.DataFrame(
-        {
-            "flat_frag_start_idx": [0, 3],
-            "flat_frag_stop_idx": [3, 6],
-            "sequence": ["PEPTIDE", "SEQUENCE"],
-        }
+@pytest.mark.parametrize("n_sites", [0, 3])
+def test_precursor_metrics_empty_spectrum(n_sites):
+    coverage, metrics = calculate_precursor_metrics(
+        np.array([]),
+        np.array([], dtype=np.uint8),
+        np.array([]),
+        np.zeros((n_sites, 2)),
     )
-    speclib_flat._fragment_df = pd.DataFrame(
-        {
-            "error": [
-                1.0,
-                np.nan,
-                3.0,  # First precursor
-                np.nan,
-                np.nan,
-                np.nan,
-            ]  # Second precursor
-        }
+    np.testing.assert_array_equal(coverage, np.zeros(n_sites, dtype=bool))
+    assert metrics == {
+        "pif": 0.0,
+        "sequence_coverage": 0.0,
+        "sequence_gini": 1.0,
+        "normalized_count": 0.0,
+        "mass_accuracy": np.inf,
+    }
+
+
+def test_precursor_metrics_zero_intensity_matches():
+    coverage, metrics = calculate_precursor_metrics(
+        np.zeros(3),
+        np.array([98, 98, 255]),
+        np.array([1.0, 3.0, np.inf]),
+        np.zeros((2, 2)),
     )
-
-    _mass_accuracy_metric(speclib_flat)
-    expected = np.array([2.0, np.inf])  # Median of [1.0, 3.0] and inf for all NaNs
-    assert np.allclose(
-        speclib_flat.precursor_df["mass_accuracy"], expected, equal_nan=True
-    )
-
-
-def test_mass_accuracy_metric_with_infs():
-    speclib_flat = SpecLibFlat()
-    speclib_flat.precursor_df = pd.DataFrame(
-        {
-            "flat_frag_start_idx": [0, 3],
-            "flat_frag_stop_idx": [3, 6],
-            "sequence": ["PEPTIDE", "SEQUENCE"],
-        }
-    )
-    speclib_flat._fragment_df = pd.DataFrame(
-        {
-            "error": [
-                1.0,
-                np.inf,
-                3.0,  # First precursor
-                np.inf,
-                np.inf,
-                np.inf,
-            ]  # Second precursor
-        }
-    )
-
-    _mass_accuracy_metric(speclib_flat)
-    expected = np.array([2.0, np.inf])  # Median of [1.0, 3.0] and inf for all infs
-    assert np.allclose(
-        speclib_flat.precursor_df["mass_accuracy"], expected, equal_nan=True
-    )
-
-
-def test_mass_accuracy_metric_empty_fragments():
-    speclib_flat = SpecLibFlat()
-    speclib_flat.precursor_df = pd.DataFrame(
-        {
-            "flat_frag_start_idx": [0, 0],
-            "flat_frag_stop_idx": [0, 0],
-            "sequence": ["PEPTIDE", "SEQUENCE"],
-        }
-    )
-    speclib_flat._fragment_df = pd.DataFrame({"error": []})
-
-    _mass_accuracy_metric(speclib_flat)
-    expected = np.array([np.inf, np.inf])  # inf for empty fragments
-    assert np.allclose(
-        speclib_flat.precursor_df["mass_accuracy"], expected, equal_nan=True
-    )
-
-
-def test_mass_accuracy_metric_index_mismatch():
-    """Verify that mass_accuracy uses correct indices (flat vs dense).
-
-    This test creates a scenario where flat and dense indices differ significantly.
-    If _mass_accuracy_metric incorrectly uses dense indices (frag_start_idx) to
-    slice the flat _fragment_df, the results will be wrong.
-    """
-    speclib_flat = SpecLibFlat()
-    speclib_flat.precursor_df = pd.DataFrame(
-        {
-            "frag_start_idx": [0, 4],
-            "frag_stop_idx": [4, 8],
-            "flat_frag_start_idx": [0, 100],
-            "flat_frag_stop_idx": [100, 200],
-            "sequence": ["PEPTIDE", "SEQUENCE"],
-        }
-    )
-
-    # Flat fragment_df has 200 rows total
-    # First 100 (precursor 0's peaks) have error=1.0
-    # Next 100 (precursor 1's peaks) have error=2.0
-    speclib_flat._fragment_df = pd.DataFrame({"error": [1.0] * 100 + [2.0] * 100})
-
-    _mass_accuracy_metric(speclib_flat)
-
-    expected = np.array([1.0, 2.0])
-    actual = speclib_flat.precursor_df["mass_accuracy"].to_numpy()
-    assert np.allclose(actual, expected), (
-        f"mass_accuracy uses wrong indices! Expected {expected}, got {actual}. "
-        "Should use flat_frag_start_idx/flat_frag_stop_idx, not frag_start_idx/frag_stop_idx."
-    )
+    assert not coverage.any()
+    assert metrics == {
+        "pif": 0.0,
+        "sequence_coverage": 0.0,
+        "sequence_gini": 1.0,
+        "normalized_count": 0.0,
+        "mass_accuracy": 2.0,
+    }
