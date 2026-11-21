@@ -245,6 +245,8 @@ TEST_DATA_SAGE = """	psm_id	filename	scannr	peptide	stripped_peptide	proteins	nu
 56254	107790	60_1.mzML	controllerType=0 controllerNumber=1 scan=37155	LPIGDVATQYFADR	LPIGDVATQYFADR	sp|Q99832|TCPH_HUMAN	1	1	False	1564.7881	1564.7885	3	14	0	0.0	0.23403226	1.1101317	24.397646	2.0240285	0.0	58.68759	0.70844483	0.6982606	0.010184228	0.0	0.0	0.0	6	1	4	0.2857143	7.907757	2490	-3.2228017	0.65660965	-1.9138397	0.0010133153	0.00021067557	0.0007049733
 65695	55156	60_1.mzML	controllerType=0 controllerNumber=1 scan=35946	LPIGDVATQYFADR	LPIGDVATQYFADR	sp|Q99832|TCPH_HUMAN	1	1	False	1564.7876	1564.7885	3	14	0	0.0	0.54607534	3.9860673	25.07365	1.2712177	0.0	56.798138	0.6889547	0.6982606	0.009305894	0.0	0.0	0.0	6	2	3	0.21428572	10.15254	1956	-3.2445283	0.5478867	-1.305784	0.004600688	0.00021067557	0.0007049733
 69029	70640	60_2.mzML	controllerType=0 controllerNumber=1 scan=38325	LPIGDVATQYFADR	LPIGDVATQYFADR	sp|Q99832|TCPH_HUMAN	1	1	False	1564.7872	1564.7885	2	14	0	0.0	0.78010774	3.0232615	26.206385	0.14770344	0.0	60.46434	0.7195401	0.6982606	0.021279514	0.0	0.0	0.0	6	1	3	0.21428572	4.999368	2359	-3.1304493	0.5049445	-1.140718	0.0072214277	0.00021067557	0.0007049733
+69030	200001	sage_mixed.mzML	scan=1	AM[-29.992805]GM[-29.992805]	AMGM	fixture	1	1	False	348.164501	348.164501	2	4								30.0														1.0		0.0	0.0	0.0
+69031	200002	sage_named.mzML	scan=2	AMGM[-29.992805]-[-0.984016]	AMGM	fixture	1	1	False	377.173290	377.173290	2	4								60.0														1.0		0.0	0.0	0.0
 """
 
 TEST_DATA_DIANN_SPECLIB = """FileName	PrecursorMz	ProductMz	Tr_recalibrated	IonMobility	transition_name	LibraryIntensity	transition_group_id	decoy	PeptideSequence	Proteotypic	QValue	PGQValue	Ms1ProfileCorr	ProteinGroup	ProteinName	Genes	FullUniModPeptideName	ModifiedPeptide	PrecursorCharge	PeptideGroupLabel	UniprotID	NTerm	CTerm	FragmentType	FragmentCharge	FragmentSeriesNumber	FragmentLossType	ExcludeFromAssay
@@ -582,15 +584,22 @@ def test_openswath_reader() -> None:
     _assert_reference_df_equal(reader.psm_df, "openswath")
 
 
-def test_sage_reader() -> None:
+@pytest.mark.parametrize(
+    "split_files", [False, True], ids=["single-file", "split-files"]
+)
+def test_sage_reader(split_files: bool) -> None:
     """Test the Sage TSV reader."""
-
-    input_data = StringIO(TEST_DATA_SAGE)
-
     reader = SageReaderTSV(mp_process_num=1)
-    reader.import_file(input_data)
+    if split_files:
+        # The last PSM has only named modifications and arrives in its own file.
+        header, *rows = TEST_DATA_SAGE.splitlines(keepends=True)
+        psms = reader.load(
+            [StringIO(header + "".join(rows[:-1])), StringIO(header + rows[-1])]
+        )
+    else:
+        psms = reader.import_file(StringIO(TEST_DATA_SAGE))
 
-    _assert_reference_df_equal(reader.psm_df, "sage", loose_check=True)
+    _assert_reference_df_equal(psms, "sage", loose_check=True)
 
 
 def test_alphadia_reader() -> None:
