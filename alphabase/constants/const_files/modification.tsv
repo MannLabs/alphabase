@@ -43,8 +43,8 @@ Deamidated@N	0.984016	0.9848	H(-1)N(-1)O(1)	0.0		Artefact	7	C([C@@H](C(=O)[Ts])N
 Deamidated@F^Protein_N-term	0.984016	0.9848	H(-1)N(-1)O(1)	0.0		Post-translational	7		0.0
 ICAT-G@C	486.251206	486.6253	H(38)C(22)N(4)O(6)S(1)	0.0		Isotopic label	8		0.0
 ICAT-G:2H(8)@C	494.30142	494.6746	H(30)2H(8)C(22)N(4)O(6)S(1)	0.0		Isotopic label	9		0.0
+Met->Hse@M	-29.992806	-30.0922	H(-2)C(-1)O(1)S(-1)	0.0		Artefact	10	N([Fl])([Fl])[C@H](C(=O)[Ts])CCO	0.0
 Met->Hse@M^Any_C-term	-29.992806	-30.0922	H(-2)C(-1)O(1)S(-1)	0.0		Chemical derivative	10	N([Fl])([Fl])[C@H](C(=O)[Ts])CCO	0.0
-Met->Hse@M	-29.992806	-30.0922	H(-2)C(-1)O(1)S(-1)	0.0		Artefact	-1	N([Fl])([Fl])[C@H](C(=O)[Ts])CCO	0.0
 Met->Hsl@M^Any_C-term	-48.003371	-48.1075	H(-4)C(-1)S(-1)	0.0		Chemical derivative	11		0.0
 ICAT-D:2H(8)@C	450.275205	450.6221	H(26)2H(8)C(20)N(4)O(5)S(1)	0.0		Isotopic label	12		0.0
 ICAT-D@C	442.224991	442.5728	H(34)C(20)N(4)O(5)S(1)	0.0		Isotopic label	13		0.0
