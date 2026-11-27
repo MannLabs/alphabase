@@ -13,7 +13,7 @@ from alphabase.peptide.mobility import mobility_to_ccs_for_df
 from alphabase.psm_reader.keys import LibPsmDfCols, PsmDfCols
 from alphabase.psm_reader.maxquant_reader import ModifiedSequenceReader
 from alphabase.spectral_library.base import SpecLibBase
-from alphabase.utils import _get_delimiter
+from alphabase.utils import _get_delimiter, _sanitize_missing_values
 
 
 class LibraryReaderBase(ModifiedSequenceReader, SpecLibBase):
@@ -160,6 +160,7 @@ class LibraryReaderBase(ModifiedSequenceReader, SpecLibBase):
 
         # drop all columns which are all NaN as they prohibit grouping
         lib_df = lib_df.dropna(axis=1, how="all")
+        lib_df = _sanitize_missing_values(lib_df)
 
         precursor_df_list = []
 
@@ -178,7 +179,9 @@ class LibraryReaderBase(ModifiedSequenceReader, SpecLibBase):
         # by default, all non-fragment columns are used to group the library
         non_fragment_columns = sorted(set(lib_df.columns) - set(fragment_columns))
 
-        for keys, df_group in tqdm(lib_df.groupby(non_fragment_columns)):
+        for keys, df_group in tqdm(
+            lib_df.groupby(non_fragment_columns, dropna=False, observed=True)
+        ):
             precursor_columns = dict(zip(non_fragment_columns, keys))
 
             n_aa = len(precursor_columns[PsmDfCols.SEQUENCE])

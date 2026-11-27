@@ -112,6 +112,11 @@ def _sanitize_missing_values(df: pd.DataFrame) -> pd.DataFrame:
             # infers float64, but alphabase expects text (e.g. an unpopulated `Genes` column).
             # Assigning avoids fillna's deprecated object-dtype downcasting.
             df[column] = ""
+        elif isinstance(df[column].dtype, pd.CategoricalDtype):
+            if pd.api.types.is_string_dtype(df[column]) and df[column].isna().any():
+                if "" not in df[column].cat.categories:
+                    df[column] = df[column].cat.add_categories([""])
+                df[column] = df[column].fillna("")
         elif pd.api.types.is_object_dtype(df[column]) or pd.api.types.is_string_dtype(
             df[column]
         ):
